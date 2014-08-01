@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" ng-app="facebaseApp">
+<head>
+  <meta charset="utf-8">
+  <title>Test Facebase</title>
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/ng-grid.css">
+  <link rel="stylesheet" href="css/rzslider.css">
+  <link rel="stylesheet" href="css/facebase.css">
+  <script src="js/variables.js"></script>
+  <script src="js/jquery.js"></script>
+  <script src="js/jquery.cookie.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/ermrest.js"></script>
+  <script src="js/angular.js"></script>
+  <script src="js/angular-route.js"></script>
+  <script src="js/angular-sanitize.js"></script>
+  <script src="js/rzslider.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/controllers.js"></script>
+  <script src="js/ng-grid.js"></script>
+</head>
+<body>
+
+<div>
+
+<div class="topPanel" name="loginForm" id="topPanel" ng-controller="TopPanelCtrl as topPanelController" ng-show="topPanelController.showTop()">
+  <div class="floatLeft"><a href="#"  class="banner-text" ng-bind-html="topPanelController.welcome()" ng-click="topPanelController.preventRoute($event)" ng-show="topPanelController.show()"></a></div>
+  <div class="floatRight"><a href="#/login" class="banner-text" ng-hide="topPanelController.hide()">Login</a></div>
+  <div class="floatRight"><a href="#/logout" class="banner-text" ng-show="topPanelController.show()">Logout</a></div>
+  <br class="clearBoth">
+</div>
+
+<div ng-view></div>
+
+</div>
+
+</body>
+</html>
+
+

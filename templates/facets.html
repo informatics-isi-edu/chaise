@@ -1,0 +1,45 @@
+<div ng-controller="FacetListCtrl as facetList">
+	<div id="ajaxSpinnerContainer" ng-hide="facetList.hideSpinner()">
+		<img src="/devfacebase/img/ajax-loader.gif" id="ajaxSpinnerImage"
+			title="Processing..." alt="Spinner" ng-hide="facetList.hideSpinner()" class="center"/>
+	</div>
+      <div class="logo"><img class="facebase_logo" src="/devfacebase/img/logo.png" alt="Facebase logo"></div>
+      <table ng-show="facetList.showFacebase()" class="ng-hide">
+        <thead><tr><th class="top">Narrow Your Choices</th><th><th></tr></thead>
+        <tbody><tr>
+          <td class="top">
+	    <table class="leftArea"><tbody>
+              <tr ng-repeat-start="facet in facets">
+                    <!-- <td><a ng-href="#"  ng-click="facetList.preventRoute($event)">{{facetList.display(facet)}}</a></td> -->
+                    <td><a ng-href="#"  ng-click="facetList.preventRoute($event, facet)">{{box[facet]['count']}}</a></td>
+	            <td ng-show="facetList.show(facet)"><img src="/devfacebase/img/triangle--down.jpeg" alt="Expand" height="8" width="8" ng-click="facetList.expand(facet)" class="pointer"></td>
+	            <td ng-hide="facetList.hide(facet)"><img src="/devfacebase/img/triangle--up.jpeg" alt="Collapse" height="8" width="8" ng-click="facetList.collapse(facet)" class="pointer"></td>
+	      </tr>
+	      <tr ng-repeat-end>
+	            <td ng-hide="facetList.hide(facet)">
+			<input ng-if="facetList.if_type(facet, 'text')" type="text" ng-model="box[facet]['value']" ng-keyup="facetList.delay_predicate(facet,$event.keyCode)">
+			<table ng-if="facetList.if_type(facet, 'enum')">
+			  <tr ng-repeat="value in colsDescr[facet]['values']">
+			    <td><input type="checkbox" ng-model="box[facet]['values'][value]" ng-change="facetList.predicate_checkbox(facet)" ng-disabled="facetList.showFacetValue(facet, value)">{{facetList.displayValue(facet, value)}}</td>
+			  </tr>
+			</table>
+			<select ng-if="facetList.if_type(facet, 'select')" ng-model="box[facet]['value']" ng-change="facetList.predicate_select(facet)" multiple="multiple" ng-options="value for value in colsDescr[facet]['values']"></select>
+			<rzslider ng-if="facetList.if_type(facet, 'bigint')" rz-slider-model="box[facet]['min']" rz-slider-high="box[facet]['max']" rz-slider-floor="box[facet]['floor']"  rz-slider-ceil="box[facet]['ceil']"
+				ng-mouseup="facetList.delay_slider(facet)">
+			</rzslider>
+		    </td>
+		    <td></td>
+		    <td></td>
+	      </tr>
+            </tbody></table>
+		<div class="floatRight"><button ng-model="clear" ng-click="facetList.clear()" ng-show="facetList.showClearButton()" class="ng-hide">Clear</button></div>
+		<br class="clearBoth">
+          </td>
+
+          <td class="top">
+            <div class="gridStyle" ng-grid="gridOptions"></div>
+          </td>
+        </tr></tbody>
+      </table>
+</div>
+
