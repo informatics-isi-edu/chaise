@@ -351,7 +351,7 @@ function getPredicate(values, colsDescr, filterAllText) {
 		}
 	});
 	if (filterAllText && filterAllText != '') {
-		predicate.push(encodeSafeURIComponent('*') + '::ts::' + encodeSafeURIComponent(filterAllText));
+		predicate.push(encodeSafeURIComponent('*') + '::ts::' + encodeSafeURIComponent(getSearchExpression(filterAllText, '&')));
 	}
 	return predicate;
 }
@@ -876,5 +876,17 @@ function setFacetClass(facet, box, colsDescr, facetClass) {
 		}
 	}
 	facetClass[facet] = cssClass;
+}
+
+function getSearchExpression(originalValue, delimiter) {
+	var arr = originalValue.split(' ');
+	var keywords = [];
+	$.each(arr, function(i, value) {
+		if (value != '') {
+			keywords.push(value);
+		}
+	});
+	keywords = keywords.join(delimiter);
+	return keywords;
 }
 
