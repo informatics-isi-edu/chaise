@@ -61,7 +61,8 @@ div.floatRight {
 
 td.top {
     vertical-align: top;
-    padding: 5px 20px;
+    /* padding: 5px 20px */;
+    padding: 5px 5px;
 }
 
 table.leftArea {
@@ -106,5 +107,9 @@ th.top {
     margin-left: auto;
     margin-right: auto;
     max-width:300px;
+}
+
+.select_facet {
+	width: 100%;
 }
 

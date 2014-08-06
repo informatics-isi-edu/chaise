@@ -8,13 +8,17 @@ var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 
 var PRIMARY_KEY = [];
+var uniquenessColumns = [
+                       'gene',
+                       'chromosome'
+];
 var visibleColumns = {
 		'dataset1': [
 		             'id',
 		             'owner',
 		             'title',
 		             'organism',
-		             'gender',
+		             //'gender',
 		             'genotype',
 		             'age_stages',
 		             'chromosome'
@@ -31,7 +35,7 @@ var visibleColumns = {
 	                 'id',
 	                 'owner',
 	                 'title',
-	                 'gender',
+	                 //'gender',
 	                 'genotype',
 	                 'age_stages',
 	                 'chromosome'
@@ -86,7 +90,7 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 }
 
 var ERMREST = {
-		POST: function(url, contentType, async, processData, obj, successCallback, param) {
+		POST: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
 			document.body.style.cursor = 'wait';
 			var res = null;
 			$.ajax({
@@ -107,15 +111,19 @@ var ERMREST = {
 					res = data;
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
-					handleError(jqXHR, textStatus, errorThrown, url);
+					if (errorCallback == null) {
+						handleError(jqXHR, textStatus, errorThrown, url);
+					} else {
+						errorCallback(jqXHR, textStatus, errorThrown, url, param);
+					}
 				}
 			});
 			return res;
 		},
-		GET: function(url, contentType, successCallback, param) {
-			return ERMREST.fetch(url, contentType, true, true, [], successCallback, param);
+		GET: function(url, contentType, successCallback, errorCallback, param) {
+			return ERMREST.fetch(url, contentType, true, true, [], successCallback, errorCallback, param);
 		},
-		fetch: function(url, contentType, async, processData, obj, successCallback, param) {
+		fetch: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
 			document.body.style.cursor = 'wait';
 			var res = null;
 			$.ajax({
@@ -136,15 +144,19 @@ var ERMREST = {
 					res = data;
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
-					handleError(jqXHR, textStatus, errorThrown, url);
+					if (errorCallback == null) {
+						handleError(jqXHR, textStatus, errorThrown, url);
+					} else {
+						errorCallback(jqXHR, textStatus, errorThrown, url, param);
+					}
 				}
 			});
 			return res;
 		},
-		DELETE: function(url) {
+		DELETE: function(url, successCallback, errorCallback, param) {
 			return ERMREST.remove(url, true, successCallback, param);
 		},
-		remove: function(url, async, successCallback, param) {
+		remove: function(url, async, successCallback, errorCallback, param) {
 			document.body.style.cursor = 'wait';
 			var res = null;
 			$.ajax({
@@ -162,12 +174,16 @@ var ERMREST = {
 					res = data;
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
-					handleError(jqXHR, textStatus, errorThrown, url);
+					if (errorCallback == null) {
+						handleError(jqXHR, textStatus, errorThrown, url);
+					} else {
+						errorCallback(jqXHR, textStatus, errorThrown, url, param);
+					}
 				}
 			});
 			return res;
 		},
-		PUT: function(url, contentType, async, processData, obj, successCallback, param) {
+		PUT: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
 			document.body.style.cursor = 'wait';
 			var res = null;
 			$.ajax({
@@ -188,7 +204,11 @@ var ERMREST = {
 					res = data;
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
-					handleError(jqXHR, textStatus, errorThrown, url);
+					if (errorCallback == null) {
+						handleError(jqXHR, textStatus, errorThrown, url);
+					} else {
+						errorCallback(jqXHR, textStatus, errorThrown, url, param);
+					}
 				}
 			});
 			return res;
@@ -265,7 +285,7 @@ function encodeSafeURIComponent(value) {
 
 function getMetadata(table, successCallback) {
 	var url = ERMREST_SCHEMA_HOME + encodeSafeURIComponent(table);
-	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successCallback, null);
+	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successCallback, null, null);
 }
 
 function getTableColumns(table, sortInfo) {
@@ -378,7 +398,7 @@ function getFacebaseData(table, facet, values, colsDefs, colsDescr, colsGroup, p
 	param['sortOption'] = sortOption;
 	param['successCallback'] = successCallback;
 	param['filterAllText'] = filterAllText;
-	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successTotalCount, param);
+	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successTotalCount, null, param);
 }
 
 function successTotalCount(data, textStatus, jqXHR, param) {
@@ -436,13 +456,15 @@ function updateCount(box, colsDescr, table, filterAllText, successCallback) {
 	$.each(box, function(col, value) {
 		box[col]['ready'] = false;
 	});
+	var alertObject = {'display': true};
 	$.each(box, function(col, value) {
 		var url = urlPrefix + encodeSafeURIComponent(col) + ')';
 		var param = {};
 		param['box'] = box;
 		param['col'] = col;
+		param['alert'] = alertObject;
 		param['successCallback'] = successCallback;
-		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateCount, param);
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateCount, errorErmrest, param);
 	});
 }
 
@@ -467,11 +489,13 @@ function successUpdateCount(data, textStatus, jqXHR, param) {
 }
 
 function updateGroups(colsGroup, table, facet, predicate, successCallback) {
+	var alertObject = {'display': true};
 	$.each(colsGroup, function(col, values) {
 		if (col == facet) {
 			colsGroup[col]['ready'] = true;
 		} else {
 			var param = {};
+			param['alert'] = alertObject;
 			var col_name = encodeSafeURIComponent(col);
 			param['successCallback'] = successCallback;
 			param['colsGroup'] = colsGroup;
@@ -483,7 +507,7 @@ function updateGroups(colsGroup, table, facet, predicate, successCallback) {
 				url += '/' + predicate.join('/');
 			}
 			url += '/' + col_name + ';cnt:=cnt(' + col_name + ')';
-			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateGroups, param);
+			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateGroups, errorErmrest, param);
 		}
 	});
 }
@@ -545,24 +569,27 @@ function getColumnDescriptions(table, data, successCallback) {
 			obj['ready'] = false;
 			ret[col_name] = obj;
 		});
+		var alertObject = {'display': true};
 		$.each(ret, function(col, obj) {
 			if (obj['type'] == 'text') {
 				var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(table['table_name']) + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 				var param = {};
+				param['alert'] = alertObject;
 				param['successCallback'] = successCallback;
 				param['entity'] = ret;
 				param['col'] = col;
 				param['table'] = table;
-				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, param);
+				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
 			} else if (obj['type'] == 'bigint') {
 				var param = {};
+				param['alert'] = alertObject;
 				var col_name = encodeSafeURIComponent(col);
 				param['successCallback'] = successCallback;
 				param['entity'] = ret;
 				param['col'] = col;
 				param['table'] = table;
 				var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(table['table_name']) + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
-				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, param);
+				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
 			}
 		});
 	} else {
@@ -584,7 +611,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			param['entity'] = entity;
 			param['col'] = col;
 			param['table'] = table;
-			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, param);
+			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, null, param);
 		} else if (data[0]['cnt_d'] <= 25) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table['table_name']) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
@@ -593,7 +620,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			param['entity'] = entity;
 			param['col'] = col;
 			param['table'] = table;
-			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, param);
+			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, null, param);
 		} else {
 			entity[col]['ready'] = true;
 		}
@@ -683,7 +710,7 @@ function getPage(table, values, colsDescr, pageSize, page, totalItems, sortOptio
 		param['page'] = page;
 		param['totalItems'] = totalItems;
 		param['successCallback'] = successCallback;
-		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetPagePredicate, param);
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetPagePredicate, null, param);
 	}
 }
 
@@ -715,7 +742,7 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 			url += getSortQuery(sortOption, false);
 		}
 		url += '?limit=' + pageSize;
-		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetPage, param);
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetPage, null, param);
 	}
 }
 
@@ -747,7 +774,7 @@ function getTables(tables, successCallback) {
 	var param = {};
 	param['successCallback'] = successCallback;
 	param['tables'] = tables;
-	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTables, param);
+	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTables, null, param);
 }
 
 function successGetTables(data, textStatus, jqXHR, param) {
@@ -775,7 +802,7 @@ function getTableColumnsUniques(table, score, successCallback) {
 		param['score'] = score;
 		param['successCallback'] = successCallback;
 		param['table'] = table['table_name'];
-		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsUniques, param);
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsUniques, null, param);
 	}
 }
 
@@ -789,14 +816,16 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 		cols[col['name']]['distinct'] = -1;
 	});
 	var urlPrefix = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table) + '/';
+	var alertObject = {'display': true};
 	$.each(column_definitions, function(i,col) {
 		var params = {};
+		params['alert'] = alertObject;
 		params['score'] = param['score'];
 		params['successCallback'] = param['successCallback'];
 		params['cols'] = cols;
 		params['col'] = col['name'];
 		var url = urlPrefix + encodeSafeURIComponent(col['name']) + ';cnt:=cnt(' + encodeSafeURIComponent(col['name']) + ')';
-		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsDistinct, params);
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsDistinct, errorErmrest, params);
 	});
 }
 
@@ -832,8 +861,8 @@ function successGetTableColumnsDistinct(data, textStatus, jqXHR, param) {
 
 function compareUniques(item1, item2) {
 	var ret = 0;
-	var val1 = item1['distinct'] / item1['cnt'];
-	var val2 = item2['distinct'] / item2['cnt'];
+	var val1 = uniquenessColumns.contains(item1['name']) ? 0 : item1['distinct'] / item1['cnt'];
+	var val2 = uniquenessColumns.contains(item2['name']) ? 0 : item2['distinct'] / item2['cnt'];
 	if (val1 < val2) {
 		ret = -1;
 	} else if (val1 > val2) {
@@ -890,3 +919,11 @@ function getSearchExpression(originalValue, delimiter) {
 	return keywords;
 }
 
+function errorErmrest(jqXHR, textStatus, errorThrown, param) {
+	if (param == null || param['alert'] == null) {
+		handleError(jqXHR, textStatus, errorThrown, url);
+	} else if (param['alert']['display']) {
+		param['alert']['display'] = false;
+		handleError(jqXHR, textStatus, errorThrown, url);
+	}
+}
