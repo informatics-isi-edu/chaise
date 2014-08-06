@@ -4,14 +4,19 @@
 			title="Processing..." alt="Spinner" ng-hide="facetList.hideSpinner()" class="center"/>
 	</div>
       <div class="logo"><img class="facebase_logo" src="/devfacebase/img/logo.png" alt="Facebase logo"></div>
+      <br />
+      <div><b>Data:&nbsp;</b><select ng-model="table" ng-change="facetList.table_select()" ng-options="value for value in tables"></select></div>
+      <br />
+      <div ng-show="facetList.showSearchBox()" class="ng-hide"><input type="text" ng-model="filterAllText" size="25" placeholder="Search..." ng-keyup="facetList.delay_search_all($event.keyCode)"></div>
       <table ng-show="facetList.showFacebase()" class="ng-hide">
-        <thead><tr><th class="top">Narrow Your Choices</th><th><th></tr></thead>
-        <tbody><tr>
+        <thead><tr><th class="top"></th><th><th></tr></thead>
+        <tbody>
+        <tr>
           <td class="top">
 	    <table class="leftArea"><tbody>
               <tr ng-repeat-start="facet in facets">
                     <!-- <td><a ng-href="#"  ng-click="facetList.preventRoute($event)">{{facetList.display(facet)}}</a></td> -->
-                    <td><a ng-href="#"  ng-click="facetList.preventRoute($event, facet)">{{box[facet]['count']}}</a></td>
+                    <td><a ng-href="#"  ng-show="chooseColumns[facet]" ng_class="facetClass[facet]" ng-click="facetList.preventRoute($event, facet)">{{box[facet]['count']}}</a></td>
 	            <td ng-show="facetList.show(facet)"><img src="/devfacebase/img/triangle--down.jpeg" alt="Expand" height="8" width="8" ng-click="facetList.expand(facet)" class="pointer"></td>
 	            <td ng-hide="facetList.hide(facet)"><img src="/devfacebase/img/triangle--up.jpeg" alt="Collapse" height="8" width="8" ng-click="facetList.collapse(facet)" class="pointer"></td>
 	      </tr>
@@ -32,6 +37,25 @@
 		    <td></td>
 	      </tr>
             </tbody></table>
+        <br/>
+        <table class="leftArea"><tbody>
+          <tr ng-show="facetList.showMoreButton()" >
+        	<td><a ng-href="#"  ng-click="facetList.displayMore($event)">More...</a></td>
+        	<td ng-show="facetList.showMore()"><img src="/devfacebase/img/triangle--down.jpeg" alt="Expand" height="8" width="8" ng-click="facetList.expandMore()" class="pointer"></td>
+	        <td ng-hide="facetList.hideMore()"><img src="/devfacebase/img/triangle--up.jpeg" alt="Collapse" height="8" width="8" ng-click="facetList.collapseMore()" class="pointer"></td>
+          </tr>
+          <tr>
+          	<td ng-hide="facetList.hideMore()">
+				<table>
+				  <tr ng-repeat="facet in facets">
+				    <td><input type="checkbox" ng-model="chooseColumns[facet]">{{facet}}</td>
+				  </tr>
+				</table>
+          	</td>
+		    <td></td>
+		    <td></td>
+          </tr>
+        </tbody></table>
 		<div class="floatRight"><button ng-model="clear" ng-click="facetList.clear()" ng-show="facetList.showClearButton()" class="ng-hide">Clear</button></div>
 		<br class="clearBoth">
           </td>

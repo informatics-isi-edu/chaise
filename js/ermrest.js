@@ -1,10 +1,3 @@
-Array.prototype.contains = function (elem) {
-	for (i in this) {
-		if (this[i] == elem) return true;
-	}
-	return false;
-};
-
 var AJAX_TIMEOUT = 300000;
 var goauth_cookie = 'globusonline-goauth';
 var token = null;
@@ -15,21 +8,45 @@ var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 
 var PRIMARY_KEY = [];
-//var DATASET_NAME = 'dataset1';
-var visibleColumns = [
-	'id',
-	'owner',
-	'title',
-	'organism',
-	'gender',
-	'genotype',
-	'age_stages',
-	'chromosome'
-];
+var visibleColumns = {
+		'dataset1': [
+		             'id',
+		             'owner',
+		             'title',
+		             'organism',
+		             'gender',
+		             'genotype',
+		             'age_stages',
+		             'chromosome'
+		             ],
+         'mouse': [
+                   'id',
+                   'owner',
+                   'title',
+                   'genotype',
+                   'age_stages',
+                   'chromosome'
+                   ],
+	      'human': [
+	                 'id',
+	                 'owner',
+	                 'title',
+	                 'gender',
+	                 'genotype',
+	                 'age_stages',
+	                 'chromosome'
+	                 ],
+   	      'zebrafish': [
+                 'id',
+                 'owner',
+                 'title',
+                 'genotype',
+                 'age_stages'
+                 ]
+};
 
 function initFacebase() {
 	initLocation();
-	//alert(HOME);
 	ERMREST_SCHEMA_HOME = HOME + ERMREST_FACEBASE_SCHEMA;
 	ERMREST_DATA_HOME = HOME + ERMREST_FACEBASE_DATA;
 
@@ -223,9 +240,9 @@ function submitGlobusLogin(username, password) {
 }
 
 function make_basic_auth(user, password) {
-    var tok = user + ':' + password;
-    var hash = btoa(tok);
-    return 'Basic ' + hash;
+	var tok = user + ':' + password;
+	var hash = btoa(tok);
+	return 'Basic ' + hash;
 }
 
 function submitLogout() {
@@ -273,14 +290,15 @@ function getTableColumns(table, sortInfo) {
 		$.each(column_definitions, function(i, col) {
 			var col_def = {};
 			col_def['field'] = col['name'];
-/*
+			/*
 			var b = $('<b>');
 			b.html(col['name']);
 			$('body').append(b);
 			var l = b.width() + 10;
 			col_def['minWidth'] = col_def['width'] = (l > 50 ? l : 50);
-*/
-			if (!visibleColumns.contains(col['name'])) {
+			 */
+			var visibleTableColumns = visibleColumns[table['table_name']];
+			if (visibleTableColumns != null && !visibleTableColumns.contains(col['name'])){
 				col_def['visible'] = false;
 			}
 			columns_definitions.push(col_def);
@@ -295,7 +313,7 @@ function getTableColumns(table, sortInfo) {
 		'colsDefs': columns_definitions};
 }
 
-function getPredicate(values, colsDescr) {
+function getPredicate(values, colsDescr, filterAllText) {
 	var predicate = [];
 	$.each(values, function(key, value) {
 		if (colsDescr[key]['type'] == 'text') {
@@ -319,7 +337,6 @@ function getPredicate(values, colsDescr) {
 		} else if (colsDescr[key]['type'] == 'select') {
 			var selectedValues = [];
 			$.each(value['value'], function(i, selectedValue) {
-				//alert(selectedValue);
 				selectedValues.push(encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(selectedValue));
 			});
 			selectedValues = selectedValues.join(';');
@@ -333,13 +350,17 @@ function getPredicate(values, colsDescr) {
 			}
 		}
 	});
+	if (filterAllText && filterAllText != '') {
+		predicate.push(encodeSafeURIComponent('*') + '::ts::' + encodeSafeURIComponent(filterAllText));
+	}
 	return predicate;
 }
 
-function getFacebaseData(table, facet, values, colsDefs, colsDescr, colsGroup, page, pageSize, sortOption, successCallback, successUpdateModels) {
-	updateCount(values, colsDescr, table, successUpdateModels);
+function getFacebaseData(table, facet, values, colsDefs, colsDescr, colsGroup, page, pageSize, sortOption, 
+		 filterAllText, successCallback, successUpdateModels) {
+	updateCount(values, colsDescr, table, filterAllText, successUpdateModels);
 	var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(table);
-	var predicate = getPredicate(values, colsDescr);
+	var predicate = getPredicate(values, colsDescr, filterAllText);
 	if (predicate.length > 0) {
 		url += '/' + predicate.join('/');
 		updateGroups(colsGroup, table, facet, predicate, successUpdateModels);
@@ -356,16 +377,27 @@ function getFacebaseData(table, facet, values, colsDefs, colsDescr, colsGroup, p
 	param['pageSize'] = pageSize;
 	param['sortOption'] = sortOption;
 	param['successCallback'] = successCallback;
+	param['filterAllText'] = filterAllText;
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successTotalCount, param);
 }
 
 function successTotalCount(data, textStatus, jqXHR, param) {
-	getPage(param['table'], param['values'], param['colsDescr'], param['pageSize'], param['page'], data[0]['cnt'], param['sortOption'], param['successCallback'])
+	getPage(param['table'], param['values'], param['colsDescr'], param['pageSize'], param['page'], data[0]['cnt'], param['sortOption'], param['filterAllText'], param['successCallback'])
 }
 
-function initModels(box, narrow, colsDescr, colsGroup, table, successCallback) {
+function initModels(box, narrow, colsDescr, colsGroup, table, chooseColumns, facetClass, score, successCallback) {
+	var topN = [];
+	$.each(score, function(i,col) {
+		if (i < 10) {
+			topN.push(col['name']);
+		} else {
+			return false;
+		}
+	});
 	var sentRequests = false;
 	$.each(colsDescr, function(col, value) {
+		chooseColumns[col] = topN.contains(col);
+		facetClass[col] = '';
 		box[col] = {};
 		box[col]['count'] = col;
 		if (value['type'] == 'enum') {
@@ -375,7 +407,6 @@ function initModels(box, narrow, colsDescr, colsGroup, table, successCallback) {
 			sentRequests = true;
 			//narrow[col] = true;
 		} else if (value['type'] == 'select') {
-			//box[col]['value'] = value['values'][0];
 			box[col]['value'] = [];
 			//narrow[col] = true;
 		} else if (value['type'] == 'text') {
@@ -384,6 +415,7 @@ function initModels(box, narrow, colsDescr, colsGroup, table, successCallback) {
 		} else if (value['type'] == 'bigint') {
 			box[col]['min'] = box[col]['floor'] = value['min'];
 			box[col]['max'] = box[col]['ceil'] = value['max'];
+			//box[col]['step'] = 1;
 			//narrow[col] = true;
 		}
 	});
@@ -394,15 +426,13 @@ function initModels(box, narrow, colsDescr, colsGroup, table, successCallback) {
 	}
 }
 
-function updateCount(box, colsDescr, table, successCallback) {
-	var predicate = getPredicate(box, colsDescr);
-//alert(predicate);
+function updateCount(box, colsDescr, table, filterAllText, successCallback) {
+	var predicate = getPredicate(box, colsDescr, filterAllText);
 	var urlPrefix = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(table) + '/';
 	if (predicate != null && predicate.length > 0) {
 		urlPrefix += predicate.join('/') + '/' ;
 	}
 	urlPrefix += 'cnt:=cnt(';
-//alert(urlPrefix);
 	$.each(box, function(col, value) {
 		box[col]['ready'] = false;
 	});
@@ -492,7 +522,7 @@ function successUpdateGroups(data, textStatus, jqXHR, param) {
 		});
 		param['successCallback']();
 	}
-	
+
 }
 
 function expandSlider(narrow, colsDescr) {
@@ -630,12 +660,12 @@ function getSortQuery(sortOption, isAttribute) {
 	return ret;
 }
 
-function getPage(table, values, colsDescr, pageSize, page, totalItems, sortOption, successCallback) {
+function getPage(table, values, colsDescr, pageSize, page, totalItems, sortOption, filterAllText, successCallback) {
 	if (!$.isNumeric(page) || Math.floor(page) != page || page <= 0) {
 		successCallback([], totalItems, page, pageSize);
 	} else {
 		var url = ERMREST_DATA_HOME + '/attribute/' + encodeSafeURIComponent(table);
-		var predicate = getPredicate(values, colsDescr);
+		var predicate = getPredicate(values, colsDescr, filterAllText);
 		if (predicate.length > 0) {
 			url += '/' + predicate.join('/');
 		}
@@ -671,7 +701,11 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 		if (sortOption != null) {
 			var col = sortOption['fields'][0];
 			var direction = sortOption['directions'][0];
-			predicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
+			if (data[(page-1)*pageSize][col] == null) {
+				predicate.push(encodeSafeURIComponent(col) + '::null::');
+			} else {
+				predicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
+			}
 		}
 		var url = ERMREST_DATA_HOME + '/entity/' + encodeSafeURIComponent(param['table']);
 		if (predicate.length > 0) {
@@ -721,10 +755,126 @@ function successGetTables(data, textStatus, jqXHR, param) {
 	$.each(data, function(i, table) {
 		tables.push(table['table_name']);
 	});
-//alert('hi');
-//alert(tables);
 	param['successCallback']();
 }
 
+function getTableColumnsUniques(table, score, successCallback) {
+	var columns_definitions = [];
+	var data = table;
+	if (data != null) {
+		var column_definitions = data['column_definitions'];
+		var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(table['table_name']) + '/';
+		var cnt = [];
+		$.each(column_definitions, function(i, col) {
+			cnt.push('cnt_'+encodeSafeURIComponent(col['name'])+':=cnt('+encodeSafeURIComponent(col['name'])+')');
+		});
+		var predicate = cnt.join(',');
+		url += predicate;
+		param = {};
+		param['cols'] = column_definitions;
+		param['score'] = score;
+		param['successCallback'] = successCallback;
+		param['table'] = table['table_name'];
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsUniques, param);
+	}
+}
 
+function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
+	var table = param['table'];
+	var column_definitions = param['cols'];
+	var cols = {};
+	$.each(column_definitions, function(i,col) {
+		cols[col['name']] = {};
+		cols[col['name']]['cnt'] = data[0]['cnt_'+encodeSafeURIComponent(col['name'])];
+		cols[col['name']]['distinct'] = -1;
+	});
+	var urlPrefix = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table) + '/';
+	$.each(column_definitions, function(i,col) {
+		var params = {};
+		params['score'] = param['score'];
+		params['successCallback'] = param['successCallback'];
+		params['cols'] = cols;
+		params['col'] = col['name'];
+		var url = urlPrefix + encodeSafeURIComponent(col['name']) + ';cnt:=cnt(' + encodeSafeURIComponent(col['name']) + ')';
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsDistinct, params);
+	});
+}
+
+function successGetTableColumnsDistinct(data, textStatus, jqXHR, param) {
+	var col = param['col'];
+	var cols = param['cols'];
+	var score = param['score'];
+	var successCallback = param['successCallback'];
+	var delta = 0;
+	$.each(data, function(i,ret) {
+		if (ret[col] == null) {
+			delta = 1;
+			return false;
+		}
+	});
+	cols[col]['distinct'] = data.length - delta;
+	var ready = true;
+	$.each(cols, function(key, value) {
+		if (value['distinct'] == -1) {
+			ready = false;
+			return false;
+		}
+	});
+	if (ready) {
+		$.each(cols, function(key, value) {
+			value['name'] = key;
+			score.push(value);
+		});
+		score.sort(compareUniques);
+		successCallback();
+	}
+}
+
+function compareUniques(item1, item2) {
+	var ret = 0;
+	var val1 = item1['distinct'] / item1['cnt'];
+	var val2 = item2['distinct'] / item2['cnt'];
+	if (val1 < val2) {
+		ret = -1;
+	} else if (val1 > val2) {
+		ret = 1;
+	}
+	return ret;
+}
+
+function setFacetClass(facet, facetClass, box) {
+	var values = box[facet];
+	$.each(value['values'], function(checkbox_key, checkbox_value) {
+		if (checkbox_value) {
+			checkValues.push(encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(checkbox_key));
+		}
+	});
+}
+
+function setFacetClass(facet, box, colsDescr, facetClass) {
+	var cssClass = '';
+	var value = box[facet];
+	if (colsDescr[facet]['type'] == 'text') {
+		if (value) {
+			cssClass = 'selectedFacet';
+		}
+	} else if (colsDescr[facet]['type'] == 'enum') {
+		var checkValues = [];
+		$.each(value['values'], function(checkbox_key, checkbox_value) {
+			if (checkbox_value) {
+				cssClass = 'selectedFacet';
+				return false;
+			}
+		});
+	} else if (colsDescr[facet]['type'] == 'select') {
+		if (value['value'].length > 0) {
+			cssClass = 'selectedFacet';
+		}
+	} else if (colsDescr[facet]['type'] == 'bigint') {
+		if (value['min'] != value['floor'] || value['max'] != value['ceil']) {
+			cssClass = 'selectedFacet';
+		}
+	}
+	facetClass[facet] = cssClass;
+}
 

@@ -69,7 +69,7 @@ table.leftArea {
 }
 
 .topPanel {
-    height: 50px;
+    height: 30px; 
     background-color: rgb(229, 229, 229);
 }
 
@@ -97,4 +97,14 @@ th.top {
 	
 }
 
+.selectedFacet {
+	font-weight: bold;	
+}
+
+.center_search {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width:300px;
+}
 
