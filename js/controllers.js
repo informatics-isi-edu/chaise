@@ -264,13 +264,22 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 		return getValueDisplay(facet, value, $scope.colsGroup);
 	};
 	this.show = function show(facet) {
-		return ($scope.narrow[facet] == null && $scope.ready && $scope.chooseColumns[facet] && $scope.box[facet]['facetcount'] > 0);
+		return ($scope.narrow[facet] == null && $scope.ready && $scope.chooseColumns[facet] && 
+				($scope.box[facet]['facetcount'] > 0 || 
+						$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] != ''));
+	};
+	this.showFacetCount = function showFacetCount(facet) {
+		return ($scope.chooseColumns[facet] && 
+				($scope.box[facet]['facetcount'] > 0 || 
+						$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] != ''));
 	};
 	this.showClearButton = function showClearButton() {
 		return $scope.ready;
 	};
 	this.hide = function hide(facet) {
-		return ($scope.narrow[facet] == null || !$scope.chooseColumns[facet] || $scope.box[facet]['facetcount'] == 0);
+		return ($scope.narrow[facet] == null || !$scope.chooseColumns[facet] || 
+				($scope.box[facet]['facetcount'] == 0 && 
+						($scope.colsDescr[facet]['type'] != 'text' || $scope.box[facet]['value'] == '')));
 	};
 	this.expand = function expand(facet) {
 		$scope.narrow[facet] = true;

@@ -389,9 +389,9 @@ function getFacebaseData(table, facet, values, colsDefs, colsDescr, colsGroup, p
 	var predicate = getPredicate(values, colsDescr, filterAllText);
 	if (predicate.length > 0) {
 		url += '/' + predicate.join('/');
-		updateGroups(colsGroup, table, facet, predicate, successUpdateModels);
+		updateGroups(colsGroup, table, facet, predicate, values, colsDescr, successUpdateModels);
 	} else {
-		updateGroups(colsGroup, table, facet, null, successUpdateModels);
+		updateGroups(colsGroup, table, facet, null, values, colsDescr, successUpdateModels);
 	}
 	url += '/cnt:=cnt(' +  encodeSafeURIComponent(colsDefs[0]['field']) + ')';
 	//url += '/cnt:=cnt(*)';
@@ -449,7 +449,7 @@ function initModels(box, narrow, colsDescr, colsGroup, table, chooseColumns, fac
 	if (!sentRequests) {
 		successCallback();
 	} else {
-		updateGroups(colsGroup, table['table_name'], null, null, successCallback);
+		updateGroups(colsGroup, table['table_name'], null, null, box, colsDescr, successCallback);
 	}
 }
 
@@ -500,8 +500,7 @@ function successUpdateCount(data, textStatus, jqXHR, param) {
 		param['successCallback']();
 	}
 }
-
-function updateGroups(colsGroup, table, facet, predicate, successCallback) {
+function updateGroups(colsGroup, table, facet, predicate, box, colsDescr, successCallback) {
 	var alertObject = {'display': true};
 	$.each(colsGroup, function(col, values) {
 		if (col == facet) {

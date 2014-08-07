@@ -16,7 +16,7 @@
 	    <table class="leftArea"><tbody>
               <tr ng-repeat-start="facet in facets">
                     <!-- <td><a ng-href="#"  ng-click="facetList.preventRoute($event)">{{facetList.display(facet)}}</a></td> -->
-                    <td><a ng-href="#"  ng-show="chooseColumns[facet] && box[facet]['facetcount'] > 0" ng_class="facetClass[facet]" ng-click="facetList.preventRoute($event, facet)">{{box[facet]['count']}}</a></td>
+                    <td><a ng-href="#"  ng-show="facetList.showFacetCount(facet)" ng_class="facetClass[facet]" ng-click="facetList.preventRoute($event, facet)">{{box[facet]['count']}}</a></td>
 	            <td ng-show="facetList.show(facet)"><img src="/facebase/img/triangle--down.jpeg" alt="Expand" height="8" width="8" ng-click="facetList.expand(facet)" class="pointer"></td>
 	            <td ng-hide="facetList.hide(facet)"><img src="/facebase/img/triangle--up.jpeg" alt="Collapse" height="8" width="8" ng-click="facetList.collapse(facet)" class="pointer"></td>
 	      </tr>
