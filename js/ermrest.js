@@ -9,8 +9,14 @@ var URL_ESCAPE = new String("~!()'");
 
 var PRIMARY_KEY = [];
 var uniquenessColumns = [
-                       'gene',
-                       'chromosome'
+                         'gene',
+                         'chromosome'
+];
+var textColumns = [
+                         'summary_html',
+                         'desc_html',
+                         'mutation',
+                         'title'
 ];
 var visibleColumns = {
 		'dataset1': [
@@ -154,7 +160,7 @@ var ERMREST = {
 			return res;
 		},
 		DELETE: function(url, successCallback, errorCallback, param) {
-			return ERMREST.remove(url, true, successCallback, param);
+			return ERMREST.remove(url, true, successCallback, errorCallback, param);
 		},
 		remove: function(url, async, successCallback, errorCallback, param) {
 			document.body.style.cursor = 'wait';
@@ -377,8 +383,8 @@ function getPredicate(values, colsDescr, filterAllText) {
 }
 
 function getFacebaseData(table, facet, values, colsDefs, colsDescr, colsGroup, page, pageSize, sortOption, 
-		 filterAllText, successCallback, successUpdateModels) {
-	updateCount(values, colsDescr, table, filterAllText, successUpdateModels);
+		 filterAllText, chooseColumns, successCallback, successUpdateModels) {
+	updateCount(values, colsDescr, table, filterAllText, chooseColumns, successUpdateModels);
 	var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(table);
 	var predicate = getPredicate(values, colsDescr, filterAllText);
 	if (predicate.length > 0) {
@@ -420,6 +426,7 @@ function initModels(box, narrow, colsDescr, colsGroup, table, chooseColumns, fac
 		facetClass[col] = '';
 		box[col] = {};
 		box[col]['count'] = col;
+		box[col]['facetcount'] = 0;
 		if (value['type'] == 'enum') {
 			colsGroup[col] = {};
 			colsGroup[col]['ready'] = false;
@@ -446,7 +453,7 @@ function initModels(box, narrow, colsDescr, colsGroup, table, chooseColumns, fac
 	}
 }
 
-function updateCount(box, colsDescr, table, filterAllText, successCallback) {
+function updateCount(box, colsDescr, table, filterAllText, chooseColumns, successCallback) {
 	var predicate = getPredicate(box, colsDescr, filterAllText);
 	var urlPrefix = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(table) + '/';
 	if (predicate != null && predicate.length > 0) {
@@ -461,6 +468,7 @@ function updateCount(box, colsDescr, table, filterAllText, successCallback) {
 		var url = urlPrefix + encodeSafeURIComponent(col) + ')';
 		var param = {};
 		param['box'] = box;
+		param['chooseColumns'] = chooseColumns;
 		param['col'] = col;
 		param['alert'] = alertObject;
 		param['successCallback'] = successCallback;
@@ -471,8 +479,13 @@ function updateCount(box, colsDescr, table, filterAllText, successCallback) {
 function successUpdateCount(data, textStatus, jqXHR, param) {
 	var box = param['box'];
 	var col = param['col'];
+	var chooseColumns = param['chooseColumns'];
 	box[col]['ready'] = true;
 	box[col]['count'] = col + ' (' + data[0]['cnt'] + ')';
+	box[col]['facetcount'] = data[0]['cnt'];
+	if (data[0]['cnt'] == 0) {
+		//chooseColumns[col] = false;
+	}
 	var ready = true;
 	$.each(box, function(col, value) {
 		if (!value['ready']) {
@@ -603,7 +616,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var table = param['table'];
 	var successCallback = param['successCallback'];
 	if (entity[col]['type'] == 'text') {
-		if (data[0]['cnt_d'] <= 10) {
+		if (data[0]['cnt_d'] <= 50 && !textColumns.contains(col)) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table['table_name']) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
@@ -612,7 +625,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			param['col'] = col;
 			param['table'] = table;
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, null, param);
-		} else if (data[0]['cnt_d'] <= 25) {
+		} else if (data[0]['cnt_d'] == 50) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table['table_name']) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;

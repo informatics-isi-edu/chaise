@@ -113,3 +113,14 @@ th.top {
 	width: 100%;
 }
 
+td.facet_checkbox {
+	margin: 0px;
+	line-height:5px;
+	white-space:nowrap;
+}
+
+input.facet_checkbox {
+	margin: 0px;
+	line-height:5px;
+}
+
