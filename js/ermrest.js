@@ -339,9 +339,12 @@ function getTableColumns(table, sortInfo) {
 		'colsDefs': columns_definitions};
 }
 
-function getPredicate(values, colsDescr, filterAllText) {
+function getPredicate(values, colsDescr, filterAllText, excludeColumn) {
 	var predicate = [];
 	$.each(values, function(key, value) {
+		if (key == excludeColumn) {
+			return true;
+		}
 		if (colsDescr[key]['type'] == 'text') {
 			value = value['value'].split(' ');
 			$.each(value, function(i, val) {
@@ -386,12 +389,12 @@ function getFacebaseData(table, facet, values, colsDefs, colsDescr, colsGroup, p
 		 filterAllText, chooseColumns, successCallback, successUpdateModels) {
 	updateCount(values, colsDescr, table, filterAllText, chooseColumns, successUpdateModels);
 	var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(table);
-	var predicate = getPredicate(values, colsDescr, filterAllText);
+	var predicate = getPredicate(values, colsDescr, filterAllText, null);
 	if (predicate.length > 0) {
 		url += '/' + predicate.join('/');
-		updateGroups(colsGroup, table, facet, predicate, values, colsDescr, successUpdateModels);
+		updateGroups(colsGroup, table, facet, values, colsDescr, filterAllText, successUpdateModels);
 	} else {
-		updateGroups(colsGroup, table, facet, null, values, colsDescr, successUpdateModels);
+		updateGroups(colsGroup, table, facet, values, colsDescr, filterAllText, successUpdateModels);
 	}
 	url += '/cnt:=cnt(' +  encodeSafeURIComponent(colsDefs[0]['field']) + ')';
 	//url += '/cnt:=cnt(*)';
@@ -411,7 +414,7 @@ function successTotalCount(data, textStatus, jqXHR, param) {
 	getPage(param['table'], param['values'], param['colsDescr'], param['pageSize'], param['page'], data[0]['cnt'], param['sortOption'], param['filterAllText'], param['successCallback'])
 }
 
-function initModels(box, narrow, colsDescr, colsGroup, table, chooseColumns, facetClass, score, successCallback) {
+function initModels(box, narrow, colsDescr, colsGroup, table, chooseColumns, facetClass, score, filterAllText, successCallback) {
 	var topN = [];
 	$.each(score, function(i,col) {
 		if (i < 10) {
@@ -449,12 +452,12 @@ function initModels(box, narrow, colsDescr, colsGroup, table, chooseColumns, fac
 	if (!sentRequests) {
 		successCallback();
 	} else {
-		updateGroups(colsGroup, table['table_name'], null, null, box, colsDescr, successCallback);
+		updateGroups(colsGroup, table['table_name'], null, box, colsDescr, filterAllText, successCallback);
 	}
 }
 
 function updateCount(box, colsDescr, table, filterAllText, chooseColumns, successCallback) {
-	var predicate = getPredicate(box, colsDescr, filterAllText);
+	var predicate = getPredicate(box, colsDescr, filterAllText, null);
 	var urlPrefix = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(table) + '/';
 	if (predicate != null && predicate.length > 0) {
 		urlPrefix += predicate.join('/') + '/' ;
@@ -500,10 +503,24 @@ function successUpdateCount(data, textStatus, jqXHR, param) {
 		param['successCallback']();
 	}
 }
-function updateGroups(colsGroup, table, facet, predicate, box, colsDescr, successCallback) {
+
+function hasPredicate(values, col) {
+	var value = values[col];
+	var ret = false;
+	$.each(value['values'], function(checkbox_key, checkbox_value) {
+		if (checkbox_value) {
+			ret = true;
+			return false;
+		}
+	});
+	return ret;
+}
+
+function updateGroups(colsGroup, table, facet, box, colsDescr, filterAllText, successCallback) {
 	var alertObject = {'display': true};
 	$.each(colsGroup, function(col, values) {
-		if (col == facet) {
+		var predicate = getPredicate(box, colsDescr, filterAllText, col);
+		if (col == facet && hasPredicate(box, facet) && false) {
 			colsGroup[col]['ready'] = true;
 		} else {
 			var param = {};
@@ -512,13 +529,14 @@ function updateGroups(colsGroup, table, facet, predicate, box, colsDescr, succes
 			param['successCallback'] = successCallback;
 			param['colsGroup'] = colsGroup;
 			param['col'] = col;
+			param['box'] = box;
 			param['facet'] = facet;
 			param['table'] = table;
-			var url = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table);
-			if (predicate != null) {
-				url += '/' + predicate.join('/');
+			var url = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table) + '/';
+			if (predicate != null && predicate.length > 0) {
+				url += predicate.join('/') + '/';
 			}
-			url += '/' + col_name + ';cnt:=cnt(' + col_name + ')';
+			url += col_name + ';cnt:=cnt(' + col_name + ')';
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateGroups, errorErmrest, param);
 		}
 	});
@@ -529,6 +547,7 @@ function successUpdateGroups(data, textStatus, jqXHR, param) {
 	var hideValues = [];
 	var colsGroup = param['colsGroup'];
 	var col = param['col'];
+	var box = param['box'];
 	colsGroup[col]['ready'] = true;
 	$.each(data, function(i, value) {
 		var key = value[col];
@@ -538,7 +557,7 @@ function successUpdateGroups(data, textStatus, jqXHR, param) {
 		}
 	});
 	$.each(colsGroup[col], function(key, value) {
-		if (key != 'ready' && !values.contains(key)) {
+		if (key != 'ready' && !values.contains(key) && !box[col]['values'][key]) {
 			hideValues.push(key);
 		}
 	});
@@ -704,7 +723,7 @@ function getPage(table, values, colsDescr, pageSize, page, totalItems, sortOptio
 		successCallback([], totalItems, page, pageSize);
 	} else {
 		var url = ERMREST_DATA_HOME + '/attribute/' + encodeSafeURIComponent(table);
-		var predicate = getPredicate(values, colsDescr, filterAllText);
+		var predicate = getPredicate(values, colsDescr, filterAllText, null);
 		if (predicate.length > 0) {
 			url += '/' + predicate.join('/');
 		}
@@ -734,9 +753,6 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 		param['successCallback']([], param['totalItems']);
 	} else {
 		var predicate = param['predicate'];
-		$.each(PRIMARY_KEY, function(i, col) {
-			predicate.push(encodeSafeURIComponent(col) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
-		});
 		if (sortOption != null) {
 			var col = sortOption['fields'][0];
 			var direction = sortOption['directions'][0];
@@ -745,6 +761,16 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 			} else {
 				predicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
 			}
+			var sortPredicate = [];
+			$.each(PRIMARY_KEY, function(i, primaryCol) {
+				sortPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+			});
+			sortPredicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
+			predicate.push(sortPredicate.join(';'));
+		} else {
+			$.each(PRIMARY_KEY, function(i, col) {
+				predicate.push(encodeSafeURIComponent(col) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
+			});
 		}
 		var url = ERMREST_DATA_HOME + '/entity/' + encodeSafeURIComponent(param['table']);
 		if (predicate.length > 0) {
@@ -931,11 +957,22 @@ function getSearchExpression(originalValue, delimiter) {
 	return keywords;
 }
 
-function errorErmrest(jqXHR, textStatus, errorThrown, param) {
+function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 	if (param == null || param['alert'] == null) {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	} else if (param['alert']['display']) {
 		param['alert']['display'] = false;
 		handleError(jqXHR, textStatus, errorThrown, url);
 	}
+}
+
+function hasCheckedValues(box, facet) {
+	var ret = false;
+	$.each(box[facet]['values'], function(i, value) {
+		if (value) {
+			ret = true;
+			return false;
+		}
+	});
+	return ret;
 }

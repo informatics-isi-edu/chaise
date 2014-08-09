@@ -119,6 +119,10 @@ td.facet_checkbox {
 	white-space:nowrap;
 }
 
+.facet_name {
+	white-space:nowrap;
+}
+
 input.facet_checkbox {
 	margin: 0px;
 	line-height:5px;

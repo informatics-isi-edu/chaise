@@ -136,7 +136,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 
 	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
 		$scope.colsDescr = data;
-		initModels($scope.box, $scope.narrow, $scope.colsDescr, $scope.colsGroup, $scope.metadata, $scope.chooseColumns, $scope.facetClass, $scope.score, $scope.successInitModels);
+		initModels($scope.box, $scope.narrow, $scope.colsDescr, $scope.colsGroup, $scope.metadata, $scope.chooseColumns, $scope.facetClass, $scope.score, $scope.filterAllText, $scope.successInitModels);
 	};
 
 	$scope.successGetFacebaseData = function successGetFacebaseData(data, totalItems, page, pageSize) {
@@ -266,12 +266,14 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	this.show = function show(facet) {
 		return ($scope.narrow[facet] == null && $scope.ready && $scope.chooseColumns[facet] && 
 				($scope.box[facet]['facetcount'] > 0 || 
-						$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] != ''));
+						$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] != '' ||
+						$scope.colsDescr[facet]['type'] == 'enum' && hasCheckedValues($scope.box, facet)));
 	};
 	this.showFacetCount = function showFacetCount(facet) {
 		return ($scope.chooseColumns[facet] && 
 				($scope.box[facet]['facetcount'] > 0 || 
-						$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] != ''));
+						$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] != '' ||
+						$scope.colsDescr[facet]['type'] == 'enum' && hasCheckedValues($scope.box, facet)));
 	};
 	this.showClearButton = function showClearButton() {
 		return $scope.ready;
@@ -279,7 +281,8 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	this.hide = function hide(facet) {
 		return ($scope.narrow[facet] == null || !$scope.chooseColumns[facet] || 
 				($scope.box[facet]['facetcount'] == 0 && 
-						($scope.colsDescr[facet]['type'] != 'text' || $scope.box[facet]['value'] == '')));
+						($scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] == '' ||
+								$scope.colsDescr[facet]['type'] == 'enum' && !hasCheckedValues($scope.box, facet))));
 	};
 	this.expand = function expand(facet) {
 		$scope.narrow[facet] = true;
