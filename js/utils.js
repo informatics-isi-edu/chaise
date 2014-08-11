@@ -19,17 +19,22 @@ function initLocation() {
 	HOME = window.location.protocol + '//' + window.location.host;
 }
 
-function clearFacets(narrow, box, facets, facebaseData, metadata, colsDescr, colsGroup, colsDefs,
-		filterOptions, pagingOptions, sortInfo, chooseColumns, facetClass, score) {
-	emptyJSON(narrow);
-	emptyJSON(box);
-	facets.empty();
-	facebaseData.empty();
+function clearFacets(options) {
 	//alert(JSON.stringify(metadata, null, 4));
-	emptyJSON(metadata);
-	emptyJSON(colsDescr);
-	emptyJSON(colsGroup);
-	colsDefs.empty();
+	emptyJSON(options['narrow']);
+	emptyJSON(options['box']);
+	emptyJSON(options['metadata']);
+	emptyJSON(options['colsDescr']);
+	emptyJSON(options['colsGroup']);
+	emptyJSON(options['chooseColumns']);
+	emptyJSON(options['facetClass']);
+	
+	options['facets'].empty();
+	options['facebaseData'].empty();
+	options['colsDefs'].empty();
+	options['score'].empty();
+	
+	var filterOptions = options['filterOptions'];
 	$.each(filterOptions, function(key, value) {
 		if (key == 'filterText') {
 			filterOptions[key] = '';
@@ -39,6 +44,8 @@ function clearFacets(narrow, box, facets, facebaseData, metadata, colsDescr, col
 			delete filterOptions[key];
 		}
 	});
+	
+	var pagingOptions = options['pagingOptions'];
 	$.each(pagingOptions, function(key, value) {
 		if (key == 'pageSizes') {
 			value.empty();
@@ -53,6 +60,8 @@ function clearFacets(narrow, box, facets, facebaseData, metadata, colsDescr, col
 			delete pagingOptions[key];
 		}
 	});
+	
+	var sortInfo = options['sortInfo'];
 	$.each(sortInfo, function(key, value) {
 		if (key == 'fields') {
 			value.empty();
@@ -62,7 +71,4 @@ function clearFacets(narrow, box, facets, facebaseData, metadata, colsDescr, col
 			delete sortInfo[key];
 		}
 	});
-	emptyJSON(chooseColumns);
-	emptyJSON(facetClass);
-	score.empty();
 }

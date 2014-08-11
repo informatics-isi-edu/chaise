@@ -40,7 +40,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	};  
 	$scope.sortInfo = {'fields': [], 'directions': []};
 	$scope.setPagingData = function(data, totalItems, page, pageSize){	
-		$scope.facebaseData = data;
+		$scope.options['facebaseData'] = $scope.facebaseData = data;
 		$scope.totalServerItems = totalItems;
 		if (!$scope.$$phase) {
 			$scope.$apply();
@@ -51,11 +51,11 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 			if (sortOption != null && sortOption['fields'].length > 1) {
 				sortOption = null;
 			}
-			var data;
+			$scope.options['sortOption'] = sortOption;
 			if (searchText) {
-				getPage($scope.table, $scope.box, $scope.colsDescr, pageSize, page, $scope.totalServerItems, sortOption, $scope.filterAllText, $scope.setPagingData);
+				getPage($scope.options, $scope.totalServerItems, $scope.setPagingData);
 			} else {
-				getPage($scope.table, $scope.box, $scope.colsDescr, pageSize, page, $scope.totalServerItems, sortOption, $scope.filterAllText, $scope.setPagingData);
+				getPage($scope.options, $scope.totalServerItems, $scope.setPagingData);
 			}
 		}, 100);
 	};
@@ -95,6 +95,26 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 			sortInfo: $scope.sortInfo,
 			useExternalSorting: true
 	};
+	
+	$scope.options = {
+			'box': $scope.box,
+			'chooseColumns': $scope.chooseColumns,
+			'colsDefs': $scope.colsDefs,
+			'colsDescr': $scope.colsDescr,
+			'colsGroup': $scope.colsGroup,
+			'facebaseData': $scope.facebaseData,
+			'facetClass': $scope.facetClass,
+			'facets': $scope.facets,
+			'filterOptions': $scope.filterOptions,
+			'filterAllText': $scope.filterAllText,
+			'metadata': $scope.metadata,
+			'narrow': $scope.narrow,
+			'pagingOptions': $scope.pagingOptions,
+			'score': $scope.score,
+			'sortInfo': $scope.sortInfo,
+			'sortOption': null,
+			'table': $scope.table
+	};
 
 	$scope.initTable = function initTable() {
 		$scope.ready = false;
@@ -103,21 +123,8 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 		$scope.filterSliderTimeout = null;
 		$scope.filterSearchAllTimeout = null;
 		$scope.totalServerItems = 0;
-		$scope.filterAllText = '';
-		clearFacets($scope.narrow, 
-				$scope.box, 
-				$scope.facets, 
-				$scope.facebaseData, 
-				$scope.metadata, 
-				$scope.colsDescr, 
-				$scope.colsGroup, 
-				$scope.colsDefs,
-				$scope.filterOptions, 
-				$scope.pagingOptions, 
-				$scope.sortInfo,
-				$scope.chooseColumns,
-				$scope.facetClass,
-				$scope.score)
+		$scope.options['filterAllText'] = $scope.filterAllText = '';
+		clearFacets($scope.options);
 	};
 
 	$scope.successUpdateModels = function successUpdateModels() {
@@ -130,20 +137,20 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	};
 
 	$scope.successInitModels = function successInitModels() {
-		updateCount($scope.box, $scope.colsDescr, $scope.table, $scope.filterAllText, $scope.chooseColumns, $scope.successUpdateCount);
+		updateCount($scope.options, $scope.successUpdateCount);
 		$scope.$apply();
 	};
 
 	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
-		$scope.colsDescr = data;
-		initModels($scope.box, $scope.narrow, $scope.colsDescr, $scope.colsGroup, $scope.metadata, $scope.chooseColumns, $scope.facetClass, $scope.score, $scope.filterAllText, $scope.successInitModels);
+		$scope.options['colsDescr'] = $scope.colsDescr = data;
+		initModels($scope.options, $scope.successInitModels);
 	};
 
 	$scope.successGetFacebaseData = function successGetFacebaseData(data, totalItems, page, pageSize) {
-		$scope.facebaseData = data;
+		$scope.options['facebaseData'] = $scope.facebaseData = data;
 		$scope.totalServerItems = totalItems;
 		$scope.$apply();
-		getColumnDescriptions($scope.metadata, $scope.facebaseData, $scope.successGetColumnDescriptions);
+		getColumnDescriptions($scope.options, $scope.successGetColumnDescriptions);
 	};
 
 	$scope.successGetTableColumnsUniques = function successGetTableColumnsUniques() {
@@ -152,28 +159,28 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 		if (sortOption != null && sortOption['fields'].length > 1) {
 			sortOption = null;
 		}
-		getFacebaseData($scope.table, null, $scope.box, $scope.colsDefs, $scope.colsDescr, $scope.colsGroup, 
-				$scope.gridOptions.pagingOptions.currentPage, $scope.gridOptions.pagingOptions.pageSize, 
-				sortOption, $scope.filterAllText, $scope.chooseColumns, $scope.successGetFacebaseData, $scope.successUpdateModels);
+		$scope.options['sortOption'] = sortOption;
+		getFacebaseData($scope.options, $scope.successGetFacebaseData, $scope.successUpdateModels);
 	};
 
 	$scope.successGetMetadata = function successGetMetadata(data, textStatus, jqXHR) {
-		$scope.metadata = data;
-		var columns  = getTableColumns($scope.metadata, $scope.sortInfo);
-		$scope.facets = columns['facets'];
-		$scope.colsDefs = columns['colsDefs'];
+		$scope.options['metadata'] = $scope.metadata = data;
+		var columns  = getTableColumns($scope.options);
+		$scope.options['facets'] = $scope.facets = columns['facets'];
+		$scope.options['colsDefs'] = $scope.colsDefs = columns['colsDefs'];
 		$scope.$apply();
-		getTableColumnsUniques($scope.metadata, $scope.score, $scope.successGetTableColumnsUniques);
+		getTableColumnsUniques($scope.options, $scope.successGetTableColumnsUniques);
 	};
+	
 	$scope.successGetTables = function successGetTables() {
-		$scope.table = $scope.tables[0];
+		$scope.options['table'] = $scope.table = $scope.tables[0];
 		getMetadata($scope.table, $scope.successGetMetadata);
 	};
 
 	getTables($scope.tables, $scope.successGetTables);
 
 	$scope.successSearchFacets = function successSearchFacets(data, totalItems, page, pageSize) {
-		$scope.facebaseData = data;
+		$scope.options['facebaseData'] = $scope.facebaseData = data;
 		$scope.totalServerItems = totalItems;
 		$scope.$apply();
 	};
@@ -203,9 +210,8 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 		} else {
 			$scope.facetClass[facet] = 'selectedFacet';
 		}
-		getFacebaseData($scope.table, facet, $scope.box, $scope.colsDefs, $scope.colsDescr, $scope.colsGroup, 
-				$scope.gridOptions.pagingOptions.currentPage, $scope.gridOptions.pagingOptions.pageSize, 
-				$scope.sortInfo, $scope.filterAllText, $scope.chooseColumns, $scope.successSearchFacets, $scope.successUpdateModels);
+		$scope.options['sortOption'] = $scope.sortInfo;
+		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.delay_slider = function delay_slider(facet) {
@@ -216,10 +222,9 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	};
 
 	$scope.predicate_slider = function predicate_slider(facet) {
-		setFacetClass(facet, $scope.box, $scope.colsDescr, $scope.facetClass);
-		getFacebaseData($scope.table, facet, $scope.box, $scope.colsDefs, $scope.colsDescr, $scope.colsGroup, 
-				$scope.gridOptions.pagingOptions.currentPage, $scope.gridOptions.pagingOptions.pageSize, 
-				$scope.sortInfo, $scope.filterAllText, $scope.chooseColumns, $scope.successSearchFacets, $scope.successUpdateModels);
+		setFacetClass($scope.options, facet, $scope.facetClass);
+		$scope.options['sortOption'] = $scope.sortInfo;
+		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.delay_search_all = function delay_search_all() {
@@ -230,23 +235,21 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	};
 
 	$scope.predicate_search_all = function predicate_search_all() {
-		getFacebaseData($scope.table, null, $scope.box, $scope.colsDefs, $scope.colsDescr, $scope.colsGroup, 
-				$scope.gridOptions.pagingOptions.currentPage, $scope.gridOptions.pagingOptions.pageSize, 
-				$scope.sortInfo, $scope.filterAllText, $scope.chooseColumns, $scope.successSearchFacets, $scope.successUpdateModels);
+		$scope.options['filterAllText'] = $scope.filterAllText;
+		$scope.options['sortOption'] = $scope.sortInfo;
+		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_checkbox = function predicate_checkbox(facet) {
-		setFacetClass(facet, $scope.box, $scope.colsDescr, $scope.facetClass);
-		getFacebaseData($scope.table, facet, $scope.box, $scope.colsDefs, $scope.colsDescr, $scope.colsGroup, 
-				$scope.gridOptions.pagingOptions.currentPage, $scope.gridOptions.pagingOptions.pageSize, 
-				$scope.sortInfo, $scope.filterAllText, $scope.chooseColumns, $scope.successSearchFacets, $scope.successUpdateModels);
+		setFacetClass($scope.options, facet, $scope.facetClass);
+		$scope.options['sortOption'] = $scope.sortInfo;
+		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_select = function predicate_select(facet) {
-		setFacetClass(facet, $scope.box, $scope.colsDescr, $scope.facetClass);
-		getFacebaseData($scope.table, facet, $scope.box, $scope.colsDefs, $scope.colsDescr, $scope.colsGroup, 
-				$scope.gridOptions.pagingOptions.currentPage, $scope.gridOptions.pagingOptions.pageSize, 
-				$scope.sortInfo, $scope.filterAllText, $scope.chooseColumns, $scope.successSearchFacets, $scope.successUpdateModels);
+		setFacetClass($scope.options, facet, $scope.facetClass);
+		$scope.options['sortOption'] = $scope.sortInfo;
+		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.table_select = function table_select() {
