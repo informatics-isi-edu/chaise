@@ -756,16 +756,20 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 		if (sortOption != null) {
 			var col = sortOption['fields'][0];
 			var direction = sortOption['directions'][0];
-			if (data[(page-1)*pageSize][col] == null) {
-				predicate.push(encodeSafeURIComponent(col) + '::null::');
-			} else {
-				predicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
-			}
 			var sortPredicate = [];
+			sortPredicate.push(encodeSafeURIComponent(col) + '::null::');
+			if (data[(page-1)*pageSize][col] != null) {
+				sortPredicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
+			}
+			predicate.push(sortPredicate.join(';'));
+			sortPredicate = [];
 			$.each(PRIMARY_KEY, function(i, primaryCol) {
 				sortPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
 			});
-			sortPredicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
+			if (data[(page-1)*pageSize][col] != null) {
+				sortPredicate.push(encodeSafeURIComponent(col) + '::null::');
+				sortPredicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
+			}
 			predicate.push(sortPredicate.join(';'));
 		} else {
 			$.each(PRIMARY_KEY, function(i, col) {
