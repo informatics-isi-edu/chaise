@@ -125,6 +125,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 		$scope.filterSearchAllTimeout = null;
 		$scope.totalServerItems = 0;
 		$scope.options['filterAllText'] = $scope.filterAllText = '';
+		$scope.options['table'] = $scope.table;
 		clearFacets($scope.options);
 	};
 
@@ -152,6 +153,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 		$scope.options['facebaseData'] = $scope.facebaseData = data;
 		$scope.totalServerItems = totalItems;
 		$scope.$apply();
+		$('div.ngSortButtonDown').addClass('ng-hide');
 		getColumnDescriptions($scope.options, $scope.successGetColumnDescriptions);
 	};
 
