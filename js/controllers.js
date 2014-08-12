@@ -88,6 +88,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 			enableSorting: true,
 			enableColumnResize: true,
 			enableCellSelection: true,
+			enableColumnReordering: true,
 			showColumnMenu: true,
 			enableCellEdit: true,
 			columnDefs: 'colsDefs',
@@ -134,6 +135,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	$scope.successUpdateCount = function successUpdateCount() {
 		$scope.ready = true;
 		$scope.$apply();
+		//console.log(JSON.stringify($scope.options, null, 4));
 	};
 
 	$scope.successInitModels = function successInitModels() {
