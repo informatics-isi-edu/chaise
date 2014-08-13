@@ -74,6 +74,9 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	
 	$scope.$watch('sortInfo', function (newVal, oldVal) {
 		if ($scope.ready && newVal !== oldVal) {
+			if ($scope.options['sortInfo']['fields'].length > 1) {
+				$('div.ngSortButtonDown').addClass('ng-hide');
+			}
 			$scope.getPagedDataAsync($scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage, $scope.filterOptions.filterText, newVal);
 		}
 	}, true);

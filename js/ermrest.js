@@ -314,12 +314,12 @@ function getTableColumns(options) {
 	var ret = [];
 	if (metadata != null) {
 		var htmlCellTemplate = '<div class="ngCellText" ng-class="col.colIndex()"><span ng-cell-text ng-bind-html="row.getProperty(col.field)"></span></div>';
-		var bigintCellTemplate = '<div class="ngCellText" ng-class="col.colIndex()"><span ng-cell-text>{{row.getProperty(col.field)}}</span></div>';
+		var cellTemplate = '<div class="ngCellText" ng-class="col.colIndex()"><span ng-cell-text>{{row.getProperty(col.field)}}</span></div>';
 		var column_definitions = metadata['column_definitions'];
 		$.each(column_definitions, function(i, col) {
 			var col_def = {};
 			col_def['field'] = col['name'];
-			col_def['cellTemplate'] = (col['type'] == 'bigint' ? bigintCellTemplate : htmlCellTemplate);
+			col_def['cellTemplate'] = cellTemplate;
 			/*
 			var b = $('<b>');
 			b.html(col['name']);
