@@ -55,6 +55,21 @@ var visibleColumns = {
                  ]
 };
 
+var unsortableColumns = {
+		'dataset1': [
+		             'desc_html'
+		             ],
+         'mouse': [
+                   'desc_html'
+                   ],
+	      'human': [
+	                 'desc_html'
+	                 ],
+   	      'zebrafish': [
+                 'desc_html'
+                 ]
+};
+
 function initFacebase() {
 	initLocation();
 	ERMREST_SCHEMA_HOME = HOME + ERMREST_FACEBASE_SCHEMA;
@@ -331,6 +346,10 @@ function getTableColumns(options) {
 			var visibleTableColumns = visibleColumns[metadata['table_name']];
 			if (visibleTableColumns != null && !visibleTableColumns.contains(col['name'])){
 				col_def['visible'] = false;
+			}
+			var unsortableTableColumns = unsortableColumns[metadata['table_name']];
+			if (unsortableTableColumns != null && unsortableTableColumns.contains(col['name'])){
+				col_def['sortable'] = false;
 			}
 			columns_definitions.push(col_def);
 			//b.remove();
