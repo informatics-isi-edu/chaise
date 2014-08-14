@@ -401,6 +401,7 @@ function getFacebaseData(options, successCallback, successUpdateModels) {
 		url += '/' + predicate.join('/');
 	}
 	updateGroups(options, successUpdateModels);
+	updateSliders(options, successUpdateModels);
 	url += '/cnt:=cnt(' +  encodeSafeURIComponent(options['colsDefs'][0]['field']) + ')';
 	var param = {};
 	param['options'] = options;
@@ -443,12 +444,14 @@ function initModels(options, successCallback) {
 		} else if (value['type'] == 'bigint') {
 			box[col]['min'] = box[col]['floor'] = value['min'];
 			box[col]['max'] = box[col]['ceil'] = value['max'];
+			sentRequests = true;
 		}
 	});
 	if (!sentRequests) {
 		successCallback();
 	} else {
 		updateGroups(options, successCallback);
+		updateSliders(options, successCallback);
 	}
 }
 
@@ -547,6 +550,59 @@ function successUpdateGroups(data, textStatus, jqXHR, param) {
 	if (ready) {
 		$.each(colsGroup, function(key, value) {
 			delete value['ready'];
+		});
+		param['successCallback']();
+	}
+
+}
+
+function updateSliders(options, successCallback) {
+	var alertObject = {'display': true};
+	$.each(options['box'], function(col, values) {
+		if (values['floor'] != null) {
+			var predicate = getPredicate(options, col);
+			var param = {};
+			param['alert'] = alertObject;
+			var col_name = encodeSafeURIComponent(col);
+			param['successCallback'] = successCallback;
+			param['options'] = options;
+			param['col'] = col;
+			var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(options['table']) + '/';
+			if (predicate != null && predicate.length > 0) {
+				url += predicate.join('/') + '/';
+			}
+			url += 'min:=min(' + encodeSafeURIComponent(col_name) + '),max:=max(' + encodeSafeURIComponent(col_name) + ')';
+			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateSliders, errorErmrest, param);
+		}
+	});
+}
+
+function successUpdateSliders(data, textStatus, jqXHR, param) {
+	var col = param['col'];
+	var box = param['options']['box'];
+	box[col]['ready'] = true;
+	if (data[0]['min'] != null) {
+		box[col]['floor'] = data[0]['min'];
+		box[col]['ceil'] = data[0]['max'];
+		if (box[col]['max'] > box[col]['ceil']) {
+			box[col]['max'] = box[col]['ceil'];
+		}
+		if (box[col]['min'] < box[col]['floor']) {
+			box[col]['min'] = box[col]['floor'];
+		}
+	}
+	var ready = true;
+	$.each(box, function(key, value) {
+		if (value['floor'] != null && !value['ready']) {
+			ready = false;
+			return false;
+		}
+	});
+	if (ready) {
+		$.each(box, function(key, value) {
+			if (value['floor'] != null) {
+				delete value['ready'];
+			}
 		});
 		param['successCallback']();
 	}

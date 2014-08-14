@@ -291,7 +291,8 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	this.hide = function hide(facet) {
 		return ($scope.narrow[facet] == null || !$scope.chooseColumns[facet] || 
 				($scope.box[facet]['facetcount'] == 0 && 
-						($scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] == '' ||
+						($scope.colsDescr[facet]['type'] == 'bigint' ||
+								$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] == '' ||
 								$scope.colsDescr[facet]['type'] == 'enum' && !hasCheckedValues($scope.box, facet))));
 	};
 	this.expand = function expand(facet) {
