@@ -320,6 +320,7 @@ function getTableColumns(options) {
 			var col_def = {};
 			col_def['field'] = col['name'];
 			col_def['cellTemplate'] = cellTemplate;
+			col_def['groupable'] = false;
 			/*
 			var b = $('<b>');
 			b.html(col['name']);
