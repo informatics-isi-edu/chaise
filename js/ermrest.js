@@ -457,18 +457,18 @@ function initModels(options, successCallback) {
 
 function updateCount(options, successCallback) {
 	var box = options['box'];
-	var predicate = getPredicate(options, null);
 	var urlPrefix = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(options['table']) + '/';
-	if (predicate != null && predicate.length > 0) {
-		urlPrefix += predicate.join('/') + '/' ;
-	}
-	urlPrefix += 'cnt:=cnt(';
 	$.each(box, function(col, value) {
 		box[col]['ready'] = false;
 	});
 	var alertObject = {'display': true};
 	$.each(box, function(col, value) {
-		var url = urlPrefix + encodeSafeURIComponent(col) + ')';
+		var predicate = getPredicate(options, col);
+		var url = urlPrefix;
+		if (predicate != null && predicate.length > 0) {
+			url += predicate.join('/') + '/' ;
+		}
+		url += 'cnt:=cnt(' + encodeSafeURIComponent(col) + ')';
 		var param = {};
 		param['options'] = options;
 		param['col'] = col;
