@@ -276,13 +276,11 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	this.show = function show(facet) {
 		return ($scope.narrow[facet] == null && $scope.ready && $scope.chooseColumns[facet] && 
 				($scope.box[facet]['facetcount'] > 0 || 
-						$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] != '' ||
 						$scope.colsDescr[facet]['type'] == 'enum' && hasCheckedValues($scope.box, facet)));
 	};
 	this.showFacetCount = function showFacetCount(facet) {
 		return ($scope.chooseColumns[facet] && 
 				($scope.box[facet]['facetcount'] > 0 || 
-						$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] != '' ||
 						$scope.colsDescr[facet]['type'] == 'enum' && hasCheckedValues($scope.box, facet)));
 	};
 	this.showClearButton = function showClearButton() {
@@ -292,7 +290,6 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 		return ($scope.narrow[facet] == null || !$scope.chooseColumns[facet] || 
 				($scope.box[facet]['facetcount'] == 0 && 
 						($scope.colsDescr[facet]['type'] == 'bigint' ||
-								$scope.colsDescr[facet]['type'] == 'text' && $scope.box[facet]['value'] == '' ||
 								$scope.colsDescr[facet]['type'] == 'enum' && !hasCheckedValues($scope.box, facet))));
 	};
 	this.expand = function expand(facet) {
