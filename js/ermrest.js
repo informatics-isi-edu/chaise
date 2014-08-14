@@ -533,7 +533,7 @@ function successUpdateGroups(data, textStatus, jqXHR, param) {
 		}
 	});
 	$.each(colsGroup[col], function(key, value) {
-		if (key != 'ready' && !values.contains(key) && !box[col]['values'][key]) {
+		if (key != 'ready' && !values.contains(key)) {
 			hideValues.push(key);
 		}
 	});

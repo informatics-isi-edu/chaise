@@ -265,7 +265,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	};
 
 	this.showFacetValue = function showFacetValue(facet, value) {
-		return ($scope.colsGroup[facet][value] == 0);
+		return ($scope.colsGroup[facet][value] == 0 && !$scope.box[facet]['values'][value]);
 	};
 	this.display = function display(facet) {
 		return getColumnDisplay(facet, $scope.colsGroup);
