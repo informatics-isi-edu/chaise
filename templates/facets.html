@@ -14,7 +14,7 @@
         <tr>
           <td class="top">
 	    <table class="leftArea"><tbody>
-              <tr ng-repeat-start="facet in facets">
+              <tr ng-repeat-start="facet in facets" ng-click="$broadcast('reCalcViewDimensions')">
                     <!-- <td><a ng-href="#"  ng-click="facetList.preventRoute($event)">{{facetList.display(facet)}}</a></td> -->
                     <td><a ng-href="#"  class="facet_name" ng-show="facetList.showFacetCount(facet)" ng_class="facetClass[facet]" ng-click="facetList.preventRoute($event, facet)">{{box[facet]['count']}}</a></td>
 	            <td ng-show="facetList.show(facet)"><img src="/facebase/img/triangle--down.jpeg" alt="Expand" height="8" width="8" ng-click="facetList.expand(facet)" class="pointer"></td>
