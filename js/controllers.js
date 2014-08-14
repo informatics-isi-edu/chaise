@@ -75,7 +75,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	$scope.$watch('sortInfo', function (newVal, oldVal) {
 		if ($scope.ready && newVal !== oldVal) {
 			if ($scope.options['sortInfo']['fields'].length > 1) {
-				$('div.ngSortButtonDown').addClass('ng-hide');
+				$('div.ngSortButtonUp').addClass('ng-hide');
 			}
 			$scope.getPagedDataAsync($scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage, $scope.filterOptions.filterText, newVal);
 		}
@@ -156,7 +156,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 		$scope.options['facebaseData'] = $scope.facebaseData = data;
 		$scope.totalServerItems = totalItems;
 		$scope.$apply();
-		$('div.ngSortButtonDown').addClass('ng-hide');
+		$('div.ngSortButtonUp').addClass('ng-hide');
 		getColumnDescriptions($scope.options, $scope.successGetColumnDescriptions);
 	};
 

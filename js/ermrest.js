@@ -336,7 +336,7 @@ function getTableColumns(options) {
 			//b.remove();
 			ret.push(col['name']);
 			sortInfo['fields'].push(col['name']);
-			sortInfo['directions'].push('');
+			sortInfo['directions'].push('desc');
 		});
 	}
 
