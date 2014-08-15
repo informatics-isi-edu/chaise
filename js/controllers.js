@@ -120,6 +120,14 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 			'table': $scope.table
 	};
 
+	$scope.setSortOption = function setSortOption() {
+		var sortOption = $scope.sortInfo;
+		if (sortOption != null && sortOption['fields'].length > 1) {
+			sortOption = null;
+		}
+		$scope.options['sortOption'] = sortOption;
+	};
+	
 	$scope.initTable = function initTable() {
 		$scope.ready = false;
 		$scope.moreFlag = false;
@@ -134,6 +142,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 
 	$scope.successUpdateModels = function successUpdateModels() {
 		$scope.$apply();
+		$scope.$broadcast('reCalcViewDimensions');
 	};
 
 	$scope.successUpdateCount = function successUpdateCount() {
@@ -162,11 +171,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 
 	$scope.successGetTableColumnsUniques = function successGetTableColumnsUniques() {
 		//alert(JSON.stringify($scope.score, null, 4));
-		var sortOption = $scope.sortInfo;
-		if (sortOption != null && sortOption['fields'].length > 1) {
-			sortOption = null;
-		}
-		$scope.options['sortOption'] = sortOption;
+		$scope.setSortOption();
 		getFacebaseData($scope.options, $scope.successGetFacebaseData, $scope.successUpdateModels);
 	};
 
@@ -217,7 +222,7 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 		} else {
 			$scope.facetClass[facet] = 'selectedFacet';
 		}
-		$scope.options['sortOption'] = $scope.sortInfo;
+		$scope.setSortOption();
 		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
@@ -229,8 +234,18 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 	};
 
 	$scope.predicate_slider = function predicate_slider(facet) {
+		if ($scope.box[facet]['min'] > $scope.box[facet]['floor']) {
+			$scope.box[facet]['left'] = true;
+		} else if ($scope.box[facet]['left'] && $scope.box[facet]['min'] == $scope.box[facet]['floor']) {
+			delete $scope.box[facet]['left'];
+		}
+		if ($scope.box[facet]['max'] < $scope.box[facet]['ceil']) {
+			$scope.box[facet]['right'] = true;
+		} else if ($scope.box[facet]['right'] && $scope.box[facet]['max'] == $scope.box[facet]['original_ceil']) {
+			delete $scope.box[facet]['right'];
+		}
 		setFacetClass($scope.options, facet, $scope.facetClass);
-		$scope.options['sortOption'] = $scope.sortInfo;
+		$scope.setSortOption();
 		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
@@ -243,19 +258,19 @@ facetsControllers.controller('FacetListCtrl', ['$scope', '$timeout',
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		$scope.options['filterAllText'] = $scope.filterAllText;
-		$scope.options['sortOption'] = $scope.sortInfo;
+		$scope.setSortOption();
 		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_checkbox = function predicate_checkbox(facet) {
 		setFacetClass($scope.options, facet, $scope.facetClass);
-		$scope.options['sortOption'] = $scope.sortInfo;
+		$scope.setSortOption();
 		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_select = function predicate_select(facet) {
 		setFacetClass($scope.options, facet, $scope.facetClass);
-		$scope.options['sortOption'] = $scope.sortInfo;
+		$scope.setSortOption();
 		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 

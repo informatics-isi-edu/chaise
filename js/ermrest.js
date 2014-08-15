@@ -400,8 +400,10 @@ function getPredicate(options, excludeColumn) {
 				predicate.push(selectedValues);
 			}
 		} else if (colsDescr[key]['type'] == 'bigint') {
-			if (value['min'] != value['floor'] || value['max'] != value['ceil']) {
+			if (value['left']) {
 				predicate.push(encodeSafeURIComponent(key) + '::geq::' + encodeSafeURIComponent(value['min']));
+			}
+			if (value['right']) {
 				predicate.push(encodeSafeURIComponent(key) + '::leq::' + encodeSafeURIComponent(value['max']));
 			}
 		}
@@ -579,7 +581,7 @@ function updateSliders(options, successCallback) {
 	var alertObject = {'display': true};
 	$.each(options['box'], function(col, values) {
 		if (values['floor'] != null) {
-			var predicate = getPredicate(options, col);
+			var predicate = getPredicate(options, values['left'] || values['right'] ? null : col);
 			var param = {};
 			param['alert'] = alertObject;
 			var col_name = encodeSafeURIComponent(col);
@@ -601,13 +603,17 @@ function successUpdateSliders(data, textStatus, jqXHR, param) {
 	var box = param['options']['box'];
 	box[col]['ready'] = true;
 	if (data[0]['min'] != null) {
-		box[col]['floor'] = data[0]['min'];
-		box[col]['ceil'] = data[0]['max'];
-		if (box[col]['max'] > box[col]['ceil']) {
-			box[col]['max'] = box[col]['ceil'];
+		if (!box[col]['left']) {
+			box[col]['min'] = data[0]['min'];
 		}
-		if (box[col]['min'] < box[col]['floor']) {
-			box[col]['min'] = box[col]['floor'];
+		if (!box[col]['right']) {
+			box[col]['max'] = data[0]['max'];
+		}
+		if (box[col]['right'] && box[col]['max'] == box[col]['ceil']) {
+			delete box[col]['right'];
+		}
+		if (box[col]['left'] && box[col]['min'] == box[col]['floor']) {
+			delete box[col]['left'];
 		}
 	}
 	var ready = true;
@@ -982,7 +988,7 @@ function setFacetClass(options, facet, facetClass) {
 			cssClass = 'selectedFacet';
 		}
 	} else if (colsDescr[facet]['type'] == 'bigint') {
-		if (value['min'] != value['floor'] || value['max'] != value['ceil']) {
+		if (value['left'] || value['right']) {
 			cssClass = 'selectedFacet';
 		}
 	}
