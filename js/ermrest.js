@@ -376,7 +376,7 @@ function getPredicate(options, excludeColumn) {
 			value = value['value'].split(' ');
 			$.each(value, function(i, val) {
 				if (val.length > 0) {
-					predicate.push(encodeSafeURIComponent(key) + '::ts::' + encodeSafeURIComponent(val));
+					predicate.push(encodeSafeURIComponent(key) + '::regexp::' + encodeSafeURIComponent(val));
 				}
 			});
 		} else if (colsDescr[key]['type'] == 'enum') {
