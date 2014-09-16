@@ -1,35 +1,119 @@
 <!doctype html>
-<html lang="en" ng-app="facebaseApp">
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Facebase</title>
-  <link rel="stylesheet" href="css/bootstrap.css">
-  <link rel="stylesheet" href="css/ng-grid.css">
-  <link rel="stylesheet" href="css/rzslider.css">
-  <link rel="stylesheet" href="css/facebase.css">
-  <script src="js/variables.js"></script>
-  <script src="js/jquery.js"></script>
-  <script src="js/jquery.cookie.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/ermrest.js"></script>
-  <script src="js/angular.js"></script>
-  <script src="js/angular-route.js"></script>
-  <script src="js/angular-sanitize.js"></script>
-  <script src="js/rzslider.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/controllers.js"></script>
-  <script src="js/ng-grid.js"></script>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Faceted Search interface">
+  <title>Facebase Faceted Search Demo</title>
+  <link rel="stylesheet" href="styles/bootstrap.css">
+  <link rel="stylesheet" href="styles/ng-grid.css">
+  <link rel="stylesheet" href="styles/rzslider.css">
+  <link rel="stylesheet" href="styles/facebase.css">
+  <link rel="stylesheet" media="screen" href="styles/superfish.css">
+  <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+  <link href="styles/style.css" rel="stylesheet" media="screen, projection">
+  <link rel="stylesheet" href="styles/jquery-ui.css">
+  <script src="scripts/variables.js"></script>
+  <script src="scripts/vendor/jquery-1.10.2.js"></script>
+  <script src="scripts/vendor/jquery-ui.min.js"></script>
+  <script src="scripts/vendor/jquery.js"></script>
+  <script src="scripts/vendor/hoverIntent.js"></script>
+  <script src="scripts/vendor/superfish.js"></script>
+  <script src="scripts/vendor/jquery.cookie.js"></script>
+  <script src="scripts/utils.js"></script>
+  <script src="scripts/ermrest.js"></script>
+  <script src="scripts/vendor/angular.js"></script>
+  <script src="scripts/vendor/angular-route.js"></script>
+  <script src="scripts/vendor/angular-sanitize.js"></script>
+  <script src="scripts/vendor/rzslider.js"></script>
+  <script src="scripts/app.js"></script>
+  <script src="scripts/controller/fbGridController.js"></script>
+  <script src="scripts/controller/fbDiscoverController.js"></script>
+  <script src="scripts/controller/fbLoginController.js"></script>
+  <script src="scripts/controller/fbLogoutController.js"></script>
+  <script src="scripts/vendor/ng-grid.js"></script>
 </head>
 <body>
+	<header>
 
-<div>
+		<nav id="mainnav">
+			<ul class="sf-menu sf-js-enabled sf-arrows" id="sample-menu-1">
+				<li class="current"><a href="*">Home</a></li>
+				<li><a href="*" class="sf-with-ul">About</a>
+					<ul>
+						<li><a href="#">Facebase Mission</a></li>
+						<li><a href="#">Steering Committee</a></li>
+						<li><a href="#">History</a></li>
+					</ul></li>
+				<li><a href="*" class="sf-with-ul">Data Search</a>
+					<ul>
+						<li><a href="#">Development Stage</a></li>
+						<li><a href="#">Anatomical Structure</a></li>
+						<li><a href="#">Species</a></li>
+						<li><a href="#">Genetics</a></li>
+					</ul></li>
+				<li><a href="*" class="sf-with-ul">Tools</a>
+					<ul>
+						<li><a href="#">OPT Viewer</a></li>
+						<li><a href="#">Tooln</a></li>
+						<li><a href="#">Tooln</a></li>
+						<li><a href="#">Tooln</a></li>
+					</ul></li>
+				<li><a href="*" class="sf-with-ul">Projects</a>
+					<ul>
+						<li><a href="#">Anatomical Atlas and Transgenic Toolkit
+								for Late Skull Formation in Zebrafish</a></li>
+						<li><a href="#">Developing 3D Craniofacial Morphometry
+								Data and Tools to Transform Dysmorphology</a></li>
+						<li><a href="#">Epigenetic Landscapes and Regulatory
+								Divergence of Human Craniofacial Traits</a></li>
+						<li><a href="#">Genomic, Transgenic and Knockout
+								Resources for Craniofacial Enhancer Studies</a></li>
+						<li><a href="#">Human Genomics Analysis Interface for
+								Facebase 2</a></li>
+						<li><a href="#">Integrated Research of Functional
+								Genomics and Craniofacial Morphogenesis</a></li>
+						<li><a href="#">Integration of Gene Expression and
+								Signaling in the Developing Facial Prominences</a></li>
+						<li><a href="#">Ontology-based Integration, Visualization
+								and Exploration of Craniofacial Data</a></li>
+						<li><a href="#">Rapid Identification and Validation of
+								Human Craniofacial Development Genes</a></li>
+						<li><a href="#">Transcriptome Atlases of the Craniofacial
+								Sutures </a></li>
+					</ul></li>
+				<li><a href="*" class="sf-with-ul">Docs</a>
+					<ul>
+						<li><a href="#">Data Use Policy</a></li>
+						<li><a href="#">Metadata Annotation</a></li>
+						<li><a href="#">Submitting Track Hub Data</a></li>
+					</ul></li>
+				<li><a href="*">FAQs</a></li>
+				<li><a href="*">Publications</a></li>
+			</ul>
+		</nav>
 
-<div class="topPanel" name="loginForm" id="topPanel" ng-controller="TopPanelCtrl as topPanelController" ng-show="topPanelController.showTop()">
-  <div class="floatLeft"><a href="#"  class="banner-text" ng-bind-html="topPanelController.welcome()" ng-click="topPanelController.preventRoute($event)" ng-show="topPanelController.show()"></a></div>
-  <div class="floatRight"><a href="#/login" class="banner-text" ng-hide="topPanelController.hide()">Login</a></div>
-  <div class="floatRight"><a href="#/logout" class="banner-text" ng-show="topPanelController.show()">Logout</a></div>
-  <br class="clearBoth">
-</div>
+	</header>
+	<nav id="usernav">
+		<div id="usermenu">
+			<div id="userlinks">
+				User Links: <a href="#">Meetings</a> | <a href="#">Roadmap</a> | <a
+					href="#">News</a> | <a href="#">Calendar</a> | <a href="#">Discussions</a>
+				| <a href="#">Support</a>
+			</div>
+			<div id="login">
+				john.doe &nbsp; <span class="fa fa-user fa-lg"></span>
+			</div>
+			<form id="sitesearch" method="get" action="#">
+				<input type="text" class="keyinput" name="q" size="24"
+					maxlength="120" onfocus="if (this.value=='search') this.value = ''"
+					value="Site Search...">
+			</form>
+
+		</div>
+	</nav>
+
+<div ng-app="facebaseApp">
 
 <div ng-view></div>
 

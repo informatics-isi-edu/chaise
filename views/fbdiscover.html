@@ -1,0 +1,90 @@
+<div ng-controller="DiscoverListCtrl as facetList">
+	  <div id="ajaxSpinnerContainer" ng-hide="facetList.hideSpinner()">
+		<img src="/facebase/images/ajax-loader.gif" id="ajaxSpinnerImage"
+			title="Processing..." alt="Spinner" ng-hide="facetList.hideSpinner()" class="center"/>
+	  </div>
+      <div><b>Collections:&nbsp;</b><select ng-model="table" ng-change="facetList.table_select()" ng-options="value for value in tables"></select></div>
+      <div id="content">
+      	<h1>Faceted Search Demo</h1>
+      	<div id="filters">
+      		<a href="#" ng-click="facetList.clear($event)" ng-show="facetList.showClearButton()" class="ng-hide button reset">Reset All</a>
+      		<p class="searchtitle">Filters</p>
+      		<div id="listContainer">
+      			<form>
+      				<ul id="expList">
+      					<li ng-repeat="facet in facets" class="expanded" ng-show="facetList.showFacetCount(facet)" ng-click="facetList.toggleFacet($event, facet)">{{facet}}
+      						<span>{{box[facet]['facetcount']}}</span>
+      						<ul ng-hide="facetList.hide(facet)">
+								<li ng-if="facetList.if_type(facet, 'bigint')" ><rzslider rz-slider-model="box[facet]['min']" rz-slider-high="box[facet]['max']" rz-slider-floor="box[facet]['floor']"  rz-slider-ceil="box[facet]['ceil']"
+									ng-mouseup="facetList.delay_slider(facet)">
+								</rzslider></li>
+								<li ng-if="facetList.if_type(facet, 'text')"><input type="text" ng-model="box[facet]['value']" ng-keyup="facetList.delay_predicate(facet,$event.keyCode)"></li>
+      							<li ng-if="facetList.if_type(facet, 'enum')" ng-repeat="value in colsDescr[facet]['values']" ng-hide="facetList.showFacetValue(facet, value)">
+      								<input type="checkbox" ng-model="box[facet]['values'][value]" ng-change="facetList.predicate_checkbox(facet)" ng-disabled="facetList.showFacetValue(facet, value)"/>{{value}}
+      								<span>{{colsGroup[facet][value]}}</span>
+      							</li>
+      						</ul>
+      					</li>
+      				</ul>
+      				<ul id="moreList">
+						<li ng-show="facetList.showMoreButton()" class="more"><a href="#" ng-click="facetList.displayMore($event)">More filter options</a>&nbsp;&nbsp;<i class="fa fa-angle-down fa-lg"></i>
+							<ul ng-hide="facetList.hideMore()">
+								<li ng-repeat="facet in facets">
+									<input  class="facet_checkbox" type="checkbox" ng-model="chooseColumns[facet]">{{facet}}
+								</li>
+							</ul>
+						</li>
+      				</ul>
+      			</form>
+      		</div>
+      	</div>
+      	<div id="main">
+      		<div id="searchsort">
+      			<form id="keysearch">
+      				<input type="text" ng-model="filterAllText" class="keyinput" name="q" size="24" maxlength="120" placeholder="Search..." ng-keyup="facetList.delay_search_all($event.keyCode)">
+      			</form>
+      			<div id="sort">
+      				<span>Sort</span>
+      				<img src="images/asc_desc.png" border="0" ng-click="facetList.changeSortDirection()">
+      				<div class="style-select">
+      					<select name="field-pick" ng-model="sortFacet" ng-change="facetList.changeSortOption()" ng-options="value for value in sortColumns"></select>
+      				</div>
+      			</div>
+      			<div id="showpg">
+      				<span>Show</span>
+      				<div class="style-select-pg">
+      					<select size="1" name="field-pick" ng-model="pagingOptions.pageSize" ng-options="value for value in pagingOptions.pageSizes"></select>
+      				</div>
+      			</div>
+      			<div id="paginator">
+      				<ul class="pages">
+      					<li class="prev"><a href="#" ng-hide="facetList.cantPageBackward()" ng-click="facetList.pageToFirst($event)">&lt;&lt;</a></li>
+      					<li class="prev"><a href="#" ng-hide="facetList.cantPageBackward()" ng-click="facetList.pageBackward($event)">&lt;</a></li>
+      					<li ng-repeat="page in pageRange" ><a href="#" ng-click="facetList.selectPage($event, page)">{{facetList.pageButton(page)}}</a></li>
+      					<li class="next"><a href="#" ng-show="facetList.canPageForward()" ng-click="facetList.pageForward($event)">&gt;</a></li>
+      					<li class="next"><a href="#" ng-show="facetList.canPageForward()" ng-click="facetList.pageToLast($event)">&gt;&gt;</a></li>
+      				</ul>
+      			</div>
+      		</div>
+      		<div id="results_tally">
+      			<p>Page {{pagingOptions.currentPage}} of {{maxPages}}. Showing results <strong>{{(pagingOptions.currentPage-1)*pagingOptions.pageSize+1}}-{{facetList.lastRecord()}}</strong> of <strong>{{totalServerItems}}.</strong></p>
+      		</div>
+      		<div id="resultstable">
+      			<div class="resultsrow" ng-repeat="row in facebaseData">
+      				<a class="button view" href="#" ng-click="facetList.clicker($event, row);">View All Data</a>
+      				<p class="title" ng-bind-html="facetList.itemTitle(row)"></p>
+      				<table class="resultsdata" ng-bind-html="facetList.itemRow(row)"></table>
+      			</div>
+      		</div>
+      	</div>
+      </div>
+      <div id="displaybox" ng-show="details">
+      	<div id="viewdata">
+      		<div class="formtitle">
+      			<a href="#" ng-click="facetList.clicker($event);"><img src="images/close_overlay.png"></a>
+      		</div>
+      		<div id="datacontent" ng-bind-html="entryRow"></div>
+      	</div>
+      </div>
+</div>
+
