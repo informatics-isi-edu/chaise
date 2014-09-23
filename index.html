@@ -5,20 +5,15 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="Faceted Search interface">
   <title>Facebase Faceted Search Demo</title>
-  <link rel="stylesheet" href="styles/bootstrap.css">
-  <link rel="stylesheet" href="styles/ng-grid.css">
-  <link rel="stylesheet" href="styles/rzslider.css">
+  <link rel="stylesheet" href="styles/vendor/bootstrap.css">
+  <link rel="stylesheet" href="styles/vendor/ng-grid.css">
+  <link rel="stylesheet" href="styles/vendor/rzslider.css">
   <link rel="stylesheet" href="styles/facebase.css">
-  <link rel="stylesheet" media="screen" href="styles/superfish.css">
-  <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
-  <link href="styles/style.css" rel="stylesheet" media="screen, projection">
-  <link rel="stylesheet" href="styles/jquery-ui.css">
+  <link href="styles/bootstrap.min.css" rel="stylesheet">
+  <link href="styles/style.css" rel="stylesheet">
   <script src="scripts/variables.js"></script>
-  <script src="scripts/vendor/jquery-1.10.2.js"></script>
-  <script src="scripts/vendor/jquery-ui.min.js"></script>
-  <script src="scripts/vendor/jquery.js"></script>
-  <script src="scripts/vendor/hoverIntent.js"></script>
-  <script src="scripts/vendor/superfish.js"></script>
+  <script src="scripts/vendor/jquery-latest.min.js"></script>
+  <script src="scripts/vendor/bootstrap.min.js"></script>
   <script src="scripts/vendor/jquery.cookie.js"></script>
   <script src="scripts/utils.js"></script>
   <script src="scripts/ermrest.js"></script>
@@ -34,91 +29,144 @@
   <script src="scripts/vendor/ng-grid.js"></script>
 </head>
 <body>
-	<header>
+	<div class="container-fluid">
+		<!-- Row 1: Logo and Main navigation -->
+		<header class="row">
+			<nav id="mainnav" class="navbar navbar-default navbar-inverse"
+				role="navigation">
 
-		<nav id="mainnav">
-			<ul class="sf-menu sf-js-enabled sf-arrows" id="sample-menu-1">
-				<li class="current"><a href="*">Home</a></li>
-				<li><a href="*" class="sf-with-ul">About</a>
-					<ul>
-						<li><a href="#">Facebase Mission</a></li>
-						<li><a href="#">Steering Committee</a></li>
-						<li><a href="#">History</a></li>
-					</ul></li>
-				<li><a href="*" class="sf-with-ul">Data Search</a>
-					<ul>
-						<li><a href="#">Development Stage</a></li>
-						<li><a href="#">Anatomical Structure</a></li>
-						<li><a href="#">Species</a></li>
-						<li><a href="#">Genetics</a></li>
-					</ul></li>
-				<li><a href="*" class="sf-with-ul">Tools</a>
-					<ul>
-						<li><a href="#">OPT Viewer</a></li>
-						<li><a href="#">Tooln</a></li>
-						<li><a href="#">Tooln</a></li>
-						<li><a href="#">Tooln</a></li>
-					</ul></li>
-				<li><a href="*" class="sf-with-ul">Projects</a>
-					<ul>
-						<li><a href="#">Anatomical Atlas and Transgenic Toolkit
-								for Late Skull Formation in Zebrafish</a></li>
-						<li><a href="#">Developing 3D Craniofacial Morphometry
-								Data and Tools to Transform Dysmorphology</a></li>
-						<li><a href="#">Epigenetic Landscapes and Regulatory
-								Divergence of Human Craniofacial Traits</a></li>
-						<li><a href="#">Genomic, Transgenic and Knockout
-								Resources for Craniofacial Enhancer Studies</a></li>
-						<li><a href="#">Human Genomics Analysis Interface for
-								Facebase 2</a></li>
-						<li><a href="#">Integrated Research of Functional
-								Genomics and Craniofacial Morphogenesis</a></li>
-						<li><a href="#">Integration of Gene Expression and
-								Signaling in the Developing Facial Prominences</a></li>
-						<li><a href="#">Ontology-based Integration, Visualization
-								and Exploration of Craniofacial Data</a></li>
-						<li><a href="#">Rapid Identification and Validation of
-								Human Craniofacial Development Genes</a></li>
-						<li><a href="#">Transcriptome Atlases of the Craniofacial
-								Sutures </a></li>
-					</ul></li>
-				<li><a href="*" class="sf-with-ul">Docs</a>
-					<ul>
-						<li><a href="#">Data Use Policy</a></li>
-						<li><a href="#">Metadata Annotation</a></li>
-						<li><a href="#">Submitting Track Hub Data</a></li>
-					</ul></li>
-				<li><a href="*">FAQs</a></li>
-				<li><a href="*">Publications</a></li>
-			</ul>
-		</nav>
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed"
+						data-toggle="collapse" data-target="#fb-navbar-main-collapse">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand visible-xs-block" href="#">Facebase</a>
+				</div>
 
-	</header>
-	<nav id="usernav">
-		<div id="usermenu">
-			<div id="userlinks">
-				User Links: <a href="#">Meetings</a> | <a href="#">Roadmap</a> | <a
-					href="#">News</a> | <a href="#">Calendar</a> | <a href="#">Discussions</a>
-				| <a href="#">Support</a>
-			</div>
-			<div id="login">
-				john.doe &nbsp; <span class="fa fa-user fa-lg"></span>
-			</div>
-			<form id="sitesearch" method="get" action="#">
-				<input type="text" class="keyinput" name="q" size="24"
-					maxlength="120" onfocus="if (this.value=='search') this.value = ''"
-					value="Site Search...">
-			</form>
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="collapse navbar-collapse" id="fb-navbar-main-collapse">
+					<ul class="nav navbar-nav">
+						<li class="active"><a href="#">Data Browser</a>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#">Development Stage</a></li>
+								<li><a href="#">Anatomical Structure</a></li>
+								<li><a href="#">Species</a></li>
+								<li><a href="#">Genetics</a></li>
+							</ul></li>
+						<li class="dropdown"><a href="#" data-toggle="dropdown">About
+								<span class="caret"></span>
+						</a>
+							<ul class="dropdown-menu">
+								<li><a href="#">History</a></li>
+								<li><a href="#">Steering Committee</a></li>
+								<li><a href="#">Scientific Leadership Group</a></li>
+							</ul></li>
+						<li class="dropdown"><a href="#" class="dropdown-toggle"
+							data-toggle="dropdown">Tools <span class="caret"></span></a>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#">OPT Viewer</a></li>
+								<li><a href="#">Tool n</a></li>
+								<li><a href="#">Tool n</a></li>
+								<li><a href="#">Tool n</a></li>
+							</ul></li>
+						<li class="dropdown"><a href="#" class="dropdown-toggle"
+							data-toggle="dropdown">Projects <span class="caret"></span></a>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#">Anatomical Atlas and Transgenic Toolkit
+										for Late Skull Formation in Zebrafish</a></li>
+								<li><a href="#">Developing 3D Craniofacial Morphometry
+										Data and Tools to Transform Dysmorphology</a></li>
+								<li><a href="#">Epigenetic Landscapes and Regulatory
+										Divergence of Human Craniofacial Traits</a></li>
+								<li><a href="#">Genomic, Transgenic and Knockout
+										Resources for Craniofacial Enhancer Studies</a></li>
+								<li><a href="#">Human Genomics Analysis Interface for
+										Facebase 2</a></li>
+								<li><a href="#">Integrated Research of Functional
+										Genomics and Craniofacial Morphogenesis</a></li>
+								<li><a href="#">Integration of Gene Expression and
+										Signaling in the Developing Facial Prominences</a></li>
+								<li><a href="#">Ontology-based Integration,
+										Visualization and Exploration of Craniofacial Data</a></li>
+								<li><a href="#">Rapid Identification and Validation of
+										Human Craniofacial Development Genes</a></li>
+								<li><a href="#">Transcriptome Atlases of the
+										Craniofacial Sutures </a></li>
+							</ul></li>
+						<li class="dropdown"><a href="#" class="dropdown-toggle"
+							data-toggle="dropdown">Docs <span class="caret"></span></a>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#">Data Use Policy</a></li>
+								<li><a href="#">Metadata Annotation</a></li>
+								<li><a href="#">Submitting Track Hub Data</a></li>
+							</ul></li>
+						<li><a href="#">FAQs</a></li>
+						<li><a href="#">Publications</a></li>
+					</ul>
+				</div>
+				<!-- /.navbar-collapse -->
+			</nav>
+		</header>
+
+		<!-- Row 2: User navigation bar  -->
+		<div class="row">
+			<nav id="usernav" class="navbar navbar-default" role="navigation">
+
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed"
+						data-toggle="collapse" data-target="#fb-userbar-main-collapse">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand  visible-xs-block" href="#">FB User
+						Links</a>
+				</div>
+
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="collapse navbar-collapse" id="fb-userbar-main-collapse">
+					<ul class="nav navbar-nav">
+						<li><a href="#">Meetings</a></li>
+						<li><a href="#">Roadmap</a></li>
+						<li><a href="#">News</a></li>
+						<li><a href="#">Calendar</a></li>
+						<li><a href="#">Discussions</a></li>
+						<li><a href="#">Support</a></li>
+					</ul>
+					<ul class="nav navbar-nav navbar-right">
+						<li class="dropdown"><a href="#" class="dropdown-toggle"
+							data-toggle="dropdown">john.doe <span class="caret"></span>&nbsp;<span
+								class="glyphicon glyphicon-user"></span></a>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#">Dashboard</a></li>
+								<li><a href="#">Edit profile</a></li>
+								<li><a href="#">Logout</a></li>
+							</ul></li>
+					</ul>
+					<form class="navbar-form navbar-right" role="search">
+						<div class="form-group">
+							<input type="text" class="form-control"
+								placeholder="Site Search...">
+						</div>
+						<button type="submit" class="btn btn-default btn-sm">Submit</button>
+					</form>
+				</div>
+				<!-- /.navbar-collapse -->
+			</nav>
+		</div>
+
+		<div ng-app="facebaseApp">
+			<div ng-view></div>
 
 		</div>
-	</nav>
-
-<div ng-app="facebaseApp">
-
-<div ng-view></div>
-
-</div>
-
+		<footer class="row">
+			<p>This is the footer</p><p>FAQ</p>
+		</footer>
+	</div>
 </body>
 </html>
 

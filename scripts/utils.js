@@ -86,29 +86,12 @@ var mockup_prototype = {
 		                'gene',
 		                'affymetrix_genechip',
 		                'chromosome'
+		                ],
+		'text_columns': [
+		                'desc_html',
+		                'summary_html'
 		                ]
 };
-
-function htmlItemOld(row, viewAllData) {
-	var ret = $('<div>')
-	var table = $('<table>');
-	ret.append(table);
-	$.each(mockup_prototype['top_columns'], function(i, col) {
-		if (i%3 == 0) {
-			tr = $('<tr>');
-			table.append(tr);
-		}
-		var td = $('<td>');
-		td.addClass('facetName');
-		tr.append(td);
-		td.html(col+':');
-		td = $('<td>');
-		td.addClass('itemBody');
-		tr.append(td);
-		td.html(row[col]);
-	});
-	return ret.html();
-}
 
 function htmlItemTitle(row) {
 	return row[mockup_prototype['title']];
@@ -144,19 +127,14 @@ function htmlItem(row) {
 }
 
 function htmlEntryRow(row) {
-	var ret = $('<div>');
-	var h2 = $('<h2>');
-	ret.append(h2);
-	h2.html(row[mockup_prototype['title']]);
-	var h3 = $('<h3>');
-	ret.append(h3);
-	h3.html(row[mockup_prototype['owner']]);
 	var table = $('<table>');
-	ret.append(table);
 	var tbody = $('<tbody>');
 	table.append(tbody);
 	var i = 0;
 	$.each(row, function(key, value) {
+		if (key == mockup_prototype['title'] || key == mockup_prototype['owner'] || mockup_prototype['text_columns'].contains(key)) {
+			return true;
+		}
 		if (value == null) {
 			//return true;
 		}
@@ -165,45 +143,99 @@ function htmlEntryRow(row) {
 			table.append(tr);
 		}
 		var td = $('<td>');
+		td.addClass('key');
+		if (i == 1) {
+			//td.addClass('sortby');
+		}
 		tr.append(td);
-		var strong = $('<strong>');
-		td.append(strong);
-		strong.html(key);
+		td.html(key);
 		
 		td = $('<td>');
+		td.addClass('value');
 		tr.append(td);
 		td.html(value);
 		
 		td = $('<td>');
 		tr.append(td);
-		//td.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
 		td.addClass('spacer');
 		td.html('&nbsp;');
 	});
-	return ret.html();
+	return table.html();
+}
+
+function htmlTextEntryRow(row) {
+	var div = $('<div>');
+	$.each(mockup_prototype['text_columns'], function(i, col) {
+		var h4 = $('<h4>');
+		div.append(h4);
+		h4.html(col);
+		var p = $('<p>');
+		div.append(p);
+		p.html(row[col]);
+	});
+	return div.html();
+}
+
+function htmlEntryTitle(row) {
+	return row[mockup_prototype['title']];
+}
+
+function htmlEntryOwner(row) {
+	return row[mockup_prototype['owner']];
 }
 
 function updatePageTag(direction, currentPage, pageMap, tagPages, maxPages) {
 	var ret = currentPage;
 	if (direction == 'forward') {
 		ret++;
-		var firstPageTag = currentPage;
-		if (maxPages - tagPages < firstPageTag) {
-			firstPageTag = maxPages - tagPages + 1;
-		}
-		for (var i=0; i<tagPages; i++) {
-			pageMap[i+1] = firstPageTag + i;
+		if (maxPages > tagPages) {
+			var firstPageTag = currentPage;
+			if (maxPages - tagPages < firstPageTag) {
+				firstPageTag = maxPages - tagPages + 1;
+			}
+			for (var i=0; i<tagPages; i++) {
+				pageMap[i+1] = firstPageTag + i;
+			}
 		}
 	} else {
 		ret--;
-		var firstPageTag = currentPage - tagPages;
-		if (firstPageTag < 1) {
-			firstPageTag = 1;
-		}
-		for (var i=0; i<tagPages; i++) {
-			pageMap[i+1] = firstPageTag + i;
+		if (maxPages > tagPages) {
+			var firstPageTag = currentPage - tagPages;
+			if (firstPageTag < 1) {
+				firstPageTag = 1;
+			}
+			for (var i=0; i<tagPages; i++) {
+				pageMap[i+1] = firstPageTag + i;
+			}
 		}
 	}
 	return ret;
+}
+
+function setActivePage(currentPage, pageMap) {
+	$('.pagination li').removeClass('active');
+	var j = 0;
+	$.each($('.toppagination li'), function(i, li) {
+		if ($(li).hasClass('page-selector')) {
+			j++;
+			if (currentPage == pageMap[j]) {
+				//alert('j='+j+', page='+page);
+				$(li).addClass('active');
+				return false;
+			}
+		}
+	});
+	j = 0;
+	$.each($('.bottompagination li'), function(i, li) {
+		if ($(li).hasClass('page-selector')) {
+			j++;
+			if (currentPage == pageMap[j]) {
+				//alert('j='+j+', page='+page);
+				$(li).addClass('active');
+				return false;
+			}
+		}
+	});
+	
 }
 

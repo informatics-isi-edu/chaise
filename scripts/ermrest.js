@@ -1028,11 +1028,13 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 
 function hasCheckedValues(box, facet) {
 	var ret = false;
-	$.each(box[facet]['values'], function(i, value) {
-		if (value) {
-			ret = true;
-			return false;
-		}
-	});
+	if (box[facet]['values'] != null) {
+		$.each(box[facet]['values'], function(i, value) {
+			if (value) {
+				ret = true;
+				return false;
+			}
+		});
+	}
 	return ret;
 }

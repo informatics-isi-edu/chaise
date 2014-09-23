@@ -6,10 +6,20 @@ var fbDiscoverController = angular.module('fbDiscoverController', []);
 
 fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce', 
                                                function($scope, $timeout, $sce) {
-	$('ul.sf-menu').superfish();
+	//$('ul.sf-menu').superfish();
+	$('footer').hide();
+	$('#filtermenu').on('hide.bs.collapse', function () {
+	      $(".glyphicon-minus").removeClass("glyphicon-minus").addClass("glyphicon-plus");
+	});
+	$('#filtermenu').on('show.bs.collapse', function () {
+	      $(".glyphicon-plus").removeClass("glyphicon-plus").addClass("glyphicon-minus");
+	});
 	initFacebase();
 	$scope.details = false;
 	$scope.entryRow = '';
+	$scope.textEntryRow = '';
+	$scope.entryTitle = '';
+	$scope.entryOwner = '';
 	$scope.tagPages = 5;
 	$scope.pageRange = [];
 	$scope.pageMap = {};
@@ -141,6 +151,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	
 	$scope.initTable = function initTable() {
 		$scope.ready = false;
+		$('footer').hide();
 		$scope.moreFlag = false;
 		$scope.filterTextTimeout = null;
 		$scope.filterSliderTimeout = null;
@@ -156,6 +167,9 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		$scope.sortDirection = 'asc';
 		$scope.details = false;
 		$scope.entryRow = '';
+		$scope.textEntryRow = '';
+		$scope.entryTitle = '';
+		$scope.entryOwner = '';
 		$scope.initPageRange();
 		clearFacets($scope.options);
 	};
@@ -167,6 +181,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 
 	$scope.successUpdateCount = function successUpdateCount() {
 		$scope.ready = true;
+		$('footer').show();
 		$scope.$apply();
 		//console.log(JSON.stringify($scope.options, null, 4));
 	};
@@ -227,7 +242,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		$scope.$apply();
 	};
 
-	this.if_type = function if_type(facet, facet_type) {
+	this.if_type = $scope.if_type = function if_type(facet, facet_type) {
 		return $scope.colsDescr[facet]['type'] == facet_type;
 	};
 
@@ -331,6 +346,12 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	this.showClearButton = function showClearButton() {
 		return $scope.ready;
 	};
+	this.showFilters = function showFilters() {
+		return $scope.ready;
+	};
+	this.showResults = function showResults() {
+		return $scope.ready;
+	};
 	this.hide = function hide(facet) {
 		return ($scope.narrow[facet] == null || !$scope.chooseColumns[facet] || 
 				($scope.box[facet]['facetcount'] == 0 && 
@@ -390,26 +411,30 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	this.itemRow = function itemRow(row) {
 		return $sce.trustAsHtml(htmlItem(row));
 	};
-	this.viewAllData = function viewAllData(row) {
-		alert(JSON.stringify(row, null, 4));
+	this.preventDefault = function preventDefault(event) {
+		event.preventDefault();
 	};
 	this.pageToFirst = function pageToFirst(event) {
 		event.preventDefault();
 		$scope.pagingOptions.currentPage = 2;
 		$scope.pagingOptions.currentPage = updatePageTag('backward', $scope.pagingOptions.currentPage, $scope.pageMap, $scope.tagPages, $scope.maxPages);
+		setActivePage($scope.pagingOptions.currentPage, $scope.pageMap);
 	};
 	this.pageToLast = function pageToLast(event) {
 		event.preventDefault();
 		$scope.pagingOptions.currentPage = $scope.maxPages - 1;
 		$scope.pagingOptions.currentPage = updatePageTag('forward', $scope.pagingOptions.currentPage, $scope.pageMap, $scope.tagPages, $scope.maxPages);
+		setActivePage($scope.pagingOptions.currentPage, $scope.pageMap);
 	};
 	this.pageBackward = function pageBackward(event) {
 		event.preventDefault();
 		$scope.pagingOptions.currentPage = updatePageTag('backward', $scope.pagingOptions.currentPage, $scope.pageMap, $scope.tagPages, $scope.maxPages);
+		setActivePage($scope.pagingOptions.currentPage, $scope.pageMap);
 	};
 	this.pageForward = function pageForward(event) {
 		event.preventDefault();
 		$scope.pagingOptions.currentPage = updatePageTag('forward', $scope.pagingOptions.currentPage, $scope.pageMap, $scope.tagPages, $scope.maxPages);
+		setActivePage($scope.pagingOptions.currentPage, $scope.pageMap);
 	};
 	this.cantPageBackward = function cantPageBackward() {
 		return $scope.pagingOptions.currentPage == 1;
@@ -421,9 +446,21 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	this.pageButton = function pageButton(page) {
 		return $scope.pageMap[page];
 	};
+	this.setActiveClass = function setActiveClass(index) {
+		var ret = 'page-selector';
+		if (index == 0) {
+			ret += ' active';
+		}
+		return ret;
+	};
+
 	this.selectPage = function selectPage(event, page) {
 		event.preventDefault();
 		$scope.pagingOptions.currentPage = $scope.pageMap[page];
+		setActivePage($scope.pagingOptions.currentPage, $scope.pageMap);
+	};
+	this.pageInRange = function pageInRange(page) {
+		return $scope.pageMap[page] <= $scope.maxPages;
 	};
 	this.lastRecord = function lastRecord() {
 		var ret = $scope.pagingOptions.currentPage * $scope.pagingOptions.pageSize;
@@ -432,7 +469,8 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		}
 		return ret;
 	};
-	this.changeSortDirection = function changeSortDirection() {
+	this.changeSortDirection = function changeSortDirection(event) {
+		event.preventDefault();
 		if ($scope.sortInfo.fields.length == 1) {
 			$scope.sortInfo.directions.length = 1;
 			if ($scope.sortDirection == $scope.sortDirectionOptions[0]) {
@@ -453,13 +491,27 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		}
 	};
 	this.toggleFacet = function toggleFacet(event, facet) {
-		$scope.$broadcast('reCalcViewDimensions');
 		if ($scope.narrow[facet] == null) {
 			$scope.narrow[facet] = true;
 			$(event.target).addClass('collapsed');
-		} else if (!hasCheckedValues($scope.box, facet) && !$(event.target).is(':checkbox')) {
-			$(event.target).removeClass('collapsed');
-			delete $scope.narrow[facet];
+			setTimeout(function () {
+				$scope.$broadcast('reCalcViewDimensions');
+			}, 1);
+		} else if ($scope.if_type(facet, 'enum')) {
+			if (!hasCheckedValues($scope.box, facet) && !$(event.target).is(':checkbox')) {
+				$(event.target).removeClass('collapsed');
+				delete $scope.narrow[facet];
+			}
+		} else if ($scope.if_type(facet, 'bigint') && !$(event.target).is('rzslider')) {
+			if ($scope.box[facet]['min'] == $scope.box[facet]['floor'] && $scope.box[facet]['max'] == $scope.box[facet]['ceil']) {
+				$(event.target).removeClass('collapsed');
+				delete $scope.narrow[facet];
+			}
+		} else if ($scope.if_type(facet, 'text') && !$(event.target).is('input:text')) {
+			if ($scope.box[facet]['value'].length == 0) {
+				$(event.target).removeClass('collapsed');
+				delete $scope.narrow[facet];
+			}
 		}
 	};
 	this.clicker = function clicker(event, row) {
@@ -467,8 +519,14 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		if (row == null) {
 			$scope.details = false;
 			$scope.entryRow = '';
+			$scope.textEntryRow = '';
+			$scope.entryTitle = '';
+			$scope.entryOwner = '';
 		} else {
 			$scope.entryRow = $sce.trustAsHtml(htmlEntryRow(row));
+			$scope.textEntryRow = $sce.trustAsHtml(htmlTextEntryRow(row));
+			$scope.entryTitle = $sce.trustAsHtml(htmlEntryTitle(row));
+			$scope.entryOwner = $sce.trustAsHtml(htmlEntryOwner(row));
 			$scope.details = true;
 		}
 	};
