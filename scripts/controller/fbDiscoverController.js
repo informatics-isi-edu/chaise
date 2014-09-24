@@ -6,7 +6,6 @@ var fbDiscoverController = angular.module('fbDiscoverController', []);
 
 fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce', 
                                                function($scope, $timeout, $sce) {
-	//$('ul.sf-menu').superfish();
 	$('footer').hide();
 	$('#filtermenu').on('hide.bs.collapse', function () {
 	      $(".glyphicon-minus").removeClass("glyphicon-minus").addClass("glyphicon-plus");

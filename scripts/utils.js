@@ -132,6 +132,9 @@ function htmlEntryRow(row) {
 	table.append(tbody);
 	var i = 0;
 	$.each(row, function(key, value) {
+		if (key == '$$hashKey') {
+			return true;
+		}
 		if (key == mockup_prototype['title'] || key == mockup_prototype['owner'] || mockup_prototype['text_columns'].contains(key)) {
 			return true;
 		}
