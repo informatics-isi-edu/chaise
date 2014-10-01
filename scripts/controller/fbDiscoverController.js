@@ -18,7 +18,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	$scope.entryRow = '';
 	$scope.textEntryRow = '';
 	$scope.entryTitle = '';
-	$scope.entryOwner = '';
+	$scope.entrySubtitle = '';
 	$scope.tagPages = 5;
 	$scope.pageRange = [];
 	$scope.pageMap = {};
@@ -168,7 +168,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		$scope.entryRow = '';
 		$scope.textEntryRow = '';
 		$scope.entryTitle = '';
-		$scope.entryOwner = '';
+		$scope.entrySubtitle = '';
 		$scope.initPageRange();
 		clearFacets($scope.options);
 	};
@@ -520,12 +520,12 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 			$scope.entryRow = '';
 			$scope.textEntryRow = '';
 			$scope.entryTitle = '';
-			$scope.entryOwner = '';
+			$scope.entrySubtitle = '';
 		} else {
 			$scope.entryRow = $sce.trustAsHtml(htmlEntryRow(row));
 			$scope.textEntryRow = $sce.trustAsHtml(htmlTextEntryRow(row));
 			$scope.entryTitle = $sce.trustAsHtml(htmlEntryTitle(row));
-			$scope.entryOwner = $sce.trustAsHtml(htmlEntryOwner(row));
+			$scope.entrySubtitle = $sce.trustAsHtml(htmlEntrySubtitle(row));
 			$scope.details = true;
 		}
 	};

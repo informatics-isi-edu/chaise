@@ -8,16 +8,10 @@ var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 
 var PRIMARY_KEY = [];
-var uniquenessColumns = [
-                         'gene',
-                         'chromosome'
-];
-var textColumns = [
-                         'summary_html',
-                         'desc_html',
-                         'mutation',
-                         'title'
-];
+var uniquenessColumns = [];
+var textColumns = [];
+var display_columns = {};
+
 var visibleColumns = {
 		'dataset1': [
 		             'id',
@@ -55,28 +49,10 @@ var visibleColumns = {
                  ]
 };
 
-var unsortableColumns = {
-		'dataset1': [
-		             'desc_html'
-		             ],
-         'mouse': [
-                   'desc_html'
-                   ],
-	      'human': [
-	                 'desc_html'
-	                 ],
-   	      'zebrafish': [
-                 'desc_html'
-                 ]
-};
+var unsortableColumns = [];
 
 function isSortable(table, column) {
-	var ret = true;
-	//if (column=='desc_html') alert(unsortableColumns[table] != null && unsortableColumns[table].contains(column));
-	if (unsortableColumns[table] != null && unsortableColumns[table].contains(column)) {
-		ret = false;
-	}
-	return ret;
+	return !unsortableColumns.contains(column);
 }
 
 function initFacebase() {
@@ -321,6 +297,10 @@ function getMetadata(table, successCallback) {
 function getTableColumns(options) {
 	var metadata = options['metadata'];
 	var sortInfo = options['sortInfo'];
+	uniquenessColumns = [];
+	textColumns = [];
+	unsortableColumns = [];
+	display_columns = {'text_columns': []};
 	PRIMARY_KEY = [];
 	if (metadata['keys'] != null) {
 		var unique_columns = [];
@@ -341,6 +321,27 @@ function getTableColumns(options) {
 		var cellTemplate = '<div class="ngCellText" ng-class="col.colIndex()"><span ng-cell-text>{{row.getProperty(col.field)}}</span></div>';
 		var column_definitions = metadata['column_definitions'];
 		$.each(column_definitions, function(i, col) {
+			if (col['comment'] != null) {
+				var comments = $.parseJSON(col['comment']);
+				if (comments.contains('top')) {
+					uniquenessColumns.push(col['name']);
+				}
+				if (comments.contains('text')) {
+					textColumns.push(col['name']);
+				}
+				if (comments.contains('unsortable')) {
+					unsortableColumns.push(col['name']);
+				}
+				if (comments.contains('title')) {
+					display_columns['title'] = col['name'];
+				}
+				if (comments.contains('subtitle')) {
+					display_columns['subtitle'] = col['name'];
+				}
+				if (comments.contains('html')) {
+					display_columns['text_columns'].push(col['name']);
+				}
+			}
 			var col_def = {};
 			col_def['field'] = col['name'];
 			col_def['cellTemplate'] = cellTemplate;
@@ -356,8 +357,7 @@ function getTableColumns(options) {
 			if (visibleTableColumns != null && !visibleTableColumns.contains(col['name'])){
 				col_def['visible'] = false;
 			}
-			var unsortableTableColumns = unsortableColumns[metadata['table_name']];
-			if (unsortableTableColumns != null && unsortableTableColumns.contains(col['name'])){
+			if (unsortableColumns.contains(col['name'])){
 				col_def['sortable'] = false;
 			}
 			columns_definitions.push(col_def);
@@ -367,7 +367,6 @@ function getTableColumns(options) {
 			sortInfo['directions'].push('desc');
 		});
 	}
-
 	return {'facets': ret,
 		'sortInfo': sortInfo,
 		'colsDefs': columns_definitions};
@@ -961,6 +960,11 @@ function successGetTableColumnsDistinct(data, textStatus, jqXHR, param) {
 			score.push(value);
 		});
 		score.sort(compareUniques);
+		var top_columns = [];
+		$.each(score, function(i, columns) {
+			top_columns.push(columns['name']);
+		});
+		display_columns['top_columns'] = top_columns;
 		successCallback();
 	}
 }

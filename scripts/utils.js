@@ -73,57 +73,77 @@ function clearFacets(options) {
 	});
 }
 
-var mockup_prototype = {
-		'title': 'title',
-		'owner': 'owner',
-		'top_columns': [
-		                'pubmed_id',
-		                'age_stages',
-		                'illumina_sequencer',
-		                'owner',
-		                'microarray_platform',
-		                'somite_count',
-		                'gene',
-		                'affymetrix_genechip',
-		                'chromosome'
-		                ],
-		'text_columns': [
-		                'desc_html',
-		                'summary_html'
-		                ]
-};
-
 function htmlItemTitle(row) {
-	return row[mockup_prototype['title']];
+	return row[display_columns['title']];
 }
+
+var trace = false;
 
 function htmlItem(row) {
 	var table = $('<table>');
-	$.each(mockup_prototype['top_columns'], function(i, col) {
-		if (i%3 == 0) {
+	var k = 0;
+	var tr;
+	$.each(display_columns['top_columns'], function(i, col) {
+		if (row[col] == null || display_columns['title'] == col) {
+			return true;
+		}
+		if (k%3 == 0) {
 			tr = $('<tr>');
 			table.append(tr);
 		}
 		var td = $('<td>');
-		td.addClass('key');
-		if (i==0) {
+		td.addClass('key truncate');
+		if (k++==0) {
 			td.addClass('sortby');
 		}
 		tr.append(td);
 		td.html(col);
 		
 		td = $('<td>');
-		td.addClass('value');
+		td.addClass('value truncate');
 		tr.append(td);
-		td.html(row[col]);
+		td.text(row[col]);
 
 		td = $('<td>');
 		td.addClass('spacer');
 		tr.append(td);
 		td.html('&nbsp;');
+		if (k==9) {
+			return false;
+		}
 		
 	});
+	var delta = (3 - k%3) % 3;
+	if (trace) {
+		alert(delta);
+		alert(tr.html());
+		trace = false;
+	}
+	for (var i=0; i < delta; i++) {
+		var td = $('<td>');
+		td.addClass('key');
+		tr.append(td);
+		td.html('&nbsp;');
+		
+		td = $('<td>');
+		td.addClass('value');
+		tr.append(td);
+		td.html('&nbsp;');
+
+		td = $('<td>');
+		td.addClass('spacer');
+		tr.append(td);
+		td.html('&nbsp;');
+	}
 	return table.html();
+}
+
+function isLongText(col, value) {
+	return (col != '$$hashKey' && 
+			value != null &&
+			col != display_columns['title'] && 
+			col != display_columns['subtitle'] &&
+			(display_columns['text_columns'].contains(col) || ('' + value).length > 20));
 }
 
 function htmlEntryRow(row) {
@@ -132,14 +152,12 @@ function htmlEntryRow(row) {
 	table.append(tbody);
 	var i = 0;
 	$.each(row, function(key, value) {
-		if (key == '$$hashKey') {
+		if (key == '$$hashKey' || value == null) {
 			return true;
 		}
-		if (key == mockup_prototype['title'] || key == mockup_prototype['owner'] || mockup_prototype['text_columns'].contains(key)) {
+		if (key == display_columns['title'] || key == display_columns['subtitle'] || 
+				display_columns['text_columns'].contains(key) || value.length > 20) {
 			return true;
-		}
-		if (value == null) {
-			//return true;
 		}
 		if (i++%3 == 0) {
 			tr = $('<tr>');
@@ -168,7 +186,10 @@ function htmlEntryRow(row) {
 
 function htmlTextEntryRow(row) {
 	var div = $('<div>');
-	$.each(mockup_prototype['text_columns'], function(i, col) {
+	$.each(row, function(col, value) {
+		if (!isLongText(col, value)) {
+			return true;
+		}
 		var h4 = $('<h4>');
 		div.append(h4);
 		h4.html(col);
@@ -180,11 +201,11 @@ function htmlTextEntryRow(row) {
 }
 
 function htmlEntryTitle(row) {
-	return row[mockup_prototype['title']];
+	return row[display_columns['title']];
 }
 
-function htmlEntryOwner(row) {
-	return row[mockup_prototype['owner']];
+function htmlEntrySubtitle(row) {
+	return row[display_columns['subtitle']];
 }
 
 function updatePageTag(direction, currentPage, pageMap, tagPages, maxPages) {
@@ -222,7 +243,6 @@ function setActivePage(currentPage, pageMap) {
 		if ($(li).hasClass('page-selector')) {
 			j++;
 			if (currentPage == pageMap[j]) {
-				//alert('j='+j+', page='+page);
 				$(li).addClass('active');
 				return false;
 			}
@@ -233,7 +253,6 @@ function setActivePage(currentPage, pageMap) {
 		if ($(li).hasClass('page-selector')) {
 			j++;
 			if (currentPage == pageMap[j]) {
-				//alert('j='+j+', page='+page);
 				$(li).addClass('active');
 				return false;
 			}
