@@ -104,10 +104,12 @@ function htmlItem(row) {
 		tr.append(td);
 		td.text(row[col]);
 
+		/*
 		td = $('<td>');
-		//td.addClass('spacer');
+		td.addClass('spacer');
 		tr.append(td);
 		td.html('&nbsp;');
+		*/
 		if (k==9) {
 			return false;
 		}
@@ -130,10 +132,12 @@ function htmlItem(row) {
 		tr.append(td);
 		td.html('&nbsp;');
 
+		/*
 		td = $('<td>');
-		//td.addClass('spacer');
+		td.addClass('spacer');
 		tr.append(td);
 		td.html('&nbsp;');
+		*/
 	}
 	return table.html();
 }
@@ -176,10 +180,12 @@ function htmlEntryRow(row) {
 		tr.append(td);
 		td.html(value);
 		
+		/*
 		td = $('<td>');
 		tr.append(td);
-		//td.addClass('spacer');
+		td.addClass('spacer');
 		td.html('&nbsp;');
+		*/
 	});
 	return table.html();
 }
