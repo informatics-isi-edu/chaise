@@ -105,7 +105,7 @@ function htmlItem(row) {
 		td.text(row[col]);
 
 		td = $('<td>');
-		td.addClass('spacer');
+		//td.addClass('spacer');
 		tr.append(td);
 		td.html('&nbsp;');
 		if (k==9) {
@@ -131,7 +131,7 @@ function htmlItem(row) {
 		td.html('&nbsp;');
 
 		td = $('<td>');
-		td.addClass('spacer');
+		//td.addClass('spacer');
 		tr.append(td);
 		td.html('&nbsp;');
 	}
@@ -178,7 +178,7 @@ function htmlEntryRow(row) {
 		
 		td = $('<td>');
 		tr.append(td);
-		td.addClass('spacer');
+		//td.addClass('spacer');
 		td.html('&nbsp;');
 	});
 	return table.html();

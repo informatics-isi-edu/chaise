@@ -57,15 +57,17 @@ function isSortable(table, column) {
 
 function initFacebaseHeader(tables) {
 	var ul = $('#dataMenu');
-	ul.html('');
-	var li = $('<li><a href="#">All Data</a></li>');
-	ul.append(li);
-	$.each(tables, function(i, table) {
-		var li = $('<li><a href="#/discover?table='+table+'">'+table+'</a></li>');
+	if (ul.html().replace(/^\s*/, "").replace(/\s*$/, "").length == 0) {
+		ul.html('');
+		var li = $('<li><a href="#">All Data</a></li>');
 		ul.append(li);
-	});
-	var li = $('<li><a href="#">Policies</a></li>');
-	ul.append(li);
+		$.each(tables, function(i, table) {
+			var li = $('<li><a href="#/discover?table='+table+'">'+table+'</a></li>');
+			ul.append(li);
+		});
+		var li = $('<li><a href="#">Policies</a></li>');
+		ul.append(li);
+	}
 }
 
 function initFacebase() {
