@@ -4,8 +4,8 @@
 
 var fbDiscoverController = angular.module('fbDiscoverController', []);
 
-fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce', 
-                                               function($scope, $timeout, $sce) {
+fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce', '$location',
+                                               function($scope, $timeout, $sce, $location) {
 	$('footer').hide();
 	$('.panel-collapse').on('hide.bs.collapse', function () {
 	      $(this).prev('.panel-heading').find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
@@ -44,6 +44,9 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	}
 	
 	$scope.table = '';
+	if ($location.search()['table'] != null) {
+		$scope.table = $location.search()['table'];
+	}
 	$scope.tables = [];
 
 	$scope.ready = false;
@@ -233,7 +236,10 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	};
 	
 	$scope.successGetTables = function successGetTables() {
-		$scope.options['table'] = $scope.table = $scope.tables[0];
+		if ($scope.table == '') {
+			$scope.table = $scope.tables[0];
+		}
+		$scope.options['table'] = $scope.table;
 		getMetadata($scope.table, $scope.successGetMetadata);
 	};
 
