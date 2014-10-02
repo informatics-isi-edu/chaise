@@ -55,6 +55,19 @@ function isSortable(table, column) {
 	return !unsortableColumns.contains(column);
 }
 
+function initFacebaseHeader(tables) {
+	var ul = $('#dataMenu');
+	ul.html('');
+	var li = $('<li><a href="#">All Data</a></li>');
+	ul.append(li);
+	$.each(tables, function(i, table) {
+		var li = $('<li><a href="#/discover?table='+table+'">'+table+'</a></li>');
+		ul.append(li);
+	});
+	var li = $('<li><a href="#">Policies</a></li>');
+	ul.append(li);
+}
+
 function initFacebase() {
 	initLocation();
 	ERMREST_SCHEMA_HOME = HOME + ERMREST_FACEBASE_SCHEMA;
@@ -889,6 +902,7 @@ function successGetTables(data, textStatus, jqXHR, param) {
 	$.each(data, function(i, table) {
 		tables.push(table['table_name']);
 	});
+	initFacebaseHeader(tables);
 	param['successCallback']();
 }
 
