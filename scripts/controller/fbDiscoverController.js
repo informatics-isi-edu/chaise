@@ -7,11 +7,20 @@ var fbDiscoverController = angular.module('fbDiscoverController', []);
 fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce', 
                                                function($scope, $timeout, $sce) {
 	$('footer').hide();
-	$('#filtermenu').on('hide.bs.collapse', function () {
-	      $(".glyphicon-minus").removeClass("glyphicon-minus").addClass("glyphicon-plus");
+	$('.panel-collapse').on('hide.bs.collapse', function () {
+	      $(this).prev('.panel-heading').find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
 	});
-	$('#filtermenu').on('show.bs.collapse', function () {
-	      $(".glyphicon-plus").removeClass("glyphicon-plus").addClass("glyphicon-minus");
+	$('.panel-collapse').on('show.bs.collapse', function () {
+	      $(this).prev('.panel-heading').find('.glyphicon').removeClass('glyphicon-plus').addClass('glyphicon-minus');
+	});
+
+	$('#attrsort').click(function(){
+		if ($('span').hasClass("glyphicon-sort-by-attributes")) {
+		$("#attrsort span.glyphicon").removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt");
+		}
+		else {
+		$("#attrsort span.glyphicon").removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes");
+		}
 	});
 	initFacebase();
 	$scope.details = false;

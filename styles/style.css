@@ -1,18 +1,11 @@
 /* this is a custom css stylesheet */
 body {
 	background-color: #fff;
+	padding-top: 70px;
 }
 
-header {
-	background: #000 url(../images/logo.png) no-repeat top left;
-	height: 90px;
-	/* margin-bottom: 10px; 
-	padding: 5px 10px; */
-}
-
-#mainnav {
-margin-left: 360px;
-margin-top: 10px;
+.navbar-inverse .navbar-brand {
+    color: #6DD0FF;
 }
 
 .navbar-inverse {
@@ -29,8 +22,9 @@ margin-top: 10px;
 	background-color: #000;
 }
 
-nav#usernav .navbar {
-	margin-bottom: 10px;
+#mainnav .form-control-feedback {
+     height: 28px;
+     line-height: 28px;
 }
 
 h1 {
@@ -69,6 +63,11 @@ label {
 	font-size: .8em;
 	line-height: 1.1;
 	padding: 3px 6px;
+}
+
+#searchsort .form-control-feedback {
+     height: 24px;
+     line-height: 24px;
 }
 
 .form-inline .form-group {
@@ -154,9 +153,9 @@ label {
 }
 
 table.resultsdata {
+	table-layout: fixed;
 	font-size: .9em;
 	color:#555555;
-	table-layout: fixed;
 	padding: 0;
 	width: 100%;
 }
@@ -220,9 +219,7 @@ button.close {
 }
 
 #filtermenu li {
-	padding: 0px 0;
-	margin-top: 0px;
-	margin-bottom: 0px;
+	padding: 3px 0;
 	color: #3b9edf;
 	font-size: .85em;
 }
@@ -254,4 +251,3 @@ footer {
 	text-align: center;
 	padding: 10px;
 }
-

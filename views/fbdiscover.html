@@ -31,6 +31,7 @@
 		</div>
 	</div>
 
+	<!-- Row 2: Filters / Search results -->
 	<div class="row">
       	<div class="col-lg-2 col-sm-3">
       		<form role="form" class="form-horizontal">
@@ -61,7 +62,7 @@
 								ng-click="facetList.toggleFacet($event, facet)">
 								<div class="panel-heading">
 									<h4 class="panel-title">
-										<a data-toggle="collapse" href="#" ng-click="facetList.preventDefault($event)">{{facet}}</a> <span
+										<a data-toggle="collapse" href="#" ng-click="facetList.preventDefault($event)"><span class="glyphicon glyphicon-plus"></span>{{facet}}</a> <span
 											class="pull-right">{{box[facet]['facetcount']}}</span>
 									</h4>
 								</div>
@@ -114,33 +115,35 @@
 			</div>
 		</div>
 		
+		<!-- Search Results -->
 		<div class="col-lg-10 col-sm-9" ng-show="facetList.showResults()">
 			<div class="row" id="searchsort">
 				<form class="form-inline" role="form">
-					<div class="col-sm-3">
-						<div class="form-group">
+					<div class="col-sm-6 col-md-5 col-lg-4">
+						<div class="form-group has-feedback">
+							<label class="control-label sr-only">Search Data</label>
 							<input type="text" ng-model="filterAllText" class="form-control"
-								placeholder="Data Search..." size="44" maxlength="120"
+								placeholder="Search data..." size="44" maxlength="120"
 								ng-keyup="facetList.delay_search_all($event.keyCode)">
 						</div>
 					</div>
-					<div class="col-sm-3">
-						<div class="form-group">
+					<div class="col-sm-6 col-md-4 col-lg-3">
+						<div class="form-group" id="attrsort">
 							<label for="sort">Sort</label> <select class="form-control"
 								name="field-pick" id="sort" ng-model="sortFacet"
 								ng-change="facetList.changeSortOption()"
 								ng-options="value for value in sortColumns"></select> <a
-								href="#" ng-click="facetList.changeSortDirection($event)"><span class="glyphicon glyphicon-sort"></span></a>
+								href="#" ng-click="facetList.changeSortDirection($event)"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
 						</div>
 					</div>
-					<div class="col-sm-2">
+					<div class="col-sm-4 col-md-3 col-lg-2">
 						<div class="form-group">
 							<label for="show">Show</label> <select class="form-control"
 								name="field-pick" id="show" ng-model="pagingOptions.pageSize"
 								ng-options="value for value in pagingOptions.pageSizes"></select>
 						</div>
 					</div>
-					<div class="col-sm-4">
+					<div class="col-sm-4 col-md-4 col-lg-3">
 						<div class="form-group">
 							<ul class="pagination toppagination">
 								<li class="prev"><a href="#"
@@ -150,7 +153,7 @@
 									ng-hide="facetList.cantPageBackward()"
 									ng-click="facetList.pageBackward($event)">&lt;</a></li>
 								<li ng-repeat="page in pageRange" ng-class="facetList.setActiveClass($index)"><a href="#"
-									ng-click="facetList.selectPage($event, page)" ng-show="facetList.pageInRange(page)">{{facetList.pageButton(page)}}</a></li>
+									ng-click="facetList.selectPage($event, page)" ng-show="facetList.pageInRange(page)">{{facetList.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
 								<li class="next"><a href="#"
 									ng-show="facetList.canPageForward()"
 									ng-click="facetList.pageForward($event)">&gt;</a></li>
@@ -196,7 +199,7 @@
 							ng-hide="facetList.cantPageBackward()"
 							ng-click="facetList.pageBackward($event)">&lt;</a></li>
 						<li ng-repeat="page in pageRange" ng-class="facetList.setActiveClass($index)"><a href="#"
-							ng-click="facetList.selectPage($event, page)" ng-show="facetList.pageInRange(page)">{{facetList.pageButton(page)}}</a></li>
+							ng-click="facetList.selectPage($event, page)" ng-show="facetList.pageInRange(page)">{{facetList.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
 						<li class="next"><a href="#"
 							ng-show="facetList.canPageForward()"
 							ng-click="facetList.pageForward($event)">&gt;</a></li>
