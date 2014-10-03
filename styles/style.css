@@ -1,7 +1,16 @@
 /* this is a custom css stylesheet */
+html,body { 
+	height: 100%;
+}
+
 body {
 	background-color: #fff;
 	padding-top: 70px;
+}
+
+.container-fluid { 
+	min-height: 100%;
+	position: relative;
 }
 
 .navbar-inverse .navbar-brand {
@@ -30,6 +39,10 @@ body {
 h1 {
 	margin-top: 0;
 	font-size: 1.7em;
+}
+
+#content {
+	padding-bottom: 50px;
 }
 
 label {
@@ -230,6 +243,10 @@ button.close {
 
 }
 
+.filteritems input[type="checkbox"] {
+	margin-right: 3px;
+}
+
 .more .panel-heading {
 	background-color: #fff;
 	color: #3b9edf;
@@ -250,4 +267,8 @@ footer {
 	color: #fff;
 	text-align: center;
 	padding: 10px;
+	height: 50px;
+	width: 100%;
+	position: absolute;
+	bottom: 0;
 }
