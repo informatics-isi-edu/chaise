@@ -508,22 +508,26 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		if ($scope.narrow[facet] == null) {
 			$scope.narrow[facet] = true;
 			$(event.target).addClass('collapsed');
+			$(event.target).find('.glyphicon').removeClass('glyphicon-plus').addClass('glyphicon-minus');
 			setTimeout(function () {
 				$scope.$broadcast('reCalcViewDimensions');
 			}, 1);
 		} else if ($scope.if_type(facet, 'enum')) {
 			if (!hasCheckedValues($scope.box, facet) && !$(event.target).is(':checkbox')) {
 				$(event.target).removeClass('collapsed');
+				$(event.target).find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
 				delete $scope.narrow[facet];
 			}
 		} else if ($scope.if_type(facet, 'bigint') && !$(event.target).is('rzslider')) {
 			if ($scope.box[facet]['min'] == $scope.box[facet]['floor'] && $scope.box[facet]['max'] == $scope.box[facet]['ceil']) {
 				$(event.target).removeClass('collapsed');
+				$(event.target).find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
 				delete $scope.narrow[facet];
 			}
 		} else if ($scope.if_type(facet, 'text') && !$(event.target).is('input:text')) {
 			if ($scope.box[facet]['value'].length == 0) {
 				$(event.target).removeClass('collapsed');
+				$(event.target).find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
 				delete $scope.narrow[facet];
 			}
 		}
