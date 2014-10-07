@@ -198,7 +198,13 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout',
 	};
 
 	this.if_type = function if_type(facet, facet_type) {
-		return $scope.colsDescr[facet]['type'] == facet_type;
+		var ret = ($scope.colsDescr[facet]['type'] == facet_type);
+		if (facet_type == 'bigint') {
+			ret = psqlNumeric.contains($scope.colsDescr[facet]['type']);
+		} else if (facet_type == 'text') {
+			ret = psqlText.contains($scope.colsDescr[facet]['type']);
+		}
+		return ret;
 	};
 
 	this.showFacebase = function showFacebase() {

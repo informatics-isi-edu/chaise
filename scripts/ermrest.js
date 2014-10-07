@@ -12,13 +12,18 @@ var uniquenessColumns = [];
 var textColumns = [];
 var display_columns = {};
 
+var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real',
+		'smallint' ];
+
+var psqlText = [ 'character', 'character varying', 'text' ];
+
 var visibleColumns = {
 		'dataset1': [
 		             'id',
 		             'owner',
 		             'title',
 		             'organism',
-		             //'gender',
+		             // 'gender',
 		             'genotype',
 		             'age_stages',
 		             'chromosome'
@@ -395,7 +400,7 @@ function getPredicate(options, excludeColumn) {
 		if (key == excludeColumn) {
 			return true;
 		}
-		if (colsDescr[key]['type'] == 'text') {
+		if (psqlText.contains(colsDescr[key]['type'])) {
 			value = value['value'].split(' ');
 			$.each(value, function(i, val) {
 				if (val.length > 0) {
@@ -422,7 +427,7 @@ function getPredicate(options, excludeColumn) {
 			if (selectedValues.length > 0) {
 				predicate.push(selectedValues);
 			}
-		} else if (colsDescr[key]['type'] == 'bigint') {
+		} else if (psqlNumeric.contains(colsDescr[key]['type'])) {
 			if (value['left']) {
 				predicate.push(encodeSafeURIComponent(key) + '::geq::' + encodeSafeURIComponent(value['min']));
 			}
@@ -483,9 +488,9 @@ function initModels(options, successCallback) {
 			sentRequests = true;
 		} else if (value['type'] == 'select') {
 			box[col]['value'] = [];
-		} else if (value['type'] == 'text') {
+		} else if (psqlText.contains(value['type'])) {
 			box[col]['value'] = '';
-		} else if (value['type'] == 'bigint') {
+		} else if (psqlNumeric.contains(value['type'])) {
 			box[col]['min'] = box[col]['floor'] = value['min'];
 			box[col]['max'] = box[col]['ceil'] = value['max'];
 			sentRequests = true;
@@ -659,7 +664,7 @@ function successUpdateSliders(data, textStatus, jqXHR, param) {
 
 function expandSlider(narrow, colsDescr) {
 	$.each(colsDescr, function(col, value) {
-		if (value['type'] == 'bigint') {
+		if (psqlNumeric.contains(value['type'])) {
 			//narrow[col] = true;
 		}
 	});
@@ -680,7 +685,7 @@ function getColumnDescriptions(options, successCallback) {
 		});
 		var alertObject = {'display': true};
 		$.each(ret, function(col, obj) {
-			if (obj['type'] == 'text') {
+			if (psqlText.contains(obj['type'])) {
 				var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(metadata['table_name']) + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 				var param = {};
 				param['options'] = options;
@@ -689,7 +694,7 @@ function getColumnDescriptions(options, successCallback) {
 				param['entity'] = ret;
 				param['col'] = col;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
-			} else if (obj['type'] == 'bigint') {
+			} else if (psqlNumeric.contains(obj['type'])) {
 				var param = {};
 				param['options'] = options;
 				param['alert'] = alertObject;
@@ -712,7 +717,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var table = param['options']['table'];
 	var options = param['options'];
 	var successCallback = param['successCallback'];
-	if (entity[col]['type'] == 'text') {
+	if (psqlText.contains(entity[col]['type'])) {
 		if (data[0]['cnt_d'] <= 50 && !textColumns.contains(col)) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
@@ -752,7 +757,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			}
 		});
 		entity[col]['values'] = values;
-	} else if (entity[col]['type'] == 'bigint') {
+	} else if (psqlNumeric.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
 		entity[col]['min'] = data[0]['min'];
 		entity[col]['max'] = data[0]['max'];
@@ -1001,7 +1006,7 @@ function setFacetClass(options, facet, facetClass) {
 	var cssClass = '';
 	var colsDescr = options['colsDescr'];
 	var value = options['box'][facet];
-	if (colsDescr[facet]['type'] == 'text') {
+	if (psqlText.contains(colsDescr[facet]['type'])) {
 		if (value) {
 			cssClass = 'selectedFacet';
 		}
@@ -1017,7 +1022,7 @@ function setFacetClass(options, facet, facetClass) {
 		if (value['value'].length > 0) {
 			cssClass = 'selectedFacet';
 		}
-	} else if (colsDescr[facet]['type'] == 'bigint') {
+	} else if (psqlNumeric.contains(colsDescr[facet]['type'])) {
 		if (value['left'] || value['right']) {
 			cssClass = 'selectedFacet';
 		}
