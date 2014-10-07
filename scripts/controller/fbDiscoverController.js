@@ -22,6 +22,11 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		$("#attrsort span.glyphicon").removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes");
 		}
 	});
+	if ($location.search()['schema'] != null) {
+		SCHEMA = $location.search()['schema'];
+	} else if (SCHEMA == null) {
+		SCHEMA = 'facebase';
+	}
 	initFacebase();
 	$scope.details = false;
 	$scope.entryRow = '';

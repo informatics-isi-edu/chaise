@@ -1,7 +1,8 @@
 var AJAX_TIMEOUT = 300000;
 var goauth_cookie = 'globusonline-goauth';
 var token = null;
-var ERMREST_FACEBASE_SCHEMA = '/ermrest/catalog/1/schema/facebase/table/';
+var SCHEMA = null;
+var ERMREST_FACEBASE_SCHEMA = '/ermrest/catalog/1/schema/';
 var ERMREST_FACEBASE_DATA = '/ermrest/catalog/1';
 var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
@@ -15,7 +16,7 @@ var display_columns = {};
 var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real',
 		'smallint' ];
 
-var psqlText = [ 'character', 'character varying', 'text' ];
+var psqlText = [ 'date', 'character', 'character varying', 'text' ];
 
 var visibleColumns = {
 		'dataset1': [
@@ -77,7 +78,7 @@ function initFacebaseHeader(tables) {
 
 function initFacebase() {
 	initLocation();
-	ERMREST_SCHEMA_HOME = HOME + ERMREST_FACEBASE_SCHEMA;
+	ERMREST_SCHEMA_HOME = HOME + ERMREST_FACEBASE_SCHEMA + SCHEMA + '/table/';
 	ERMREST_DATA_HOME = HOME + ERMREST_FACEBASE_DATA;
 
 	//alert(JSON.stringify(DATASET_COLUMNS, null, 4));
@@ -612,7 +613,6 @@ function updateSliders(options, successCallback) {
 			var predicate = getPredicate(options, values['left'] || values['right'] ? null : col);
 			var param = {};
 			param['alert'] = alertObject;
-			var col_name = encodeSafeURIComponent(col);
 			param['successCallback'] = successCallback;
 			param['options'] = options;
 			param['col'] = col;
@@ -620,7 +620,7 @@ function updateSliders(options, successCallback) {
 			if (predicate != null && predicate.length > 0) {
 				url += predicate.join('/') + '/';
 			}
-			url += 'min:=min(' + encodeSafeURIComponent(col_name) + '),max:=max(' + encodeSafeURIComponent(col_name) + ')';
+			url += 'min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateSliders, errorErmrest, param);
 		}
 	});
