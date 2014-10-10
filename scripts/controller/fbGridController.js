@@ -4,8 +4,29 @@
 
 var fbGridController = angular.module('fbGridController', []);
 
-fbGridController.controller('GridListCtrl', ['$scope', '$timeout',
-                                               function($scope, $timeout) {
+fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
+                                               function($scope, $timeout, $location) {
+	$('footer').hide();
+	$('.panel-collapse').on('hide.bs.collapse', function () {
+	      $(this).prev('.panel-heading').find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
+	});
+	$('.panel-collapse').on('show.bs.collapse', function () {
+	      $(this).prev('.panel-heading').find('.glyphicon').removeClass('glyphicon-plus').addClass('glyphicon-minus');
+	});
+
+	$('#attrsort').click(function(){
+		if ($('span').hasClass("glyphicon-sort-by-attributes")) {
+		$("#attrsort span.glyphicon").removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt");
+		}
+		else {
+		$("#attrsort span.glyphicon").removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes");
+		}
+	});
+	if ($location.search()['schema'] != null) {
+		SCHEMA = $location.search()['schema'];
+	} else if (SCHEMA == null) {
+		SCHEMA = 'facebase';
+	}
 	initFacebase();
 	$scope.table = '';
 	$scope.tables = [];
