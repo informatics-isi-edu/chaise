@@ -1,0 +1,27 @@
+FaceBase
+~~~~~~~~
+
+FaceBase is a resource for the craniofacial researchers.
+
+System Requirements
+~~~~~~~~~~~~~~~~~~~
+
+You must have ERMREST installed on CentOS 6. 
+ 
+Installation
+~~~~~~~~~~~~
+
+To install from the Subversion repository:
+
+  1. From a source directory run:
+     svn co https://svn2.misd.isi.edu/repos/tagfiler/facebase/trunk facebase
+
+  2. From the source directory run the following command as root:
+     rsync -av --delete --exclude=".*" --exclude="README" facebase /var/www/html/
+
+Accessing the Application
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  1. In a browser type the following URL by replacing <hostname> with the one you have the installation:
+     http://<hostname>/facebase
+
