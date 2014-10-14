@@ -16,7 +16,8 @@ var display_columns = {};
 var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real',
 		'smallint' ];
 
-var psqlText = [ 'date', 'character', 'character varying', 'text' ];
+var psqlText = [ 'date', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone',
+                 'character', 'character varying', 'text' ];
 
 var visibleColumns = {
 		'dataset1': [
