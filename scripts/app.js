@@ -2,34 +2,34 @@
 
 /* App Module */
 
-var facebaseApp = angular.module('facebaseApp', [
+var ermrestApp = angular.module('ermrestApp', [
   'ngRoute',
   'ngSanitize',
   'ngGrid',
   'rzModule',
-  'fbGridController',
-  'fbDiscoverController',
-  'fbLoginController',
-  'fbLogoutController'
+  'ermGridController',
+  'ermDiscoverController',
+  'ermLoginController',
+  'ermLogoutController'
 ]);
 
-facebaseApp.config(['$routeProvider',
+ermrestApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
       when('/login', {
-        templateUrl: 'views/fblogin.html'//,
+        templateUrl: 'views/ermlogin.html'//,
         //controller: 'LoginCtrl'
       }).
       when('/logout', {
-        templateUrl: 'views/fblogout.html',
+        templateUrl: 'views/ermlogout.html',
         //controller: 'LogoutCtrl'
       }).
       when('/grid', {
-          templateUrl: 'views/fbgrid.html'//,
+          templateUrl: 'views/ermgrid.html'//,
           //controller: 'GridListCtrl'
         }).
         when('/discover', {
-            templateUrl: 'views/fbdiscover.html'//,
+            templateUrl: 'views/ermdiscover.html'//,
             //controller: 'DiscoverListCtrl'
           }).
       otherwise({

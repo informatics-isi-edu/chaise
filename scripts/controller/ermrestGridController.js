@@ -2,9 +2,9 @@
 
 /* Controllers */
 
-var fbGridController = angular.module('fbGridController', []);
+var ermGridController = angular.module('ermGridController', []);
 
-fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
+ermGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
                                                function($scope, $timeout, $location) {
 	$('footer').hide();
 	$('.panel-collapse').on('hide.bs.collapse', function () {
@@ -27,7 +27,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 	} else if (SCHEMA == null) {
 		SCHEMA = 'facebase';
 	}
-	initFacebase();
+	initApplication();
 	$scope.table = '';
 	$scope.tables = [];
 
@@ -44,7 +44,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 	$scope.filterSearchAllTimeout = null;
 
 	$scope.facets = [];
-	$scope.facebaseData = [];
+	$scope.ermrestData = [];
 	$scope.metadata = {};
 	$scope.colsDescr = {};
 	$scope.colsGroup = {};
@@ -61,7 +61,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 	};  
 	$scope.sortInfo = {'fields': [], 'directions': []};
 	$scope.setPagingData = function(data, totalItems, page, pageSize){	
-		$scope.options['facebaseData'] = $scope.facebaseData = data;
+		$scope.options['ermrestData'] = $scope.ermrestData = data;
 		$scope.totalServerItems = totalItems;
 		if (!$scope.$$phase) {
 			$scope.$apply();
@@ -103,7 +103,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 	}, true);
 
 	$scope.gridOptions = {
-			data: 'facebaseData',
+			data: 'ermrestData',
 			enablePaging: true,
 			showFooter: true,
 			//showFilter: true,
@@ -127,7 +127,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 			'colsDefs': $scope.colsDefs,
 			'colsDescr': $scope.colsDescr,
 			'colsGroup': $scope.colsGroup,
-			'facebaseData': $scope.facebaseData,
+			'ermrestData': $scope.ermrestData,
 			'facetClass': $scope.facetClass,
 			'facets': $scope.facets,
 			'filterOptions': $scope.filterOptions,
@@ -182,8 +182,8 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 		initModels($scope.options, $scope.successInitModels);
 	};
 
-	$scope.successGetFacebaseData = function successGetFacebaseData(data, totalItems, page, pageSize) {
-		$scope.options['facebaseData'] = $scope.facebaseData = data;
+	$scope.successGetErmrestData = function successGetErmrestData(data, totalItems, page, pageSize) {
+		$scope.options['ermrestData'] = $scope.ermrestData = data;
 		$scope.totalServerItems = totalItems;
 		$scope.$apply();
 		$('div.ngSortButtonUp').addClass('ng-hide');
@@ -193,7 +193,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 	$scope.successGetTableColumnsUniques = function successGetTableColumnsUniques() {
 		//alert(JSON.stringify($scope.score, null, 4));
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successGetFacebaseData, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successGetErmrestData, $scope.successUpdateModels);
 	};
 
 	$scope.successGetMetadata = function successGetMetadata(data, textStatus, jqXHR) {
@@ -213,7 +213,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 	getTables($scope.tables, $scope.successGetTables);
 
 	$scope.successSearchFacets = function successSearchFacets(data, totalItems, page, pageSize) {
-		$scope.options['facebaseData'] = $scope.facebaseData = data;
+		$scope.options['ermrestData'] = $scope.ermrestData = data;
 		$scope.totalServerItems = totalItems;
 		$scope.$apply();
 	};
@@ -228,7 +228,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 		return ret;
 	};
 
-	this.showFacebase = function showFacebase() {
+	this.showApplication = function showApplication() {
 		return true;
 	};
 
@@ -250,7 +250,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 			$scope.facetClass[facet] = 'selectedFacet';
 		}
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.delay_slider = function delay_slider(facet) {
@@ -273,7 +273,7 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 		}
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.delay_search_all = function delay_search_all() {
@@ -286,19 +286,19 @@ fbGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 	$scope.predicate_search_all = function predicate_search_all() {
 		$scope.options['filterAllText'] = $scope.filterAllText;
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_checkbox = function predicate_checkbox(facet) {
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_select = function predicate_select(facet) {
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.table_select = function table_select() {

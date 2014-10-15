@@ -2,9 +2,9 @@
 
 /* Controllers */
 
-var fbLogoutController = angular.module('fbLogoutController', []);
+var ermLogoutController = angular.module('ermLogoutController', []);
 
-fbLogoutController.controller('LogoutCtrl', ['$scope',
+ermLogoutController.controller('LogoutCtrl', ['$scope',
                                             function($scope) {
 	submitLogout();
 	TOP_DISPLAY = true;

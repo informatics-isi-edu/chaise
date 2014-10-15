@@ -30,7 +30,7 @@ function clearFacets(options) {
 	emptyJSON(options['facetClass']);
 	
 	options['facets'].empty();
-	options['facebaseData'].empty();
+	options['ermrestData'].empty();
 	options['colsDefs'].empty();
 	options['score'].empty();
 	

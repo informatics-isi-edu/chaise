@@ -6,7 +6,7 @@
       <div><b>Collections:&nbsp;</b><select ng-model="table" ng-change="facetList.table_select()" ng-options="value for value in tables"></select></div>
       <br />
       <div ng-show="facetList.showSearchBox()" class="ng-hide"><input type="text" ng-model="filterAllText" size="25" placeholder="Search..." ng-keyup="facetList.delay_search_all($event.keyCode)"></div>
-      <table ng-show="facetList.showFacebase()" class="ng-hide">
+      <table ng-show="facetList.showApplication()" class="ng-hide">
         <thead><tr><th class="top"></th><th><th></tr></thead>
         <tbody>
         <tr>

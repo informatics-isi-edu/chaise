@@ -62,7 +62,7 @@ function isSortable(table, column) {
 	return !unsortableColumns.contains(column);
 }
 
-function initFacebaseHeader(tables) {
+function initApplicationHeader(tables) {
 	var ul = $('#dataMenu');
 	if (ul.html().replace(/^\s*/, "").replace(/\s*$/, "").length == 0) {
 		ul.html('');
@@ -77,7 +77,9 @@ function initFacebaseHeader(tables) {
 	}
 }
 
-function initFacebase() {
+function initApplication() {
+	$( "#ermrestHeader" ).load( "views/ermheader.html" );
+	$( "#ermrestFooter" ).load( "views/ermfooter.html" );
 	initLocation();
 	ERMREST_SCHEMA_HOME = HOME + ERMREST_FACEBASE_SCHEMA + SCHEMA + '/table/';
 	ERMREST_DATA_HOME = HOME + ERMREST_FACEBASE_DATA;
@@ -444,7 +446,7 @@ function getPredicate(options, excludeColumn) {
 	return predicate;
 }
 
-function getFacebaseData(options, successCallback, successUpdateModels) {
+function getErmrestData(options, successCallback, successUpdateModels) {
 	updateCount(options, successUpdateModels);
 	var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(options['table']);
 	var predicate = getPredicate(options, null);
@@ -910,7 +912,7 @@ function successGetTables(data, textStatus, jqXHR, param) {
 	$.each(data, function(i, table) {
 		tables.push(table['table_name']);
 	});
-	initFacebaseHeader(tables);
+	initApplicationHeader(tables);
 	param['successCallback']();
 }
 

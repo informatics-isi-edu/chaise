@@ -2,9 +2,9 @@
 
 /* Controllers */
 
-var fbDiscoverController = angular.module('fbDiscoverController', []);
+var ermDiscoverController = angular.module('ermDiscoverController', []);
 
-fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce', '$location',
+ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce', '$location',
                                                function($scope, $timeout, $sce, $location) {
 	$('footer').hide();
 	$('.panel-collapse').on('hide.bs.collapse', function () {
@@ -27,7 +27,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	} else if (SCHEMA == null) {
 		SCHEMA = 'facebase';
 	}
-	initFacebase();
+	initApplication();
 	$scope.details = false;
 	$scope.entryRow = '';
 	$scope.textEntryRow = '';
@@ -67,7 +67,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	$scope.filterSearchAllTimeout = null;
 
 	$scope.facets = [];
-	$scope.facebaseData = [];
+	$scope.ermrestData = [];
 	$scope.metadata = {};
 	$scope.colsDescr = {};
 	$scope.colsGroup = {};
@@ -84,7 +84,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	};  
 	$scope.sortInfo = {'fields': [], 'directions': []};
 	$scope.setPagingData = function(data, totalItems, page, pageSize){	
-		$scope.options['facebaseData'] = $scope.facebaseData = data;
+		$scope.options['ermrestData'] = $scope.ermrestData = data;
 		$scope.totalServerItems = totalItems;
 		$scope.maxPages = Math.floor($scope.totalServerItems/$scope.pagingOptions.pageSize);
 		if ($scope.totalServerItems%$scope.pagingOptions != 0) {
@@ -135,7 +135,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 			'colsDefs': $scope.colsDefs,
 			'colsDescr': $scope.colsDescr,
 			'colsGroup': $scope.colsGroup,
-			'facebaseData': $scope.facebaseData,
+			'ermrestData': $scope.ermrestData,
 			'facetClass': $scope.facetClass,
 			'facets': $scope.facets,
 			'filterOptions': $scope.filterOptions,
@@ -212,8 +212,8 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		initModels($scope.options, $scope.successInitModels);
 	};
 
-	$scope.successGetFacebaseData = function successGetFacebaseData(data, totalItems, page, pageSize) {
-		$scope.options['facebaseData'] = $scope.facebaseData = data;
+	$scope.successGetErmrestData = function successGetErmrestData(data, totalItems, page, pageSize) {
+		$scope.options['ermrestData'] = $scope.ermrestData = data;
 		$scope.totalServerItems = totalItems;
 		$scope.maxPages = Math.floor($scope.totalServerItems/$scope.pagingOptions.pageSize);
 		if ($scope.totalServerItems%$scope.pagingOptions != 0) {
@@ -227,7 +227,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	$scope.successGetTableColumnsUniques = function successGetTableColumnsUniques() {
 		//alert(JSON.stringify($scope.score, null, 4));
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successGetFacebaseData, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successGetErmrestData, $scope.successUpdateModels);
 	};
 
 	$scope.successGetMetadata = function successGetMetadata(data, textStatus, jqXHR) {
@@ -252,7 +252,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	getTables($scope.tables, $scope.successGetTables);
 
 	$scope.successSearchFacets = function successSearchFacets(data, totalItems, page, pageSize) {
-		$scope.options['facebaseData'] = $scope.facebaseData = data;
+		$scope.options['ermrestData'] = $scope.ermrestData = data;
 		$scope.totalServerItems = totalItems;
 		$scope.maxPages = Math.floor($scope.totalServerItems/$scope.pagingOptions.pageSize);
 		if ($scope.totalServerItems%$scope.pagingOptions != 0) {
@@ -271,7 +271,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		return ret;
 	};
 
-	this.showFacebase = function showFacebase() {
+	this.showApplication = function showApplication() {
 		return true;
 	};
 
@@ -293,7 +293,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 			$scope.facetClass[facet] = 'selectedFacet';
 		}
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.delay_slider = function delay_slider(facet) {
@@ -316,7 +316,7 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 		}
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.delay_search_all = function delay_search_all() {
@@ -329,19 +329,19 @@ fbDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sce
 	$scope.predicate_search_all = function predicate_search_all() {
 		$scope.options['filterAllText'] = $scope.filterAllText;
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_checkbox = function predicate_checkbox(facet) {
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_select = function predicate_select(facet) {
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
-		getFacebaseData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
+		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.table_select = function table_select() {

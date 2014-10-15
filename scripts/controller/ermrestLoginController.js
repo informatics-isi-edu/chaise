@@ -2,9 +2,9 @@
 
 /* Controllers */
 
-var fbLoginController = angular.module('fbLoginController', []);
+var ermLoginController = angular.module('ermLoginController', []);
 
-fbLoginController.controller('LoginCtrl', ['$scope',
+ermLoginController.controller('LoginCtrl', ['$scope',
                                            function($scope) {
 	TOP_DISPLAY = false;
 	$scope.isVisible = true;
