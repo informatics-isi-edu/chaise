@@ -272,3 +272,13 @@ footer {
 	position: absolute;
 	bottom: 0;
 }
+
+.ermrest_header {
+	background-color: #000000;
+	color: #fff;
+	text-align: center;
+	height: 50px;
+	width: 100%;
+	position: absolute;
+	top: -70px;
+}

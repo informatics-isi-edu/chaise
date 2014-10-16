@@ -63,18 +63,7 @@ function isSortable(table, column) {
 }
 
 function initApplicationHeader(tables) {
-	var ul = $('#dataMenu');
-	if (ul.html().replace(/^\s*/, "").replace(/\s*$/, "").length == 0) {
-		ul.html('');
-		var li = $('<li><a href="#">All Data</a></li>');
-		ul.append(li);
-		$.each(tables, function(i, table) {
-			var li = $('<li><a href="#/discover?table='+table+'">'+table+'</a></li>');
-			ul.append(li);
-		});
-		var li = $('<li><a href="#">Policies</a></li>');
-		ul.append(li);
-	}
+	// overwritten by the application
 }
 
 function initApplication() {
