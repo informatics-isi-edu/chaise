@@ -66,9 +66,13 @@ function initApplicationHeader(tables) {
 	// overwritten by the application
 }
 
-function initApplication() {
+function loadApplicationHeaderAndFooter() {
 	$( "#ermrestHeader" ).load( "views/ermheader.html" );
 	$( "#ermrestFooter" ).load( "views/ermfooter.html" );
+}
+
+function initApplication() {
+	loadApplicationHeaderAndFooter();
 	initLocation();
 	ERMREST_SCHEMA_HOME = HOME + ERMREST_FACEBASE_SCHEMA + SCHEMA + '/table/';
 	ERMREST_DATA_HOME = HOME + ERMREST_FACEBASE_DATA;
