@@ -13,14 +13,21 @@
 					<button type="button" class="close" data-dismiss="modal">
 						<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 					</button>
-					<h4 class="modal-title" id="viewAllData" ng-bind-html="entryTitle"></h4>
+					<h4 class="modal-title" id="viewAllData">{{entryTitle}}</h4>
 				</div>
 				<div class="modal-body">
 					<div id="datacontent">
-						<h3 ng-bind-html="entrySubtitle"></h3>
-						<table ng-bind-html="entryRow"></table>
+						<h3>{{entrySubtitle}}</h3>
+						<table>
+							<tr ng-repeat="detailRow in detailRows">
+								<td ng-repeat-start="detail in detailRow" class="key">{{detail}}</td>
+								<td ng-repeat-end class="value">{{entryRow[detail]}}</td>
+							</tr>
+						</table>
 						<hr>
-						<div ng-bind-html="textEntryRow">
+						<div>
+							<h4 ng-repeat-start="detail in textEntryRow">{{detail}}</h4>
+							<p ng-repeat-end >{{entryRow[detail]}}</p>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -181,12 +188,17 @@
 						<div class="col-sm-6">
 							<button type="button" class="btn btn-default btn-sm pull-right"
 								data-toggle="modal" data-target="#viewdata"
-								ng-click="facetList.clicker($event, row);">View All
+								ng-click="facetList.clicker($event, row, 3);">View All
 								Data</button>
 						</div>
 					</div>
 					<table class="resultsdata table table-condensed table-striped"
-						ng-bind-html="facetList.itemRow(row)"></table>
+						ng-init="values=facetList.displayColumns(row, 3, 3)">
+						<tr ng-repeat="value in values">
+							<td ng-repeat-start="col in value" ng-class="$parent.$first && $first ? 'key truncate sortby' : 'key truncate'">{{col}}</td>
+							<td ng-repeat-end class="value truncate">{{row[col]}}</td>
+						</tr>
+					</table>
 				</div>
 			</div>
 			<div class="row bottompgr">

@@ -73,12 +73,6 @@ function clearFacets(options) {
 	});
 }
 
-function htmlItemTitle(row) {
-	return row[display_columns['title']];
-}
-
-var trace = false;
-
 function htmlItem(row) {
 	var table = $('<table>');
 	var k = 0;
@@ -116,11 +110,6 @@ function htmlItem(row) {
 		
 	});
 	var delta = (3 - k%3) % 3;
-	if (trace) {
-		alert(delta);
-		alert(tr.html());
-		trace = false;
-	}
 	for (var i=0; i < delta; i++) {
 		var td = $('<td>');
 		td.addClass('key');
@@ -142,6 +131,35 @@ function htmlItem(row) {
 	return table.html();
 }
 
+// "m" is the number of columns per row
+// "maxRows" is the maxim number of rows to be displayed
+function getDisplayColumns(row, m, maxRows) {
+	var ret = [];
+	var tr = [];
+	var rowCount = 0;
+	$.each(display_columns['top_columns'], function(i, col) {
+		if (row[col] == null || display_columns['title'] == col) {
+			return true;
+		}
+		tr.push(col);
+		if (tr.length == m) {
+			ret.push(tr);
+			tr = [];
+			if (++rowCount == maxRows) {
+				return false;
+			}
+		}
+	});
+	if (tr.length > 0) {
+		for (var i=0; i < m; i++) {
+			tr.push('');
+		}
+		tr.length = m;
+		ret.push(tr);
+	}
+	return ret;
+}
+
 function isLongText(col, value) {
 	return (col != '$$hashKey' && 
 			value != null &&
@@ -150,11 +168,10 @@ function isLongText(col, value) {
 			(display_columns['text_columns'].contains(col) || ('' + value).length > 20));
 }
 
-function htmlEntryRow(row) {
-	var table = $('<table>');
-	var tbody = $('<tbody>');
-	table.append(tbody);
-	var i = 0;
+// "m" is the number of columns per row
+function getDetailRows(row, m) {
+	var ret = [];
+	var tr = [];
 	$.each(row, function(key, value) {
 		if (key == '$$hashKey' || value == null) {
 			return true;
@@ -163,54 +180,35 @@ function htmlEntryRow(row) {
 				display_columns['text_columns'].contains(key) || value.length > 20) {
 			return true;
 		}
-		if (i++%3 == 0) {
-			tr = $('<tr>');
-			table.append(tr);
-		}
-		var td = $('<td>');
-		td.addClass('key');
-		if (i == 1) {
-			//td.addClass('sortby');
-		}
-		tr.append(td);
-		td.html(key);
 		
-		td = $('<td>');
-		td.addClass('value');
-		tr.append(td);
-		td.html(value);
-		
-		/*
-		td = $('<td>');
-		tr.append(td);
-		td.addClass('spacer');
-		td.html('&nbsp;');
-		*/
+		tr.push(key);
+		if (tr.length == m) {
+			ret.push(tr);
+			tr = [];
+		}
 	});
-	return table.html();
+	if (tr.length > 0) {
+		ret.push(tr);
+	}
+	return ret;
 }
 
-function htmlTextEntryRow(row) {
-	var div = $('<div>');
+function getLongTextColumns(row) {
+	var ret = [];
 	$.each(row, function(col, value) {
 		if (!isLongText(col, value)) {
 			return true;
 		}
-		var h4 = $('<h4>');
-		div.append(h4);
-		h4.html(col);
-		var p = $('<p>');
-		div.append(p);
-		p.html(row[col]);
+		ret.push(col);
 	});
-	return div.html();
+	return ret;
 }
 
-function htmlEntryTitle(row) {
+function getEntryTitle(row) {
 	return row[display_columns['title']];
 }
 
-function htmlEntrySubtitle(row) {
+function getEntrySubtitle(row) {
 	return row[display_columns['subtitle']];
 }
 

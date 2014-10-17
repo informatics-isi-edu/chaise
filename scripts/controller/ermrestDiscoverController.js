@@ -29,8 +29,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	}
 	initApplication();
 	$scope.details = false;
-	$scope.entryRow = '';
-	$scope.textEntryRow = '';
+	$scope.entryRow = [];
+	$scope.detailRows = [];
+	$scope.textEntryRow = [];
 	$scope.entryTitle = '';
 	$scope.entrySubtitle = '';
 	$scope.tagPages = 5;
@@ -182,8 +183,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.sortFacet = '';
 		$scope.sortDirection = 'asc';
 		$scope.details = false;
-		$scope.entryRow = '';
-		$scope.textEntryRow = '';
+		$scope.entryRow = [];
+		$scope.detailRows = [];
+		$scope.textEntryRow = [];
 		$scope.entryTitle = '';
 		$scope.entrySubtitle = '';
 		$scope.initPageRange();
@@ -431,7 +433,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return $scope.ready;
 	};
 	this.itemTitle = function itemTitle(row) {
-		return htmlItemTitle(row);
+		return getEntryTitle(row);
 	};
 	this.itemRow = function itemRow(row) {
 		return $sce.trustAsHtml(htmlItem(row));
@@ -543,21 +545,29 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			}
 		}
 	};
-	this.clicker = function clicker(event, row) {
+	// "m" is the number of columns per row
+	this.clicker = function clicker(event, row, m) {
 		event.preventDefault();
 		if (row == null) {
 			$scope.details = false;
-			$scope.entryRow = '';
-			$scope.textEntryRow = '';
+			$scope.entryRow = [];
+			$scope.detailRows = [];
+			$scope.textEntryRow = [];
 			$scope.entryTitle = '';
 			$scope.entrySubtitle = '';
 		} else {
-			$scope.entryRow = $sce.trustAsHtml(htmlEntryRow(row));
-			$scope.textEntryRow = $sce.trustAsHtml(htmlTextEntryRow(row));
-			$scope.entryTitle = $sce.trustAsHtml(htmlEntryTitle(row));
-			$scope.entrySubtitle = $sce.trustAsHtml(htmlEntrySubtitle(row));
+			$scope.entryRow = row;
+			$scope.detailRows = getDetailRows(row, m);
+			$scope.textEntryRow = getLongTextColumns(row);
+			$scope.entryTitle = getEntryTitle(row);
+			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
 		}
+	};
+	// "m" is the number of columns per row
+	// "maxRows" is the maxim number of rows to be displayed
+	this.displayColumns = function displayColumns(row, m, maxRows) {
+		return getDisplayColumns(row, m, maxRows);
 	};
 }]);
 
