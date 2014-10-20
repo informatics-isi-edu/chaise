@@ -317,7 +317,7 @@ function getTableColumns(options) {
 	uniquenessColumns = [];
 	textColumns = [];
 	unsortableColumns = [];
-	display_columns = {'text_columns': []};
+	display_columns = {'text_columns': [], 'file': []};
 	PRIMARY_KEY = [];
 	if (metadata['keys'] != null) {
 		var unique_columns = [];
@@ -357,6 +357,9 @@ function getTableColumns(options) {
 				}
 				if (comments.contains('html')) {
 					display_columns['text_columns'].push(col['name']);
+				}
+				if (comments.contains('file')) {
+					display_columns['file'].push(col['name']);
 				}
 			}
 			var col_def = {};

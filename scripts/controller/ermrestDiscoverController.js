@@ -32,6 +32,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.entryRow = [];
 	$scope.detailRows = [];
 	$scope.textEntryRow = [];
+	$scope.fileUrlEntryRow = [];
 	$scope.entryTitle = '';
 	$scope.entrySubtitle = '';
 	$scope.tagPages = 5;
@@ -186,6 +187,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.entryRow = [];
 		$scope.detailRows = [];
 		$scope.textEntryRow = [];
+		$scope.fileUrlEntryRow = [];
 		$scope.entryTitle = '';
 		$scope.entrySubtitle = '';
 		$scope.initPageRange();
@@ -553,12 +555,14 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.entryRow = [];
 			$scope.detailRows = [];
 			$scope.textEntryRow = [];
+			$scope.fileUrlEntryRow = [];
 			$scope.entryTitle = '';
 			$scope.entrySubtitle = '';
 		} else {
 			$scope.entryRow = row;
 			$scope.detailRows = getDetailRows(row, m);
 			$scope.textEntryRow = getLongTextColumns(row);
+			$scope.fileUrlEntryRow = getFileUrlColumns(row);
 			$scope.entryTitle = getEntryTitle(row);
 			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
@@ -568,6 +572,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	// "maxRows" is the maxim number of rows to be displayed
 	this.displayColumns = function displayColumns(row, m, maxRows) {
 		return getDisplayColumns(row, m, maxRows);
+	};
+	this.download = function download(event, url) {
+		window.open(url, '_blank');
 	};
 }]);
 

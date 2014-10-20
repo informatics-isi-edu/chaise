@@ -165,6 +165,7 @@ function isLongText(col, value) {
 			value != null &&
 			col != display_columns['title'] && 
 			col != display_columns['subtitle'] &&
+			!display_columns['file'].contains(col) &&
 			(display_columns['text_columns'].contains(col) || ('' + value).length > 20));
 }
 
@@ -200,6 +201,16 @@ function getLongTextColumns(row) {
 			return true;
 		}
 		ret.push(col);
+	});
+	return ret;
+}
+
+function getFileUrlColumns(row) {
+	var ret = [];
+	$.each(row, function(col, value) {
+		if (value != null && display_columns['file'].contains(col)) {
+			ret.push(col);
+		}
 	});
 	return ret;
 }
