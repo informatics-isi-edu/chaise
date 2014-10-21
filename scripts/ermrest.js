@@ -907,7 +907,10 @@ function getTables(tables, successCallback) {
 function successGetTables(data, textStatus, jqXHR, param) {
 	var tables = param['tables'];
 	$.each(data, function(i, table) {
-		tables.push(table['table_name']);
+		if (table['annotations'] == null || table['annotations']['comment'] == null || 
+				!table['annotations']['comment'].contains('exclude')) {
+			tables.push(table['table_name']);
+		}
 	});
 	initApplicationHeader(tables);
 	param['successCallback']();
