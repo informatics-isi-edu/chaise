@@ -24,7 +24,7 @@
 								<td ng-repeat-end class="value">{{entryRow[detail]}}</td>
 							</tr>
 						</table>
-						<hr>
+						<hr ng-if="facetList.if_hasHtmlOrUrl()">
 						<div>
 							<h4 ng-repeat-start="detail in textEntryRow">{{detail}}</h4>
 							<p ng-repeat-end ng-bind-html="facetList.html(entryRow[detail])" ></p>

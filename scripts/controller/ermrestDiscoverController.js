@@ -579,5 +579,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.html = function html(data) {
 		return $sce.trustAsHtml(data);
 	};
+	this.if_hasHtmlOrUrl = function if_hasHtmlOrUrl() {
+		return $scope.textEntryRow.length > 0 || $scope.fileUrlEntryRow > 0;
+	};
 }]);
 
