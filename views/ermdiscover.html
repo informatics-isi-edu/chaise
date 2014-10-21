@@ -27,7 +27,7 @@
 						<hr>
 						<div>
 							<h4 ng-repeat-start="detail in textEntryRow">{{detail}}</h4>
-							<p ng-repeat-end >{{entryRow[detail]}}</p>
+							<p ng-repeat-end ng-bind-html="facetList.html(entryRow[detail])" ></p>
 						</div>
 						<div>
 							<h4 ng-repeat-start="detail in fileUrlEntryRow">{{detail}}</h4>

@@ -576,5 +576,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.download = function download(event, url) {
 		window.open(url, '_blank');
 	};
+	this.html = function html(data) {
+		return $sce.trustAsHtml(data);
+	};
 }]);
 
