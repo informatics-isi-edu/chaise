@@ -166,7 +166,7 @@ function isLongText(col, value) {
 			col != display_columns['title'] && 
 			col != display_columns['subtitle'] &&
 			!display_columns['file'].contains(col) &&
-			(display_columns['text_columns'].contains(col) || ('' + value).length > 20));
+			(/*display_columns['text_columns'].contains(col) ||*/ ('' + value).length > 20));
 }
 
 // "m" is the number of columns per row
@@ -178,7 +178,7 @@ function getDetailRows(row, m) {
 			return true;
 		}
 		if (key == display_columns['title'] || key == display_columns['subtitle'] || 
-				display_columns['text_columns'].contains(key) || value.length > 20) {
+				/*display_columns['text_columns'].contains(key) ||*/ value.length > 20) {
 			return true;
 		}
 		

@@ -338,8 +338,9 @@ function getTableColumns(options) {
 		var cellTemplate = '<div class="ngCellText" ng-class="col.colIndex()"><span ng-cell-text>{{row.getProperty(col.field)}}</span></div>';
 		var column_definitions = metadata['column_definitions'];
 		$.each(column_definitions, function(i, col) {
-			if (col['comment'] != null) {
-				var comments = $.parseJSON(col['comment']);
+			if (col['annotations'] != null && col['annotations']['comment'] != null) {
+				//var comments = $.parseJSON(col['comment']);
+				var comments = col['annotations']['comment'];
 				if (comments.contains('top')) {
 					uniquenessColumns.push(col['name']);
 				}
