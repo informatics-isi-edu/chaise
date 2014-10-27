@@ -12,6 +12,7 @@ var PRIMARY_KEY = [];
 var uniquenessColumns = [];
 var textColumns = [];
 var display_columns = {};
+var back_references = {};
 
 var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real',
 		'smallint' ];
@@ -912,6 +913,7 @@ function successGetTables(data, textStatus, jqXHR, param) {
 			tables.push(table['table_name']);
 		}
 	});
+	setTablesBackReferences(tables, data);
 	initApplicationHeader(tables);
 	param['successCallback']();
 }
@@ -941,7 +943,7 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 	var cols = {};
 	$.each(column_definitions, function(i,col) {
 		cols[col['name']] = {};
-		cols[col['name']]['cnt'] = data[0]['cnt_'+encodeSafeURIComponent(col['name'])];
+		cols[col['name']]['cnt'] = data[0]['cnt_'+col['name']];
 		cols[col['name']]['distinct'] = -1;
 	});
 	var urlPrefix = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(metadata['table_name']) + '/';
@@ -1066,3 +1068,20 @@ function hasCheckedValues(box, facet) {
 	}
 	return ret;
 }
+
+function setTablesBackReferences(tables, data) {
+	$.each(data, function(i, table) {
+		$.each(table['foreign_keys'], function(j, fk) {
+			$.each(fk['referenced_columns'], function(k, ref_column) {
+				if (tables.contains(ref_column['table_name'])) {
+					if (back_references[ref_column['table_name']] == null) {
+						back_references[ref_column['table_name']] = [];
+					}
+					back_references[ref_column['table_name']].push(table['table_name']);
+				}
+			});
+		});
+	});
+	//alert(JSON.stringify(back_references, null, 4));
+}
+
