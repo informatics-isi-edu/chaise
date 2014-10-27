@@ -33,6 +33,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.detailRows = [];
 	$scope.textEntryRow = [];
 	$scope.fileUrlEntryRow = [];
+	$scope.entryThumbnail = '';
 	$scope.entryTitle = '';
 	$scope.entrySubtitle = '';
 	$scope.tagPages = 5;
@@ -188,6 +189,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.detailRows = [];
 		$scope.textEntryRow = [];
 		$scope.fileUrlEntryRow = [];
+		$scope.entryThumbnail = '';
 		$scope.entryTitle = '';
 		$scope.entrySubtitle = '';
 		$scope.initPageRange();
@@ -434,6 +436,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.showSearchBox = function showSearchBox() {
 		return $scope.ready;
 	};
+	this.itemThumbnail = function itemThumbnail(row) {
+		return getEntryThumbnail(row);
+	};
 	this.itemTitle = function itemTitle(row) {
 		return getEntryTitle(row);
 	};
@@ -556,6 +561,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.detailRows = [];
 			$scope.textEntryRow = [];
 			$scope.fileUrlEntryRow = [];
+			$scope.entryThumbnail = '';
 			$scope.entryTitle = '';
 			$scope.entrySubtitle = '';
 		} else {
@@ -563,6 +569,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.detailRows = getDetailRows(row, m);
 			$scope.textEntryRow = getLongTextColumns(row);
 			$scope.fileUrlEntryRow = getFileUrlColumns(row);
+			$scope.entryThumbnail = getEntryThumbnail(row);
 			$scope.entryTitle = getEntryTitle(row);
 			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
@@ -581,6 +588,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.if_hasHtmlOrUrl = function if_hasHtmlOrUrl() {
 		return $scope.textEntryRow.length > 0 || $scope.fileUrlEntryRow > 0;
+	};
+	this.hasThumbnail = function hasThumbnail() {
+		return display_columns['thumbnail'] != null;
 	};
 }]);
 

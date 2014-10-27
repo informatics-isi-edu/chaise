@@ -18,6 +18,13 @@
 				<div class="modal-body">
 					<div id="datacontent">
 						<h3>{{entrySubtitle}}</h3>
+						<div ng-show="entryThumbnail!=null">
+							<a ng-href="{{entryThumbnail}}">
+								<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{entryThumbnail}}">
+							</a>
+							<!-- <p>{{entryThumbnail}}</p> -->
+							<hr>
+						</div>
 						<table>
 							<tr ng-repeat="detailRow in detailRows">
 								<td ng-repeat-start="detail in detailRow" class="key">{{detail}}</td>
@@ -197,11 +204,27 @@
 								Data</button>
 						</div>
 					</div>
-					<table class="resultsdata table table-condensed table-striped"
-						ng-init="values=facetList.displayColumns(row, 3, 3)">
-						<tr ng-repeat="value in values">
-							<td ng-repeat-start="col in value" ng-class="$parent.$first && $first ? 'key truncate sortby' : 'key truncate'">{{col}}</td>
-							<td ng-repeat-end class="value truncate">{{row[col]}}</td>
+					<table ng-init="thumbnail=facetList.itemThumbnail(row)">
+						<tr>
+							<td ng-show="thumbnail!=null">
+								<a ng-href="{{thumbnail}}">
+									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
+								</a>
+							</td>
+							<td ng-show="facetList.hasThumbnail() && thumbnail==null">
+								<a ng-href="images/blank.jpeg">
+									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="images/blank.jpeg">
+								</a>
+							</td>
+							<td class="item_display">
+								<table class="resultsdata table table-condensed table-striped"
+									ng-init="values=facetList.displayColumns(row, 3, 3)">
+									<tr ng-repeat="value in values">
+										<td ng-repeat-start="col in value" ng-class="$parent.$first && $first ? 'key truncate sortby' : 'key truncate'">{{col}}</td>
+										<td ng-repeat-end class="value truncate">{{row[col]}}</td>
+									</tr>
+								</table>
+							</td>
 						</tr>
 					</table>
 				</div>

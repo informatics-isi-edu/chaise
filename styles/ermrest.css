@@ -153,3 +153,7 @@ td.itemBody {
   text-overflow: ellipsis;
 }
 
+td.item_display {
+	padding: 0px 0px 0px 10px;
+}
+

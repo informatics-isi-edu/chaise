@@ -357,6 +357,9 @@ function getTableColumns(options) {
 				if (comments.contains('subtitle')) {
 					display_columns['subtitle'] = col['name'];
 				}
+				if (comments.contains('thumbnail')) {
+					display_columns['thumbnail'] = col['name'];
+				}
 				if (comments.contains('html')) {
 					display_columns['text_columns'].push(col['name']);
 				}
