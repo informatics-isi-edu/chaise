@@ -7,7 +7,7 @@ clean:
 
 build:
 	mkdir -p ./build
-	rsync -av --delete --exclude=".*" --exclude="README" --exclude="Makefile" --exclude="build" \
+	rsync -av --delete --exclude=".*" --exclude="README" --exclude="build" \
 		--exclude="Makefile" . ./build
 
 deploy: build
