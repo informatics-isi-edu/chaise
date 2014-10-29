@@ -220,7 +220,7 @@
 								<table class="resultsdata table table-condensed table-striped"
 									ng-init="values=facetList.displayColumns(row, 3, 3)">
 									<tr ng-repeat="value in values">
-										<td ng-repeat-start="col in value" ng-class="$parent.$first && $first ? 'key truncate sortby' : 'key truncate'">{{col}}</td>
+										<td ng-repeat-start="col in value" ng-class="$parent.$first && $first ? 'key truncate' : 'key truncate'">{{col}}</td>
 										<td ng-repeat-end class="value truncate">{{row[col]}}</td>
 									</tr>
 								</table>
