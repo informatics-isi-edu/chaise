@@ -34,6 +34,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.textEntryRow = [];
 	$scope.fileUrlEntryRow = [];
 	$scope.entryThumbnail = '';
+	$scope.entryZoomify = '';
 	$scope.entryTitle = '';
 	$scope.entrySubtitle = '';
 	$scope.tagPages = 5;
@@ -51,6 +52,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	    }
 	}
 	
+	$scope.tree = [];
 	$scope.table = '';
 	if ($location.search()['table'] != null) {
 		$scope.table = $location.search()['table'];
@@ -149,7 +151,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			'score': $scope.score,
 			'sortInfo': $scope.sortInfo,
 			'sortOption': null,
-			'table': $scope.table
+			'table': $scope.table,
+			'tree': $scope.tree
 	};
 
 	$scope.setSortOption = function setSortOption() {
@@ -190,6 +193,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.textEntryRow = [];
 		$scope.fileUrlEntryRow = [];
 		$scope.entryThumbnail = '';
+		$scope.entryZoomify = '';
 		$scope.entryTitle = '';
 		$scope.entrySubtitle = '';
 		$scope.initPageRange();
@@ -380,6 +384,10 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.showFilters = function showFilters() {
 		return $scope.ready;
 	};
+	this.showTree = function showTree() {
+		return false;
+		//return $scope.ready && $scope.tree[0]['nodes'].length > 0;
+	};
 	this.showResults = function showResults() {
 		return $scope.ready;
 	};
@@ -562,6 +570,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.textEntryRow = [];
 			$scope.fileUrlEntryRow = [];
 			$scope.entryThumbnail = '';
+			$scope.entryZoomify = '';
 			$scope.entryTitle = '';
 			$scope.entrySubtitle = '';
 		} else {
@@ -570,6 +579,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.textEntryRow = getLongTextColumns(row);
 			$scope.fileUrlEntryRow = getFileUrlColumns(row);
 			$scope.entryThumbnail = getEntryThumbnail(row);
+			$scope.entryZoomify = getEntryZoomify(row);
 			$scope.entryTitle = getEntryTitle(row);
 			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
@@ -583,14 +593,29 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.download = function download(event, url) {
 		window.open(url, '_blank');
 	};
+	this.openZoomify = function openZoomify(event, url) {
+		window.open(url, '_blank');
+	};
 	this.html = function html(data) {
 		return $sce.trustAsHtml(data);
 	};
-	this.if_hasHtmlOrUrl = function if_hasHtmlOrUrl() {
-		return $scope.textEntryRow.length > 0 || $scope.fileUrlEntryRow > 0;
+	this.if_hasText = function if_hasText() {
+		return $scope.textEntryRow.length > 0;
 	};
-	this.hasThumbnail = function hasThumbnail() {
+	this.if_hasFile = function if_hasFile() {
+		return $scope.fileUrlEntryRow.length > 0;
+	};
+	this.if_hasZoomify = function if_hasZoomify() {
+		return $scope.entryZoomify != null;
+	};
+	this.if_hasThumbnail = function if_hasThumbnail() {
 		return display_columns['thumbnail'] != null;
+	};
+	this.thumbnailColumn = function thumbnailColumn() {
+		return display_columns['thumbnail'];
+	};
+	this.zoomifyColumn = function zoomifyColumn() {
+		return display_columns['zoomify'];
 	};
 }]);
 

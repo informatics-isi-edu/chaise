@@ -313,6 +313,7 @@ function getMetadata(table, successCallback) {
 }
 
 function getTableColumns(options) {
+	setTreeReferences(options['tree'], options['table']);
 	var metadata = options['metadata'];
 	var sortInfo = options['sortInfo'];
 	uniquenessColumns = [];
@@ -359,6 +360,9 @@ function getTableColumns(options) {
 				}
 				if (comments.contains('thumbnail')) {
 					display_columns['thumbnail'] = col['name'];
+				}
+				if (comments.contains('zoomify')) {
+					display_columns['zoomify'] = col['name'];
 				}
 				if (comments.contains('html')) {
 					display_columns['text_columns'].push(col['name']);
@@ -1073,6 +1077,7 @@ function hasCheckedValues(box, facet) {
 }
 
 function setTablesBackReferences(tables, data) {
+	back_references = {};
 	$.each(data, function(i, table) {
 		$.each(table['foreign_keys'], function(j, fk) {
 			$.each(fk['referenced_columns'], function(k, ref_column) {
@@ -1085,6 +1090,29 @@ function setTablesBackReferences(tables, data) {
 			});
 		});
 	});
-	//alert(JSON.stringify(back_references, null, 4));
+}
+
+function setTreeReferences(tree, table) {
+	tree.length = 0
+	var nodes = [];
+	tree.push({'name': table,
+		'nodes': nodes});
+	if (back_references[table] != null) {
+		$.each(back_references[table], function(i, key) {
+			addTreeReference(key, nodes);
+		});
+	}
+}
+
+function addTreeReference(table, nodes) {
+	var subNodes = [];
+	var node = {'name': table,
+			'nodes': subNodes};
+	nodes.push(node);
+	if (back_references[table] != null) {
+		$.each(back_references[table], function(i, key) {
+			addTreeReference(key, subNodes);
+		});
+	}
 }
 

@@ -18,24 +18,32 @@
 				<div class="modal-body">
 					<div id="datacontent">
 						<h3>{{entrySubtitle}}</h3>
-						<div ng-show="entryThumbnail!=null">
-							<a ng-href="{{entryThumbnail}}">
-								<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{entryThumbnail}}">
-							</a>
-							<!-- <p>{{entryThumbnail}}</p> -->
-							<hr>
-						</div>
 						<table>
 							<tr ng-repeat="detailRow in detailRows">
 								<td ng-repeat-start="detail in detailRow" class="key">{{detail}}</td>
 								<td ng-repeat-end class="value">{{entryRow[detail]}}</td>
 							</tr>
 						</table>
-						<hr ng-if="facetList.if_hasHtmlOrUrl()">
+						<hr ng-if="facetList.if_hasText()">
 						<div>
 							<h4 ng-repeat-start="detail in textEntryRow">{{detail}}</h4>
 							<p ng-repeat-end ng-bind-html="facetList.html(entryRow[detail])" ></p>
 						</div>
+						<hr ng-if="facetList.if_hasThumbnail()">
+						<div ng-show="entryThumbnail!=null">
+							<h4>{{facetList.thumbnailColumn()}}</h4>
+							<p>{{entryThumbnail}}</p>
+							<a ng-href="{{entryThumbnail}}">
+								<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{entryThumbnail}}">
+							</a>
+						</div>
+						<hr ng-if="facetList.if_hasZoomify()">
+						<div ng-show="entryZoomify!=null">
+							<h4>{{facetList.zoomifyColumn()}}</h4>
+							<p>{{entryZoomify}}</p>
+							<button type="button" class="btn btn-default" ng-click="facetList.openZoomify($event, entryZoomify)">Open</button>
+						</div>
+						<hr ng-if="facetList.if_hasFile()">
 						<div>
 							<h4 ng-repeat-start="detail in fileUrlEntryRow">{{detail}}</h4>
 							<p>{{entryRow[detail]}}</p>
@@ -72,6 +80,17 @@
       				<div class="col-sm-5 col-sm-offset-1">
       					<p class="filtertitle">Filters</p>
       				</div>
+      			</div>
+      			<div class="row" ng-show="facetList.showTree()">
+					<script type="text/ng-template" id="tree_item_renderer.html">
+    					{{data.name}}
+    					<ul>
+        					<li ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
+    					</ul>
+  					</script>
+					<ul>
+      					<li ng-repeat="data in tree" ng-include="'tree_item_renderer.html'"></li>
+      				</ul>
       			</div>
 				<div class="row">
 					<div class="col-sm-10 col-sm-offset-1">
