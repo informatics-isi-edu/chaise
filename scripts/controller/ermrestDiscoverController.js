@@ -90,10 +90,15 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};  
 	$scope.sortInfo = {'fields': [], 'directions': []};
 	$scope.setPagingData = function(data, totalItems, page, pageSize){	
-		$scope.options['ermrestData'] = $scope.ermrestData = data;
+		if (page == 1) {
+			$scope.ermrestData = data;
+		} else {
+			$scope.ermrestData = $scope.ermrestData.concat(data);
+		}
+		$scope.options['ermrestData'] = $scope.ermrestData;
 		$scope.totalServerItems = totalItems;
 		$scope.maxPages = Math.floor($scope.totalServerItems/$scope.pagingOptions.pageSize);
-		if ($scope.totalServerItems%$scope.pagingOptions != 0) {
+		if ($scope.totalServerItems%$scope.pagingOptions.pageSize != 0) {
 			$scope.maxPages++;
 		}
 		if (!$scope.$$phase) {
@@ -122,6 +127,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	
 	$scope.$watch('filterOptions', function (newVal, oldVal) {
 		if ($scope.ready && newVal !== oldVal) {
+			$scope.pagingOptions.currentPage = 1;
 			$scope.getPagedDataAsync($scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage, $scope.filterOptions.filterText, $scope.sortInfo);
 		}
 	}, true);
@@ -131,6 +137,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			if ($scope.options['sortInfo']['fields'].length > 1) {
 				$('div.ngSortButtonUp').addClass('ng-hide');
 			}
+			$scope.pagingOptions.currentPage = 1;
 			$scope.getPagedDataAsync($scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage, $scope.filterOptions.filterText, newVal);
 		}
 	}, true);
@@ -224,7 +231,12 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	$scope.successGetErmrestData = function successGetErmrestData(data, totalItems, page, pageSize) {
-		$scope.options['ermrestData'] = $scope.ermrestData = data;
+		if (page == 1) {
+			$scope.ermrestData = data;
+		} else {
+			$scope.ermrestData = $scope.ermrestData.concat(data);
+		}
+		$scope.options['ermrestData'] = $scope.ermrestData;
 		$scope.totalServerItems = totalItems;
 		$scope.maxPages = Math.floor($scope.totalServerItems/$scope.pagingOptions.pageSize);
 		if ($scope.totalServerItems%$scope.pagingOptions != 0) {
@@ -304,6 +316,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.facetClass[facet] = 'selectedFacet';
 		}
 		$scope.setSortOption();
+		$scope.pagingOptions.currentPage = 1;
 		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
@@ -327,6 +340,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		}
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
+		$scope.pagingOptions.currentPage = 1;
 		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
@@ -340,18 +354,21 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.predicate_search_all = function predicate_search_all() {
 		$scope.options['filterAllText'] = $scope.filterAllText;
 		$scope.setSortOption();
+		$scope.pagingOptions.currentPage = 1;
 		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_checkbox = function predicate_checkbox(facet) {
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
+		$scope.pagingOptions.currentPage = 1;
 		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.predicate_select = function predicate_select(facet) {
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
+		$scope.pagingOptions.currentPage = 1;
 		getErmrestData($scope.options, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
