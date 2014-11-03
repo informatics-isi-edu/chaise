@@ -28,6 +28,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		SCHEMA = 'facebase';
 	}
 	initApplication();
+	$scope.pageNavigation = false;
 	$scope.details = false;
 	$scope.entryRow = [];
 	$scope.detailRows = [];

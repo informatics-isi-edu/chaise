@@ -157,7 +157,7 @@
 		<div class="col-lg-10 col-sm-9" ng-show="facetList.showResults()">
 			<div class="row" id="searchsort">
 				<form class="form-inline" role="form">
-					<div class="col-sm-6 col-md-5 col-lg-4">
+					<div ng-show="pageNavigation" class="col-sm-6 col-md-5 col-lg-4">
 						<div class="form-group has-feedback">
 							<label class="control-label sr-only">Search Data</label>
 							<input id="dataSearch" type="text" ng-model="filterAllText" class="form-control"
@@ -174,14 +174,14 @@
 								href="#" ng-click="facetList.changeSortDirection($event)"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
 						</div>
 					</div>
-					<div class="col-sm-4 col-md-3 col-lg-2">
+					<div ng-show="pageNavigation" class="col-sm-4 col-md-3 col-lg-2">
 						<div class="form-group">
 							<label for="show">Show</label> <select class="form-control"
 								name="field-pick" id="show" ng-model="pagingOptions.pageSize"
 								ng-options="value for value in pagingOptions.pageSizes"></select>
 						</div>
 					</div>
-					<div class="col-sm-4 col-md-4 col-lg-3">
+					<div ng-show="pageNavigation" class="col-sm-4 col-md-4 col-lg-3">
 						<div class="form-group">
 							<ul class="pagination toppagination">
 								<li class="prev"><a href="#"
@@ -203,7 +203,7 @@
 					</div>
 				</form>
 			</div>
-			<div id="results_tally">
+			<div ng-show="pageNavigation" id="results_tally">
 				<p>
 					Page {{pagingOptions.currentPage}} of {{maxPages}}. Showing results
 					<strong>{{(pagingOptions.currentPage-1)*pagingOptions.pageSize+1}}-{{facetList.lastRecord()}}</strong>
@@ -250,18 +250,18 @@
 			<div class="row bottompgr">
 				<div class="form-group">
 					<ul class="pagination bottompagination">
-						<li class="prev"><a href="#"
+						<li ng-show="pageNavigation" class="prev"><a href="#"
 							ng-hide="facetList.cantPageBackward()"
 							ng-click="facetList.pageToFirst($event)">&laquo;</a></li>
-						<li class="prev"><a href="#"
+						<li ng-show="pageNavigation" class="prev"><a href="#"
 							ng-hide="facetList.cantPageBackward()"
 							ng-click="facetList.pageBackward($event)">&lt;</a></li>
-						<li ng-repeat="page in pageRange" ng-class="facetList.setActiveClass($index)"><a href="#"
+						<li ng-show="pageNavigation" ng-repeat="page in pageRange" ng-class="facetList.setActiveClass($index)"><a href="#"
 							ng-click="facetList.selectPage($event, page)" ng-show="facetList.pageInRange(page)">{{facetList.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
 						<li class="next"><a href="#"
 							ng-show="facetList.canPageForward()"
-							ng-click="facetList.pageForward($event)">&gt;</a></li>
-						<li class="next"><a href="#"
+							ng-click="facetList.pageForward($event)">More...</a></li>
+						<li ng-show="pageNavigation" class="next"><a href="#"
 							ng-show="facetList.canPageForward()"
 							ng-click="facetList.pageToLast($event)">&raquo;</a></li>
 					</ul>
