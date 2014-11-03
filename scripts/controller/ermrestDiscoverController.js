@@ -382,14 +382,16 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return $scope.ready;
 	};
 	this.showFilters = function showFilters() {
-		return $scope.ready;
+		//return $scope.ready;
+		return true;
 	};
 	this.showTree = function showTree() {
 		return false;
-		//return $scope.ready && $scope.tree[0]['nodes'].length > 0;
+		return $scope.ready && $scope.tree[0]['nodes'].length > 0;
 	};
 	this.showResults = function showResults() {
-		return $scope.ready;
+		//return $scope.ready;
+		return true;
 	};
 	this.hide = function hide(facet) {
 		return ($scope.narrow[facet] == null || !$scope.chooseColumns[facet] || 

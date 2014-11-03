@@ -413,7 +413,7 @@ function getPredicate(options, excludeColumn) {
 			value = value['value'].split(' ');
 			$.each(value, function(i, val) {
 				if (val.length > 0) {
-					predicate.push(encodeSafeURIComponent(key) + '::regexp::' + encodeSafeURIComponent(val));
+					predicate.push(encodeSafeURIComponent(key) + '::ciregexp::' + encodeSafeURIComponent(val));
 				}
 			});
 		} else if (colsDescr[key]['type'] == 'enum') {
@@ -446,7 +446,7 @@ function getPredicate(options, excludeColumn) {
 		}
 	});
 	if (filterAllText && filterAllText != '') {
-		predicate.push(encodeSafeURIComponent('*') + '::ts::' + encodeSafeURIComponent(getSearchExpression(filterAllText, '&')));
+		predicate.push(encodeSafeURIComponent('*') + '::ciregexp::' + encodeSafeURIComponent(getSearchExpression(filterAllText, '&')));
 	}
 	return predicate;
 }
