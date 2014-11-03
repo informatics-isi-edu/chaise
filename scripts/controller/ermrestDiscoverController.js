@@ -452,9 +452,6 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.itemTitle = function itemTitle(row) {
 		return getEntryTitle(row);
 	};
-	this.itemRow = function itemRow(row) {
-		return $sce.trustAsHtml(htmlItem(row));
-	};
 	this.preventDefault = function preventDefault(event) {
 		event.preventDefault();
 	};
@@ -599,7 +596,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		window.open(url, '_blank');
 	};
 	this.html = function html(data) {
-		return $sce.trustAsHtml(data);
+		//return $sce.trustAsHtml(data);
+		return data;
 	};
 	this.if_hasText = function if_hasText() {
 		return $scope.textEntryRow.length > 0;

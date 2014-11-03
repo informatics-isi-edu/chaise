@@ -73,64 +73,6 @@ function clearFacets(options) {
 	});
 }
 
-function htmlItem(row) {
-	var table = $('<table>');
-	var k = 0;
-	var tr;
-	$.each(display_columns['top_columns'], function(i, col) {
-		if (row[col] == null || display_columns['title'] == col) {
-			return true;
-		}
-		if (k%3 == 0) {
-			tr = $('<tr>');
-			table.append(tr);
-		}
-		var td = $('<td>');
-		td.addClass('key truncate');
-		if (k++==0) {
-			td.addClass('sortby');
-		}
-		tr.append(td);
-		td.html(col);
-		
-		td = $('<td>');
-		td.addClass('value truncate');
-		tr.append(td);
-		td.text(row[col]);
-
-		/*
-		td = $('<td>');
-		td.addClass('spacer');
-		tr.append(td);
-		td.html('&nbsp;');
-		*/
-		if (k==9) {
-			return false;
-		}
-		
-	});
-	var delta = (3 - k%3) % 3;
-	for (var i=0; i < delta; i++) {
-		var td = $('<td>');
-		td.addClass('key');
-		tr.append(td);
-		td.html('&nbsp;');
-		
-		td = $('<td>');
-		td.addClass('value');
-		tr.append(td);
-		td.html('&nbsp;');
-
-		/*
-		td = $('<td>');
-		td.addClass('spacer');
-		tr.append(td);
-		td.html('&nbsp;');
-		*/
-	}
-	return table.html();
-}
-
 // "m" is the number of columns per row
 // "maxRows" is the maxim number of rows to be displayed
 function getDisplayColumns(row, m, maxRows) {

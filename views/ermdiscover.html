@@ -27,7 +27,7 @@
 						<hr ng-if="facetList.if_hasText()">
 						<div>
 							<h4 ng-repeat-start="detail in textEntryRow">{{detail}}</h4>
-							<p ng-repeat-end ng-bind-html="facetList.html(entryRow[detail])" ></p>
+							<p ng-repeat-end>{{entryRow[detail]}}</p>
 						</div>
 						<hr ng-if="facetList.if_hasThumbnail()">
 						<div ng-show="entryThumbnail!=null">
