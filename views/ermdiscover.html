@@ -49,6 +49,13 @@
 							<p>{{entryRow[detail]}}</p>
 							<button ng-repeat-end type="button" class="btn btn-default" ng-click="facetList.download($event, entryRow[detail])">Download</button>
 						</div>
+						<div ng-repeat="(detail, values) in denormalizedView">
+							<div ng-repeat="value in values">
+								<hr>
+								<h1>{{detail}}</h1>
+								<p ng-repeat="(name, val) in value"><b>{{name}}: </b>{{val}}</p>
+							</div>
+						</div>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

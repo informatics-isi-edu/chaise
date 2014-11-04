@@ -1116,3 +1116,31 @@ function addTreeReference(table, nodes) {
 	}
 }
 
+function entityDenormalize(table, row, result) {
+	emptyJSON(result);
+	var predicate = [];
+	$.each(PRIMARY_KEY, function(i, primaryCol) {
+		predicate.push(encodeSafeURIComponent(primaryCol) + '=' + encodeSafeURIComponent(row[primaryCol]));
+	});
+	predicate = predicate.join('/');
+	var url = ERMREST_DATA_HOME + '/entity/' + encodeSafeURIComponent(table) + '/' + predicate;
+	getDenormalizedValues(table, url, result);
+}
+
+function getDenormalizedValues(table, url, result) {
+	if (back_references[table] != null) {
+		$.each(back_references[table], function(i, key) {
+			var keyUrl = url + '/' + key;
+			getDenormalizedValues(key, keyUrl, result);
+			result[key] = ERMREST.fetch(keyUrl, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+			$.each(result[key], function(i, row) {
+				$.each(row, function(name, value) {
+					if (value == null || value === '') {
+						delete result[key][i][name];
+					}
+				});
+			});
+		});
+	}
+}
+

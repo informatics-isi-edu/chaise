@@ -30,6 +30,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	initApplication();
 	$scope.pageNavigation = false;
 	$scope.details = false;
+	$scope.denormalizedView = {};
 	$scope.entryRow = [];
 	$scope.detailRows = [];
 	$scope.textEntryRow = [];
@@ -499,7 +500,6 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return $scope.pagingOptions.currentPage == 1;
 	};
 	this.canPageForward = function canPageForward() {
-		//alert($scope.pagingOptions.currentPage);
 		return $scope.pagingOptions.currentPage < $scope.maxPages;
 	};
 	this.pageButton = function pageButton(page) {
@@ -600,6 +600,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.entryTitle = getEntryTitle(row);
 			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
+			entityDenormalize($scope.table, row, $scope.denormalizedView);
 		}
 	};
 	// "m" is the number of columns per row

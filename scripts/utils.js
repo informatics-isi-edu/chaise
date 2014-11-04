@@ -80,7 +80,7 @@ function getDisplayColumns(row, m, maxRows) {
 	var tr = [];
 	var rowCount = 0;
 	$.each(display_columns['top_columns'], function(i, col) {
-		if (row[col] == null || display_columns['title'] == col || 
+		if (row[col] == null || row[col] === '' || display_columns['title'] == col || 
 				display_columns['thumbnail'] == col || display_columns['zoomify'] == col) {
 			return true;
 		}
@@ -106,6 +106,7 @@ function getDisplayColumns(row, m, maxRows) {
 function isLongText(col, value) {
 	return (col != '$$hashKey' && 
 			value != null &&
+			value !== '' &&
 			col != display_columns['title'] && 
 			col != display_columns['subtitle'] &&
 			col != display_columns['thumbnail'] &&
@@ -119,7 +120,7 @@ function getDetailRows(row, m) {
 	var ret = [];
 	var tr = [];
 	$.each(row, function(key, value) {
-		if (key == '$$hashKey' || value == null) {
+		if (key == '$$hashKey' || value == null || value === '') {
 			return true;
 		}
 		if (key == display_columns['thumbnail'] || key == display_columns['zoomify'] || 
@@ -154,7 +155,7 @@ function getLongTextColumns(row) {
 function getFileUrlColumns(row) {
 	var ret = [];
 	$.each(row, function(col, value) {
-		if (value != null && display_columns['file'].contains(col)) {
+		if (value != null && value !== '' && display_columns['file'].contains(col)) {
 			ret.push(col);
 		}
 	});
