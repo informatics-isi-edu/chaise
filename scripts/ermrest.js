@@ -313,7 +313,9 @@ function getMetadata(table, successCallback) {
 }
 
 function getTableColumns(options) {
-	setTreeReferences(options['tree'], options['table']);
+	if (options['entityPredicates'].length == 0) {
+		setTreeReferences(options['tree'], options['table']);
+	}
 	var metadata = options['metadata'];
 	var sortInfo = options['sortInfo'];
 	uniquenessColumns = [];
@@ -453,7 +455,7 @@ function getPredicate(options, excludeColumn) {
 
 function getErmrestData(options, successCallback, successUpdateModels) {
 	updateCount(options, successUpdateModels);
-	var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(options['table']);
+	var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options);
 	var predicate = getPredicate(options, null);
 	if (predicate.length > 0) {
 		url += '/' + predicate.join('/');
@@ -515,7 +517,7 @@ function initModels(options, successCallback) {
 
 function updateCount(options, successCallback) {
 	var box = options['box'];
-	var urlPrefix = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(options['table']) + '/';
+	var urlPrefix = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/';
 	$.each(box, function(col, value) {
 		box[col]['ready'] = false;
 	});
@@ -567,7 +569,7 @@ function updateGroups(options, successCallback) {
 		param['successCallback'] = successCallback;
 		param['options'] = options;
 		param['col'] = col;
-		var url = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(options['table']) + '/';
+		var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/';
 		if (predicate != null && predicate.length > 0) {
 			url += predicate.join('/') + '/';
 		}
@@ -624,7 +626,7 @@ function updateSliders(options, successCallback) {
 			param['successCallback'] = successCallback;
 			param['options'] = options;
 			param['col'] = col;
-			var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(options['table']) + '/';
+			var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/';
 			if (predicate != null && predicate.length > 0) {
 				url += predicate.join('/') + '/';
 			}
@@ -722,12 +724,11 @@ function getColumnDescriptions(options, successCallback) {
 function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var col = param['col'];
 	var entity = param['entity'];
-	var table = param['options']['table'];
 	var options = param['options'];
 	var successCallback = param['successCallback'];
 	if (psqlText.contains(entity[col]['type'])) {
 		if (data[0]['cnt_d'] <= 50 && !textColumns.contains(col)) {
-			var url = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
 			entity[col]['type'] = 'enum';
@@ -736,7 +737,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			param['options'] = options;
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, null, param);
 		} else if (data[0]['cnt_d'] == 50) {
-			var url = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
 			entity[col]['type'] = 'select';
@@ -817,7 +818,7 @@ function getPage(options, totalItems, successCallback) {
 	if (!$.isNumeric(page) || Math.floor(page) != page || page <= 0) {
 		successCallback([], totalItems, page, pageSize);
 	} else {
-		var url = ERMREST_DATA_HOME + '/attribute/' + encodeSafeURIComponent(options['table']);
+		var url = ERMREST_DATA_HOME + '/attribute/' + getQueryPredicate(options);
 		var predicate = getPredicate(options, null);
 		if (predicate.length > 0) {
 			url += '/' + predicate.join('/');
@@ -868,7 +869,7 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 				predicate.push(encodeSafeURIComponent(col) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
 			});
 		}
-		var url = ERMREST_DATA_HOME + '/entity/' + encodeSafeURIComponent(param['options']['table']);
+		var url = ERMREST_DATA_HOME + '/entity/' + getQueryPredicate(param['options']);
 		if (predicate.length > 0) {
 			url += '/' + predicate.join('/');
 		}
@@ -1095,23 +1096,33 @@ function setTablesBackReferences(tables, data) {
 function setTreeReferences(tree, table) {
 	tree.length = 0
 	var nodes = [];
-	tree.push({'name': table,
-		'nodes': nodes});
+	var level = 0;
+	var node = {'name': table,
+			'parent': null,
+			'level': level,
+			'show': false,
+			'expand': true,
+			'nodes': nodes};
+	tree.push(node);
 	if (back_references[table] != null) {
 		$.each(back_references[table], function(i, key) {
-			addTreeReference(key, nodes);
+			addTreeReference(key, nodes, level+1, node);
 		});
 	}
 }
 
-function addTreeReference(table, nodes) {
+function addTreeReference(table, nodes, level, parent) {
 	var subNodes = [];
 	var node = {'name': table,
+			'parent': parent,
+			'level': level,
+			'show': false,
+			'expand': true,
 			'nodes': subNodes};
 	nodes.push(node);
 	if (back_references[table] != null) {
 		$.each(back_references[table], function(i, key) {
-			addTreeReference(key, subNodes);
+			addTreeReference(key, subNodes, level+1, node);
 		});
 	}
 }
@@ -1142,5 +1153,13 @@ function getDenormalizedValues(table, url, result) {
 			});
 		});
 	}
+}
+
+function getQueryPredicate(options) {
+	var ret = encodeSafeURIComponent(options['table']);
+	if (options['entityPredicates'].length > 0) {
+		ret = options['entityPredicates'].join('/')
+	}
+	return ret;
 }
 

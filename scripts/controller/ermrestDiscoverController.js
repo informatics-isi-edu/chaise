@@ -28,6 +28,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		SCHEMA = 'facebase';
 	}
 	initApplication();
+	$scope.level = 0;
+	$scope.entityPredicates = [];
 	$scope.pageNavigation = false;
 	$scope.details = false;
 	$scope.denormalizedView = {};
@@ -161,7 +163,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			'sortInfo': $scope.sortInfo,
 			'sortOption': null,
 			'table': $scope.table,
-			'tree': $scope.tree
+			'tree': $scope.tree,
+			'entityPredicates': $scope.entityPredicates
 	};
 
 	$scope.setSortOption = function setSortOption() {
@@ -374,6 +377,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	this.table_select = function table_select() {
+		$scope.entityPredicates.length = 0;
 		$scope.initTable();
 		getMetadata($scope.table, $scope.successGetMetadata);
 	};
@@ -405,8 +409,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return true;
 	};
 	this.showTree = function showTree() {
-		return false;
-		return $scope.ready && $scope.tree[0]['nodes'].length > 0;
+		return $scope.tree[0]['nodes'].length > 0;
 	};
 	this.showResults = function showResults() {
 		//return $scope.ready;
@@ -439,6 +442,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.clear = function clear(event) {
 		//window.location = '#';
 		event.preventDefault();
+		$scope.entityPredicates.length = 0;
 		$scope.initTable();
 		getMetadata($scope.table, $scope.successGetMetadata);
 	};
@@ -635,6 +639,40 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.zoomifyColumn = function zoomifyColumn() {
 		return display_columns['zoomify'];
+	};
+	this.expandCollapse = function expandCollapse(data, show) {
+		data.expand = !data.expand;
+		data.show = show;
+	};
+	this.getEntityResults = function getEntityResults(event, data) {
+		$('label', $('#treeDiv')).removeClass('highlighted');
+		$(event.target).addClass('highlighted');
+		if ($scope.entityPredicates.length == 0) {
+			$scope.entityPredicates.push(encodeSafeURIComponent($scope.table));
+			$scope.level = 0;
+		}
+		if (data.level > $scope.level) {
+			$scope.entityPredicates.length = data.level+1;
+			$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
+			var predicate = getPredicate($scope.options, null);
+			if (predicate.length > 0) {
+				$scope.entityPredicates[$scope.level] += '/' + getPredicate($scope.options, null).join('/');
+			}
+			var node = data.parent;
+			for (var i=data.level-1; i>$scope.level; i--) {
+				$scope.entityPredicates[i] = encodeSafeURIComponent(node.name);
+				node = node.parent;
+			}
+			$scope.level = data.level;
+			$scope.initTable();
+			getMetadata(data.name, $scope.successGetMetadata);
+		} else if (data.level < $scope.level) {
+			$scope.entityPredicates.length = data.level+1;
+			$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
+			$scope.level = data.level;
+			$scope.initTable();
+			getMetadata(data.name, $scope.successGetMetadata);
+		}
 	};
 }]);
 

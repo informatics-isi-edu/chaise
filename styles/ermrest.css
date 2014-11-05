@@ -157,3 +157,24 @@ td.item_display {
 	padding: 0px 0px 0px 10px;
 }
 
+ul.entity {
+	list-style: none;
+	padding: 0px;
+}
+
+li.entity {
+	margin-left: 20px;
+}
+
+div.entity {
+	padding-left: 15px;
+}
+
+label.highlighted {
+	background-color: #ECFFB3;
+}
+
+#treeDiv label:hover, #treeDiv label:active {
+     cursor: pointer;
+}
+
