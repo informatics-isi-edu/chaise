@@ -289,11 +289,14 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	this.if_type = $scope.if_type = function if_type(facet, facet_type) {
-		var ret = ($scope.colsDescr[facet]['type'] == facet_type);
-		if (facet_type == 'bigint') {
-			ret = psqlNumeric.contains($scope.colsDescr[facet]['type']);
-		} else if (facet_type == 'text') {
-			ret = psqlText.contains($scope.colsDescr[facet]['type']);
+		var ret = false;
+		if ($scope.colsDescr[facet] != null) {
+			ret = ($scope.colsDescr[facet]['type'] == facet_type);
+			if (facet_type == 'bigint') {
+				ret = psqlNumeric.contains($scope.colsDescr[facet]['type']);
+			} else if (facet_type == 'text') {
+				ret = psqlText.contains($scope.colsDescr[facet]['type']);
+			}
 		}
 		return ret;
 	};
@@ -409,7 +412,11 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return true;
 	};
 	this.showTree = function showTree() {
-		return $scope.tree[0]['nodes'].length > 0;
+		var ret = false;
+		if ($scope.tree.length > 0) {
+			ret = ($scope.tree[0]['nodes'].length > 0);
+		}
+		return ret;
 	};
 	this.showResults = function showResults() {
 		//return $scope.ready;

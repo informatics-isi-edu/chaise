@@ -14,7 +14,7 @@ var textColumns = [];
 var display_columns = {};
 var back_references = {};
 
-var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real',
+var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4',
 		'smallint' ];
 
 var psqlText = [ 'date', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone',
@@ -687,7 +687,7 @@ function getColumnDescriptions(options, successCallback) {
 		var column_definitions = metadata['column_definitions'];
 		$.each(column_definitions, function(i, col) {
 			var col_name = col['name'];
-			var col_type = col['type'];
+			var col_type = col['type']['typename'];
 			var obj = {};
 			obj['type'] = col_type;
 			obj['ready'] = false;
@@ -714,6 +714,8 @@ function getColumnDescriptions(options, successCallback) {
 				param['col'] = col;
 				var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(metadata['table_name']) + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
+			} else {
+				alert('Type not found: '+obj['type'])
 			}
 		});
 	} else {
