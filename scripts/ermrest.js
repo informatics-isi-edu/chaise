@@ -1160,7 +1160,16 @@ function getDenormalizedValues(table, url, result) {
 function getQueryPredicate(options) {
 	var ret = encodeSafeURIComponent(options['table']);
 	if (options['entityPredicates'].length > 0) {
-		ret = options['entityPredicates'].join('/')
+		ret = options['entityPredicates'].join('/');
+	}
+	return ret;
+}
+
+function getEntityTable(options) {
+	var ret = options['table'];
+	var level = options['entityPredicates'].length;
+	if (level > 0) {
+		ret = decodeURIComponent(options['entityPredicates'][level-1]);
 	}
 	return ret;
 }

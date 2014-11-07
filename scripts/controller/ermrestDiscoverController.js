@@ -611,7 +611,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.entryTitle = getEntryTitle(row);
 			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
-			entityDenormalize($scope.table, row, $scope.denormalizedView);
+			entityDenormalize(getEntityTable($scope.options), row, $scope.denormalizedView);
 		}
 	};
 	// "m" is the number of columns per row
