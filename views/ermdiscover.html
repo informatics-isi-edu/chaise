@@ -68,6 +68,15 @@
 	<!-- Row 2: Filters / Search results -->
 	<div class="row" id="content">
       	<div class="col-lg-2 col-sm-3">
+      		<form class="form-inline" role="form">
+				<div class="form-group sort-attr" id="attrsort">
+					<label for="sort">Sort:</label> <select class="form-control"
+						name="field-pick" id="sort" ng-model="sortFacet"
+						ng-change="facetList.changeSortOption()"
+						ng-options="value for value in sortColumns"></select> <a
+						href="#" ng-click="facetList.changeSortDirection($event)"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+				</div>
+			</form>
       		<form role="form" class="form-horizontal">
       			<div class="form-group">
       				<div class="col-sm-3 col-sm-offset-1">
@@ -174,15 +183,6 @@
 							<input id="dataSearch" type="text" ng-model="filterAllText" class="form-control"
 								placeholder="Search data..." size="44" maxlength="120"
 								ng-change="facetList.delay_search_all($event.keyCode)">
-						</div>
-					</div>
-					<div class="col-sm-6 col-md-4 col-lg-3">
-						<div class="form-group" id="attrsort">
-							<label for="sort">Sort</label> <select class="form-control"
-								name="field-pick" id="sort" ng-model="sortFacet"
-								ng-change="facetList.changeSortOption()"
-								ng-options="value for value in sortColumns"></select> <a
-								href="#" ng-click="facetList.changeSortDirection($event)"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
 						</div>
 					</div>
 					<div ng-show="pageNavigation" class="col-sm-4 col-md-3 col-lg-2">
