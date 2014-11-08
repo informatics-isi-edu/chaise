@@ -727,6 +727,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var col = param['col'];
 	var entity = param['entity'];
 	var options = param['options'];
+	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
 	if (psqlText.contains(entity[col]['type'])) {
 		if (data[0]['cnt_d'] <= 50 && !textColumns.contains(col)) {
@@ -737,7 +738,8 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			param['entity'] = entity;
 			param['col'] = col;
 			param['options'] = options;
-			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, null, param);
+			param['alert'] = alertObject;
+			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
 		} else if (data[0]['cnt_d'] == 50) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
@@ -746,7 +748,8 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			param['entity'] = entity;
 			param['col'] = col;
 			param['options'] = options;
-			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, null, param);
+			param['alert'] = alertObject;
+			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
 		} else {
 			entity[col]['ready'] = true;
 		}
