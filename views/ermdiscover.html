@@ -68,16 +68,7 @@
 	<!-- Row 2: Filters / Search results -->
 	<div class="row" id="content">
       	<div class="col-lg-2 col-sm-3">
-      		<form class="form-inline" role="form">
-				<div class="form-group sort-attr" id="attrsort">
-					<label for="sort">Sort:</label> <select class="form-control"
-						name="field-pick" id="sort" ng-model="sortFacet"
-						ng-change="facetList.changeSortOption()"
-						ng-options="value for value in sortColumns"></select> <a
-						href="#" ng-click="facetList.changeSortDirection($event)"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
-				</div>
-			</form>
-      		<form role="form" class="form-horizontal">
+      		<form role="form" class="form-horizontal" ng-show="facetList.showTableSelect()">
       			<div class="form-group">
       				<div class="col-sm-3 col-sm-offset-1">
       					<label class="control-label">Collections:</label>
@@ -94,7 +85,7 @@
 						<script type="text/ng-template" id="tree_item_renderer.html">
     						<label ng-show="data.expand && data.nodes.length > 0" ng-click="facetList.expandCollapse(data, true)">+</label>
 							<label ng-show="!data.expand && data.nodes.length > 0" ng-click="facetList.expandCollapse(data, false)">-</label>
-							<label ng-click="facetList.getEntityResults($event, data)">{{data.name}}</label>
+							<label ng-click="facetList.getEntityResults($event, data)">{{data.name}} {{facetList.displayTreeCount(data)}}</label>
     						<ul ng-show="data.show" class="entity">
         						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
     						</ul>
@@ -104,7 +95,18 @@
 	      				</ul>
       				</div>
       			</div>
-      			<div class="row">
+	      		<form class="form-inline" role="form" ng-show="facetList.showRefine()">
+					<div class="form-group sort-attr" id="attrsort">
+						<label for="sort">Sort:</label> <select class="form-control"
+							name="field-pick" id="sort" ng-model="sortFacet"
+							ng-change="facetList.changeSortOption()"
+							ng-options="value for value in sortColumns"></select> <a
+							href="#" ng-click="facetList.changeSortDirection($event)"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+					</div>
+					<br/>
+					<br/>
+				</form>
+      			<div class="row" ng-show="facetList.showRefine()">
       				<div class="col-sm-6 pull-right">
       					<button class="ng-hide btn btn-default btn-sm" ng-click="facetList.clear($event)" ng-show="facetList.showClearButton()" >Reset All</button>
       				</div>
@@ -112,7 +114,7 @@
       					<p class="filtertitle">Refine by</p>
       				</div>
       			</div>
-				<div class="row">
+				<div class="row" ng-show="facetList.showRefine()">
 					<div class="col-sm-10 col-sm-offset-1">
 						<div class="panel-group" id="filtermenu">
 							<div class="panel panel-default" ng-repeat="facet in facets"
@@ -177,6 +179,9 @@
 		<div class="col-lg-10 col-sm-9" ng-show="facetList.showResults()">
 			<div class="row" id="searchsort">
 				<form class="form-inline" role="form">
+					<div>
+						{{collectionsPredicate}}
+					</div>
 					<div ng-show="pageNavigation" class="col-sm-6 col-md-5 col-lg-4">
 						<div class="form-group has-feedback">
 							<label class="control-label sr-only">Search Data</label>

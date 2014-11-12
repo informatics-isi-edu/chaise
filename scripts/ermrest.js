@@ -313,9 +313,6 @@ function getMetadata(table, successCallback) {
 }
 
 function getTableColumns(options) {
-	if (options['entityPredicates'].length == 0) {
-		setTreeReferences(options['tree'], options['table']);
-	}
 	var metadata = options['metadata'];
 	var sortInfo = options['sortInfo'];
 	uniquenessColumns = [];
@@ -910,24 +907,33 @@ function getValueDisplay(col, value, colsGroup) {
 	return ret;
 }
 
-function getTables(tables, successCallback) {
+function getTables(tables, options, successCallback) {
 	var url = ERMREST_SCHEMA_HOME;
 	var param = {};
 	param['successCallback'] = successCallback;
 	param['tables'] = tables;
+	param['options'] = options;
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTables, null, param);
 }
 
 function successGetTables(data, textStatus, jqXHR, param) {
 	var tables = param['tables'];
+	var rootTables = [];
 	$.each(data, function(i, table) {
-		if (table['annotations'] == null || table['annotations']['comment'] == null || 
-				!table['annotations']['comment'].contains('exclude')) {
+		var exclude = table['annotations'] != null && table['annotations']['comment'] != null && 
+			table['annotations']['comment'].contains('exclude');
+		var nested = table['annotations'] != null && table['annotations']['comment'] != null && 
+			table['annotations']['comment'].contains('nested');
+		if (!exclude) {
 			tables.push(table['table_name']);
+		}
+		if (!exclude && !nested) {
+			rootTables.push(table['table_name']);
 		}
 	});
 	setTablesBackReferences(tables, data);
-	initApplicationHeader(tables);
+	setCollectionsReferences(param['options']['tree'], rootTables);
+	initApplicationHeader(rootTables);
 	param['successCallback']();
 }
 
@@ -1098,36 +1104,57 @@ function setTablesBackReferences(tables, data) {
 	});
 }
 
-function setTreeReferences(tree, table) {
+function setCollectionsReferences(tree, tables) {
 	tree.length = 0
+	var nodes = [];
+	var level = -1;
+	var node = {'name': 'Collections',
+			'parent': null,
+			'root': null,
+			'level': level,
+			'show': true,
+			'expand': true,
+			'count': 0,
+			'nodes': nodes};
+	tree.push(node);
+	$.each(tables, function(i, table) {
+		setTreeReferences(nodes, table, node);
+	});
+}
+
+function setTreeReferences(root, table, rootNode) {
 	var nodes = [];
 	var level = 0;
 	var node = {'name': table,
 			'parent': null,
+			'root': rootNode,
 			'level': level,
 			'show': false,
 			'expand': true,
+			'count': 0,
 			'nodes': nodes};
-	tree.push(node);
+	root.push(node);
 	if (back_references[table] != null) {
 		$.each(back_references[table], function(i, key) {
-			addTreeReference(key, nodes, level+1, node);
+			addTreeReference(key, nodes, level+1, node, rootNode);
 		});
 	}
 }
 
-function addTreeReference(table, nodes, level, parent) {
+function addTreeReference(table, nodes, level, parent, rootNode) {
 	var subNodes = [];
 	var node = {'name': table,
 			'parent': parent,
+			'root': rootNode,
 			'level': level,
 			'show': false,
 			'expand': true,
+			'count': 0,
 			'nodes': subNodes};
 	nodes.push(node);
 	if (back_references[table] != null) {
 		$.each(back_references[table], function(i, key) {
-			addTreeReference(key, subNodes, level+1, node);
+			addTreeReference(key, subNodes, level+1, node, rootNode);
 		});
 	}
 }
@@ -1175,5 +1202,61 @@ function getEntityTable(options) {
 		ret = decodeURIComponent(options['entityPredicates'][level-1]);
 	}
 	return ret;
+}
+
+function updateTreeCount(data, entityPredicates) {
+	$.each(data.root.nodes, function(i, node) {
+		if (node.name != data.name) {
+			resetTreeCount(node);
+		}
+	});
+	var predicates = entityPredicates.slice();
+	var index = entityPredicates.length-1;
+	var alertObject = {'display': true};
+	while (data != null) {
+		var url = ERMREST_DATA_HOME + '/aggregate/' + predicates.join('/') + '/cnt:=cnt(*)';
+		var param = {};
+		param['data'] = data;
+		param['alert'] = alertObject;
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateTreeCount, errorErmrest, param);
+		data = data.parent;
+		predicates.length--;
+	}
+}
+
+function successUpdateTreeCount(data, textStatus, jqXHR, param) {
+	param['data']['count'] = data[0]['cnt'];
+}
+
+function resetTreeCount(data) {
+	data['count'] = 0;
+	if (data.nodes.length > 0) {
+		$.each(data.nodes, function(i, node) {
+			resetTreeCount(node);
+		});
+	}
+}
+
+function getCollectionsPredicate(entityPredicates, options) {
+	var predicates = entityPredicates.slice();
+	var index = predicates.length-1;
+	var predicate = getPredicate(options, null);
+	if (predicate.length > 0) {
+		predicates[index] += '/' + predicate.join('/');
+	}
+	return predicates.join('/');
+}
+
+function collapseTree(tree, data) {
+	var root = data;
+	while (root.parent != null) {
+		root = root.parent;
+	}
+	$.each(tree.nodes, function(i, node) {
+		if (node.name != root.name) {
+			node.expand = true;
+			node.show = false;
+		}
+	});
 }
 

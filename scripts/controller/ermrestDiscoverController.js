@@ -29,7 +29,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	}
 	initApplication();
 	$scope.level = 0;
+	$scope.collectionsPredicate = '';
 	$scope.entityPredicates = [];
+	$scope.selectedEntity = null;
 	$scope.pageNavigation = false;
 	$scope.details = false;
 	$scope.denormalizedView = {};
@@ -99,6 +101,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.ermrestData = $scope.ermrestData.concat(data);
 		}
 		$scope.options['ermrestData'] = $scope.ermrestData;
+		$scope.collectionsPredicate = getCollectionsPredicate($scope.entityPredicates, $scope.options);
 		$scope.totalServerItems = totalItems;
 		$scope.maxPages = Math.floor($scope.totalServerItems/$scope.pagingOptions.pageSize);
 		if ($scope.totalServerItems%$scope.pagingOptions.pageSize != 0) {
@@ -242,6 +245,10 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		}
 		$scope.options['ermrestData'] = $scope.ermrestData;
 		$scope.totalServerItems = totalItems;
+		$scope.collectionsPredicate = getCollectionsPredicate($scope.entityPredicates, $scope.options);
+		if ($scope.selectedEntity != null) {
+			$scope.selectedEntity['count'] = totalItems;
+		}
 		$scope.maxPages = Math.floor($scope.totalServerItems/$scope.pagingOptions.pageSize);
 		if ($scope.totalServerItems%$scope.pagingOptions != 0) {
 			$scope.maxPages++;
@@ -268,19 +275,19 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	
 	$scope.successGetTables = function successGetTables() {
-		if ($scope.table == '') {
-			$scope.table = $scope.tables[0];
-		}
-		$scope.options['table'] = $scope.table;
-		getMetadata($scope.table, $scope.successGetMetadata);
+		$scope.$apply();
 	};
 
 	$scope.initPageRange();
-	getTables($scope.tables, $scope.successGetTables);
+	getTables($scope.tables, $scope.options, $scope.successGetTables);
 
 	$scope.successSearchFacets = function successSearchFacets(data, totalItems, page, pageSize) {
 		$scope.options['ermrestData'] = $scope.ermrestData = data;
+		$scope.collectionsPredicate = getCollectionsPredicate($scope.entityPredicates, $scope.options);
 		$scope.totalServerItems = totalItems;
+		if ($scope.selectedEntity != null) {
+			$scope.selectedEntity['count'] = totalItems;
+		}
 		$scope.maxPages = Math.floor($scope.totalServerItems/$scope.pagingOptions.pageSize);
 		if ($scope.totalServerItems%$scope.pagingOptions != 0) {
 			$scope.maxPages++;
@@ -381,6 +388,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 
 	this.table_select = function table_select() {
 		$scope.entityPredicates.length = 0;
+		$scope.selectedEntity = null;
 		$scope.initTable();
 		getMetadata($scope.table, $scope.successGetMetadata);
 	};
@@ -412,11 +420,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return true;
 	};
 	this.showTree = function showTree() {
-		var ret = false;
-		if ($scope.tree.length > 0) {
-			ret = ($scope.tree[0]['nodes'].length > 0);
-		}
-		return ret;
+		return true;
 	};
 	this.showResults = function showResults() {
 		//return $scope.ready;
@@ -450,6 +454,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		//window.location = '#';
 		event.preventDefault();
 		$scope.entityPredicates.length = 0;
+		$scope.selectedEntity = null;
 		$scope.initTable();
 		getMetadata($scope.table, $scope.successGetMetadata);
 	};
@@ -651,34 +656,82 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		data.expand = !data.expand;
 		data.show = show;
 	};
-	this.getEntityResults = function getEntityResults(event, data) {
-		$('label', $('#treeDiv')).removeClass('highlighted');
-		$(event.target).addClass('highlighted');
-		if ($scope.entityPredicates.length == 0) {
-			$scope.entityPredicates.push(encodeSafeURIComponent($scope.table));
-			$scope.level = 0;
+	this.displayTreeCount = function displayTreeCount(data) {
+		var ret = '';
+		if (data.count > 0) {
+			ret = '(' + data.count + ')';
 		}
-		if (data.level > $scope.level) {
-			$scope.entityPredicates.length = data.level+1;
-			$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
-			var predicate = getPredicate($scope.options, null);
-			if (predicate.length > 0) {
-				$scope.entityPredicates[$scope.level] += '/' + getPredicate($scope.options, null).join('/');
+		return ret;
+	};
+	this.showTableSelect = function showTableSelect() {
+		return false;
+	};
+	this.showRefine = function showRefine() {
+		return $('.highlighted', $('#treeDiv')).length > 0;
+	};
+	this.getEntityResults = function getEntityResults(event, data) {
+		if (data.level != -1) {
+			collapseTree($scope.tree[0], data);
+			$('label', $('#treeDiv')).removeClass('highlighted');
+			$(event.target).addClass('highlighted');
+			var newBranch = false;
+			if (data.level > 0 && $scope.level >= 0) {
+				var oldRoot = null;
+				if ($scope.level > 0) {
+					var oldRootParent = $scope.selectedEntity.parent;
+					while (oldRootParent.parent != null) {
+						oldRootParent = oldRootParent.parent;
+					}
+					oldRoot = oldRootParent.name;
+				}
+				var newRootParent = data.parent;
+				while (newRootParent.parent != null) {
+					newRootParent = newRootParent.parent;
+				}
+				if ((oldRoot != null || $scope.entityPredicates.length == 0) && newRootParent.name != oldRoot) {
+					$scope.level = 0;
+					$scope.entityPredicates.length = 1;
+					$scope.entityPredicates[0] = encodeSafeURIComponent(newRootParent.name);
+					newBranch = true;
+				}
 			}
-			var node = data.parent;
-			for (var i=data.level-1; i>$scope.level; i--) {
-				$scope.entityPredicates[i] = encodeSafeURIComponent(node.name);
-				node = node.parent;
+			$scope.selectedEntity = data;
+			$scope.table = data.name;
+			$scope.options.table = $scope.table;
+			if (data.level == 0) {
+				$scope.entityPredicates.length = 0;
+				$scope.entityPredicates.push(encodeSafeURIComponent($scope.table));
+				$scope.level = 0;
+				updateTreeCount(data, $scope.entityPredicates);
+				$scope.initTable();
+				getMetadata(data.name, $scope.successGetMetadata);
+			} else if (data.level > $scope.level) {
+				$scope.entityPredicates.length = data.level+1;
+				$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
+				if (!newBranch) {
+					var predicate = getPredicate($scope.options, null);
+					if (predicate.length > 0) {
+						$scope.entityPredicates[$scope.level] += '/' + getPredicate($scope.options, null).join('/');
+					}
+				}
+				var node = data.parent;
+				for (var i=data.level-1; i>$scope.level; i--) {
+					$scope.entityPredicates[i] = encodeSafeURIComponent(node.name);
+					node = node.parent;
+				}
+				updateTreeCount(data, $scope.entityPredicates);
+				$scope.level = data.level;
+				$scope.initTable();
+				getMetadata(data.name, $scope.successGetMetadata);
+			} else if (data.level < $scope.level) {
+				resetTreeCount(data);
+				$scope.entityPredicates.length = data.level+1;
+				$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
+				updateTreeCount(data, $scope.entityPredicates);
+				$scope.level = data.level;
+				$scope.initTable();
+				getMetadata(data.name, $scope.successGetMetadata);
 			}
-			$scope.level = data.level;
-			$scope.initTable();
-			getMetadata(data.name, $scope.successGetMetadata);
-		} else if (data.level < $scope.level) {
-			$scope.entityPredicates.length = data.level+1;
-			$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
-			$scope.level = data.level;
-			$scope.initTable();
-			getMetadata(data.name, $scope.successGetMetadata);
 		}
 	};
 }]);
