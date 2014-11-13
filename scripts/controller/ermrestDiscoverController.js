@@ -195,6 +195,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.filterSearchAllTimeout = null;
 		$scope.totalServerItems = 0;
 		$scope.options['filterAllText'] = $scope.filterAllText = '';
+		$('#headerSearch').val('');
 		$scope.options['table'] = $scope.table;
 		$scope.sortColumns = [''];
 		$scope.pageRange = [];
@@ -275,6 +276,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	
 	$scope.successGetTables = function successGetTables() {
+		$('#headerSearch').attr('disabled', 'disabled');
 		$scope.$apply();
 	};
 
@@ -671,6 +673,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.getEntityResults = function getEntityResults(event, data) {
 		if (data.level != -1) {
+			$('#headerSearch').removeAttr('disabled');
 			collapseTree($scope.tree[0], data);
 			$('label', $('#treeDiv')).removeClass('highlighted');
 			$(event.target).addClass('highlighted');
