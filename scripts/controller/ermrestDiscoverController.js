@@ -671,6 +671,15 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.showRefine = function showRefine() {
 		return $('.highlighted', $('#treeDiv')).length > 0;
 	};
+	this.isThumbnail = function isThumbnail(table, column) {
+		return hasAnnotation(table, column, 'thumbnail');
+	};
+	this.isZoomify = function isZoomify(table, column) {
+		return hasAnnotation(table, column, 'zoomify');
+	};
+	this.isDownload = function isDownload(table, column) {
+		return hasAnnotation(table, column, 'file');
+	};
 	this.getEntityResults = function getEntityResults(event, data) {
 		if (data.level != -1) {
 			$('#headerSearch').removeAttr('disabled');

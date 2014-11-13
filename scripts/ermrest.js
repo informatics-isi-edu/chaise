@@ -14,6 +14,8 @@ var textColumns = [];
 var display_columns = {};
 var back_references = {};
 
+var SCHEMA_METADATA = [];
+
 var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4',
 		'smallint' ];
 
@@ -917,6 +919,7 @@ function getTables(tables, options, successCallback) {
 }
 
 function successGetTables(data, textStatus, jqXHR, param) {
+	SCHEMA_METADATA = data;
 	var tables = param['tables'];
 	var rootTables = [];
 	$.each(data, function(i, table) {
@@ -1260,3 +1263,24 @@ function collapseTree(tree, data) {
 	});
 }
 
+function hasAnnotation(table_name, column_name, annotation) {
+	var ret = false;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name']) {
+			var column_definitions = table['column_definitions'];
+			$.each(column_definitions, function(i, col) {
+				if (col['name'] == column_name) {
+					if (col['annotations'] != null && col['annotations']['comment'] != null) {
+						var comments = col['annotations']['comment'];
+						if (comments.contains(annotation)) {
+							ret = true;
+						}
+					}
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	return ret;
+}
