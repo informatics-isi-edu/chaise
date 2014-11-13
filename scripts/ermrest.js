@@ -1116,7 +1116,7 @@ function setCollectionsReferences(tree, tables) {
 			'root': null,
 			'level': level,
 			'show': true,
-			'expand': true,
+			'expand': false,
 			'count': 0,
 			'nodes': nodes};
 	tree.push(node);
