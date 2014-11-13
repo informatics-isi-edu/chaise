@@ -280,6 +280,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.successGetTables = function successGetTables() {
 		$('#headerSearch').attr('disabled', 'disabled');
 		$scope.$apply();
+		selectCollection();
 	};
 
 	$scope.initPageRange();

@@ -15,6 +15,7 @@ var display_columns = {};
 var back_references = {};
 
 var SCHEMA_METADATA = [];
+var DEFAULT_TABLE = null;
 
 var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4',
 		'smallint' ];
@@ -920,6 +921,7 @@ function getTables(tables, options, successCallback) {
 
 function successGetTables(data, textStatus, jqXHR, param) {
 	SCHEMA_METADATA = data;
+	DEFAULT_TABLE = null;
 	var tables = param['tables'];
 	var rootTables = [];
 	$.each(data, function(i, table) {
@@ -932,8 +934,16 @@ function successGetTables(data, textStatus, jqXHR, param) {
 		}
 		if (!exclude && !nested) {
 			rootTables.push(table['table_name']);
+			var isDefault = table['annotations'] != null && table['annotations']['comment'] != null && 
+				table['annotations']['comment'].contains('default');
+			if (isDefault) {
+				DEFAULT_TABLE = table['table_name'];
+			}
 		}
 	});
+	if (DEFAULT_TABLE == null) {
+		DEFAULT_TABLE = rootTables[0];
+	}
 	setTablesBackReferences(tables, data);
 	setCollectionsReferences(param['options']['tree'], rootTables);
 	initApplicationHeader(rootTables);
@@ -1283,4 +1293,13 @@ function hasAnnotation(table_name, column_name, annotation) {
 		}
 	});
 	return ret;
+}
+
+function selectCollection(tree) {
+	$.each($('label', $('#treeDiv')), function(i, label) {
+		if ($(label).html().replace(/^\s*/, "").replace(/\s*$/, "") == DEFAULT_TABLE) {
+			$(label).click();
+			return false;
+		}
+	});
 }
