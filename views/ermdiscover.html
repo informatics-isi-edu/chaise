@@ -17,37 +17,25 @@
 				</div>
 				<div class="modal-body">
 					<div id="datacontent">
-						<h3>{{entrySubtitle}}</h3>
-						<table>
-							<tr ng-repeat="detailRow in detailRows">
-								<td ng-repeat-start="detail in detailRow" class="key">{{detail}}</td>
-								<td ng-repeat-end class="value">{{entryRow[detail]}}</td>
-							</tr>
-						</table>
-						<hr ng-if="facetList.if_hasText()">
 						<div>
-							<h4 ng-repeat-start="detail in textEntryRow">{{detail}}</h4>
-							<p ng-repeat-end>{{entryRow[detail]}}</p>
-						</div>
-						<hr ng-if="facetList.if_hasThumbnail()">
-						<div ng-show="entryThumbnail!=null">
-							<h4>{{facetList.thumbnailColumn()}}</h4>
-							<p>{{entryThumbnail}}</p>
-							<a ng-href="{{entryThumbnail}}">
-								<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{entryThumbnail}}">
-							</a>
-						</div>
-						<hr ng-if="facetList.if_hasZoomify()">
-						<div ng-show="entryZoomify!=null">
-							<h4>{{facetList.zoomifyColumn()}}</h4>
-							<p>{{entryZoomify}}</p>
-							<button type="button" class="btn btn-default" ng-click="facetList.openZoomify($event, entryZoomify)">Open</button>
-						</div>
-						<hr ng-if="facetList.if_hasFile()">
-						<div>
-							<h4 ng-repeat-start="detail in fileUrlEntryRow">{{detail}}</h4>
-							<p>{{entryRow[detail]}}</p>
-							<button ng-repeat-end type="button" class="btn btn-default" ng-click="facetList.download($event, entryRow[detail])">Download</button>
+							<h1>{{table}}</h1>
+							<p ng-repeat-start="name in detailColumns"><b>{{name}}: </b>{{entryRow[name]}}</p>
+							<div ng-repeat-end >
+								<div ng-if="facetList.isThumbnail(table,name)">
+									<a ng-href="{{entryRow[name]}}">
+										<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{entryRow[name]}}">
+									</a>
+									<br/><br/>
+								</div>
+								<div ng-if="facetList.isZoomify(table,name)">
+									<button type="button" class="btn btn-default" ng-click="facetList.openZoomify($event, entryRow[name])">Open</button>
+									<br/><br/>
+								</div>
+								<div ng-if="facetList.isDownload(table,name)">
+									<button type="button" class="btn btn-default" ng-click="facetList.download($event, entryRow[name])">Download</button>
+									<br/><br/>
+								</div>
+							</div>
 						</div>
 						<div ng-repeat="(detail, values) in denormalizedView">
 							<div ng-repeat="value in values">

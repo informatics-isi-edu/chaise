@@ -141,6 +141,17 @@ function getDetailRows(row, m) {
 	return ret;
 }
 
+function getDetailColumns(row) {
+	var ret = [];
+	$.each(row, function(key, value) {
+		if (key == '$$hashKey' || value == null || value === '') {
+			return true;
+		}
+		ret.push(key);
+	});
+	return ret;
+}
+
 function getLongTextColumns(row) {
 	var ret = [];
 	$.each(row, function(col, value) {

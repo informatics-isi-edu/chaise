@@ -36,6 +36,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.details = false;
 	$scope.denormalizedView = {};
 	$scope.entryRow = [];
+	$scope.detailColumns = [];
 	$scope.detailRows = [];
 	$scope.textEntryRow = [];
 	$scope.fileUrlEntryRow = [];
@@ -205,6 +206,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.sortDirection = 'asc';
 		$scope.details = false;
 		$scope.entryRow = [];
+		$scope.detailColumns = [];
 		$scope.detailRows = [];
 		$scope.textEntryRow = [];
 		$scope.fileUrlEntryRow = [];
@@ -601,6 +603,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		if (row == null) {
 			$scope.details = false;
 			$scope.entryRow = [];
+			$scope.detailColumns = [];
 			$scope.detailRows = [];
 			$scope.textEntryRow = [];
 			$scope.fileUrlEntryRow = [];
@@ -610,6 +613,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.entrySubtitle = '';
 		} else {
 			$scope.entryRow = row;
+			$scope.detailColumns = getDetailColumns(row);
 			$scope.detailRows = getDetailRows(row, m);
 			$scope.textEntryRow = getLongTextColumns(row);
 			$scope.fileUrlEntryRow = getFileUrlColumns(row);
