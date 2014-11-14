@@ -182,3 +182,11 @@ label.highlighted {
      cursor: pointer;
 }
 
+div#attrsort {
+	white-space: nowrap;
+}
+
+div#attrsort label, div#attrsort select, div#attrsort a {
+	display: inline-block;
+}
+
