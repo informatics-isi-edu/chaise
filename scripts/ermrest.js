@@ -1257,7 +1257,7 @@ function getCollectionsPredicate(entityPredicates, options) {
 	if (predicate.length > 0) {
 		predicates[index] += '/' + predicate.join('/');
 	}
-	return decodeURIComponent(predicates.join('<b> AND </b>'));
+	return decodeURIComponent(predicates.join('<b> ---> </b>'));
 }
 
 function collapseTree(tree, data) {
