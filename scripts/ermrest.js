@@ -696,7 +696,7 @@ function getColumnDescriptions(options, successCallback) {
 		var alertObject = {'display': true};
 		$.each(ret, function(col, obj) {
 			if (psqlText.contains(obj['type'])) {
-				var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(metadata['table_name']) + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
+				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 				var param = {};
 				param['options'] = options;
 				param['alert'] = alertObject;
@@ -712,7 +712,7 @@ function getColumnDescriptions(options, successCallback) {
 				param['successCallback'] = successCallback;
 				param['entity'] = ret;
 				param['col'] = col;
-				var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(metadata['table_name']) + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
+				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
 			} else {
 				alert('Type not found: '+obj['type'])
@@ -731,7 +731,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var successCallback = param['successCallback'];
 	if (psqlText.contains(entity[col]['type'])) {
 		if (data[0]['cnt_d'] <= 50 && !textColumns.contains(col)) {
-			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
 			entity[col]['type'] = 'enum';
@@ -741,7 +741,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			param['alert'] = alertObject;
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
 		} else if (data[0]['cnt_d'] == 50) {
-			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
 			entity[col]['type'] = 'select';
@@ -955,7 +955,7 @@ function getTableColumnsUniques(options, successCallback) {
 	var metadata = options['metadata'];
 	if (metadata != null) {
 		var column_definitions = metadata['column_definitions'];
-		var url = ERMREST_DATA_HOME + '/aggregate/' + encodeSafeURIComponent(metadata['table_name']) + '/';
+		var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/';
 		var cnt = [];
 		$.each(column_definitions, function(i, col) {
 			cnt.push('cnt_'+encodeSafeURIComponent(col['name'])+':=cnt('+encodeSafeURIComponent(col['name'])+')');
@@ -978,7 +978,7 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 		cols[col['name']]['cnt'] = data[0]['cnt_'+col['name']];
 		cols[col['name']]['distinct'] = -1;
 	});
-	var urlPrefix = ERMREST_DATA_HOME + '/attributegroup/' + encodeSafeURIComponent(metadata['table_name']) + '/';
+	var urlPrefix = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/';
 	var alertObject = {'display': true};
 	$.each(column_definitions, function(i,col) {
 		var params = {};
