@@ -686,7 +686,12 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return hasAnnotation(table, column, 'file');
 	};
 	this.getEntityResults = function getEntityResults(event, data) {
-		if (data.level != -1) {
+		var node = $('label.highlighted', $('#treeDiv'));
+		var isNew = (node.length == 0 || node[0] !== event.target);
+		if (isNew) {
+			$("#attrsort span.glyphicon").removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes");
+		}
+		if (data.level != -1 && isNew) {
 			$('#headerSearch').removeAttr('disabled');
 			collapseTree($scope.tree[0], data);
 			$('label', $('#treeDiv')).removeClass('highlighted');
