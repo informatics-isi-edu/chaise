@@ -2,8 +2,8 @@ var AJAX_TIMEOUT = 300000;
 var goauth_cookie = 'globusonline-goauth';
 var token = null;
 var SCHEMA = null;
-var ERMREST_FACEBASE_SCHEMA = '/ermrest/catalog/1/schema/';
-var ERMREST_FACEBASE_DATA = '/ermrest/catalog/1';
+var CATALOG = null;
+var ERMREST_CATALOG_PATH = '/ermrest/catalog/';
 var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
@@ -78,8 +78,8 @@ function loadApplicationHeaderAndFooter() {
 function initApplication() {
 	loadApplicationHeaderAndFooter();
 	initLocation();
-	ERMREST_SCHEMA_HOME = HOME + ERMREST_FACEBASE_SCHEMA + SCHEMA + '/table/';
-	ERMREST_DATA_HOME = HOME + ERMREST_FACEBASE_DATA;
+	ERMREST_SCHEMA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG + '/schema/'+ SCHEMA + '/table/';
+	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
 
 	//alert(JSON.stringify(DATASET_COLUMNS, null, 4));
 }
