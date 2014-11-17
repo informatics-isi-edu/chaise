@@ -726,6 +726,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.table = data.name;
 			$scope.options.table = $scope.table;
 			if (data.level == 0) {
+				resetTreeCount(data);
 				$scope.entityPredicates.length = 0;
 				$scope.entityPredicates.push(encodeSafeURIComponent($scope.table));
 				$scope.level = 0;
