@@ -916,7 +916,7 @@ function getTables(tables, options, successCallback) {
 	param['successCallback'] = successCallback;
 	param['tables'] = tables;
 	param['options'] = options;
-	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTables, null, param);
+	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTables, errorGetTables, param);
 }
 
 function successGetTables(data, textStatus, jqXHR, param) {
@@ -1084,6 +1084,15 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	} else if (param['alert']['display']) {
 		param['alert']['display'] = false;
+		handleError(jqXHR, textStatus, errorThrown, url);
+	}
+}
+
+function errorGetTables(jqXHR, textStatus, errorThrown, url, param) {
+	if (jqXHR.status == 401) {
+		// redirect to login in case of an Unauthorized error on getting the schema tables
+		window.location = '#/login?catalog=' + CATALOG + '&schema=' + SCHEMA;
+	} else {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	}
 }
