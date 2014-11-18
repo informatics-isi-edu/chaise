@@ -1091,6 +1091,7 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 function errorGetTables(jqXHR, textStatus, errorThrown, url, param) {
 	if (jqXHR.status == 401) {
 		// redirect to login in case of an Unauthorized error on getting the schema tables
+		document.body.style.cursor = 'default';
 		window.location = '#/login?catalog=' + CATALOG + '&schema=' + SCHEMA;
 	} else {
 		handleError(jqXHR, textStatus, errorThrown, url);
