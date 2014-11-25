@@ -710,6 +710,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 						oldRootParent = oldRootParent.parent;
 					}
 					oldRoot = oldRootParent.name;
+				} else {
+					oldRoot = $scope.selectedEntity.name;
 				}
 				var newRootParent = data.parent;
 				while (newRootParent.parent != null) {
@@ -754,6 +756,12 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			} else if (data.level < $scope.level) {
 				resetTreeCount(data);
 				$scope.entityPredicates.length = data.level+1;
+				$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
+				updateTreeCount(data, $scope.entityPredicates);
+				$scope.level = data.level;
+				$scope.initTable();
+				getMetadata(data.name, $scope.successGetMetadata);
+			} else if (data.level == $scope.level) {
 				$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
 				updateTreeCount(data, $scope.entityPredicates);
 				$scope.level = data.level;

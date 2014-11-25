@@ -20,7 +20,7 @@ var DEFAULT_TABLE = null;
 var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4',
 		'smallint' ];
 
-var psqlText = [ 'date', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone',
+var psqlText = [ 'date', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone',
                  'character', 'character varying', 'text' ];
 
 var visibleColumns = {
@@ -398,6 +398,12 @@ function getTableColumns(options) {
 			sortInfo['directions'].push('desc');
 		});
 	}
+	if (PRIMARY_KEY.length == 0) {
+		$.each(ret, function(i, col) {
+			PRIMARY_KEY.push(encodeSafeURIComponent(col));
+		});
+	}
+	
 	return {'facets': ret,
 		'sortInfo': sortInfo,
 		'colsDefs': columns_definitions};
@@ -686,12 +692,14 @@ function getColumnDescriptions(options, successCallback) {
 	if (metadata != null) {
 		var column_definitions = metadata['column_definitions'];
 		$.each(column_definitions, function(i, col) {
-			var col_name = col['name'];
-			var col_type = col['type']['typename'];
-			var obj = {};
-			obj['type'] = col_type;
-			obj['ready'] = false;
-			ret[col_name] = obj;
+			if (col['type']['typename'] != 'json') {
+				var col_name = col['name'];
+				var col_type = col['type']['typename'];
+				var obj = {};
+				obj['type'] = col_type;
+				obj['ready'] = false;
+				ret[col_name] = obj;
+			}
 		});
 		var alertObject = {'display': true};
 		$.each(ret, function(col, obj) {
@@ -870,9 +878,17 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 			}
 			predicate.push(sortPredicate.join(';'));
 		} else {
+			var primaryKeyPredicate = [];
+			var firstKey = null;
 			$.each(PRIMARY_KEY, function(i, col) {
-				predicate.push(encodeSafeURIComponent(col) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
+				if (i==0) {
+					firstKey = encodeSafeURIComponent(col) + '::gt::' + encodeSafeURIComponent(data[(page-1)*pageSize][col]);
+				}
+				primaryKeyPredicate.push(encodeSafeURIComponent(col) + (i==0 ? '=' : '::geq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
 			});
+			primaryKeyPredicate = [primaryKeyPredicate.join('&')];
+			primaryKeyPredicate.push(firstKey);
+			predicate.push(primaryKeyPredicate.join(';'));
 		}
 		var url = ERMREST_DATA_HOME + '/entity/' + getQueryPredicate(param['options']);
 		if (predicate.length > 0) {
@@ -880,6 +896,8 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 		}
 		if (sortOption != null) {
 			url += getSortQuery(sortOption, false);
+		} else {
+			url += '@sort(' + PRIMARY_KEY.join(',') + ')';
 		}
 		url += '?limit=' + pageSize;
 		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetPage, null, param);
@@ -974,21 +992,25 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 	var column_definitions = metadata['column_definitions'];
 	var cols = {};
 	$.each(column_definitions, function(i,col) {
-		cols[col['name']] = {};
-		cols[col['name']]['cnt'] = data[0]['cnt_'+col['name']];
-		cols[col['name']]['distinct'] = -1;
+		if (col['type']['typename'] != 'json') {
+			cols[col['name']] = {};
+			cols[col['name']]['cnt'] = data[0]['cnt_'+col['name']];
+			cols[col['name']]['distinct'] = -1;
+		}
 	});
 	var urlPrefix = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/';
 	var alertObject = {'display': true};
 	$.each(column_definitions, function(i,col) {
-		var params = {};
-		params['alert'] = alertObject;
-		params['options'] = param['options'];
-		params['successCallback'] = param['successCallback'];
-		params['cols'] = cols;
-		params['col'] = col['name'];
-		var url = urlPrefix + encodeSafeURIComponent(col['name']) + ';cnt:=cnt(' + encodeSafeURIComponent(col['name']) + ')';
-		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsDistinct, errorErmrest, params);
+		if (col['type']['typename'] != 'json') {
+			var params = {};
+			params['alert'] = alertObject;
+			params['options'] = param['options'];
+			params['successCallback'] = param['successCallback'];
+			params['cols'] = cols;
+			params['col'] = col['name'];
+			var url = urlPrefix + encodeSafeURIComponent(col['name']) + ';cnt:=cnt(' + encodeSafeURIComponent(col['name']) + ')';
+			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsDistinct, errorErmrest, params);
+		}
 	});
 }
 
