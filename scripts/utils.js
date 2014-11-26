@@ -81,7 +81,7 @@ function getDisplayColumns(row, m, maxRows) {
 	var rowCount = 0;
 	$.each(display_columns['top_columns'], function(i, col) {
 		if (row[col] == null || row[col] === '' || display_columns['title'] == col || 
-				display_columns['thumbnail'] == col || display_columns['zoomify'] == col) {
+				display_columns['thumbnail'] == col || display_columns['zoomify'] == col || display_columns['3dview'] == col) {
 			return true;
 		}
 		tr.push(col);
@@ -110,6 +110,7 @@ function isLongText(col, value) {
 			col != display_columns['title'] && 
 			col != display_columns['subtitle'] &&
 			col != display_columns['thumbnail'] &&
+			col != display_columns['3dview'] &&
 			col != display_columns['zoomify'] &&
 			!display_columns['file'].contains(col) &&
 			(/*display_columns['text_columns'].contains(col) ||*/ ('' + value).length > 20));
@@ -123,7 +124,7 @@ function getDetailRows(row, m) {
 		if (key == '$$hashKey' || value == null || value === '') {
 			return true;
 		}
-		if (key == display_columns['thumbnail'] || key == display_columns['zoomify'] || 
+		if (key == display_columns['thumbnail'] || key == display_columns['3dview']  || key == display_columns['zoomify'] || 
 				key == display_columns['title'] || key == display_columns['subtitle'] || 
 				/*display_columns['text_columns'].contains(key) ||*/ value.length > 20) {
 			return true;

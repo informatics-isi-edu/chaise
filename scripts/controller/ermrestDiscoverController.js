@@ -46,6 +46,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.textEntryRow = [];
 	$scope.fileUrlEntryRow = [];
 	$scope.entryThumbnail = '';
+	$scope.entry3Dview = '';
 	$scope.entryZoomify = '';
 	$scope.entryTitle = '';
 	$scope.entrySubtitle = '';
@@ -216,6 +217,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.textEntryRow = [];
 		$scope.fileUrlEntryRow = [];
 		$scope.entryThumbnail = '';
+		$scope.entry3Dview = '';
 		$scope.entryZoomify = '';
 		$scope.entryTitle = '';
 		$scope.entrySubtitle = '';
@@ -614,6 +616,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.textEntryRow = [];
 			$scope.fileUrlEntryRow = [];
 			$scope.entryThumbnail = '';
+			$scope.entry3Dview = '';
 			$scope.entryZoomify = '';
 			$scope.entryTitle = '';
 			$scope.entrySubtitle = '';
@@ -638,6 +641,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.download = function download(event, url) {
 		window.open(url, '_blank');
+	};
+	this.init3Dview = function init3Dview(url) {
+		return $sce.trustAsResourceUrl(url);
 	};
 	this.openZoomify = function openZoomify(event, url) {
 		window.open(url, '_blank');
@@ -683,6 +689,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.isThumbnail = function isThumbnail(table, column) {
 		return hasAnnotation(table, column, 'thumbnail');
+	};
+	this.is3dView = function is3dView(table, column) {
+		return hasAnnotation(table, column, '3dview');
 	};
 	this.isZoomify = function isZoomify(table, column) {
 		return hasAnnotation(table, column, 'zoomify');

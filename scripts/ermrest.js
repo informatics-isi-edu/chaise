@@ -366,6 +366,9 @@ function getTableColumns(options) {
 				if (comments.contains('zoomify')) {
 					display_columns['zoomify'] = col['name'];
 				}
+				if (comments.contains('3dview')) {
+					display_columns['3dview'] = col['name'];
+				}
 				if (comments.contains('html')) {
 					display_columns['text_columns'].push(col['name']);
 				}

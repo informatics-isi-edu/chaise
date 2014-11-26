@@ -190,3 +190,6 @@ div#attrsort label, div#attrsort select, div#attrsort a {
 	display: inline-block;
 }
 
+iframe {
+    display: block;
+}
