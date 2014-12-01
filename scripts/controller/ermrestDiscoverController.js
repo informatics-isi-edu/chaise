@@ -44,10 +44,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.detailColumns = [];
 	$scope.detailRows = [];
 	$scope.textEntryRow = [];
-	$scope.fileUrlEntryRow = [];
-	$scope.entryThumbnail = '';
 	$scope.entry3Dview = '';
-	$scope.entryZoomify = '';
 	$scope.entryTitle = '';
 	$scope.entrySubtitle = '';
 	$scope.tagPages = 5;
@@ -215,10 +212,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.detailColumns = [];
 		$scope.detailRows = [];
 		$scope.textEntryRow = [];
-		$scope.fileUrlEntryRow = [];
-		$scope.entryThumbnail = '';
 		$scope.entry3Dview = '';
-		$scope.entryZoomify = '';
 		$scope.entryTitle = '';
 		$scope.entrySubtitle = '';
 		$scope.initPageRange();
@@ -614,10 +608,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.detailColumns = [];
 			$scope.detailRows = [];
 			$scope.textEntryRow = [];
-			$scope.fileUrlEntryRow = [];
-			$scope.entryThumbnail = '';
 			$scope.entry3Dview = '';
-			$scope.entryZoomify = '';
 			$scope.entryTitle = '';
 			$scope.entrySubtitle = '';
 		} else {
@@ -625,9 +616,6 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.detailColumns = getDetailColumns(row);
 			$scope.detailRows = getDetailRows(row, m);
 			$scope.textEntryRow = getLongTextColumns(row);
-			$scope.fileUrlEntryRow = getFileUrlColumns(row);
-			$scope.entryThumbnail = getEntryThumbnail(row);
-			$scope.entryZoomify = getEntryZoomify(row);
 			$scope.entryTitle = getEntryTitle(row);
 			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
@@ -655,20 +643,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.if_hasText = function if_hasText() {
 		return $scope.textEntryRow.length > 0;
 	};
-	this.if_hasFile = function if_hasFile() {
-		return $scope.fileUrlEntryRow.length > 0;
-	};
-	this.if_hasZoomify = function if_hasZoomify() {
-		return $scope.entryZoomify != null;
-	};
 	this.if_hasThumbnail = function if_hasThumbnail() {
-		return display_columns['thumbnail'] != null;
-	};
-	this.thumbnailColumn = function thumbnailColumn() {
-		return display_columns['thumbnail'];
-	};
-	this.zoomifyColumn = function zoomifyColumn() {
-		return display_columns['zoomify'];
+		return display_columns['thumbnail'].length > 0;
 	};
 	this.expandCollapse = function expandCollapse(data, show) {
 		data.expand = !data.expand;

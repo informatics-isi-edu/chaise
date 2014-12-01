@@ -81,7 +81,7 @@ function getDisplayColumns(row, m, maxRows) {
 	var rowCount = 0;
 	$.each(display_columns['top_columns'], function(i, col) {
 		if (row[col] == null || row[col] === '' || display_columns['title'] == col || 
-				display_columns['thumbnail'] == col || display_columns['zoomify'] == col || display_columns['3dview'] == col) {
+				display_columns['thumbnail'].contains(col)) {
 			return true;
 		}
 		tr.push(col);
@@ -109,9 +109,9 @@ function isLongText(col, value) {
 			value !== '' &&
 			col != display_columns['title'] && 
 			col != display_columns['subtitle'] &&
-			col != display_columns['thumbnail'] &&
-			col != display_columns['3dview'] &&
-			col != display_columns['zoomify'] &&
+			!display_columns['thumbnail'].contains(col) &&
+			!display_columns['3dview'].contains(col) &&
+			!display_columns['zoomify'].contains(col) &&
 			!display_columns['file'].contains(col) &&
 			(/*display_columns['text_columns'].contains(col) ||*/ ('' + value).length > 20));
 }
@@ -124,7 +124,7 @@ function getDetailRows(row, m) {
 		if (key == '$$hashKey' || value == null || value === '') {
 			return true;
 		}
-		if (key == display_columns['thumbnail'] || key == display_columns['3dview']  || key == display_columns['zoomify'] || 
+		if (!display_columns['thumbnail'].contains(key) || !display_columns['3dview'].contains(key)  || !display_columns['zoomify'].contains(key) || 
 				key == display_columns['title'] || key == display_columns['subtitle'] || 
 				/*display_columns['text_columns'].contains(key) ||*/ value.length > 20) {
 			return true;
@@ -183,11 +183,7 @@ function getEntrySubtitle(row) {
 }
 
 function getEntryThumbnail(row) {
-	return row[display_columns['thumbnail']];
-}
-
-function getEntryZoomify(row) {
-	return row[display_columns['zoomify']];
+	return display_columns['thumbnail'].length > 0 ? row[display_columns['thumbnail'][0]] : null;
 }
 
 function updatePageTag(direction, currentPage, pageMap, tagPages, maxPages) {

@@ -321,7 +321,12 @@ function getTableColumns(options) {
 	uniquenessColumns = [];
 	textColumns = [];
 	unsortableColumns = [];
-	display_columns = {'text_columns': [], 'file': []};
+	display_columns = {
+			'text_columns': [], 
+			'file': [],
+			'thumbnail': [],
+			'zoomify': [],
+			'3dview': []};
 	PRIMARY_KEY = [];
 	if (metadata['keys'] != null) {
 		var unique_columns = [];
@@ -361,13 +366,13 @@ function getTableColumns(options) {
 					display_columns['subtitle'] = col['name'];
 				}
 				if (comments.contains('thumbnail')) {
-					display_columns['thumbnail'] = col['name'];
+					display_columns['thumbnail'].push(col['name']);
 				}
 				if (comments.contains('zoomify')) {
-					display_columns['zoomify'] = col['name'];
+					display_columns['zoomify'].push(col['name']);
 				}
 				if (comments.contains('3dview')) {
-					display_columns['3dview'] = col['name'];
+					display_columns['3dview'].push(col['name']);
 				}
 				if (comments.contains('html')) {
 					display_columns['text_columns'].push(col['name']);

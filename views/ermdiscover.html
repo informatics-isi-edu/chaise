@@ -58,6 +58,15 @@
 										</a>
 										<br/><br/>
 									</div>
+									<div ng-if="facetList.is3dView(detail,name)" ng-init="entry3Dview=facetList.init3Dview(val)">
+										<iframe title="3dView" width="300" height="300" ng-src="{{entry3Dview}}">
+											<p>Your browser does not support iframes.</p>
+										</iframe>
+										<a ng-href="{{val}}">
+											Enlarge
+										</a>
+										<br/><br/>
+									</div>
 									<div ng-if="facetList.isZoomify(detail,name)">
 										<button type="button" class="btn btn-default" ng-click="facetList.openZoomify($event, val)">Open</button>
 										<br/><br/>
@@ -257,7 +266,7 @@
 									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 								</a>
 							</td>
-							<td ng-show="facetList.hasThumbnail() && thumbnail==null">
+							<td ng-show="facetList.if_hasThumbnail() && thumbnail==null">
 								<a ng-href="images/blank.jpeg">
 									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="images/blank.jpeg">
 								</a>
