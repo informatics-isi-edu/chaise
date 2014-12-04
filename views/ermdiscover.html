@@ -144,29 +144,29 @@
 								ng-click="facetList.toggleFacet($event, facet)">
 								<div class="panel-heading">
 									<h4 class="panel-title">
-										<a data-toggle="collapse" href="#" ng-click="facetList.preventDefault($event)"><span class="glyphicon glyphicon-plus"></span>{{facet}}</a> <span
-											class="pull-right">{{box[facet]['facetcount']}}</span>
+										<a data-toggle="collapse" href="#" ng-click="facetList.preventDefault($event)"><span class="glyphicon glyphicon-plus"></span>{{facet['display']}}</a> <span
+											class="pull-right">{{box[facet['table']][facet['name']]['facetcount']}}</span>
 									</h4>
 								</div>
 								<div class="panel-collapse collapse in">
 									<div class="panel-body">
 										<ul class="nav filteritems" ng-hide="facetList.hide(facet)">
 											<li ng-if="facetList.if_type(facet, 'bigint')"><rzslider
-													rz-slider-model="box[facet]['min']"
-													rz-slider-high="box[facet]['max']"
-													rz-slider-floor="box[facet]['floor']"
-													rz-slider-ceil="box[facet]['ceil']"
+													rz-slider-model="box[facet['table']][facet['name']]['min']"
+													rz-slider-high="box[facet['table']][facet['name']]['max']"
+													rz-slider-floor="box[facet['table']][facet['name']]['floor']"
+													rz-slider-ceil="box[facet['table']][facet['name']]['ceil']"
 													ng-mouseup="facetList.delay_slider(facet)"> </rzslider></li>
 											<li ng-if="facetList.if_type(facet, 'text')"><input
-												type="text" ng-model="box[facet]['value']"
+												type="text" ng-model="box[facet['table']][facet['name']]['value']"
 												ng-keyup="facetList.delay_predicate(facet,$event.keyCode)"/></li>
 											<li ng-if="facetList.if_type(facet, 'enum')"
-												ng-repeat="value in colsDescr[facet]['values']"
+												ng-repeat="value in colsDescr[facet['table']][facet['name']]['values']"
 												ng-hide="facetList.showFacetValue(facet, value)"><input
-												type="checkbox" ng-model="box[facet]['values'][value]"
+												type="checkbox" ng-model="box[facet['table']][facet['name']]['values'][value]"
 												ng-change="facetList.predicate_checkbox(facet)"
 												ng-disabled="facetList.showFacetValue(facet, value)" />{{value}}
-												<span class="pull-right">({{colsGroup[facet][value]}})</span>
+												<span class="pull-right">({{colsGroup[facet['table']][facet['name']][value]}})</span>
 											</li>
 										</ul>
 									</div>
@@ -186,7 +186,7 @@
 										<ul class="nav filteritems" ng-show="moreFlag">
 											<li ng-repeat="facet in facets"><input
 												type="checkbox"
-												ng-model="chooseColumns[facet]">{{facet}}</li>
+												ng-model="chooseColumns[facet['table']][facet['name']]">{{facet['display']}}</li>
 										</ul>
 									</div>
 								</div>

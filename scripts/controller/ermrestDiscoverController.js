@@ -237,7 +237,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
-		$scope.options['colsDescr'] = $scope.colsDescr = data;
+		$scope.colsDescr[$scope.table] = data;
 		initModels($scope.options, $scope.successInitModels);
 	};
 
@@ -303,12 +303,12 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 
 	this.if_type = $scope.if_type = function if_type(facet, facet_type) {
 		var ret = false;
-		if ($scope.colsDescr[facet] != null) {
-			ret = ($scope.colsDescr[facet]['type'] == facet_type);
+		if ($scope.colsDescr[facet['table']][facet['name']] != null) {
+			ret = ($scope.colsDescr[facet['table']][facet['name']]['type'] == facet_type);
 			if (facet_type == 'bigint') {
-				ret = psqlNumeric.contains($scope.colsDescr[facet]['type']);
+				ret = psqlNumeric.contains($scope.colsDescr[facet['table']][facet['name']]['type']);
 			} else if (facet_type == 'text') {
-				ret = psqlText.contains($scope.colsDescr[facet]['type']);
+				ret = psqlText.contains($scope.colsDescr[facet['table']][facet['name']]['type']);
 			}
 		}
 		return ret;
@@ -330,10 +330,10 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	$scope.predicate = function predicate(facet,keyCode) {
-		if ($scope.box[facet]['value'] == '') {
-			$scope.facetClass[facet] = '';
+		if ($scope.box[facet['table']][facet['name']]['value'] == '') {
+			$scope.facetClass[facet['table']][facet['name']] = '';
 		} else {
-			$scope.facetClass[facet] = 'selectedFacet';
+			$scope.facetClass[facet['table']][facet['name']] = 'selectedFacet';
 		}
 		$scope.setSortOption();
 		$scope.pagingOptions.currentPage = 1;
@@ -348,15 +348,15 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	$scope.predicate_slider = function predicate_slider(facet) {
-		if ($scope.box[facet]['min'] > $scope.box[facet]['floor']) {
-			$scope.box[facet]['left'] = true;
-		} else if ($scope.box[facet]['left'] && $scope.box[facet]['min'] == $scope.box[facet]['floor']) {
-			delete $scope.box[facet]['left'];
+		if ($scope.box[facet['table']][facet['name']]['min'] > $scope.box[facet['table']][facet['name']]['floor']) {
+			$scope.box[facet['table']][facet['name']]['left'] = true;
+		} else if ($scope.box[facet['table']][facet['name']]['left'] && $scope.box[facet['table']][facet['name']]['min'] == $scope.box[facet['table']][facet['name']]['floor']) {
+			delete $scope.box[facet['table']][facet['name']]['left'];
 		}
-		if ($scope.box[facet]['max'] < $scope.box[facet]['ceil']) {
-			$scope.box[facet]['right'] = true;
-		} else if ($scope.box[facet]['right'] && $scope.box[facet]['max'] == $scope.box[facet]['original_ceil']) {
-			delete $scope.box[facet]['right'];
+		if ($scope.box[facet['table']][facet['name']]['max'] < $scope.box[facet['table']][facet['name']]['ceil']) {
+			$scope.box[facet['table']][facet['name']]['right'] = true;
+		} else if ($scope.box[facet['table']][facet['name']]['right'] && $scope.box[facet['table']][facet['name']]['max'] == $scope.box[facet['table']][facet['name']]['original_ceil']) {
+			delete $scope.box[facet['table']][facet['name']]['right'];
 		}
 		setFacetClass($scope.options, facet, $scope.facetClass);
 		$scope.setSortOption();
@@ -400,23 +400,17 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	this.showFacetValue = function showFacetValue(facet, value) {
-		return ($scope.colsGroup[facet][value] == 0 && !$scope.box[facet]['values'][value]);
-	};
-	this.display = function display(facet) {
-		return getColumnDisplay(facet, $scope.colsGroup);
-	};
-	this.displayValue = function displayValue(facet, value) {
-		return getValueDisplay(facet, value, $scope.colsGroup);
+		return ($scope.colsGroup[facet['table']][facet['name']][value] == 0 && !$scope.box[facet['table']][facet['name']]['values'][value]);
 	};
 	this.show = function show(facet) {
-		return ($scope.narrow[facet] == null && $scope.ready && $scope.chooseColumns[facet] && 
-				($scope.box[facet]['facetcount'] > 0 || 
-						$scope.colsDescr[facet]['type'] == 'enum' && hasCheckedValues($scope.box, facet)));
+		return ($scope.narrow[facet['table']][facet['name']] == null && $scope.ready && $scope.chooseColumns[facet['table']][facet['name']] && 
+				($scope.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+						$scope.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.box, facet)));
 	};
 	this.showFacetCount = function showFacetCount(facet) {
-		return ($scope.chooseColumns[facet] && 
-				($scope.box[facet]['facetcount'] > 0 || 
-						$scope.colsDescr[facet]['type'] == 'enum' && hasCheckedValues($scope.box, facet)));
+		return ($scope.chooseColumns[facet['table']][facet['name']] && 
+				($scope.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+						$scope.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.box, facet)));
 	};
 	this.showClearButton = function showClearButton() {
 		return $scope.ready;
@@ -433,23 +427,23 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return true;
 	};
 	this.hide = function hide(facet) {
-		return ($scope.narrow[facet] == null || !$scope.chooseColumns[facet] || 
-				($scope.box[facet]['facetcount'] == 0 && 
-						($scope.colsDescr[facet]['type'] == 'bigint' ||
-								$scope.colsDescr[facet]['type'] == 'enum' && !hasCheckedValues($scope.box, facet))));
+		return ($scope.narrow[facet['table']][facet['name']] == null || !$scope.chooseColumns[facet['table']][facet['name']] || 
+				($scope.box[facet['table']][facet['name']]['facetcount'] == 0 && 
+						($scope.colsDescr[facet['table']][facet['name']]['type'] == 'bigint' ||
+								$scope.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && !hasCheckedValues($scope.box, facet))));
 	};
 	this.expand = function expand(facet) {
-		$scope.narrow[facet] = true;
+		$scope.narrow[facet['table']][facet['name']] = true;
 	};
 	this.collapse = function collapse(facet) {
-		delete $scope.narrow[facet];
+		delete $scope.narrow[facet['table']][facet['name']];
 	};
 	this.preventRoute = function preventRoute(event, facet) {
 		event.preventDefault();
-		if ($scope.narrow[facet] == null) {
-			$scope.narrow[facet] = true;
+		if ($scope.narrow[facet['table']][facet['name']] == null) {
+			$scope.narrow[facet['table']][facet['name']] = true;
 		} else {
-			delete $scope.narrow[facet];
+			delete $scope.narrow[facet['table']][facet['name']];
 		}
 	};
 	this.logout = function logout() {
@@ -572,8 +566,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		}
 	};
 	this.toggleFacet = function toggleFacet(event, facet) {
-		if ($scope.narrow[facet] == null) {
-			$scope.narrow[facet] = true;
+		if ($scope.narrow[facet['table']][facet['name']] == null) {
+			$scope.narrow[facet['table']][facet['name']] = true;
 			$(event.target).addClass('collapsed');
 			$(event.target).find('.glyphicon').removeClass('glyphicon-plus').addClass('glyphicon-minus');
 			setTimeout(function () {
@@ -583,19 +577,19 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			if (!hasCheckedValues($scope.box, facet) && !$(event.target).is(':checkbox')) {
 				$(event.target).removeClass('collapsed');
 				$(event.target).find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
-				delete $scope.narrow[facet];
+				delete $scope.narrow[facet['table']][facet['name']];
 			}
 		} else if ($scope.if_type(facet, 'bigint') && !$(event.target).is('rzslider')) {
-			if ($scope.box[facet]['min'] == $scope.box[facet]['floor'] && $scope.box[facet]['max'] == $scope.box[facet]['ceil']) {
+			if ($scope.box[facet['table']][facet['name']]['min'] == $scope.box[facet['table']][facet['name']]['floor'] && $scope.box[facet['table']][facet['name']]['max'] == $scope.box[facet['table']][facet['name']]['ceil']) {
 				$(event.target).removeClass('collapsed');
 				$(event.target).find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
-				delete $scope.narrow[facet];
+				delete $scope.narrow[facet['table']][facet['name']];
 			}
 		} else if ($scope.if_type(facet, 'text') && !$(event.target).is('input:text')) {
-			if ($scope.box[facet]['value'].length == 0) {
+			if ($scope.box[facet['table']][facet['name']]['value'].length == 0) {
 				$(event.target).removeClass('collapsed');
 				$(event.target).find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
-				delete $scope.narrow[facet];
+				delete $scope.narrow[facet['table']][facet['name']];
 			}
 		}
 	};
@@ -676,6 +670,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return hasAnnotation(table, column, 'file');
 	};
 	this.getEntityResults = function getEntityResults(event, data) {
+		var peviousTable = $scope.table;
 		var node = $('label.highlighted', $('#treeDiv'));
 		var isNew = (node.length == 0 || node[0] !== event.target);
 		if (isNew) {
@@ -724,9 +719,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 				$scope.entityPredicates.length = data.level+1;
 				$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
 				if (!newBranch) {
-					var predicate = getPredicate($scope.options, null);
+					var predicate = getPredicate($scope.options, null, peviousTable);
 					if (predicate.length > 0) {
-						$scope.entityPredicates[$scope.level] += '/' + getPredicate($scope.options, null).join('/');
+						$scope.entityPredicates[$scope.level] += '/' + predicate.join('/');
 					}
 				}
 				var node = data.parent;

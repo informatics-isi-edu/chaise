@@ -13,6 +13,8 @@ var uniquenessColumns = [];
 var textColumns = [];
 var display_columns = {};
 var back_references = {};
+var association_tables = {};
+var association_tables_names = [];
 
 var SCHEMA_METADATA = [];
 var DEFAULT_TABLE = null;
@@ -316,6 +318,7 @@ function getMetadata(table, successCallback) {
 }
 
 function getTableColumns(options) {
+	setAssociationTables(options['table']);
 	var metadata = options['metadata'];
 	var sortInfo = options['sortInfo'];
 	uniquenessColumns = [];
@@ -401,7 +404,13 @@ function getTableColumns(options) {
 			}
 			columns_definitions.push(col_def);
 			//b.remove();
-			ret.push(col['name']);
+			var display = col['name'];
+			if (col['annotations'] != null && col['annotations']['description'] != null && col['annotations']['description']['display'] != null) {
+				display = col['annotations']['description']['display'];
+			}
+			ret.push({'name': col['name'],
+				'display': display,
+				'table': options['table']});
 			sortInfo['fields'].push(col['name']);
 			sortInfo['directions'].push('desc');
 		});
@@ -412,16 +421,26 @@ function getTableColumns(options) {
 		});
 	}
 	
+	var table = options['table'];
+	options['box'][table] = {};
+	options['colsGroup'][table] = {};
+	options['facetClass'][table] = {};
+	options['chooseColumns'][table] = {};
+	options['narrow'][table] = {};
+
 	return {'facets': ret,
 		'sortInfo': sortInfo,
 		'colsDefs': columns_definitions};
 }
 
-function getPredicate(options, excludeColumn) {
-	var colsDescr = options['colsDescr'];
+function getPredicate(options, excludeColumn, table) {
+	if (table == null) {
+		table = options['table'];
+	}
+	var colsDescr = options['colsDescr'][table];
 	var filterAllText = options['filterAllText'];
 	var predicate = [];
-	$.each(options['box'], function(key, value) {
+	$.each(options['box'][table], function(key, value) {
 		if (key == excludeColumn) {
 			return true;
 		}
@@ -488,9 +507,10 @@ function successTotalCount(data, textStatus, jqXHR, param) {
 }
 
 function initModels(options, successCallback) {
-	var box = options['box'];
-	var colsDescr = options['colsDescr'];
-	var colsGroup = options['colsGroup'];
+	var table = options['table'];
+	var box = options['box'][table];
+	var colsDescr = options['colsDescr'][options['table']];
+	var colsGroup = options['colsGroup'][options['table']];
 	var topN = [];
 	$.each(options['score'], function(i,col) {
 		if (i < 10) {
@@ -501,8 +521,8 @@ function initModels(options, successCallback) {
 	});
 	var sentRequests = false;
 	$.each(colsDescr, function(col, value) {
-		options['chooseColumns'][col] = topN.contains(col);
-		options['facetClass'][col] = '';
+		options['chooseColumns'][table][col] = topN.contains(col);
+		options['facetClass'][table][col] = '';
 		box[col] = {};
 		box[col]['count'] = col;
 		box[col]['facetcount'] = 0;
@@ -529,8 +549,11 @@ function initModels(options, successCallback) {
 	}
 }
 
-function updateCount(options, successCallback) {
-	var box = options['box'];
+function updateCount(options, successCallback, table) {
+	if (table == null) {
+		table = options['table'];
+	}
+	var box = options['box'][table];
 	var urlPrefix = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/';
 	$.each(box, function(col, value) {
 		box[col]['ready'] = false;
@@ -545,6 +568,7 @@ function updateCount(options, successCallback) {
 		url += 'cnt:=cnt(' + encodeSafeURIComponent(col) + ')';
 		var param = {};
 		param['options'] = options;
+		param['table'] = table;
 		param['col'] = col;
 		param['alert'] = alertObject;
 		param['successCallback'] = successCallback;
@@ -553,7 +577,11 @@ function updateCount(options, successCallback) {
 }
 
 function successUpdateCount(data, textStatus, jqXHR, param) {
-	var box = param['options']['box'];
+	var table = param['table'];
+	if (table == null) {
+		table = param['options']['table'];
+	}
+	var box = param['options']['box'][table];
 	var col = param['col'];
 	box[col]['ready'] = true;
 	box[col]['count'] = col + ' (' + data[0]['cnt'] + ')';
@@ -573,9 +601,12 @@ function successUpdateCount(data, textStatus, jqXHR, param) {
 	}
 }
 
-function updateGroups(options, successCallback) {
+function updateGroups(options, successCallback, table) {
+	if (table == null) {
+		table = options['table'];
+	}
 	var alertObject = {'display': true};
-	$.each(options['colsGroup'], function(col, values) {
+	$.each(options['colsGroup'][table], function(col, values) {
 		var predicate = getPredicate(options, col);
 		var param = {};
 		param['alert'] = alertObject;
@@ -583,6 +614,7 @@ function updateGroups(options, successCallback) {
 		param['successCallback'] = successCallback;
 		param['options'] = options;
 		param['col'] = col;
+		param['table'] = table;
 		var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/';
 		if (predicate != null && predicate.length > 0) {
 			url += predicate.join('/') + '/';
@@ -593,11 +625,12 @@ function updateGroups(options, successCallback) {
 }
 
 function successUpdateGroups(data, textStatus, jqXHR, param) {
+	var table = param['table'];
 	var values = [];
 	var hideValues = [];
-	var colsGroup = param['options']['colsGroup'];
+	var colsGroup = param['options']['colsGroup'][table];
 	var col = param['col'];
-	var box = param['options']['box'];
+	var box = param['options']['box'][table];
 	colsGroup[col]['ready'] = true;
 	$.each(data, function(i, value) {
 		var key = value[col];
@@ -630,9 +663,12 @@ function successUpdateGroups(data, textStatus, jqXHR, param) {
 
 }
 
-function updateSliders(options, successCallback) {
+function updateSliders(options, successCallback, table) {
+	if (table == null) {
+		table = options['table'];
+	}
 	var alertObject = {'display': true};
-	$.each(options['box'], function(col, values) {
+	$.each(options['box'][table], function(col, values) {
 		if (values['floor'] != null) {
 			var predicate = getPredicate(options, values['left'] || values['right'] ? null : col);
 			var param = {};
@@ -640,6 +676,7 @@ function updateSliders(options, successCallback) {
 			param['successCallback'] = successCallback;
 			param['options'] = options;
 			param['col'] = col;
+			param['table'] = table;
 			var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/';
 			if (predicate != null && predicate.length > 0) {
 				url += predicate.join('/') + '/';
@@ -651,8 +688,9 @@ function updateSliders(options, successCallback) {
 }
 
 function successUpdateSliders(data, textStatus, jqXHR, param) {
+	var table = param['table'];
 	var col = param['col'];
-	var box = param['options']['box'];
+	var box = param['options']['box'][table];
 	box[col]['ready'] = true;
 	if (data[0]['min'] != null) {
 		if (!box[col]['left']) {
@@ -684,14 +722,6 @@ function successUpdateSliders(data, textStatus, jqXHR, param) {
 		param['successCallback']();
 	}
 
-}
-
-function expandSlider(narrow, colsDescr) {
-	$.each(colsDescr, function(col, value) {
-		if (psqlNumeric.contains(value['type'])) {
-			//narrow[col] = true;
-		}
-	});
 }
 
 function getColumnDescriptions(options, successCallback) {
@@ -916,26 +946,6 @@ function successGetPage(data, textStatus, jqXHR, param) {
 	param['successCallback'](data, param['totalItems'], param['options']['pagingOptions']['currentPage'], param['options']['pagingOptions']['pageSize']);
 }
 
-function getColumnDisplay(col, colsGroup) {
-	var suffix = '';
-	if (colsGroup[col] != null) {
-		var count = 0;
-		$.each(colsGroup[col], function(key, value) {
-			if (key != 'ready' && value > 0) {
-				count++;
-			}
-		});
-		suffix += ' (' + count + ')';
-	}
-	return col + suffix;
-}
-
-
-function getValueDisplay(col, value, colsGroup) {
-	var ret = value + ' (' + colsGroup[col][value] + ')';
-	return ret;
-}
-
 function getTables(tables, options, successCallback) {
 	var url = ERMREST_SCHEMA_HOME;
 	var param = {};
@@ -950,9 +960,10 @@ function successGetTables(data, textStatus, jqXHR, param) {
 	DEFAULT_TABLE = null;
 	var tables = param['tables'];
 	var rootTables = [];
+	association_tables_names = [];
 	$.each(data, function(i, table) {
 		var exclude = table['annotations'] != null && table['annotations']['comment'] != null && 
-			table['annotations']['comment'].contains('exclude');
+			(table['annotations']['comment'].contains('exclude') || table['annotations']['comment'].contains('association'));
 		var nested = table['annotations'] != null && table['annotations']['comment'] != null && 
 			table['annotations']['comment'].contains('nested');
 		if (!exclude) {
@@ -965,6 +976,10 @@ function successGetTables(data, textStatus, jqXHR, param) {
 			if (isDefault) {
 				DEFAULT_TABLE = table['table_name'];
 			}
+		}
+		if (table['annotations'] != null && table['annotations']['comment'] != null &&
+				table['annotations']['comment'].contains('association')) {
+			association_tables_names.push(table['table_name']);
 		}
 	});
 	if (DEFAULT_TABLE == null) {
@@ -1071,13 +1086,13 @@ function compareUniques(item1, item2) {
 
 function setFacetClass(options, facet, facetClass) {
 	var cssClass = '';
-	var colsDescr = options['colsDescr'];
-	var value = options['box'][facet];
-	if (psqlText.contains(colsDescr[facet]['type'])) {
+	var colsDescr = options['colsDescr'][facet['table']];
+	var value = options['box'][facet['table']][facet['name']];
+	if (psqlText.contains(colsDescr[facet['name']]['type'])) {
 		if (value) {
 			cssClass = 'selectedFacet';
 		}
-	} else if (colsDescr[facet]['type'] == 'enum') {
+	} else if (colsDescr[facet['name']]['type'] == 'enum') {
 		var checkValues = [];
 		$.each(value['values'], function(checkbox_key, checkbox_value) {
 			if (checkbox_value) {
@@ -1085,16 +1100,16 @@ function setFacetClass(options, facet, facetClass) {
 				return false;
 			}
 		});
-	} else if (colsDescr[facet]['type'] == 'select') {
+	} else if (colsDescr[facet['name']]['type'] == 'select') {
 		if (value['value'].length > 0) {
 			cssClass = 'selectedFacet';
 		}
-	} else if (psqlNumeric.contains(colsDescr[facet]['type'])) {
+	} else if (psqlNumeric.contains(colsDescr[facet['name']]['type'])) {
 		if (value['left'] || value['right']) {
 			cssClass = 'selectedFacet';
 		}
 	}
-	facetClass[facet] = cssClass;
+	facetClass[facet['table']][facet['name']] = cssClass;
 }
 
 function getSearchExpression(originalValue, delimiter) {
@@ -1130,8 +1145,8 @@ function errorGetTables(jqXHR, textStatus, errorThrown, url, param) {
 
 function hasCheckedValues(box, facet) {
 	var ret = false;
-	if (box[facet]['values'] != null) {
-		$.each(box[facet]['values'], function(i, value) {
+	if (box[facet['table']][facet['name']]['values'] != null) {
+		$.each(box[facet['table']][facet['name']]['values'], function(i, value) {
 			if (value) {
 				ret = true;
 				return false;
@@ -1189,7 +1204,9 @@ function setTreeReferences(root, table, rootNode) {
 	root.push(node);
 	if (back_references[table] != null) {
 		$.each(back_references[table], function(i, key) {
-			addTreeReference(key, nodes, level+1, node, rootNode);
+			if (!association_tables_names.contains(key)) {
+				addTreeReference(key, nodes, level+1, node, rootNode);
+			}
 		});
 	}
 }
@@ -1340,6 +1357,37 @@ function selectCollection(tree) {
 		if ($(label).html().replace(/^\s*/, "").replace(/\s*$/, "") == DEFAULT_TABLE) {
 			$(label).click();
 			return false;
+		}
+	});
+}
+
+function setAssociationTables(table_name) {
+	association_tables = {};
+	var index = 0;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (association_tables_names.contains(table['table_name'])) {
+			var fk_columns = [];
+			$.each(table['foreign_keys'], function(j, foreign_keys) {
+				$.each(foreign_keys['referenced_columns'], function(k, referenced_column) {
+					if (referenced_column['table_name'] == table_name) {
+						fk_columns.push(foreign_keys['foreign_key_columns'][k]['column_name']);
+					}
+				});
+			});
+			if (fk_columns.length > 0) {
+				var columns = [];
+				$.each(table['column_definitions'], function(k, column_definition) {
+					if (!fk_columns.contains(column_definition['name'])) {
+						columns.push(column_definition['name']);
+					}
+				});
+				if (columns.length > 0) {
+					association_tables[table['table_name']] = {
+							'columns': columns,
+							'alias': 'A' + (++index)
+					};
+				}
+			}
 		}
 	});
 }

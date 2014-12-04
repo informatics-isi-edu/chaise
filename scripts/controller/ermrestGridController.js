@@ -309,12 +309,6 @@ ermGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 	this.showFacetValue = function showFacetValue(facet, value) {
 		return ($scope.colsGroup[facet][value] == 0 && !$scope.box[facet]['values'][value]);
 	};
-	this.display = function display(facet) {
-		return getColumnDisplay(facet, $scope.colsGroup);
-	};
-	this.displayValue = function displayValue(facet, value) {
-		return getValueDisplay(facet, value, $scope.colsGroup);
-	};
 	this.show = function show(facet) {
 		return ($scope.narrow[facet] == null && $scope.ready && $scope.chooseColumns[facet] && 
 				($scope.box[facet]['facetcount'] > 0 || 
