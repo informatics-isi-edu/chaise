@@ -237,7 +237,6 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
-		$scope.colsDescr[$scope.table] = data;
 		initModels($scope.options, $scope.successInitModels);
 	};
 
@@ -268,14 +267,17 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		getErmrestData($scope.options, $scope.successGetErmrestData, $scope.successUpdateModels);
 	};
 
-	$scope.successGetMetadata = function successGetMetadata(data, textStatus, jqXHR) {
-		$scope.options['metadata'] = $scope.metadata = data;
-		var columns  = getTableColumns($scope.options);
+	$scope.successGetTableColumns = function successGetTableColumns(columns) {
 		$scope.options['facets'] = $scope.facets = columns['facets'];
 		$scope.options['colsDefs'] = $scope.colsDefs = columns['colsDefs'];
 		$scope.initSortOption();
 		$scope.$apply();
 		getTableColumnsUniques($scope.options, $scope.successGetTableColumnsUniques);
+	};
+	
+	$scope.successGetMetadata = function successGetMetadata(data, textStatus, jqXHR) {
+		$scope.options['metadata'] = $scope.metadata = data;
+		getTableColumns($scope.options, $scope.successGetTableColumns);
 	};
 	
 	$scope.successGetTables = function successGetTables() {
@@ -719,7 +721,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 				$scope.entityPredicates.length = data.level+1;
 				$scope.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
 				if (!newBranch) {
-					var predicate = getPredicate($scope.options, null, peviousTable);
+					var predicate = getPredicate($scope.options, null, null, peviousTable);
 					if (predicate.length > 0) {
 						$scope.entityPredicates[$scope.level] += '/' + predicate.join('/');
 					}
