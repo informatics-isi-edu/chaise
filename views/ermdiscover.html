@@ -19,7 +19,7 @@
 					<div id="datacontent">
 						<div>
 							<h1>{{table}}</h1>
-							<p ng-repeat-start="name in detailColumns"><b>{{name}}: </b>{{entryRow[name]}}</p>
+							<p ng-repeat-start="name in detailColumns"><b>{{name}}: </b>{{facetList.detailValue(table,name,entryRow[name])}}</p>
 							<div ng-repeat-end >
 								<div ng-if="facetList.isThumbnail(table,name)">
 									<a ng-href="{{entryRow[name]}}">
@@ -43,6 +43,9 @@
 								<div ng-if="facetList.isDownload(table,name)">
 									<button type="button" class="btn btn-default" ng-click="facetList.download($event, entryRow[name])">Download</button>
 									<br/><br/>
+								</div>
+								<div ng-if="facetList.isHTML(table,name)">
+									<p ng-bind-html="facetList.html(table,name,entryRow[name])"></p>
 								</div>
 							</div>
 						</div>
@@ -276,7 +279,7 @@
 									ng-init="values=facetList.displayColumns(row, 3, 3)">
 									<tr ng-repeat="value in values">
 										<td ng-repeat-start="col in value track by $index" ng-class="$parent.$first && $first ? 'key truncate' : 'key truncate'">{{col}}</td>
-										<td ng-repeat-end class="value truncate">{{row[col]}}</td>
+										<td ng-repeat-end class="value truncate">{{facetList.html(table,col,row[col])}}</td>
 									</tr>
 								</table>
 							</td>

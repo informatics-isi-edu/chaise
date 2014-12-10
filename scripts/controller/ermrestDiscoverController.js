@@ -632,9 +632,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.openZoomify = function openZoomify(event, url) {
 		window.open(url, '_blank');
 	};
-	this.html = function html(data) {
-		//return $sce.trustAsHtml(data);
-		return data;
+	this.html = function html(table, column, data) {
+		return hasAnnotation(table, column, 'html') ? $sce.trustAsHtml(data) : data;
 	};
 	this.if_hasText = function if_hasText() {
 		return $scope.textEntryRow.length > 0;
@@ -662,6 +661,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.isThumbnail = function isThumbnail(table, column) {
 		return hasAnnotation(table, column, 'thumbnail');
 	};
+	this.isHTML = function isHTML(table, column) {
+		return hasAnnotation(table, column, 'html');
+	};
 	this.is3dView = function is3dView(table, column) {
 		return hasAnnotation(table, column, '3dview');
 	};
@@ -670,6 +672,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.isDownload = function isDownload(table, column) {
 		return hasAnnotation(table, column, 'file');
+	};
+	this.detailValue = function detailValue(table, column, data) {
+		return hasAnnotation(table, column, 'html') ? '' : data;
 	};
 	this.getEntityResults = function getEntityResults(event, data) {
 		var peviousTable = $scope.table;
