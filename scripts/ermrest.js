@@ -1746,6 +1746,7 @@ function hasTableAnnotation(table_name, annotation) {
 }
 
 function getAssociationThumbnail(table_name, row) {
+	var ret = null;
 	var predicate = [];
 	if (PRIMARY_KEY != null) {
 		$.each(PRIMARY_KEY, function(i, key) {
@@ -1786,22 +1787,23 @@ function getAssociationThumbnail(table_name, row) {
 				return false;
 			}
 		});
+		var thumbnailPredicate = [];
+		thumbnailPredicate.push(ERMREST_DATA_HOME);
+		thumbnailPredicate.push('entity');
+		thumbnailPredicate.push(encodeSafeURIComponent(table_name));
+		thumbnailPredicate.push(predicate.join('&'));
+		thumbnailPredicate.push(encodeSafeURIComponent(imageTable));
+		thumbnailPredicate.push(encodeSafeURIComponent(fileTable));
+		var contentTypePredicate = [];
+		$.each(thumbnailFileTypes, function(i, fileType) {
+			contentTypePredicate.push(encodeSafeURIComponent(typeColumn) + '=' + encodeSafeURIComponent(fileType));
+		});
+		thumbnailPredicate.push(contentTypePredicate.join(';'));
+		var url = thumbnailPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
+		var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+		ret = data.length == 0 ? null : data[0][thumbnail];
 	}
-	var thumbnailPredicate = [];
-	thumbnailPredicate.push(ERMREST_DATA_HOME);
-	thumbnailPredicate.push('entity');
-	thumbnailPredicate.push(encodeSafeURIComponent(table_name));
-	thumbnailPredicate.push(predicate.join('&'));
-	thumbnailPredicate.push(encodeSafeURIComponent(imageTable));
-	thumbnailPredicate.push(encodeSafeURIComponent(fileTable));
-	var contentTypePredicate = [];
-	$.each(thumbnailFileTypes, function(i, fileType) {
-		contentTypePredicate.push(encodeSafeURIComponent(typeColumn) + '=' + encodeSafeURIComponent(fileType));
-	});
-	thumbnailPredicate.push(contentTypePredicate.join(';'));
-	var url = thumbnailPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
-	var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-	return data.length == 0 ? null : data[0][thumbnail];
+	return ret;
 }
 
 function getTablesBackReferences(table_name) {
