@@ -61,6 +61,14 @@
 										</a>
 										<br/><br/>
 									</div>
+									<div ng-init="thumbnail=facetList.itemAssociateThumbnail(detail,value,name)">
+										<div ng-if="thumbnail!=null">
+											<a ng-href="{{thumbnail}}">
+												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
+											</a>
+											<br/><br/>
+										</div>
+									</div>
 									<div ng-if="facetList.is3dView(detail,name)" ng-init="entry3Dview=facetList.init3Dview(val)">
 										<iframe title="3dView" width="300" height="300" ng-src="{{entry3Dview}}">
 											<p>Your browser does not support iframes.</p>
