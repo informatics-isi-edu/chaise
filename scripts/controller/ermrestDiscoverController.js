@@ -484,7 +484,11 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return $scope.ready;
 	};
 	this.itemThumbnail = function itemThumbnail(row) {
-		return getEntryThumbnail(row);
+		var ret = getEntryThumbnail(row);
+		if (ret == null) {
+			ret = getAssociationThumbnail($scope.table, row);
+		}
+		return ret;
 	};
 	this.itemTitle = function itemTitle(row) {
 		return getEntryTitle(row);
@@ -639,7 +643,11 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return $scope.textEntryRow.length > 0;
 	};
 	this.if_hasThumbnail = function if_hasThumbnail() {
-		return display_columns['thumbnail'].length > 0;
+		var ret = display_columns['thumbnail'].length > 0;
+		if (!ret) {
+			ret = hasAssociationThumnbnail($scope.table);
+		}
+		return ret;
 	};
 	this.expandCollapse = function expandCollapse(data, show) {
 		data.expand = !data.expand;

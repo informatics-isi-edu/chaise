@@ -19,6 +19,8 @@ var association_tables_names = [];
 var SCHEMA_METADATA = [];
 var DEFAULT_TABLE = null;
 
+var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
+
 var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4',
 		'smallint' ];
 
@@ -1730,3 +1732,106 @@ function getColumnDisplayName(column) {
 	});
 	return parts.join(' ');
 }
+
+function hasTableAnnotation(table_name, annotation) {
+	var ret = false;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name'] && table['annotations'] != null && 
+				table['annotations']['comment'] != null && table['annotations']['comment'].contains(annotation)) {
+			ret = true;
+			return false;
+		}
+	});
+	return ret;
+}
+
+function getAssociationThumbnail(table_name, row) {
+	var predicate = [];
+	if (PRIMARY_KEY != null) {
+		$.each(PRIMARY_KEY, function(i, key) {
+			predicate.push(encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(row[key]));
+		});
+	}
+	var imageTable = null;
+	$.each(back_references[table_name], function(i, table) {
+		if (hasTableAnnotation(table, 'image')) {
+			imageTable = table;
+			return false;
+		}
+	});
+	var fileTable = null;
+	if (imageTable != null) {
+		fileTable = getTablesBackReferences(imageTable);
+	}
+	var thumbnail = null;
+	var sortColumn = null;
+	var typeColumn = null;
+	if (fileTable != null) {
+		$.each(SCHEMA_METADATA, function(i, table) {
+			if (fileTable == table['table_name']) {
+				var column_definitions = table['column_definitions'];
+				$.each(column_definitions, function(j, col) {
+					if (col['annotations'] != null && col['annotations']['comment'] != null) {
+						if (hasAnnotation(fileTable, col['name'], 'thumbnail')) {
+							thumbnail = col['name'];
+						}
+						if (hasAnnotation(fileTable, col['name'], 'orderby')) {
+							sortColumn = col['name'];
+						}
+						if (hasAnnotation(fileTable, col['name'], 'type')) {
+							typeColumn = col['name'];
+						}
+					}
+				});
+				return false;
+			}
+		});
+	}
+	var thumbnailPredicate = [];
+	thumbnailPredicate.push(ERMREST_DATA_HOME);
+	thumbnailPredicate.push('entity');
+	thumbnailPredicate.push(encodeSafeURIComponent(table_name));
+	thumbnailPredicate.push(predicate.join('&'));
+	thumbnailPredicate.push(encodeSafeURIComponent(imageTable));
+	thumbnailPredicate.push(encodeSafeURIComponent(fileTable));
+	var contentTypePredicate = [];
+	$.each(thumbnailFileTypes, function(i, fileType) {
+		contentTypePredicate.push(encodeSafeURIComponent(typeColumn) + '=' + encodeSafeURIComponent(fileType));
+	});
+	thumbnailPredicate.push(contentTypePredicate.join(';'));
+	var url = thumbnailPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
+	var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+	return data.length == 0 ? null : data[0][thumbnail];
+}
+
+function getTablesBackReferences(table_name) {
+	var ret = null;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table['table_name'] == table_name) {
+			$.each(table['foreign_keys'], function(j, fk) {
+				$.each(fk['referenced_columns'], function(k, ref_column) {
+					if (ref_column['table_name'] != table_name) {
+						ret = ref_column['table_name'];
+						return false;
+					}
+				});
+			});
+			if (ret != null) {
+				return false;
+			}
+		}
+	});
+	return ret;
+}
+
+function hasAssociationThumnbnail(table_name) {
+	var ret = false;
+	$.each(back_references[table_name], function(i, table) {
+		if (hasTableAnnotation(table, 'image')) {
+			ret = true;
+			return false;
+		}
+	});
+	return ret;
+}
+
