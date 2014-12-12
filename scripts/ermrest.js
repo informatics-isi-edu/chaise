@@ -18,6 +18,7 @@ var association_tables_names = [];
 
 var SCHEMA_METADATA = [];
 var DEFAULT_TABLE = null;
+var COLUMNS_ALIAS = {};
 
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
 
@@ -1076,6 +1077,7 @@ function successGetTables(data, textStatus, jqXHR, param) {
 	if (DEFAULT_TABLE == null) {
 		DEFAULT_TABLE = rootTables[0];
 	}
+	setColumnsAlias();
 	setTablesBackReferences(tables, data);
 	setCollectionsReferences(param['options']['tree'], rootTables);
 	initApplicationHeader(rootTables);
@@ -1902,5 +1904,22 @@ function getDenormalizedThumbnail(table_name, row, column_name) {
 		}
 	}
 	return ret;
+}
+
+function setColumnsAlias() {
+	COLUMNS_ALIAS = {};
+	$.each(SCHEMA_METADATA, function(i, table) {
+		var values = {};
+		var column_definitions = table['column_definitions'];
+		$.each(column_definitions, function(j, col) {
+			var display = getColumnDisplayName(col['name']);
+			if (col['annotations'] != null && col['annotations']['description'] != null && 
+					col['annotations']['description']['display'] != null) {
+				display = col['annotations']['description']['display'];
+			}
+			values[col['name']] = display;
+		});
+		COLUMNS_ALIAS[table['table_name']] = values;
+	});
 }
 
