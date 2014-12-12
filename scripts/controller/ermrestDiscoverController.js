@@ -331,6 +331,14 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.filterTextTimeout = $timeout(function(){$scope.predicate(facet,keyCode);}, 1000); // delay 1000 ms
 	};
 
+	this.isAttribute = function isAttribute(table, column) {
+		return !hasAnnotation(table, column, 'dataset');
+	};
+	
+	this.isNested = function isNested(table) {
+		return !association_tables_names.contains(table);
+	};
+	
 	$scope.predicate = function predicate(facet,keyCode) {
 		if ($scope.box[facet['table']][facet['name']]['value'] == '') {
 			$scope.facetClass[facet['table']][facet['name']] = '';
