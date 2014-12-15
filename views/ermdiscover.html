@@ -51,7 +51,7 @@
 						</div>
 						<div ng-repeat="(detail, values) in denormalizedView">
 							<div ng-repeat="value in values">
-								<hr>
+								<hr ng-show="facetList.isNested(detail)">
 								<h1 ng-show="facetList.isNested(detail)">{{detail}}</h1>
 								<p ng-repeat-start="(name, val) in value" ng-show="facetList.isAttribute(detail,name)"><b>{{facetList.display(detail,name)}}: </b>{{val}}</p>
 								<div ng-repeat-end >
