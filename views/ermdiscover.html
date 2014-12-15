@@ -78,6 +78,19 @@
 										</a>
 										<br/><br/>
 									</div>
+									<div ng-init="viewer3d=facetList.itemAssociate3dView(detail,value,name)">
+										<div ng-if="viewer3d!=null">
+											<div ng-init="entry3Dview=facetList.init3Dview(viewer3d)">
+												<iframe title="3dView" width="300" height="300" ng-src="{{entry3Dview}}">
+													<p>Your browser does not support iframes.</p>
+												</iframe>
+												<a ng-href="{{viewer3d}}">
+													Enlarge
+												</a>
+												<br/><br/>
+											</div>
+										</div>
+									</div>
 									<div ng-if="facetList.isZoomify(detail,name)">
 										<button type="button" class="btn btn-default" ng-click="facetList.openZoomify($event, val)">Open</button>
 										<br/><br/>

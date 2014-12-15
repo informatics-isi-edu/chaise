@@ -21,6 +21,7 @@ var DEFAULT_TABLE = null;
 var COLUMNS_ALIAS = {};
 
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
+var viewer3dFileTypes = ['image/x.nifti'];
 
 var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4',
 		'smallint' ];
@@ -1921,5 +1922,90 @@ function setColumnsAlias() {
 		});
 		COLUMNS_ALIAS[table['table_name']] = values;
 	});
+}
+
+function getDenormalized3dView(table_name, row, column_name) {
+	var ret = null;
+	if (hasTableAnnotation(table_name, 'viewer')) {
+		var dataset_id = null;
+		var file_id = null;
+		$.each(SCHEMA_METADATA, function(i, table) {
+			if (table_name == table['table_name']) {
+				var column_definitions = table['column_definitions'];
+				$.each(column_definitions, function(j, col) {
+					if (col['annotations'] != null && col['annotations']['comment'] != null) {
+						if (hasAnnotation(table_name, col['name'], 'dataset')) {
+							dataset_id = col['name'];
+						}
+						if (hasAnnotation(table_name, col['name'], 'viewer')) {
+							file_id = col['name'];
+						}
+					}
+				});
+				return false;
+			}
+		});
+		if (file_id != null && column_name != dataset_id) {
+			var imageTable = table_name;
+			var fileTable = getTablesBackReferences(imageTable);
+			var viewer = null;
+			var sortColumn = null;
+			var typeColumn = null;
+			if (fileTable != null) {
+				$.each(SCHEMA_METADATA, function(i, table) {
+					if (fileTable == table['table_name']) {
+						var column_definitions = table['column_definitions'];
+						$.each(column_definitions, function(j, col) {
+							if (col['annotations'] != null && col['annotations']['comment'] != null) {
+								if (hasAnnotation(fileTable, col['name'], 'viewer')) {
+									viewer = col['name'];
+								}
+								if (hasAnnotation(fileTable, col['name'], 'orderby')) {
+									sortColumn = col['name'];
+								}
+								if (hasAnnotation(fileTable, col['name'], 'type')) {
+									typeColumn = col['name'];
+								}
+							}
+						});
+						return false;
+					}
+				});
+			}
+			var predicate = [];
+			predicate.push(encodeSafeURIComponent(dataset_id) + '=' + encodeSafeURIComponent(row[dataset_id]));
+			predicate.push(encodeSafeURIComponent(file_id) + '=' + encodeSafeURIComponent(row[file_id]));
+			var contentTypePredicate = [];
+			$.each(viewer3dFileTypes, function(i, fileType) {
+				contentTypePredicate.push(encodeSafeURIComponent(typeColumn) + '=' + encodeSafeURIComponent(fileType));
+			});
+			var viewerPredicate = [];
+			viewerPredicate.push(ERMREST_DATA_HOME);
+			viewerPredicate.push('entity');
+			viewerPredicate.push(encodeSafeURIComponent(imageTable));
+			viewerPredicate.push(predicate.join('&'));
+			viewerPredicate.push(encodeSafeURIComponent(fileTable));
+			viewerPredicate.push(contentTypePredicate.join(';'));
+			var url = viewerPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
+			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+			if (data.length == 1) {
+				ret = getTableAnnotation(fileTable, 'description', 'viewer_url');
+				ret += '?url=' + data[0][viewer];
+			}
+		}
+	}
+	return ret;
+}
+
+function getTableAnnotation(table_name, annotation, key) {
+	var ret = null;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name'] && table['annotations'] != null && 
+				table['annotations'][annotation] != null) {
+			ret = table['annotations'][annotation][key];
+			return false;
+		}
+	});
+	return ret;
 }
 

@@ -501,6 +501,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.itemAssociateThumbnail = function itemAssociateThumbnail(table, row, column) {
 		return getDenormalizedThumbnail(table, row, column);
 	};
+	this.itemAssociate3dView = function itemAssociate3dView(table, row, column) {
+		return getDenormalized3dView(table, row, column);
+	};
 	this.itemTitle = function itemTitle(row) {
 		return getEntryTitle(row);
 	};
