@@ -99,6 +99,12 @@
 										<button type="button" class="btn btn-default" ng-click="facetList.download($event, val)">Download</button>
 										<br/><br/>
 									</div>
+									<div ng-init="file=facetList.itemAssociateFile(detail,value,name)">
+										<div ng-if="file!=null">
+											<button type="button" class="btn btn-default" ng-click="facetList.download($event, file)">Download</button>
+										<br/><br/>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
