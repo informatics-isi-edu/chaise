@@ -2079,3 +2079,70 @@ function getDenormalizedFile(table_name, row, column_name) {
 	return ret;
 }
 
+function getItemDenormalizedValue(table_name, row, column_name, val) {
+	var ret = val;
+	if (hasTableAnnotation(table_name, 'download') || hasTableAnnotation(table_name, 'image')) {
+		var dataset_id = null;
+		var file_id = null;
+		$.each(SCHEMA_METADATA, function(i, table) {
+			if (table_name == table['table_name']) {
+				var column_definitions = table['column_definitions'];
+				$.each(column_definitions, function(j, col) {
+					if (col['annotations'] != null && col['annotations']['comment'] != null) {
+						if (hasAnnotation(table_name, col['name'], 'dataset')) {
+							dataset_id = col['name'];
+						}
+						if (hasAnnotation(table_name, col['name'], 'download') || hasAnnotation(table_name, col['name'], 'image')) {
+							file_id = col['name'];
+						}
+					}
+				});
+				return false;
+			}
+		});
+		if (file_id != null && column_name != dataset_id) {
+			var downloadTable = table_name;
+			var fileTable = getTablesBackReferences(downloadTable);
+			var download = null;
+			var sortColumn = null;
+			var nameColumn = null;
+			if (fileTable != null) {
+				$.each(SCHEMA_METADATA, function(i, table) {
+					if (fileTable == table['table_name']) {
+						var column_definitions = table['column_definitions'];
+						$.each(column_definitions, function(j, col) {
+							if (col['annotations'] != null && col['annotations']['comment'] != null) {
+								if (hasAnnotation(fileTable, col['name'], 'download')) {
+									download = col['name'];
+								}
+								if (hasAnnotation(fileTable, col['name'], 'orderby')) {
+									sortColumn = col['name'];
+								}
+								if (hasAnnotation(fileTable, col['name'], 'name')) {
+									nameColumn = col['name'];
+								}
+							}
+						});
+						return false;
+					}
+				});
+			}
+			var predicate = [];
+			predicate.push(encodeSafeURIComponent(dataset_id) + '=' + encodeSafeURIComponent(row[dataset_id]));
+			predicate.push(encodeSafeURIComponent(file_id) + '=' + encodeSafeURIComponent(row[file_id]));
+			var downloadPredicate = [];
+			downloadPredicate.push(ERMREST_DATA_HOME);
+			downloadPredicate.push('entity');
+			downloadPredicate.push(encodeSafeURIComponent(downloadTable));
+			downloadPredicate.push(predicate.join('&'));
+			downloadPredicate.push(encodeSafeURIComponent(fileTable));
+			var url = downloadPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
+			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+			if (data.length == 1) {
+				ret = data[0][nameColumn];
+			}
+		}
+	}
+	return ret;
+}
+

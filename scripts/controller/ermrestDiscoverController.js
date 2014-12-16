@@ -507,6 +507,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.itemAssociateFile = function itemAssociateFile(table, row, column) {
 		return getDenormalizedFile(table, row, column);
 	};
+	this.itemDenormalizedValue = function itemDenormalizedValue(table, row, column, val) {
+		return getItemDenormalizedValue(table, row, column, val);
+	};
 	this.itemTitle = function itemTitle(row) {
 		return getEntryTitle(row);
 	};

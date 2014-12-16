@@ -53,7 +53,7 @@
 							<div ng-repeat="value in values">
 								<hr ng-show="facetList.isNested(detail)">
 								<h1 ng-show="facetList.isNested(detail)">{{detail}}</h1>
-								<p ng-repeat-start="(name, val) in value" ng-show="facetList.isAttribute(detail,name)"><b>{{facetList.display(detail,name)}}: </b>{{val}}</p>
+								<p ng-repeat-start="(name, val) in value" ng-show="facetList.isAttribute(detail,name)"><b>{{facetList.display(detail,name)}}: </b>{{facetList.itemDenormalizedValue(detail,value,name,val)}}</p>
 								<div ng-repeat-end >
 									<div ng-if="facetList.isThumbnail(detail,name)">
 										<a ng-href="{{val}}">
