@@ -305,8 +305,10 @@
 								<table class="resultsdata table table-condensed table-striped"
 									ng-init="values=facetList.displayColumns(row, 3, 3)">
 									<tr ng-repeat="value in values">
-										<td ng-repeat-start="col in value track by $index" ng-class="$parent.$first && $first ? 'key truncate' : 'key truncate'">{{facetList.display(table,col)}}</td>
-										<td ng-repeat-end class="value truncate">{{facetList.html(table,col,row[col])}}</td>
+										<td ng-repeat="col in value track by $index" class="value truncate">
+											<span ng-show="facetList.display(table,col)!=null" ng-class="$parent.$first && $first ? 'key truncate' : 'key truncate'">{{facetList.display(table,col)}}: </span>
+											{{facetList.html(table,col,row[col])}}
+										</td>
 									</tr>
 								</table>
 							</td>
