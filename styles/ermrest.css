@@ -193,3 +193,22 @@ div#attrsort label, div#attrsort select, div#attrsort a {
 iframe {
     display: block;
 }
+
+#attrsort {
+     margin-top: 15px;
+}
+
+#sort {
+     width: 170px;
+}
+
+#searchsort {
+     font-size: 1.2em;
+     font-weight: bold;
+     padding-left: 5px;
+     text-transform: capitalize;
+}
+
+label.highlighted {
+     background-color: #ffffcc;
+}
