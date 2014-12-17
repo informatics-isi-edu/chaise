@@ -560,12 +560,17 @@ function initModels(options, successCallback) {
 			sentRequests = true;
 		}
 	});
+	var topCount = 0;
 	$.each(association_tables_names, function(i, table) {
 		var box = options['box'][table];
 		var colsDescr = options['colsDescr'][table];
 		var colsGroup = options['colsGroup'][table];
 		$.each(colsDescr, function(col, value) {
-			options['chooseColumns'][table][col] = false;
+			var hasTop = hasAnnotation(table, col, 'top');
+			options['chooseColumns'][table][col] = hasTop;
+			if (hasTop) {
+				topCount++;
+			}
 			options['facetClass'][table][col] = '';
 			box[col] = {};
 			box[col]['count'] = col;
@@ -586,6 +591,13 @@ function initModels(options, successCallback) {
 			}
 		});
 	});
+	var index = topN.length - topCount;
+	var table = options['table'];
+	$.each(topN, function(i, col) {
+		if (i >= index) {
+			options['chooseColumns'][table][topN[i]] = false;
+		}
+	})
 	
 	if (!sentRequests) {
 		successCallback();
