@@ -292,12 +292,12 @@
 					<table ng-init="thumbnail=facetList.itemThumbnail(row)">
 						<tr>
 							<td ng-show="thumbnail!=null">
-								<a ng-href="{{thumbnail}}">
+								<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetList.clicker($event, row, 3);">
 									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 								</a>
 							</td>
 							<td ng-show="facetList.if_hasThumbnail() && thumbnail==null">
-								<a ng-href="images/blank.jpeg">
+								<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetList.clicker($event, row, 3);">
 									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="images/blank.jpeg">
 								</a>
 							</td>
