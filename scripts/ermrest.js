@@ -591,7 +591,7 @@ function initModels(options, successCallback) {
 			}
 		});
 	});
-	var index = topN.length - topCount;
+	var index = 10 - topCount;
 	var table = options['table'];
 	$.each(topN, function(i, col) {
 		if (i >= index) {
