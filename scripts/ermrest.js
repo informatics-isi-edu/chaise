@@ -1330,6 +1330,7 @@ function setCollectionsReferences(tree, tables) {
 	var nodes = [];
 	var level = -1;
 	var node = {'name': 'Collections',
+                        'display': 'Collections',
 			'parent': null,
 			'root': null,
 			'level': level,
@@ -1347,6 +1348,7 @@ function setTreeReferences(root, table, rootNode) {
 	var nodes = [];
 	var level = 0;
 	var node = {'name': table,
+                        'display': getTableDisplayName(table),
 			'parent': null,
 			'root': rootNode,
 			'level': level,
@@ -1367,6 +1369,7 @@ function setTreeReferences(root, table, rootNode) {
 function addTreeReference(table, nodes, level, parent, rootNode) {
 	var subNodes = [];
 	var node = {'name': table,
+                        'display': getTableDisplayName(table),
 			'parent': parent,
 			'root': rootNode,
 			'level': level,
@@ -1522,7 +1525,7 @@ function hasAnnotation(table_name, column_name, annotation) {
 
 function selectCollection(tree) {
 	$.each($('label', $('#treeDiv')), function(i, label) {
-		if ($(label).html().replace(/^\s*/, "").replace(/\s*$/, "") == DEFAULT_TABLE) {
+		if ($(label).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE)) {
 			$(label).click();
 			return false;
 		}
@@ -2246,4 +2249,17 @@ function getDatasetFiles(root_table, row, table_annotation, tables) {
                 ret = data;
 	}
 	return ret;
+}
+
+function getTableDisplayName(table_name) {
+    var ret = table_name;
+    $.each(SCHEMA_METADATA, function(i, table) {
+        if (table_name == table['table_name']) {
+            if (table['annotations']['description'] != null && table['annotations']['description']['display'] != null) {
+                ret = table['annotations']['description']['display'];
+            }
+            return false;
+        }
+    });
+    return ret;
 }

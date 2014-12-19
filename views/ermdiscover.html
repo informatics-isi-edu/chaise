@@ -18,7 +18,7 @@
 				<div class="modal-body">
 					<div id="datacontent">
 						<div>
-							<h1>{{table}}</h1>
+							<h1>{{facetList.displayTable(table)}}</h1>
 							<p ng-repeat-start="name in detailColumns"><b>{{facetList.display(table,name)}}: </b>{{facetList.detailValue(table,name,entryRow[name])}}</p>
 							<div ng-repeat-end >
 								<div ng-if="facetList.isThumbnail(table,name)">
@@ -177,7 +177,7 @@
 						<script type="text/ng-template" id="tree_item_renderer.html">
     						<label ng-show="data.expand && data.nodes.length > 0" ng-click="facetList.expandCollapse(data, true)">+</label>
 							<label ng-show="!data.expand && data.nodes.length > 0" ng-click="facetList.expandCollapse(data, false)">-</label>
-							<label ng-click="facetList.getEntityResults($event, data)">{{data.name}} {{facetList.displayTreeCount(data)}}</label>
+							<label ng-click="facetList.getEntityResults($event, data)">{{data.display}} {{facetList.displayTreeCount(data)}}</label>
     						<ul ng-show="data.show" class="entity">
         						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
     						</ul>

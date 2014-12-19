@@ -718,6 +718,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.display = function display(table, column) {
 		return COLUMNS_ALIAS[table][column];
 	};
+	this.displayTable = function displayTable(table) {
+		return getTableDisplayName(table);
+	};
 	this.getEntityResults = function getEntityResults(event, data) {
 		var peviousTable = $scope.table;
 		var node = $('label.highlighted', $('#treeDiv'));
