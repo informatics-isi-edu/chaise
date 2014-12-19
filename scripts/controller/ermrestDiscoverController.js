@@ -25,7 +25,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	if ($location.search()['schema'] != null) {
 		SCHEMA = $location.search()['schema'];
 	} else if (SCHEMA == null) {
-		SCHEMA = 'facebase';
+		SCHEMA = 'legacy';
 	}
 	if ($location.search()['catalog'] != null) {
 		CATALOG = $location.search()['catalog'];
