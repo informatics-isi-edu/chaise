@@ -282,6 +282,8 @@ function getFilesLayout(datasetFiles) {
 function getViewer3d(datasetFiles) {
         var data = datasetFiles['image3dFiles'];
         var uri = datasetFiles['uri'];
+        var preview = datasetFiles['preview'];
+        var preview_url = datasetFiles['preview_url'];
         var name = datasetFiles['name'];
         var size = datasetFiles['size'];
         var viewer_url = datasetFiles['viewer_url'];
@@ -291,6 +293,7 @@ function getViewer3d(datasetFiles) {
 		tr.push(viewer_url + '?url=' + file[uri]);
 		tr.push(file[name]);
 		tr.push(file[size]);
+		tr.push(preview_url + '?url=' + file[preview]);
 		ret.push(tr);
 	});
 	return ret;

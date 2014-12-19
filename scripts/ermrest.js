@@ -2193,11 +2193,14 @@ function getDenormalizedFiles(root_table, row, result) {
             downloadFiles.push(data);
         }
     });
+    var preview = getColumnName(tables['download'], 'preview');
     var uri = getColumnName(tables['download'], 'download');
     var filename = getColumnName(tables['download'], 'name');
     var bytes = getColumnName(tables['download'], 'orderby');
     result['viewer_url'] = getTableAnnotation(tables['download'], 'description', 'viewer_url');
+    result['preview_url'] = getTableAnnotation(tables['download'], 'description', 'preview_url');
     result['uri'] = uri;
+    result['preview'] = preview;
     result['name'] = filename;
     result['size'] = bytes;
     result['image3dFiles'] = image3dFiles;
