@@ -62,7 +62,7 @@
 										<br/><br/>
 									</div>
 									<div ng-init="thumbnail=facetList.itemAssociateThumbnail(detail,value,name)">
-										<div ng-if="thumbnail!=null">
+										<div ng-if="thumbnail!=null&&tiles.length==0">
 											<a ng-href="{{thumbnail}}">
 												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 											</a>
@@ -79,7 +79,7 @@
 										<br/><br/>
 									</div>
 									<div ng-init="viewer3d=facetList.itemAssociate3dView(detail,value,name)">
-										<div ng-if="viewer3d!=null">
+										<div ng-if="viewer3d!=null&&viewer3dFile.length==0">
 											<div ng-init="entry3Dview=facetList.init3Dview(viewer3d)">
 												<iframe title="3dView" width="300" height="300" ng-src="{{entry3Dview}}">
 													<p>Your browser does not support iframes.</p>
@@ -100,7 +100,7 @@
 										<br/><br/>
 									</div>
 									<div ng-init="file=facetList.itemAssociateFile(detail,value,name)">
-										<div ng-if="file!=null">
+										<div ng-if="file!=null&&files.length==0">
 											<button type="button" class="btn btn-default" ng-click="facetList.download($event, file)">Download</button>
 										<br/><br/>
 										</div>
@@ -108,7 +108,47 @@
 								</div>
 							</div>
 						</div>
-					</div>
+                                                <h3 ng-show="tiles.length>0">Images:</h3>
+                                                <table>
+                                                    <tr ng-repeat="values in tiles">
+                                                        <td ng-repeat="tile in values" class="tiles">
+                                                            <a ng-href="{{tile}}">
+                                                                    <img title="Thumbnail" alt="" width="90" height="90" ng-src="{{tile}}">
+                                                            </a>
+                                                        </td>
+
+                                                     </tr>
+                                                </table>
+                                                <h3 ng-show="files.length>0 || viewer3dFile.length>0">Files:</h3>
+                                                <table class="files">
+                                                    <tr>
+                                                        <th class="files">Preview</th>
+                                                        <th class="files">Name</th>
+                                                        <th class="files">Size</th>
+                                                    </tr>
+                                                    <tr ng-repeat="values in viewer3dFile">
+                                                        <td class="files" ng-init="entry3Dview=facetList.init3Dview(values[0])">
+                                                            <iframe title="3dView" width="300" height="300" ng-src="{{entry3Dview}}">
+								<p>Your browser does not support iframes.</p>
+                                                            </iframe>
+                                                        </td>
+                                                        <td class="files">
+                                                            <a ng-href="{{values[0]}}">
+                                                                    {{values[1]}}
+                                                            </a>
+                                                        </td>
+                                                        <td class="files">{{values[2]}}</td>
+                                                     </tr>
+                                                    <tr ng-repeat="values in files">
+                                                        <td class="files">{{values[0]}}</td>
+                                                        <td class="files">
+                                                            <a ng-href="{{values[2]}}">{{values[1]}}
+                                                            </a>
+                                                        </td>
+                                                        <td class="files">{{values[3]}}</td>
+                                                     </tr>
+                                                </table>
+ 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 					</div>

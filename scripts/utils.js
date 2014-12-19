@@ -239,3 +239,60 @@ function setActivePage(currentPage, pageMap) {
 	
 }
 
+// "m" is the number of tiles per row
+function getTilesLayout(datasetFiles, m) {
+        var data = datasetFiles['thumbnailsFiles'];
+        var col_name = datasetFiles['uri'];
+	var ret = [];
+	var tr = [];
+	$.each(data, function(i, tile) {
+		tr.push(tile[col_name]);
+		if (tr.length == m) {
+			ret.push(tr);
+			tr = [];
+		}
+	});
+	if (tr.length > 0) {
+		for (var i=0; i < m; i++) {
+			tr.push('');
+		}
+		tr.length = m;
+		ret.push(tr);
+	}
+	return ret;
+}
+
+function getFilesLayout(datasetFiles) {
+        var data = datasetFiles['downloadFiles'];
+        var uri = datasetFiles['uri'];
+        var name = datasetFiles['name'];
+        var size = datasetFiles['size'];
+	var ret = [];
+	$.each(data, function(i, file) {
+                var tr = [];
+		tr.push('');
+		tr.push(file[name]);
+		tr.push(file[uri]);
+		tr.push(file[size]);
+		ret.push(tr);
+	});
+	return ret;
+}
+
+function getViewer3d(datasetFiles) {
+        var data = datasetFiles['image3dFiles'];
+        var uri = datasetFiles['uri'];
+        var name = datasetFiles['name'];
+        var size = datasetFiles['size'];
+        var viewer_url = datasetFiles['viewer_url'];
+	var ret = [];
+	$.each(data, function(i, file) {
+                var tr = [];
+		tr.push(viewer_url + '?url=' + file[uri]);
+		tr.push(file[name]);
+		tr.push(file[size]);
+		ret.push(tr);
+	});
+	return ret;
+}
+

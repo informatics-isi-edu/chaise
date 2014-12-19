@@ -2158,3 +2158,92 @@ function getItemDenormalizedValue(table_name, row, column_name, val) {
 	return ret;
 }
 
+function getColumnName(table_name, column_annotation) {
+	var ret = null;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name']) {
+                    var column_definitions = table['column_definitions'];
+                    $.each(column_definitions, function(i, col) {
+                        if (col['annotations'] != null && 
+                                        col['annotations']['comment'] != null && col['annotations']['comment'].contains(column_annotation)) {
+                                ret = col['name'];
+                                return false;
+                        }
+                    });
+                    return false;
+                }
+	});
+	return ret;
+}
+
+function getDenormalizedFiles(root_table, row, result) {
+    emptyJSON(result);
+    var tables = {};
+    var image3dFiles = [];
+    var downloadFiles = [];
+    var ret = getDatasetFiles(root_table, row, 'download', tables);
+    var col_name = getColumnName(tables['download'], 'type');
+    $.each(ret, function(i, data) {
+        if (data[col_name] == 'image/x.nifti') {
+            image3dFiles.push(data);
+        } else {
+            downloadFiles.push(data);
+        }
+    });
+    var uri = getColumnName(tables['download'], 'download');
+    var filename = getColumnName(tables['download'], 'name');
+    var bytes = getColumnName(tables['download'], 'orderby');
+    result['viewer_url'] = getTableAnnotation(tables['download'], 'description', 'viewer_url');
+    result['uri'] = uri;
+    result['name'] = filename;
+    result['size'] = bytes;
+    result['image3dFiles'] = image3dFiles;
+    result['downloadFiles'] = downloadFiles;
+    result['thumbnailsFiles'] = getDatasetFiles(root_table, row, 'image', tables);
+}
+
+function getDatasetFiles(root_table, row, table_annotation, tables) {
+	var ret = null;
+	var table_name = null;
+	if (back_references[root_table] != null) {
+		$.each(back_references[root_table], function(i, key) {
+                    if (hasTableAnnotation(key, table_annotation)) {
+                            table_name = key;
+                            return false;
+                    }
+		});
+	}
+	if (table_name != null) {
+		var root_id = null;
+		var dataset_id = null;
+		var fileTable = null;
+		$.each(SCHEMA_METADATA, function(i, table) {
+			if (table_name == table['table_name']) {
+				$.each(table['foreign_keys'], function(j, fk) {
+                                    $.each(fk['referenced_columns'], function(k, fkcol) {
+                                        if (fkcol['table_name'] == root_table) {
+                                            root_id = fkcol['column_name'];
+                                            dataset_id = fk['foreign_key_columns'][k]['column_name'];
+                                        } else {
+                                            fileTable = fkcol['table_name'];
+                                            tables[table_annotation] = fileTable;
+                                        }
+                                    });
+				});
+				return false;
+			}
+		});
+                var predicate = [];
+                predicate.push(encodeSafeURIComponent(dataset_id) + '=' + encodeSafeURIComponent(row[root_id]));
+                var downloadPredicate = [];
+                downloadPredicate.push(ERMREST_DATA_HOME);
+                downloadPredicate.push('entity');
+                downloadPredicate.push(encodeSafeURIComponent(table_name));
+                downloadPredicate.push(predicate.join('&'));
+                downloadPredicate.push(encodeSafeURIComponent(fileTable));
+                var url = downloadPredicate.join('/');
+                var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+                ret = data;
+	}
+	return ret;
+}

@@ -212,3 +212,13 @@ iframe {
 label.highlighted {
      background-color: #ffffcc;
 }
+
+td.tiles {
+    padding: 15px;
+}
+
+table.files, th.files, td.files {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 5px;
+}

@@ -40,6 +40,10 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.pageNavigation = false;
 	$scope.details = false;
 	$scope.denormalizedView = {};
+	$scope.datasetFiles = {};
+	$scope.tiles = [];
+	$scope.files = [];
+	$scope.viewer3dFile = [];
 	$scope.entryRow = [];
 	$scope.detailColumns = [];
 	$scope.detailRows = [];
@@ -332,7 +336,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	this.isAttribute = function isAttribute(table, column) {
-		return !hasAnnotation(table, column, 'dataset');
+		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && !hasAnnotation(table, column, 'download');
 	};
 	
 	this.isNested = function isNested(table) {
@@ -631,6 +635,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.entry3Dview = '';
 			$scope.entryTitle = '';
 			$scope.entrySubtitle = '';
+                        $scope.tiles = [];
+                        $scope.files = [];
+                        $scope.viewer3dFile = [];
 		} else {
 			$scope.entryRow = row;
 			$scope.detailColumns = getDetailColumns(row);
@@ -640,6 +647,10 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
 			entityDenormalize(getEntityTable($scope.options), row, $scope.denormalizedView);
+                        getDenormalizedFiles($scope.table, row, $scope.datasetFiles);
+                        $scope.tiles = getTilesLayout($scope.datasetFiles, 3);
+                        $scope.files = getFilesLayout($scope.datasetFiles);
+                        $scope.viewer3dFile = getViewer3d($scope.datasetFiles);
 		}
 	};
 	// "m" is the number of columns per row
