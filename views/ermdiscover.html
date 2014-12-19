@@ -240,7 +240,7 @@
 												type="checkbox" ng-model="box[facet['table']][facet['name']]['values'][value]"
 												ng-change="facetList.predicate_checkbox(facet)"
 												ng-disabled="facetList.showFacetValue(facet, value)" />{{value}}
-												<span class="pull-right">({{colsGroup[facet['table']][facet['name']][value]}})</span>
+												<span class="pull-right badge">{{colsGroup[facet['table']][facet['name']][value]}}</span>
 											</li>
 										</ul>
 									</div>
