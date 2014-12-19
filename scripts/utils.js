@@ -75,13 +75,13 @@ function clearFacets(options) {
 
 // "m" is the number of columns per row
 // "maxRows" is the maxim number of rows to be displayed
-function getDisplayColumns(row, m, maxRows) {
+function getDisplayColumns(row, m, maxRows, table_name) {
 	var ret = [];
 	var tr = [];
 	var rowCount = 0;
 	$.each(display_columns['top_columns'], function(i, col) {
 		if (row[col] == null || row[col] === '' || display_columns['title'] == col || 
-				display_columns['thumbnail'].contains(col)) {
+				display_columns['thumbnail'].contains(col) || hasAnnotation(table_name, col, 'bottom')) {
 			return true;
 		}
 		tr.push(col);

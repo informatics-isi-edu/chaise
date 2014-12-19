@@ -656,7 +656,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	// "m" is the number of columns per row
 	// "maxRows" is the maxim number of rows to be displayed
 	this.displayColumns = function displayColumns(row, m, maxRows) {
-		return getDisplayColumns(row, m, maxRows);
+		return getDisplayColumns(row, m, maxRows, $scope.table);
 	};
 	this.download = function download(event, url) {
 		window.open(url, '_blank');
