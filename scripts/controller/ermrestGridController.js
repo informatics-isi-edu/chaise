@@ -25,7 +25,7 @@ ermGridController.controller('GridListCtrl', ['$scope', '$timeout', '$location',
 	if ($location.search()['schema'] != null) {
 		SCHEMA = $location.search()['schema'];
 	} else if (SCHEMA == null) {
-		SCHEMA = 'facebase';
+		SCHEMA = 'legacy';
 	}
 	initApplication();
 	$scope.table = '';
