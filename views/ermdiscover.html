@@ -325,7 +325,9 @@
 				<div class="resultsrow" ng-repeat="row in ermrestData">
 					<div class="row tableheader">
 						<div class="col-sm-6">
+                                                    <a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetList.clicker($event, row, 3);">
 							<p class="title" ng-bind-html="facetList.itemTitle(row)"></p>
+                                                    </a>
 						</div>
 						<div class="col-sm-6">
 							<button type="button" class="btn btn-default btn-sm pull-right"
