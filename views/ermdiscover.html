@@ -187,27 +187,31 @@
 	      				</ul>
       				</div>
       			</div>
-	      		<form class="form-inline" role="form" ng-show="facetList.showRefine()">
-					<div class="form-group sort-attr" id="attrsort">
-						<label for="sort">Sort:</label> <select class="form-control"
-							name="field-pick" id="sort" ng-model="sortFacet"
-							ng-change="facetList.changeSortOption()"
-							ng-options="value for value in sortColumns"></select> <a
-							href="#" ng-click="facetList.changeSortDirection($event)"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+      			<div class="row">
+  					<div class="col-sm-12">
+			      		<form class="form-inline" role="form" ng-show="facetList.showRefine()">
+							<div class="form-group sort-attr" id="attrsort">
+								<label for="sort">Sort:</label> <select class="form-control"
+									name="field-pick" id="sort" ng-model="sortFacet"
+									ng-change="facetList.changeSortOption()"
+									ng-options="value for value in sortColumns"></select> <a
+									href="#" ng-click="facetList.changeSortDirection($event)"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+							</div>
+							<br/>
+							<br/>
+						</form>
 					</div>
-					<br/>
-					<br/>
-				</form>
+				</div>
       			<div class="row" ng-show="facetList.showRefine()">
       				<div class="col-sm-5 pull-right">
       					<button class="ng-hide btn btn-default btn-sm" ng-click="facetList.clear($event)" ng-show="facetList.showClearButton()" >Reset All</button>
       				</div>
-      				<div class="col-sm-6 col-sm-offset-1">
+      				<div class="col-sm-7">
       					<p class="filtertitle">Refine by</p>
       				</div>
       			</div>
 				<div class="row" ng-show="facetList.showRefine()">
-					<div class="col-sm-10 col-sm-offset-1">
+					<div class="col-sm-12">
 						<div class="panel-group" id="filtermenu">
 							<div class="panel panel-default" ng-repeat="facet in facets"
 								ng-show="facetList.showFacetCount(facet)"
@@ -342,7 +346,7 @@
 								</a>
 							</td>
 							<td class="item_display">
-								<table class="resultsdata table table-condensed table-striped"
+								<table class="resultsdata table table-condensed"
 									ng-init="values=facetList.displayColumns(row, 3, 3)">
 									<tr ng-repeat="value in values">
 										<td ng-repeat="col in value track by $index" class="value truncate">

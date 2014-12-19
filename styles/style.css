@@ -282,3 +282,24 @@ footer {
 	position: absolute;
 	top: -70px;
 }
+
+.resultsdata.table > thead > tr > th, .resultsdata.table > tbody > tr > th, .resultsdata.table > tfoot > tr > th, .resultsdata.table > thead > tr > td, .resultsdata.table > tbody > tr > td, .resultsdata.table > tfoot > tr > td {
+    border-top: 0px;
+}
+
+#filtermenu h4 span {
+    margin-right: 5px;
+}
+
+li.entity {
+ 	margin-left: 0;
+}
+
+li.entity li {
+    margin-left: 25px;
+}
+
+div.sort-attr {
+    padding-left: 0x;
+}
+
