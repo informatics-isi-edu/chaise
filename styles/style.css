@@ -235,6 +235,16 @@ button.close {
 	padding: 3px 0;
 	color: #3b9edf;
 	font-size: .85em;
+     -ms-word-break: break-all;
+         word-break: break-all;
+
+     /* Non standard for webkit */
+     word-break: break-word;
+
+	-webkit-hyphens: auto;
+   	-moz-hyphens: auto;
+    -ms-hyphens: auto;
+        hyphens: auto;
 }
 
 #filtermenu .panel-body span {
