@@ -2266,3 +2266,16 @@ function getTableDisplayName(table_name) {
     });
     return ret;
 }
+
+function getGeoValue(table_name, row, column_name) {
+    var ret = null;
+    var geo_prefix = null;
+    $.each(SCHEMA_METADATA, function(i, table) {
+        if (table_name == table['table_name']) {
+            geo_prefix = table['annotations']['description'][column_name];
+            return false;
+        }
+    });
+    ret = geo_prefix + row[column_name];
+    return ret;
+}

@@ -55,6 +55,18 @@
 								<h1 ng-show="facetList.isNested(detail)">{{detail}}</h1>
 								<p ng-repeat-start="(name, val) in value" ng-show="facetList.isAttribute(detail,name)"><b>{{facetList.display(detail,name)}}: </b>{{facetList.itemDenormalizedValue(detail,value,name,val)}}</p>
 								<div ng-repeat-end >
+									<div ng-if="facetList.isGeoGDS(detail,name)">
+                                                                            <p>
+                                                                                <b>{{facetList.display(detail,name)}}: </b>
+                                                                                <a ng-href="{{facetList.geoValue(detail,value,name)}}">{{val}}</a>
+                                                                            </p>
+									</div>
+									<div ng-if="facetList.isGeoGSE(detail,name)">
+                                                                            <p>
+                                                                                <b>{{facetList.display(detail,name)}}: </b>
+                                                                                <a ng-href="{{facetList.geoValue(detail,value,name)}}">{{val}}</a>
+                                                                            </p>
+									</div>
 									<div ng-if="facetList.isThumbnail(detail,name)">
 										<a ng-href="{{val}}">
 											<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{val}}">

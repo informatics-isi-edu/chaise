@@ -336,7 +336,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 
 	this.isAttribute = function isAttribute(table, column) {
-		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && !hasAnnotation(table, column, 'download');
+		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
+                        !hasAnnotation(table, column, 'download') && !hasAnnotation(table, column, 'geo_gds') &&
+                        !hasAnnotation(table, column, 'geo_gse');
 	};
 	
 	this.isNested = function isNested(table) {
@@ -513,6 +515,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.itemDenormalizedValue = function itemDenormalizedValue(table, row, column, val) {
 		return getItemDenormalizedValue(table, row, column, val);
+	};
+	this.geoValue = function geoValue(table, row, column) {
+		return getGeoValue(table, row, column);
 	};
 	this.itemTitle = function itemTitle(row) {
 		return getEntryTitle(row);
@@ -699,6 +704,12 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.isThumbnail = function isThumbnail(table, column) {
 		return hasAnnotation(table, column, 'thumbnail');
+	};
+	this.isGeoGDS = function isGeoGDS(table, column) {
+		return hasAnnotation(table, column, 'geo_gds');
+	};
+	this.isGeoGSE = function isGeoGSE(table, column) {
+		return hasAnnotation(table, column, 'geo_gse');
 	};
 	this.isHTML = function isHTML(table, column) {
 		return hasAnnotation(table, column, 'html');
