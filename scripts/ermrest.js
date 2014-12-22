@@ -440,7 +440,7 @@ function getTableColumns(options, successCallback) {
 	getAssociationTableColumns(options, successCallback, columns);
 }
 
-function getPredicate(options, excludeColumn, table_name, peviousTable) {
+function getPredicate(options, excludeColumn, table_name, peviousTable, aliases) {
 	if (table_name == null) {
 		table_name = options['table'];
 	}
@@ -494,6 +494,9 @@ function getPredicate(options, excludeColumn, table_name, peviousTable) {
 			if (table != options['table']) {
 				predicate.push('$A');
 				predicate.push(association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table));
+                                if (aliases != null) {
+                                    aliases.push(association_tables[table]['alias']);
+                                }
 			}
 			predicate = predicate.concat(tablePredicate);
 		}
@@ -508,7 +511,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable) {
 function getErmrestData(options, successCallback, successUpdateModels) {
 	updateCount(options, successUpdateModels);
 	var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options);
-	var predicate = getPredicate(options, null);
+	var predicate = getPredicate(options, null, null, null, null);
 	if (predicate.length > 0) {
 		url += '/' + predicate.join('/');
 	}
@@ -611,20 +614,27 @@ function updateCount(options, successCallback) {
 	var tables = [options['table']].concat(association_tables_names);
 	var alertObject = {'display': true};
 	$.each(tables, function(i, table) {
-		var tableRef = (association_tables_names.contains(table) 
-				? '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias']
-				: '$A');
 		var box = options['box'][table];
 		var urlPrefix = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/';
 		$.each(box, function(col, value) {
 			box[col]['ready'] = false;
 		});
 		$.each(box, function(col, value) {
-			var predicate = getPredicate(options, col, table);
+                        var aliases = [];
+			var predicate = getPredicate(options, col, table, null, aliases);
 			var url = urlPrefix;
 			if (predicate != null && predicate.length > 0) {
 				url += predicate.join('/') + '/' ;
 			}
+                        var aliasDef = '';
+                        if (association_tables_names.contains(table)) {
+                            if (!aliases.contains(association_tables[table]['alias'])) {
+                                aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+                            }
+                        }
+                        var tableRef = (association_tables_names.contains(table) 
+                                        ? aliasDef + '$A/$' + association_tables[table]['alias']
+                                        : '$A');
 			url += tableRef +  '/' + 'cnt:=cnt(' + encodeSafeURIComponent(col) + ')';
 			var param = {};
 			param['options'] = options;
@@ -677,11 +687,18 @@ function updateGroups(options, successCallback) {
 	var tables = [options['table']].concat(association_tables_names);
 	var alertObject = {'display': true};
 	$.each(tables, function(i, table) {
-		var tableRef = (association_tables_names.contains(table) 
-				? '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias']
-				: '$A');
 		$.each(options['colsGroup'][table], function(col, values) {
-			var predicate = getPredicate(options, col, table);
+                        var aliases = [];
+			var predicate = getPredicate(options, col, table, null, aliases);
+                        var aliasDef = '';
+                        if (association_tables_names.contains(table)) {
+                            if (!aliases.contains(association_tables[table]['alias'])) {
+                                aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+                            }
+                        }
+                        var tableRef = (association_tables_names.contains(table) 
+                                        ? aliasDef + '$A/$' + association_tables[table]['alias']
+                                        : '$A');
 			var param = {};
 			param['alert'] = alertObject;
 			var col_name = encodeSafeURIComponent(col);
@@ -752,12 +769,19 @@ function updateSliders(options, successCallback) {
 	var tables = [options['table']].concat(association_tables_names);
 	var alertObject = {'display': true};
 	$.each(tables, function(i, table) {
-		var tableRef = (association_tables_names.contains(table) 
-				? '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias']
-				: '$A');
 		$.each(options['box'][table], function(col, values) {
 			if (values['floor'] != null) {
-				var predicate = getPredicate(options, values['left'] || values['right'] ? null : col, table);
+                                var aliases = [];
+				var predicate = getPredicate(options, values['left'] || values['right'] ? null : col, table, null, aliases);
+                                var aliasDef = '';
+                                if (association_tables_names.contains(table)) {
+                                    if (!aliases.contains(association_tables[table]['alias'])) {
+                                        aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+                                    }
+                                }
+                                var tableRef = (association_tables_names.contains(table) 
+                                                ? aliasDef + '$A/$' + association_tables[table]['alias']
+                                                : '$A');
 				var param = {};
 				param['alert'] = alertObject;
 				param['successCallback'] = successCallback;
@@ -973,7 +997,7 @@ function getPage(options, totalItems, successCallback) {
 		successCallback([], totalItems, page, pageSize);
 	} else {
 		var url = ERMREST_DATA_HOME + '/attribute/' + getQueryPredicate(options);
-		var predicate = getPredicate(options, null);
+		var predicate = getPredicate(options, null, null, null, null);
 		if (predicate.length > 0) {
 			url += '/' + predicate.join('/');
 		}
@@ -1481,7 +1505,7 @@ function resetTreeCount(data) {
 function getCollectionsPredicate(entityPredicates, options) {
 	var predicates = entityPredicates.slice();
 	var index = predicates.length-1;
-	var predicate = getPredicate(options, null);
+	var predicate = getPredicate(options, null, null, null, null);
 	if (predicate.length > 0) {
 		predicates[index] += '/' + predicate.join('/');
 	}
