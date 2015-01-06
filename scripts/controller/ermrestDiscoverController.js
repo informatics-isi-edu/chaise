@@ -73,6 +73,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	}
 	$scope.tables = [];
 
+        $scope.spinner = [];
+        $scope.modalIndex = -1;
 	$scope.ready = false;
 	$scope.filterAllText = '';
 	$scope.moreFlag = false;
@@ -220,6 +222,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.entryTitle = '';
 		$scope.entrySubtitle = '';
 		$scope.initPageRange();
+                $scope.spinner = [];
+                $scope.modalIndex = -1;
 		clearFacets($scope.options);
 	};
 
@@ -328,6 +332,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return true;
 	};
 
+	this.showSpinner = function showSpinner(index) {
+		return $scope.spinner[index] == true;
+	};
 	this.delay_predicate = function delay_predicate(facet,keyCode) {
 		if ($scope.filterTextTimeout != null) {
 			$timeout.cancel($scope.filterTextTimeout);
@@ -633,7 +640,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		}
 	};
 	// "m" is the number of columns per row
-	this.clicker = function clicker(event, row, m) {
+	this.clicker = function clicker(event, row, m, index) {
 		event.preventDefault();
 		if (row == null) {
 			$scope.details = false;
@@ -648,6 +655,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
                         $scope.files = [];
                         $scope.viewer3dFile = [];
 		} else {
+                        $scope.modalIndex = index;
+                        $scope.spinner[index] = true;
+                        $scope.$apply();
 			$scope.entryRow = row;
 			$scope.detailColumns = getDetailColumns(row);
 			$scope.detailRows = getDetailRows(row, m);
@@ -739,6 +749,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.displayTable = function displayTable(table) {
 		return getTableDisplayName(table);
 	};
+        this.closeModal = function closeModal(event) {
+                        $scope.spinner[$scope.modalIndex] = false;
+	}
 	this.getEntityResults = function getEntityResults(event, data) {
 		var peviousTable = $scope.table;
 		var node = $('label.highlighted', $('#treeDiv'));

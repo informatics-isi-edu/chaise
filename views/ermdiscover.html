@@ -10,7 +10,7 @@
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal">
+					<button type="button" class="close" data-dismiss="modal" ng-click="facetList.closeModal($event);">
 						<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 					</button>
 					<h4 class="modal-title" id="viewAllData">{{entryTitle}}</h4>
@@ -162,7 +162,7 @@
                                                 </table>
  					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" ng-click="facetList.closeModal($event);">Close</button>
 					</div>
 				</div>
 			</div>
@@ -334,28 +334,33 @@
 				</p>
 			</div>
 			<div id="resultstable">
-				<div class="resultsrow" ng-repeat="row in ermrestData">
+				<div class="resultsrow" ng-init="spinner=[]" ng-repeat="row in ermrestData">
+                                        <div ng-init="spinner[$index]=false" class="ng-hide" ng-show="facetList.showSpinner($index)">
+                                                <img src="/facebase/images/ajax-loader.gif"
+                                                        title="Processing..." alt="Spinner" ng-show="facetList.showSpinner($index)"
+                                                        class="center" />
+                                        </div>
 					<div class="row tableheader">
 						<div class="col-sm-6">
-                                                    <a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetList.clicker($event, row, 3);">
+                                                    <a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetList.clicker($event, row, 3, $index);">
 							<p class="title" ng-bind-html="facetList.itemTitle(row)"></p>
                                                     </a>
 						</div>
 						<div class="col-sm-6">
 							<button type="button" class="btn btn-default btn-sm pull-right"
 								data-toggle="modal" data-target="#viewdata"
-								ng-click="facetList.clicker($event, row, 3);">View Data</button>
+								ng-click="facetList.clicker($event, row, 3, $index);">View Data</button>
 						</div>
 					</div>
 					<table ng-init="thumbnail=facetList.itemThumbnail(row)">
 						<tr>
 							<td ng-show="thumbnail!=null">
-								<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetList.clicker($event, row, 3);">
+								<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetList.clicker($event, row, 3, $index);">
 									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 								</a>
 							</td>
 							<td ng-show="facetList.if_hasThumbnail() && thumbnail==null">
-								<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetList.clicker($event, row, 3);">
+								<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetList.clicker($event, row, 3, $index);">
 									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="images/blank.jpeg">
 								</a>
 							</td>
