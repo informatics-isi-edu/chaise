@@ -564,6 +564,10 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		return ret;
 	};
 
+	this.setSummaryClass = function setSummaryClass(table, column, value) {
+		return value + (hasAnnotation(table, column, 'summary') ? ' summary' : ' truncate');
+	};
+
 	this.selectPage = function selectPage(event, page) {
 		event.preventDefault();
 		$scope.pagingOptions.currentPage = $scope.pageMap[page];
@@ -722,6 +726,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.isDownload = function isDownload(table, column) {
 		return hasAnnotation(table, column, 'file');
+	};
+	this.isSummary = function isSummary(table, column) {
+		return hasAnnotation(table, column, 'summary');
 	};
 	this.detailValue = function detailValue(table, column, data) {
 		return hasAnnotation(table, column, 'html') ? '' : data;

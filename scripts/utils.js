@@ -78,28 +78,33 @@ function clearFacets(options) {
 function getDisplayColumns(row, m, maxRows, table_name) {
 	var ret = [];
 	var tr = [];
-	var rowCount = 0;
-	$.each(display_columns['top_columns'], function(i, col) {
-		if (row[col] == null || row[col] === '' || display_columns['title'] == col || 
-				display_columns['thumbnail'].contains(col) || hasAnnotation(table_name, col, 'bottom')) {
-			return true;
-		}
-		tr.push(col);
-		if (tr.length == m) {
-			ret.push(tr);
-			tr = [];
-			if (++rowCount == maxRows) {
-				return false;
-			}
-		}
-	});
-	if (tr.length > 0) {
-		for (var i=0; i < m; i++) {
-			tr.push('');
-		}
-		tr.length = m;
-		ret.push(tr);
-	}
+        if (display_columns['summary'] != null) {
+            tr.push(display_columns['summary']);
+            ret.push(tr);
+        } else {
+            var rowCount = 0;
+            $.each(display_columns['top_columns'], function(i, col) {
+                    if (row[col] == null || row[col] === '' || display_columns['title'] == col || 
+                                    display_columns['thumbnail'].contains(col) || hasAnnotation(table_name, col, 'bottom')) {
+                            return true;
+                    }
+                    tr.push(col);
+                    if (tr.length == m) {
+                            ret.push(tr);
+                            tr = [];
+                            if (++rowCount == maxRows) {
+                                    return false;
+                            }
+                    }
+            });
+            if (tr.length > 0) {
+                    for (var i=0; i < m; i++) {
+                            tr.push('');
+                    }
+                    tr.length = m;
+                    ret.push(tr);
+            }
+        }
 	return ret;
 }
 

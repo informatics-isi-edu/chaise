@@ -363,9 +363,13 @@
 								<table class="resultsdata table table-condensed"
 									ng-init="values=facetList.displayColumns(row, 3, 3)">
 									<tr ng-repeat="value in values">
-										<td ng-repeat="col in value track by $index" class="value truncate">
-											<span ng-show="facetList.display(table,col)!=null" ng-class="$parent.$first && $first ? 'key truncate' : 'key truncate'">{{facetList.display(table,col)}}: </span>
-											{{facetList.html(table,col,row[col])}}
+										<td ng-repeat="col in value track by $index" ng-class="facetList.setSummaryClass(table,col,'value')">
+											<span ng-show="facetList.display(table,col)!=null && !facetList.isSummary(table,col)" ng-class="$parent.$first && $first ? 'key truncate' : 'key truncate'">{{facetList.display(table,col)}}: </span>
+                                                                                        <span ng-switch="facetList.isSummary(table,col)">
+                                                                                            <span ng-switch-when="true"><p ng-class="facetList.setSummaryClass(table,col,'')">{{facetList.html(table,col,row[col])}}</p></span>
+                                                                                            <span ng-switch-default>{{facetList.html(table,col,row[col])}}</span>
+                                                                                        </span>
+                                                                                        
 										</td>
 									</tr>
 								</table>

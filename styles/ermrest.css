@@ -153,6 +153,13 @@ td.itemBody {
   text-overflow: ellipsis;
 }
 
+.summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.8em;
+  max-height: 5.4em;
+}
+
 td.item_display {
 	padding: 0px 0px 0px 10px;
 }
