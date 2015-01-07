@@ -753,8 +753,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.displayTable = function displayTable(table) {
 		return getTableDisplayName(table);
 	};
-        this.closeModal = function closeModal(event) {
-                        $scope.spinner[$scope.modalIndex] = false;
+    this.closeModal = function closeModal(event) {
+        $scope.spinner[$scope.modalIndex] = false;
 	}
 	this.getEntityResults = function getEntityResults(event, data) {
 		var peviousTable = $scope.table;

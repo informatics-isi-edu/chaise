@@ -1,4 +1,4 @@
-<div ng-controller="DiscoverListCtrl as facetList">
+<div ng-controller="DiscoverListCtrl as facetList" ng-click="facetList.closeModal($event);">
 	<div id="ajaxSpinnerContainer" ng-hide="facetList.hideSpinner()">
 		<img src="images/ajax-loader.gif" id="ajaxSpinnerImage"
 			title="Processing..." alt="Spinner" ng-hide="facetList.hideSpinner()"
