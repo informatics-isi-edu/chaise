@@ -84,8 +84,9 @@ function getDisplayColumns(row, m, maxRows, table_name) {
         } else {
             var rowCount = 0;
             $.each(display_columns['top_columns'], function(i, col) {
-                    if (row[col] == null || row[col] === '' || display_columns['title'] == col || 
-                                    display_columns['thumbnail'].contains(col) || hasAnnotation(table_name, col, 'bottom')) {
+                    if (row[col] == null || row[col] === '' || display_columns['title'] == col ||
+                                    display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) || 
+                                    hasAnnotation(table_name, col, 'bottom')) {
                             return true;
                     }
                     tr.push(col);
@@ -115,6 +116,7 @@ function isLongText(col, value) {
 			col != display_columns['title'] && 
 			col != display_columns['subtitle'] &&
 			!display_columns['thumbnail'].contains(col) &&
+                        !display_columns['hidden'].contains(col) &&
 			!display_columns['3dview'].contains(col) &&
 			!display_columns['zoomify'].contains(col) &&
 			!display_columns['file'].contains(col) &&
@@ -129,12 +131,12 @@ function getDetailRows(row, m) {
 		if (key == '$$hashKey' || value == null || value === '') {
 			return true;
 		}
-		if (!display_columns['thumbnail'].contains(key) || !display_columns['3dview'].contains(key)  || !display_columns['zoomify'].contains(key) || 
+		if (!display_columns['thumbnail'].contains(key) || !display_columns['3dview'].contains(key)  || 
+                        !display_columns['zoomify'].contains(key) || display_columns['hidden'].contains(key) ||
 				key == display_columns['title'] || key == display_columns['subtitle'] || 
 				/*display_columns['text_columns'].contains(key) ||*/ value.length > 20) {
 			return true;
 		}
-		
 		tr.push(key);
 		if (tr.length == m) {
 			ret.push(tr);
@@ -150,7 +152,7 @@ function getDetailRows(row, m) {
 function getDetailColumns(row) {
 	var ret = [];
 	$.each(row, function(key, value) {
-		if (key == '$$hashKey' || value == null || value === '') {
+		if (key == '$$hashKey' || value == null || value === '' || display_columns['hidden'].contains(key)) {
 			return true;
 		}
 		ret.push(key);

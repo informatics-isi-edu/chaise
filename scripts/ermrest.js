@@ -333,7 +333,8 @@ function getTableColumns(options, successCallback) {
 			'file': [],
 			'thumbnail': [],
 			'zoomify': [],
-			'3dview': []};
+			'3dview': [],
+                        'hidden': []};
 	PRIMARY_KEY = [];
 	if (metadata['keys'] != null) {
 		var unique_columns = [];
@@ -389,6 +390,9 @@ function getTableColumns(options, successCallback) {
 				}
 				if (comments.contains('file')) {
 					display_columns['file'].push(col['name']);
+				}
+				if (comments.contains('hidden')) {
+					display_columns['hidden'].push(col['name']);
 				}
 			}
 			var col_def = {};
