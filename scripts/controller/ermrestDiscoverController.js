@@ -680,6 +680,10 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.download = function download(event, url) {
 		window.open(url, '_blank');
 	};
+	this.enlarge = function enlarge(event, url) {
+		event.preventDefault();
+		window.open(url, '_blank');
+	};
 	this.init3Dview = function init3Dview(url) {
 		return $sce.trustAsResourceUrl(url);
 	};

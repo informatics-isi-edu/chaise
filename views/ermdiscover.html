@@ -140,9 +140,24 @@
                                                     </tr>
                                                     <tr ng-repeat="values in viewer3dFile">
                                                         <td class="files" ng-init="entry3Dview=facetList.init3Dview(values[3])">
-                                                            <iframe title="3dView" width="500" height="400" ng-src="{{entry3Dview}}">
-								<p>Your browser does not support iframes.</p>
-                                                            </iframe>
+                                                        	<table>
+                                                        		<tr>
+                                                        			<td>
+			                                                            <iframe title="3dView" width="500" height="400" ng-src="{{entry3Dview}}">
+																			<p>Your browser does not support iframes.</p>
+			                                                            </iframe>
+                                                        			</td>
+                                                        		</tr>
+                                                        	</table>
+                                                        	<table>
+                                                        		<tr>
+                                                        			<td class="center">
+			                                                            <a ng-href="{{values[3]}}" ng-click="facetList.enlarge($event, values[3])">
+			                                                                    Enlarge
+			                                                            </a>
+                                                        			</td>
+                                                        		</tr>
+                                                        	</table>
                                                         </td>
                                                         <td class="files">
                                                             <a ng-href="{{values[0]}}">

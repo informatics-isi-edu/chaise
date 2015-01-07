@@ -229,3 +229,7 @@ table.files, th.files, td.files {
     border-collapse: collapse;
     padding: 5px;
 }
+
+td.center {
+    text-align: center;
+}
