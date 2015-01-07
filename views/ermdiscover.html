@@ -1,6 +1,6 @@
 <div ng-controller="DiscoverListCtrl as facetList">
 	<div id="ajaxSpinnerContainer" ng-hide="facetList.hideSpinner()">
-		<img src="/facebase/images/ajax-loader.gif" id="ajaxSpinnerImage"
+		<img src="images/ajax-loader.gif" id="ajaxSpinnerImage"
 			title="Processing..." alt="Spinner" ng-hide="facetList.hideSpinner()"
 			class="center" />
 	</div>
@@ -336,7 +336,7 @@
 			<div id="resultstable">
 				<div class="resultsrow" ng-init="spinner=[]" ng-repeat="row in ermrestData">
                                         <div ng-init="spinner[$index]=false" class="ng-hide" ng-show="facetList.showSpinner($index)">
-                                                <img src="/facebase/images/ajax-loader.gif"
+                                                <img src="images/ajax-loader.gif"
                                                         title="Processing..." alt="Spinner" ng-show="facetList.showSpinner($index)"
                                                         class="center" />
                                         </div>
