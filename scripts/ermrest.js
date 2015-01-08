@@ -2230,6 +2230,7 @@ function getDenormalizedFiles(root_table, row, result) {
     var bytes = getColumnName(tables['download'], 'orderby');
     result['viewer_url'] = getTableAnnotation(tables['download'], 'description', 'viewer_url');
     result['preview_url'] = getTableAnnotation(tables['download'], 'description', 'preview_url');
+    result['enlarge_url'] = getTableAnnotation(tables['download'], 'description', 'enlarge_url');
     result['uri'] = uri;
     result['preview'] = preview;
     result['name'] = filename;
