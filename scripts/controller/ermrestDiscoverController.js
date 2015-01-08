@@ -477,8 +477,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		//window.location = '#';
 		event.preventDefault();
 		$scope.entityPredicates.length = 0;
-		$scope.selectedEntity = null;
 		$scope.initTable();
+		selectCollection();
 		getMetadata($scope.table, $scope.successGetMetadata);
 	};
 	

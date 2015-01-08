@@ -1554,7 +1554,7 @@ function hasAnnotation(table_name, column_name, annotation) {
 	return ret;
 }
 
-function selectCollection(tree) {
+function selectCollection() {
 	$.each($('label', $('#treeDiv')), function(i, label) {
 		if ($(label).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE)) {
 			$(label).click();
