@@ -164,7 +164,7 @@
                                                                     {{values[1]}}
                                                             </a>
                                                         </td>
-                                                        <td class="files">{{values[2]}}</td>
+                                                        <td class="files">{{values[2] | number}}</td>
                                                      </tr>
                                                     <tr ng-repeat="values in files">
                                                         <td class="files">{{values[0]}}</td>
@@ -172,7 +172,7 @@
                                                             <a ng-href="{{values[2]}}">{{values[1]}}
                                                             </a>
                                                         </td>
-                                                        <td class="files">{{values[3]}}</td>
+                                                        <td class="files">{{values[3] | number}}</td>
                                                      </tr>
                                                 </table>
  					</div>
