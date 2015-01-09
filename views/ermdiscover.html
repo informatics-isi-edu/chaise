@@ -123,7 +123,7 @@
                                                 <h3 ng-show="tiles.length>0">Images:</h3>
                                                 <table>
                                                     <tr ng-repeat="values in tiles">
-                                                        <td ng-repeat="tile in values" class="tiles">
+                                                        <td ng-repeat="tile in values track by $index" class="tiles">
                                                             <a ng-href="{{tile}}">
                                                                     <img title="Thumbnail" alt="" width="90" height="90" ng-src="{{tile}}">
                                                             </a>

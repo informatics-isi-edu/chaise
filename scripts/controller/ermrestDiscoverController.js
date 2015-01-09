@@ -655,9 +655,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
                         $scope.files = [];
                         $scope.viewer3dFile = [];
 		} else {
-                        $scope.modalIndex = index;
-                        $scope.spinner[index] = true;
-                        $scope.$apply();
+            $scope.modalIndex = index;
+            $scope.spinner[index] = true;
+            $scope.$apply();
 			$scope.entryRow = row;
 			$scope.detailColumns = getDetailColumns(row);
 			$scope.detailRows = getDetailRows(row, m);
@@ -666,10 +666,10 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
 			entityDenormalize(getEntityTable($scope.options), row, $scope.denormalizedView);
-                        getDenormalizedFiles($scope.table, row, $scope.datasetFiles);
-                        $scope.tiles = getTilesLayout($scope.datasetFiles, 3);
-                        $scope.files = getFilesLayout($scope.datasetFiles);
-                        $scope.viewer3dFile = getViewer3d($scope.datasetFiles);
+            getDenormalizedFiles($scope.table, row, $scope.datasetFiles);
+            $scope.tiles = getTilesLayout($scope.datasetFiles, 3);
+            $scope.files = getFilesLayout($scope.datasetFiles);
+            $scope.viewer3dFile = getViewer3d($scope.datasetFiles);
 		}
 	};
 	// "m" is the number of columns per row
