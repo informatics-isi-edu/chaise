@@ -73,8 +73,8 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	}
 	$scope.tables = [];
 
-        $scope.spinner = [];
-        $scope.modalIndex = -1;
+    $scope.spinner = [];
+    $scope.modalIndex = -1;
 	$scope.ready = false;
 	$scope.filterAllText = '';
 	$scope.moreFlag = false;
@@ -222,26 +222,32 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.entryTitle = '';
 		$scope.entrySubtitle = '';
 		$scope.initPageRange();
-                $scope.spinner = [];
-                $scope.modalIndex = -1;
+        $scope.spinner = [];
+        $scope.modalIndex = -1;
 		clearFacets($scope.options);
 	};
 
 	$scope.successUpdateModels = function successUpdateModels() {
-		$scope.$apply();
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 		$scope.$broadcast('reCalcViewDimensions');
 	};
 
 	$scope.successUpdateCount = function successUpdateCount() {
 		$scope.ready = true;
 		$('footer').show();
-		$scope.$apply();
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 		//console.log(JSON.stringify($scope.options, null, 4));
 	};
 
 	$scope.successInitModels = function successInitModels() {
 		updateCount($scope.options, $scope.successUpdateCount);
-		$scope.$apply();
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 	};
 
 	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
@@ -264,7 +270,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		if ($scope.totalServerItems%$scope.pagingOptions != 0) {
 			$scope.maxPages++;
 		}
-		$scope.$apply();
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 		$('div.ngSortButtonUp').addClass('ng-hide');
 		getColumnDescriptions($scope.options, $scope.successGetColumnDescriptions);
 	};
@@ -279,7 +287,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		$scope.options['facets'] = $scope.facets = columns['facets'];
 		$scope.options['colsDefs'] = $scope.colsDefs = columns['colsDefs'];
 		$scope.initSortOption();
-		$scope.$apply();
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 		getTableColumnsUniques($scope.options, $scope.successGetTableColumnsUniques);
 	};
 	
@@ -290,7 +300,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	
 	$scope.successGetTables = function successGetTables() {
 		$('#headerSearch').attr('disabled', 'disabled');
-		$scope.$apply();
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 		selectCollection();
 	};
 
@@ -308,12 +320,14 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		if ($scope.totalServerItems%$scope.pagingOptions != 0) {
 			$scope.maxPages++;
 		}
-		$scope.$apply();
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 	};
 
 	this.if_type = $scope.if_type = function if_type(facet, facet_type) {
 		var ret = false;
-		if ($scope.colsDescr[facet['table']][facet['name']] != null) {
+		if ($scope.colsDescr[facet['table']] != null && $scope.colsDescr[facet['table']][facet['name']] != null) {
 			ret = ($scope.colsDescr[facet['table']][facet['name']]['type'] == facet_type);
 			if (facet_type == 'bigint') {
 				ret = psqlNumeric.contains($scope.colsDescr[facet['table']][facet['name']]['type']);
@@ -330,7 +344,6 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 
 	this.hideSpinner = function hideSpinner() {
 		return true;
-		//return false;
 	};
 
 	this.showSpinner = function showSpinner(index) {
@@ -652,13 +665,12 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.entry3Dview = '';
 			$scope.entryTitle = '';
 			$scope.entrySubtitle = '';
-                        $scope.tiles = [];
-                        $scope.files = [];
-                        $scope.viewer3dFile = [];
+            $scope.tiles = [];
+            $scope.files = [];
+            $scope.viewer3dFile = [];
 		} else {
             $scope.modalIndex = index;
             $scope.spinner[index] = true;
-            $scope.$apply();
 			$scope.entryRow = row;
 			$scope.detailColumns = getDetailColumns(row);
 			$scope.detailRows = getDetailRows(row, m);
