@@ -124,7 +124,7 @@
                                                 <table>
                                                     <tr ng-repeat="values in tiles">
                                                         <td ng-repeat="tile in values track by $index" class="tiles">
-                                                            <a ng-href="{{tile}}">
+                                                            <a ng-if="tile!=''" ng-href="{{tile}}">
                                                                     <img title="Thumbnail" alt="" width="90" height="90" ng-src="{{tile}}">
                                                             </a>
                                                         </td>
@@ -132,7 +132,7 @@
                                                      </tr>
                                                 </table>
                                                 <h3 ng-show="files.length>0 || viewer3dFile.length>0">Files:</h3>
-                                                <table class="files">
+                                                <table ng-if="files.length>0 || viewer3dFile.length>0" class="files">
                                                     <tr>
                                                         <th class="files">Preview</th>
                                                         <th class="files">Name</th>

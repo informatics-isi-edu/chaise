@@ -330,6 +330,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 
 	this.hideSpinner = function hideSpinner() {
 		return true;
+		//return false;
 	};
 
 	this.showSpinner = function showSpinner(index) {
