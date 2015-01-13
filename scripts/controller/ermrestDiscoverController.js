@@ -730,6 +730,9 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	this.showTableSelect = function showTableSelect() {
 		return false;
 	};
+	this.showSort = function showSort() {
+		return false;
+	};
 	this.showRefine = function showRefine() {
 		return $('.highlighted', $('#treeDiv')).length > 0;
 	};
