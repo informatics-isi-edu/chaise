@@ -40,6 +40,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	$scope.pageNavigation = false;
 	$scope.details = false;
 	$scope.denormalizedView = {};
+	$scope.linearizeView = {};
 	$scope.datasetFiles = {};
 	$scope.tiles = [];
 	$scope.files = [];
@@ -362,6 +363,11 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
                         !hasAnnotation(table, column, 'geo_gse');
 	};
 	
+	this.isDetailAttribute = function isDetailAttribute(table, column) {
+		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') &&
+		!hasAnnotation(table, column, 'download');
+	};
+	
 	this.isNested = function isNested(table) {
 		return !association_tables_names.contains(table);
 	};
@@ -584,6 +590,12 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 		}
 		return ret;
 	};
+	this.setListClass = function setListClass(values) {
+		return (values.length > 1) ? 'multi_values' : 'single_value';
+	};
+	this.setPreviewClass = function setPreviewClass() {
+		return ($scope.viewer3dFile.length>0) ? 'preview' : 'no_preview';
+	};
 
 	this.setSummaryClass = function setSummaryClass(table, column, value) {
 		return value + (hasAnnotation(table, column, 'summary') ? ' summary' : ' truncate');
@@ -679,6 +691,7 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 			$scope.entrySubtitle = getEntrySubtitle(row);
 			$scope.details = true;
 			entityDenormalize(getEntityTable($scope.options), row, $scope.denormalizedView);
+			entityLinearize($scope.denormalizedView, $scope.linearizeView);
             getDenormalizedFiles($scope.table, row, $scope.datasetFiles);
             $scope.tiles = getTilesLayout($scope.datasetFiles, 3);
             $scope.files = getFilesLayout($scope.datasetFiles);
@@ -759,6 +772,13 @@ ermDiscoverController.controller('DiscoverListCtrl', ['$scope', '$timeout', '$sc
 	};
 	this.isSummary = function isSummary(table, column) {
 		return hasAnnotation(table, column, 'summary');
+	};
+	this.isText = function isText(table, column) {
+		return !hasAnnotation(table, column, 'thumbnail') &&
+		!hasAnnotation(table, column, '3dview') &&
+		!hasAnnotation(table, column, 'zoomify') &&
+		!hasAnnotation(table, column, 'file') &&
+		!hasAnnotation(table, column, 'html');
 	};
 	this.detailValue = function detailValue(table, column, data) {
 		return hasAnnotation(table, column, 'html') ? '' : data;

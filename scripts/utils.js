@@ -304,6 +304,7 @@ function getViewer3d(datasetFiles) {
 		tr.push(file[size]);
 		tr.push(preview_url + '?url=' + file[preview]);
 		tr.push(enlarge_url + '?url=' + file[preview]);
+		tr.push(file[preview]);
 		ret.push(tr);
 	});
 	return ret;

@@ -2311,3 +2311,26 @@ function getGeoValue(table_name, row, column_name) {
     ret = geo_prefix + row[column_name];
     return ret;
 }
+
+function isTextAttribute(table, column) {
+	return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
+		!hasAnnotation(table, column, 'download') && !hasAnnotation(table, column, 'geo_gds') &&
+		!hasAnnotation(table, column, 'geo_gse');
+
+}
+
+function entityLinearize(denormalizedView, linearizeView) {
+	emptyJSON(linearizeView);
+	$.each(denormalizedView, function(table, rows) {
+		$.each(rows, function(i, row) {
+			$.each(row, function(column, val) {
+				if (isTextAttribute(table, column)) {
+					if (linearizeView[column] == null) {
+						linearizeView[column] = {'table': table, 'rows': []};
+					}
+					linearizeView[column]['rows'].push(row);
+				}
+			});
+		});
+	});
+}

@@ -224,12 +224,68 @@ td.tiles {
     padding: 15px;
 }
 
-table.files, th.files, td.files {
-    border: 1px solid black;
+table.files {
     border-collapse: collapse;
+	table-layout: fixed;
+}
+
+th.files, td.files {
+    border: 1px solid black;
     padding: 5px;
+    word-wrap: break-word;
+    width: 25%;
+}
+
+th.size, td.size {
+    border: 1px solid black;
+    padding: 5px;
+    word-wrap: break-word;
+    width: 15%;
+}
+
+td.preview, th.preview {
+    border: 1px solid black;
+    padding: 5px;
+    word-wrap: break-word;
+    width: 60%;
+}
+
+td.no_preview, th.no_preview {
+    display: none;
 }
 
 td.center {
     text-align: center;
+}
+
+table.dataset {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+	table-layout: fixed;
+	width: 100%;
+}
+
+td.key {
+    vertical-align: top;
+	font-weight: bold;
+    text-align: right;
+    padding-right: 20px;
+	white-space:nowrap;
+}
+
+td.value {
+    word-wrap: break-word;
+}
+
+.single_value {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+.multi_values {
+    padding: 0px;
+    margin-left: 10px;
+    margin-bottom: 0px;
 }
