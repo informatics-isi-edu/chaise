@@ -2314,9 +2314,7 @@ function getGeoValue(table_name, row, column_name) {
 
 function isTextAttribute(table, column) {
 	return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
-		!hasAnnotation(table, column, 'download') && !hasAnnotation(table, column, 'geo_gds') &&
-		!hasAnnotation(table, column, 'geo_gse');
-
+		!hasAnnotation(table, column, 'download');
 }
 
 function entityLinearize(denormalizedView, linearizeView) {
