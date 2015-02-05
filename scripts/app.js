@@ -10,7 +10,13 @@ var ermrestApp = angular.module('ermrestApp', [
   'ermGridController',
   'ermDiscoverController',
   'ermLoginController',
-  'ermLogoutController'
+  'ermLogoutController',
+  'facebaseModel',
+  'facebaseService',
+  'ermInitController',
+  'ermDetailController',
+  'ermFilterController',
+  'ermResultsController'
 ]);
 
 ermrestApp.config(['$routeProvider',
@@ -32,7 +38,12 @@ ermrestApp.config(['$routeProvider',
             templateUrl: 'views/ermdiscover.html'//,
             //controller: 'DiscoverListCtrl'
           }).
+          when('/explore', {
+              templateUrl: 'views/ermexplore.html'//,
+              //controller: 'ExplorerListCtrl'
+            }).
       otherwise({
-        redirectTo: '/discover'
+        redirectTo: '/explore'
       });
   }]);
+
