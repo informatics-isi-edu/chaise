@@ -1,6 +1,6 @@
 <div>
-	<div ng-controller="InitListCtrl as facetInit" id="ajaxSpinnerContainer" ng-hide="facetInit.hideSpinner()">
-		<img src="images/ajax-loader.gif" id="ajaxSpinnerImage"
+	<div ng-controller="InitListCtrl as facetInit" id="ajaxSpinnerContainer" class="ng-hide" ng-hide="facetInit.hideSpinner()">
+		<img class="ng-hide" src="images/ajax-loader.gif" id="ajaxSpinnerImage"
 			title="Processing..." alt="Spinner" ng-hide="facetInit.hideSpinner()"
 			class="center" />
 	</div>
@@ -284,11 +284,11 @@
 		
 		<!-- Search Results -->
 		<div  ng-controller="ResultsListCtrl as facetResults" class="col-lg-9 col-sm-9" ng-show="facetResults.showResults()" ng-click="facetResults.closeModal($event);">
-			<div class="row" id="searchsort" ng-show="FacebaseData.pageNavigation">
+			<div class="row ng-hide" id="searchsort" ng-show="FacebaseData.pageNavigation">
 				<form class="form-inline" role="form">
-					<div ng-show="FacebaseData.pageNavigation" ng-bind-html="FacebaseData.collectionsPredicate">
+					<div class="ng-hide" ng-show="FacebaseData.pageNavigation" ng-bind-html="FacebaseData.collectionsPredicate">
 					</div>
-					<div ng-show="FacebaseData.pageNavigation" class="col-sm-6 col-md-5 col-lg-4">
+					<div class="ng-hide" ng-show="FacebaseData.pageNavigation" class="col-sm-6 col-md-5 col-lg-4">
 						<div class="form-group has-feedback">
 							<label class="control-label sr-only">Search Data</label>
 							<input id="dataSearch" type="text" ng-model="FacebaseData.filterAllText" class="form-control"
@@ -296,14 +296,14 @@
 								ng-change="facetResults.delay_search_all($event.keyCode)">
 						</div>
 					</div>
-					<div ng-show="FacebaseData.pageNavigation" class="col-sm-4 col-md-3 col-lg-2">
+					<div class="ng-hide" ng-show="FacebaseData.pageNavigation" class="col-sm-4 col-md-3 col-lg-2">
 						<div class="form-group">
 							<label for="show">Show</label> <select class="form-control"
 								name="field-pick" id="show" ng-model="FacebaseData.pagingOptions.pageSize"
 								ng-options="value for value in FacebaseData.pagingOptions.pageSizes"></select>
 						</div>
 					</div>
-					<div ng-show="FacebaseData.pageNavigation" class="col-sm-4 col-md-4 col-lg-3">
+					<div class="ng-hide" ng-show="FacebaseData.pageNavigation" class="col-sm-4 col-md-4 col-lg-3">
 						<div class="form-group">
 							<ul class="pagination toppagination">
 								<li class="prev"><a href="#"
@@ -312,7 +312,7 @@
 								<li class="prev"><a href="#"
 									ng-hide="facetResults.cantPageBackward()"
 									ng-click="facetResults.pageBackward($event)">&lt;</a></li>
-								<li ng-repeat="page in FacebaseData.pageRange" ng-class="facetResults.setActiveClass($index)"><a href="#"
+								<li ng-repeat="page in FacebaseData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
 									ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
 								<li class="next"><a href="#"
 									ng-show="facetResults.canPageForward()"
@@ -325,7 +325,7 @@
 					</div>
 				</form>
 			</div>
-			<div ng-show="FacebaseData.pageNavigation" id="results_tally">
+			<div class="ng-hide" ng-show="FacebaseData.pageNavigation" id="results_tally">
 				<p>
 					Page {{FacebaseData.pagingOptions.currentPage}} of {{FacebaseData.maxPages}}. Showing results
 					<strong>{{(FacebaseData.pagingOptions.currentPage-1)*FacebaseData.pagingOptions.pageSize+1}}-{{facetResults.lastRecord()}}</strong>
@@ -385,18 +385,18 @@
 			<div class="row bottompgr">
 				<div class="form-group">
 					<ul class="pagination bottompagination">
-						<li ng-show="FacebaseData.pageNavigation" class="prev"><a href="#"
+						<li class="ng-hide" ng-show="FacebaseData.pageNavigation" class="prev"><a href="#"
 							ng-hide="facetResults.cantPageBackward()"
 							ng-click="facetResults.pageToFirst($event)">&laquo;</a></li>
-						<li ng-show="FacebaseData.pageNavigation" class="prev"><a href="#"
+						<li class="ng-hide" ng-show="FacebaseData.pageNavigation" class="prev"><a href="#"
 							ng-hide="facetResults.cantPageBackward()"
 							ng-click="facetResults.pageBackward($event)">&lt;</a></li>
-						<li ng-show="FacebaseData.pageNavigation" ng-repeat="page in FacebaseData.pageRange" ng-class="facetResults.setActiveClass($index)"><a href="#"
+						<li class="ng-hide" ng-show="FacebaseData.pageNavigation" ng-repeat="page in FacebaseData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
 							ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
 						<li class="next"><a href="#"
-							ng-show="facetResults.canPageForward()"
+							class="ng-hide" ng-show="facetResults.canPageForward()"
 							ng-click="facetResults.pageForward($event)">More...</a></li>
-						<li ng-show="FacebaseData.pageNavigation" class="next"><a href="#"
+						<li class="ng-hide" ng-show="FacebaseData.pageNavigation" class="next"><a href="#"
 							ng-show="facetResults.canPageForward()"
 							ng-click="facetResults.pageToLast($event)">&raquo;</a></li>
 					</ul>

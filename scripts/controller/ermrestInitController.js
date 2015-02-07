@@ -2,11 +2,11 @@
 
 /* Controllers */
 
-var ermInitController = angular.module('ermInitController', ['facebaseModel']);
+var ermInitController = angular.module('ermInitController', ['facebaseModel', 'facebaseService']);
 
 //angular.module('ermrestApp').controller('InitListCtrl', ['$scope', '$location', 'FacebaseData',
-ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacebaseData',
-                                                      function($scope, $location, FacebaseData) {
+ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacebaseData', 'FacebaseService',
+                                                      function($scope, $location, FacebaseData, FacebaseService) {
 	
 	$('footer').hide();
 	$('.panel-collapse').on('hide.bs.collapse', function () {
@@ -28,7 +28,7 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacebaseDa
 	if ($location.search()['schema'] != null) {
 		SCHEMA = $location.search()['schema'];
 	} else if (SCHEMA == null) {
-		SCHEMA = 'legacy';
+		//SCHEMA = 'legacy';
 	}
 	if ($location.search()['catalog'] != null) {
 		CATALOG = $location.search()['catalog'];
@@ -36,16 +36,19 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacebaseDa
 		CATALOG = 1;
 	}
 	
-	initApplication();
-	
 	$scope.FacebaseData = FacebaseData;
 	
+	FacebaseService.initTable();
+
 	if ($location.search()['table'] != null) {
 		$scope.FacebaseData.table = $location.search()['table'];
+	} else {
+		$scope.FacebaseData.table = '';
 	}
+	
+	initApplication();
 	
 	this.hideSpinner = function hideSpinner() {
 		return true;
 	};
-
 }]);

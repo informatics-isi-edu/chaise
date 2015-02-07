@@ -15,10 +15,22 @@ var display_columns = {};
 var back_references = {};
 var association_tables = {};
 var association_tables_names = [];
+var catalog_association_tables = {};
+var catalog_association_tables_names = {};
+var catalog_back_references = {};
 
 var SCHEMA_METADATA = [];
 var DEFAULT_TABLE = null;
 var COLUMNS_ALIAS = {};
+
+var CATALOG_SCHEMAS = {};
+var CATALOG_METADATA = {};
+var CATALOG_COLUMNS_ALIAS = {};
+
+var COLUMNS_LIST_URI = 'comment';
+var TABLES_LIST_URI = 'comment';
+var COLUMNS_MAP_URI = 'description';
+var TABLES_MAP_URI = 'description';
 
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
 var viewer3dFileTypes = ['image/x.nifti'];
@@ -84,10 +96,20 @@ function loadApplicationHeaderAndFooter() {
 function initApplication() {
 	loadApplicationHeaderAndFooter();
 	initLocation();
-	ERMREST_SCHEMA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG + '/schema/'+ SCHEMA + '/table/';
 	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
-
+	getSchemas();
 	//alert(JSON.stringify(DATASET_COLUMNS, null, 4));
+}
+
+function setSchema() {
+	if (SCHEMA == null) {
+		// get the first schema from the catalog
+		$.each(CATALOG_SCHEMAS, function(schema, value) {
+			SCHEMA = schema;
+			return false;
+		});
+	}
+	ERMREST_SCHEMA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG + '/schema/'+ SCHEMA + '/table/';
 }
 
 /**
@@ -355,9 +377,8 @@ function getTableColumns(options, successCallback) {
 		var cellTemplate = '<div class="ngCellText" ng-class="col.colIndex()"><span ng-cell-text>{{row.getProperty(col.field)}}</span></div>';
 		var column_definitions = metadata['column_definitions'];
 		$.each(column_definitions, function(i, col) {
-			if (col['annotations'] != null && col['annotations']['comment'] != null) {
-				//var comments = $.parseJSON(col['comment']);
-				var comments = col['annotations']['comment'];
+			if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
+				var comments = col['annotations'][COLUMNS_LIST_URI];
 				if (comments.contains('top')) {
 					uniquenessColumns.push(col['name']);
 				}
@@ -416,8 +437,8 @@ function getTableColumns(options, successCallback) {
 			columns_definitions.push(col_def);
 			//b.remove();
 			var display = getColumnDisplayName(col['name']);
-			if (col['annotations'] != null && col['annotations']['description'] != null && col['annotations']['description']['display'] != null) {
-				display = col['annotations']['description']['display'];
+			if (col['annotations'] != null && col['annotations'][COLUMNS_MAP_URI] != null && col['annotations'][COLUMNS_MAP_URI]['display'] != null) {
+				display = col['annotations'][COLUMNS_MAP_URI]['display'];
 			}
 			ret.push({'name': col['name'],
 				'display': display,
@@ -1083,49 +1104,54 @@ function successGetPage(data, textStatus, jqXHR, param) {
 }
 
 function getTables(tables, options, successCallback) {
-	var url = ERMREST_SCHEMA_HOME;
-	var param = {};
-	param['successCallback'] = successCallback;
-	param['tables'] = tables;
-	param['options'] = options;
-	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTables, errorGetTables, param);
-}
-
-function successGetTables(data, textStatus, jqXHR, param) {
-	SCHEMA_METADATA = data;
+	SCHEMA_METADATA = CATALOG_METADATA[SCHEMA];
+	catalog_association_tables_names = {};
 	DEFAULT_TABLE = null;
-	var tables = param['tables'];
 	var rootTables = [];
-	association_tables_names = [];
-	$.each(data, function(i, table) {
-		var exclude = table['annotations'] != null && table['annotations']['comment'] != null && 
-			(table['annotations']['comment'].contains('exclude') || table['annotations']['comment'].contains('association'));
-		var nested = table['annotations'] != null && table['annotations']['comment'] != null && 
-			table['annotations']['comment'].contains('nested');
-		if (!exclude) {
-			tables.push(table['table_name']);
-		}
-		if (!exclude && !nested) {
-			rootTables.push(table['table_name']);
-			var isDefault = table['annotations'] != null && table['annotations']['comment'] != null && 
-				table['annotations']['comment'].contains('default');
-			if (isDefault) {
-				DEFAULT_TABLE = table['table_name'];
+	$.each(CATALOG_METADATA, function(schema, metadata) {
+		catalog_association_tables_names[schema] = [];
+		$.each(metadata, function(i, table) {
+			var exclude = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null && 
+			(table['annotations'][TABLES_LIST_URI].contains('exclude') || table['annotations'][TABLES_LIST_URI].contains('association'));
+			var nested = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null && 
+			table['annotations'][TABLES_LIST_URI].contains('nested');
+			if (!exclude && schema == SCHEMA) {
+				tables.push(table['table_name']);
 			}
-		}
-		if (table['annotations'] != null && table['annotations']['comment'] != null &&
-				table['annotations']['comment'].contains('association')) {
-			association_tables_names.push(table['table_name']);
-		}
+			if (!exclude && !nested && schema == SCHEMA) {
+				rootTables.push(table['table_name']);
+				var isDefault = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null && 
+				table['annotations'][TABLES_LIST_URI].contains('default');
+				if (isDefault) {
+					DEFAULT_TABLE = table['table_name'];
+				}
+			}
+			if (table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null &&
+					table['annotations'][TABLES_LIST_URI].contains('association')) {
+				catalog_association_tables_names[schema].push(table['table_name']);
+			}
+		});
 	});
+	association_tables_names = catalog_association_tables_names[SCHEMA];
 	if (DEFAULT_TABLE == null) {
 		DEFAULT_TABLE = rootTables[0];
 	}
 	setColumnsAlias();
-	setTablesBackReferences(tables, data);
-	setCollectionsReferences(param['options']['tree'], rootTables);
+	COLUMNS_ALIAS = CATALOG_COLUMNS_ALIAS[SCHEMA];
+	setTablesBackReferences();
+	back_references = catalog_back_references[SCHEMA];
+	setCollectionsReferences(options['tree']);
 	initApplicationHeader(rootTables);
-	param['successCallback']();
+	successCallback();
+}
+
+function initSchema(newSchema) {
+	SCHEMA = newSchema;
+	ERMREST_SCHEMA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG + '/schema/'+ SCHEMA + '/table/';
+	SCHEMA_METADATA = CATALOG_METADATA[SCHEMA];
+	association_tables_names = catalog_association_tables_names[SCHEMA];
+	COLUMNS_ALIAS = CATALOG_COLUMNS_ALIAS[SCHEMA];
+	back_references = catalog_back_references[SCHEMA];
 }
 
 function getTableColumnsUniques(options, successCallback) {
@@ -1340,29 +1366,41 @@ function hasCheckedValues(box, facet) {
 	return ret;
 }
 
-function setTablesBackReferences(tables, data) {
-	back_references = {};
-	$.each(data, function(i, table) {
-		$.each(table['foreign_keys'], function(j, fk) {
-			$.each(fk['referenced_columns'], function(k, ref_column) {
-				if (tables.contains(ref_column['table_name'])) {
-					if (back_references[ref_column['table_name']] == null) {
-						back_references[ref_column['table_name']] = [];
+function setTablesBackReferences() {
+	catalog_back_references = {};
+	$.each(CATALOG_METADATA, function(schema, metadata) {
+		catalog_back_references[schema] = {};
+		var tables = [];
+		$.each(metadata, function(i, table) {
+			var exclude = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null && 
+			(table['annotations'][TABLES_LIST_URI].contains('exclude') || table['annotations'][TABLES_LIST_URI].contains('association'));
+			if (!exclude) {
+				tables.push(table['table_name']);
+			}
+		});
+		$.each(metadata, function(i, table) {
+			$.each(table['foreign_keys'], function(j, fk) {
+				$.each(fk['referenced_columns'], function(k, ref_column) {
+					if (tables.contains(ref_column['table_name'])) {
+						if (catalog_back_references[schema][ref_column['table_name']] == null) {
+							catalog_back_references[schema][ref_column['table_name']] = [];
+						}
+						catalog_back_references[schema][ref_column['table_name']].push(table['table_name']);
 					}
-					back_references[ref_column['table_name']].push(table['table_name']);
-				}
+				});
 			});
 		});
 	});
 }
 
-function setCollectionsReferences(tree, tables) {
+function setCollectionsReferences(tree) {
 	tree.length = 0
 	var nodes = [];
 	var level = -1;
 	var node = {'name': 'Collections',
                         'display': 'Collections',
 			'parent': null,
+			'schema': null,
 			'root': null,
 			'level': level,
 			'show': true,
@@ -1370,17 +1408,30 @@ function setCollectionsReferences(tree, tables) {
 			'count': 0,
 			'nodes': nodes};
 	tree.push(node);
-	$.each(tables, function(i, table) {
-		setTreeReferences(nodes, table, node);
+	$.each(CATALOG_METADATA, function(schema, metadata) {
+		var tables = [];
+		$.each(metadata, function(i, table) {
+			var exclude = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null && 
+			(table['annotations'][TABLES_LIST_URI].contains('exclude') || table['annotations'][TABLES_LIST_URI].contains('association'));
+			var nested = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null && 
+			table['annotations'][TABLES_LIST_URI].contains('nested');
+			if (!exclude && !nested) {
+				tables.push(table['table_name']);
+			}
+		});
+		$.each(tables, function(i, table) {
+			setTreeReferences(nodes, table, node, schema);
+		});
 	});
 }
 
-function setTreeReferences(root, table, rootNode) {
+function setTreeReferences(root, table, rootNode, schema) {
 	var nodes = [];
 	var level = 0;
 	var node = {'name': table,
                         'display': getTableDisplayName(table),
 			'parent': null,
+			'schema': schema,
 			'root': rootNode,
 			'level': level,
 			'show': false,
@@ -1388,30 +1439,31 @@ function setTreeReferences(root, table, rootNode) {
 			'count': 0,
 			'nodes': nodes};
 	root.push(node);
-	if (back_references[table] != null) {
-		$.each(back_references[table], function(i, key) {
-			if (!association_tables_names.contains(key)) {
-				addTreeReference(key, nodes, level+1, node, rootNode);
+	if (catalog_back_references[schema][table] != null) {
+		$.each(catalog_back_references[schema][table], function(i, key) {
+			if (!catalog_association_tables_names[schema].contains(key)) {
+				addTreeReference(key, nodes, level+1, node, rootNode, schema);
 			}
 		});
 	}
 }
 
-function addTreeReference(table, nodes, level, parent, rootNode) {
+function addTreeReference(table, nodes, level, parent, rootNode, schema) {
 	var subNodes = [];
 	var node = {'name': table,
                         'display': getTableDisplayName(table),
 			'parent': parent,
 			'root': rootNode,
+			'schema': schema,
 			'level': level,
 			'show': false,
 			'expand': true,
 			'count': 0,
 			'nodes': subNodes};
 	nodes.push(node);
-	if (back_references[table] != null) {
-		$.each(back_references[table], function(i, key) {
-			addTreeReference(key, subNodes, level+1, node, rootNode);
+	if (catalog_back_references[schema][table] != null) {
+		$.each(catalog_back_references[schema][table], function(i, key) {
+			addTreeReference(key, subNodes, level+1, node, rootNode, schema);
 		});
 	}
 }
@@ -1423,7 +1475,7 @@ function entityDenormalize(table, row, result) {
 		predicate.push(encodeSafeURIComponent(primaryCol) + '=' + encodeSafeURIComponent(row[primaryCol]));
 	});
 	predicate = predicate.join('/');
-	var url = ERMREST_DATA_HOME + '/entity/' + encodeSafeURIComponent(table) + '/' + predicate;
+	var url = ERMREST_DATA_HOME + '/entity/' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/' + predicate;
 	getDenormalizedValues(table, url, result);
 }
 
@@ -1449,7 +1501,7 @@ function getQueryPredicate(options, table) {
 	
 	if (options['entityPredicates'].length > 0) {
 		ret = options['entityPredicates'].join('/');
-		if (ret == encodeSafeURIComponent(options['table'])) {
+		if (ret == encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(options['table'])) {
 			ret = 'A:=' + ret;
 		} else {
 			var ret = options['entityPredicates'].slice();
@@ -1457,11 +1509,11 @@ function getQueryPredicate(options, table) {
 			ret = ret.join('/');
 		}
 	} else {
-		ret = 'A:=' + encodeSafeURIComponent(options['table']);
+		ret = 'A:=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(options['table']);
 	}
 	
 	if (table != null) {
-		ret += '/$A/' + encodeSafeURIComponent(table);
+		ret += '/$A/' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table);
 	}
 
 	return ret;
@@ -1539,8 +1591,8 @@ function hasAnnotation(table_name, column_name, annotation) {
 			var column_definitions = table['column_definitions'];
 			$.each(column_definitions, function(i, col) {
 				if (col['name'] == column_name) {
-					if (col['annotations'] != null && col['annotations']['comment'] != null) {
-						var comments = col['annotations']['comment'];
+					if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
+						var comments = col['annotations'][COLUMNS_LIST_URI];
 						if (comments.contains(annotation)) {
 							ret = true;
 						}
@@ -1581,8 +1633,8 @@ function setAssociationTables(table_name) {
 				$.each(table['column_definitions'], function(k, column_definition) {
 					if (!fk_columns.contains(column_definition['name'])) {
 						var display = getColumnDisplayName(column_definition['name']);
-						if (column_definition['annotations'] != null && column_definition['annotations']['description'] != null && column_definition['annotations']['description']['display'] != null) {
-							display = column_definition['annotations']['description']['display'];
+						if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_MAP_URI] != null && column_definition['annotations'][COLUMNS_MAP_URI]['display'] != null) {
+							display = column_definition['annotations'][COLUMNS_MAP_URI]['display'];
 						}
 						columns.push({'name': column_definition['name'],
 							'display': display});
@@ -1606,7 +1658,7 @@ function isTextColumn(table, column) {
 	var column_definitions = metadata['column_definitions'];
 	$.each(column_definitions, function(i, col) {
 		if (col['name'] == column && col['annotations'] != null && 
-				col['annotations']['comment'] != null && col['annotations']['comment'].contains('text')) {
+				col['annotations'][COLUMNS_LIST_URI] != null && col['annotations'][COLUMNS_LIST_URI].contains('text')) {
 			ret = true;
 			return false;
 		}
@@ -1786,7 +1838,7 @@ function hasTableAnnotation(table_name, annotation) {
 	var ret = false;
 	$.each(SCHEMA_METADATA, function(i, table) {
 		if (table_name == table['table_name'] && table['annotations'] != null && 
-				table['annotations']['comment'] != null && table['annotations']['comment'].contains(annotation)) {
+				table['annotations'][TABLES_LIST_URI] != null && table['annotations'][TABLES_LIST_URI].contains(annotation)) {
 			ret = true;
 			return false;
 		}
@@ -1821,7 +1873,7 @@ function getAssociationThumbnail(table_name, row) {
 			if (fileTable == table['table_name']) {
 				var column_definitions = table['column_definitions'];
 				$.each(column_definitions, function(j, col) {
-					if (col['annotations'] != null && col['annotations']['comment'] != null) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
 						if (hasAnnotation(fileTable, col['name'], 'thumbnail')) {
 							thumbnail = col['name'];
 						}
@@ -1839,10 +1891,10 @@ function getAssociationThumbnail(table_name, row) {
 		var thumbnailPredicate = [];
 		thumbnailPredicate.push(ERMREST_DATA_HOME);
 		thumbnailPredicate.push('entity');
-		thumbnailPredicate.push(encodeSafeURIComponent(table_name));
+		thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table_name));
 		thumbnailPredicate.push(predicate.join('&'));
-		thumbnailPredicate.push(encodeSafeURIComponent(imageTable));
-		thumbnailPredicate.push(encodeSafeURIComponent(fileTable));
+		thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(imageTable));
+		thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
 		var contentTypePredicate = [];
 		$.each(thumbnailFileTypes, function(i, fileType) {
 			contentTypePredicate.push(encodeSafeURIComponent(typeColumn) + '=' + encodeSafeURIComponent(fileType));
@@ -1895,7 +1947,7 @@ function getDenormalizedThumbnail(table_name, row, column_name) {
 			if (table_name == table['table_name']) {
 				var column_definitions = table['column_definitions'];
 				$.each(column_definitions, function(j, col) {
-					if (col['annotations'] != null && col['annotations']['comment'] != null) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
 						if (hasAnnotation(table_name, col['name'], 'dataset')) {
 							dataset_id = col['name'];
 						}
@@ -1918,7 +1970,7 @@ function getDenormalizedThumbnail(table_name, row, column_name) {
 					if (fileTable == table['table_name']) {
 						var column_definitions = table['column_definitions'];
 						$.each(column_definitions, function(j, col) {
-							if (col['annotations'] != null && col['annotations']['comment'] != null) {
+							if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
 								if (hasAnnotation(fileTable, col['name'], 'thumbnail')) {
 									thumbnail = col['name'];
 								}
@@ -1940,9 +1992,9 @@ function getDenormalizedThumbnail(table_name, row, column_name) {
 			var thumbnailPredicate = [];
 			thumbnailPredicate.push(ERMREST_DATA_HOME);
 			thumbnailPredicate.push('entity');
-			thumbnailPredicate.push(encodeSafeURIComponent(imageTable));
+			thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(imageTable));
 			thumbnailPredicate.push(predicate.join('&'));
-			thumbnailPredicate.push(encodeSafeURIComponent(fileTable));
+			thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
 			var url = thumbnailPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
 			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
 			if (data.length == 1) {
@@ -1954,19 +2006,22 @@ function getDenormalizedThumbnail(table_name, row, column_name) {
 }
 
 function setColumnsAlias() {
-	COLUMNS_ALIAS = {};
-	$.each(SCHEMA_METADATA, function(i, table) {
-		var values = {};
-		var column_definitions = table['column_definitions'];
-		$.each(column_definitions, function(j, col) {
-			var display = getColumnDisplayName(col['name']);
-			if (col['annotations'] != null && col['annotations']['description'] != null && 
-					col['annotations']['description']['display'] != null) {
-				display = col['annotations']['description']['display'];
-			}
-			values[col['name']] = display;
+	CATALOG_COLUMNS_ALIAS = {};
+	$.each(CATALOG_METADATA, function(schema, metadata) {
+		CATALOG_COLUMNS_ALIAS[schema] = {};
+		$.each(metadata, function(i, table) {
+			var values = {};
+			var column_definitions = table['column_definitions'];
+			$.each(column_definitions, function(j, col) {
+				var display = getColumnDisplayName(col['name']);
+				if (col['annotations'] != null && col['annotations'][COLUMNS_MAP_URI] != null && 
+						col['annotations'][COLUMNS_MAP_URI]['display'] != null) {
+					display = col['annotations'][COLUMNS_MAP_URI]['display'];
+				}
+				values[col['name']] = display;
+			});
+			CATALOG_COLUMNS_ALIAS[schema][table['table_name']] = values;
 		});
-		COLUMNS_ALIAS[table['table_name']] = values;
 	});
 }
 
@@ -1979,7 +2034,7 @@ function getDenormalized3dView(table_name, row, column_name) {
 			if (table_name == table['table_name']) {
 				var column_definitions = table['column_definitions'];
 				$.each(column_definitions, function(j, col) {
-					if (col['annotations'] != null && col['annotations']['comment'] != null) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
 						if (hasAnnotation(table_name, col['name'], 'dataset')) {
 							dataset_id = col['name'];
 						}
@@ -2002,7 +2057,7 @@ function getDenormalized3dView(table_name, row, column_name) {
 					if (fileTable == table['table_name']) {
 						var column_definitions = table['column_definitions'];
 						$.each(column_definitions, function(j, col) {
-							if (col['annotations'] != null && col['annotations']['comment'] != null) {
+							if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
 								if (hasAnnotation(fileTable, col['name'], 'viewer')) {
 									viewer = col['name'];
 								}
@@ -2028,14 +2083,14 @@ function getDenormalized3dView(table_name, row, column_name) {
 			var viewerPredicate = [];
 			viewerPredicate.push(ERMREST_DATA_HOME);
 			viewerPredicate.push('entity');
-			viewerPredicate.push(encodeSafeURIComponent(imageTable));
+			viewerPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(imageTable));
 			viewerPredicate.push(predicate.join('&'));
-			viewerPredicate.push(encodeSafeURIComponent(fileTable));
+			viewerPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
 			viewerPredicate.push(contentTypePredicate.join(';'));
 			var url = viewerPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
 			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
 			if (data.length == 1) {
-				ret = getTableAnnotation(fileTable, 'description', 'viewer_url');
+				ret = getTableAnnotation(fileTable, TABLES_MAP_URI, 'viewer_url');
 				ret += '?url=' + data[0][viewer];
 			}
 		}
@@ -2064,7 +2119,7 @@ function getDenormalizedFile(table_name, row, column_name) {
 			if (table_name == table['table_name']) {
 				var column_definitions = table['column_definitions'];
 				$.each(column_definitions, function(j, col) {
-					if (col['annotations'] != null && col['annotations']['comment'] != null) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
 						if (hasAnnotation(table_name, col['name'], 'dataset')) {
 							dataset_id = col['name'];
 						}
@@ -2087,7 +2142,7 @@ function getDenormalizedFile(table_name, row, column_name) {
 					if (fileTable == table['table_name']) {
 						var column_definitions = table['column_definitions'];
 						$.each(column_definitions, function(j, col) {
-							if (col['annotations'] != null && col['annotations']['comment'] != null) {
+							if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
 								if (hasAnnotation(fileTable, col['name'], 'download')) {
 									download = col['name'];
 								}
@@ -2111,9 +2166,9 @@ function getDenormalizedFile(table_name, row, column_name) {
 			var downloadPredicate = [];
 			downloadPredicate.push(ERMREST_DATA_HOME);
 			downloadPredicate.push('entity');
-			downloadPredicate.push(encodeSafeURIComponent(downloadTable));
+			downloadPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(downloadTable));
 			downloadPredicate.push(predicate.join('&'));
-			downloadPredicate.push(encodeSafeURIComponent(fileTable));
+			downloadPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
 			downloadPredicate.push(contentTypePredicate.join(';'));
 			var url = downloadPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
 			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
@@ -2134,7 +2189,7 @@ function getItemDenormalizedValue(table_name, row, column_name, val) {
 			if (table_name == table['table_name']) {
 				var column_definitions = table['column_definitions'];
 				$.each(column_definitions, function(j, col) {
-					if (col['annotations'] != null && col['annotations']['comment'] != null) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
 						if (hasAnnotation(table_name, col['name'], 'dataset')) {
 							dataset_id = col['name'];
 						}
@@ -2157,7 +2212,7 @@ function getItemDenormalizedValue(table_name, row, column_name, val) {
 					if (fileTable == table['table_name']) {
 						var column_definitions = table['column_definitions'];
 						$.each(column_definitions, function(j, col) {
-							if (col['annotations'] != null && col['annotations']['comment'] != null) {
+							if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
 								if (hasAnnotation(fileTable, col['name'], 'download')) {
 									download = col['name'];
 								}
@@ -2179,9 +2234,9 @@ function getItemDenormalizedValue(table_name, row, column_name, val) {
 			var downloadPredicate = [];
 			downloadPredicate.push(ERMREST_DATA_HOME);
 			downloadPredicate.push('entity');
-			downloadPredicate.push(encodeSafeURIComponent(downloadTable));
+			downloadPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(downloadTable));
 			downloadPredicate.push(predicate.join('&'));
-			downloadPredicate.push(encodeSafeURIComponent(fileTable));
+			downloadPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
 			var url = downloadPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
 			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
 			if (data.length == 1) {
@@ -2199,7 +2254,7 @@ function getColumnName(table_name, column_annotation) {
                     var column_definitions = table['column_definitions'];
                     $.each(column_definitions, function(i, col) {
                         if (col['annotations'] != null && 
-                                        col['annotations']['comment'] != null && col['annotations']['comment'].contains(column_annotation)) {
+                                        col['annotations'][COLUMNS_LIST_URI] != null && col['annotations'][COLUMNS_LIST_URI].contains(column_annotation)) {
                                 ret = col['name'];
                                 return false;
                         }
@@ -2228,9 +2283,9 @@ function getDenormalizedFiles(root_table, row, result) {
     var uri = getColumnName(tables['download'], 'download');
     var filename = getColumnName(tables['download'], 'name');
     var bytes = getColumnName(tables['download'], 'orderby');
-    result['viewer_url'] = getTableAnnotation(tables['download'], 'description', 'viewer_url');
-    result['preview_url'] = getTableAnnotation(tables['download'], 'description', 'preview_url');
-    result['enlarge_url'] = getTableAnnotation(tables['download'], 'description', 'enlarge_url');
+    result['viewer_url'] = getTableAnnotation(tables['download'], TABLES_MAP_URI, 'viewer_url');
+    result['preview_url'] = getTableAnnotation(tables['download'], TABLES_MAP_URI, 'preview_url');
+    result['enlarge_url'] = getTableAnnotation(tables['download'], TABLES_MAP_URI, 'enlarge_url');
     result['uri'] = uri;
     result['preview'] = preview;
     result['name'] = filename;
@@ -2276,9 +2331,9 @@ function getDatasetFiles(root_table, row, table_annotation, tables) {
                 var downloadPredicate = [];
                 downloadPredicate.push(ERMREST_DATA_HOME);
                 downloadPredicate.push('entity');
-                downloadPredicate.push(encodeSafeURIComponent(table_name));
+                downloadPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table_name));
                 downloadPredicate.push(predicate.join('&'));
-                downloadPredicate.push(encodeSafeURIComponent(fileTable));
+                downloadPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
                 var url = downloadPredicate.join('/');
                 var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
                 ret = data;
@@ -2290,8 +2345,8 @@ function getTableDisplayName(table_name) {
     var ret = table_name;
     $.each(SCHEMA_METADATA, function(i, table) {
         if (table_name == table['table_name']) {
-            if (table['annotations']['description'] != null && table['annotations']['description']['display'] != null) {
-                ret = table['annotations']['description']['display'];
+            if (table['annotations'][TABLES_MAP_URI] != null && table['annotations'][TABLES_MAP_URI]['display'] != null) {
+                ret = table['annotations'][TABLES_MAP_URI]['display'];
             }
             return false;
         }
@@ -2304,7 +2359,7 @@ function getGeoValue(table_name, row, column_name) {
     var geo_prefix = null;
     $.each(SCHEMA_METADATA, function(i, table) {
         if (table_name == table['table_name']) {
-            geo_prefix = table['annotations']['description'][column_name];
+            geo_prefix = table['annotations'][TABLES_MAP_URI][column_name];
             return false;
         }
     });
@@ -2329,6 +2384,41 @@ function entityLinearize(denormalizedView, linearizeView) {
 					linearizeView[column]['rows'].push(row);
 				}
 			});
+		});
+	});
+}
+
+function getSchemas() {
+	var url = ERMREST_DATA_HOME + '/schema';
+	CATALOG_SCHEMAS = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null)['schemas'];
+	var excludeSchemas = [];
+	$.each(CATALOG_SCHEMAS, function(schema, value) {
+		var tables = value['tables'];
+		var exclude = true;
+		$.each(tables, function(table, tableDef) {
+			if (tableDef['annotations'] == null || tableDef['annotations'][TABLES_LIST_URI] == null ||
+					!tableDef['annotations'][TABLES_LIST_URI].contains('exclude')) {
+				exclude = false;
+				return false;
+			}
+		});
+		if (exclude) {
+			excludeSchemas.push(schema);
+		}
+	});
+	$.each(excludeSchemas, function(i, schema) {
+		delete CATALOG_SCHEMAS[schema];
+	});
+	setSchema();
+	setCatalogTables();
+}
+
+function setCatalogTables() {
+	CATALOG_METADATA = {};
+	$.each(CATALOG_SCHEMAS, function(schema, value) {
+		CATALOG_METADATA[schema] = [];
+		$.each(value['tables'], function(key, table) {
+			CATALOG_METADATA[schema].push(table);
 		});
 	});
 }

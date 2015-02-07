@@ -38,4 +38,41 @@ facebaseService.service('FacebaseService', ['$sce', 'FacebaseData', function($sc
 			FacebaseData.maxPages++;
 		}
 	};
+	
+	this.initTable = function () {
+		$('footer').hide();
+		$('#headerSearch').val('');
+		FacebaseData.ready = false;
+		FacebaseData.moreFlag = false;
+		FacebaseData.filterTextTimeout = null;
+		FacebaseData.filterSliderTimeout = null;
+		FacebaseData.filterSearchAllTimeout = null;
+		FacebaseData.totalServerItems = 0;
+		FacebaseData.filterAllText = '';
+		FacebaseData.sortColumns = [''];
+		FacebaseData.pageRange = [];
+		FacebaseData.pageMap = {};
+		FacebaseData.maxPages = 0;
+		FacebaseData.sortFacet = '';
+		FacebaseData.sortDirection = 'asc';
+		FacebaseData.details = false;
+		FacebaseData.entryRow = [];
+		FacebaseData.detailColumns = [];
+		FacebaseData.detailRows = [];
+		FacebaseData.textEntryRow = [];
+		FacebaseData.entry3Dview = '';
+		FacebaseData.entryTitle = '';
+		FacebaseData.entrySubtitle = '';
+		this.initPageRange();
+        FacebaseData.spinner = [];
+        FacebaseData.modalIndex = -1;
+		clearFacets(FacebaseData);
+	};
+	
+	this.initPageRange = function () {
+	    for (var i = 1; i <= FacebaseData.tagPages; i++) {
+	    	FacebaseData.pageRange.push(i);
+	    	FacebaseData.pageMap[i] = i;
+	    }
+	};
 }]);

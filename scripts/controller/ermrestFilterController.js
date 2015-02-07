@@ -49,10 +49,7 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	};
 
 	$scope.initPageRange = function () {
-	    for (var i = 1; i <= $scope.FacebaseData.tagPages; i++) {
-	    	$scope.FacebaseData.pageRange.push(i);
-	    	$scope.FacebaseData.pageMap[i] = i;
-	    }
+    	FacebaseService.initPageRange();
 	}
 	
 	$scope.initSortOption = function initSortOption() {
@@ -64,33 +61,7 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	};
 	
 	$scope.initTable = function initTable() {
-		$('footer').hide();
-		$('#headerSearch').val('');
-		$scope.FacebaseData.ready = false;
-		$scope.FacebaseData.moreFlag = false;
-		$scope.FacebaseData.filterTextTimeout = null;
-		$scope.FacebaseData.filterSliderTimeout = null;
-		$scope.FacebaseData.filterSearchAllTimeout = null;
-		$scope.FacebaseData.totalServerItems = 0;
-		$scope.FacebaseData.filterAllText = '';
-		$scope.FacebaseData.sortColumns = [''];
-		$scope.FacebaseData.pageRange = [];
-		$scope.FacebaseData.pageMap = {};
-		$scope.FacebaseData.maxPages = 0;
-		$scope.FacebaseData.sortFacet = '';
-		$scope.FacebaseData.sortDirection = 'asc';
-		$scope.FacebaseData.details = false;
-		$scope.FacebaseData.entryRow = [];
-		$scope.FacebaseData.detailColumns = [];
-		$scope.FacebaseData.detailRows = [];
-		$scope.FacebaseData.textEntryRow = [];
-		$scope.FacebaseData.entry3Dview = '';
-		$scope.FacebaseData.entryTitle = '';
-		$scope.FacebaseData.entrySubtitle = '';
-		$scope.initPageRange();
-        $scope.FacebaseData.spinner = [];
-        $scope.FacebaseData.modalIndex = -1;
-		clearFacets($scope.FacebaseData);
+    	FacebaseService.initTable();
 	};
 
 	$scope.predicate = function predicate(facet,keyCode) {
@@ -292,6 +263,10 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	};
 
 	this.getEntityResults = function getEntityResults(event, data) {
+		var isNewSchema = (SCHEMA != data.schema);
+		if (isNewSchema) {
+			initSchema(data.schema);
+		}
 		var peviousTable = $scope.FacebaseData.table;
 		var node = $('label.highlighted', $('#treeDiv'));
 		var isNew = (node.length == 0 || node[0] !== event.target);
@@ -304,7 +279,7 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 			$('label', $('#treeDiv')).removeClass('highlighted');
 			$(event.target).addClass('highlighted');
 			var newBranch = false;
-			if (data.level > 0 && $scope.FacebaseData.level >= 0) {
+			if (!isNewSchema && data.level > 0 && $scope.FacebaseData.level >= 0) {
 				var oldRoot = null;
 				if ($scope.FacebaseData.level > 0) {
 					var oldRootParent = $scope.FacebaseData.selectedEntity.parent;
@@ -328,11 +303,18 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 			}
 			$scope.FacebaseData.selectedEntity = data;
 			$scope.FacebaseData.table = data.name;
-			if (data.level == 0) {
+			if (data.level == 0 || isNewSchema) {
 				resetTreeCount(data);
 				$scope.FacebaseData.entityPredicates.length = 0;
+				if (isNewSchema && data.level > 0) {
+					var node = data.parent;
+					for (var i=data.level-1; i>=0; i--) {
+						$scope.FacebaseData.entityPredicates[i] = encodeSafeURIComponent(node.name);
+						node = node.parent;
+					}
+				}
 				$scope.FacebaseData.entityPredicates.push(encodeSafeURIComponent($scope.FacebaseData.table));
-				$scope.FacebaseData.level = 0;
+				$scope.FacebaseData.level = data.level;
 				updateTreeCount(data, $scope.FacebaseData.entityPredicates);
 				$scope.initTable();
 				getMetadata(data.name, $scope.successGetMetadata);
@@ -474,5 +456,8 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	};
 	
 	$scope.initPageRange();
-	getTables($scope.FacebaseData.tables, $scope.FacebaseData, $scope.successGetTables);
+	setTimeout(function () {
+		// delay is necessary for Angular render activity
+		getTables($scope.FacebaseData.tables, $scope.FacebaseData, $scope.successGetTables);
+	}, 1);
 }]);
