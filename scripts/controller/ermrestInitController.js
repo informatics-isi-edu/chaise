@@ -2,11 +2,11 @@
 
 /* Controllers */
 
-var ermInitController = angular.module('ermInitController', ['facebaseModel', 'facebaseService']);
+var ermInitController = angular.module('ermInitController', ['facetsModel', 'facetsService']);
 
-//angular.module('ermrestApp').controller('InitListCtrl', ['$scope', '$location', 'FacebaseData',
-ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacebaseData', 'FacebaseService',
-                                                      function($scope, $location, FacebaseData, FacebaseService) {
+//angular.module('ermrestApp').controller('InitListCtrl', ['$scope', '$location', 'FacetsData',
+ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacetsData', 'FacetsService',
+                                                      function($scope, $location, FacetsData, FacetsService) {
 	
 	$('footer').hide();
 	$('.panel-collapse').on('hide.bs.collapse', function () {
@@ -36,14 +36,14 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacebaseDa
 		CATALOG = 1;
 	}
 	
-	$scope.FacebaseData = FacebaseData;
+	$scope.FacetsData = FacetsData;
 	
-	FacebaseService.initTable();
+	FacetsService.initTable();
 
 	if ($location.search()['table'] != null) {
-		$scope.FacebaseData.table = $location.search()['table'];
+		$scope.FacetsData.table = $location.search()['table'];
 	} else {
-		$scope.FacebaseData.table = '';
+		$scope.FacetsData.table = '';
 	}
 	
 	initApplication();

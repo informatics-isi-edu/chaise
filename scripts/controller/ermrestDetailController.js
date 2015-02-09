@@ -2,16 +2,16 @@
 
 /* Controllers */
 
-var ermDetailController = angular.module('ermDetailController', ['facebaseModel', 'facebaseService']);
+var ermDetailController = angular.module('ermDetailController', ['facetsModel', 'facetsService']);
 
-//angular.module('ermrestApp').controller('DetailListCtrl', ['$scope', '$sce', 'FacebaseData', 'FacebaseService',
-ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacebaseData', 'FacebaseService',
-                                                      function($scope, $sce, FacebaseData, FacebaseService) {
+//angular.module('ermrestApp').controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData', 'FacetsService',
+ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData', 'FacetsService',
+                                                      function($scope, $sce, FacetsData, FacetsService) {
 	
-	$scope.FacebaseData = FacebaseData;
+	$scope.FacetsData = FacetsData;
 	
     this.closeModal = function closeModal(event) {
-    	FacebaseService.closeModal(event);
+    	FacetsService.closeModal(event);
 	}
     
 	this.detailValue = function detailValue(table, column, data) {
@@ -19,7 +19,7 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacebaseDat
 	};
 
 	this.display = function display(table, column) {
-		return FacebaseService.display(table, column);
+		return FacetsService.display(table, column);
 	};
 
 	this.displayTable = function displayTable(table) {
@@ -40,7 +40,7 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacebaseDat
 	};
 
 	this.html = function html(table, column, data) {
-		return FacebaseService.html(table, column, data);
+		return FacetsService.html(table, column, data);
 	};
 
 	this.init3Dview = function init3Dview(url) {
@@ -114,7 +114,7 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacebaseDat
 	};
 	
 	this.setPreviewClass = function setPreviewClass() {
-		return ($scope.FacebaseData.viewer3dFile.length>0) ? 'preview' : 'no_preview';
+		return ($scope.FacetsData.viewer3dFile.length>0) ? 'preview' : 'no_preview';
 	};
 
 }]);

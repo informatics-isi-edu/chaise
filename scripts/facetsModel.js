@@ -2,10 +2,10 @@
 
 /* Model Module */
 
-var facebaseModel = angular.module('facebaseModel', []);
+var facetsModel = angular.module('facetsModel', []);
 
-//angular.module('ermrestApp').factory('FacebaseData', function() {
-facebaseModel.factory('FacebaseData', function() {
+//angular.module('ermrestApp').factory('FacetsData', function() {
+facetsModel.factory('FacetsData', function() {
 	return {
 		'box': {},
 		'chooseColumns': {},

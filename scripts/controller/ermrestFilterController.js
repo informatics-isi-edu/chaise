@@ -2,35 +2,35 @@
 
 /* Controllers */
 
-var ermFilterController = angular.module('ermFilterController', ['facebaseModel', 'facebaseService']);
+var ermFilterController = angular.module('ermFilterController', ['facetsModel', 'facetsService']);
 
-//angular.module('ermrestApp').controller('FilterListCtrl', ['$scope', '$timeout', 'FacebaseData', 'FacebaseService',
-ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'FacebaseData', 'FacebaseService',
-                                                      function($scope, $timeout, FacebaseData, FacebaseService) {
+//angular.module('ermrestApp').controller('FilterListCtrl', ['$scope', '$timeout', 'FacetsData', 'FacetsService',
+ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'FacetsData', 'FacetsService',
+                                                      function($scope, $timeout, FacetsData, FacetsService) {
 	
-	$scope.FacebaseData = FacebaseData;
+	$scope.FacetsData = FacetsData;
 	
-	$scope.$watch('FacebaseData.filterOptions', function (newVal, oldVal) {
-		if ($scope.FacebaseData.ready && newVal !== oldVal) {
-			$scope.FacebaseData.pagingOptions.currentPage = 1;
-			$scope.getPagedDataAsync($scope.FacebaseData.pagingOptions.pageSize, $scope.FacebaseData.pagingOptions.currentPage, $scope.FacebaseData.filterOptions.filterText, $scope.FacebaseData.sortInfo);
+	$scope.$watch('FacetsData.filterOptions', function (newVal, oldVal) {
+		if ($scope.FacetsData.ready && newVal !== oldVal) {
+			$scope.FacetsData.pagingOptions.currentPage = 1;
+			$scope.getPagedDataAsync($scope.FacetsData.pagingOptions.pageSize, $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.filterOptions.filterText, $scope.FacetsData.sortInfo);
 		}
 	}, true);
 	
-	$scope.$watch('FacebaseData.pagingOptions', function (newVal, oldVal) {
-		if ($scope.FacebaseData.ready && newVal !== oldVal && 
+	$scope.$watch('FacetsData.pagingOptions', function (newVal, oldVal) {
+		if ($scope.FacetsData.ready && newVal !== oldVal && 
 				(newVal.currentPage !== oldVal.currentPage || newVal.pageSize !== oldVal.pageSize)) {
-			$scope.getPagedDataAsync($scope.FacebaseData.pagingOptions.pageSize, $scope.FacebaseData.pagingOptions.currentPage, $scope.FacebaseData.filterOptions.filterText, $scope.FacebaseData.sortInfo);
+			$scope.getPagedDataAsync($scope.FacetsData.pagingOptions.pageSize, $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.filterOptions.filterText, $scope.FacetsData.sortInfo);
 		}
 	}, true);
 	
-	$scope.$watch('FacebaseData.sortInfo', function (newVal, oldVal) {
-		if ($scope.FacebaseData.ready && newVal !== oldVal) {
-			if ($scope.FacebaseData['sortInfo']['fields'].length > 1) {
+	$scope.$watch('FacetsData.sortInfo', function (newVal, oldVal) {
+		if ($scope.FacetsData.ready && newVal !== oldVal) {
+			if ($scope.FacetsData['sortInfo']['fields'].length > 1) {
 				$('div.ngSortButtonUp').addClass('ng-hide');
 			}
-			$scope.FacebaseData.pagingOptions.currentPage = 1;
-			$scope.getPagedDataAsync($scope.FacebaseData.pagingOptions.pageSize, $scope.FacebaseData.pagingOptions.currentPage, $scope.FacebaseData.filterOptions.filterText, newVal);
+			$scope.FacetsData.pagingOptions.currentPage = 1;
+			$scope.getPagedDataAsync($scope.FacetsData.pagingOptions.pageSize, $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.filterOptions.filterText, newVal);
 		}
 	}, true);
 
@@ -39,70 +39,70 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 			if (sortOption != null && sortOption['fields'].length > 1) {
 				sortOption = null;
 			}
-			$scope.FacebaseData['sortOption'] = sortOption;
+			$scope.FacetsData['sortOption'] = sortOption;
 			if (searchText) {
-				getPage($scope.FacebaseData, $scope.FacebaseData.totalServerItems, $scope.setPagingData);
+				getPage($scope.FacetsData, $scope.FacetsData.totalServerItems, $scope.setPagingData);
 			} else {
-				getPage($scope.FacebaseData, $scope.FacebaseData.totalServerItems, $scope.setPagingData);
+				getPage($scope.FacetsData, $scope.FacetsData.totalServerItems, $scope.setPagingData);
 			}
 		}, 100);
 	};
 
 	$scope.initPageRange = function () {
-    	FacebaseService.initPageRange();
+    	FacetsService.initPageRange();
 	}
 	
 	$scope.initSortOption = function initSortOption() {
-		$.each($scope.FacebaseData.colsDefs, function(i, col) {
-			if (isSortable($scope.FacebaseData.table, col.field)) {
-				$scope.FacebaseData.sortColumns.push(col.field);
+		$.each($scope.FacetsData.colsDefs, function(i, col) {
+			if (isSortable($scope.FacetsData.table, col.field)) {
+				$scope.FacetsData.sortColumns.push(col.field);
 			}
 		});
 	};
 	
 	$scope.initTable = function initTable() {
-    	FacebaseService.initTable();
+    	FacetsService.initTable();
 	};
 
 	$scope.predicate = function predicate(facet,keyCode) {
-		if ($scope.FacebaseData.box[facet['table']][facet['name']]['value'] == '') {
-			$scope.FacebaseData.facetClass[facet['table']][facet['name']] = '';
+		if ($scope.FacetsData.box[facet['table']][facet['name']]['value'] == '') {
+			$scope.FacetsData.facetClass[facet['table']][facet['name']] = '';
 		} else {
-			$scope.FacebaseData.facetClass[facet['table']][facet['name']] = 'selectedFacet';
+			$scope.FacetsData.facetClass[facet['table']][facet['name']] = 'selectedFacet';
 		}
-		FacebaseService.setSortOption();
-		$scope.FacebaseData.pagingOptions.currentPage = 1;
-		getErmrestData($scope.FacebaseData, $scope.successSearchFacets, $scope.successUpdateModels);
+		FacetsService.setSortOption();
+		$scope.FacetsData.pagingOptions.currentPage = 1;
+		getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	$scope.predicate_slider = function predicate_slider(facet) {
-		if ($scope.FacebaseData.box[facet['table']][facet['name']]['min'] > $scope.FacebaseData.box[facet['table']][facet['name']]['floor']) {
-			$scope.FacebaseData.box[facet['table']][facet['name']]['left'] = true;
-		} else if ($scope.FacebaseData.box[facet['table']][facet['name']]['left'] && $scope.FacebaseData.box[facet['table']][facet['name']]['min'] == $scope.FacebaseData.box[facet['table']][facet['name']]['floor']) {
-			delete $scope.FacebaseData.box[facet['table']][facet['name']]['left'];
+		if ($scope.FacetsData.box[facet['table']][facet['name']]['min'] > $scope.FacetsData.box[facet['table']][facet['name']]['floor']) {
+			$scope.FacetsData.box[facet['table']][facet['name']]['left'] = true;
+		} else if ($scope.FacetsData.box[facet['table']][facet['name']]['left'] && $scope.FacetsData.box[facet['table']][facet['name']]['min'] == $scope.FacetsData.box[facet['table']][facet['name']]['floor']) {
+			delete $scope.FacetsData.box[facet['table']][facet['name']]['left'];
 		}
-		if ($scope.FacebaseData.box[facet['table']][facet['name']]['max'] < $scope.FacebaseData.box[facet['table']][facet['name']]['ceil']) {
-			$scope.FacebaseData.box[facet['table']][facet['name']]['right'] = true;
-		} else if ($scope.FacebaseData.box[facet['table']][facet['name']]['right'] && $scope.FacebaseData.box[facet['table']][facet['name']]['max'] == $scope.FacebaseData.box[facet['table']][facet['name']]['original_ceil']) {
-			delete $scope.FacebaseData.box[facet['table']][facet['name']]['right'];
+		if ($scope.FacetsData.box[facet['table']][facet['name']]['max'] < $scope.FacetsData.box[facet['table']][facet['name']]['ceil']) {
+			$scope.FacetsData.box[facet['table']][facet['name']]['right'] = true;
+		} else if ($scope.FacetsData.box[facet['table']][facet['name']]['right'] && $scope.FacetsData.box[facet['table']][facet['name']]['max'] == $scope.FacetsData.box[facet['table']][facet['name']]['original_ceil']) {
+			delete $scope.FacetsData.box[facet['table']][facet['name']]['right'];
 		}
-		setFacetClass($scope.FacebaseData, facet, $scope.FacebaseData.facetClass);
-		FacebaseService.setSortOption();
-		$scope.FacebaseData.pagingOptions.currentPage = 1;
-		getErmrestData($scope.FacebaseData, $scope.successSearchFacets, $scope.successUpdateModels);
+		setFacetClass($scope.FacetsData, facet, $scope.FacetsData.facetClass);
+		FacetsService.setSortOption();
+		$scope.FacetsData.pagingOptions.currentPage = 1;
+		getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	$scope.setPagingData = function(data, totalItems, page, pageSize){	
 		if (page == 1) {
-			$scope.FacebaseData.ermrestData = data;
+			$scope.FacetsData.ermrestData = data;
 		} else {
-			$scope.FacebaseData.ermrestData = $scope.FacebaseData.ermrestData.concat(data);
+			$scope.FacetsData.ermrestData = $scope.FacetsData.ermrestData.concat(data);
 		}
-		$scope.FacebaseData.collectionsPredicate = getCollectionsPredicate($scope.FacebaseData.entityPredicates, $scope.FacebaseData);
-		$scope.FacebaseData.totalServerItems = totalItems;
-		$scope.FacebaseData.maxPages = Math.floor($scope.FacebaseData.totalServerItems/$scope.FacebaseData.pagingOptions.pageSize);
-		if ($scope.FacebaseData.totalServerItems%$scope.FacebaseData.pagingOptions.pageSize != 0) {
-			$scope.FacebaseData.maxPages++;
+		$scope.FacetsData.collectionsPredicate = getCollectionsPredicate($scope.FacetsData.entityPredicates, $scope.FacetsData);
+		$scope.FacetsData.totalServerItems = totalItems;
+		$scope.FacetsData.maxPages = Math.floor($scope.FacetsData.totalServerItems/$scope.FacetsData.pagingOptions.pageSize);
+		if ($scope.FacetsData.totalServerItems%$scope.FacetsData.pagingOptions.pageSize != 0) {
+			$scope.FacetsData.maxPages++;
 		}
 		if (!$scope.$$phase) {
 			$scope.$apply();
@@ -110,50 +110,50 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	};
 
 	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
-		initModels($scope.FacebaseData, $scope.successInitModels);
+		initModels($scope.FacetsData, $scope.successInitModels);
 	};
 
 	$scope.successGetErmrestData = function successGetErmrestData(data, totalItems, page, pageSize) {
 		if (page == 1) {
-			$scope.FacebaseData.ermrestData = data;
+			$scope.FacetsData.ermrestData = data;
 		} else {
-			$scope.FacebaseData.ermrestData = $scope.FacebaseData.ermrestData.concat(data);
+			$scope.FacetsData.ermrestData = $scope.FacetsData.ermrestData.concat(data);
 		}
-		$scope.FacebaseData.totalServerItems = totalItems;
-		$scope.FacebaseData.collectionsPredicate = getCollectionsPredicate($scope.FacebaseData.entityPredicates, $scope.FacebaseData);
-		if ($scope.FacebaseData.selectedEntity != null) {
-			$scope.FacebaseData.selectedEntity['count'] = totalItems;
+		$scope.FacetsData.totalServerItems = totalItems;
+		$scope.FacetsData.collectionsPredicate = getCollectionsPredicate($scope.FacetsData.entityPredicates, $scope.FacetsData);
+		if ($scope.FacetsData.selectedEntity != null) {
+			$scope.FacetsData.selectedEntity['count'] = totalItems;
 		}
-		$scope.FacebaseData.maxPages = Math.floor($scope.FacebaseData.totalServerItems/$scope.FacebaseData.pagingOptions.pageSize);
-		if ($scope.FacebaseData.totalServerItems%$scope.FacebaseData.pagingOptions.pageSize != 0) {
-			$scope.FacebaseData.maxPages++;
+		$scope.FacetsData.maxPages = Math.floor($scope.FacetsData.totalServerItems/$scope.FacetsData.pagingOptions.pageSize);
+		if ($scope.FacetsData.totalServerItems%$scope.FacetsData.pagingOptions.pageSize != 0) {
+			$scope.FacetsData.maxPages++;
 		}
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
 		$('div.ngSortButtonUp').addClass('ng-hide');
-		getColumnDescriptions($scope.FacebaseData, $scope.successGetColumnDescriptions);
+		getColumnDescriptions($scope.FacetsData, $scope.successGetColumnDescriptions);
 	};
 
 	$scope.successGetMetadata = function successGetMetadata(data, textStatus, jqXHR) {
-		$scope.FacebaseData['metadata'] = data;
-		getTableColumns($scope.FacebaseData, $scope.successGetTableColumns);
+		$scope.FacetsData['metadata'] = data;
+		getTableColumns($scope.FacetsData, $scope.successGetTableColumns);
 	};
 	
 	$scope.successGetTableColumns = function successGetTableColumns(columns) {
-		$scope.FacebaseData['facets'] = columns['facets'];
-		$scope.FacebaseData['colsDefs'] = columns['colsDefs'];
+		$scope.FacetsData['facets'] = columns['facets'];
+		$scope.FacetsData['colsDefs'] = columns['colsDefs'];
 		$scope.initSortOption();
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
-		getTableColumnsUniques($scope.FacebaseData, $scope.successGetTableColumnsUniques);
+		getTableColumnsUniques($scope.FacetsData, $scope.successGetTableColumnsUniques);
 	};
 	
 	$scope.successGetTableColumnsUniques = function successGetTableColumnsUniques() {
 		//alert(JSON.stringify($scope.score, null, 4));
-		FacebaseService.setSortOption();
-		getErmrestData($scope.FacebaseData, $scope.successGetErmrestData, $scope.successUpdateModels);
+		FacetsService.setSortOption();
+		getErmrestData($scope.FacetsData, $scope.successGetErmrestData, $scope.successUpdateModels);
 	};
 
 	$scope.successGetTables = function successGetTables() {
@@ -165,21 +165,21 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	};
 
 	$scope.successInitModels = function successInitModels() {
-		updateCount($scope.FacebaseData, $scope.successUpdateCount);
+		updateCount($scope.FacetsData, $scope.successUpdateCount);
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
 	};
 
 	$scope.successSearchFacets = function successSearchFacets(data, totalItems, page, pageSize) {
-		FacebaseService.successSearchFacets(data, totalItems, page, pageSize);
+		FacetsService.successSearchFacets(data, totalItems, page, pageSize);
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
 	};
 
 	$scope.successUpdateCount = function successUpdateCount() {
-		$scope.FacebaseData.ready = true;
+		$scope.FacetsData.ready = true;
 		$('footer').show();
 		if (!$scope.$$phase) {
 			$scope.$apply();
@@ -196,57 +196,57 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 
 	this.changeSortDirection = function changeSortDirection(event) {
 		event.preventDefault();
-		if ($scope.FacebaseData.sortInfo.fields.length == 1) {
-			$scope.FacebaseData.sortInfo.directions.length = 1;
-			if ($scope.FacebaseData.sortDirection == $scope.FacebaseData.sortDirectionOptions[0]) {
-				$scope.FacebaseData.sortDirection = $scope.FacebaseData.sortDirectionOptions[1];
+		if ($scope.FacetsData.sortInfo.fields.length == 1) {
+			$scope.FacetsData.sortInfo.directions.length = 1;
+			if ($scope.FacetsData.sortDirection == $scope.FacetsData.sortDirectionOptions[0]) {
+				$scope.FacetsData.sortDirection = $scope.FacetsData.sortDirectionOptions[1];
 			} else {
-				$scope.FacebaseData.sortDirection = $scope.FacebaseData.sortDirectionOptions[0];
+				$scope.FacetsData.sortDirection = $scope.FacetsData.sortDirectionOptions[0];
 			}
-			$scope.FacebaseData.sortInfo.directions[0] = $scope.FacebaseData.sortDirection;
+			$scope.FacetsData.sortInfo.directions[0] = $scope.FacetsData.sortDirection;
 		}
 	};
 
 	this.changeSortOption = function changeSortOption() {
-		$scope.FacebaseData.sortInfo.fields.length = 1;
-		$scope.FacebaseData.sortInfo.directions.length = 1;
-		$scope.FacebaseData.sortInfo.fields[0] = $scope.FacebaseData.sortFacet;
-		$scope.FacebaseData.sortInfo.directions[0] = $scope.FacebaseData.sortDirection;
-		if ($scope.FacebaseData.sortFacet=='') {
-			$scope.FacebaseData.sortInfo.fields.push('Not Sorted');
+		$scope.FacetsData.sortInfo.fields.length = 1;
+		$scope.FacetsData.sortInfo.directions.length = 1;
+		$scope.FacetsData.sortInfo.fields[0] = $scope.FacetsData.sortFacet;
+		$scope.FacetsData.sortInfo.directions[0] = $scope.FacetsData.sortDirection;
+		if ($scope.FacetsData.sortFacet=='') {
+			$scope.FacetsData.sortInfo.fields.push('Not Sorted');
 		}
 	};
 	
 	this.clear = function clear(event) {
 		//window.location = '#';
 		event.preventDefault();
-		$scope.FacebaseData.entityPredicates.length = 0;
+		$scope.FacetsData.entityPredicates.length = 0;
 		$scope.initTable();
 		selectCollection();
-		getMetadata($scope.FacebaseData.table, $scope.successGetMetadata);
+		getMetadata($scope.FacetsData.table, $scope.successGetMetadata);
 	};
 	
     this.closeModal = function closeModal(event) {
-    	FacebaseService.closeModal(event);
+    	FacetsService.closeModal(event);
 	}
 
 	this.delay_predicate = function delay_predicate(facet,keyCode) {
-		if ($scope.FacebaseData.filterTextTimeout != null) {
-			$timeout.cancel($scope.FacebaseData.filterTextTimeout);
+		if ($scope.FacetsData.filterTextTimeout != null) {
+			$timeout.cancel($scope.FacetsData.filterTextTimeout);
 		}
-		$scope.FacebaseData.filterTextTimeout = $timeout(function(){$scope.predicate(facet,keyCode);}, 1000); // delay 1000 ms
+		$scope.FacetsData.filterTextTimeout = $timeout(function(){$scope.predicate(facet,keyCode);}, 1000); // delay 1000 ms
 	};
 
 	this.delay_slider = function delay_slider(facet) {
-		if ($scope.FacebaseData.filterSliderTimeout != null) {
-			$timeout.cancel($scope.FacebaseData.filterSliderTimeout);
+		if ($scope.FacetsData.filterSliderTimeout != null) {
+			$timeout.cancel($scope.FacetsData.filterSliderTimeout);
 		}
-		$scope.FacebaseData.filterSliderTimeout = $timeout(function(){$scope.predicate_slider(facet);}, 1); // delay 1 ms
+		$scope.FacetsData.filterSliderTimeout = $timeout(function(){$scope.predicate_slider(facet);}, 1); // delay 1 ms
 	};
 
 	this.displayMore = function displayMore(event) {
 		event.preventDefault();
-		$scope.FacebaseData.moreFlag = !$scope.FacebaseData.moreFlag;
+		$scope.FacetsData.moreFlag = !$scope.FacetsData.moreFlag;
 	};
 
 	this.displayTreeCount = function displayTreeCount(data) {
@@ -267,7 +267,7 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 		if (isNewSchema) {
 			initSchema(data.schema);
 		}
-		var peviousTable = $scope.FacebaseData.table;
+		var peviousTable = $scope.FacetsData.table;
 		var node = $('label.highlighted', $('#treeDiv'));
 		var isNew = (node.length == 0 || node[0] !== event.target);
 		if (isNew) {
@@ -275,79 +275,79 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 		}
 		if (data.level != -1 && isNew) {
 			$('#headerSearch').removeAttr('disabled');
-			collapseTree($scope.FacebaseData.tree[0], data);
+			collapseTree($scope.FacetsData.tree[0], data);
 			$('label', $('#treeDiv')).removeClass('highlighted');
 			$(event.target).addClass('highlighted');
 			var newBranch = false;
-			if (!isNewSchema && data.level > 0 && $scope.FacebaseData.level >= 0) {
+			if (!isNewSchema && data.level > 0 && $scope.FacetsData.level >= 0) {
 				var oldRoot = null;
-				if ($scope.FacebaseData.level > 0) {
-					var oldRootParent = $scope.FacebaseData.selectedEntity.parent;
+				if ($scope.FacetsData.level > 0) {
+					var oldRootParent = $scope.FacetsData.selectedEntity.parent;
 					while (oldRootParent.parent != null) {
 						oldRootParent = oldRootParent.parent;
 					}
 					oldRoot = oldRootParent.name;
 				} else {
-					oldRoot = $scope.FacebaseData.selectedEntity.name;
+					oldRoot = $scope.FacetsData.selectedEntity.name;
 				}
 				var newRootParent = data.parent;
 				while (newRootParent.parent != null) {
 					newRootParent = newRootParent.parent;
 				}
-				if ((oldRoot != null || $scope.FacebaseData.entityPredicates.length == 0) && newRootParent.name != oldRoot) {
-					$scope.FacebaseData.level = 0;
-					$scope.FacebaseData.entityPredicates.length = 1;
-					$scope.FacebaseData.entityPredicates[0] = encodeSafeURIComponent(newRootParent.name);
+				if ((oldRoot != null || $scope.FacetsData.entityPredicates.length == 0) && newRootParent.name != oldRoot) {
+					$scope.FacetsData.level = 0;
+					$scope.FacetsData.entityPredicates.length = 1;
+					$scope.FacetsData.entityPredicates[0] = encodeSafeURIComponent(newRootParent.name);
 					newBranch = true;
 				}
 			}
-			$scope.FacebaseData.selectedEntity = data;
-			$scope.FacebaseData.table = data.name;
+			$scope.FacetsData.selectedEntity = data;
+			$scope.FacetsData.table = data.name;
 			if (data.level == 0 || isNewSchema) {
 				resetTreeCount(data);
-				$scope.FacebaseData.entityPredicates.length = 0;
+				$scope.FacetsData.entityPredicates.length = 0;
 				if (isNewSchema && data.level > 0) {
 					var node = data.parent;
 					for (var i=data.level-1; i>=0; i--) {
-						$scope.FacebaseData.entityPredicates[i] = encodeSafeURIComponent(node.name);
+						$scope.FacetsData.entityPredicates[i] = encodeSafeURIComponent(node.name);
 						node = node.parent;
 					}
 				}
-				$scope.FacebaseData.entityPredicates.push(encodeSafeURIComponent($scope.FacebaseData.table));
-				$scope.FacebaseData.level = data.level;
-				updateTreeCount(data, $scope.FacebaseData.entityPredicates);
+				$scope.FacetsData.entityPredicates.push(encodeSafeURIComponent($scope.FacetsData.table));
+				$scope.FacetsData.level = data.level;
+				updateTreeCount(data, $scope.FacetsData.entityPredicates);
 				$scope.initTable();
 				getMetadata(data.name, $scope.successGetMetadata);
-			} else if (data.level > $scope.FacebaseData.level) {
-				$scope.FacebaseData.entityPredicates.length = data.level+1;
-				$scope.FacebaseData.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
+			} else if (data.level > $scope.FacetsData.level) {
+				$scope.FacetsData.entityPredicates.length = data.level+1;
+				$scope.FacetsData.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
 				if (!newBranch) {
-					var predicate = getPredicate($scope.FacebaseData, null, null, peviousTable);
+					var predicate = getPredicate($scope.FacetsData, null, null, peviousTable);
 					if (predicate.length > 0) {
-						$scope.FacebaseData.entityPredicates[$scope.FacebaseData.level] += '/' + predicate.join('/');
+						$scope.FacetsData.entityPredicates[$scope.FacetsData.level] += '/' + predicate.join('/');
 					}
 				}
 				var node = data.parent;
-				for (var i=data.level-1; i>$scope.FacebaseData.level; i--) {
-					$scope.FacebaseData.entityPredicates[i] = encodeSafeURIComponent(node.name);
+				for (var i=data.level-1; i>$scope.FacetsData.level; i--) {
+					$scope.FacetsData.entityPredicates[i] = encodeSafeURIComponent(node.name);
 					node = node.parent;
 				}
-				updateTreeCount(data, $scope.FacebaseData.entityPredicates);
-				$scope.FacebaseData.level = data.level;
+				updateTreeCount(data, $scope.FacetsData.entityPredicates);
+				$scope.FacetsData.level = data.level;
 				$scope.initTable();
 				getMetadata(data.name, $scope.successGetMetadata);
-			} else if (data.level < $scope.FacebaseData.level) {
+			} else if (data.level < $scope.FacetsData.level) {
 				resetTreeCount(data);
-				$scope.FacebaseData.entityPredicates.length = data.level+1;
-				$scope.FacebaseData.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
-				updateTreeCount(data, $scope.FacebaseData.entityPredicates);
-				$scope.FacebaseData.level = data.level;
+				$scope.FacetsData.entityPredicates.length = data.level+1;
+				$scope.FacetsData.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
+				updateTreeCount(data, $scope.FacetsData.entityPredicates);
+				$scope.FacetsData.level = data.level;
 				$scope.initTable();
 				getMetadata(data.name, $scope.successGetMetadata);
-			} else if (data.level == $scope.FacebaseData.level) {
-				$scope.FacebaseData.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
-				updateTreeCount(data, $scope.FacebaseData.entityPredicates);
-				$scope.FacebaseData.level = data.level;
+			} else if (data.level == $scope.FacetsData.level) {
+				$scope.FacetsData.entityPredicates[data.level] = encodeSafeURIComponent(data.name);
+				updateTreeCount(data, $scope.FacetsData.entityPredicates);
+				$scope.FacetsData.level = data.level;
 				$scope.initTable();
 				getMetadata(data.name, $scope.successGetMetadata);
 			}
@@ -355,30 +355,30 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	};
 	
 	this.hide = function hide(facet) {
-		return ($scope.FacebaseData.narrow[facet['table']][facet['name']] == null || !$scope.FacebaseData.chooseColumns[facet['table']][facet['name']] || 
-				($scope.FacebaseData.box[facet['table']][facet['name']]['facetcount'] == 0 && 
-						($scope.FacebaseData.colsDescr[facet['table']][facet['name']]['type'] == 'bigint' ||
-								$scope.FacebaseData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && !hasCheckedValues($scope.FacebaseData.box, facet))));
+		return ($scope.FacetsData.narrow[facet['table']][facet['name']] == null || !$scope.FacetsData.chooseColumns[facet['table']][facet['name']] || 
+				($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] == 0 && 
+						($scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'bigint' ||
+								$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && !hasCheckedValues($scope.FacetsData.box, facet))));
 	};
 
 	this.if_type = $scope.if_type = function if_type(facet, facet_type) {
 		var ret = false;
-		if ($scope.FacebaseData.colsDescr[facet['table']] != null && $scope.FacebaseData.colsDescr[facet['table']][facet['name']] != null) {
-			ret = ($scope.FacebaseData.colsDescr[facet['table']][facet['name']]['type'] == facet_type);
+		if ($scope.FacetsData.colsDescr[facet['table']] != null && $scope.FacetsData.colsDescr[facet['table']][facet['name']] != null) {
+			ret = ($scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == facet_type);
 			if (facet_type == 'bigint') {
-				ret = psqlNumeric.contains($scope.FacebaseData.colsDescr[facet['table']][facet['name']]['type']);
+				ret = psqlNumeric.contains($scope.FacetsData.colsDescr[facet['table']][facet['name']]['type']);
 			} else if (facet_type == 'text') {
-				ret = psqlText.contains($scope.FacebaseData.colsDescr[facet['table']][facet['name']]['type']);
+				ret = psqlText.contains($scope.FacetsData.colsDescr[facet['table']][facet['name']]['type']);
 			}
 		}
 		return ret;
 	};
 
 	this.predicate_checkbox = function predicate_checkbox(facet) {
-		setFacetClass($scope.FacebaseData, facet, $scope.FacebaseData.facetClass);
-		FacebaseService.setSortOption();
-		$scope.FacebaseData.pagingOptions.currentPage = 1;
-		getErmrestData($scope.FacebaseData, $scope.successSearchFacets, $scope.successUpdateModels);
+		setFacetClass($scope.FacetsData, facet, $scope.FacetsData.facetClass);
+		FacetsService.setSortOption();
+		$scope.FacetsData.pagingOptions.currentPage = 1;
+		getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.preventDefault = function preventDefault(event) {
@@ -386,17 +386,17 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	};
 
 	this.showClearButton = function showClearButton() {
-		return $scope.FacebaseData.ready;
+		return $scope.FacetsData.ready;
 	};
 
 	this.showFacetCount = function showFacetCount(facet) {
-		return ($scope.FacebaseData.chooseColumns[facet['table']][facet['name']] && 
-				($scope.FacebaseData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
-						$scope.FacebaseData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacebaseData.box, facet)));
+		return ($scope.FacetsData.chooseColumns[facet['table']][facet['name']] && 
+				($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+						$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet)));
 	};
 
 	this.showFacetValue = function showFacetValue(facet, value) {
-		return ($scope.FacebaseData.colsGroup[facet['table']][facet['name']][value] == 0 && !$scope.FacebaseData.box[facet['table']][facet['name']]['values'][value]);
+		return ($scope.FacetsData.colsGroup[facet['table']][facet['name']][value] == 0 && !$scope.FacetsData.box[facet['table']][facet['name']]['values'][value]);
 	};
 
 	this.showFilters = function showFilters() {
@@ -420,37 +420,37 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	};
 
 	this.table_select = function table_select() {
-		$scope.FacebaseData.entityPredicates.length = 0;
-		$scope.FacebaseData.selectedEntity = null;
+		$scope.FacetsData.entityPredicates.length = 0;
+		$scope.FacetsData.selectedEntity = null;
 		$scope.initTable();
-		getMetadata($scope.FacebaseData.table, $scope.successGetMetadata);
+		getMetadata($scope.FacetsData.table, $scope.successGetMetadata);
 	};
 
 	this.toggleFacet = function toggleFacet(event, facet) {
-		if ($scope.FacebaseData.narrow[facet['table']][facet['name']] == null) {
-			$scope.FacebaseData.narrow[facet['table']][facet['name']] = true;
+		if ($scope.FacetsData.narrow[facet['table']][facet['name']] == null) {
+			$scope.FacetsData.narrow[facet['table']][facet['name']] = true;
 			$(event.target).addClass('collapsed');
 			$(event.target).find('.glyphicon').removeClass('glyphicon-plus').addClass('glyphicon-minus');
 			setTimeout(function () {
 				$scope.$broadcast('reCalcViewDimensions');
 			}, 1);
 		} else if ($scope.if_type(facet, 'enum')) {
-			if (!hasCheckedValues($scope.FacebaseData.box, facet) && !$(event.target).is(':checkbox')) {
+			if (!hasCheckedValues($scope.FacetsData.box, facet) && !$(event.target).is(':checkbox')) {
 				$(event.target).removeClass('collapsed');
 				$(event.target).find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
-				delete $scope.FacebaseData.narrow[facet['table']][facet['name']];
+				delete $scope.FacetsData.narrow[facet['table']][facet['name']];
 			}
 		} else if ($scope.if_type(facet, 'bigint') && !$(event.target).is('rzslider')) {
-			if ($scope.FacebaseData.box[facet['table']][facet['name']]['min'] == $scope.FacebaseData.box[facet['table']][facet['name']]['floor'] && $scope.FacebaseData.box[facet['table']][facet['name']]['max'] == $scope.FacebaseData.box[facet['table']][facet['name']]['ceil']) {
+			if ($scope.FacetsData.box[facet['table']][facet['name']]['min'] == $scope.FacetsData.box[facet['table']][facet['name']]['floor'] && $scope.FacetsData.box[facet['table']][facet['name']]['max'] == $scope.FacetsData.box[facet['table']][facet['name']]['ceil']) {
 				$(event.target).removeClass('collapsed');
 				$(event.target).find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
-				delete $scope.FacebaseData.narrow[facet['table']][facet['name']];
+				delete $scope.FacetsData.narrow[facet['table']][facet['name']];
 			}
 		} else if ($scope.if_type(facet, 'text') && !$(event.target).is('input:text')) {
-			if ($scope.FacebaseData.box[facet['table']][facet['name']]['value'].length == 0) {
+			if ($scope.FacetsData.box[facet['table']][facet['name']]['value'].length == 0) {
 				$(event.target).removeClass('collapsed');
 				$(event.target).find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
-				delete $scope.FacebaseData.narrow[facet['table']][facet['name']];
+				delete $scope.FacetsData.narrow[facet['table']][facet['name']];
 			}
 		}
 	};
@@ -458,6 +458,6 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'Facebas
 	$scope.initPageRange();
 	setTimeout(function () {
 		// delay is necessary for Angular render activity
-		getTables($scope.FacebaseData.tables, $scope.FacebaseData, $scope.successGetTables);
+		getTables($scope.FacetsData.tables, $scope.FacetsData, $scope.successGetTables);
 	}, 1);
 }]);
