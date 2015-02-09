@@ -186,9 +186,9 @@
       			<div class="row" ng-show="facetFilter.showTree()">
       				<div class="entity" id="treeDiv">
 						<script type="text/ng-template" id="tree_item_renderer.html">
-    						<label ng-show="data.expand && data.nodes.length > 0" ng-click="facetFilter.expandCollapse(data, true)">+</label>
-							<label ng-show="!data.expand && data.nodes.length > 0" ng-click="facetFilter.expandCollapse(data, false)">-</label>
-							<label ng-click="facetFilter.getEntityResults($event, data)">{{data.display}} {{facetFilter.displayTreeCount(data)}}</label>
+    						<label ng-show="data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="facetFilter.expandCollapse(data, true)">+</label>
+							<label ng-show="!data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="facetFilter.expandCollapse(data, false)">-</label>
+							<label ng-show="data.level!=-1" ng-click="facetFilter.getEntityResults($event, data)">{{data.display}} {{facetFilter.displayTreeCount(data)}}</label>
     						<ul ng-show="data.show" class="entity">
         						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
     						</ul>
