@@ -11,7 +11,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	};
 	
 	this.display = function (table, column) {
-		return COLUMNS_ALIAS[table][column];
+		return COLUMNS_ALIAS[table] != null ? COLUMNS_ALIAS[table][column] : '';
 	};
 	
 	this.html = function (table, column, data) {
