@@ -17,6 +17,26 @@ var ermrestApp = angular.module('ermrestApp', [
   'ermResultsController'
 ]);
 
+ermrestApp.provider('ermrest', function () {
+	var catalog;
+	
+	return {
+		setCatalog: function (value) {
+			catalog = value;
+		},
+		$get: function () {
+			return {
+				'catalog': catalog
+			}
+		}
+	}
+});
+
+ermrestApp.config(['ermrestProvider',
+                   function(ermrestProvider) {
+	ermrestProvider.setCatalog(1);
+}]);
+
 ermrestApp.config(['$routeProvider',
                    function($routeProvider) {
 	$routeProvider.

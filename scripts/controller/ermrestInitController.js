@@ -5,8 +5,8 @@
 var ermInitController = angular.module('ermInitController', ['facetsModel', 'facetsService']);
 
 //angular.module('ermrestApp').controller('InitListCtrl', ['$scope', '$location', 'FacetsData',
-ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacetsData', 'FacetsService',
-                                                      function($scope, $location, FacetsData, FacetsService) {
+ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacetsData', 'FacetsService', 'ermrest',
+                                                      function($scope, $location, FacetsData, FacetsService, ermrest) {
 	
 	$('footer').hide();
 	$('.panel-collapse').on('hide.bs.collapse', function () {
@@ -33,7 +33,7 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacetsData
 	if ($location.search()['catalog'] != null) {
 		CATALOG = $location.search()['catalog'];
 	} else if (CATALOG == null) {
-		CATALOG = 1;
+		CATALOG = ermrest.catalog;
 	}
 	
 	$scope.FacetsData = FacetsData;

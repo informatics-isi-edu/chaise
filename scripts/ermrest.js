@@ -1855,12 +1855,14 @@ function getAssociationThumbnail(table_name, row) {
 		});
 	}
 	var imageTable = null;
-	$.each(back_references[table_name], function(i, table) {
-		if (hasTableAnnotation(table, 'image')) {
-			imageTable = table;
-			return false;
-		}
-	});
+	if (back_references[table_name] != null) {
+		$.each(back_references[table_name], function(i, table) {
+			if (hasTableAnnotation(table, 'image')) {
+				imageTable = table;
+				return false;
+			}
+		});
+	}
 	var fileTable = null;
 	if (imageTable != null) {
 		fileTable = getTablesBackReferences(imageTable);
@@ -1929,12 +1931,14 @@ function getTablesBackReferences(table_name) {
 
 function hasAssociationThumnbnail(table_name) {
 	var ret = false;
-	$.each(back_references[table_name], function(i, table) {
-		if (hasTableAnnotation(table, 'image')) {
-			ret = true;
-			return false;
-		}
-	});
+	if (back_references[table_name] != null) {
+		$.each(back_references[table_name], function(i, table) {
+			if (hasTableAnnotation(table, 'image')) {
+				ret = true;
+				return false;
+			}
+		});
+	}
 	return ret;
 }
 
