@@ -103,11 +103,26 @@ function initApplication() {
 
 function setSchema() {
 	if (SCHEMA == null) {
-		// get the first schema from the catalog
 		$.each(CATALOG_SCHEMAS, function(schema, value) {
-			SCHEMA = schema;
-			return false;
+			$.each(value['tables'], function(i, table) {
+				var isDefault = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null && 
+					table['annotations'][TABLES_LIST_URI].contains('default');
+				if (isDefault) {
+					SCHEMA = schema;
+					return false;
+				}
+			});
+			if (SCHEMA != null) {
+				return false;
+			}
 		});
+		if (SCHEMA == null) {
+			// get the first schema from the catalog
+			$.each(CATALOG_SCHEMAS, function(schema, value) {
+				SCHEMA = schema;
+				return false;
+			});
+		}
 	}
 	ERMREST_SCHEMA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG + '/schema/'+ SCHEMA + '/table/';
 }
