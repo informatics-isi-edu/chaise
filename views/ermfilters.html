@@ -1,0 +1,111 @@
+      	<div ng-controller="FilterListCtrl as facetFilter" class="col-lg-3 col-sm-3" ng-click="facetFilter.closeModal($event);">
+      		<form role="form" class="form-horizontal" ng-show="facetFilter.showTableSelect()">
+      			<div class="form-group">
+      				<div class="col-sm-3 col-sm-offset-1">
+      					<label class="control-label">Collections:</label>
+      				</div>
+      				<div class="col-sm-5 col-sm-offset-2">
+      					<select class="form-control" ng-model="FacetsData.table" ng-change="facetFilter.table_select()" ng-options="value for value in tables"></select>
+      				</div>
+      			</div>
+      		</form>
+      		
+      		<div id="filters" ng-show="facetFilter.showFilters()">
+      			<div class="row" ng-show="facetFilter.showTree()">
+      				<div class="entity" id="treeDiv">
+						<script type="text/ng-template" id="tree_item_renderer.html">
+    						<label ng-show="data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="facetFilter.expandCollapse(data, true)">+</label>
+							<label ng-show="!data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="facetFilter.expandCollapse(data, false)">-</label>
+							<label ng-show="data.level!=-1" ng-click="facetFilter.getEntityResults($event, data)">{{data.display}} {{facetFilter.displayTreeCount(data)}}</label>
+    						<ul ng-show="data.show" class="entity">
+        						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
+    						</ul>
+  						</script>
+						<ul class="entity">
+	      					<li class="entity" ng-repeat="data in FacetsData.tree" ng-include="'tree_item_renderer.html'"></li>
+	      				</ul>
+      				</div>
+      			</div>
+      			<div class="row">
+  					<div class="col-sm-12">
+			      		<form class="form-inline" role="form" ng-show="facetFilter.showSort()">
+							<div class="form-group sort-attr" id="attrsort">
+								<label for="sort">Sort:</label> <select class="form-control"
+									name="field-pick" id="sort" ng-model="FacetsData.sortFacet"
+									ng-change="facetFilter.changeSortOption()"
+									ng-options="value for value in sortColumns"></select> <a
+									href="#" ng-click="facetFilter.changeSortDirection($event)"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+							</div>
+							<br/>
+							<br/>
+						</form>
+					</div>
+				</div>
+      			<div class="row" ng-show="facetFilter.showRefine()">
+      				<div class="col-sm-5 pull-right">
+      					<button class="ng-hide btn btn-default btn-sm pull-right" ng-click="facetFilter.clear($event)" ng-show="facetFilter.showClearButton()" >Reset All</button>
+      				</div>
+      				<div class="col-sm-7">
+      					<p class="filtertitle">Refine by</p>
+      				</div>
+      			</div>
+				<div class="row" ng-show="facetFilter.showRefine()">
+					<div class="col-sm-12">
+						<div class="panel-group" id="filtermenu">
+							<div class="panel panel-default" ng-repeat="facet in FacetsData.facets"
+								ng-show="facetFilter.showFacetCount(facet)"
+								ng-click="facetFilter.toggleFacet($event, facet)">
+								<div class="panel-heading">
+									<h4 class="panel-title">
+										<a data-toggle="collapse" href="#" ng-click="facetFilter.preventDefault($event)"><span class="glyphicon glyphicon-plus"></span>{{facet['display']}}</a> <span
+											class="pull-right">{{FacetsData.box[facet['table']][facet['name']]['facetcount']}}</span>
+									</h4>
+								</div>
+								<div class="panel-collapse collapse in">
+									<div class="panel-body">
+										<ul class="nav filteritems" ng-hide="facetFilter.hide(facet)">
+											<li ng-if="facetFilter.if_type(facet, 'bigint')"><rzslider
+													rz-slider-model="FacetsData.box[facet['table']][facet['name']]['min']"
+													rz-slider-high="FacetsData.box[facet['table']][facet['name']]['max']"
+													rz-slider-floor="FacetsData.box[facet['table']][facet['name']]['floor']"
+													rz-slider-ceil="FacetsData.box[facet['table']][facet['name']]['ceil']"
+													ng-mouseup="facetFilter.delay_slider(facet)"> </rzslider></li>
+											<li ng-if="facetFilter.if_type(facet, 'text')"><input
+												type="text" ng-model="FacetsData.box[facet['table']][facet['name']]['value']"
+												ng-keyup="facetFilter.delay_predicate(facet,$event.keyCode)"/></li>
+											<li ng-if="facetFilter.if_type(facet, 'enum')"
+												ng-repeat="value in FacetsData.colsDescr[facet['table']][facet['name']]['values']"
+												ng-hide="facetFilter.showFacetValue(facet, value)"><input
+												type="checkbox" ng-model="FacetsData.box[facet['table']][facet['name']]['values'][value]"
+												ng-change="facetFilter.predicate_checkbox(facet)"
+												ng-disabled="facetFilter.showFacetValue(facet, value)" />{{value}}
+												<span class="pull-right badge">{{FacetsData.colsGroup[facet['table']][facet['name']][value]}}</span>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div class="panel panel-default more">
+								<div class="panel-heading">
+									<h4 class="panel-title">
+										<a data-toggle="collapse" href="#" ng-click="facetFilter.displayMore($event)"> More filter
+											options&nbsp;&nbsp;<span
+											class="glyphicon glyphicon-collapse-down pull-right"></span>
+										</a>
+									</h4>
+								</div>
+								<div class="panel-collapse collapse in">
+									<div class="panel-body">
+										<ul class="nav filteritems" ng-show="FacetsData.moreFlag">
+											<li ng-repeat="facet in FacetsData.facets"><input
+												type="checkbox"
+												ng-model="FacetsData.chooseColumns[facet['table']][facet['name']]">{{facet['display']}}</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>

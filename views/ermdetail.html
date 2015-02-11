@@ -1,0 +1,162 @@
+	<div ng-controller="DetailListCtrl as facetDetail" class="modal fade" id="viewdata" tabindex="-1" role="dialog"
+		aria-labelledby="viewAllData" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" ng-click="facetDetail.closeModal($event);">
+						<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+					</button>
+					<h4 class="modal-title" id="viewAllData">{{FacetsData.entryTitle}}</h4>
+				</div>
+				<div class="modal-body">
+					<div id="datacontent">
+						<h1>{{facetDetail.displayTable(FacetsData.table)}}</h1>
+						<table class="dataset">
+							<tr ng-repeat="name in FacetsData.detailColumns">
+								<td class="key">{{facetDetail.display(FacetsData.table,name)}}:</td>
+								<td class="value">
+									<span ng-if="facetDetail.isThumbnail(FacetsData.table,name)">
+										<a ng-href="{{FacetsData.entryRow[name]}}">
+											<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{FacetsData.entryRow[name]}}">
+										</a>
+									</span>
+									<span ng-if="facetDetail.is3dView(FacetsData.table,name)" ng-init="entry3Dview=facetDetail.init3Dview(FacetsData.entryRow[name])">
+										<iframe title="3dView" width="300" height="300" ng-src="{{entry3Dview}}">
+											<p>Your browser does not support iframes.</p>
+										</iframe>
+										<a ng-href="{{FacetsData.entryRow[name]}}">
+											Enlarge
+										</a>
+									</span>
+									<span ng-if="facetDetail.isZoomify(FacetsData.table,name)">
+										<button type="button" class="btn btn-default" ng-click="facetDetail.openZoomify($event, FacetsData.entryRow[name])">Open</button>
+									</span>
+									<span ng-if="facetDetail.isDownload(FacetsData.table,name)">
+										<button type="button" class="btn btn-default" ng-click="facetDetail.download($event, FacetsData.entryRow[name])">Download</button>
+									</span>
+									<span ng-if="facetDetail.isHTML(FacetsData.table,name)" ng-bind-html="facetDetail.html(FacetsData.table,name,FacetsData.entryRow[name])">
+									</span>
+									<span ng-if="facetDetail.isText(FacetsData.table,name)">
+										{{facetDetail.detailValue(FacetsData.table,name,FacetsData.entryRow[name])}}
+									</span>
+								</td>
+							</tr>
+							<tr ng-repeat="(name, data) in FacetsData.linearizeView">
+								<td class="key">{{facetDetail.display(data['table'],name)}}:</td>
+								<td class="value">
+									<ul ng-class="facetDetail.setListClass(data['rows'])">
+										<li ng-repeat="value in data['rows']">
+											<span ng-if="facetDetail.isAttribute(data['table'],name)">{{facetDetail.itemDenormalizedValue(data['table'],value,name,value[name])}}</span>
+											<span ng-if="facetDetail.isGeoGDS(data['table'],name)"><a ng-href="{{facetDetail.geoValue(data['table'],value,name)}}">{{value[name]}}</a></span>
+											<span ng-if="facetDetail.isGeoGSE(data['table'],name)"><a ng-href="{{facetDetail.geoValue(data['table'],value,name)}}">{{value[name]}}</a></span>
+											<span ng-if="facetDetail.isThumbnail(data['table'],name)">
+												<a ng-href="{{value[name]}}">
+													<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{value[name]}}">
+												</a>
+											</span>
+											<span ng-init="thumbnail=facetDetail.itemAssociateThumbnail(data['table'],value,name)">
+												<span ng-if="thumbnail!=null&&FacetsData.tiles.length==0">
+													<a ng-href="{{thumbnail}}">
+														<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
+													</a>
+												</span>
+											</span>
+											<span ng-if="facetDetail.is3dView(data['table'],name)" ng-init="entry3Dview=facetDetail.init3Dview(value[name])">
+												<iframe title="3dView" width="300" height="300" ng-src="{{entry3Dview}}">
+													<p>Your browser does not support iframes.</p>
+												</iframe>
+												<a ng-href="{{value[name]}}">
+													Enlarge
+												</a>
+											</span>
+											<span ng-init="viewer3d=facetDetail.itemAssociate3dView(data['table'],value,name)">
+												<span ng-if="viewer3d!=null&&FacetsData.viewer3dFile.length==0">
+													<span ng-init="entry3Dview=facetDetail.init3Dview(viewer3d)">
+														<iframe title="3dView" width="300" height="300" ng-src="{{entry3Dview}}">
+															<p>Your browser does not support iframes.</p>
+														</iframe>
+														<a ng-href="{{viewer3d}}">
+															Enlarge
+														</a>
+													</span>
+												</span>
+											</span>
+											<span ng-if="facetDetail.isZoomify(data['table'],name)">
+												<button type="button" class="btn btn-default" ng-click="facetDetail.openZoomify($event, value[name])">Open</button>
+											</span>
+											<span ng-if="facetDetail.isDownload(data['table'],name)">
+												<button type="button" class="btn btn-default" ng-click="facetDetail.download($event, value[name])">Download</button>
+											</span>
+											<span ng-init="file=facetDetail.itemAssociateFile(data['table'],value,name)">
+												<span ng-if="file!=null&&FacetsData.files.length==0">
+													<button type="button" class="btn btn-default" ng-click="facetDetail.download($event, file)">Download</button>
+												</span>
+											</span>
+										</li>
+									</ul>
+								</td>
+							</tr>
+						</table>
+                        <h3 ng-show="FacetsData.tiles.length>0">Images:</h3>
+                        <table>
+                            <tr ng-repeat="values in FacetsData.tiles">
+                                <td ng-repeat="tile in values track by $index" class="tiles">
+                                    <a ng-if="tile!=''" ng-href="{{tile}}">
+                                            <img title="Thumbnail" alt="" width="90" height="90" ng-src="{{tile}}">
+                                    </a>
+                                </td>
+
+                             </tr>
+                        </table>
+                        <h3 ng-show="FacetsData.files.length>0 || FacetsData.viewer3dFile.length>0">Files:</h3>
+                        <table ng-if="FacetsData.files.length>0 || FacetsData.viewer3dFile.length>0" class="files">
+                            <tr>
+                                <th ng-class="facetDetail.setPreviewClass()">Preview</th>
+                                <th class="files">Name</th>
+                                <th class="size">Size (bytes)</th>
+                            </tr>
+                            <tr ng-repeat="values in FacetsData.viewer3dFile">
+                                <td ng-class="facetDetail.setPreviewClass()" ng-init="entry3Dview=facetDetail.init3Dview(values[3])">
+                                	<table ng-if="values[5]!= null">
+                                		<tr>
+                                			<td>
+		                                       <iframe title="3dView" width="500" height="400" ng-src="{{entry3Dview}}">
+													<p>Your browser does not support iframes.</p>
+		                                       </iframe>
+                                			</td>
+                                		</tr>
+                                	</table>
+                                	<table ng-if="values[5]!= null">
+                                		<tr>
+                                			<td class="center">
+		                                       <a ng-href="{{values[4]}}" ng-click="facetDetail.enlarge($event, values[4])">
+		                                               Enlarge
+		                                       </a>
+                                			</td>
+                                		</tr>
+                                	</table>
+                                </td>
+                                <td class="files">
+                                    <a ng-href="{{values[0]}}">
+                                            {{values[1]}}
+                                    </a>
+                                </td>
+                                <td class="size">{{values[2] | number}}</td>
+                             </tr>
+                             <tr ng-repeat="values in FacetsData.files">
+                                <td ng-class="facetDetail.setPreviewClass()">{{values[0]}}</td>
+                                <td class="files">
+                                    <a ng-href="{{values[2]}}">{{values[1]}}
+                                    </a>
+                                </td>
+                                <td class="size">{{values[3] | number}}</td>
+                             </tr>
+                        </table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal" ng-click="facetDetail.closeModal($event);">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>

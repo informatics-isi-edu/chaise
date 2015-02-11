@@ -1,0 +1,121 @@
+		<!-- Search Results -->
+		<div  ng-controller="ResultsListCtrl as facetResults" class="col-lg-9 col-sm-9" ng-show="facetResults.showResults()" ng-click="facetResults.closeModal($event);">
+			<div class="row ng-hide" id="searchsort" ng-show="FacetsData.pageNavigation">
+				<form class="form-inline" role="form">
+					<div class="ng-hide" ng-show="FacetsData.pageNavigation" ng-bind-html="FacetsData.collectionsPredicate">
+					</div>
+					<div class="ng-hide" ng-show="FacetsData.pageNavigation" class="col-sm-6 col-md-5 col-lg-4">
+						<div class="form-group has-feedback">
+							<label class="control-label sr-only">Search Data</label>
+							<input id="dataSearch" type="text" ng-model="FacetsData.filterAllText" class="form-control"
+								placeholder="Search data..." size="44" maxlength="120"
+								ng-change="facetResults.delay_search_all($event.keyCode)">
+						</div>
+					</div>
+					<div class="ng-hide" ng-show="FacetsData.pageNavigation" class="col-sm-4 col-md-3 col-lg-2">
+						<div class="form-group">
+							<label for="show">Show</label> <select class="form-control"
+								name="field-pick" id="show" ng-model="FacetsData.pagingOptions.pageSize"
+								ng-options="value for value in FacetsData.pagingOptions.pageSizes"></select>
+						</div>
+					</div>
+					<div class="ng-hide" ng-show="FacetsData.pageNavigation" class="col-sm-4 col-md-4 col-lg-3">
+						<div class="form-group">
+							<ul class="pagination toppagination">
+								<li class="prev"><a href="#"
+									ng-hide="facetResults.cantPageBackward()"
+									ng-click="facetResults.pageToFirst($event)">&laquo;</a></li>
+								<li class="prev"><a href="#"
+									ng-hide="facetResults.cantPageBackward()"
+									ng-click="facetResults.pageBackward($event)">&lt;</a></li>
+								<li ng-repeat="page in FacetsData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
+									ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
+								<li class="next"><a href="#"
+									ng-show="facetResults.canPageForward()"
+									ng-click="facetResults.pageForward($event)">&gt;</a></li>
+								<li class="next"><a href="#"
+									ng-show="facetResults.canPageForward()"
+									ng-click="facetResults.pageToLast($event)">&raquo;</a></li>
+							</ul>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="ng-hide" ng-show="FacetsData.pageNavigation" id="results_tally">
+				<p>
+					Page {{FacetsData.pagingOptions.currentPage}} of {{FacetsData.maxPages}}. Showing results
+					<strong>{{(FacetsData.pagingOptions.currentPage-1)*FacetsData.pagingOptions.pageSize+1}}-{{facetResults.lastRecord()}}</strong>
+					of <strong>{{FacetsData.totalServerItems}}.</strong>
+				</p>
+			</div>
+			<div id="resultstable">
+				<div class="resultsrow" ng-init="FacetsData.spinner=[]" ng-repeat="row in FacetsData.ermrestData">
+                    <div ng-init="FacetsData.spinner[$index]=false" class="ng-hide" ng-show="facetResults.showSpinner($index)">
+                            <img src="images/ajax-loader.gif"
+                                    title="Processing..." alt="Spinner" ng-show="facetResults.showSpinner($index)"
+                                    class="center" />
+                    </div>
+					<div class="row tableheader">
+						<div class="col-sm-6">
+                                                    <a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetResults.clicker($event, row, 3, $index);">
+							<p class="title" ng-bind-html="facetResults.itemTitle(row)"></p>
+                                                    </a>
+						</div>
+						<div class="col-sm-6">
+							<button type="button" class="btn btn-default btn-sm pull-right"
+								data-toggle="modal" data-target="#viewdata"
+								ng-click="facetResults.clicker($event, row, 3, $index);">View Data</button>
+						</div>
+					</div>
+					<table ng-init="thumbnail=facetResults.itemThumbnail(row)">
+						<tr>
+							<td ng-show="thumbnail!=null">
+								<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetResults.clicker($event, row, 3, $index);">
+									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
+								</a>
+							</td>
+							<td ng-show="facetResults.if_hasThumbnail() && thumbnail==null">
+								<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetResults.clicker($event, row, 3, $index);">
+									<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="images/blank.jpeg">
+								</a>
+							</td>
+							<td class="item_display">
+								<table class="resultsdata table table-condensed"
+									ng-init="values=facetResults.displayColumns(row, 3, 3)">
+									<tr ng-repeat="value in values">
+										<td ng-repeat="col in value track by $index" ng-class="facetResults.setSummaryClass(FacetsData.table,col,'value')">
+											<span ng-show="facetResults.display(FacetsData.table,col)!=null && !facetResults.isSummary(FacetsData.table,col)" ng-class="$parent.$first && $first ? 'key truncate' : 'key truncate'">{{facetResults.display(FacetsData.table,col)}}: </span>
+                                                                                        <span ng-switch="facetResults.isSummary(FacetsData.table,col)">
+                                                                                            <span ng-switch-when="true"><p ng-class="facetResults.setSummaryClass(FacetsData.table,col,'')">{{facetResults.html(FacetsData.table,col,row[col])}}</p></span>
+                                                                                            <span ng-switch-default>{{facetResults.html(FacetsData.table,col,row[col])}}</span>
+                                                                                        </span>
+                                                                                        
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="row bottompgr">
+				<div class="form-group">
+					<ul class="pagination bottompagination">
+						<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="prev"><a href="#"
+							ng-hide="facetResults.cantPageBackward()"
+							ng-click="facetResults.pageToFirst($event)">&laquo;</a></li>
+						<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="prev"><a href="#"
+							ng-hide="facetResults.cantPageBackward()"
+							ng-click="facetResults.pageBackward($event)">&lt;</a></li>
+						<li class="ng-hide" ng-show="FacetsData.pageNavigation" ng-repeat="page in FacetsData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
+							ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
+						<li class="next"><a href="#"
+							class="ng-hide" ng-show="facetResults.canPageForward()"
+							ng-click="facetResults.pageForward($event)">More...</a></li>
+						<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="next"><a href="#"
+							ng-show="facetResults.canPageForward()"
+							ng-click="facetResults.pageToLast($event)">&raquo;</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
