@@ -25,6 +25,7 @@ facetsModel.factory('FacetsData', function() {
 		'entryTitle': '',
 		'ermrestData': [],
 		'facetClass': {},
+		'facetPreviousValues': {},
 		'facets': [],
 		'files': [],
 		'filterAllText': '',
@@ -60,11 +61,13 @@ facetsModel.factory('FacetsData', function() {
 			'spinner': [],
 			'table': '',
 			'tables': [],
+			'tag': null,
 			'tagPages': 5,
 			'textEntryRow': [],
 			'tiles': [],
 			'totalServerItems': 0,
 			'tree': [],
+			'view': 'list',
 			'viewer3dFile': []
 	};
 });

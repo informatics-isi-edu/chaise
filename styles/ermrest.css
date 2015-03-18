@@ -1,13 +1,23 @@
-html, body {
+/* html, body { */
 	/* background:	#666; */
-	width:		100%;
-	height:		100%;					
-	padding:	0;
-	margin:		0;
-	overflow:	auto; /* when page gets too small for container min-width/height */
-	font-family: sans-serif, Calibri, Candara, Segoe, "Segoe UI", Optima, Arial;
-	font-size: 90%;
-	line-height: 1.4em;
+	/* width:		100%; */
+	/* height:		100%;	*/				
+	/* padding:	0; */
+	/* margin:		0; */
+	/* overflow:	auto; */ /* when page gets too small for container min-width/height */
+	/* font-family: sans-serif, Calibri, Candara, Segoe, "Segoe UI", Optima, Arial; */
+	/* font-size: 90%; */
+	/* line-height: 1.4em; */
+/* } */
+
+.ermrest_header {
+	background-color: #000000;
+	color: #fff;
+	text-align: center;
+	height: 50px;
+	width: 100%;
+	position: absolute;
+	top: 0px;
 }
 
 img.center {
@@ -278,6 +288,18 @@ td.value {
     word-wrap: break-word;
 }
 
+td.filter_key {
+    vertical-align: top;
+	font-weight: bold;
+    text-align: right;
+	white-space:nowrap;
+    padding-right: 10px;
+}
+
+td.filter_value {
+	white-space:nowrap;
+}
+
 .single_value {
     list-style-type: none;
     padding: 0px;
@@ -288,4 +310,8 @@ td.value {
     padding: 0px;
     margin-left: 10px;
     margin-bottom: 0px;
+}
+
+.chiclet-value {
+    display: list-item;
 }

@@ -75,4 +75,35 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	    	FacetsData.pageMap[i] = i;
 	    }
 	};
+	
+	this.sidebarClick = function (toggle) {
+	    var overlay = $('.sidebar-overlay');
+	    
+	    if (toggle == 'sidebar-toggle') {
+	        var sidebar = $('#sidebar');
+	        sidebar.toggleClass('open');
+	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
+	            overlay.addClass('active');
+	        } else {
+	            overlay.removeClass('active');
+	        }
+	    } else if (toggle == 'field-toggle') {
+	        var sidebar = $('#editfilter');
+	        sidebar.toggleClass('open');
+	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
+	            //overlay.addClass('active');
+	        } else {
+	            //overlay.removeClass('active');
+	        }
+	    } else if (toggle == 'collections-toggle') {
+	        var sidebar = $('#collectionsTree');
+	        sidebar.toggleClass('open');
+	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
+	            overlay.addClass('active');
+	        } else {
+	            overlay.removeClass('active');
+	        }
+	    }
+	};
+	
 }]);

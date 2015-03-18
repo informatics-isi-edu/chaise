@@ -14,7 +14,8 @@ var ermrestApp = angular.module('ermrestApp', [
   'ermInitController',
   'ermDetailController',
   'ermFilterController',
-  'ermResultsController'
+  'ermResultsController',
+  'ermSideBarController'
 ]);
 
 ermrestApp.provider('ermrest', function () {
@@ -48,12 +49,12 @@ ermrestApp.config(['$routeProvider',
 		templateUrl: 'views/ermlogout.html',
 		//controller: 'LogoutCtrl'
 	}).
-	when('/explore', {
-		templateUrl: 'views/ermexplore.html'//,
+	when('/retrieve', {
+		templateUrl: 'views/ermretrieve.html'//,
 			//controller: 'ExplorerListCtrl'
 	}).
 	otherwise({
-		redirectTo: '/explore'
+		redirectTo: '/retrieve'
 	});
 }]);
 

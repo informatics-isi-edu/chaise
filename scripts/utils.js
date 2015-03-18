@@ -73,40 +73,88 @@ function clearFacets(options) {
 	});
 }
 
-// "m" is the number of columns per row
-// "maxRows" is the maxim number of rows to be displayed
+//"m" is the number of columns per row
+//"maxRows" is the maxim number of rows to be displayed
 function getDisplayColumns(row, m, maxRows, table_name) {
 	var ret = [];
 	var tr = [];
-        if (display_columns['summary'] != null) {
-            tr.push(display_columns['summary']);
-            ret.push(tr);
-        } else {
-            var rowCount = 0;
-            $.each(display_columns['top_columns'], function(i, col) {
-                    if (row[col] == null || row[col] === '' || display_columns['title'] == col ||
-                                    display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) || 
-                                    hasAnnotation(table_name, col, 'bottom')) {
-                            return true;
-                    }
-                    tr.push(col);
-                    if (tr.length == m) {
-                            ret.push(tr);
-                            tr = [];
-                            if (++rowCount == maxRows) {
-                                    return false;
-                            }
-                    }
-            });
-            if (tr.length > 0) {
-                    for (var i=0; i < m; i++) {
-                            tr.push('');
-                    }
-                    tr.length = m;
-                    ret.push(tr);
-            }
-        }
+     if (display_columns['summary'] != null) {
+         tr.push(display_columns['summary']);
+         ret.push(tr);
+     } else {
+         var rowCount = 0;
+         $.each(display_columns['top_columns'], function(i, col) {
+                 if (row[col] == null || row[col] === '' || display_columns['title'] == col ||
+                                 display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) || 
+                                 hasAnnotation(table_name, col, 'bottom')) {
+                         return true;
+                 }
+                 tr.push(col);
+                 if (tr.length == m) {
+                         ret.push(tr);
+                         tr = [];
+                         if (++rowCount == maxRows) {
+                                 return false;
+                         }
+                 }
+         });
+         if (tr.length > 0) {
+                 for (var i=0; i < m; i++) {
+                         tr.push('');
+                 }
+                 tr.length = m;
+                 ret.push(tr);
+         }
+     }
 	return ret;
+}
+
+//"m" is the number of columns per row
+//"maxRows" is the maxim number of rows to be displayed
+function getViewColumns(row, m, maxRows, table_name) {
+	var res = {'top_columns': null,
+			'summary': null};
+	var ret = [];
+	var tr = [];
+	if (display_columns['summary'] != null) {
+		res['summary'] = display_columns['summary'];
+	}
+    var rowCount = 0;
+    $.each(display_columns['top_columns'], function(i, col) {
+            if (row[col] == null || row[col] === '' || display_columns['title'] == col || display_columns['summary'] == col ||
+                            display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) || 
+                            hasAnnotation(table_name, col, 'bottom')) {
+                    return true;
+            }
+            tr.push(col);
+            if (tr.length == m) {
+                    ret.push(tr);
+                    tr = [];
+                    if (++rowCount == maxRows) {
+                            return false;
+                    }
+            }
+    });
+    if (tr.length > 0) {
+            for (var i=0; i < m; i++) {
+                    tr.push('');
+            }
+            tr.length = m;
+            ret.push(tr);
+    }
+    // transpose the matrix
+    var arr = [];
+    $.each(ret, function(i, tr) {
+    	$.each(tr, function(j, col) {
+    		if (arr[j] == null) {
+    			arr[j] = [];
+    		}
+    		arr[j][i] = col;
+    	});
+    });
+    res['top_columns'] = arr;
+    //res['top_columns'] = ret;
+	return res;
 }
 
 function isLongText(col, value) {

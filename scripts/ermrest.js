@@ -1622,12 +1622,17 @@ function hasAnnotation(table_name, column_name, annotation) {
 }
 
 function selectCollection() {
+	var clicked = false;
 	$.each($('label', $('#treeDiv')), function(i, label) {
 		if ($(label).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE)) {
 			$(label).click();
+			clicked = true;
 			return false;
 		}
 	});
+	if (!clicked) {
+		setTimeout('selectCollection()', 1);
+	}
 }
 
 function setAssociationTables(table_name) {
@@ -2441,3 +2446,24 @@ function setCatalogTables() {
 		});
 	});
 }
+
+function hasColumnAnnotation(table_name, annotation) {
+	var ret = false;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name']) {
+			var column_definitions = table['column_definitions'];
+			$.each(column_definitions, function(i, col) {
+				if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
+					var comments = col['annotations'][COLUMNS_LIST_URI];
+					if (comments.contains(annotation)) {
+						ret = true;
+						return false;
+					}
+				}
+			});
+			return false;
+		}
+	});
+	return ret;
+}
+

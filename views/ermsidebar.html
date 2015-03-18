@@ -1,0 +1,185 @@
+<div ng-controller="SideBarCtrl as sideBar">
+	<!-- Collections sidebar -->
+	<aside id="collectionsTree" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+	    <!-- Sidebar header -->
+	    <div class="sidebar-header header-cover">
+	        <!-- Sidebar toggle button -->
+	        <div class="row">
+	        	<div class="col-md-10">
+				        <h5>Collections</h5>
+				</div>
+				<div class="col-md-2">
+				        <button type="button" class="btn btn-default btn-sm pull-right collections-toggle" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
+				            DONE
+				        </button>
+				    </div>
+			</div>
+	    </div>
+		<div class="row">
+			<div class="entity" id="treeDiv">
+				<script type="text/ng-template" id="tree_item_renderer.html">
+    						<label ng-show="data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, true)">+</label>
+							<label ng-show="!data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, false)">-</label>
+							<label ng-show="data.level!=-1" ng-click="sideBar.getEntityResults($event, data)">{{data.display}} {{sideBar.displayTreeCount(data)}}</label>
+    						<ul ng-show="data.show" class="entity">
+        						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
+    						</ul>
+				</script>
+				<ul class="entity">
+ 					<li class="entity" ng-repeat="data in FacetsData.tree" ng-include="'tree_item_renderer.html'"></li>
+ 				</ul>
+			</div>
+		</div>
+	</aside>
+
+
+	<!-- Filters sidebar -->
+	<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+	    <!-- Sidebar header -->
+	    <div class="sidebar-header header-cover">
+	        <!-- Sidebar toggle button -->
+	        <div class="row">
+	        	<div class="col-md-10">
+				        <h5>Fields &amp; Values</h5>
+				</div>
+				<div class="col-md-2">
+				        <button type="button" class="btn btn-default btn-sm pull-right sidebar-toggle" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
+				            DONE
+				        </button>
+				    </div>
+			</div>
+	        <!-- Sidebar brand image 
+	        <div class="sidebar-image">
+	            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/53474/atom_profile_01.jpg">
+	        </div> -->
+	        <!-- Sidebar brand name 
+	        <a data-toggle="dropdown" class="sidebar-brand" href="#settings-dropdown">
+	            john.doe@gmail.com
+	            <b class="caret"></b>
+	        </a>
+	        -->
+	    </div>
+	    <div>
+		    <!-- Sidebar navigation -->
+		    <ul class="nav sidebar-nav">
+		        <li ng-show="sideBar.showFacetCount(facet)" ng-repeat="facet in FacetsData.facets">
+		            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
+		                {{facet['display']}}
+		            	<span class="badge">{{FacetsData.box[facet['table']][facet['name']]['facetcount']}}</span>
+		                <span class="glyphicon glyphicon-chevron-right"></span>
+		                <!--
+		                <b class="caret"></b>
+		            -->
+		            </a>
+		        </li>
+		
+		    </ul>
+	    </div>
+	
+		<div class="panel panel-default more">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+					<a data-toggle="collapse" href="#" ng-click="sideBar.displayMore($event)"> More filter
+						options&nbsp;&nbsp;<span
+						class="glyphicon glyphicon-collapse-down pull-right"></span>
+					</a>
+				</h4>
+			</div>
+			<div class="panel-collapse collapse in">
+				<div class="panel-body" ng-show="FacetsData.moreFlag">
+					<ul class="nav filteritems">
+						<li ng-repeat="facet in FacetsData.facets"><input
+							type="checkbox"
+							ng-model="FacetsData.chooseColumns[facet['table']][facet['name']]">{{facet['display']}}</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+	    <!-- Sidebar divider -->
+	    <!-- <div class="sidebar-divider"></div> -->
+	    
+	    <!-- Sidebar text -->
+	    <!--  <div class="sidebar-text">Text</div> -->
+	</aside>
+
+
+	<!-- next level sidebar to adjust value ranges per field -->
+
+	<aside id="editfilter" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+	    <!-- Sidebar header -->
+	    <div class="sidebar-header header-cover">
+	        <!-- Sidebar toggle button -->
+	        <div class="row">
+	        	<div class="col-md-10">
+				   <a href="#" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="glyphicon glyphicon-chevron-left"></span> Fields &amp; Values</a>
+				</div>
+				<div class="col-md-2">
+				        <button type="button" class="btn btn-default btn-sm pull-right field-toggle" ng-click="sideBar.editFilterDone($event, 'field-toggle', true);">
+				            DONE
+				        </button>
+				    </div>
+			</div>
+	    </div>
+	
+	    <!-- Edit Filter Container -->
+	    <div ng-if="FacetsData.tag!=null" class="row">
+	        <div class="col-md-12">
+	            <div class="editfilter-container">
+	                <!-- <p>Click filter button to use filters.</p> -->
+	                <div class="filter-item">
+	                    <span class="filter-item-field">{{FacetsData.tag['display']}}</span>&nbsp;
+	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'bigint')" class="filter-item-value">
+	                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}
+	                    	</span>
+	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'text')" class="filter-item-value">
+	                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']}}
+	                    	</span>
+	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="filter-item-value">
+				    			<span ng-repeat="value in sideBar.getFacetValues(FacetsData.tag)">
+				    				<span ng-if="!$first">, </span>
+				    					{{value}}
+				    			</span>
+	                    	</span>
+	                    <a href="#" ng-click="sideBar.removeFilter($event, FacetsData.tag);"><i class="glyphicon glyphicon-remove"></i></a>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    <!-- slider/value picker -->
+	    <div ng-if="FacetsData.tag!=null" class="row">
+	        <div class="col-md-12">
+	        	<div class="editslider-container">
+					<div class="panel-body">
+						<ul class="nav filteritems" ng-hide="sideBar.hide(FacetsData.tag)">
+							<li ng-if="sideBar.if_type(FacetsData.tag, 'bigint')"><rzslider
+									rz-slider-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']"
+									rz-slider-high="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']"
+									rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
+									rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
+									rz-slider-translate="translate"> </rzslider></li>
+							<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input
+								type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
+								/></li>
+							<li ng-if="sideBar.if_type(FacetsData.tag, 'enum')"
+								ng-repeat="value in FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values']"
+								ng-hide="sideBar.showFacetValue(FacetsData.tag, value)"><input
+								type="checkbox" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['values'][value]"
+								ng-disabled="sideBar.showFacetValue(FacetsData.tag, value)" />{{value}}
+								<span class="pull-right badge">{{FacetsData.colsGroup[FacetsData.tag['table']][FacetsData.tag['name']][value]}}</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+	        </div>
+	    </div>
+	    <!-- Sidebar divider -->
+	    <!-- <div class="sidebar-divider"></div> -->
+	    
+	    <!-- Sidebar text -->
+	    <!--  <div class="sidebar-text">Text</div> -->
+	</aside>
+
+	<!-- end edit-filter sidebar overlay -->
+
+</div>

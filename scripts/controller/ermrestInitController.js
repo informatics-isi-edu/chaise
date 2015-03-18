@@ -25,6 +25,18 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacetsData
 		}
 	});
 	
+	$('.sidebar-overlay').click(function(event) {
+    	if (!$('#editfilter').hasClass('open') && $('.sidebar-overlay').hasClass('active')) {
+	        $('.sidebar-overlay').removeClass('active');
+    		if ($('#sidebar').hasClass('open')) {
+    	        $('#sidebar').toggleClass('open');
+    		} else if ($('#collectionsTree').hasClass('open')) {
+    	        $('#collectionsTree').toggleClass('open');
+    		}
+    	}
+	});
+
+
 	if ($location.search()['schema'] != null) {
 		SCHEMA = $location.search()['schema'];
 	} else if (SCHEMA == null) {
