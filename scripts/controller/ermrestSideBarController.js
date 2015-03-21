@@ -189,7 +189,8 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	};
 
 	this.showFacetValue = function showFacetValue(facet, value) {
-		return ($scope.FacetsData.colsGroup[facet['table']][facet['name']][value] == 0 && !$scope.FacetsData.box[facet['table']][facet['name']]['values'][value]);
+		return ($scope.FacetsData.colsGroup[facet['table']][facet['name']][value] == 0 && !$scope.FacetsData.box[facet['table']][facet['name']]['values'][value]) ||
+			($scope.FacetsData.searchFilterValue[facet['table']][facet['name']].length > 0 && !(new RegExp($scope.FacetsData.searchFilterValue[facet['table']][facet['name']], 'i')).test(value));
 	};
 
 	this.predicate_checkbox = $scope.predicate_checkbox = function predicate_checkbox(facet) {
@@ -494,6 +495,11 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 		event.preventDefault();
 		event.preventDefault();
     	FacetsService.sidebarClick(toggle);
+	};
+
+	this.showUsableFilter = function showUsableFilter(facet) {
+		var ret = $scope.FacetsData.searchFilter.length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']);
+		return ret;
 	};
 
 }]);

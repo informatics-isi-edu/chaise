@@ -52,6 +52,8 @@ facetsModel.factory('FacetsData', function() {
 			'pageRange': [],
 			'ready': false,
 			'score': [],
+			'searchFilter': '',
+			'searchFilterValue': {},
 			'selectedEntity': null,
 			'sortColumns': [''],
 			'sortDirection': 'asc',

@@ -474,6 +474,7 @@ function getTableColumns(options, successCallback) {
 	options['colsGroup'][table] = {};
 	options['facetClass'][table] = {};
 	options['chooseColumns'][table] = {};
+	options['searchFilterValue'][table] = {};
 	options['narrow'][table] = {};
 
 	var columns = {'facets': ret,
@@ -587,6 +588,7 @@ function initModels(options, successCallback) {
 	var sentRequests = false;
 	$.each(colsDescr, function(col, value) {
 		options['chooseColumns'][table][col] = topN.contains(col);
+		options['searchFilterValue'][table][col] = '';
 		options['facetClass'][table][col] = '';
 		box[col] = {};
 		box[col]['count'] = col;
@@ -614,6 +616,7 @@ function initModels(options, successCallback) {
 		$.each(colsDescr, function(col, value) {
 			var hasTop = hasAnnotation(table, col, 'top');
 			options['chooseColumns'][table][col] = hasTop;
+			options['searchFilterValue'][table][col] = '';
 			if (hasTop) {
 				topCount++;
 			}
@@ -642,6 +645,7 @@ function initModels(options, successCallback) {
 	$.each(topN, function(i, col) {
 		if (i >= index) {
 			options['chooseColumns'][table][topN[i]] = false;
+			options['searchFilterValue'][table][topN[i]] = '';
 		}
 	})
 	
@@ -1695,6 +1699,7 @@ function getAssociationTableColumns(options, successCallback, columns) {
 			options['colsGroup'][table] = {};
 			options['facetClass'][table] = {};
 			options['chooseColumns'][table] = {};
+			options['searchFilterValue'][table] = {};
 			options['narrow'][table] = {};
 			$.each(value['columns'], function(i, obj) {
 				facets.push({'name': obj['name'],

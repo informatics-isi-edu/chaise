@@ -27,6 +27,7 @@ function clearFacets(options) {
 	emptyJSON(options['colsDescr']);
 	emptyJSON(options['colsGroup']);
 	emptyJSON(options['chooseColumns']);
+	emptyJSON(options['searchFilterValue']);
 	emptyJSON(options['facetClass']);
 	
 	options['facets'].empty();

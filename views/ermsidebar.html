@@ -123,12 +123,12 @@
 									<span class="glyphicon glyphicon-search"></span>
 								</a>
 							</span>
-							<input type="text" class="sidebar-search form-control pull-right" placeholder="Search">
+							<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search">
 						</div>
 					</div>
 					<div class="panel-body">
 						<ul class="nav filteritems">
-							<li ng-repeat="facet in FacetsData.facets">
+							<li ng-repeat="facet in FacetsData.facets" ng-show="sideBar.showUsableFilter(facet)">
 								<div class="field-enable">
 									<label ng-class="sideBar.getMoreFilterClass(facet)" id="filt-css">CSS</label>
 									<div ng-class="sideBar.getMoreFieldSwitchClass(facet)">
@@ -204,6 +204,16 @@
 			</div>
 	    </div>
 	    
+		<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box">
+			<div class="input-group">
+				<span class="input-group-btn">
+					<a class="btn btn-default btn-lg" type="button">
+						<span class="glyphicon glyphicon-search"></span>
+					</a>
+				</span>
+				<input type="text" ng-model="FacetsData.searchFilterValue[FacetsData.tag['table']][FacetsData.tag['name']]" class="sidebar-search form-control pull-right" placeholder="Search">
+			</div>
+		</div>
 	    <!-- slider/value picker -->
 	    <div ng-if="FacetsData.tag!=null" class="row">
 	        <div class="col-md-12">
