@@ -270,7 +270,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$timeout', '$sce'
 		return (values.length > 1) ? 'multi_values' : 'single_value';
 	};
 	
-	this.getFacetValues = function getFacetValues(facet) {
+	this.getFacetValues = $scope.getFacetValues = function getFacetValues(facet) {
 		var value = $scope.FacetsData.box[facet['table']][facet['name']];
 		var values = [];
 		$.each(value['values'], function(checkbox_key, checkbox_value) {
@@ -279,6 +279,18 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$timeout', '$sce'
 			}
 		});
 		return values;
+	};
+	
+	this.displayTitle = function displayTitle(facet) {
+		var values = $scope.getFacetValues(facet);
+		var ret = '';
+		$.each(values, function(i, value) {
+			if (i > 0) {
+				ret += ', ';
+			}
+			ret += value;
+		});
+		return ret;
 	};
 	
 	this.hasFilters = $scope.hasFilters = function hasFilters() {
@@ -316,7 +328,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$timeout', '$sce'
     		$scope.FacetsData.box[facet['table']][facet['name']]['value'] = '';
     		$scope.delay_predicate(facet, event.keyCode);
     	} else if ($scope.if_type(facet, 'enum')) {
-    		var hasChanged = false;
     		$.each($scope.FacetsData.box[facet['table']][facet['name']]['values'], function(key, value) {
     			$scope.FacetsData.box[facet['table']][facet['name']]['values'][key] = false;
     		});

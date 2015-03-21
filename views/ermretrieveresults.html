@@ -61,20 +61,20 @@
 								</div>
 							</div>
 			                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
+			                    <a href="#" ng-click="facetResults.removeFilter($event, facet);"><i class="glyphicon glyphicon-remove"></i></a>
 			                    <a href="#" ng-click="facetResults.editFacet($event, facet)"><span class="filter-item-field">{{facet['display']}}</span>&nbsp;</a>
-		                    	<span ng-if="facetResults.if_type(facet, 'bigint')" class="filter-item-value">
+		                    	<span ng-if="facetResults.if_type(facet, 'bigint')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}">
 		                    		{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}
 		                    	</span>
-		                    	<span ng-if="facetResults.if_type(facet, 'text')" class="filter-item-value">
+		                    	<span ng-if="facetResults.if_type(facet, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['value']}}">
 		                    		{{FacetsData.box[facet['table']][facet['name']]['value']}}
 		                    	</span>
-		                    	<span ng-if="facetResults.if_type(facet, 'enum')" class="filter-item-value">
+		                    	<span ng-if="facetResults.if_type(facet, 'enum')" class="filter-item-value" ng-attr-title="{{facetResults.displayTitle(facet)}}">
 					    			<span ng-repeat="value in facetResults.getFacetValues(facet)">
 				    					<span ng-if="!$first">, </span>
 					    					{{value}}
 					    			</span>
 		                    	</span>
-			                    <a href="#" ng-click="facetResults.removeFilter($event, facet);"><i class="glyphicon glyphicon-remove"></i></a>
 			                </div>
 						</div>
 					</div>

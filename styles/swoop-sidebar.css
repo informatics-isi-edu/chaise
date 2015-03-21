@@ -8,7 +8,7 @@
 .sidebar::-webkit-scrollbar-track{border-radius:2px}
 .sidebar::-webkit-scrollbar{width:5px;background-color:#F7F7F7}
 .sidebar::-webkit-scrollbar-thumb{border-radius:10px;-webkit-box-shadow:inset 0 0 6px rgba(0,0,0,0.3);background-color:#BFBFBF}
-.sidebar .sidebar-header{position:relative;padding:10px;margin-bottom:8px;-webkit-transition:all .2s ease-in-out;-o-transition:all .2s ease-in-out;transition:all .2s ease-in-out}
+.sidebar .sidebar-header{position:relative;padding:10px;-webkit-transition:all .2s ease-in-out;-o-transition:all .2s ease-in-out;transition:all .2s ease-in-out}
 .sidebar .sidebar-header.header-cover{background-repeat:no-repeat;background-position:center center;-webkit-background-size:cover;-moz-background-size:cover;-o-background-size:cover;background-size:cover}
 .sidebar .sidebar-header h5{margin:5px}
 .sidebar .sidebar-header:hover .sidebar-toggle{opacity:1}
@@ -21,7 +21,7 @@
 .sidebar .sidebar-nav li a:hover{background:transparent}
 .sidebar .sidebar-nav .dropdown-menu{position:relative;width:100%;margin:0;padding:0;border:none;border-radius:0;-webkit-box-shadow:none;box-shadow:none}
 .sidebar-default{background-color:#fff}
-.sidebar-default .sidebar-header{background-color:#eceff1}
+.sidebar-default .sidebar-header{background-color:#fff}
 .sidebar-default .sidebar-brand{color:#757575;background-color:transparent}
 .sidebar-default .sidebar-brand:hover,.sidebar-default .sidebar-brand:focus{color:#212121;background-color:rgba(0,0,0,0.1)}
 .sidebar-default .sidebar-badge{color:#fff;background-color:#bdbdbd}

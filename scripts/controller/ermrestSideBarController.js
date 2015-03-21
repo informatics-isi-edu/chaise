@@ -97,12 +97,8 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     	} else if ($scope.if_type(facet, 'enum')) {
     		var hasChanged = false;
     		$.each($scope.FacetsData.box[facet['table']][facet['name']]['values'], function(key, value) {
-    			hasChanged = $scope.FacetsData.facetPreviousValues['values'][key] == null && value ||
-    				$scope.FacetsData.facetPreviousValues['values'][key] != null && $scope.FacetsData.facetPreviousValues['values'][key] != value;
+    			$scope.FacetsData.box[facet['table']][facet['name']]['values'][key] = false;
     		});
-    		if (hasChanged) {
-        		$scope.predicate_checkbox(facet);
-    		}
     	}
 	}
     
@@ -125,7 +121,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 
 	this.if_type = $scope.if_type = function if_type(facet, facet_type) {
 		var ret = false;
-		if ($scope.FacetsData.colsDescr[facet['table']] != null && $scope.FacetsData.colsDescr[facet['table']][facet['name']] != null) {
+		if (facet != null && $scope.FacetsData.colsDescr[facet['table']] != null && $scope.FacetsData.colsDescr[facet['table']][facet['name']] != null) {
 			ret = ($scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == facet_type);
 			if (facet_type == 'bigint') {
 				ret = psqlNumeric.contains($scope.FacetsData.colsDescr[facet['table']][facet['name']]['type']);
@@ -394,7 +390,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 		return (values.length > 1) ? 'multi_values' : 'single_value';
 	};
 	
-	this.getFacetValues = function getFacetValues(facet) {
+	this.getFacetValues = $scope.getFacetValues = function getFacetValues(facet) {
 		var value = $scope.FacetsData.box[facet['table']][facet['name']];
 		var values = [];
 		$.each(value['values'], function(checkbox_key, checkbox_value) {
@@ -405,4 +401,99 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 		return values;
 	};
 	
+	this.displayTitle = function displayTitle(facet) {
+		var values = $scope.getFacetValues(facet);
+		var ret = '';
+		$.each(values, function(i, value) {
+			if (i > 0) {
+				ret += ', ';
+			}
+			ret += value;
+		});
+		return ret;
+	};
+	
+	this.checkedFilter = function checkedFilter(event) {
+		//var target = $(event.target).parent();
+		//target[0].classList.toggle('disabled');
+		//target.prev()[0].classList.toggle('toggler--is-active');
+		//target.next()[0].classList.toggle('toggler--is-active');
+	};
+	
+	this.getFilterClass = function getFilterClass(facet, value) {
+		var model = $scope.FacetsData.box[facet['table']][facet['name']]['values'][value];
+		var ret = 'toggler';
+		if (model == null || !model) {
+			ret += ' toggler--is-active';
+		}
+		return ret;
+	};
+	
+	this.getFieldSwitchClass = function getFieldSwitchClass(facet, value) {
+		var model = $scope.FacetsData.box[facet['table']][facet['name']]['values'][value];
+		var ret = 'toggle';
+		if (model == null || !model) {
+			ret += ' disabled';
+		}
+		return ret;
+	};
+	
+	this.getFieldValueClass = function getFieldValueClass(facet, value) {
+		var model = $scope.FacetsData.box[facet['table']][facet['name']]['values'][value];
+		var ret = 'toggler';
+		if (model != null && model) {
+			ret += ' toggler--is-active';
+		}
+		return ret;
+	};
+	
+	this.getMoreFilterClass = function getMoreFilterClass(facet) {
+		var model = $scope.FacetsData.chooseColumns[facet['table']][facet['name']];
+		var ret = 'toggler';
+		if (!model) {
+			ret += ' toggler--is-active';
+		}
+		return ret;
+	};
+	
+	this.getMoreFieldSwitchClass = function getMoreFieldSwitchClass(facet) {
+		var model = $scope.FacetsData.chooseColumns[facet['table']][facet['name']];
+		var ret = 'toggle';
+		if (!model) {
+			ret += ' disabled';
+		}
+		return ret;
+	};
+	
+	this.getMoreFieldValueClass = function getMoreFieldValueClass(facet) {
+		var model = $scope.FacetsData.chooseColumns[facet['table']][facet['name']];
+		var ret = 'toggler';
+		if (model) {
+			ret += ' toggler--is-active';
+		}
+		return ret;
+	};
+	
+	this.getEnabledFilters = function getEnabledFilters() {
+		var ret = 0;
+		$.each($scope.FacetsData.facets, function(i, facet) {
+			if ($scope.FacetsData.chooseColumns[facet['table']][facet['name']]) {
+				ret++;
+			}
+		});
+		return ret;
+	};
+	
+    this.editMoreFilterDone = function editMoreFilterDone(event, toggle) {
+    	event.stopPropagation();
+		event.preventDefault();
+    	FacetsService.sidebarClick(toggle);
+	}
+    
+	this.slideMoreFilter = function slideMoreFilter(event, toggle) {
+		event.preventDefault();
+		event.preventDefault();
+    	FacetsService.sidebarClick(toggle);
+	};
+
 }]);

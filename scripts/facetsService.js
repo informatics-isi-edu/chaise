@@ -103,7 +103,20 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	        } else {
 	            overlay.removeClass('active');
 	        }
+	    } else if (toggle == 'more-field-toggle') {
+	        var sidebar = $('#morefilters');
+	        sidebar.toggleClass('open');
 	    }
+
+	};
+	
+	this.setFilterHeight = function setFilterHeight() {
+		//if ($('.filter-button').length == 1 || $('#filter').length == 1 && $('.filter-button').height() != $('#filter').height()) {
+		//	$('.filter-button').height($('#filter').height());
+		//} 
+		//setTimeout(function () {
+		//	setFilterHeight();
+		//}, 1000);
 	};
 	
 }]);
