@@ -297,17 +297,19 @@ function setActivePage(currentPage, pageMap) {
 
 // "m" is the number of tiles per row
 function getTilesLayout(datasetFiles, m) {
-        var data = datasetFiles['thumbnailsFiles'];
-        var col_name = datasetFiles['uri'];
+    var data = datasetFiles['thumbnailsFiles'];
+    var col_name = datasetFiles['uri'];
 	var ret = [];
 	var tr = [];
-	$.each(data, function(i, tile) {
-		tr.push(tile[col_name]);
-		if (tr.length == m) {
-			ret.push(tr);
-			tr = [];
-		}
-	});
+	if (data != null) {
+		$.each(data, function(i, tile) {
+			tr.push(tile[col_name]);
+			if (tr.length == m) {
+				ret.push(tr);
+				tr = [];
+			}
+		});
+	}
 	if (tr.length > 0) {
 		for (var i=0; i < m; i++) {
 			tr.push('');

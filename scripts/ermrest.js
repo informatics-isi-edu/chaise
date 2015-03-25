@@ -1890,7 +1890,7 @@ function getAssociationThumbnail(table_name, row) {
 	}
 	var fileTable = null;
 	if (imageTable != null) {
-		fileTable = getTablesBackReferences(imageTable);
+		fileTable = getTablesBackReferences(imageTable, table_name);
 	}
 	var thumbnail = null;
 	var sortColumn = null;
@@ -1934,13 +1934,13 @@ function getAssociationThumbnail(table_name, row) {
 	return ret;
 }
 
-function getTablesBackReferences(table_name) {
+function getTablesBackReferences(table_name, dataset) {
 	var ret = null;
 	$.each(SCHEMA_METADATA, function(i, table) {
 		if (table['table_name'] == table_name) {
 			$.each(table['foreign_keys'], function(j, fk) {
 				$.each(fk['referenced_columns'], function(k, ref_column) {
-					if (ref_column['table_name'] != table_name) {
+					if (ref_column['table_name'] != table_name && ref_column['table_name'] != dataset) {
 						ret = ref_column['table_name'];
 						return false;
 					}
@@ -1967,7 +1967,7 @@ function hasAssociationThumnbnail(table_name) {
 	return ret;
 }
 
-function getDenormalizedThumbnail(table_name, row, column_name) {
+function getDenormalizedThumbnail(table_name, row, column_name, dataset) {
 	var ret = null;
 	if (hasTableAnnotation(table_name, 'image')) {
 		var dataset_id = null;
@@ -1990,7 +1990,7 @@ function getDenormalizedThumbnail(table_name, row, column_name) {
 		});
 		if (column_name != dataset_id) {
 			var imageTable = table_name;
-			var fileTable = getTablesBackReferences(imageTable);
+			var fileTable = getTablesBackReferences(imageTable, dataset);
 			var thumbnail = null;
 			var sortColumn = null;
 			var typeColumn = null;
@@ -2054,7 +2054,7 @@ function setColumnsAlias() {
 	});
 }
 
-function getDenormalized3dView(table_name, row, column_name) {
+function getDenormalized3dView(table_name, row, column_name, dataset) {
 	var ret = null;
 	if (hasTableAnnotation(table_name, 'viewer')) {
 		var dataset_id = null;
@@ -2077,7 +2077,7 @@ function getDenormalized3dView(table_name, row, column_name) {
 		});
 		if (file_id != null && column_name != dataset_id) {
 			var imageTable = table_name;
-			var fileTable = getTablesBackReferences(imageTable);
+			var fileTable = getTablesBackReferences(imageTable, dataset);
 			var viewer = null;
 			var sortColumn = null;
 			var typeColumn = null;
@@ -2139,7 +2139,7 @@ function getTableAnnotation(table_name, annotation, key) {
 	return ret;
 }
 
-function getDenormalizedFile(table_name, row, column_name) {
+function getDenormalizedFile(table_name, row, column_name, dataset) {
 	var ret = null;
 	if (hasTableAnnotation(table_name, 'download')) {
 		var dataset_id = null;
@@ -2162,7 +2162,7 @@ function getDenormalizedFile(table_name, row, column_name) {
 		});
 		if (file_id != null && column_name != dataset_id) {
 			var downloadTable = table_name;
-			var fileTable = getTablesBackReferences(downloadTable);
+			var fileTable = getTablesBackReferences(downloadTable, dataset);
 			var download = null;
 			var sortColumn = null;
 			var typeColumn = null;
@@ -2209,7 +2209,7 @@ function getDenormalizedFile(table_name, row, column_name) {
 	return ret;
 }
 
-function getItemDenormalizedValue(table_name, row, column_name, val) {
+function getItemDenormalizedValue(table_name, row, column_name, val, dataset) {
 	var ret = val;
 	if (hasTableAnnotation(table_name, 'download') || hasTableAnnotation(table_name, 'image')) {
 		var dataset_id = null;
@@ -2232,7 +2232,7 @@ function getItemDenormalizedValue(table_name, row, column_name, val) {
 		});
 		if (file_id != null && column_name != dataset_id) {
 			var downloadTable = table_name;
-			var fileTable = getTablesBackReferences(downloadTable);
+			var fileTable = getTablesBackReferences(downloadTable, dataset);
 			var download = null;
 			var sortColumn = null;
 			var nameColumn = null;
@@ -2301,13 +2301,15 @@ function getDenormalizedFiles(root_table, row, result) {
     var downloadFiles = [];
     var ret = getDatasetFiles(root_table, row, 'download', tables);
     var col_name = getColumnName(tables['download'], 'type');
-    $.each(ret, function(i, data) {
-        if (data[col_name] == 'image/x.nifti') {
-            image3dFiles.push(data);
-        } else {
-            downloadFiles.push(data);
-        }
-    });
+    if (ret != null) {
+        $.each(ret, function(i, data) {
+            if (data[col_name] == 'image/x.nifti') {
+                image3dFiles.push(data);
+            } else {
+                downloadFiles.push(data);
+            }
+        });
+    }
     var preview = getColumnName(tables['download'], 'preview');
     var uri = getColumnName(tables['download'], 'download');
     var filename = getColumnName(tables['download'], 'name');

@@ -90,19 +90,19 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 	};
 
 	this.itemAssociate3dView = function itemAssociate3dView(table, row, column) {
-		return getDenormalized3dView(table, row, column);
+		return getDenormalized3dView(table, row, column, $scope.FacetsData.table);
 	};
 
 	this.itemAssociateFile = function itemAssociateFile(table, row, column) {
-		return getDenormalizedFile(table, row, column);
+		return getDenormalizedFile(table, row, column, $scope.FacetsData.table);
 	};
 
 	this.itemAssociateThumbnail = function itemAssociateThumbnail(table, row, column) {
-		return getDenormalizedThumbnail(table, row, column);
+		return getDenormalizedThumbnail(table, row, column, $scope.FacetsData.table);
 	};
 
 	this.itemDenormalizedValue = function itemDenormalizedValue(table, row, column, val) {
-		return getItemDenormalizedValue(table, row, column, val);
+		return getItemDenormalizedValue(table, row, column, val, $scope.FacetsData.table);
 	};
 
 	this.openZoomify = function openZoomify(event, url) {
