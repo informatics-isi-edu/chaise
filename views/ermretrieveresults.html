@@ -1,126 +1,98 @@
 		<!-- Search Results -->
-		<div  id="content" class="row" ng-controller="ResultsListCtrl as facetResults" ng-show="facetResults.showResults()" ng-click="facetResults.closeModal($event);">
+		<div  id="resultscontent" ng-controller="ResultsListCtrl as facetResults" ng-show="facetResults.showResults()" ng-click="facetResults.closeModal($event);">
 			<!-- nested row 20: Dashboard link / Name of saved query / Bookmarks button -->
 			<div id="dashboard-link" class="row">
 				<div class="col-md-12">
 					<p>
-						<i class="glyphicon glyphicon-dashboard"></i>
-						<a href="#">Dashboard</a>
+						<i class="md-dashboard md-lg"></i>
+						<a href="#" ng-click="facetResults.preventDefault($event);">Dashboard</a>
 					</p>
 				</div>
 			</div>
 			
 			<div id="browser-header" class="row">
 				<div class="col-md-10">
-					<h1>This is the name of a saved query <i class="glyphicon glyphicon-bookmark"></i></h1>
+					<h1>This is the name of a saved query <i class="md-bookmark-outline"></i></h1>
 				</div>
 				<div class="col-md-2">
-					<button type="button" class="btn btn-default btn-lg pull-right" >Bookmarks</button>
+					<button type="button" class="btn btn-default btn-lg pull-right" >Bookmark Query</button>
 				</div>
 			</div>
 			
 			<div class="row">
 				<div id="filter" class="col-md-10">
 					<div class="filter-button">
-						<button id="filterButton" type="button" class="btn btn-default btn-filter sidebar-toggle" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');"><i class="glyphicon glyphicon-filter"></i></button>
+						<button id="filterButton" type="button" title="Click to apply filters" class="btn btn-default btn-filter sidebar-toggle" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');"><i class="md-filter-list md-lg"></i></button>
 					</div>
 					<div class="filter-container">
 						<!-- <p>Click filter button to use filters.</p> -->
 						<div ng-class="facetResults.setFilterClass()">
-							<div class="filter-item">
-								<a href="#" ng-click="facetResults.preventDefault($event);"><i class="glyphicon glyphicon-remove"></i></a>
-								<!-- <span class="filter-item-field">Collection</span>&nbsp;<span class="filter-item-value">{{FacetsData.selectedEntity.display}} {{facetResults.displayTreeCount(FacetsData.selectedEntity)}}</span>  -->
-								<span class="filter-item-field">Collection</span>&nbsp;<a href="#" class="collections-toggle" ng-click="facetResults.sidebarClick($event, 'collections-toggle');">{{FacetsData.selectedEntity.display}} {{facetResults.displayTreeCount(FacetsData.selectedEntity)}}</a>
-								<!-- <a href="#" ng-click="facetResults.preventDefault($event);"><i class="glyphicon glyphicon-chevron-down"></i></a> -->
-								<div class="btn-group" role="group" ng-show="false">
-									<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-										<span class="caret"></span>
-									</button>
-								    <ul class="dropdown-menu" role="menu" ng-show="facetResults.hasFilters()">
-								    	<li ng-repeat="facet in FacetsData.facets">
-								    		<span ng-if="facetResults.if_type(facet, 'bigint')" ng-show="facetResults.showFacetValues(facet, 'bigint')">
-								    			<b>{{facet['display']}}: </b>{{FacetsData.box[facet['table']][facet['name']]['min']}} - {{FacetsData.box[facet['table']][facet['name']]['max']}}
-								    		</span>
-								    		<span ng-if="facetResults.if_type(facet, 'text')" ng-show="facetResults.showFacetValues(facet, 'text')">
-								    			<b>{{facet['display']}}: </b>{{FacetsData.box[facet['table']][facet['name']]['value']}}
-								    		</span>
-								    		<table class="dataset" ng-if="facetResults.if_type(facet, 'enum')" ng-show="facetResults.showFacetValues(facet, 'enum')">
-								    			<tr>
-								    				<td class="filter_key">{{facet['display']}}:</td>
-									    			<td class="filter_value">
-										    			<ul type="disc" ng-class="facetResults.setListClass(facet)">
-										    				<li ng-repeat="value in facetResults.getFacetValues(facet)">
-										    					{{value}}
-										    				</li>
-										    			</ul>
-										    		</td>
-										    	</tr>
-								    		</table>
-								    	</li>
-								    </ul>
-								</div>
-							</div>
-			                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
-			                    <a href="#" ng-click="facetResults.removeFilter($event, facet);"><i class="glyphicon glyphicon-remove"></i></a>
-			                    <a href="#" ng-click="facetResults.editFacet($event, facet)"><span class="filter-item-field">{{facet['display']}}</span>&nbsp;</a>
-		                    	<span ng-if="facetResults.if_type(facet, 'bigint')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}">
-		                    		{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}
-		                    	</span>
-		                    	<span ng-if="facetResults.if_type(facet, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['value']}}">
-		                    		{{FacetsData.box[facet['table']][facet['name']]['value']}}
-		                    	</span>
-		                    	<span ng-if="facetResults.if_type(facet, 'enum')" class="filter-item-value" ng-attr-title="{{facetResults.displayTitle(facet)}}">
-					    			<span ng-repeat="value in facetResults.getFacetValues(facet)">
-				    					<span ng-if="!$first">, </span>
-					    					{{value}}
-					    			</span>
-		                    	</span>
-			                </div>
+							Click <i class="md-filter-list"></i> on the left to apply filters.
 						</div>
+						<div class="filter-item">
+							<a href="#" ng-click="facetResults.preventDefault($event);"><i class="md-cancel md-lg"></i></a>
+							<!-- <span class="filter-item-field">Collection</span>&nbsp;<span class="filter-item-value">{{FacetsData.selectedEntity.display}} {{facetResults.displayTreeCount(FacetsData.selectedEntity)}}</span>  -->
+							<span class="filter-item-field">Collection</span>&nbsp;
+							<span class="filter-item-value">
+								<a href="#" class="collections-toggle" ng-click="facetResults.sidebarClick($event, 'collections-toggle');">{{FacetsData.selectedEntity.display}} {{facetResults.displayTreeCount(FacetsData.selectedEntity)}}</a>
+							</span>
+						</div>
+		                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
+		                    <a href="#" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
+		                    <a href="#" ng-click="facetResults.editFacet($event, facet)"><span class="filter-item-field">{{facet['display']}}</span>&nbsp;</a>
+	                    	<span ng-if="facetResults.if_type(facet, 'bigint')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}">
+	                    		{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}
+	                    	</span>
+	                    	<span ng-if="facetResults.if_type(facet, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['value']}}">
+	                    		{{FacetsData.box[facet['table']][facet['name']]['value']}}
+	                    	</span>
+	                    	<span ng-if="facetResults.if_type(facet, 'enum')" class="filter-item-value" ng-attr-title="{{facetResults.displayTitle(facet)}}">
+				    			<span ng-repeat="value in facetResults.getFacetValues(facet)">
+			    					<span ng-if="!$first">, </span>
+				    					{{value}}
+				    			</span>
+	                    	</span>
+		                </div>
 					</div>
 				</div>
 				<div id="view-buttons" class="col-md-2">
 					<div class="btn-toolbar pull-right" role="toolbar">
 						<div class="btn-group" role="group">
-							<button class="btn btn-default" aria-label="Sort" type="button">
-								<i class="glyphicon glyphicon-sort" aria-hidden="true"></i>
+							<button class="btn btn-default" aria-label="Sort" type="button" title="Sort">
+								<i class="md-sort md-lg" aria-hidden="true"></i>
 							</button>
 	
-							<div class="btn-group" role="group">
-								<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-	      							<i class="glyphicon glyphicon-th-list" aria-hidden="true"></i>
-	      							<span class="caret"></span>
+							<div class="btn-group view-toggle" role="group">
+								<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="Switch view">
+	      							<i class="md-view-list md-lg" aria-hidden="true"></i>
 	    						</button>
 							    <ul class="dropdown-menu" role="menu">
 							      <li>
 							      	<a href="#" ng-click="facetResults.selectView($event, 'table');">
-							      		<i class="glyphicon glyphicon-list-alt" aria-hidden="true"></i> Table View
+							      		<i class="md-view-column md-lg" aria-hidden="true"></i> Table View
 							      	</a>
 							      </li>
 							      <li>
 							      	<a href="#" ng-click="facetResults.selectView($event, 'list');">
-							      		<i class="glyphicon glyphicon-th-list" aria-hidden="true"></i> List View
+							      		<i class="md-view-list md-lg" aria-hidden="true"></i> List View
 							      	</a>
 							      </li>
 							      <li>
 							      	<a href="#" ng-click="facetResults.selectView($event, 'card');">
-							      		<i class="glyphicon glyphicon-th-large" aria-hidden="true"></i> Card View
+							      		<i class="md-view-module md-lg" aria-hidden="true"></i> Card View
 							      	</a>
 							      </li>
 							    </ul>
 							</div>
 	
-							<button class="btn btn-default" aria-label="Settings" type="button">
-								<i class="glyphicon glyphicon-cog" aria-hidden="true"></i>
+							<button class="btn btn-default" aria-label="Settings" type="button" title="Configure settings">
+								<i class="md-settings md-lg" aria-hidden="true"></i>
 							</button>
 						</div>
 						<div class="btn-group" role="group">
 							<button class="btn btn-default" aria-label="Add Filter Layer" type="button">
-								<i class="glyphicon glyphicon-plus" aria-hidden="true"></i>
+								<i class="md-add md-2x" aria-hidden="true"></i>
 							</button>
-							<!-- <div class="filter-button">
-								<button type="button" class="btn btn-default collections-toggle" ng-click="facetResults.sidebarClick($event, 'collections-toggle');"><i class="glyphicon glyphicon-briefcase"></i></button>
-							</div> -->
 						</div>
 					</div>
 				</div>

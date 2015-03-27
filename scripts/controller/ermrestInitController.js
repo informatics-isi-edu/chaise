@@ -60,8 +60,6 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacetsData
 	
 	initApplication();
 	
-	FacetsService.setFilterHeight();
-
 	this.hideSpinner = function hideSpinner() {
 		return true;
 	};

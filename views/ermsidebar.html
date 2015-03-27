@@ -16,18 +16,22 @@
 			</div>
 	    </div>
 		<div class="row">
-			<div class="entity" id="treeDiv">
-				<script type="text/ng-template" id="tree_item_renderer.html">
+			<div class="col-md-12">
+				<div class="editvalue-container">
+					<div id="treeDiv">
+						<script type="text/ng-template" id="tree_item_renderer.html">
     						<label ng-show="data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, true)">+</label>
 							<label ng-show="!data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, false)">-</label>
 							<label ng-show="data.level!=-1" ng-click="sideBar.getEntityResults($event, data)">{{data.display}} {{sideBar.displayTreeCount(data)}}</label>
     						<ul ng-show="data.show" class="entity">
         						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
     						</ul>
-				</script>
-				<ul class="entity">
- 					<li class="entity" ng-repeat="data in FacetsData.tree" ng-include="'tree_item_renderer.html'"></li>
- 				</ul>
+						</script>
+						<ul class="entity">
+		 					<li class="entity" ng-repeat="data in FacetsData.tree" ng-include="'tree_item_renderer.html'"></li>
+		 				</ul>
+					</div>
+				</div>
 			</div>
 		</div>
 	</aside>
@@ -48,6 +52,7 @@
 				        </button>
 				    </div>
 			</div>
+		</div>
 	        <!-- Sidebar brand image 
 	        <div class="sidebar-image">
 	            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/53474/atom_profile_01.jpg">
@@ -58,29 +63,29 @@
 	            <b class="caret"></b>
 	        </a>
 	        -->
-		    <div>
-			    <!-- Sidebar navigation -->
-			    <ul class="nav sidebar-nav">
-			    	<li>
-			            <a class="field-toggle" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')">
-			                More filter options
-			                <span class="glyphicon glyphicon-chevron-right"></span>
-			            </a>
-			    	</li>
-			        <li ng-show="sideBar.showFacetCount(facet)" ng-repeat="facet in FacetsData.facets">
-			            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
-			            	<span class="badge">{{FacetsData.box[facet['table']][facet['name']]['facetcount']}}</span>
-			                {{facet['display']}}
-			                <span class="glyphicon glyphicon-chevron-right"></span>
-			                <!--
-			                <b class="caret"></b>
-			            -->
-			            </a>
-			        </li>
-			
-			    </ul>
-		    </div>
-	    </div>
+	        <div class="row">
+	        	<div class="col-md-12">
+	        		<div class="editfilter-container">
+	        			<div class="filter-item">
+	        				<a class="field-toggle" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')">
+	        					<span class="filter-item-field">enabled {{sideBar.getEnabledFilters()}} of {{FacetsData.facets.length}}</span><i class="md-chevron-right md-lg"></i>
+	        				</a>
+	        			</div>
+	        		</div>
+	        	</div>
+	        </div>
+	        <ul class="nav sidebar-nav">
+		        <li ng-show="sideBar.showFacetCount(facet)" ng-repeat="facet in FacetsData.facets">
+		            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
+		            	<span class="badge truncate">{{FacetsData.box[facet['table']][facet['name']]['facetcount']}}</span>
+		            	{{facet['display']}}
+		                <span class="md-chevron-right md-lg"></span>
+		                <!--
+		                <b class="caret"></b>
+		            -->
+		            </a>
+		        </li>
+	        </ul>
 
 	    <!-- Sidebar divider -->
 	    <!-- <div class="sidebar-divider"></div> -->
@@ -95,7 +100,7 @@
 		<div class="sidebar-header header-cover">
 			<div class="row">
 				<div class="col-md-10">
-				   <a href="#" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="glyphicon glyphicon-chevron-left"></span> Fields &amp; Values</a>
+				   <h5><a href="#" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><i class="md-arrow-back md-lg"></i> Fields &amp; Values</a></h5>
 				</div>
 				<div class="col-md-2">
 				        <button type="button" class="btn btn-default btn-sm pull-right field-toggle" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');">
@@ -120,29 +125,23 @@
 						<div class="input-group">
 							<span class="input-group-btn">
 								<a class="btn btn-default btn-lg" type="button">
-									<span class="glyphicon glyphicon-search"></span>
+									<i class="md-search md-lg"></i>
 								</a>
 							</span>
 							<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search">
 						</div>
 					</div>
-					<div class="panel-body">
-						<ul class="nav filteritems">
-							<li ng-repeat="facet in FacetsData.facets" ng-show="sideBar.showUsableFilter(facet)">
-								<div class="field-enable">
-									<label ng-class="sideBar.getMoreFilterClass(facet)" id="filt-css">CSS</label>
-									<div ng-class="sideBar.getMoreFieldSwitchClass(facet)">
-										<input
-											type="checkbox" ng-model="FacetsData.chooseColumns[facet['table']][facet['name']]"
-											class="check"/><b class="b switch"></b>
-									</div>
-									<label ng-class="sideBar.getMoreFieldValueClass(facet)">{{facet['display']}}</label>
-									<div class="field-count pull-right">
-										<span class="badge">{{FacetsData.box[facet['table']][facet['name']]['facetcount']}}</span>
-									</div>
-								</div>
-							</li>
-						</ul>
+					<div class="field-enable" ng-repeat="facet in FacetsData.facets" ng-show="sideBar.showUsableFilter(facet)">
+						<label ng-class="sideBar.getMoreFilterClass(facet)" id="filt-css">CSS</label>
+						<div ng-class="sideBar.getMoreFieldSwitchClass(facet)">
+							<input
+								type="checkbox" ng-model="FacetsData.chooseColumns[facet['table']][facet['name']]"
+								class="check"/><b class="b switch"></b>
+						</div>
+						<label ng-class="sideBar.getMoreFieldValueClass(facet)">{{facet['display']}}</label>
+						<div class="field-count pull-right">
+							<span class="badge">{{FacetsData.box[facet['table']][facet['name']]['facetcount']}}</span>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -157,7 +156,7 @@
 	        <!-- Sidebar toggle button -->
 	        <div class="row">
 	        	<div class="col-md-10">
-				   <a href="#" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="glyphicon glyphicon-chevron-left"></span> Fields &amp; Values</a>
+				   <a href="#" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="md-arrow-back md-lg"></span> Fields &amp; Values</a>
 				</div>
 				<div class="col-md-2">
 				        <button type="button" class="btn btn-default btn-sm pull-right field-toggle" ng-click="sideBar.editFilterDone($event, 'field-toggle', true);">
@@ -173,7 +172,7 @@
 	            <div class="editfilter-container">
 	                <!-- <p>Click filter button to use filters.</p> -->
 	                <div class="filter-item">
-	                    <a href="#" ng-click="sideBar.removeFilter($event, FacetsData.tag);"><i class="glyphicon glyphicon-remove"></i></a>
+	                    <a href="#" ng-click="sideBar.removeFilter($event, FacetsData.tag);"><i class="md-cancel md-lg"></i></a>
 	                    <span class="filter-item-field">{{FacetsData.tag['display']}}</span>&nbsp;
 	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'bigint')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}">
 	                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}
@@ -208,7 +207,7 @@
 			<div class="input-group">
 				<span class="input-group-btn">
 					<a class="btn btn-default btn-lg" type="button">
-						<span class="glyphicon glyphicon-search"></span>
+						<span class="md-search md-lg"></span>
 					</a>
 				</span>
 				<input type="text" ng-model="FacetsData.searchFilterValue[FacetsData.tag['table']][FacetsData.tag['name']]" class="sidebar-search form-control pull-right" placeholder="Search">

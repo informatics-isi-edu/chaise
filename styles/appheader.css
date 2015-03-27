@@ -1,0 +1,45 @@
+html,body { 
+	height: 100%;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+}
+
+body {
+	background-color: #fff;
+}
+
+body > .container {
+	min-height: 100%;
+	position: relative;
+	padding-top: 70px;
+}
+
+.navbar-inverse .navbar-brand {
+   color: #FFFFFF;
+}
+
+.navbar-inverse {
+    background-color: #4D4D4D;
+    border-color: #4D4D4D;
+    font-size: 1.2em;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+   /* color: #999; */
+}
+
+.navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
+	border-color: #4D4D4D;
+}
+
+.navbar-inverse .navbar-nav > .active > a, .navbar-inverse .navbar-nav > .active > a:hover, .navbar-inverse .navbar-nav > .active > a:focus {
+	background-color: #4D4D4D;
+}
+
+.navbar-inverse .navbar-text {
+	color: #FFF;
+}
+
+#mainnav .form-control-feedback {
+     height: 28px;
+     line-height: 28px;
+}

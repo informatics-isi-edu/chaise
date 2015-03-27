@@ -441,7 +441,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	
 	this.getFieldValueClass = function getFieldValueClass(facet, value) {
 		var model = $scope.FacetsData.box[facet['table']][facet['name']]['values'][value];
-		var ret = 'toggler';
+		var ret = 'toggler truncate';
 		if (model != null && model) {
 			ret += ' toggler--is-active';
 		}
@@ -468,7 +468,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	
 	this.getMoreFieldValueClass = function getMoreFieldValueClass(facet) {
 		var model = $scope.FacetsData.chooseColumns[facet['table']][facet['name']];
-		var ret = 'toggler';
+		var ret = 'toggler truncate';
 		if (model) {
 			ret += ' toggler--is-active';
 		}

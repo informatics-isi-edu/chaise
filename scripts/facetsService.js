@@ -110,13 +110,4 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 
 	};
 	
-	this.setFilterHeight = function setFilterHeight() {
-		//if ($('.filter-button').length == 1 || $('#filter').length == 1 && $('.filter-button').height() != $('#filter').height()) {
-		//	$('.filter-button').height($('#filter').height());
-		//} 
-		//setTimeout(function () {
-		//	setFilterHeight();
-		//}, 1000);
-	};
-	
 }]);
