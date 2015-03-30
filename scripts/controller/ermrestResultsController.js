@@ -314,7 +314,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$timeout', '$sce'
 	};
 	
 	this.setFilterClass = function setFilterClass() {
-		return $scope.hasFilters() ? '' : 'filter-bg';
+		return $scope.hasFilters() ? 'filter-bg-hide' : 'filter-bg';
 	};
 
     this.removeFilter = function removeFilter(event, facet) {
