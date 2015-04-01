@@ -449,7 +449,7 @@ dt, dd {
 	text-overflow:ellipsis;
 	white-space:nowrap;
 	/* max-width: 136px; */
-	max-width: 155px;
+	max-width: 145px;
 }
 
 .toggle, .toggler {
