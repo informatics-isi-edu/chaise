@@ -65,6 +65,16 @@
 	        -->
 	        <div class="row">
 	        	<div class="col-md-12">
+					<div class="search-box">
+						<div class="input-group">
+							<span class="input-group-btn">
+								<a class="btn btn-default btn-lg" type="button">
+									<i class="md-search md-lg"></i>
+								</a>
+							</span>
+							<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search">
+						</div>
+					</div>
 	        		<div class="editfilter-container">
 	        			<div class="filter-item">
 	        				<a class="field-toggle" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')">
@@ -120,17 +130,17 @@
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				<div class="editvalue-container">
-					<div class="search-box">
-						<div class="input-group">
-							<span class="input-group-btn">
-								<a class="btn btn-default btn-lg" type="button">
-									<i class="md-search md-lg"></i>
-								</a>
-							</span>
-							<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search">
-						</div>
+				<div class="search-box">
+					<div class="input-group">
+						<span class="input-group-btn">
+							<a class="btn btn-default btn-lg" type="button">
+								<i class="md-search md-lg"></i>
+							</a>
+						</span>
+						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search">
 					</div>
+				</div>
+				<div class="editvalue-container">
 					<div class="field-enable" ng-repeat="facet in FacetsData.facets" ng-show="sideBar.showUsableFilter(facet)">
 						<label ng-class="sideBar.getMoreFilterClass(facet)" id="filt-css">CSS</label>
 						<div ng-class="sideBar.getMoreFieldSwitchClass(facet)">
@@ -217,35 +227,33 @@
 	    <div ng-if="FacetsData.tag!=null" class="row">
 	        <div class="col-md-12">
 	        	<div class="editvalue-container">
-					<div class="panel-body">
-						<ul class="nav filteritems" ng-hide="sideBar.hide(FacetsData.tag)">
-							<li ng-if="sideBar.if_type(FacetsData.tag, 'bigint')"><rzslider
-									rz-slider-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']"
-									rz-slider-high="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']"
-									rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
-									rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
-									rz-slider-translate="translate"> </rzslider></li>
-							<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search" 
-								type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
-								/></li>
-							<li ng-if="sideBar.if_type(FacetsData.tag, 'enum')"
-								ng-repeat="value in FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values']"
-								ng-hide="sideBar.showFacetValue(FacetsData.tag, value)">
-								<div class="field-enable">
-									<label ng-class="sideBar.getFilterClass(FacetsData.tag, value)" id="filt-css">CSS</label>
-									<div ng-class="sideBar.getFieldSwitchClass(FacetsData.tag, value)">
-										<input
-											type="checkbox" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['values'][value]"
-											class="check" ng-click="sideBar.checkedFilter($event)"/><b class="b switch"></b>
-									</div>
-									<label ng-class="sideBar.getFieldValueClass(FacetsData.tag, value)">{{value}}</label>
-									<div class="field-count pull-right">
-										<span class="badge">{{FacetsData.colsGroup[FacetsData.tag['table']][FacetsData.tag['name']][value]}}</span>
-									</div>
+					<ul class="nav filteritems" ng-hide="sideBar.hide(FacetsData.tag)">
+						<li ng-if="sideBar.if_type(FacetsData.tag, 'bigint')"><rzslider
+								rz-slider-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']"
+								rz-slider-high="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']"
+								rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
+								rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
+								rz-slider-translate="translate"> </rzslider></li>
+						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search" 
+							type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
+							/></li>
+						<li ng-if="sideBar.if_type(FacetsData.tag, 'enum')"
+							ng-repeat="value in FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values']"
+							ng-hide="sideBar.showFacetValue(FacetsData.tag, value)">
+							<div class="field-enable">
+								<label ng-class="sideBar.getFilterClass(FacetsData.tag, value)" id="filt-css">CSS</label>
+								<div ng-class="sideBar.getFieldSwitchClass(FacetsData.tag, value)">
+									<input
+										type="checkbox" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['values'][value]"
+										class="check" ng-click="sideBar.checkedFilter($event)"/><b class="b switch"></b>
 								</div>
-							</li>
-						</ul>
-					</div>
+								<label ng-class="sideBar.getFieldValueClass(FacetsData.tag, value)">{{value}}</label>
+								<div class="field-count pull-right">
+									<span class="badge">{{FacetsData.colsGroup[FacetsData.tag['table']][FacetsData.tag['name']][value]}}</span>
+								</div>
+							</div>
+						</li>
+					</ul>
 				</div>
 	        </div>
 	    </div>
