@@ -2407,14 +2407,21 @@ function entityLinearize(denormalizedView, linearizeView) {
 	emptyJSON(linearizeView);
 	$.each(denormalizedView, function(table, rows) {
 		$.each(rows, function(i, row) {
-			$.each(row, function(column, val) {
-				if (isTextAttribute(table, column)) {
-					if (linearizeView[column] == null) {
-						linearizeView[column] = {'table': table, 'rows': []};
-					}
-					linearizeView[column]['rows'].push(row);
+			if (Object.keys(row).length > 2) {
+				if (linearizeView[table] == null) {
+					linearizeView[table] = {'table': table, 'rows': []};
 				}
-			});
+				linearizeView[table]['rows'].push(row);
+			} else {
+				$.each(row, function(column, val) {
+					if (isTextAttribute(table, column)) {
+						if (linearizeView[column] == null) {
+							linearizeView[column] = {'table': table, 'rows': []};
+						}
+						linearizeView[column]['rows'].push(row);
+					}
+				});
+			}
 		});
 	});
 }
@@ -2472,5 +2479,18 @@ function hasColumnAnnotation(table_name, annotation) {
 		}
 	});
 	return ret;
+}
+
+function getTableLabelName(table_name) {
+    var ret = getColumnDisplayName(table_name);
+    $.each(SCHEMA_METADATA, function(i, table) {
+        if (table_name == table['table_name']) {
+            if (table['annotations'][TABLES_MAP_URI] != null && table['annotations'][TABLES_MAP_URI]['display'] != null) {
+                ret = table['annotations'][TABLES_MAP_URI]['display'];
+            }
+            return false;
+        }
+    });
+    return ret;
 }
 

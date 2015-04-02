@@ -312,6 +312,19 @@ td.filter_value {
     margin-bottom: 0px;
 }
 
+li.entity_detail {
+    padding: 0px;
+    margin-left: 10px;
+    margin-bottom: 0px;
+}
+
+ul.entity_detail {
+    list-style-type: disc;
+	padding: 0px;
+    margin-left: 0px;
+    margin-bottom: 0px;
+}
+
 .chiclet-value {
     display: list-item;
 }

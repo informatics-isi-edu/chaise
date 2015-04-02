@@ -18,11 +18,11 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return hasAnnotation(table, column, 'html') ? '' : data;
 	};
 
-	this.display = function display(table, column) {
-		return FacetsService.display(table, column);
+	this.display = $scope.display = function display(table, column, row) {
+		return (row != null && Object.keys(row[0]).length > 3) ? getTableLabelName(table) : FacetsService.display(table, column);
 	};
 
-	this.displayTable = function displayTable(table) {
+	this.displayTable = $scope.displayTable = function displayTable(table) {
 		return getTableDisplayName(table);
 	};
 	
@@ -51,10 +51,14 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return hasAnnotation(table, column, '3dview');
 	};
 
-	this.isAttribute = function isAttribute(table, column) {
-		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
+	this.isAttribute = function isAttribute(table, column, row) {
+		return Object.keys(row).length == 3 && !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
                         !hasAnnotation(table, column, 'download') && !hasAnnotation(table, column, 'geo_gds') &&
                         !hasAnnotation(table, column, 'geo_gse');
+	};
+	
+	this.isMultiAttribute = function isMultiAttribute(table, column, row) {
+		return Object.keys(row).length > 3;
 	};
 	
 	this.isDownload = function isDownload(table, column) {
@@ -117,4 +121,20 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return ($scope.FacetsData.viewer3dFile.length>0) ? 'preview' : 'no_preview';
 	};
 
+	this.isNested = function isNested(table, values) {
+		return values.length > 0 && !hasTableAnnotation(table, 'association');
+	};
+
+	this.isAssociation = function isAssociation(table, values) {
+		return values.length > 0 && hasTableAnnotation(table, 'association') && !hasTableAnnotation(table, 'image') && !hasTableAnnotation(table, 'viewer') && !hasTableAnnotation(table, 'download');
+	};
+
+	this.isMultiColumn = function isMultiColumn(table, column) {
+		return !hasAnnotation(table, column, 'dataset');
+	};
+	
+	this.setEntityDetailClass = function setEntityDetailClass() {
+		return 'entity_detail';
+	};
+	
 }]);
