@@ -137,4 +137,8 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return 'entity_detail';
 	};
 	
+	this.showDetail = function showDetail() {
+		return $scope.FacetsData.isDetail;
+	};
+
 }]);

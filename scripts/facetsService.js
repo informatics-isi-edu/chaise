@@ -44,6 +44,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		$('#headerSearch').val('');
 		FacetsData.ready = false;
 		FacetsData.moreFlag = false;
+		FacetsData.isDetail = false;
 		FacetsData.filterTextTimeout = null;
 		FacetsData.filterSliderTimeout = null;
 		FacetsData.filterSearchAllTimeout = null;

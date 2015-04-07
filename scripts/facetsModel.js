@@ -38,6 +38,7 @@ facetsModel.factory('FacetsData', function() {
 		'filterTextTimeout': null,
 		'level': 0,
 		'linearizeView': {},
+		'isDetail': false,
 		'maxPages': 0,
 		'metadata': {},
 		'modalIndex': -1,

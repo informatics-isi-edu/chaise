@@ -5,8 +5,8 @@
 var ermInitController = angular.module('ermInitController', ['facetsModel', 'facetsService']);
 
 //angular.module('ermrestApp').controller('InitListCtrl', ['$scope', '$location', 'FacetsData',
-ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacetsData', 'FacetsService', 'ermrest',
-                                                      function($scope, $location, FacetsData, FacetsService, ermrest) {
+ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 'FacetsData', 'FacetsService', 'ermrest',
+                                                      function($scope, $location, $window, FacetsData, FacetsService, ermrest) {
 	
 	$('footer').hide();
 	$('.panel-collapse').on('hide.bs.collapse', function () {
@@ -58,6 +58,11 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', 'FacetsData
 		$scope.FacetsData.table = '';
 	}
 	
+	$window.addEventListener('popstate', function(event) {
+		$scope.FacetsData.isDetail = false;
+		$scope.$apply();
+	});
+
 	initApplication();
 	
 	this.hideSpinner = function hideSpinner() {

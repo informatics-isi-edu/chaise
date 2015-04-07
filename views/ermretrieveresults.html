@@ -162,14 +162,14 @@
                     <div ng-if="FacetsData.view=='list'" class="panel panel-default">
                     	<div class="panel-heading">
                     		<input type="checkbox">
-                    		<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetResults.clicker($event, row, 3, $index);">
+                    		<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
                     			<span class="panel-title" ng-bind-html="facetResults.itemTitle(row)"></span>
                     		</a>
                     	</div>
                     	<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
                     		<div class="row">
                     			<div class="col-md-2" ng-show="thumbnail!=null">
-									<a ng-href="#" data-toggle="modal" data-target="#viewdata" ng-click="facetResults.clicker($event, row, 3, $index);">
+									<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
 										<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 									</a>
 								</div>

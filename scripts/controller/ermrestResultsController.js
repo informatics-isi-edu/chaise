@@ -5,8 +5,8 @@
 var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService']);
 
 //angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
-ermResultsController.controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
-                                                      function($scope, $timeout, $sce, FacetsData, FacetsService) {
+ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
+                                                      function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
 	
@@ -69,6 +69,8 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$timeout', '$sce'
             $scope.FacetsData.tiles = getTilesLayout($scope.FacetsData.datasetFiles, 3);
             $scope.FacetsData.files = getFilesLayout($scope.FacetsData.datasetFiles);
             $scope.FacetsData.viewer3dFile = getViewer3d($scope.FacetsData.datasetFiles);
+            $scope.FacetsData.isDetail = true;
+            $window.history.pushState({'ermrest': 'detail'}, '', '');
 		}
 	};
 	
@@ -191,7 +193,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$timeout', '$sce'
 
 
 	this.showResults = function showResults() {
-		return true;
+		return !$scope.FacetsData.isDetail;
 	};
 
 	this.showSpinner = function showSpinner(index) {
