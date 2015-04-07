@@ -11,6 +11,11 @@
 							<tr ng-repeat="name in FacetsData.detailColumns">
 								<td class="key">{{facetDetail.display(FacetsData.table,name)}}:</td>
 								<td class="value">
+									<span ng-if="facetDetail.isUrl(FacetsData.table,name)">
+										<a ng-href="{{FacetsData.entryRow[name]}}">
+											{{FacetsData.entryRow[name]}}
+										</a>
+									</span>
 									<span ng-if="facetDetail.isThumbnail(FacetsData.table,name)">
 										<a ng-href="{{FacetsData.entryRow[name]}}">
 											<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{FacetsData.entryRow[name]}}">
@@ -46,6 +51,7 @@
 											<span ng-if="facetDetail.isAttribute(data['table'],name,value)">{{facetDetail.itemDenormalizedValue(data['table'],value,name,value[name])}}</span>
 											<span ng-if="facetDetail.isGeoGDS(data['table'],name)"><a ng-href="{{facetDetail.geoValue(data['table'],value,name)}}">{{value[name]}}</a></span>
 											<span ng-if="facetDetail.isGeoGSE(data['table'],name)"><a ng-href="{{facetDetail.geoValue(data['table'],value,name)}}">{{value[name]}}</a></span>
+											<span ng-if="facetDetail.isUrl(data['table'],name)"><a ng-href="{{value[name]}}">{{value[name]}}</a></span>
 										</li>
 										<li ng-if="facetDetail.isMultiAttribute(data['table'],name,value)" ng-repeat="value in data['rows']">
 											<ul ng-class="facetDetail.setEntityDetailClass()" ng-repeat="(column,val) in value">
@@ -67,7 +73,10 @@
 										<td class="key">{{name}}:</td>
 										<td class="value">
 											<table>
-												<tr>
+												<tr ng-if="facetDetail.isUrl(detail,name)">
+													<td><a ng-href="{{val}}">{{val}}</a></td>
+												</tr>
+												<tr ng-if="!facetDetail.isUrl(detail,name)">
 													<td>{{val}}</td>
 												</tr>
 												<tr ng-if="facetDetail.isThumbnail(detail,name)">

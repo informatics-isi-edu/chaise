@@ -82,11 +82,16 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		!hasAnnotation(table, column, '3dview') &&
 		!hasAnnotation(table, column, 'zoomify') &&
 		!hasAnnotation(table, column, 'file') &&
-		!hasAnnotation(table, column, 'html');
+		!hasAnnotation(table, column, 'html') &&
+		!hasAnnotation(table, column, 'url');
 	};
 
 	this.isThumbnail = function isThumbnail(table, column) {
 		return hasAnnotation(table, column, 'thumbnail');
+	};
+	
+	this.isUrl = function isUrl(table, column) {
+		return hasAnnotation(table, column, 'url');
 	};
 	
 	this.isZoomify = function isZoomify(table, column) {

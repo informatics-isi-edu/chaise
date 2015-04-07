@@ -371,7 +371,9 @@ function getTableColumns(options, successCallback) {
 			'thumbnail': [],
 			'zoomify': [],
 			'3dview': [],
-                        'hidden': []};
+			'hidden': [],
+			'url': []
+	};
 	PRIMARY_KEY = [];
 	if (metadata['keys'] != null) {
 		var unique_columns = [];
@@ -429,6 +431,9 @@ function getTableColumns(options, successCallback) {
 				}
 				if (comments.contains('hidden')) {
 					display_columns['hidden'].push(col['name']);
+				}
+				if (comments.contains('url')) {
+					display_columns['url'].push(col['name']);
 				}
 			}
 			var col_def = {};
@@ -1506,7 +1511,7 @@ function getDenormalizedValues(table, url, result) {
 			result[key] = ERMREST.fetch(keyUrl, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
 			$.each(result[key], function(i, row) {
 				$.each(row, function(name, value) {
-					if (value == null || value === '') {
+					if (value == null || value === '' || hasAnnotation(key, name, 'hidden')) {
 						delete result[key][i][name];
 					}
 				});
