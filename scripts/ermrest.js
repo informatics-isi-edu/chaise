@@ -354,6 +354,7 @@ function encodeSafeURIComponent(value) {
 }
 
 function getMetadata(table, successCallback) {
+	setAssociationTablesNames(table);
 	var url = ERMREST_SCHEMA_HOME + encodeSafeURIComponent(table);
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successCallback, null, null);
 }
@@ -1156,7 +1157,6 @@ function getTables(tables, options, successCallback) {
 			}
 		});
 	});
-	association_tables_names = catalog_association_tables_names[SCHEMA];
 	if (DEFAULT_TABLE == null) {
 		DEFAULT_TABLE = rootTables[0];
 	}
@@ -1173,7 +1173,6 @@ function initSchema(newSchema) {
 	SCHEMA = newSchema;
 	ERMREST_SCHEMA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG + '/schema/'+ SCHEMA + '/table/';
 	SCHEMA_METADATA = CATALOG_METADATA[SCHEMA];
-	association_tables_names = catalog_association_tables_names[SCHEMA];
 	COLUMNS_ALIAS = CATALOG_COLUMNS_ALIAS[SCHEMA];
 	back_references = catalog_back_references[SCHEMA];
 }
@@ -2497,5 +2496,16 @@ function getTableLabelName(table_name) {
         }
     });
     return ret;
+}
+
+function setAssociationTablesNames(table) {
+	association_tables_names = [];
+	if (back_references != null && back_references[table] != null) {
+		$.each(catalog_association_tables_names[SCHEMA], function(i, name) {
+			if (back_references[table].contains(name)) {
+				association_tables_names.push(name);
+			}
+		});
+	}
 }
 
