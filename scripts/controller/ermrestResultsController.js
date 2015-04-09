@@ -89,34 +89,12 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return FacetsService.display(table, column);
 	};
 
-	// "m" is the number of columns per row
-	// "maxRows" is the maxim number of rows to be displayed
-	this.displayColumns = function displayColumns(row, m, maxRows) {
-		return getDisplayColumns(row, m, maxRows, $scope.FacetsData.table);
-	};
-	
 	this.viewColumns = function viewColumns(row, m, maxRows) {
 		return getViewColumns(row, m, maxRows, $scope.FacetsData.table);
 	}
 
 	this.html = function html(table, column, data) {
 		return FacetsService.html(table, column, data);
-	};
-
-	this.if_hasThumbnail = function if_hasThumbnail() {
-		var ret = display_columns['thumbnail'].length > 0;
-		if (!ret) {
-			ret = hasAssociationThumnbnail($scope.FacetsData.table);
-		}
-		return ret;
-	};
-
-	this.isSummary = function isSummary(table, column) {
-		return hasAnnotation(table, column, 'summary');
-	};
-
-	this.hasSummary = function hasSummary(table) {
-		return hasColumnAnnotation(table, 'summary');
 	};
 
 	this.itemThumbnail = function itemThumbnail(row) {
@@ -187,11 +165,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return ret;
 	};
 
-	this.setSummaryClass = function setSummaryClass(table, column, value) {
-		return value + (hasAnnotation(table, column, 'summary') ? ' summary' : ' truncate');
-	};
-
-
 	this.showResults = function showResults() {
 		return !$scope.FacetsData.isDetail;
 	};
@@ -229,16 +202,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	};
 
 	this.if_type = $scope.if_type = function if_type(facet, facet_type) {
-		var ret = false;
-		if ($scope.FacetsData.colsDescr[facet['table']] != null && $scope.FacetsData.colsDescr[facet['table']][facet['name']] != null) {
-			ret = ($scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == facet_type);
-			if (facet_type == 'bigint') {
-				ret = psqlNumeric.contains($scope.FacetsData.colsDescr[facet['table']][facet['name']]['type']);
-			} else if (facet_type == 'text') {
-				ret = psqlText.contains($scope.FacetsData.colsDescr[facet['table']][facet['name']]['type']);
-			}
-		}
-		return ret;
+		return FacetsService.if_type(facet, facet_type);
 	};
 
 	this.showFacetValues = $scope.showFacetValues  = function showFacetValues(facet, facet_type) {
@@ -261,17 +225,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return ret;
 	};
 
-	this.setListClass = function setListClass(facet) {
-		var value = $scope.FacetsData.box[facet['table']][facet['name']];
-		var values = [];
-		$.each(value['values'], function(checkbox_key, checkbox_value) {
-			if (checkbox_value) {
-				values.push(checkbox_value);
-			}
-		});
-		return (values.length > 1) ? 'multi_values' : 'single_value';
-	};
-	
 	this.getFacetValues = $scope.getFacetValues = function getFacetValues(facet) {
 		var value = $scope.FacetsData.box[facet['table']][facet['name']];
 		var values = [];
@@ -338,31 +291,11 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	}
     
 	$scope.predicate_slider = function predicate_slider(facet) {
-		if ($scope.FacetsData.box[facet['table']][facet['name']]['min'] > $scope.FacetsData.box[facet['table']][facet['name']]['floor']) {
-			$scope.FacetsData.box[facet['table']][facet['name']]['left'] = true;
-		} else if ($scope.FacetsData.box[facet['table']][facet['name']]['left'] && $scope.FacetsData.box[facet['table']][facet['name']]['min'] == $scope.FacetsData.box[facet['table']][facet['name']]['floor']) {
-			delete $scope.FacetsData.box[facet['table']][facet['name']]['left'];
-		}
-		if ($scope.FacetsData.box[facet['table']][facet['name']]['max'] < $scope.FacetsData.box[facet['table']][facet['name']]['ceil']) {
-			$scope.FacetsData.box[facet['table']][facet['name']]['right'] = true;
-		} else if ($scope.FacetsData.box[facet['table']][facet['name']]['right'] && $scope.FacetsData.box[facet['table']][facet['name']]['max'] == $scope.FacetsData.box[facet['table']][facet['name']]['original_ceil']) {
-			delete $scope.FacetsData.box[facet['table']][facet['name']]['right'];
-		}
-		setFacetClass($scope.FacetsData, facet, $scope.FacetsData.facetClass);
-		FacetsService.setSortOption();
-		$scope.FacetsData.pagingOptions.currentPage = 1;
-		getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
+    	FacetsService.predicate_slider(facet, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	$scope.predicate = function predicate(facet,keyCode) {
-		if ($scope.FacetsData.box[facet['table']][facet['name']]['value'] == '') {
-			$scope.FacetsData.facetClass[facet['table']][facet['name']] = '';
-		} else {
-			$scope.FacetsData.facetClass[facet['table']][facet['name']] = 'selectedFacet';
-		}
-		FacetsService.setSortOption();
-		$scope.FacetsData.pagingOptions.currentPage = 1;
-		getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
+    	FacetsService.predicate(facet, keyCode, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.delay_slider = $scope.delay_slider = function delay_slider(facet) {
@@ -384,10 +317,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	};
 
 	this.predicate_checkbox = $scope.predicate_checkbox = function predicate_checkbox(facet) {
-		setFacetClass($scope.FacetsData, facet, $scope.FacetsData.facetClass);
-		FacetsService.setSortOption();
-		$scope.FacetsData.pagingOptions.currentPage = 1;
-		getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
+		FacetsService.predicate_checkbox(facet, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
 
 	this.showChiclet = $scope.showChiclet  = function showChiclet(facet) {

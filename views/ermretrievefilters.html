@@ -1,12 +1,2 @@
- <div ng-controller="FilterListCtrl as facetFilter" class="col-lg-3 col-sm-3" ng-click="facetFilter.closeModal($event);">
-	<form role="form" class="form-horizontal" ng-show="facetFilter.showTableSelect()">
-		<div class="form-group">
-			<div class="col-sm-3 col-sm-offset-1">
-				<label class="control-label">Collections:</label>
-			</div>
-			<div class="col-sm-5 col-sm-offset-2">
-				<select class="form-control" ng-model="FacetsData.table" ng-change="facetFilter.table_select()" ng-options="value for value in tables"></select>
-			</div>
-		</div>
-	</form>
+ <div ng-controller="FilterListCtrl as facetFilter">
 </div>
