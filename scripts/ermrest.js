@@ -541,12 +541,12 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 			}
 		});
 		if (tablePredicate.length > 0) {
-			if (table != options['table']) {
+			if (table != options['table'] && association_tables[table] != null) {
 				predicate.push('$A');
 				predicate.push(association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table));
-                                if (aliases != null) {
-                                    aliases.push(association_tables[table]['alias']);
-                                }
+				if (aliases != null) {
+					aliases.push(association_tables[table]['alias']);
+				}
 			}
 			predicate = predicate.concat(tablePredicate);
 		}
