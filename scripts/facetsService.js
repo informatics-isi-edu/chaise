@@ -213,6 +213,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		if (isNewSchema) {
 			initSchema(data.schema);
 		}
+		this.setCollectionChiclets(data, isNewSchema, this);
 		var peviousTable = FacetsData.table;
 		var node = $('label.highlighted', $('#treeDiv'));
 		var isNew = (node.length == 0 || node[0] !== event.target);
@@ -300,4 +301,136 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		}
 	};
 	
+	this.getFacetValues = function getFacetValues(facet) {
+		var value = FacetsData.box[facet['table']][facet['name']];
+		var values = [];
+		$.each(value['values'], function(checkbox_key, checkbox_value) {
+			if (checkbox_value) {
+				values.push(checkbox_key);
+			}
+		});
+		return values;
+	};
+	
+	this.displayTitle = function displayTitle(facet) {
+		var values = this.getFacetValues(facet);
+		var ret = '';
+		$.each(values, function(i, value) {
+			if (i > 0) {
+				ret += ', ';
+			}
+			ret += value;
+		});
+		return ret;
+	};
+	
+	this.setCollectionChiclets = function setCollectionChiclets(data, isNewSchema, that) {
+		var oldRoot = null;
+		var newRoot = null;
+		if (FacetsData.selectedEntity != null) {
+			if (FacetsData.level > 0) {
+				var oldRootParent = FacetsData.selectedEntity.parent;
+				while (oldRootParent.parent != null) {
+					oldRootParent = oldRootParent.parent;
+				}
+				oldRoot = oldRootParent.name;
+			} else {
+				oldRoot = FacetsData.selectedEntity.name;
+			}
+		}
+		var newRootParent = data.parent;
+		if (newRootParent != null) {
+			while (newRootParent.parent != null) {
+				newRootParent = newRootParent.parent;
+			}
+			newRoot = newRootParent.name;
+		}
+		
+		var isNewRoot = (oldRoot != newRoot);
+
+		if (isNewSchema || isNewRoot) {
+			FacetsData['tablesStack'].empty();
+		} else {
+			if (data.level > FacetsData['tablesStack'].length) {
+				var item = {};
+				item['Collection'] = getTableDisplayName(FacetsData.table);
+				var chiclets = {};
+				$.each(FacetsData.facets, function(i, facet) {
+					if (!that.showChiclet(facet)) {
+						return true;
+					}
+					var chiclet = {};
+					chiclet['display'] = that.display(FacetsData.table, facet['name']);
+					if (that.if_type(facet, 'bigint')) {
+						chiclet['type'] = 'bigint';
+						chiclet['min'] = FacetsData.box[facet['table']][facet['name']]['min'];
+						chiclet['max'] = FacetsData.box[facet['table']][facet['name']]['max'];
+					} else if (that.if_type(facet, 'text')) {
+						chiclet['type'] = 'text';
+						chiclet['value'] = FacetsData.box[facet['table']][facet['name']]['value'];
+					} else if (that.if_type(facet, 'enum')) {
+						chiclet['type'] = 'enum';
+						chiclet['value'] = that.displayTitle(facet);
+					}
+					chiclets[facet['name']] = chiclet;
+				});
+				item['chiclets'] = chiclets;
+				FacetsData['tablesStack'].push(item);
+			} else if (data.level >= 0) {
+				FacetsData['tablesStack'].length = data.level;
+			} else {
+				FacetsData['tablesStack'].length = 0;
+			}
+		}
+		var tables = [];
+		var crt = data.parent;
+		while (crt != null) {
+			tables.unshift(crt.display);
+			crt = crt.parent;
+		}
+		var delta = data.level - FacetsData['tablesStack'].length;
+		if (delta > 0) {
+			var index = (FacetsData['tablesStack'].length == 0) ? delta-1 : delta;
+			for (var i=FacetsData['tablesStack'].length; i <= index; i++) {
+				var item = {};
+				item['Collection'] = getTableDisplayName(tables[i]);
+				item['chiclets'] = {};
+				FacetsData['tablesStack'].push(item);
+			}
+		}
+	}
+	
+	this.showChiclet = function showChiclet(facet) {
+		var facet_type = null;
+		if (this.if_type(facet, 'bigint')) {
+			facet_type = 'bigint';
+		} else if (this.if_type(facet, 'text')) {
+			facet_type = 'text';
+		} else if (this.if_type(facet, 'enum')) {
+			facet_type = 'enum';
+		}
+		var ret = facet_type != null ? this.showFacetValues(facet, facet_type) : false;
+		return ret;
+	};
+
+	this.showFacetValues = function showFacetValues(facet, facet_type) {
+		var ret = false;
+		var value = FacetsData.box[facet['table']][facet['name']];
+		if (value != null) {
+			if (facet_type == 'bigint') {
+				ret = value['left'] || value['right'];
+			} else if (facet_type == 'text') {
+				ret = value['value'].length > 0;
+			} else if (facet_type == 'enum') {
+				$.each(value['values'], function(checkbox_key, checkbox_value) {
+					if (checkbox_value) {
+						ret = true;
+						return false;
+					}
+				});
+			}
+		}
+		return ret;
+	};
+
 }]);

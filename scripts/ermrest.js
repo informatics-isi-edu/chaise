@@ -1527,7 +1527,7 @@ function getQueryPredicate(options, table) {
 		if (ret == encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(options['table'])) {
 			ret = 'A:=' + ret;
 		} else {
-			var ret = options['entityPredicates'].slice();
+			ret = options['entityPredicates'].slice();
 			ret[ret.length-1] = 'A:=' + encodeSafeURIComponent(ret[ret.length-1]);
 			ret = ret.join('/');
 		}

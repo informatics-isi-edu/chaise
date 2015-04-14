@@ -64,6 +64,7 @@ facetsModel.factory('FacetsData', function() {
 			'spinner': [],
 			'table': '',
 			'tables': [],
+			'tablesStack': [],
 			'tag': null,
 			'tagPages': 5,
 			'textEntryRow': [],

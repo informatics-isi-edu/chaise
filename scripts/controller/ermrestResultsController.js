@@ -206,46 +206,15 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	};
 
 	this.showFacetValues = $scope.showFacetValues  = function showFacetValues(facet, facet_type) {
-		var ret = false;
-		var value = $scope.FacetsData.box[facet['table']][facet['name']];
-		if (value != null) {
-			if (facet_type == 'bigint') {
-				ret = value['left'] || value['right'];
-			} else if (facet_type == 'text') {
-				ret = value['value'].length > 0;
-			} else if (facet_type == 'enum') {
-				$.each(value['values'], function(checkbox_key, checkbox_value) {
-					if (checkbox_value) {
-						ret = true;
-						return false;
-					}
-				});
-			}
-		}
-		return ret;
+		return FacetsService.showFacetValues(facet, facet_type);
 	};
 
 	this.getFacetValues = $scope.getFacetValues = function getFacetValues(facet) {
-		var value = $scope.FacetsData.box[facet['table']][facet['name']];
-		var values = [];
-		$.each(value['values'], function(checkbox_key, checkbox_value) {
-			if (checkbox_value) {
-				values.push(checkbox_key);
-			}
-		});
-		return values;
+		return FacetsService.getFacetValues(facet);
 	};
 	
 	this.displayTitle = function displayTitle(facet) {
-		var values = $scope.getFacetValues(facet);
-		var ret = '';
-		$.each(values, function(i, value) {
-			if (i > 0) {
-				ret += ', ';
-			}
-			ret += value;
-		});
-		return ret;
+		return FacetsService.displayTitle(facet);
 	};
 	
 	this.hasFilters = $scope.hasFilters = function hasFilters() {
@@ -321,16 +290,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	};
 
 	this.showChiclet = $scope.showChiclet  = function showChiclet(facet) {
-		var facet_type = null;
-		if ($scope.if_type(facet, 'bigint')) {
-			facet_type = 'bigint';
-		} else if ($scope.if_type(facet, 'text')) {
-			facet_type = 'text';
-		} else if ($scope.if_type(facet, 'enum')) {
-			facet_type = 'enum';
-		}
-		var ret = facet_type != null ? $scope.showFacetValues(facet, facet_type) : false;
-		return ret;
+		return FacetsService.showChiclet(facet);
 	};
 
 	$scope.slideFilter = function slideFilter(event, toggle, tag) {

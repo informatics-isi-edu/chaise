@@ -19,6 +19,32 @@
 				</div>
 			</div>
 			
+			<div class="row" ng-show="true">
+				<div id="filters" ng-repeat="item in FacetsData.tablesStack" class="col-md-10">
+					<div class="filter-button">
+					</div>
+					<div class="filter-container">
+						<div class="filter-item">
+							<span class="filter-item-field">Collection</span>&nbsp;
+							<span class="filter-item-value">
+								{{item['Collection']}}
+							</span>
+						</div>
+						<div class="filter-item" ng-repeat="(name,chiclet) in item['chiclets']">
+							<span class="filter-item-field">{{name}}</span>&nbsp;
+	                    	<span ng-if="chiclet['type']=='bigint'" class="filter-item-value" ng-attr-title="{{chiclet['min'] | number}} - {{chiclet['max'] | number}}">
+	                    		{{chiclet['min'] | number}} - {{chiclet['max'] | number}}
+	                    	</span>
+	                    	<span ng-if="chiclet['type']=='text'" class="filter-item-value" ng-attr-title="{{chiclet['value']}}">
+	                    		{{chiclet['value']}}
+	                    	</span>
+	                    	<span ng-if="chiclet['type']=='enum'" class="filter-item-value" ng-attr-title="{{chiclet['value']}}">
+	                    		{{chiclet['value']}}
+	                    	</span>
+						</div>
+					</div>
+				</div>
+			</div>
 			<div class="row">
 				<div id="filter" class="col-md-10">
 					<div class="filter-button">

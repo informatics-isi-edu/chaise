@@ -124,7 +124,7 @@ label {
 	max-width: 300px;
 }
 
-#filter .filter-item {
+#filter .filter-item, #filters .filter-item {
 	margin-bottom: 5px;
 	display: inline-block;
 }
@@ -455,18 +455,19 @@ dt, dd {
 .toggle, .toggler {
   display: inline-block;
   vertical-align: middle;
-  /* margin: 10px; */
   margin-right: 10px;
   position: relative;
+  font-weight: normal;
 }
 
 .toggler {
-  color: #a6a6a6;
+  color: #333;
   transition: .2s;
 }
 
 .toggler--is-active {
   color: #333;
+  font-weight: normal;
 }
 
 .b {
