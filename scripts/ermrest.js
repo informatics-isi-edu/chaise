@@ -2432,7 +2432,7 @@ function entityLinearize(denormalizedView, linearizeView) {
 
 function getSchemas() {
 	var url = ERMREST_DATA_HOME + '/schema';
-	CATALOG_SCHEMAS = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null)['schemas'];
+	CATALOG_SCHEMAS = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, errorGetTables, null)['schemas'];
 	var excludeSchemas = [];
 	$.each(CATALOG_SCHEMAS, function(schema, value) {
 		var tables = value['tables'];
