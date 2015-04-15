@@ -37,7 +37,7 @@
 									</span>
 									<span ng-if="facetDetail.isHTML(FacetsData.table,name)" ng-bind-html="facetDetail.html(FacetsData.table,name,FacetsData.entryRow[name])">
 									</span>
-									<span ng-if="facetDetail.isText(FacetsData.table,name)">
+									<span ng-class="detail_text" ng-if="facetDetail.isText(FacetsData.table,name)">
 										{{facetDetail.detailValue(FacetsData.table,name,FacetsData.entryRow[name])}}
 									</span>
 								</td>
