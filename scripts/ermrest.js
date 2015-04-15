@@ -1370,7 +1370,19 @@ function errorGetTables(jqXHR, textStatus, errorThrown, url, param) {
 	if (jqXHR.status == 401) {
 		// redirect to login in case of an Unauthorized error on getting the schema tables
 		document.body.style.cursor = 'default';
-		window.location = '#/login?catalog=' + CATALOG + '&schema=' + SCHEMA;
+		var url = '#/login';
+		if (CATALOG != null) {
+			url += '?catalog=' + CATALOG;
+		}
+		if (SCHEMA != null) {
+			if (url == '#/login') {
+				url += '?';
+			} else {
+				url += '&';
+			}
+			url += 'schema=' + SCHEMA;
+		}
+		window.location = url;
 	} else {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	}

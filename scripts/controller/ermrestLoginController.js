@@ -26,12 +26,12 @@ ermLoginController.controller('LoginCtrl', ['$scope', '$location',
 		if (myToken != null) {
 			$scope.isVisible = false;
 			TOP_DISPLAY = true;
-			window.location = '#/discover?catalog=' + CATALOG + '&schema=' + SCHEMA;
+			window.location = '#/retrieve?catalog=' + CATALOG + '&schema=' + SCHEMA;
 		}
 	};
 	this.cancelLogin = function cancelLogin() {
 		TOP_DISPLAY = true;
-		window.location = '#/discover';
+		window.location = '#/retrieve';
 	};
 	this.checkLogin = function checkLogin(keyCode) {
 		if (keyCode == 13 && $scope.username && $scope.password) {

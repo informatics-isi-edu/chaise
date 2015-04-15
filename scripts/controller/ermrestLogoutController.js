@@ -8,7 +8,7 @@ ermLogoutController.controller('LogoutCtrl', ['$scope',
                                             function($scope) {
 	submitLogout();
 	TOP_DISPLAY = true;
-	window.location = '#/discover';
+	window.location = '#/retrieve';
 }]);
 
 
