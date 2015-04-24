@@ -47,6 +47,7 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	} else if (CATALOG == null) {
 		CATALOG = ermrest.catalog;
 	}
+	authnProvider = ermrest.authnProvider;
 	
 	$scope.FacetsData = FacetsData;
 	

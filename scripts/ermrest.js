@@ -3,6 +3,7 @@ var goauth_cookie = 'globusonline-goauth';
 var token = null;
 var SCHEMA = null;
 var CATALOG = null;
+var authnProvider = null;
 var ERMREST_CATALOG_PATH = '/ermrest/catalog/';
 var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
@@ -139,24 +140,48 @@ function setSchema() {
  * 	the request url
  */
 function handleError(jqXHR, textStatus, errorThrown, url) {
-	var msg = '';
-	var err = jqXHR.status;
-	if (err != null) {
-		msg += 'Status: ' + err + '\n';
+	switch (jqXHR.status) {
+	case 401:
+		// redirect to login in case of an Unauthorized error
+		document.body.style.cursor = 'default';
+		if (authnProvider == 'goauth') {
+			getGoauth(window.location);
+		} else {
+			var login_url = '#/login';
+			if (CATALOG != null) {
+				url += '?catalog=' + CATALOG;
+			}
+			if (SCHEMA != null) {
+				if (url == '#/login') {
+					url += '?';
+				} else {
+					url += '&';
+				}
+				url += 'schema=' + SCHEMA;
+			}
+			window.location = url;
+		}
+		break;
+	default:
+		var msg = '';
+		var err = jqXHR.status;
+		if (err != null) {
+			msg += 'Status: ' + err + '\n';
+		}
+		err = jqXHR.responseText;
+		if (err != null) {
+			msg += 'ResponseText: ' + err + '\n';
+		}
+		if (textStatus != null) {
+			msg += 'TextStatus: ' + textStatus + '\n';
+		}
+		if (errorThrown != null) {
+			msg += 'ErrorThrown: ' + errorThrown + '\n';
+		}
+		msg += 'URL: ' + url + '\n';
+		document.body.style.cursor = 'default';
+		alert(msg);
 	}
-	err = jqXHR.responseText;
-	if (err != null) {
-		msg += 'ResponseText: ' + err + '\n';
-	}
-	if (textStatus != null) {
-		msg += 'TextStatus: ' + textStatus + '\n';
-	}
-	if (errorThrown != null) {
-		msg += 'ErrorThrown: ' + errorThrown + '\n';
-	}
-	msg += 'URL: ' + url + '\n';
-	document.body.style.cursor = 'default';
-	alert(msg);
 }
 
 var ERMREST = {
@@ -1366,11 +1391,22 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 	}
 }
 
-function errorGetTables(jqXHR, textStatus, errorThrown, url, param) {
-	if (jqXHR.status == 401) {
-		// redirect to login in case of an Unauthorized error on getting the schema tables
-		document.body.style.cursor = 'default';
-		var url = '#/login';
+function getGoauth(referrer) {
+	//var url = '/service/goauth/ermrest/authn/preauth';
+	var url = 'https://facebase.org/ermrest/authn/preauth?referrer='+referrer;
+	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetGoauth, null, null);
+}
+
+function successGetGoauth(data, textStatus, jqXHR) {
+	var url = data['redirect_url'];
+	window.open(url, '_self');
+	//globusWindow = window.open(url, '_self');
+	//checkGlobusWindow();
+}
+
+function checkGlobusWindow() {
+	if (globusWindow.closed) {
+		var url = '#/retrieve';
 		if (CATALOG != null) {
 			url += '?catalog=' + CATALOG;
 		}
@@ -1382,9 +1418,10 @@ function errorGetTables(jqXHR, textStatus, errorThrown, url, param) {
 			}
 			url += 'schema=' + SCHEMA;
 		}
+		globusWindow = null;
 		window.location = url;
 	} else {
-		handleError(jqXHR, textStatus, errorThrown, url);
+		setTimeout(checkGlobusWindow, 1);
 	}
 }
 
@@ -2444,7 +2481,7 @@ function entityLinearize(denormalizedView, linearizeView) {
 
 function getSchemas() {
 	var url = ERMREST_DATA_HOME + '/schema';
-	CATALOG_SCHEMAS = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, errorGetTables, null)['schemas'];
+	CATALOG_SCHEMAS = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null)['schemas'];
 	var excludeSchemas = [];
 	$.each(CATALOG_SCHEMAS, function(schema, value) {
 		var tables = value['tables'];
