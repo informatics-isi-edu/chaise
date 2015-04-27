@@ -63,7 +63,8 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     	}
     	if ($scope.if_type($scope.FacetsData.tag, 'bigint')) {
     		if ($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['min'] != $scope.FacetsData.facetPreviousValues['min'] ||
-    				$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['max'] != $scope.FacetsData.facetPreviousValues['max']) {
+    				$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['max'] != $scope.FacetsData.facetPreviousValues['max'] ||
+    				$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['min'] == $scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['max']) {
         		$scope.delay_slider($scope.FacetsData.tag);
     		}
     	} else if ($scope.if_type($scope.FacetsData.tag, 'text')) {
@@ -336,7 +337,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	this.getEnabledFilters = function getEnabledFilters() {
 		var ret = 0;
 		$.each($scope.FacetsData.facets, function(i, facet) {
-			if ($scope.FacetsData.chooseColumns[facet['table']][facet['name']]) {
+			if ($scope.FacetsData.chooseColumns[facet['table']][facet['name']] && $scope.showSearchFilter(facet)) {
 				ret++;
 			}
 		});
@@ -355,8 +356,14 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     	FacetsService.sidebarClick(toggle);
 	};
 
+	$scope.showSearchFilter = function showSearchFilter(facet) {
+		return FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+						FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues(FacetsData.box, facet);
+	};
+
 	this.showUsableFilter = function showUsableFilter(facet) {
-		var ret = $scope.FacetsData.searchFilter.length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']);
+		var ret = $scope.showSearchFilter(facet) &&
+			($scope.FacetsData.searchFilter.length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']));
 		return ret;
 	};
 
