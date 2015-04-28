@@ -599,6 +599,25 @@ function getErmrestData(options, successCallback, successUpdateModels) {
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successTotalCount, null, param);
 }
 
+function searchFilters(options) {
+	emptyJSON(options['enabledFilters']);
+	if (options.searchFilter != null && options.searchFilter.length > 0) {
+		var url = ERMREST_DATA_HOME + '/textfacet/' + encodeSafeURIComponent(options.searchFilter);
+		var result = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+		// put here the data
+		var enabledFilters = options['enabledFilters'];
+		$.each(result, function(i, item) {
+			if (item['schema'] != SCHEMA) {
+				return true;
+			}
+			if (enabledFilters[item['table']] == null) {
+				enabledFilters[item['table']] = [];
+			}
+			enabledFilters[item['table']].push(item['column']);
+		});
+	}
+}
+
 function successTotalCount(data, textStatus, jqXHR, param) {
 	getPage(param['options'], data[0]['cnt'], param['successCallback'])
 }

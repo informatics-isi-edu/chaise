@@ -29,6 +29,7 @@ function clearFacets(options) {
 	emptyJSON(options['chooseColumns']);
 	emptyJSON(options['searchFilterValue']);
 	emptyJSON(options['facetClass']);
+	emptyJSON(options['enabledFilters']);
 	
 	options['facets'].empty();
 	options['ermrestData'].empty();
