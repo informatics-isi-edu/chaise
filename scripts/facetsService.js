@@ -80,6 +80,18 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	    }
 	};
 	
+	this.updateSessionFilter = function () {
+		emptyJSON(FacetsData.sessionFilters);
+    	$.each(FacetsData.facets, function(i, facet) {
+    		if (FacetsData.chooseColumns[facet['table']][facet['name']]) {
+    			if (FacetsData.sessionFilters[facet['table']] == null) {
+    				FacetsData.sessionFilters[facet['table']] = [];
+    			}
+    			FacetsData.sessionFilters[facet['table']].push(facet['name']);
+    		}
+    	});
+	};
+	
 	this.sidebarClick = function (toggle) {
 	    var overlay = $('.sidebar-overlay');
 	    
@@ -108,6 +120,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	            overlay.removeClass('active');
 	        }
 	    } else if (toggle == 'more-field-toggle') {
+	    	this.updateSessionFilter();
 	        var sidebar = $('#morefilters');
 	        sidebar.toggleClass('open');
 	    }
