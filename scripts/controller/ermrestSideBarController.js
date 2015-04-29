@@ -405,10 +405,21 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	};
 
 	this.clear = $scope.clear = function clear() {
-		$scope.FacetsData.entityPredicates.length = 0;
-		//$scope.FacetsData.selectedEntity = null;
-		$scope.initTable();
-		getMetadata($scope.FacetsData.table, $scope.successGetMetadata);
+		$scope.FacetsData.narrowFilter = '';
+    	$.each($scope.FacetsData.facets, function(i, facet) {
+    		if (FacetsService.showChiclet(facet)) {
+    			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = true;
+    		} else {
+    			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = false;
+    		}
+    		if ($scope.if_type(facet, 'enum')) {
+    			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = '';
+    		}
+    	});
+    	$scope.FacetsData.narrowFilter = '';
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 	};
 	
 	this.enableDisableAll = function enableDisableAll() {
