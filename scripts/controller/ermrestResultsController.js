@@ -181,10 +181,18 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		}
 	}
 	
-    this.sidebarClick = function sidebarClick(event, toggle) {
+    this.sidebarClick = function sidebarClick(event, toggle, selection) {
     	event.stopPropagation();
     	if (toggle == 'collections-toggle') {
     		event.preventDefault();
+    	}
+    	if (selection) {
+    		$scope.FacetsData.narrowFilter = $scope.FacetsData.searchFilter = '';
+        	$.each($scope.FacetsData.facets, function(i, facet) {
+        		if ($scope.if_type(facet, 'enum')) {
+        			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = '';
+        		}
+        	});
     	}
     	FacetsService.sidebarClick(toggle);
 	}
