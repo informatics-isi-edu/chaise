@@ -158,13 +158,29 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 		$scope.FacetsData.filterTextTimeout = $timeout(function(){$scope.predicate(facet,keyCode);}, 1000); // delay 1000 ms
 	};
 
-	$scope.search_filters = function search_filters() {
-    	searchFilters($scope.FacetsData);
+	$scope.success_search_filters = function success_search_filters(data, textStatus, jqXHR) {
     	$.each($scope.FacetsData.facets, function(i, facet) {
     		if ($scope.FacetsData.enabledFilters[facet['table']] != null && $scope.FacetsData.enabledFilters[facet['table']].contains([facet['name']])) {
     			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = true;
+    		} else {
+    			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = false;
+    		}
+    		if ($scope.if_type(facet, 'enum')) {
+    			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = $scope.FacetsData.searchFilter;
     		}
     	});
+    	$scope.FacetsData.narrowFilter = $scope.FacetsData.searchFilter;
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
+	};
+
+	$scope.search_filters = function search_filters() {
+		if ($scope.FacetsData.searchFilter != null && $scope.FacetsData.searchFilter.length == 0) {
+			$scope.clear();
+		} else {
+			searchFilters($scope.FacetsData, $scope.success_search_filters);
+		}
 	};
 
 	this.delay_search_filters = $scope.delay_search_filters = function delay_search_filters(keyCode) {
@@ -383,16 +399,22 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 
 	this.showUsableFilter = function showUsableFilter(facet) {
 		var ret = $scope.showSearchFilter(facet) &&
-			//($scope.FacetsData.searchFilter.length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']));
-			($scope.FacetsData.searchFilter.length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || $scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0);
+			($scope.FacetsData.narrowFilter.length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || (new RegExp($scope.FacetsData.narrowFilter, 'i')).test(facet['display']));
+			//($scope.FacetsData..length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || $scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0);
 		return ret;
 	};
 
-	this.clear = function clear(event) {
+	this.clear = $scope.clear = function clear() {
 		$scope.FacetsData.entityPredicates.length = 0;
 		$scope.FacetsData.selectedEntity = null;
 		$scope.initTable();
 		getMetadata($scope.FacetsData.table, $scope.successGetMetadata);
+	};
+	
+	this.enableDisableAll = function enableDisableAll() {
+    	$.each($scope.FacetsData.facets, function(i, facet) {
+			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = $scope.FacetsData.enableAll;
+    	});
 	};
 	
 }]);

@@ -45,6 +45,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		FacetsData.ready = false;
 		FacetsData.moreFlag = false;
 		FacetsData.isDetail = false;
+		FacetsData.enableAll = false;
 		FacetsData.filterTextTimeout = null;
 		FacetsData.filterSliderTimeout = null;
 		FacetsData.filterSearchAllTimeout = null;
@@ -64,6 +65,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		FacetsData.entry3Dview = '';
 		FacetsData.entryTitle = '';
 		FacetsData.searchFilter = '';
+		FacetsData.narrowFilter = '';
 		FacetsData.entrySubtitle = '';
 		this.initPageRange();
         FacetsData.spinner = [];

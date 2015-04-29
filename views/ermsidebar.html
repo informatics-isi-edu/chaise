@@ -44,9 +44,9 @@
 	        <!-- Sidebar toggle button -->
 	        <div class="row">
 	        	<div class="col-md-10">
-				        <button type="button" class="btn btn-default btn-sm sidebar-toggle" ng-click="sideBar.clear($event);">
-				            RESET FILTERS
-				        </button>
+				        <h5>
+				            &nbsp;&nbsp;&nbsp;&nbsp;
+				        </h5>
 				</div>
 				<div class="col-md-2">
 				        <button type="button" class="btn btn-default btn-sm pull-right sidebar-toggle" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
@@ -139,10 +139,13 @@
 								<i class="md-search md-lg"></i>
 							</a>
 						</span>
-						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search" ng-keyup="sideBar.delay_search_filters($event.keyCode)">
+						<input type="text" ng-model="FacetsData.narrowFilter" class="sidebar-search form-control pull-right" placeholder="Filter">
 					</div>
 				</div>
 				<div class="editvalue-container">
+					<div ng-show="false" class="field-enable">
+						<input ng-model="FacetsData.enableAll" type="checkbox" ng-click="sideBar.enableDisableAll()" />
+					</div>
 					<div class="field-enable" ng-repeat="facet in FacetsData.facets" ng-show="sideBar.showUsableFilter(facet)">
 						<label ng-class="sideBar.getMoreFilterClass(facet)" id="filt-css">CSS</label>
 						<div ng-class="sideBar.getMoreFieldSwitchClass(facet)">
@@ -222,7 +225,7 @@
 						<span class="md-search md-lg"></span>
 					</a>
 				</span>
-				<input type="text" ng-model="FacetsData.searchFilterValue[FacetsData.tag['table']][FacetsData.tag['name']]" class="sidebar-search form-control pull-right" placeholder="Search">
+				<input type="text" ng-model="FacetsData.searchFilterValue[FacetsData.tag['table']][FacetsData.tag['name']]" class="sidebar-search form-control pull-right" placeholder="Filter">
 			</div>
 		</div>
 	    <!-- slider/value picker -->

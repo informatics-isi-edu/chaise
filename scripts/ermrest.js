@@ -1,3 +1,4 @@
+var MULTI_SELECT_LIMIT = 1000;
 var AJAX_TIMEOUT = 300000;
 var goauth_cookie = 'globusonline-goauth';
 var token = null;
@@ -471,7 +472,7 @@ function getTableColumns(options, successCallback) {
 			b.html(col['name']);
 			$('body').append(b);
 			var l = b.width() + 10;
-			col_def['minWidth'] = col_def['width'] = (l > 50 ? l : 50);
+			col_def['minWidth'] = col_def['width'] = (l > MULTI_SELECT_LIMIT ? l : MULTI_SELECT_LIMIT);
 			 */
 			var visibleTableColumns = visibleColumns[metadata['table_name']];
 			if (visibleTableColumns != null && !visibleTableColumns.contains(col['name'])){
@@ -599,23 +600,29 @@ function getErmrestData(options, successCallback, successUpdateModels) {
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successTotalCount, null, param);
 }
 
-function searchFilters(options) {
+function searchFilters(options, successCallback) {
+	var url = ERMREST_DATA_HOME + '/textfacet/' + encodeSafeURIComponent(options.searchFilter);
+	var param = {};
+	param['options'] = options;
+	param['successCallback'] = successCallback;
+	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successSearchFilters, null, param);
+}
+
+function successSearchFilters(data, textStatus, jqXHR, param) {
+	var options = param['options'];
 	emptyJSON(options['enabledFilters']);
-	if (options.searchFilter != null && options.searchFilter.length > 0) {
-		var url = ERMREST_DATA_HOME + '/textfacet/' + encodeSafeURIComponent(options.searchFilter);
-		var result = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-		// put here the data
-		var enabledFilters = options['enabledFilters'];
-		$.each(result, function(i, item) {
-			if (item['schema'] != SCHEMA) {
-				return true;
-			}
-			if (enabledFilters[item['table']] == null) {
-				enabledFilters[item['table']] = [];
-			}
-			enabledFilters[item['table']].push(item['column']);
-		});
-	}
+	var enabledFilters = options['enabledFilters'];
+	$.each(data, function(i, item) {
+		if (item['schema'] != SCHEMA) {
+			return true;
+		}
+		if (enabledFilters[item['table']] == null) {
+			enabledFilters[item['table']] = [];
+		}
+		enabledFilters[item['table']].push(item['column']);
+	});
+
+	param['successCallback']();
 }
 
 function successTotalCount(data, textStatus, jqXHR, param) {
@@ -995,7 +1002,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
 	if (psqlText.contains(entity[col]['type'])) {
-		if (data[0]['cnt_d'] <= 50 && !textColumns.contains(col)) {
+		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
@@ -1005,7 +1012,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			param['options'] = options;
 			param['alert'] = alertObject;
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
-		} else if (data[0]['cnt_d'] == 50) {
+		} else if (data[0]['cnt_d'] == MULTI_SELECT_LIMIT) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
@@ -1855,7 +1862,7 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
 	if (psqlText.contains(entity[col]['type'])) {
-		if (data[0]['cnt_d'] <= 50 && !isTextColumn(table, col)) {
+		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !isTextColumn(table, col)) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
@@ -1866,7 +1873,7 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 			param['alert'] = alertObject;
 			param['table'] = table;
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
-		} else if (data[0]['cnt_d'] == 50) {
+		} else if (data[0]['cnt_d'] == MULTI_SELECT_LIMIT) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;

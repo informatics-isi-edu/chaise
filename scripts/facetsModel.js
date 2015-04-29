@@ -19,6 +19,7 @@ facetsModel.factory('FacetsData', function() {
 		'detailRows': [],
 		'details': false,
 		'enabledFilters': {},
+		'enableAll': false,
 		'entryRow': [],
 		'entityPredicates': [],
 		'entry3Dview': '',
@@ -45,6 +46,7 @@ facetsModel.factory('FacetsData', function() {
 		'modalIndex': -1,
 		'moreFlag': false,
 		'narrow': {},
+		'narrowFilter': '',
 		'pageMap': {},
 		'pageNavigation': false,
 		'pagingOptions': {
