@@ -40,6 +40,7 @@ facetsModel.factory('FacetsData', function() {
 		'filterTextTimeout': null,
 		'level': 0,
 		'linearizeView': {},
+		'initialEnablesFilters': {},
 		'isDetail': false,
 		'maxPages': 0,
 		'metadata': {},

@@ -189,6 +189,11 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
     	if (selection) {
     		$scope.FacetsData.narrowFilter = $scope.FacetsData.searchFilter = '';
         	$.each($scope.FacetsData.facets, function(i, facet) {
+        		if ($scope.FacetsData['initialEnablesFilters'][facet['table']] != null && $scope.FacetsData['initialEnablesFilters'][facet['table']].contains(facet['name'])) {
+        			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = true;
+        		} else {
+        			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = false;
+        		}
         		if ($scope.if_type(facet, 'enum')) {
         			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = '';
         		}

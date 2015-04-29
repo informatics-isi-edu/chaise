@@ -204,10 +204,6 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 		data.show = show;
 	};
 
-	$scope.initTable = function initTable() {
-    	FacetsService.initTable();
-	};
-
 	$scope.initSortOption = function initSortOption() {
     	FacetsService.initSortOption();
 	};
@@ -223,6 +219,16 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 
 	$scope.successInitModels = function successInitModels() {
 		updateCount($scope.FacetsData, $scope.successUpdateCount);
+		var initialEnablesFilters = $scope.FacetsData['initialEnablesFilters'];
+		emptyJSON(initialEnablesFilters);
+    	$.each($scope.FacetsData.facets, function(i, facet) {
+    		if ($scope.FacetsData.chooseColumns[facet['table']] != null && $scope.FacetsData.chooseColumns[facet['table']][facet['name']]) {
+    			if (initialEnablesFilters[facet['table']] == null) {
+    				initialEnablesFilters[facet['table']] = [];
+    			}
+    			initialEnablesFilters[facet['table']].push(facet['name']);
+    		} 
+    	});
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
@@ -407,7 +413,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	this.clear = $scope.clear = function clear() {
 		$scope.FacetsData.narrowFilter = '';
     	$.each($scope.FacetsData.facets, function(i, facet) {
-    		if (FacetsService.showChiclet(facet)) {
+    		if (FacetsService.showChiclet(facet) || $scope.FacetsData['initialEnablesFilters'][facet['table']] != null && $scope.FacetsData['initialEnablesFilters'][facet['table']].contains(facet['name'])) {
     			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = true;
     		} else {
     			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = false;
