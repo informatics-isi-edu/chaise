@@ -56,7 +56,9 @@
 										<li ng-if="facetDetail.isMultiAttribute(data['table'],name,value)" ng-repeat="value in data['rows']">
 											<ul ng-class="facetDetail.setEntityDetailClass()" ng-repeat="(column,val) in value">
 												<li ng-class="facetDetail.setEntityDetailClass()" ng-if="facetDetail.isMultiColumn(data['table'],column)">
-													<b>{{facetDetail.display(data['table'],column)}}</b>: {{val}}
+													<b>{{facetDetail.display(data['table'],column)}}</b>: 
+														<span ng-if="facetDetail.isGeoGDS(data['table'],column) || facetDetail.isGeoGSE(data['table'],column)"><a ng-href="{{facetDetail.geoValue(data['table'],value,column)}}">{{val}}</a></span>
+														<span ng-if="!facetDetail.isGeoGDS(data['table'],column) && !facetDetail.isGeoGSE(data['table'],column)">{{val}}</span>
 												</li>
 											</ul>
 										</li>
