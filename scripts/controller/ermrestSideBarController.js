@@ -406,7 +406,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 
 	this.clear = $scope.clear = function clear() {
 		$scope.FacetsData.entityPredicates.length = 0;
-		$scope.FacetsData.selectedEntity = null;
+		//$scope.FacetsData.selectedEntity = null;
 		$scope.initTable();
 		getMetadata($scope.FacetsData.table, $scope.successGetMetadata);
 	};
