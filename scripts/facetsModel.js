@@ -29,6 +29,7 @@ facetsModel.factory('FacetsData', function() {
 		'facetClass': {},
 		'facetPreviousValues': {},
 		'facets': [],
+		'facetSelection': false,
 		'files': [],
 		'filterAllText': '',
 		'filterOptions': {

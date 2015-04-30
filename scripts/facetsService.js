@@ -120,7 +120,9 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	            overlay.removeClass('active');
 	        }
 	    } else if (toggle == 'more-field-toggle') {
-	    	this.updateSessionFilter();
+	    	if (FacetsData.facetSelection) {
+		    	this.updateSessionFilter();
+	    	}
 	        var sidebar = $('#morefilters');
 	        sidebar.toggleClass('open');
 	    }

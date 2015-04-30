@@ -9,6 +9,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
                                                       function($scope, $timeout, FacetsData, FacetsService, numberFilter) {
 	
 	$scope.FacetsData = FacetsData;
+	$scope.filtersStatus = {};
 	
 	$scope.translate = function(value)
 	{
@@ -112,6 +113,13 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 
 	this.showFacetCount = function showFacetCount(facet) {
 		return FacetsService.showFacetCount(facet);
+	};
+
+	this.showFacetMatch = function showFacetMatch(facet) {
+		var ret = ($scope.FacetsData.searchFilter.length > 0) && (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']) && 
+			($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet));
+		return ret;
 	};
 
 	this.hide = function hide(facet) {
@@ -385,12 +393,14 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     this.editMoreFilterDone = function editMoreFilterDone(event, toggle) {
     	event.stopPropagation();
 		event.preventDefault();
+		$scope.FacetsData.facetSelection = checkFacetSelection($scope.FacetsData, $scope.filtersStatus);
     	FacetsService.sidebarClick(toggle);
 	}
     
 	this.slideMoreFilter = function slideMoreFilter(event, toggle) {
 		event.preventDefault();
 		event.preventDefault();
+		$scope.filtersStatus = saveSessionFilters($scope.FacetsData);
     	FacetsService.sidebarClick(toggle);
 	};
 

@@ -85,7 +85,7 @@
 	        	</div>
 	        </div>
 	        <ul class="nav sidebar-nav">
-		        <li ng-show="sideBar.showFacetCount(facet)" ng-repeat="facet in FacetsData.facets">
+		        <li ng-show="sideBar.showFacetCount(facet) || sideBar.showFacetMatch(facet)" ng-repeat="facet in FacetsData.facets">
 		            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
 		            	<span class="badge">{{FacetsData.box[facet['table']][facet['name']]['facetcount']}}</span>
 		            	{{facet['display']}}

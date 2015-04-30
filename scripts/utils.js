@@ -363,3 +363,30 @@ function getViewer3d(datasetFiles) {
 	return ret;
 }
 
+function saveSessionFilters(facetsData) {
+	var ret = {};
+	$.each(facetsData.facets, function(i, facet) {
+		if (ret[facet['table']] == null) {
+			ret[facet['table']] = {};
+		}
+		ret[facet['table']][facet['name']] = facetsData.chooseColumns[facet['table']][facet['name']];
+	});
+	return ret;
+}
+
+function checkFacetSelection(facetsData, filtersStatus) {
+	var ret = false;
+	$.each(facetsData.chooseColumns, function(table, columns) {
+		$.each(columns, function(column, value) {
+			if (value != filtersStatus[table][column]) {
+				ret = true;
+				return false;
+			}
+		});
+		if (ret) {
+			return false;
+		}
+	});
+	return ret;
+}
+
