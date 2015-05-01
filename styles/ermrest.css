@@ -35,6 +35,11 @@ img.center {
 
 td.tag {
     text-align: right;
+    padding-top: 10px;
+}
+
+td.tag label {
+  padding-right: 5px;
 }
 
 div.floatLeft {
