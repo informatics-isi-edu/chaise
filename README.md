@@ -1,10 +1,8 @@
-ERMrest-UI
-~~~~~~~~~~
+# Chaise
 
 This is a Web UI for the ERMrest service.
 
-System Requirements
-~~~~~~~~~~~~~~~~~~~
+## System Requirements
 
  * CentOS 6.x
  * Apache Httpd 2.x
@@ -14,8 +12,7 @@ The installation instructions assume directory paths based on a CentOS 6
 installation of these components. However, the UI is independent of the
 system or httpd.
  
-Installation
-~~~~~~~~~~~~
+# Installation
 
 To install from the Subversion repository:
 
@@ -25,8 +22,7 @@ To install from the Subversion repository:
   2. From the source directory run the following command as root:
      rsync -av --delete --exclude=".*" --exclude="README" ermrest-ui /var/www/html/
 
-Accessing the Application
-~~~~~~~~~~~~~~~~~~~~~~~~~
+# Accessing the Application
 
   1. In a browser type the following URL by replacing <hostname> with the one 
      you have the installation:
