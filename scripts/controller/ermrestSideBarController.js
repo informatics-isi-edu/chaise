@@ -10,6 +10,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	
 	$scope.FacetsData = FacetsData;
 	$scope.filtersStatus = {};
+	$scope.filtersMatch = {};
 	
 	$scope.translate = function(value)
 	{
@@ -119,6 +120,16 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 		var ret = ($scope.FacetsData.searchFilter.length > 0) && (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']) && 
 			($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
 					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet));
+		if (ret) {
+			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = '';
+			if ($scope.filtersMatch[facet['table']] == null) {
+				$scope.filtersMatch[facet['table']] = [];
+			}
+			if (!$scope.filtersMatch[facet['table']].contains(facet['name'])) {
+				$scope.filtersMatch[facet['table']].push(facet['name']);
+				$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = true;
+			}
+		}
 		return ret;
 	};
 
@@ -177,6 +188,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = $scope.FacetsData.searchFilter;
     		}
     	});
+    	$scope.filtersMatch = {};
     	$scope.FacetsData.narrowFilter = $scope.FacetsData.searchFilter;
 		if (!$scope.$$phase) {
 			$scope.$apply();
