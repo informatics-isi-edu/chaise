@@ -1,5 +1,5 @@
-<div name="loginForm" ng-controller="LoginCtrl as loginController" ng-show="loginController.show()">
-  <div class="center_fieldset">
+<div name="loginForm" ng-controller="LoginCtrl as loginController">
+  <div ng-show="authnProvider!='goauth'" class="center_fieldset">
     <br><br>
     <fieldset>
       <table>
@@ -14,6 +14,8 @@
         </tbody>
       </table>
     </fieldset>
+  </div>
+  <div ng-show="authnProvider=='goauth'" ng-init="loginController.login()">
   </div>
 </div>
 
