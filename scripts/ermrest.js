@@ -1419,7 +1419,7 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 
 function getGoauth(referrer) {
 	//var url = '/service/goauth/ermrest/authn/preauth';
-	var url = 'https://facebase.org/ermrest/authn/preauth?referrer='+referrer;
+	var url = '/ermrest/authn/preauth?referrer='+referrer;
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetGoauth, null, null);
 }
 

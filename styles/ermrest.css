@@ -291,6 +291,7 @@ td.key {
 
 td.value {
     word-wrap: break-word;
+    word-break: break-all;
 }
 
 td.filter_key {
