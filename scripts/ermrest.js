@@ -320,6 +320,19 @@ function make_headers() {
 	return res;
 }
 
+function submitLogin(username, password) {
+	var url = HOME + '/ermrest/authn/session';
+	var obj = {
+			'username': username,
+			'password': password
+	};
+	ERMREST.POST(url, 'application/x-www-form-urlencoded; charset=UTF-8', true, true, obj, successSubmitLogin, null, null);
+}
+
+function successSubmitLogin(data, textStatus, jqXHR) {
+	window.location = '#/retrieve?catalog=' + CATALOG + '&schema=' + SCHEMA;
+}
+
 function submitGlobusLogin(username, password) {
 	token = $.cookie(goauth_cookie);
 	if (token == null) {

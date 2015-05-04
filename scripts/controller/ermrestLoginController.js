@@ -33,9 +33,15 @@ ermLoginController.controller('LoginCtrl', ['$scope', '$location', 'ermrest',
 			} else if (CATALOG == null) {
 				CATALOG = 1;
 			}
-			var myToken = submitGlobusLogin($scope.username, $scope.password);
-			if (myToken != null) {
-				window.location = '#/retrieve?catalog=' + CATALOG + '&schema=' + SCHEMA;
+			
+			if (authnProvider == 'globusonline') {
+				// nexus
+				var myToken = submitGlobusLogin($scope.username, $scope.password);
+				if (myToken != null) {
+					window.location = '#/retrieve?catalog=' + CATALOG + '&schema=' + SCHEMA;
+				}
+			} else {
+				submitLogin($scope.username, $scope.password);
 			}
 		}
 	};
