@@ -69,10 +69,10 @@
 						<div ng-if="facetDetail.isNested(detail, values)" ng-repeat="(detail, values) in FacetsData.denormalizedView">
 							<div ng-repeat="value in values">
 								<hr>
-								<h4>{{detail}}</h4>
+								<h4>{{facetDetail.displayTable(detail)}}</h4>
 								<table class="dataset">
 									<tr ng-repeat="(name, val) in value">
-										<td class="key">{{name}}:</td>
+										<td class="key">{{facetDetail.display(detail,name)}}:</td>
 										<td class="value">
 											<table>
 												<tr ng-if="facetDetail.isUrl(detail,name)">

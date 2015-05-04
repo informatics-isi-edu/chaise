@@ -1540,7 +1540,7 @@ function setTreeReferences(root, table, rootNode, schema) {
 	var nodes = [];
 	var level = 0;
 	var node = {'name': table,
-                        'display': getTableDisplayName(table),
+                        'display': getTableDisplayName(table, CATALOG_METADATA[schema]),
 			'parent': null,
 			'schema': schema,
 			'root': rootNode,
@@ -1562,7 +1562,7 @@ function setTreeReferences(root, table, rootNode, schema) {
 function addTreeReference(table, nodes, level, parent, rootNode, schema) {
 	var subNodes = [];
 	var node = {'name': table,
-                        'display': getTableDisplayName(table),
+                        'display': getTableDisplayName(table, CATALOG_METADATA[schema]),
 			'parent': parent,
 			'root': rootNode,
 			'schema': schema,
@@ -2464,9 +2464,12 @@ function getDatasetFiles(root_table, row, table_annotation, tables) {
 	return ret;
 }
 
-function getTableDisplayName(table_name) {
+function getTableDisplayName(table_name, schema) {
+	if (schema == null) {
+		schema = SCHEMA_METADATA;
+	}
     var ret = table_name;
-    $.each(SCHEMA_METADATA, function(i, table) {
+    $.each(schema, function(i, table) {
         if (table_name == table['table_name']) {
             if (table['annotations'][TABLES_MAP_URI] != null && table['annotations'][TABLES_MAP_URI]['display'] != null) {
                 ret = table['annotations'][TABLES_MAP_URI]['display'];
