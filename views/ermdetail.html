@@ -1,6 +1,11 @@
 	<div ng-controller="DetailListCtrl as facetDetail" ng-show="facetDetail.showDetail()">
 		<div>
 			<div class="modal-content">
+				<div>
+			        <button type="button" class="btn btn-default btn-sm" ng-click="facetDetail.goBack();">
+			            <i class="md-chevron-left md-lg"></i><span>BACK</span>
+			        </button>
+			    </div>
 				<div class="modal-header">
 					<h4 class="modal-title">{{FacetsData.entryTitle}}</h4>
 				</div>

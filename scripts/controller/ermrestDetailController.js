@@ -146,4 +146,8 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return $scope.FacetsData.isDetail;
 	};
 
+	this.goBack = function goBack() {
+		window.history.back();
+	};
+
 }]);
