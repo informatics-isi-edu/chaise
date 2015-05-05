@@ -411,7 +411,6 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     
 	this.slideMoreFilter = function slideMoreFilter(event, toggle) {
 		event.preventDefault();
-		event.preventDefault();
 		$scope.filtersStatus = saveSessionFilters($scope.FacetsData);
     	FacetsService.sidebarClick(toggle);
 	};

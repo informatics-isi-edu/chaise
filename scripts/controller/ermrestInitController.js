@@ -60,8 +60,12 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	}
 	
 	$window.addEventListener('popstate', function(event) {
+    	event.stopPropagation();
+		event.preventDefault();
 		$scope.FacetsData.isDetail = false;
-		$scope.$apply();
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 	});
 
 	initApplication();
