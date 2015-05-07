@@ -572,3 +572,10 @@ th.table-more-bt {
 .table-more-bt a {
 	color: #000;
 }
+
+#results-table-view td.top-columns {
+	text-align: left;
+	max-width: 100px;
+	word-wrap: break-word;
+}
+

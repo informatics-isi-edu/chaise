@@ -211,7 +211,7 @@ function getDetailColumns(row) {
 	return ret;
 }
 
-function getTableColumnsNames(table_name) {
+function getTableColumnsNames(table_name, maxCols) {
 	var ret = [];
     $.each(display_columns['top_columns'], function(i, col) {
         if (display_columns['title'] == col || display_columns['summary'] == col ||
@@ -220,6 +220,9 @@ function getTableColumnsNames(table_name) {
                 return true;
         }
         ret.push(col);
+        if (ret.length == maxCols) {
+        	return false;
+        }
     });
 	return ret;
 }

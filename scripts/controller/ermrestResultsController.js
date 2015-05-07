@@ -113,8 +113,8 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return getTitleName();
 	};
 
-	this.tableColumns = function tableColumns(table_name) {
-		return getTableColumnsNames(table_name);
+	this.tableColumns = function tableColumns(table_name, maxCols) {
+		return getTableColumnsNames(table_name, maxCols);
 	};
 
 	this.lastRecord = function lastRecord() {
