@@ -219,8 +219,38 @@
 					<div ng-if="FacetsData.view=='card' && $index==0">
 						<h1>Card view is not yet implemented.</h1>
 					</div>
-					<div ng-if="FacetsData.view=='table' && $index==0">
-						<h1>Table view is not yet implemented.</h1>
+				</div>
+				<div ng-if="FacetsData.view=='table'">
+					<div id="results-group" class="row">
+						<div class="col-md-12">
+							<table class="table table-condensed table-responsive table-hover table-bordered" id="results-table-view">
+								<thead>
+									<tr class="active">
+										<th>
+											<input type="checkbox" class="pull-left"> <span ng-if="facetResults.titleName()!=null">{{facetResults.display(FacetsData.table,facetResults.titleName())}}</span>
+										</th>
+										<th ng-if="facetResults.itemThumbnail(FacetsData.ermrestData[0])">Image
+										</th>
+										<th ng-repeat="col in facetResults.tableColumns(FacetsData.table)">{{facetResults.display(FacetsData.table,col)}}
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="row in FacetsData.ermrestData">
+										<td class="results-title"><input type="checkbox">
+											<a href="#" ng-click="facetResults.clicker($event, row, 3, $index);"><span class="results-title" ng-bind-html="facetResults.itemTitle(row)"></span></a>
+										</td>
+										<td ng-if="facetResults.itemThumbnail(row)!=null">
+											<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{facetResults.itemThumbnail(row)}}">
+											</a>
+										</td>
+										<td ng-repeat="col in facetResults.tableColumns(FacetsData.table)">{{facetResults.html(FacetsData.table,col,row[col])}}
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -236,7 +266,7 @@
 						<li class="ng-hide" ng-show="FacetsData.pageNavigation" ng-repeat="page in FacetsData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
 							ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
 						<li class="next"><a href="#"
-							class="ng-hide" ng-show="facetResults.canPageForward() && FacetsData.view=='list'"
+							class="ng-hide" ng-show="facetResults.canPageForward() && (FacetsData.view=='list' || FacetsData.view=='table')"
 							ng-click="facetResults.pageForward($event)">More...</a></li>
 						<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="next"><a href="#"
 							ng-show="facetResults.canPageForward()"

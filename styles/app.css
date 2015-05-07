@@ -240,6 +240,11 @@ dl.attribute-group dd {
 
 /* Edit filters in sidebar */
 
+.sidebar.open {
+	max-width: 380px;
+	width: 380px;
+}
+
 .sidebar-header {
 	border-bottom: 1px solid #CCC;
 }
@@ -370,6 +375,7 @@ input.sidebar-search.form-control {
 
 #sidebar .editfilter-container .filter-item {
 	position: relative;
+	max-width: 380px;
 }
 
 #sidebar .editfilter-container .filter-item .md-chevron-right{
@@ -406,7 +412,7 @@ input.sidebar-search.form-control {
 .data-attributes dd {
     margin-bottom: 10px;
     padding-bottom: 0;
-margin-left: 200px;
+	margin-left: 200px;
     word-wrap: break-word;
 }
 
@@ -434,7 +440,7 @@ dt, dd {
 	margin: 20px 0px;
 }
 
-/* field enable/disable toggle animations */
+/* Enable/disable Toggle animations */
 
 .field-enable {
 	font-weight: normal;
@@ -449,7 +455,7 @@ dt, dd {
 	text-overflow:ellipsis;
 	white-space:nowrap;
 	/* max-width: 136px; */
-	max-width: 145px;
+	max-width: 250px;
 }
 
 .toggle, .toggler {
@@ -463,6 +469,8 @@ dt, dd {
 .toggler {
   color: #333;
   transition: .2s;
+  font-size: 14px;
+  width: 250px;
 }
 
 .toggler--is-active {
@@ -481,6 +489,7 @@ dt, dd {
   background-color: #2ecc71;
   overflow: hidden;
   box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.05);
+  vertical-align: middle;
 }
 
 .toggle.disabled {
@@ -522,5 +531,44 @@ dt, dd {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .detail_text {
-    word-wrap: break-word;
+	word-wrap: break-word;
+}
+
+/* Table view styles */
+
+#results-table-view th {
+	font-weight: normal;
+	color: #000;
+}
+
+#results-table-view th, #results-table-view td {
+	text-align: center;
+}
+
+#results-table-view td.results-title {
+	text-align: left;
+	width: 450px;
+	overflow: hidden;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	max-width: 450px;
+}
+
+th.table-more-bt {
+	width: 20px;
+	position: relative;
+}
+
+#results-table-view.table-condensed > thead > tr > th.table-more-bt {
+	padding: 0;
+	border-left: 2px solid #ddd;
+}
+
+.table-more-bt .md-keyboard-arrow-right {
+	width: 20px;
+	margin-left: -7px;
+}
+
+.table-more-bt a {
+	color: #000;
 }

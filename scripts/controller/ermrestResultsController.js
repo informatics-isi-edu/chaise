@@ -109,6 +109,14 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return getEntryTitle(row);
 	};
 
+	this.titleName = function titleName() {
+		return getTitleName();
+	};
+
+	this.tableColumns = function tableColumns(table_name) {
+		return getTableColumnsNames(table_name);
+	};
+
 	this.lastRecord = function lastRecord() {
 		var ret = $scope.FacetsData.pagingOptions.currentPage * $scope.FacetsData.pagingOptions.pageSize;
 		if (ret > $scope.FacetsData.totalServerItems) {
@@ -342,6 +350,10 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 			}, 1);
 		}, 1);
 		//alert(facet['display']);
+	};
+
+	this.display = $scope.display = function display(table, column, row) {
+		return (row != null && Object.keys(row[0]).length > 3) ? getTableLabelName(table) : FacetsService.display(table, column);
 	};
 
 }]);

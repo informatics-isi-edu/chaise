@@ -211,6 +211,19 @@ function getDetailColumns(row) {
 	return ret;
 }
 
+function getTableColumnsNames(table_name) {
+	var ret = [];
+    $.each(display_columns['top_columns'], function(i, col) {
+        if (display_columns['title'] == col || display_columns['summary'] == col ||
+                        display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) || 
+                        hasAnnotation(table_name, col, 'bottom')) {
+                return true;
+        }
+        ret.push(col);
+    });
+	return ret;
+}
+
 function getLongTextColumns(row) {
 	var ret = [];
 	$.each(row, function(col, value) {
@@ -230,6 +243,10 @@ function getFileUrlColumns(row) {
 		}
 	});
 	return ret;
+}
+
+function getTitleName() {
+	return display_columns['title'];
 }
 
 function getEntryTitle(row) {
