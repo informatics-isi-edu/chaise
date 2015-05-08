@@ -131,8 +131,8 @@
 
                              </tr>
                         </table>
-                        <h3 ng-show="FacetsData.files.length>0 || FacetsData.viewer3dFile.length>0">Files:</h3>
-                        <table ng-if="FacetsData.files.length>0 || FacetsData.viewer3dFile.length>0" class="files">
+                        <h3 ng-show="FacetsData.viewer3dFile.length>0">Previews:</h3>
+                        <table ng-if="FacetsData.viewer3dFile.length>0" class="files">
                             <tr>
                                 <th ng-class="facetDetail.setPreviewClass()">Preview</th>
                                 <th class="files">Name</th>
@@ -166,8 +166,14 @@
                                 </td>
                                 <td class="size">{{values[2] | number}}</td>
                              </tr>
+                        </table>
+                        <h3 ng-show="FacetsData.files.length>0">Files:</h3>
+                        <table ng-if="FacetsData.files.length>0" class="files">
+                            <tr>
+                                <th class="files">Name</th>
+                                <th class="size">Size (bytes)</th>
+                            </tr>
                              <tr ng-repeat="values in FacetsData.files">
-                                <td ng-class="facetDetail.setPreviewClass()">{{values[0]}}</td>
                                 <td class="files">
                                     <a ng-href="{{values[2]}}">{{values[1]}}
                                     </a>
