@@ -64,9 +64,8 @@ label {
 	float: left;
 }
 .filter-button {
-	/* height: 80px; */
 	width: 30px;
-	float: left;
+	float: right;
 	display: block;
 	min-height: 80px;
 
@@ -82,7 +81,7 @@ label {
 
 .filter-container {
 	display: block; 
-	margin-left: 29px;
+	margin-right: 29px;
 	min-height: 80px; 
 	background-color: #FFF;
 	border: 1px solid #CCC;
