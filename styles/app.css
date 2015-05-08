@@ -578,3 +578,9 @@ th.table-more-bt {
 	word-wrap: break-word;
 }
 
+/* Temporarily hide features that are not active yet */
+
+#browser-header, #add-filter {
+	display: none;
+}
+
