@@ -22,6 +22,10 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return (row != null && Object.keys(row[0]).length > 3) ? getTableLabelName(table) : FacetsService.display(table, column);
 	};
 
+	this.displayTableName = function displayTableName(table) {
+		return getTableLabelName(table);
+	};
+
 	this.displayTable = $scope.displayTable = function displayTable(table) {
 		return getTableDisplayName(table);
 	};
@@ -130,6 +134,10 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return values.length > 0 && !hasTableAnnotation(table, 'association');
 	};
 
+	this.isGEO = function isGEO(table) {
+		return hasTableAnnotation(table, 'geo');
+	};
+
 	this.isAssociation = function isAssociation(table, values) {
 		return values.length > 0 && hasTableAnnotation(table, 'association') && !hasTableAnnotation(table, 'image') && !hasTableAnnotation(table, 'viewer') && !hasTableAnnotation(table, 'download');
 	};
@@ -150,4 +158,13 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		window.history.back();
 	};
 
+	this.isAssociationAttribute = function isAssociationAttribute(table, column) {
+		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
+                        !hasAnnotation(table, column, 'download');
+	};
+	
+	this.isMultipleAttribute = function isMultipleAttribute(row) {
+		return Object.keys(row).length > 3;
+	};
+	
 }]);

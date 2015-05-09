@@ -334,3 +334,14 @@ ul.entity_detail {
 .chiclet-value {
     display: list-item;
 }
+
+table.multiple_values {
+    border-collapse: collapse;
+}
+
+th.multiple_values, td.multiple_values {
+    border: 1px solid black;
+    padding: 5px;
+    word-wrap: break-word;
+}
+
