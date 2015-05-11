@@ -163,6 +163,12 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
                         !hasAnnotation(table, column, 'download');
 	};
 	
+	this.isCommonAttribute = function isCommonAttribute(table, column) {
+		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
+                        !hasAnnotation(table, column, 'download') && !hasAnnotation(table, column, 'url') &&
+                        !hasAnnotation(table, column, 'geo_gds') && !hasAnnotation(table, column, 'geo_gse');
+	};
+	
 	this.isMultipleAttribute = function isMultipleAttribute(row) {
 		return Object.keys(row).length > 3;
 	};
