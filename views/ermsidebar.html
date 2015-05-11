@@ -20,8 +20,8 @@
 				<div class="editvalue-container">
 					<div id="treeDiv">
 						<script type="text/ng-template" id="tree_item_renderer.html">
-    						<label ng-show="data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, true)">+</label>
-							<label ng-show="!data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, false)">-</label>
+    						<label ng-show="false && data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, true)">+</label>
+							<label ng-show="false && !data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, false)">-</label>
 							<label ng-show="data.level!=-1" ng-click="sideBar.getEntityResults($event, data)">{{data.display}} {{sideBar.displayTreeCount(data)}}</label>
     						<ul ng-show="data.show" class="entity">
         						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
