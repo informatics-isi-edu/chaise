@@ -63,7 +63,7 @@
 						<div ng-if="facetDetail.isAssociation(data['table'], data['rows'])" ng-repeat="(name, data) in FacetsData.linearizeView">
 							<div ng-if="facetDetail.isMultipleAttribute(data['rows'][0]) || facetDetail.isGEO(data['table'])">
 								<h3>{{facetDetail.displayTableName(data['table'])}}</h3>
-								<table class="multiple_values">
+								<table ng-if="!facetDetail.isReference(data['table'])" class="multiple_values">
 									<thead>
 										<tr>
 											<th class="multiple_values" ng-if="facetDetail.isAssociationAttribute(data['table'], column)" ng-repeat="(column,val) in data['rows'][0]">{{facetDetail.display(data['table'],column)}}
@@ -76,6 +76,21 @@
 												<span ng-if="facetDetail.isUrl(data['table'],column)"><a ng-href="{{val}}">{{val}}</a></span>
 												<span ng-if="facetDetail.isGeoGDS(data['table'],column) || facetDetail.isGeoGSE(data['table'],column)"><a ng-href="{{facetDetail.geoValue(data['table'],value,column)}}">{{val}}</a></span>
 												<span ng-if="facetDetail.isCommonAttribute(data['table'],column)">{{val}}</span>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<table ng-if="facetDetail.isReference(data['table'])" class="multiple_values">
+									<thead>
+										<tr>
+											<th class="multiple_values" ng-repeat="column in facetDetail.referenceColumns(data['table'], data['rows'][0])">{{facetDetail.display(data['table'],column)}}
+											</th>
+										</tr>
+									</thead>
+									<tbody ng-init="rows=facetDetail.referenceRows(data['table'], data['rows'])">
+										<tr ng-repeat="value in rows">
+											<td class="multiple_values">
+												<a ng-href="{{value['href']}}">{{value['label']}}</a>
 											</td>
 										</tr>
 									</tbody>

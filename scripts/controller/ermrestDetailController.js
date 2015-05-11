@@ -138,6 +138,10 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return hasTableAnnotation(table, 'geo');
 	};
 
+	this.isReference = function isReference(table) {
+		return hasTableAnnotation(table, 'reference');
+	};
+
 	this.isAssociation = function isAssociation(table, values) {
 		return values.length > 0 && hasTableAnnotation(table, 'association') && !hasTableAnnotation(table, 'image') && !hasTableAnnotation(table, 'viewer') && !hasTableAnnotation(table, 'download');
 	};
@@ -171,6 +175,34 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 	
 	this.isMultipleAttribute = function isMultipleAttribute(row) {
 		return Object.keys(row).length > 3;
+	};
+	
+	this.referenceColumns = function referenceColumns(table, row) {
+		var ret = [];
+		$.each(row, function(column, val) {
+			if (column != '$$hashKey' && !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'url')) {
+				ret.push(column);
+			}
+		});
+		return ret;
+	};
+	
+	this.referenceRows = function referenceRows(table, rows) {
+		var ret = [];
+		$.each(rows, function(i, row) {
+			var obj = {};
+			$.each(row, function(column, val) {
+				if (column == '$$hashKey' || hasAnnotation(table, column, 'dataset')) {
+					return true;
+				} else if (hasAnnotation(table, column, 'url')) {
+					obj['href'] = val;
+				} else {
+					obj['label'] = val;
+				}
+			});
+			ret.push(obj);
+		});
+		return ret;
 	};
 	
 }]);
