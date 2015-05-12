@@ -203,7 +203,7 @@ function getDetailRows(row, m) {
 function getDetailColumns(row) {
 	var ret = [];
 	$.each(row, function(key, value) {
-		if (key == '$$hashKey' || value == null || value === '' || display_columns['hidden'].contains(key)) {
+		if (key == '$$hashKey' || value == null || value === '' || display_columns['hidden'].contains(key) || display_columns['title'] == key) {
 			return true;
 		}
 		ret.push(key);
