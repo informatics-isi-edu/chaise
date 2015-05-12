@@ -49,7 +49,7 @@
 							</tr>
 							
 							<tr ng-if="facetDetail.isAssociation(data['table'], data['rows'])" ng-repeat="(name, data) in FacetsData.linearizeView">
-								<td ng-if="!facetDetail.isGEO(data['table'])" class="key">{{facetDetail.display(data['table'],name,data['rows'])}}:</td>
+								<td ng-if="!facetDetail.isMultipleAttribute(data['rows'][0]) && !facetDetail.isGEO(data['table'])" class="key">{{facetDetail.display(data['table'],name,data['rows'])}}:</td>
 								<td class="value">
 									<ul ng-class="facetDetail.setListClass(data['rows'])">
 										<li ng-if="!facetDetail.isMultiAttribute(data['table'],name,value)" ng-repeat="value in data['rows']">
