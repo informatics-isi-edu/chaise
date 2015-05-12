@@ -70,7 +70,10 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
             $scope.FacetsData.files = getFilesLayout($scope.FacetsData.datasetFiles);
             $scope.FacetsData.viewer3dFile = getViewer3d($scope.FacetsData.datasetFiles);
             $scope.FacetsData.isDetail = true;
-            $window.history.pushState({'ermrest': 'detail'}, '', '');
+            var isIE = /*@cc_on!@*/false || !!document.documentMode;
+            if (!isIE) {
+                $window.history.pushState({'ermrest': 'detail'}, '', '');
+            }
 		}
 	};
 	

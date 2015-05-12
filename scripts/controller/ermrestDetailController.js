@@ -159,7 +159,12 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 	};
 
 	this.goBack = function goBack() {
-		window.history.back();
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+        if (!isIE) {
+    		window.history.back();
+        } else {
+    		$scope.FacetsData.isDetail = false;
+        }
 	};
 
 	this.isAssociationAttribute = function isAssociationAttribute(table, column) {
