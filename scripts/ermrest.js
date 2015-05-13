@@ -1230,6 +1230,7 @@ function getTables(tables, options, successCallback) {
 	setTablesBackReferences();
 	back_references = catalog_back_references[SCHEMA];
 	setCollectionsReferences(options['tree']);
+	options['tree'][0].nodes.sort(compareCollections);
 	initApplicationHeader(rootTables);
 	successCallback();
 }
@@ -1380,6 +1381,24 @@ function compareUniques(item1, item2) {
 		ret = 1;
 	}
 	return ret;
+}
+
+function compareIgnoreCase(str1, str2) {
+	var val1 = str1.toLowerCase();
+	var val2 = str2.toLowerCase();
+	if (val1 == val2) {
+		return 0;
+	} else if (val1 < val2) {
+		return -1;
+	} else {
+		return 1;
+	}
+}
+
+function compareCollections(item1, item2) {
+	var val1 = item1['display'];
+	var val2 = item2['display'];
+	return compareIgnoreCase(val1, val2);
 }
 
 function setFacetClass(options, facet, facetClass) {
