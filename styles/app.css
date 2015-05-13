@@ -52,7 +52,7 @@ label {
 	border-radius: 0;
 }
 /* fix cross browser box model issue */
-#filter .btn, #view-buttons .btn {
+#filter .btn, #view-buttons .btn, #views .btn {
 	padding: 0;
 }
 
@@ -64,7 +64,7 @@ label {
 	float: left;
 }
 .filter-button {
-	width: 30px;
+	width: 36px; /* was 30px */
 	float: right;
 	display: block;
 	min-height: 80px;
@@ -81,7 +81,7 @@ label {
 
 .filter-container {
 	display: block; 
-	margin-right: 29px;
+	margin-right: 35px; /* was 29px */
 	min-height: 80px; 
 	background-color: #FFF;
 	border: 1px solid #CCC;
@@ -162,7 +162,7 @@ a.field-toggle .md-chevron-right {
 	color: #fc868d;
 }
 
-#view-buttons .btn-default {
+#view-buttons .btn-default, #views .btn-default {
 	background-color: #F2F2F2;
 	width: 36px;
 	height: 36px;
@@ -197,7 +197,7 @@ a.filter-link-cancel {
 
 #results_tally {
 	padding-top: 1.5em;
-	/*padding-bottom: 1em;*/
+	padding-bottom: 1em;
 }
 
 #results_tally p {
@@ -236,6 +236,21 @@ dl.attribute-group dd {
 	color: #000;
 }
 
+/* Standardize card view */
+
+#resultstable .panel {
+     height: 365px;
+     overflow: hidden;
+}
+
+#resultstable .panel dl.attribute-group dd.summ-desc {
+     display: block;
+     height: 76px;
+     line-height: 1.4;
+     max-width: 500px;
+     overflow: hidden;
+     text-overflow: ellipsis;
+}
 
 /* Edit filters in sidebar */
 
@@ -580,7 +595,7 @@ th.table-more-bt {
 
 /* Temporarily hide features that are not active yet */
 
-#browser-header, #add-filter {
+#browser-header, #add-filter-btn, #view-buttons {
 	display: none;
 }
 

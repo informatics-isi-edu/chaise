@@ -61,7 +61,6 @@
 						<button id="filterButton" type="button" title="Click to apply filters" class="btn btn-default btn-filter sidebar-toggle" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);"><i class="md-filter-list md-lg"></i></button>
 					</div>
 					<div class="filter-container">
-						<!-- <p>Click filter button to use filters.</p> -->
 						<div ng-class="facetResults.setFilterClass()">
 							Click <i class="md-filter-list"></i> on the right to apply filters.
 						</div>
@@ -89,29 +88,6 @@
 							<button class="btn btn-default" id="sort-btn" aria-label="Sort" type="button" title="Sort">
 								<i class="md-sort md-lg" aria-hidden="true"></i>
 							</button>
-	
-							<div class="btn-group view-toggle" role="group" id="views">
-								<button type="button" id="views-btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="Switch view">
-	      							<i class="md-view-list md-lg" aria-hidden="true"></i>
-	    						</button>
-							    <ul class="dropdown-menu" role="menu">
-							      <li>
-							      	<a href="#" ng-click="facetResults.selectView($event, 'table');">
-							      		<i class="md-view-column md-lg" aria-hidden="true"></i> Table View
-							      	</a>
-							      </li>
-							      <li>
-							      	<a href="#" ng-click="facetResults.selectView($event, 'list');">
-							      		<i class="md-view-list md-lg" aria-hidden="true"></i> List View
-							      	</a>
-							      </li>
-							      <li>
-							      	<a href="#" ng-click="facetResults.selectView($event, 'card');">
-							      		<i class="md-view-module md-lg" aria-hidden="true"></i> Card View
-							      	</a>
-							      </li>
-							    </ul>
-							</div>
 	
 							<button class="btn btn-default" id="settings-btn" aria-label="Settings" type="button" title="Configure settings">
 								<i class="md-settings md-lg" aria-hidden="true"></i>
@@ -176,8 +152,32 @@
 			</div>
 			
 			<div id="results_tally" class="row">
-				<div class="col-md-12">
+				<div class="col-md-10">
 					<p>Displaying results <strong>1-{{FacetsData.ermrestData.length}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
+				</div>
+				<div class="col-md-2">
+					<div class="btn-group view-toggle pull-right" role="group" id="views">
+								<button type="button" id="views-btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="Switch view">
+	      							<i class="md-view-list md-lg" aria-hidden="true"></i>
+	    						</button>
+							    <ul class="dropdown-menu" role="menu">
+							      <li>
+							      	<a href="#" ng-click="facetResults.selectView($event, 'table');">
+							      		<i class="md-view-column md-lg" aria-hidden="true"></i> Table View
+							      	</a>
+							      </li>
+							      <li>
+							      	<a href="#" ng-click="facetResults.selectView($event, 'list');">
+							      		<i class="md-view-list md-lg" aria-hidden="true"></i> List View
+							      	</a>
+							      </li>
+							      <li>
+							      	<a href="#" ng-click="facetResults.selectView($event, 'card');">
+							      		<i class="md-view-module md-lg" aria-hidden="true"></i> Card View
+							      	</a>
+							      </li>
+							    </ul>
+							</div>
 				</div>
 			</div>
 			<div id="resultstable" class="row">
@@ -285,7 +285,7 @@
 										<div class="col-md-12">
 											<dl class="attribute-group">
 												<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
-												<dd>{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</dd>
+												<dd class="summ-desc">{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</dd>
 											</dl>
 										</div>
 									</div>
