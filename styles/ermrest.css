@@ -345,3 +345,6 @@ th.multiple_values, td.multiple_values {
     word-wrap: break-word;
 }
 
+#login_user {
+	color: yellow;
+}

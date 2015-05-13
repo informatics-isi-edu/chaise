@@ -1437,7 +1437,7 @@ function getSession() {
 }
 
 function successGetSession(data, textStatus, jqXHR) {
-	alert(JSON.stringify(data, null, 4));
+	$('#login_user').html(data['client']);
 }
 
 function errorGetSession(jqXHR, textStatus, errorThrown, url) {
