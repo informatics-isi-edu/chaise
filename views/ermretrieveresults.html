@@ -46,6 +46,16 @@
 				</div>
 			</div>
 			<div class="row">
+				<div class="col-md-12">
+					<p>
+						<span class="filter-item-value">
+							<span class="filter-item-field">Search within: </span>&nbsp;
+							<a href="#" class="collections-toggle" ng-click="facetResults.sidebarClick($event, 'collections-toggle');">{{FacetsData.selectedEntity.display}} {{facetResults.displayTreeCount(FacetsData.selectedEntity)}}</a>
+						</span>
+					</p>
+				</div>
+			</div>
+			<div class="row">
 				<div id="filter" class="col-md-10">
 					<div class="filter-button">
 						<button id="filterButton" type="button" title="Click to apply filters" class="btn btn-default btn-filter sidebar-toggle" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);"><i class="md-filter-list md-lg"></i></button>
@@ -54,14 +64,6 @@
 						<!-- <p>Click filter button to use filters.</p> -->
 						<div ng-class="facetResults.setFilterClass()">
 							Click <i class="md-filter-list"></i> on the right to apply filters.
-						</div>
-						<div class="filter-item">
-							<a href="#" class="filter-link-cancel" ng-click="facetResults.preventDefault($event);"><i class="md-cancel md-lg"></i></a>
-							<!-- <span class="filter-item-field">Collection</span>&nbsp;<span class="filter-item-value">{{FacetsData.selectedEntity.display}} {{facetResults.displayTreeCount(FacetsData.selectedEntity)}}</span>  -->
-							<span class="filter-item-field">Collection</span>&nbsp;
-							<span class="filter-item-value">
-								<a href="#" class="collections-toggle" ng-click="facetResults.sidebarClick($event, 'collections-toggle');">{{FacetsData.selectedEntity.display}} {{facetResults.displayTreeCount(FacetsData.selectedEntity)}}</a>
-							</span>
 						</div>
 		                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
 		                    <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
