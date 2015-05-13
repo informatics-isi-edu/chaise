@@ -1437,11 +1437,14 @@ function getSession() {
 }
 
 function successGetSession(data, textStatus, jqXHR) {
-	$('#login_user').html(data['client']);
+	$('#login_user').html(data['client'] != null ? data['client'] : '');
 }
 
 function errorGetSession(jqXHR, textStatus, errorThrown, url) {
-	if (jqXHR.status != 401) {
+	if (jqXHR.status == 401 || jqXHR.status == 404) {
+		// Unauthorized or Not Found
+		$('#login_user').html('');
+	} else {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	}
 }
