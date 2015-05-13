@@ -100,6 +100,7 @@ function initApplication() {
 	initLocation();
 	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
 	getSchemas();
+	getSession();
 	//alert(JSON.stringify(DATASET_COLUMNS, null, 4));
 }
 
@@ -1426,6 +1427,21 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	} else if (param['alert']['display']) {
 		param['alert']['display'] = false;
+		handleError(jqXHR, textStatus, errorThrown, url);
+	}
+}
+
+function getSession() {
+	var url = '/ermrest/authn/session';
+	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetSession, errorGetSession, null);
+}
+
+function successGetSession(data, textStatus, jqXHR) {
+	alert(JSON.stringify(data, null, 4));
+}
+
+function errorGetSession(jqXHR, textStatus, errorThrown, url) {
+	if (jqXHR.status != 401) {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	}
 }
