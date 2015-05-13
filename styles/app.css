@@ -619,7 +619,7 @@ th.table-more-bt {
 
 /* Temporarily hide features that are not active yet */
 
-#browser-header, #add-filter-btn, #view-buttons {
+#browser-header, #add-filter-btn, #view-buttons, #dashboard-link {
 	display: none;
 }
 
