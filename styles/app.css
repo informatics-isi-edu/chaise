@@ -308,6 +308,7 @@ dl.attribute-group dd {
 .sidebar .filter-item a {
 	color: #999;
 	text-decoration: none;
+	display: block;
 }
 
 .sidebar .filter-item-value {
@@ -398,6 +399,29 @@ input.sidebar-search.form-control {
 }
 
 /* Details page styles */
+
+#datacontent td {
+     padding-bottom: 10px;
+}
+
+#datacontent td.key {
+     color: #999999;
+     font-weight: normal;
+}
+
+#datacontent h1, #datacontent h2, #datacontent h3 {
+     font-size: 1.2em;
+     font-weight: normal;
+}
+
+#datacontent th {
+  color: #999;
+  font-weight: normal;
+}
+
+#datacontent th, #datacontent td {
+  border-color: #999;
+}
 
 .center-block {
   display: block;

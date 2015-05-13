@@ -1,15 +1,13 @@
 	<div ng-controller="DetailListCtrl as facetDetail" ng-show="facetDetail.showDetail()">
 		<div>
-			<div class="modal-content">
-				<div>
-			        <button type="button" class="btn btn-default btn-sm" ng-click="facetDetail.goBack();">
+			<div class="modal-content panel panel-default">
+				<div class="panel-heading">
+					<h2 class="modal-title panel-title ng-binding">Gene expression microarray - mouse E10.5 mandibular arch <button type="button" class="btn btn-default btn-sm pull-right" ng-click="facetDetail.goBack();">
 			            <i class="md-chevron-left md-lg"></i><span>BACK</span>
-			        </button>
-			    </div>
-				<div class="modal-header">
-					<h4 class="modal-title">{{FacetsData.entryTitle}}</h4>
+			        </button></h2>
 				</div>
-				<div class="modal-body">
+				<div class="panel-body">
+					<div id="datacontent">
 					<div id="datacontent">
 						<h1>{{facetDetail.displayTable(FacetsData.table)}}</h1>
 						<table class="dataset">
