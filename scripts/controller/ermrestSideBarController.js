@@ -289,6 +289,15 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     	FacetsService.getEntityResults(event, data, $scope.successGetMetadata);
 	};
 	
+	this.searchCollection = function searchCollection(event, data) {
+    	FacetsService.getEntityResults(event, data, $scope.successGetMetadata);
+    	if ($('#collectionsTree').hasClass('open')) {
+    		setTimeout(function () {
+    		    $('#collectionDoneButton').click();
+    		}, 1);
+    	}
+	};
+	
 	this.displayTreeCount = function displayTreeCount(data) {
 		var ret = '';
 		if (data.count > 0) {

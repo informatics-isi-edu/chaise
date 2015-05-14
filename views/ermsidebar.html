@@ -9,7 +9,7 @@
 				        <h5>Collections</h5>
 				</div>
 				<div class="col-md-2">
-				        <button type="button" class="btn btn-default btn-sm pull-right collections-toggle" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
+				        <button id="collectionDoneButton" type="button" class="btn btn-default btn-sm pull-right collections-toggle" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
 				            DONE
 				        </button>
 				    </div>
@@ -28,7 +28,9 @@
     						</ul>
 						</script>
 						<ul class="entity">
-		 					<li class="entity" ng-repeat="data in FacetsData.tree" ng-include="'tree_item_renderer.html'"></li>
+		 					<li class="entity" ng-repeat="data in FacetsData.tree[0].nodes">
+		 						<label ng-click="sideBar.searchCollection($event, data)">{{data.display}}</label>
+		 					</li>
 		 				</ul>
 					</div>
 				</div>
