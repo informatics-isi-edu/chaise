@@ -196,10 +196,6 @@ div.sort-attr {
 	padding-left: 25px;
 }
 
-label.highlighted {
-	background-color: #ECFFB3;
-}
-
 #treeDiv label:hover, #treeDiv label:active {
      cursor: pointer;
 }
@@ -232,7 +228,7 @@ iframe {
 }
 
 label.highlighted {
-     background-color: #ffffcc;
+     /* background-color: #ffffcc; */
 }
 
 td.tiles {

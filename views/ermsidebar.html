@@ -17,6 +17,11 @@
 	    </div>
 		<div class="row">
 			<div class="col-md-12">
+        		<div class="editfilter-container">
+        			<div class="filter-item">
+        				<span class="filter-item-field">enabled &nbsp;<span class="filter-item-value">{{selectedCollection}}</span></span>
+        			</div>
+        		</div>
 				<div class="editvalue-container">
 					<div id="treeDiv">
 						<script type="text/ng-template" id="tree_item_renderer.html">
@@ -29,7 +34,7 @@
 						</script>
 						<ul class="entity">
 		 					<li class="entity" ng-repeat="data in FacetsData.tree[0].nodes">
-		 						<label ng-click="sideBar.searchCollection($event, data)">{{data.display}}</label>
+		 						<label class="badge pointer" ng-click="sideBar.searchCollection($event, data)">{{data.display}}</label>
 		 					</li>
 		 				</ul>
 					</div>

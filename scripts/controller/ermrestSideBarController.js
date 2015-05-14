@@ -11,6 +11,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	$scope.FacetsData = FacetsData;
 	$scope.filtersStatus = {};
 	$scope.filtersMatch = {};
+	$scope.selectedCollection = '';
 	
 	$scope.translate = function(value)
 	{
@@ -290,6 +291,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	};
 	
 	this.searchCollection = function searchCollection(event, data) {
+		$scope.selectedCollection = data['display'];
     	FacetsService.getEntityResults(event, data, $scope.successGetMetadata);
     	if ($('#collectionsTree').hasClass('open')) {
     		setTimeout(function () {
