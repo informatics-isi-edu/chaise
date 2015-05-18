@@ -1450,19 +1450,32 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 	}
 }
 
+function deleteSession() {
+	var url = '/ermrest/authn/session';
+	ERMREST.DELETE(url, getSession, null, null);
+}
+
 function getSession() {
 	var url = '/ermrest/authn/session';
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetSession, errorGetSession, null);
 }
 
 function successGetSession(data, textStatus, jqXHR) {
-	$('#login_user').html(data['client'] != null ? data['client'] : '');
+	//alert(JSON.stringify(data, null, 4));
+	if (data['client'] != null) {
+		$('#login_user').html(data['client']);
+		$('#login_link').hide();
+	} else {
+		$('#login_user').html('');
+		$('#login_link').show();
+	}
 }
 
 function errorGetSession(jqXHR, textStatus, errorThrown, url) {
 	if (jqXHR.status == 401 || jqXHR.status == 404) {
 		// Unauthorized or Not Found
 		$('#login_user').html('');
+		$('#login_link').show();
 	} else {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	}
