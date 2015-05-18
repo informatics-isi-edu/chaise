@@ -238,7 +238,7 @@ dl.attribute-group dd {
 
 /* Standardize card view */
 
-#resultstable .panel {
+.col-md-6 #resultstable .panel {
      height: 365px;
      overflow: hidden;
 }
