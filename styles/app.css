@@ -61,7 +61,7 @@ label {
 #filter {
 	min-height: 80px;
 	height: 100%;
-	float: left;
+	/* float: left; */
 }
 .filter-button {
 	width: 36px; /* was 30px */
@@ -196,12 +196,13 @@ a.filter-link-cancel {
 }
 
 #results_tally {
-	padding-top: 1.5em;
+	padding-top: 1em;
 	padding-bottom: 1em;
 }
 
 #results_tally p {
 	font-style: italic;
+	margin: 8px 0 0;
 }
 
 #results_tally span {
@@ -238,8 +239,8 @@ dl.attribute-group dd {
 
 /* Standardize card view */
 
-.col-md-6 #resultstable .panel {
-     height: 365px;
+#results-group .col-md-6 .panel {
+     height: 300px;
      overflow: hidden;
 }
 
