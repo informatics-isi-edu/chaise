@@ -344,3 +344,9 @@ th.multiple_values, td.multiple_values {
 #login_user {
 	color: yellow;
 }
+
+.collection_badge {
+	background-color: #FFF;
+	color: #333;
+	font-weight: 400;
+}

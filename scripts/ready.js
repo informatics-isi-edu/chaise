@@ -30,7 +30,7 @@ function initSlider() {
 	}
 }
 
-initSlider();
+//initSlider();
 
 
 

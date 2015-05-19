@@ -32,9 +32,9 @@
         						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
     						</ul>
 						</script>
-						<ul class="entity">
-		 					<li class="entity" ng-repeat="data in FacetsData.tree[0].nodes">
-		 						<label class="badge pointer" ng-click="sideBar.searchCollection($event, data)">{{data.display}}</label>
+						<ul class="nav sidebar-nav">
+		 					<li ng-repeat="data in FacetsData.tree[0].nodes">
+		 						<label class="collection_badge pointer" ng-click="sideBar.searchCollection($event, data)">{{data.display}}</label>
 		 					</li>
 		 				</ul>
 					</div>
