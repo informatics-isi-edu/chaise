@@ -192,7 +192,7 @@
 	            <div class="editfilter-container">
 	                <!-- <p>Click filter button to use filters.</p> -->
 	                <div class="filter-item">
-	                    <a href="#" ng-click="sideBar.removeFilter($event, FacetsData.tag);"><i class="md-cancel md-lg"></i></a>
+	                    <a href="#" ng-click="sideBar.removeFilter($event, FacetsData.tag);"><i class="md-cancel md-lg"></i>
 	                    <span class="filter-item-field">{{FacetsData.tag['display']}}</span>&nbsp;
 	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'bigint')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}">
 	                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}
@@ -206,6 +206,7 @@
 				    					{{value}}
 				    			</span>
 	                    	</span>
+	                    </a>
 	                </div>
 	            </div>
 	        </div>
