@@ -58,11 +58,11 @@
 			<div class="row">
 				<div id="filter" class="col-md-12">
 					<div class="filter-button">
-						<button id="filterButton" type="button" title="Click to apply filters" class="btn btn-default btn-filter sidebar-toggle" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);"><i class="md-filter-list md-lg"></i></button>
+						<button id="filterButton" type="button" title="Click to apply filters to your data" class="btn btn-default btn-filter sidebar-toggle" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);"><i class="md-filter-list md-lg"></i></button>
 					</div>
 					<div class="filter-container">
 						<div ng-class="facetResults.setFilterClass()">
-							Click <i class="md-filter-list"></i> on the right to apply filters.
+							Click <i class="md-filter-list"></i> on the right to apply filters to your data.
 						</div>
 		                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
 		                    <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>

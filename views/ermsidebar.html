@@ -89,7 +89,7 @@
 									<i class="md-search md-lg"></i>
 								</a>
 							</span>
-							<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search" ng-keyup="sideBar.delay_search_filters($event.keyCode)">
+							<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search Data..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 						</div>
 					</div>
 	        		<div class="editfilter-container">
@@ -255,7 +255,7 @@
 								rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
 								rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
 								rz-slider-translate="translate"> </rzslider></li>
-						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search" 
+						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search Data..." 
 							type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
 							/></li>
 						<li ng-if="sideBar.if_type(FacetsData.tag, 'enum')"
