@@ -403,6 +403,10 @@ input.sidebar-search.form-control {
 	right: -10px;
 }
 
+.collectionsSelect .radio {
+	padding-left: 5px;
+}
+
 /* Details page styles */
 
 #datacontent td {
