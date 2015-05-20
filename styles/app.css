@@ -237,6 +237,10 @@ dl.attribute-group dd {
 	color: #000;
 }
 
+.bottompgr .form-group {
+	text-align: center;
+}
+
 /* Standardize card view */
 
 #results-group .col-md-6 .panel {
