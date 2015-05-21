@@ -507,8 +507,7 @@ dt, dd {
 	overflow: hidden;
 	text-overflow:ellipsis;
 	white-space:nowrap;
-	/* max-width: 136px; */
-	max-width: 250px;
+	max-width: 240px;
 }
 
 .toggle, .toggler {
