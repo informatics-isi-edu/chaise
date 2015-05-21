@@ -1450,17 +1450,21 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 	}
 }
 
-function deleteSession() {
+function deleteSession(param) {
 	var url = '/ermrest/authn/session';
-	ERMREST.DELETE(url, getSession, null, null);
+	ERMREST.DELETE(url, successDeleteSession, null, param);
 }
 
-function getSession() {
-	var url = '/ermrest/authn/session';
-	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetSession, errorGetSession, null);
+function successDeleteSession(data, textStatus, jqXHR, param) {
+	getSession(param);
 }
 
-function successGetSession(data, textStatus, jqXHR) {
+function getSession(param) {
+	var url = '/ermrest/authn/session';
+	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetSession, errorGetSession, param);
+}
+
+function successGetSession(data, textStatus, jqXHR, param) {
 	//alert(JSON.stringify(data, null, 4));
 	if (data['client'] != null) {
 		$('#login_user').html(data['client']);
@@ -1468,6 +1472,9 @@ function successGetSession(data, textStatus, jqXHR) {
 	} else {
 		$('#login_user').html('');
 		$('#login_link').show();
+		if (param != null) {
+			window.location.href = param;
+		}
 	}
 }
 
