@@ -2440,15 +2440,12 @@ function getColumnName(table_name, column_annotation) {
 function getDenormalizedFiles(root_table, row, result) {
     emptyJSON(result);
     var tables = {};
-    var image3dFiles = [];
     var downloadFiles = [];
     var ret = getDatasetFiles(root_table, row, 'download', tables);
     var col_name = getColumnName(tables['download'], 'type');
     if (ret != null) {
         $.each(ret, function(i, data) {
-            if (data[col_name] == 'image/x.nifti') {
-                image3dFiles.push(data);
-            } else {
+            if (data[col_name] != 'image/x.nifti') {
                 downloadFiles.push(data);
             }
         });
@@ -2464,7 +2461,7 @@ function getDenormalizedFiles(root_table, row, result) {
     result['preview'] = preview;
     result['name'] = filename;
     result['size'] = bytes;
-    result['image3dFiles'] = image3dFiles;
+    result['image3dFiles'] = getDatasetFiles(root_table, row, 'preview', tables);;
     result['downloadFiles'] = downloadFiles;
     result['thumbnailsFiles'] = getDatasetFiles(root_table, row, 'image', tables);
 }
