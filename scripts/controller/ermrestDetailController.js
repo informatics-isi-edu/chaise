@@ -57,8 +57,8 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 
 	this.isAttribute = function isAttribute(table, column, row) {
 		return Object.keys(row).length == 3 && !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
-                        !hasAnnotation(table, column, 'download') && !hasAnnotation(table, column, 'geo_gds') &&
-                        !hasAnnotation(table, column, 'geo_gse');
+			!hasAnnotation(table, column, 'preview') && !hasAnnotation(table, column, 'download') && 
+			!hasAnnotation(table, column, 'geo_gds') && !hasAnnotation(table, column, 'geo_gse');
 	};
 	
 	this.isMultiAttribute = function isMultiAttribute(table, column, row) {
@@ -143,7 +143,9 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 	};
 
 	this.isAssociation = function isAssociation(table, values) {
-		return values.length > 0 && hasTableAnnotation(table, 'association') && !hasTableAnnotation(table, 'image') && !hasTableAnnotation(table, 'viewer') && !hasTableAnnotation(table, 'download');
+		return values.length > 0 && hasTableAnnotation(table, 'association') && 
+			!hasTableAnnotation(table, 'image') && !hasTableAnnotation(table, 'viewer') && 
+			!hasTableAnnotation(table, 'preview') && !hasTableAnnotation(table, 'download');
 	};
 
 	this.isMultiColumn = function isMultiColumn(table, column) {
@@ -169,11 +171,11 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 
 	this.isAssociationAttribute = function isAssociationAttribute(table, column) {
 		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
-                        !hasAnnotation(table, column, 'download');
+		!hasAnnotation(table, column, 'preview') && !hasAnnotation(table, column, 'download');
 	};
 	
 	this.isCommonAttribute = function isCommonAttribute(table, column) {
-		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
+		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && !hasAnnotation(table, column, 'preview') &&
                         !hasAnnotation(table, column, 'download') && !hasAnnotation(table, column, 'url') &&
                         !hasAnnotation(table, column, 'geo_gds') && !hasAnnotation(table, column, 'geo_gse');
 	};
