@@ -1465,17 +1465,9 @@ function successGetSession(data, textStatus, jqXHR) {
 	if (data['client'] != null) {
 		$('#login_user').html(data['client']);
 		$('#login_link').hide();
-		$('#fblogin_user').html(data['client']);
-        $('#fblogout_user').show();
-        $('#fblogin_link').hide();
-        $('#fbsignup_link').hide();
 	} else {
 		$('#login_user').html('');
 		$('#login_link').show();
-		$('#fblogin_link').show();
-        $('#fbsignup_link').show();
-        $('#fblogin_user').hide();
-        $('#fblogout_user').hide();
 	}
 }
 
@@ -1484,10 +1476,6 @@ function errorGetSession(jqXHR, textStatus, errorThrown, url) {
 		// Unauthorized or Not Found
 		$('#login_user').html('');
 		$('#login_link').show();
-		$('#fblogin_user').hide();
-        $('#fblogout_user').hide();
-        $('#fblogin_link').show();
-        $('#fbsignup_link').show();
 	} else {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	}
