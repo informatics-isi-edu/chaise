@@ -1469,9 +1469,11 @@ function successGetSession(data, textStatus, jqXHR, param) {
 	if (data['client'] != null) {
 		$('#login_user').html(data['client']);
 		$('#login_link').hide();
+		$('#logout_link').show();
 	} else {
 		$('#login_user').html('');
 		$('#login_link').show();
+		$('#logout_link').hide();
 		if (param != null) {
 			window.location.href = param;
 		}
@@ -1483,6 +1485,7 @@ function errorGetSession(jqXHR, textStatus, errorThrown, url) {
 		// Unauthorized or Not Found
 		$('#login_user').html('');
 		$('#login_link').show();
+		$('#logout_link').hide();
 	} else {
 		handleError(jqXHR, textStatus, errorThrown, url);
 	}
