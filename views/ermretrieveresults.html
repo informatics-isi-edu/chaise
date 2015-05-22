@@ -181,8 +181,8 @@
 					</div>
 				</div>
 			</div>
-			<div id="resultstable" class="row">
-				<div class="col-md-12" ng-init="FacetsData.spinner=[]" ng-repeat="row in FacetsData.ermrestData">
+			<div id="resultstable" class="row" ng-init="FacetsData.spinner=[]" >
+				<div ng-if="FacetsData.view=='list'" class="col-md-12" ng-repeat="row in FacetsData.ermrestData">
                     <div ng-init="FacetsData.spinner[$index]=false" class="ng-hide" ng-show="facetResults.showSpinner($index)">
                             <img src="images/ajax-loader.gif"
                                     title="Processing..." alt="Spinner" ng-show="facetResults.showSpinner($index)"
