@@ -250,11 +250,15 @@ dl.attribute-group dd {
 /* Standardize card view */
 
 #results-group .col-md-6 .panel {
-     height: 300px;
+     height: 280px;
      overflow: hidden;
 }
 
-#resultstable .panel dl.attribute-group dd.summ-desc {
+#resultstable dl.summary-card {
+	padding-top: 15px;
+}
+
+#resultstable dl.summary-card dd.summ-desc {
      display: block;
      height: 76px;
      line-height: 1.4;

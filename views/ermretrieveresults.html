@@ -265,16 +265,14 @@
 								</div>
 								<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
 									<div class="row">
-		                    			<div class="col-md-2" ng-show="thumbnail!=null">
+										<div class="col-md-3" ng-show="thumbnail!=null">
 											<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
 												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 												<br/>
 											</a>
 										</div>
-									</div>
-									<div class="row">
 										<div ng-init="values=facetResults.viewColumns(row, 3, 2)">
-											<div class="col-sm-6" ng-show="values['top_columns'].length>0" ng-repeat="value in values['top_columns']">
+											<div class="col-sm-3" ng-show="values['top_columns'].length>0" ng-repeat="value in values['top_columns']">
 												<dl class="attribute-group" ng-repeat="col in value track by $index" >
 													<dt ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.display(FacetsData.table,col)}}</dt>
 													<dd ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
@@ -284,7 +282,7 @@
 									</div>
 									<div class="row" ng-show="values['summary']!=null">
 										<div class="col-md-12">
-											<dl class="attribute-group">
+											<dl class="attribute-group summary-card">
 												<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
 												<dd class="summ-desc">{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</dd>
 											</dl>
