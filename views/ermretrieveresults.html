@@ -223,29 +223,29 @@
 				<div ng-if="FacetsData.view=='table'">
 					<div id="results-group" class="row">
 						<div class="col-md-12">
-							<table class="table table-condensed table-responsive table-hover table-bordered" id="results-table-view">
+							<table class="col-md-12 table table-condensed table-responsive table-hover table-bordered" id="results-table-view">
 								<thead>
 									<tr class="active">
-										<th ng-if="facetResults.itemThumbnail(FacetsData.ermrestData[0])!=null">
+										<th ng-if="facetResults.itemThumbnail(FacetsData.ermrestData[0])!=null" class="col-md-2">
 											<span>Image</span>
 										</th>
-										<th ng-if="facetResults.titleName()!=null">{{facetResults.display(FacetsData.table,facetResults.titleName())}}
+										<th ng-if="facetResults.titleName()!=null" class="col-md-2">{{facetResults.display(FacetsData.table,facetResults.titleName())}}
 										</th>
-										<th ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)">{{facetResults.display(FacetsData.table,col)}}
+										<th ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="col-md-2">{{facetResults.display(FacetsData.table,col)}}
 										</th>
 									</tr>
 								</thead>
 								<tbody>
 									<tr ng-repeat="row in FacetsData.ermrestData">
-										<td ng-if="facetResults.itemThumbnail(row)!=null" >
+										<td ng-if="facetResults.itemThumbnail(row)!=null" class="col-md-2">
 											<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
 												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{facetResults.itemThumbnail(row)}}">
 											</a>
 										</td>
-										<td ng-if="facetResults.titleName()!=null" class="results-title">
+										<td ng-if="facetResults.titleName()!=null" class="col-md-2 results-title">
 											<a href="#" ng-click="facetResults.clicker($event, row, 3, $index);"><span class="results-title" ng-bind-html="facetResults.itemTitle(row)"></span></a>
 										</td>
-										<td ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="top-columns">{{facetResults.html(FacetsData.table,col,row[col])}}
+										<td ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="col-md-2 top-columns">{{facetResults.html(FacetsData.table,col,row[col])}}
 										</td>
 									</tr>
 								</tbody>
