@@ -291,13 +291,15 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	};
 	
 	this.searchCollection = function searchCollection(event, data) {
-		$scope.selectedCollection = data['display'];
-    	FacetsService.getEntityResults(event, data, $scope.successGetMetadata);
-    	if ($('#collectionsTree').hasClass('open')) {
-    		setTimeout(function () {
-    		    $('#collectionDoneButton').click();
-    		}, 1);
-    	}
+		if (!$(event.target).is('span')) {
+			$scope.selectedCollection = data['display'];
+	    	FacetsService.getEntityResults(event, data, $scope.successGetMetadata);
+	    	if ($('#collectionsTree').hasClass('open')) {
+	    		setTimeout(function () {
+	    		    $('#collectionDoneButton').click();
+	    		}, 1);
+	    	}
+		}
 	};
 	
 	this.displayTreeCount = function displayTreeCount(data) {

@@ -1781,10 +1781,14 @@ function hasAnnotation(table_name, column_name, annotation) {
 function selectCollection() {
 	var clicked = false;
 	$.each($('label', $('#treeDiv')), function(i, label) {
-		//if ($('span', $(label)).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE)) {
-		if ($(label).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE)) {
-			$(label).click();
-			clicked = true;
+		$.each($('span', $(label)), function(j, span) {
+			if ($(span).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE)) {
+				$(label).click();
+				clicked = true;
+				return false;
+			}
+		});
+		if (clicked) {
 			return false;
 		}
 	});
