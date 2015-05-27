@@ -1779,6 +1779,7 @@ function hasAnnotation(table_name, column_name, annotation) {
 }
 
 function selectCollection() {
+	$('label', $('#treeDiv')).removeClass('highlighted');
 	var clicked = false;
 	$.each($('label', $('#treeDiv')), function(i, label) {
 		$.each($('span', $(label)), function(j, span) {

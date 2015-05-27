@@ -227,6 +227,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	};
 	
 	this.getEntityResults = function (event, data, successGetMetadata) {
+		var label = $(event.target).is('label') ? $(event.target) : $(event.target).parent();
 		var isNewSchema = (SCHEMA != data.schema);
 		if (isNewSchema) {
 			initSchema(data.schema);
@@ -234,7 +235,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		this.setCollectionChiclets(data, isNewSchema, this);
 		var peviousTable = FacetsData.table;
 		var node = $('label.highlighted', $('#treeDiv'));
-		var isNew = (node.length == 0 || node[0] !== event.target);
+		var isNew = (node.length == 0 || node[0] !== label[0]);
 		if (isNew) {
 			$("#attrsort span.glyphicon").removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes");
 		}
@@ -242,7 +243,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			$('#headerSearch').removeAttr('disabled');
 			collapseTree(FacetsData.tree[0], data);
 			$('label', $('#treeDiv')).removeClass('highlighted');
-			$(event.target).addClass('highlighted');
+			label.addClass('highlighted');
 			var newBranch = false;
 			if (!isNewSchema && data.level > 0 && FacetsData.level >= 0) {
 				var oldRoot = null;
