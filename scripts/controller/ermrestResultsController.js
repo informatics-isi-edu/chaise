@@ -53,6 +53,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
             $scope.FacetsData.tiles = [];
             $scope.FacetsData.files = [];
             $scope.FacetsData.viewer3dFile = [];
+            $scope.FacetsData.externalReferenceRows = [];
 		} else {
             $scope.FacetsData.modalIndex = index;
             $scope.FacetsData.spinner[index] = true;
@@ -69,6 +70,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
             $scope.FacetsData.tiles = getTilesLayout($scope.FacetsData.datasetFiles, 3);
             $scope.FacetsData.files = getFilesLayout($scope.FacetsData.datasetFiles);
             $scope.FacetsData.viewer3dFile = getViewer3d($scope.FacetsData.datasetFiles);
+            $scope.FacetsData.externalReferenceRows = getReferenceRows($scope.FacetsData.linearizeView);
             $scope.FacetsData.isDetail = true;
             var isIE = /*@cc_on!@*/false || !!document.documentMode;
             if (!isIE) {

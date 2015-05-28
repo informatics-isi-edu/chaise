@@ -85,8 +85,8 @@
 											</th>
 										</tr>
 									</thead>
-									<tbody ng-init="rows=facetDetail.referenceRows(data['table'], data['rows'])">
-										<tr ng-repeat="value in rows">
+									<tbody>
+										<tr ng-repeat="value in FacetsData.externalReferenceRows">
 											<td class="multiple_values">
 												<a ng-href="{{value['href']}}">{{value['label']}}</a>
 											</td>

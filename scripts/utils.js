@@ -410,3 +410,25 @@ function checkFacetSelection(facetsData, filtersStatus) {
 	return ret;
 }
 
+function getReferenceRows(linearizeView) {
+	var ret = [];
+	$.each(linearizeView, function(name, data) {
+		if (hasTableAnnotation(data['table'], 'reference')) {
+			$.each(data['rows'], function(i, row) {
+				var obj = {};
+				$.each(row, function(column, val) {
+					if (column == '$$hashKey' || hasAnnotation(data['table'], column, 'dataset')) {
+						return true;
+					} else if (hasAnnotation(data['table'], column, 'url')) {
+						obj['href'] = val;
+					} else {
+						obj['label'] = val;
+					}
+				});
+				ret.push(obj);
+			});
+		}
+	});
+	return ret;
+}
+

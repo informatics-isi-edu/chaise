@@ -194,22 +194,4 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return ret;
 	};
 	
-	this.referenceRows = function referenceRows(table, rows) {
-		var ret = [];
-		$.each(rows, function(i, row) {
-			var obj = {};
-			$.each(row, function(column, val) {
-				if (column == '$$hashKey' || hasAnnotation(table, column, 'dataset')) {
-					return true;
-				} else if (hasAnnotation(table, column, 'url')) {
-					obj['href'] = val;
-				} else {
-					obj['label'] = val;
-				}
-			});
-			ret.push(obj);
-		});
-		return ret;
-	};
-	
 }]);
