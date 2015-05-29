@@ -468,4 +468,8 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     	});
 	};
 	
+	this.checkUncheck = function checkUncheck(value) {
+		$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value] = !$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value];
+	};
+	
 }]);
