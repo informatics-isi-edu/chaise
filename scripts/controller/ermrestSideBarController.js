@@ -79,6 +79,9 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     		$.each($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'], function(key, value) {
     			hasChanged = $scope.FacetsData.facetPreviousValues['values'][key] == null && value ||
     				$scope.FacetsData.facetPreviousValues['values'][key] != null && $scope.FacetsData.facetPreviousValues['values'][key] != value;
+    			if (hasChanged) {
+    				return false;
+    			}
     		});
     		if (hasChanged) {
         		$scope.predicate_checkbox($scope.FacetsData.tag);
