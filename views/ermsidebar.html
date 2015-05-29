@@ -263,9 +263,9 @@
 							ng-hide="sideBar.showFacetValue(FacetsData.tag, value)">
 							<div class="field-enable">
 								<label ng-class="sideBar.getFilterClass(FacetsData.tag, value)" id="filt-css">CSS</label>
-								<div ng-class="sideBar.getFieldSwitchClass(FacetsData.tag, value)" ng-click="sideBar.checkUncheck(value)">
+								<div ng-class="sideBar.getFieldSwitchClass(FacetsData.tag, value)" ng-click="sideBar.checkUncheck($event,value)">
 									<input
-										type="checkbox"
+										type="checkbox" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['values'][value]"
 										class="check"/><b class="b switch"></b>
 								</div>
 								<label ng-class="sideBar.getFieldValueClass(FacetsData.tag, value)">{{value}}</label>

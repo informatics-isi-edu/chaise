@@ -471,8 +471,10 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     	});
 	};
 	
-	this.checkUncheck = function checkUncheck(value) {
-		$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value] = !$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value];
+	this.checkUncheck = function checkUncheck(event, value) {
+		if (!$(event.target).is('input')) {
+			$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value] = !$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value];
+		}
 	};
 	
 }]);
