@@ -81,6 +81,7 @@ var visibleColumns = {
 };
 
 var unsortableColumns = [];
+var suppressError = false;
 
 function isSortable(table, column) {
 	return !unsortableColumns.contains(column);
@@ -182,7 +183,9 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 		}
 		msg += 'URL: ' + url + '\n';
 		document.body.style.cursor = 'default';
-		alert(msg);
+		if (!suppressError) {
+			alert(msg);
+		}
 	}
 }
 
@@ -1499,6 +1502,7 @@ function getGoauth(referrer) {
 
 function successGetGoauth(data, textStatus, jqXHR) {
 	var url = data['redirect_url'];
+	suppressError = true;
 	window.open(url, '_self');
 	//globusWindow = window.open(url, '_self');
 	//checkGlobusWindow();
