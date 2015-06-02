@@ -361,5 +361,17 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return (row != null && Object.keys(row[0]).length > 3) ? getTableLabelName(table) : FacetsService.display(table, column);
 	};
 
+	this.setViewClass = function setViewClass() {
+		var ret = '';
+		if ($scope.FacetsData.view == 'list') {
+			ret = 'md-view-list md-lg';
+		} else if ($scope.FacetsData.view == 'table') {
+			ret = 'md-view-column md-lg';
+		} else if ($scope.FacetsData.view == 'card') {
+			ret = 'md-view-module md-lg';
+		}
+		return ret;
+	};
+	
 }]);
 
