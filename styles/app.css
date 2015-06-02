@@ -408,7 +408,7 @@ input.sidebar-search.form-control {
 	max-width: 380px;
 }
 
-#sidebar .editfilter-container .filter-item .md-chevron-right, #collectionsTree .editfilter-container .filter-item .md-chevron-right {
+#sidebar .editfilter-container .filter-item .md-chevron-right {
 	top: 10px;
 	right: -10px;
 }
