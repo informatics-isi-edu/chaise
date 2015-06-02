@@ -403,12 +403,12 @@ input.sidebar-search.form-control {
    color: #a6a6a6;  
 }
 
-#sidebar .editfilter-container .filter-item {
+#sidebar .editfilter-container .filter-item, #collectionsTree .editfilter-container .filter-item {
 	position: relative;
 	max-width: 380px;
 }
 
-#sidebar .editfilter-container .filter-item .md-chevron-right{
+#sidebar .editfilter-container .filter-item .md-chevron-right, #collectionsTree .editfilter-container .filter-item .md-chevron-right {
 	top: 10px;
 	right: -10px;
 }
