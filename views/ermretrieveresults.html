@@ -46,7 +46,7 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-8">
 					<p>
 						<span class="filter-item-value">
 							<span class="filter-item-field">Search within: </span>&nbsp;
@@ -54,15 +54,20 @@
 						</span>
 					</p>
 				</div>
+				<div class="col-md-4">
+					<div class="pull-right">
+   						<a href="/help/using-the-data-browser/">Using the Data Browser</a> | <a href="http://goo.gl/forms/f30sfheh4H">Send us your feedback</a>
+					</div>
+				</div>
 			</div>
 			<div class="row">
 				<div id="filter" class="col-md-12">
 					<div class="filter-button">
-						<button id="filterButton" type="button" title="Click to apply filters to your data" class="btn btn-default btn-filter sidebar-toggle" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);"><i class="md-filter-list md-lg"></i></button>
+						<button id="filterButton" type="button" title="Click to apply filters to your data" class="btn btn-default btn-filter sidebar-toggle" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);"><i class="md-filter-list md-lg"></i><br/><div class="filter-lbl">Filter</div></button>
 					</div>
 					<div class="filter-container">
 						<div ng-class="facetResults.setFilterClass()">
-							Click <i class="md-filter-list"></i> on the right to apply filters to your data.
+							Click <strong>Filter</strong> to refine your results by various fields <i class="glyphicon glyphicon-chevron-right"></i>
 						</div>
 		                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
 		                    <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
