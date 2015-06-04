@@ -374,5 +374,18 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return ret;
 	};
 	
+	this.isUrl = function isUrl(table, column) {
+		return hasAnnotation(table, column, 'url');
+	};
+	
+	this.urlLink = function urlLink(table, column, value) {
+		var ret = value;
+		var urlPattern = getUrlPattern(table, column, 'url_pattern');
+		if (urlPattern != null) {
+			ret = urlPattern.replace('{value}', value);
+		}
+		return ret;
+	};
+	
 }]);
 

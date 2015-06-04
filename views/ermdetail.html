@@ -15,7 +15,7 @@
 								<td class="key">{{facetDetail.display(FacetsData.table,name)}}:</td>
 								<td class="value">
 									<span ng-if="facetDetail.isUrl(FacetsData.table,name)">
-										<a ng-href="{{FacetsData.entryRow[name]}}">
+										<a ng-href="{{facetDetail.urlLink(FacetsData.table,name,FacetsData.entryRow[name])}}">
 											{{FacetsData.entryRow[name]}}
 										</a>
 									</span>

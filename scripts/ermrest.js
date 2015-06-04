@@ -1782,6 +1782,25 @@ function hasAnnotation(table_name, column_name, annotation) {
 	return ret;
 }
 
+function getUrlPattern(table_name, column_name, annotation) {
+	var ret = null;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name']) {
+			var column_definitions = table['column_definitions'];
+			$.each(column_definitions, function(i, col) {
+				if (col['name'] == column_name) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_MAP_URI] != null && col['annotations'][COLUMNS_MAP_URI][annotation] != null) {
+						ret = col['annotations'][COLUMNS_MAP_URI][annotation];
+					}
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	return ret;
+}
+
 function selectCollection() {
 	$('label', $('#treeDiv')).removeClass('highlighted');
 	var clicked = false;
