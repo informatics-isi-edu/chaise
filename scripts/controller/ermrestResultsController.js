@@ -105,7 +105,8 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	this.itemThumbnail = function itemThumbnail(row) {
 		var ret = getEntryThumbnail(row);
 		if (ret == null) {
-			ret = getAssociationThumbnail($scope.FacetsData.table, row);
+			//ret = getAssociationThumbnail($scope.FacetsData.table, row);
+			ret = getReferenceThumbnail($scope.FacetsData.table, row);
 		}
 		return ret;
 	};

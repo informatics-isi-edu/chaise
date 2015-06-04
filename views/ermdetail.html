@@ -144,7 +144,7 @@
 							</div>
 						</div>
 						
-                        <h3 ng-show="FacetsData.tiles.length>0">Images:</h3>
+                        <h3 ng-show="FacetsData.tiles.length>0">2D Images:</h3>
                         <table>
                             <tr ng-repeat="values in FacetsData.tiles">
                                 <td ng-repeat="tile in values track by $index" class="tiles">
@@ -155,7 +155,7 @@
 
                              </tr>
                         </table>
-                        <h3 ng-show="FacetsData.viewer3dFile.length>0">Previews:</h3>
+                        <h3 ng-show="FacetsData.viewer3dFile.length>0">Preview 3D Images:</h3>
                         <table ng-if="FacetsData.viewer3dFile.length>0" class="files">
                             <tr>
                                 <th ng-class="facetDetail.setPreviewClass()">Preview</th>

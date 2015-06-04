@@ -2097,6 +2097,48 @@ function getAssociationThumbnail(table_name, row) {
 	return ret;
 }
 
+var trace=false;
+function getReferenceThumbnail(table_name, row) {
+	var ret = null;
+	var predicate = [];
+	if (PRIMARY_KEY != null) {
+		$.each(PRIMARY_KEY, function(i, key) {
+			predicate.push(encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(row[key]));
+		});
+	}
+	getReferenceThumbnailTable(table_name);
+	var fileTable = getReferenceThumbnailTable(table_name);
+	if (fileTable != null) {
+		var thumbnailPredicate = [];
+		thumbnailPredicate.push(ERMREST_DATA_HOME);
+		thumbnailPredicate.push('entity');
+		thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table_name));
+		thumbnailPredicate.push(predicate.join('&'));
+		thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
+		var url = thumbnailPredicate.join('/') + '?limit=1';
+		trace = true;
+		var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+		ret = data.length == 0 ? null : data[0]['uri'];
+	}
+	return ret;
+}
+
+function getReferenceThumbnailTable(table_name) {
+	var ret = null;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table["table_name"] == table_name) {
+			$.each(table['foreign_keys'], function(i, fk) {
+				if (fk['annotations']['comment'] != null && fk['annotations']['comment'].contains('thumbnail')) {
+					//alert('found fk');
+					ret = fk['referenced_columns'][0]['table_name'];
+					return false;
+				}
+			});
+		}
+	});
+	return ret;
+}
+
 function getTablesBackReferences(table_name, dataset) {
 	var ret = null;
 	$.each(SCHEMA_METADATA, function(i, table) {
