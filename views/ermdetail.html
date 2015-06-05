@@ -52,7 +52,7 @@
 									<ul ng-class="facetDetail.setListClass(data['rows'])">
 										<li ng-if="!facetDetail.isMultiAttribute(data['table'],name,value)" ng-repeat="value in data['rows']">
 											<span ng-if="facetDetail.isAttribute(data['table'],name,value)">{{facetDetail.itemDenormalizedValue(data['table'],value,name,value[name])}}</span>
-											<span ng-if="facetDetail.isUrl(data['table'],name)"><a ng-href="{{value[name]}}">{{value[name]}}</a></span>
+											<span ng-if="facetDetail.isUrl(data['table'],name)"><a ng-href="{{facetDetail.urlLink(data['table'],name,value[name])}}">{{value[name]}}</a></span>
 										</li>
 									</ul>
 								</td>
@@ -71,8 +71,7 @@
 									<tbody>
 										<tr ng-repeat="value in data['rows']">
 											<td class="multiple_values" ng-if="facetDetail.isAssociationAttribute(data['table'], column)" ng-repeat="(column,val) in value">
-												<span ng-if="facetDetail.isUrl(data['table'],column)"><a ng-href="{{val}}">{{val}}</a></span>
-												<span ng-if="facetDetail.isGeoGDS(data['table'],column) || facetDetail.isGeoGSE(data['table'],column)"><a ng-href="{{facetDetail.geoValue(data['table'],value,column)}}">{{val}}</a></span>
+												<span ng-if="facetDetail.isUrl(data['table'],column)"><a ng-href="{{facetDetail.urlLink(data['table'],column,val)}}">{{val}}</a></span>
 												<span ng-if="facetDetail.isCommonAttribute(data['table'],column)">{{val}}</span>
 											</td>
 										</tr>
@@ -105,7 +104,7 @@
 										<td class="value">
 											<table>
 												<tr ng-if="facetDetail.isUrl(detail,name)">
-													<td><a ng-href="{{val}}">{{val}}</a></td>
+													<td><a ng-href="{{facetDetail.urlLink(detail,name,val)}}">{{val}}</a></td>
 												</tr>
 												<tr ng-if="!facetDetail.isUrl(detail,name)">
 													<td>{{val}}</td>

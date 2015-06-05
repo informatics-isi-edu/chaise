@@ -39,10 +39,6 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		window.open(url, '_blank');
 	};
 	
-	this.geoValue = function geoValue(table, row, column) {
-		return getGeoValue(table, row, column);
-	};
-
 	this.html = function html(table, column, data) {
 		return FacetsService.html(table, column, data);
 	};
@@ -57,8 +53,7 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 
 	this.isAttribute = function isAttribute(table, column, row) {
 		return Object.keys(row).length == 3 && !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && 
-			!hasAnnotation(table, column, 'preview') && !hasAnnotation(table, column, 'download') && 
-			!hasAnnotation(table, column, 'geo_gds') && !hasAnnotation(table, column, 'geo_gse');
+			!hasAnnotation(table, column, 'preview') && !hasAnnotation(table, column, 'download');
 	};
 	
 	this.isMultiAttribute = function isMultiAttribute(table, column, row) {
@@ -67,14 +62,6 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 	
 	this.isDownload = function isDownload(table, column) {
 		return hasAnnotation(table, column, 'file');
-	};
-
-	this.isGeoGDS = function isGeoGDS(table, column) {
-		return hasAnnotation(table, column, 'geo_gds');
-	};
-
-	this.isGeoGSE = function isGeoGSE(table, column) {
-		return hasAnnotation(table, column, 'geo_gse');
 	};
 
 	this.isHTML = function isHTML(table, column) {
@@ -176,8 +163,7 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 	
 	this.isCommonAttribute = function isCommonAttribute(table, column) {
 		return !hasAnnotation(table, column, 'dataset') && !hasAnnotation(table, column, 'image') && !hasAnnotation(table, column, 'preview') &&
-                        !hasAnnotation(table, column, 'download') && !hasAnnotation(table, column, 'url') &&
-                        !hasAnnotation(table, column, 'geo_gds') && !hasAnnotation(table, column, 'geo_gse');
+                        !hasAnnotation(table, column, 'download') && !hasAnnotation(table, column, 'url');
 	};
 	
 	this.isMultipleAttribute = function isMultipleAttribute(row) {
