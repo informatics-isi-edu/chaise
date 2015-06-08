@@ -235,8 +235,8 @@
 						<div class="col-md-12">
 							<table class="col-md-12 table table-condensed table-responsive table-hover table-bordered" id="results-table-view">
 								<thead>
-									<tr class="active">
-										<th ng-if="facetResults.itemThumbnail(FacetsData.ermrestData[0])!=null" class="col-md-2">
+									<tr class="active" ng-init="thumbnail_name=facetResults.itemThumbnail(FacetsData.ermrestData[0])">
+										<th ng-if="thumbnail_name!=null" class="col-md-2">
 											<span>Thumbnail</span>
 										</th>
 										<th ng-if="facetResults.titleName()!=null" class="col-md-2">{{facetResults.display(FacetsData.table,facetResults.titleName())}}
@@ -246,10 +246,10 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr ng-repeat="row in FacetsData.ermrestData">
-										<td ng-if="facetResults.itemThumbnail(row)!=null" class="col-md-2">
+									<tr ng-repeat="row in FacetsData.ermrestData" ng-init="thumbnail=facetResults.itemThumbnail(row)">
+										<td ng-if="thumbnail!=null" class="col-md-2">
 											<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
-												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{facetResults.itemThumbnail(row)}}">
+												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 											</a>
 										</td>
 										<td ng-if="facetResults.titleName()!=null" class="col-md-2 results-title">
