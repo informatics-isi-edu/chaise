@@ -167,17 +167,17 @@
 	      					<i ng-class="facetResults.setViewClass()" aria-hidden="true"></i>
 	    				</button>
 					    <ul class="dropdown-menu" role="menu">
-					      <li>
+					      <li ng-hide="FacetsData.view=='table'">
 					      	<a href="#" ng-click="facetResults.selectView($event, 'table');">
 					      		<i class="md-view-column md-lg" aria-hidden="true"></i> Table View
 					      	</a>
 					      </li>
-					      <li>
+					      <li ng-hide="FacetsData.view=='list'">
 					      	<a href="#" ng-click="facetResults.selectView($event, 'list');">
 					      		<i class="md-view-list md-lg" aria-hidden="true"></i> List View
 					      	</a>
 					      </li>
-					      <li>
+					      <li ng-hide="FacetsData.view=='card'">
 					      	<a href="#" ng-click="facetResults.selectView($event, 'card');">
 					      		<i class="md-view-module md-lg" aria-hidden="true"></i> Card View
 					      	</a>
