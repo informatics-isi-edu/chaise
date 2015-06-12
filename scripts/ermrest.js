@@ -1681,7 +1681,7 @@ function getQueryPredicate(options, table) {
 			ret = 'A:=' + ret;
 		} else {
 			ret = options['entityPredicates'].slice();
-			ret[ret.length-1] = 'A:=' + encodeSafeURIComponent(ret[ret.length-1]);
+			ret[ret.length-1] = 'A:=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(ret[ret.length-1]);
 			ret = ret.join('/');
 		}
 	} else {
@@ -1710,7 +1710,10 @@ function updateTreeCount(data, entityPredicates) {
 			resetTreeCount(node);
 		}
 	});
-	var predicates = entityPredicates.slice();
+	var predicates = [];
+	$.each(entityPredicates, function(i, predicate) {
+		predicates.push((predicate.indexOf(':') < 0 && predicate.indexOf('/') < 0) ? encodeSafeURIComponent(SCHEMA) + ':' + predicate : predicate);
+	});
 	var index = entityPredicates.length-1;
 	var alertObject = {'display': true};
 	while (data != null) {
