@@ -81,7 +81,7 @@ var visibleColumns = {
 };
 
 var unsortableColumns = [];
-var suppressError = false;
+var suppressError = true;
 
 function isSortable(table, column) {
 	return !unsortableColumns.contains(column);
