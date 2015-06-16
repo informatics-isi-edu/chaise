@@ -95,7 +95,7 @@
 							</div>
 						</div>
 						<div ng-if="facetDetail.isNested(detail, values)" ng-repeat="(detail, values) in FacetsData.denormalizedView">
-							<div ng-repeat="value in values">
+							<div ng-repeat="value in values" ng-show="facetDetail.hasValues(value)">
 								<hr>
 								<h4>{{facetDetail.displayTable(detail)}}</h4>
 								<table class="dataset">

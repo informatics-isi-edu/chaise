@@ -183,7 +183,7 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 		}
 		msg += 'URL: ' + url + '\n';
 		document.body.style.cursor = 'default';
-		if (!suppressError || jqXHR.status!=0) {
+		if (!suppressError) {
 			alert(msg);
 		}
 	}

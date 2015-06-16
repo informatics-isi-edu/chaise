@@ -189,4 +189,15 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 		return ret;
 	};
 	
+	this.hasValues = function hasValues(value) {
+		var ret = false;
+		$.each(value, function(key,val) {
+			if (key != '$$hashKey') {
+				ret = true;
+				return false;
+			}
+		});
+		return ret;
+	}
+	
 }]);

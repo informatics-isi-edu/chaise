@@ -369,17 +369,19 @@ function getViewer3d(datasetFiles) {
         var size = datasetFiles['size'];
         var viewer_url = datasetFiles['viewer_url'];
 	var ret = [];
-	$.each(data, function(i, file) {
-		var tr = [];
-		//tr.push(viewer_url + '?url=' + file[uri]);
-		tr.push(file[uri]);
-		tr.push(file[name]);
-		tr.push(file[size]);
-		tr.push(preview_url + '?url=' + file[preview]);
-		tr.push(enlarge_url + '?url=' + file[preview]);
-		tr.push(file[preview]);
-		ret.push(tr);
-	});
+	if (data != null) {
+		$.each(data, function(i, file) {
+			var tr = [];
+			//tr.push(viewer_url + '?url=' + file[uri]);
+			tr.push(file[uri]);
+			tr.push(file[name]);
+			tr.push(file[size]);
+			tr.push(preview_url + '?url=' + file[preview]);
+			tr.push(enlarge_url + '?url=' + file[preview]);
+			tr.push(file[preview]);
+			ret.push(tr);
+		});
+	}
 	return ret;
 }
 
