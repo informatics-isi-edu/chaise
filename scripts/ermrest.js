@@ -652,11 +652,14 @@ function initModels(options, successCallback) {
 	var colsDescr = options['colsDescr'][options['table']];
 	var colsGroup = options['colsGroup'][options['table']];
 	var topN = [];
+	var j = 0;
 	$.each(options['score'], function(i,col) {
-		if (i < 10) {
-			topN.push(col['name']);
-		} else {
-			return false;
+		if (!hasAnnotation(options['table'], col['name'], 'hidden') && !hasAnnotation(options['table'], col['name'], 'thumbnail')) {
+			if (j++ < 10) {
+				topN.push(col['name']);
+			} else {
+				return false;
+			}
 		}
 	});
 	var sentRequests = false;
