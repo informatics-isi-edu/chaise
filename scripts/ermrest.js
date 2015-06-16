@@ -1551,9 +1551,10 @@ function setTablesBackReferences() {
 		catalog_back_references[schema] = {};
 		var tables = [];
 		$.each(metadata, function(i, table) {
+			var isNested = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null && table['annotations'][TABLES_LIST_URI].contains('nested');
 			var exclude = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null && 
 			(table['annotations'][TABLES_LIST_URI].contains('exclude') || table['annotations'][TABLES_LIST_URI].contains('association'));
-			if (!exclude) {
+			if (isNested || !exclude) {
 				tables.push(table['table_name']);
 			}
 		});
