@@ -1664,14 +1664,18 @@ function getDenormalizedValues(table, url, result) {
 		$.each(back_references[table], function(i, key) {
 			var keyUrl = url + '/' + key;
 			getDenormalizedValues(key, keyUrl, result);
-			result[key] = ERMREST.fetch(keyUrl, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-			$.each(result[key], function(i, row) {
+			var data = ERMREST.fetch(keyUrl, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+			$.each(data, function(i, row) {
 				$.each(row, function(name, value) {
 					if (value == null || value === '' || hasAnnotation(key, name, 'hidden')) {
-						delete result[key][i][name];
+						delete data[i][name];
 					}
 				});
 			});
+			if (result[key] == null) {
+				result[key] = [];
+			}
+			result[key] = result[key].concat(data);
 		});
 	}
 }
