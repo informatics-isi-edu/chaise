@@ -37,10 +37,10 @@ var TABLES_MAP_URI = 'description';
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
 var viewer3dFileTypes = ['image/x.nifti'];
 
-var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4',
+var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4', 'int2',
 		'smallint', 'float8' ];
 
-var psqlText = [ 'date', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone',
+var psqlText = [ 'date', 'timestamp', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone',
                  'character', 'character varying', 'text' ];
 
 var visibleColumns = {
