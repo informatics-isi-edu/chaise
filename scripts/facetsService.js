@@ -1,4 +1,4 @@
-	//'use strict';
+//'use strict';
 
 /* Service Module */
 
@@ -390,8 +390,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 						chiclet['type'] = 'date';
 						chiclet['min'] = FacetsData.box[facet['table']][facet['name']]['min'];
 						chiclet['max'] = FacetsData.box[facet['table']][facet['name']]['max'];
-					}
-					else if (that.if_type(facet, 'text')) {
+					} else if (that.if_type(facet, 'text')) {
 						chiclet['type'] = 'text';
 						chiclet['value'] = FacetsData.box[facet['table']][facet['name']]['value'];
 					} else if (that.if_type(facet, 'enum')) {

@@ -7,11 +7,6 @@ var ermSideBarController = angular.module('ermSideBarController', ['facetsModel'
 //angular.module('ermrestApp').controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsData', 'FacetsService',
 ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout', 'FacetsData', 'FacetsService', 'numberFilter',
                                                       function($scope, $filter, $timeout, FacetsData, FacetsService, numberFilter) {
-	
-	$scope.FacetsData = FacetsData;
-	$scope.filtersStatus = {};
-	$scope.filtersMatch = {};
-	$scope.selectedCollection = '';
 
 	$scope.translate = function(value)
 	{
@@ -68,7 +63,8 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     			$scope.$broadcast('reCalcViewDimensions');
     		}, 1000);
     	}
-	}
+	};
+
 
     this.sidebarClick = function sidebarClick(event, toggle, done) {
     	event.stopPropagation();
@@ -154,7 +150,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 
 	this.showFacetMatch = function showFacetMatch(facet) {
 		var ret = ($scope.FacetsData.searchFilter.length > 0) && (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']) && 
-			($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+			($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 ||
 					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet) ||
 					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'date' && hasCheckedValues($scope.FacetsData.box, facet));
 		if (ret) {
@@ -288,6 +284,11 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     	});
 		if (!$scope.$$phase) {
 			$scope.$apply();
+		}
+		
+		if ($scope.FacetsData.filter != null) {
+			$scope.FacetsData.filter = null;
+			getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
 		}
 	};
 
@@ -467,7 +468,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	$scope.showSearchFilter = function showSearchFilter(facet) {
 		var ret = false;
 		if ($scope.FacetsData.box[facet['table']][facet['name']] != null) {
-			ret = $scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+			ret = $scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 ||
 				$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet) ||
 				$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'date' && hasCheckedValues($scope.FacetsData.box, facet);
 		}
