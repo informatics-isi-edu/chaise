@@ -1,0 +1,22 @@
+<div name="loginForm" ng-controller="LoginCtrl as loginController">
+  <div ng-show="authnProvider!='goauth'" class="center_fieldset">
+    <br><br>
+    <fieldset>
+      <table>
+        <tbody>
+          <tr><td class="tag"><label for="username">Username:&nbsp;</label><input type="text" id="username" ng-model="username" required></td></tr>
+          <tr><td class="tag"><label for="password">Password:&nbsp;</label><input type="password" id="password" ng-model="password" ng-keyup="loginController.checkLogin($event.keyCode)" required></td></tr>
+          <tr><td class="tag">
+		<button ng-model="cancel" ng-click="loginController.cancelLogin()">Cancel</button>
+		<button ng-model="button" ng-click="loginController.login()" ng-disabled="loginController.disableLoginButton()">Login</button>
+	      </td>
+	  </tr>
+        </tbody>
+      </table>
+    </fieldset>
+  </div>
+  <div ng-show="authnProvider=='goauth'" ng-init="loginController.login()">
+  </div>
+</div>
+
+

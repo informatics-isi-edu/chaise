@@ -1,0 +1,646 @@
+/* Styles for the FB Data app main content - header styles are in appheader.css */
+
+h1 {
+	margin-top: 0;
+	font-size: 1.7em;
+}
+
+#content {
+	padding-bottom: 50px;
+}
+
+label {
+	margin-bottom: 0px;
+	vertical-align: middle;
+}
+/*
+.form-group .glyphicon {
+	vertical-align: middle;
+}
+*/
+.form-horizontal .control-label {
+	padding-top: 0;	
+}
+
+.filtertitle {
+	margin-top: 5px;
+	font-weight: bold;
+}
+
+#dashboard-link p {
+	font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+	font-size: 16px;
+}
+
+#browser-header {
+	margin-bottom: 20px;
+	border-bottom: 1px solid #CCC;
+	color: #333;
+}
+
+#browser-header h1 {
+	font-size: 2.3em;
+	font-weight: normal;
+}
+
+#browser-header .btn-lg {
+	background-color: #F2F2F2;
+	color: #4D4D4D;
+	height: 36px;
+	font-size: 16px;
+	line-height: 1;
+	border-radius: 0;
+}
+/* fix cross browser box model issue */
+#filter .btn, #view-buttons .btn, #views .btn {
+	padding: 0;
+}
+
+/* parent element for the filter button and filter container */
+
+#filter {
+	min-height: 80px;
+	height: 100%;
+	/* float: left; */
+}
+.filter-button {
+	width: 80px;
+	float: right;
+	display: block;
+	min-height: 80px;
+}
+
+.filter-lbl {
+	padding-top: 5px;
+}
+
+.btn-filter {
+	width: 100%;
+	min-height: 80px;
+	height: 100%;
+	border-radius: 0;
+	background-color: #F2F2F2;
+}
+
+.filter-container {
+	display: block; 
+	margin-right: 79px;
+	min-height: 80px; 
+	background-color: #FFF;
+	border: 1px solid #CCC;
+	padding: 5px;
+	position: relative;
+}
+
+.filter-container p {
+	z-index: -10;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 80px;
+}
+
+.filter-bg {
+   	color: #999;
+   	width: 50%;
+  	height: 50%;
+  	overflow: auto;
+  	margin: auto;
+  	position: absolute;
+  	top: 15px; left: 300px; bottom: 0; right: 0;
+
+}
+
+.filter-bg-hide {
+	display: none;
+}
+
+.filter-item {
+	z-index: 100;
+	background-color: #FFF;
+	border: 1px solid #CCC;
+	border-radius: 40px;
+	padding: 5px 10px;
+	overflow: hidden;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	max-width: 300px;
+}
+
+#filter .filter-item, #filters .filter-item {
+	margin-bottom: 5px;
+	display: inline-block;
+}
+
+/*
+.filter-item .glyphicon, .field-toggle .glyphicon {
+	color: #999;
+	font-weight: normal;
+	font-size: .9em;
+}
+*/
+
+a.field-toggle .md-chevron-right {
+	position: absolute;
+	right:0;
+	top:12px;
+	padding-right: 10px;
+}
+
+.filter-item-field {
+	color: #999;
+}
+
+.filter-item-value {
+	font-weight: bold;
+	color: #000;
+	max-width: 180px;
+	height: 30px;
+}
+
+.md-lg {
+	vertical-align: middle;
+}
+
+.md-cancel {
+	color: #fc868d;
+}
+
+#view-buttons .btn-default, #views .btn-default {
+	background-color: #F2F2F2;
+	width: 36px;
+	height: 36px;
+	border-radius: 0;
+}
+/*
+#view-buttons .btn-default .md-2x {
+	line-height: .8;
+}
+*/
+
+#view-buttons .btn-toolbar {
+	-webkit-white-space: nowrap;
+}
+
+#view-buttons .btn-toolbar .btn-group {
+	float: none;
+}
+
+a.filter-link-cancel {
+	display: inline-block;
+	line-height: 1.5em;
+}
+
+#view-buttons .btn-group {
+	display: inline-block;
+}
+
+#view-buttons .btn-group.view-toggle {
+	margin-left: -1px;
+}
+
+#results_tally {
+	padding-top: 1em;
+	padding-bottom: 1em;
+}
+
+#results_tally p {
+	font-style: italic;
+	margin: 8px 0 0;
+}
+
+#results_tally span {
+	font-style:normal;
+}
+
+#results_tally p.btn-label {
+  background: none repeat scroll 0% 0% transparent;
+  margin-right: 10px;
+  font-style: italic;
+}
+
+.badge {
+	background-color: #FFF;
+	border: 1px solid #e5e5e5;
+	color: #333;
+	font-weight: 400;
+}
+
+@-moz-document url-prefix() {
+  fieldset { display: table-cell; }
+}
+
+.title {
+	font-weight: bold;
+}
+
+dl.attribute-group dt {
+	font-weight: normal;
+	color: #999;
+}
+
+dl.attribute-group dt:not(:first-child) {
+	padding-top: 5px;
+}
+
+dl.attribute-group dd {
+	color: #000;
+}
+
+.bottompgr .form-group {
+	text-align: center;
+}
+
+/* Standardize card view */
+
+#results-group .col-md-6 .panel {
+     height: 280px;
+     overflow: hidden;
+}
+
+#resultstable dl.summary-card {
+	padding-top: 15px;
+}
+
+#resultstable dl.summary-card dd.summ-desc {
+     display: block;
+     height: 76px;
+     line-height: 1.4;
+     max-width: 500px;
+     overflow: hidden;
+     text-overflow: ellipsis;
+}
+
+/* Edit filters in sidebar */
+
+.sidebar.open {
+	max-width: 380px;
+	width: 380px;
+}
+
+.sidebar-header {
+	border-bottom: 1px solid #CCC;
+}
+
+.sidebar .btn-default {
+	border-color: #a4a4a4;
+}
+
+.sidebar-header .btn.filter-close, .sidebar-header .btn.sidebar-toggle {
+	padding: 0 10px;
+	border-radius: 0;
+	margin-top: 2px;
+}
+
+.editfilter-container {
+	display: block; 
+	background-color: #F2F2F2;
+	border-bottom: 1px solid #CCC;
+	padding: 5px 10px;
+}
+
+.editfilter-container p {
+	z-index: -10;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 40px;
+}
+
+.editvalue-container {
+	display: block; 
+	padding: 10px;
+}
+
+.sidebar .sidebar-nav li a {
+	height: 30px;
+	line-height: 30px;
+	font-size: .9em;
+}
+
+.sidebar .filter-item .md-chevron-right {
+	position: absolute;
+	right:15px;
+	top:15px;
+	padding-right: 10px;
+}
+
+.sidebar .filter-item a {
+	color: #999;
+	text-decoration: none;
+	display: block;
+}
+
+.sidebar .filter-item-value {
+	max-width: 80px;
+	display: inline;
+}
+
+.editslider-container p {
+	padding: 10px;
+}
+
+#slider, .noUi-base {
+	padding-left: 30px;
+	padding-right: 30px;
+}
+
+.filter-tooltip {
+	display: block;
+	position: absolute;
+	border: 1px solid #D9D9D9;
+	font: 600 12px/12px Arial;
+	border-radius: 3px;
+	background: #fff;
+	top: 43px;
+	padding: 5px;
+	left: -9px;
+	text-align: center;
+	width: 50px;
+}
+
+.noUi-horizontal .noUi-handle {
+	width: 28px;
+	height: 28px;
+	left: -6px;
+	top: -6px;
+}
+
+.search-box .input-group {
+	border: 0;
+}
+
+.sidebar .search-box, .sidebar .field-enable {
+	border-bottom: 2px solid #e5e5e5;
+	padding: 5px 10px;
+}
+
+#editfilter-config .editvalue-container {
+	padding: 0 0 10px 0;
+}
+
+.sidebar .search-box a.btn-default {
+	padding: 0;
+	border: none;
+}
+
+input.sidebar-search.form-control {
+	border: 0;
+	font-size: 1.5em;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+}
+
+.sidebar-search.form-control::-webkit-input-placeholder {
+   color: #a6a6a6;
+}
+
+.sidebar-search.form-control:-moz-placeholder { /* Firefox 18- */
+   color: #a6a6a6;  
+}
+
+.sidebar-search.form-control::-moz-placeholder {  /* Firefox 19+ */
+   color: #a6a6a6;  
+}
+
+.sidebar-search.form-control:-ms-input-placeholder {  
+   color: #a6a6a6;  
+}
+
+#sidebar .editfilter-container .filter-item, #collectionsTree .editfilter-container .filter-item {
+	position: relative;
+	max-width: 380px;
+}
+
+#sidebar .editfilter-container .filter-item .md-chevron-right {
+	top: 10px;
+	right: -10px;
+}
+
+.collectionsSelect .radio {
+	padding-left: 5px;
+}
+
+/* Details page styles */
+
+#datacontent td {
+     padding-bottom: 10px;
+}
+
+#datacontent td.key {
+     color: #999999;
+     font-weight: normal;
+}
+
+#datacontent h1, #datacontent h2, #datacontent h3 {
+     font-size: 1.2em;
+     font-weight: normal;
+}
+
+#datacontent th {
+  color: #999;
+  font-weight: normal;
+}
+
+#datacontent th, #datacontent td {
+  border-color: #999;
+}
+
+.center-block {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn-subtext {
+	font-size: .85em;
+	font-style: italic;
+	text-align: center;
+	padding-top: 5px;
+}
+
+.data-attributes dt, .data-attributes dd {
+    font-size: 14px;
+    line-height: 18px;
+    padding-top: 5px;
+}
+.data-attributes dt {
+    clear: left;
+    float: left;
+    text-align: right;
+    width: 180px;
+}
+.data-attributes dd {
+    margin-bottom: 10px;
+    padding-bottom: 0;
+	margin-left: 200px;
+    word-wrap: break-word;
+}
+
+dt {
+    font-weight: bold;
+}
+dt, dd {
+    line-height: 1.42857;
+}
+
+/* Footer styles */
+
+.footer {
+	width: 100%;
+	height: 70px;
+	background-color: #F5F5F5;
+}
+
+.footer > .container {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.footer-text {
+	margin: 20px 0px;
+}
+
+/* Enable/disable Toggle animations */
+
+.field-enable {
+	font-weight: normal;
+}
+
+#filt-css {
+	display: none;
+}
+
+.truncate {
+	overflow: hidden;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	max-width: 240px;
+}
+
+.toggle, .toggler {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+  position: relative;
+  font-weight: normal;
+}
+
+.toggler {
+  color: #333;
+  transition: .2s;
+  font-size: 14px;
+  width: 250px;
+}
+
+.toggler--is-active {
+  color: #333;
+  font-weight: normal;
+}
+
+.b {
+  display: block;
+}
+
+.toggle {
+  width: 20px;
+  height: 12px;
+  border-radius: 20px;
+  background-color: #2ecc71;
+  overflow: hidden;
+  box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.05);
+  vertical-align: middle;
+}
+
+.toggle.disabled {
+	background-color: #a6a6a6;
+}
+
+.check {
+  position: absolute;
+  display: block;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 6;
+}
+
+.check:checked ~ .switch {
+  right: 2px;
+  left: 37.5%;
+  transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  transition-property: left, right;
+  transition-delay: .08s, 0s;
+}
+
+.switch {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  bottom: 2px;
+  right: 37.5%;
+  background-color: #fff;
+  border-radius: 36px;
+  z-index: 1;
+  transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  transition-property: left, right;
+  transition-delay: 0s, .08s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.detail_text {
+	word-wrap: break-word;
+}
+
+/* Table view styles */
+
+#results-table-view th {
+	font-weight: normal;
+	color: #000;
+}
+
+#results-table-view th, #results-table-view td {
+	text-align: center;
+}
+
+#results-table-view td.results-title {
+	text-align: left;
+	width: 450px;
+	overflow: hidden;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	max-width: 450px;
+}
+
+th.table-more-bt {
+	width: 20px;
+	position: relative;
+}
+
+#results-table-view.table-condensed > thead > tr > th.table-more-bt {
+	padding: 0;
+	border-left: 2px solid #ddd;
+}
+
+.table-more-bt .md-keyboard-arrow-right {
+	width: 20px;
+	margin-left: -7px;
+}
+
+.table-more-bt a {
+	color: #000;
+}
+
+#results-table-view td.top-columns {
+	text-align: left;
+	max-width: 100px;
+	word-wrap: break-word;
+}
+
+/* Temporarily hide features that are not active yet */
+
+#browser-header, #add-filter-btn, #view-buttons, #dashboard-link {
+	display: none;
+}
+

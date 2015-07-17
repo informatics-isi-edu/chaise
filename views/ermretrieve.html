@@ -1,0 +1,21 @@
+<div>
+	<div ng-controller="InitListCtrl as facetInit" id="ajaxSpinnerContainer" class="ng-hide" ng-hide="facetInit.hideSpinner()">
+		<img class="ng-hide" src="images/ajax-loader.gif" id="ajaxSpinnerImage"
+			title="Processing..." alt="Spinner" ng-hide="facetInit.hideSpinner()"
+			class="center" />
+	</div>
+	
+	<div ng-include="'views/ermdetail.html'"></div>
+	<div ng-include="'views/ermsidebar.html'"></div>
+
+	<!-- Row 2: Filters / Search results -->
+	<div id="retrievecontent">
+		<div ng-include="'views/ermretrievefilters.html'"></div>
+		
+		<!-- Search Results -->
+		<div ng-include="'views/ermretrieveresults.html'"></div>
+		<div ng-include="'views/ermready.html'"></div>
+	</div>
+</div>
+		
+
