@@ -726,6 +726,16 @@ function initModels(options, successCallback) {
 		}
 	})
 	
+	if (options.filter != null) {
+		$.each(options.filter, function(table, columns) {
+			$.each(columns, function(column, values) {
+				$.each(values, function(key, value) {
+					options.box[table][column][key] = value;
+				});
+			});
+		});
+	}
+	
 	if (!sentRequests) {
 		successCallback();
 	} else {
@@ -744,7 +754,7 @@ function updateCount(options, successCallback) {
 			box[col]['ready'] = false;
 		});
 		$.each(box, function(col, value) {
-                        var aliases = [];
+            var aliases = [];
 			var predicate = getPredicate(options, col, table, null, aliases);
 			var url = urlPrefix;
 			if (predicate != null && predicate.length > 0) {
@@ -812,7 +822,7 @@ function updateGroups(options, successCallback) {
 	var alertObject = {'display': true};
 	$.each(tables, function(i, table) {
 		$.each(options['colsGroup'][table], function(col, values) {
-                        var aliases = [];
+            var aliases = [];
 			var predicate = getPredicate(options, col, table, null, aliases);
                         var aliasDef = '';
                         if (association_tables_names.contains(table)) {
@@ -895,7 +905,7 @@ function updateSliders(options, successCallback) {
 	$.each(tables, function(i, table) {
 		$.each(options['box'][table], function(col, values) {
 			if (values['floor'] != null) {
-                                var aliases = [];
+                var aliases = [];
 				var predicate = getPredicate(options, values['left'] || values['right'] ? null : col, table, null, aliases);
                                 var aliasDef = '';
                                 if (association_tables_names.contains(table)) {

@@ -59,6 +59,12 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 		$scope.FacetsData.table = '';
 	}
 	
+	if ($location.search()['filter'] != null) {
+		$scope.FacetsData.filter = JSON.parse(decodeURIComponent($location.search()['filter']));
+	} else {
+		$scope.FacetsData.filter = null;
+	}
+	
 	$window.addEventListener('popstate', function(event) {
     	event.stopPropagation();
 		event.preventDefault();

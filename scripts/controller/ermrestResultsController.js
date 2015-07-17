@@ -5,8 +5,8 @@
 var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService']);
 
 //angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
-ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
-                                                      function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
+ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
+                                                      function($scope, $location, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
 	
@@ -385,6 +385,63 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 			ret = urlPattern.replace('{value}', value);
 		}
 		return ret;
+	};
+	
+	this.getBookmark = function getBookmark(event) {
+    	event.preventDefault();
+		var ret = {};
+		$.each($scope.FacetsData.box, function(table,columns) {
+			var colsDescr = $scope.FacetsData['colsDescr'][table];
+			$.each(columns, function(key, value) {
+				if (psqlText.contains(colsDescr[key]['type'])) {
+					if (value['value'] != '') {
+						if (ret[table] == null) {
+							ret[table] = {};
+						}
+						if (ret[table][key] == null) {
+							ret[table][key] = {};
+						}
+						ret[table][key]['value'] = value['value'];
+					}
+				} else if (colsDescr[key]['type'] == 'enum') {
+					if (value['values'] != null) {
+						$.each(value['values'], function(checkbox_key, checkbox_value) {
+							if (checkbox_value) {
+								if (ret[table] == null) {
+									ret[table] = {};
+								}
+								if (ret[table][key] == null) {
+									ret[table][key] = {};
+									ret[table][key]['values'] = {}
+								}
+								ret[table][key]['values'][checkbox_key] = true;
+							}
+						});
+					}
+				} else if (psqlNumeric.contains(colsDescr[key]['type'])) {
+					if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+						if (value['min'] != value['floor'] || value['max'] != value['ceil']) {
+							if (ret[table] == null) {
+								ret[table] = {};
+							}
+							if (ret[table][key] == null) {
+								ret[table][key] = {};
+							}
+							ret[table][key]['min'] = value['min'];
+							ret[table][key]['floor'] = value['floor'];
+							ret[table][key]['max'] = value['max'];
+							ret[table][key]['ceil'] = value['ceil'];
+						}
+					}
+				}
+			});
+		});
+		var filter = encodeSafeURIComponent(JSON.stringify(ret));
+		var len = $location.absUrl().length - $location.url().length;
+		var prefix = $location.absUrl().substr(0,len);
+		var bookmark = prefix + $location.path() + '?schema='+encodeSafeURIComponent(SCHEMA) + '&filter='+filter;
+		alert(bookmark);
+		$window.location = bookmark;
 	};
 	
 }]);

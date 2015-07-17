@@ -256,6 +256,11 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
+		
+		if ($scope.FacetsData.filter != null) {
+			$scope.FacetsData.filter = null;
+			getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
+		}
 	};
 
 	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
