@@ -32,10 +32,7 @@ facetsModel.factory('FacetsData', function() {
 		'facets': [],
 		'facetSelection': false,
 		'files': [],
-<<<<<<< HEAD
-=======
 		'filter': null,
->>>>>>> 876add76822ce3d730dfed4c61cbed870954599b
 		'filterAllText': '',
 		'filterOptions': {
 			filterText: "",

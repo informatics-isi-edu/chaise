@@ -35,12 +35,9 @@
 	                    	<span ng-if="chiclet['type']=='bigint'" class="filter-item-value" ng-attr-title="{{chiclet['min'] | number}} - {{chiclet['max'] | number}}">
 	                    		{{chiclet['min'] | number}} - {{chiclet['max'] | number}}
 	                    	</span>
-<<<<<<< HEAD
 							<span ng-if="chiclet['type']=='date'" class="filter-item-value" ng-attr-title="{{chiclet['min']}} - {{chiclet['max']}}">
-	                    		{{chiclet['min']}} - {{chiclet['max']}}
+	                    		{{chiclet['min']}} to {{chiclet['max']}}
 	                    	</span>
-=======
->>>>>>> 876add76822ce3d730dfed4c61cbed870954599b
 	                    	<span ng-if="chiclet['type']=='text'" class="filter-item-value" ng-attr-title="{{chiclet['value']}}">
 	                    		{{chiclet['value']}}
 	                    	</span>
@@ -62,11 +59,7 @@
 				</div>
 				<div class="col-md-5">
 					<div class="pull-right">
-<<<<<<< HEAD
-   						<a href="/help/using-the-data-browser/">Using the Data Browser</a> | <a href="http://goo.gl/forms/f30sfheh4H">Send us your feedback</a>
-=======
    						<a ng-href="#" ng-click="facetResults.getBookmark($event)">Bookmark</a> | <a href="/help/using-the-data-browser/">Using the Data Browser</a> | <a href="http://goo.gl/forms/f30sfheh4H">Send us your feedback</a>
->>>>>>> 876add76822ce3d730dfed4c61cbed870954599b
 					</div>
 				</div>
 			</div>
@@ -85,12 +78,9 @@
 	                    	<span ng-if="facetResults.if_type(facet, 'bigint')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}">
 	                    		{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}
 	                    	</span>
-<<<<<<< HEAD
 							<span ng-if="facetResults.if_type(facet, 'date')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min']}} - {{FacetsData.box[facet['table']][facet['name']]['max']}}">
-	                    		{{FacetsData.box[facet['table']][facet['name']]['min']}} - {{FacetsData.box[facet['table']][facet['name']]['max']}}
+	                    		{{FacetsData.box[facet['table']][facet['name']]['min']}} to {{FacetsData.box[facet['table']][facet['name']]['max']}}
 	                    	</span>
-=======
->>>>>>> 876add76822ce3d730dfed4c61cbed870954599b
 	                    	<span ng-if="facetResults.if_type(facet, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['value']}}">
 	                    		{{FacetsData.box[facet['table']][facet['name']]['value']}}
 	                    	</span>

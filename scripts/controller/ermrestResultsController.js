@@ -5,13 +5,9 @@
 var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService']);
 
 //angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
-<<<<<<< HEAD
-ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
-                                                      function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
-=======
+
 ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
                                                       function($scope, $location, $window, $timeout, $sce, FacetsData, FacetsService) {
->>>>>>> 876add76822ce3d730dfed4c61cbed870954599b
 
 	$scope.FacetsData = FacetsData;
 	
@@ -391,9 +387,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		}
 		return ret;
 	};
-	
-<<<<<<< HEAD
-=======
+
 	this.getBookmark = function getBookmark(event) {
     	event.preventDefault();
 		var ret = {};
@@ -450,7 +444,5 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		alert(bookmark);
 		$window.location = bookmark;
 	};
-	
->>>>>>> 876add76822ce3d730dfed4c61cbed870954599b
 }]);
 

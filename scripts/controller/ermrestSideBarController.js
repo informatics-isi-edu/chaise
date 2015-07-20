@@ -8,7 +8,11 @@ var ermSideBarController = angular.module('ermSideBarController', ['facetsModel'
 ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout', 'FacetsData', 'FacetsService', 'numberFilter',
                                                       function($scope, $filter, $timeout, FacetsData, FacetsService, numberFilter) {
 
-	$scope.translate = function(value)
+    $scope.FacetsData = FacetsData;
+    $scope.filtersStatus = {};
+    $scope.filtersMatch = {};
+    $scope.selectedCollection = '';
+  	$scope.translate = function(value)
 	{
 	    return numberFilter(value);
 	}
