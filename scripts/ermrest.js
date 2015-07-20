@@ -37,12 +37,12 @@ var TABLES_MAP_URI = 'description';
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
 var viewer3dFileTypes = ['image/x.nifti'];
 
-var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4',
+var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4', 'int2'
 		'smallint', 'float8' ];
 
 var psqlText = [ 'character', 'character varying', 'text' ];
 
-var psqlDate = [ 'date', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone' ];
+var psqlDate = [ 'date', 'timestamp', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone' ];
 
 var visibleColumns = {
 		'dataset1': [
@@ -610,6 +610,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 }
 
 function getErmrestData(options, successCallback, successUpdateModels) {
+	options.progress = true;
 	updateCount(options, successUpdateModels);
 	var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options);
 	var predicate = getPredicate(options, null, null, null, null);
