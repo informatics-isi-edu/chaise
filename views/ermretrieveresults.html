@@ -35,6 +35,9 @@
 	                    	<span ng-if="chiclet['type']=='bigint'" class="filter-item-value" ng-attr-title="{{chiclet['min'] | number}} - {{chiclet['max'] | number}}">
 	                    		{{chiclet['min'] | number}} - {{chiclet['max'] | number}}
 	                    	</span>
+							<span ng-if="chiclet['type']=='date'" class="filter-item-value" ng-attr-title="{{chiclet['min']}} - {{chiclet['max']}}">
+	                    		{{chiclet['min']}} to {{chiclet['max']}}
+	                    	</span>
 	                    	<span ng-if="chiclet['type']=='text'" class="filter-item-value" ng-attr-title="{{chiclet['value']}}">
 	                    		{{chiclet['value']}}
 	                    	</span>
@@ -74,6 +77,9 @@
 		                    <a href="#" ng-click="facetResults.editFacet($event, facet)"><span class="filter-item-field">{{facet['display']}}</span>&nbsp;</a>
 	                    	<span ng-if="facetResults.if_type(facet, 'bigint')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}">
 	                    		{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}
+	                    	</span>
+							<span ng-if="facetResults.if_type(facet, 'date')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min']}} - {{FacetsData.box[facet['table']][facet['name']]['max']}}">
+	                    		{{FacetsData.box[facet['table']][facet['name']]['min']}} to {{FacetsData.box[facet['table']][facet['name']]['max']}}
 	                    	</span>
 	                    	<span ng-if="facetResults.if_type(facet, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['value']}}">
 	                    		{{FacetsData.box[facet['table']][facet['name']]['value']}}

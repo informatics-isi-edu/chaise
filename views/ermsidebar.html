@@ -210,6 +210,9 @@
 	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']}}">
 	                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']}}
 	                    	</span>
+							<span ng-if="sideBar.if_type(FacetsData.tag, 'date')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']}}">
+	                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']}} to {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']}}
+	                    	</span>
 	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="filter-item-value" ng-attr-title="{{sideBar.displayTitle(FacetsData.tag)}}">
 				    			<span ng-repeat="value in sideBar.getFacetValues(FacetsData.tag)">
 				    				<span ng-if="!$first">, </span>
@@ -258,6 +261,17 @@
 						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search Data..." 
 							type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
 							/></li>
+						<li ng-if="sideBar.if_type(FacetsData.tag, 'date')">
+							From:<br>
+							<datepicker date-format="yyyy-MM-dd" date-set="{{defaultMinDate}}" date-min-limit="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']}}" date-max-limit="{{floorDate}}">
+								<input ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']" type="text">
+							</datepicker>
+							<br><br>
+							To:<br>
+							<datepicker date-format="yyyy-MM-dd" date-set="{{defaultMaxDate}}" date-min-limit="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']}}" date-max-limit="{{floorDate}}">
+								<input ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']" type="text">
+							</datepicker>
+						</li>
 						<li ng-if="sideBar.if_type(FacetsData.tag, 'enum')"
 							ng-repeat="value in FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values']"
 							ng-hide="sideBar.showFacetValue(FacetsData.tag, value)">

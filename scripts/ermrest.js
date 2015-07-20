@@ -37,11 +37,12 @@ var TABLES_MAP_URI = 'description';
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
 var viewer3dFileTypes = ['image/x.nifti'];
 
-var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4', 'int2',
+var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4',
 		'smallint', 'float8' ];
 
-var psqlText = [ 'date', 'timestamp', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone',
-                 'character', 'character varying', 'text' ];
+var psqlText = [ 'character', 'character varying', 'text' ];
+
+var psqlDate = [ 'date', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone' ];
 
 var visibleColumns = {
 		'dataset1': [
@@ -554,6 +555,13 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 						tablePredicate.push(encodeSafeURIComponent(key) + '::ciregexp::' + encodeSafeURIComponent(val));
 					}
 				});
+			} else if (psqlDate.contains(colsDescr[key]['type'])) {
+				if (value['left']) {
+					tablePredicate.push(encodeSafeURIComponent(key) + '::geq::' + encodeSafeURIComponent(value['min']));
+				}
+				if (value['right']) {
+					tablePredicate.push(encodeSafeURIComponent(key) + '::leq::' + encodeSafeURIComponent(value['max']));
+				}
 			} else if (colsDescr[key]['type'] == 'enum') {
 				var checkValues = [];
 				$.each(value['values'], function(checkbox_key, checkbox_value) {
@@ -680,6 +688,10 @@ function initModels(options, successCallback) {
 			box[col]['value'] = [];
 		} else if (psqlText.contains(value['type'])) {
 			box[col]['value'] = '';
+		} else if (psqlDate.contains(value['type'])) {
+			box[col]['min'] = box[col]['floor'] = value['min'];
+			box[col]['max'] = box[col]['ceil'] = value['max'];
+			sentRequests = true;
 		} else if (psqlNumeric.contains(value['type'])) {
 			box[col]['min'] = box[col]['floor'] = value['min'];
 			box[col]['max'] = box[col]['ceil'] = value['max'];
@@ -711,6 +723,10 @@ function initModels(options, successCallback) {
 				box[col]['value'] = [];
 			} else if (psqlText.contains(value['type'])) {
 				box[col]['value'] = '';
+			} else if (psqlDate.contains(value['type'])) {
+				box[col]['min'] = box[col]['floor'] = value['min'];
+				box[col]['max'] = box[col]['ceil'] = value['max'];
+				sentRequests = true;
 			} else if (psqlNumeric.contains(value['type'])) {
 				box[col]['min'] = box[col]['floor'] = value['min'];
 				box[col]['max'] = box[col]['ceil'] = value['max'];
@@ -726,7 +742,7 @@ function initModels(options, successCallback) {
 			options['searchFilterValue'][table][topN[i]] = '';
 		}
 	})
-	
+
 	if (options.filter != null) {
 		$.each(options.filter, function(table, columns) {
 			$.each(columns, function(column, values) {
@@ -736,7 +752,7 @@ function initModels(options, successCallback) {
 			});
 		});
 	}
-	
+
 	if (!sentRequests) {
 		successCallback();
 	} else {
@@ -823,7 +839,7 @@ function updateGroups(options, successCallback) {
 	var alertObject = {'display': true};
 	$.each(tables, function(i, table) {
 		$.each(options['colsGroup'][table], function(col, values) {
-            var aliases = [];
+			var aliases = [];
 			var predicate = getPredicate(options, col, table, null, aliases);
                         var aliasDef = '';
                         if (association_tables_names.contains(table)) {
@@ -906,7 +922,7 @@ function updateSliders(options, successCallback) {
 	$.each(tables, function(i, table) {
 		$.each(options['box'][table], function(col, values) {
 			if (values['floor'] != null) {
-                var aliases = [];
+				var aliases = [];
 				var predicate = getPredicate(options, values['left'] || values['right'] ? null : col, table, null, aliases);
                                 var aliasDef = '';
                                 if (association_tables_names.contains(table)) {
@@ -1007,6 +1023,16 @@ function getColumnDescriptions(options, successCallback) {
 				param['entity'] = ret;
 				param['col'] = col;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
+			} else if (psqlDate.contains(obj['type'])) {
+				var param = {};
+				param['options'] = options;
+				param['alert'] = alertObject;
+				var col_name = encodeSafeURIComponent(col);
+				param['successCallback'] = successCallback;
+				param['entity'] = ret;
+				param['col'] = col;
+				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
+				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
 			} else if (psqlNumeric.contains(obj['type'])) {
 				var param = {};
 				param['options'] = options;
@@ -1043,11 +1069,11 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			param['options'] = options;
 			param['alert'] = alertObject;
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
-		} else if (data[0]['cnt_d'] == MULTI_SELECT_LIMIT) {
+		} else if (data[0]['cnt_d'] >= MULTI_SELECT_LIMIT) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
-			entity[col]['type'] = 'select';
+			//entity[col]['type'] = 'select';
 			param['entity'] = entity;
 			param['col'] = col;
 			param['options'] = options;
@@ -1075,6 +1101,10 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 		});
 		entity[col]['values'] = values;
 	} else if (psqlNumeric.contains(entity[col]['type'])) {
+		entity[col]['ready'] = true;
+		entity[col]['min'] = data[0]['min'];
+		entity[col]['max'] = data[0]['max'];
+	} else if (psqlDate.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
 		entity[col]['min'] = data[0]['min'];
 		entity[col]['max'] = data[0]['max'];
@@ -1424,6 +1454,10 @@ function setFacetClass(options, facet, facetClass) {
 	var value = options['box'][facet['table']][facet['name']];
 	if (psqlText.contains(colsDescr[facet['name']]['type'])) {
 		if (value) {
+			cssClass = 'selectedFacet';
+		}
+	} else if (psqlDate.contains(colsDescr[facet['name']]['type'])) {
+		if (value['left'] || value['right']) {
 			cssClass = 'selectedFacet';
 		}
 	} else if (colsDescr[facet['name']]['type'] == 'enum') {
@@ -1961,6 +1995,16 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 				param['col'] = col;
 				param['table'] = table;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
+			} else if (psqlDate.contains(obj['type'])) {
+				var param = {};
+				param['options'] = options;
+				param['alert'] = alertObject;
+				param['successCallback'] = successCallback;
+				param['entity'] = ret;
+				param['col'] = col;
+				param['table'] = table;
+				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options, table) + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
+				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
 			} else if (psqlNumeric.contains(obj['type'])) {
 				var param = {};
 				param['options'] = options;
@@ -1998,7 +2042,7 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 			param['alert'] = alertObject;
 			param['table'] = table;
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
-		} else if (data[0]['cnt_d'] == MULTI_SELECT_LIMIT) {
+		} else if (data[0]['cnt_d'] >= MULTI_SELECT_LIMIT) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
 			param['successCallback'] = successCallback;
@@ -2031,6 +2075,10 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 		});
 		entity[col]['values'] = values;
 	} else if (psqlNumeric.contains(entity[col]['type'])) {
+		entity[col]['ready'] = true;
+		entity[col]['min'] = data[0]['min'];
+		entity[col]['max'] = data[0]['max'];
+	} else if (psqlDate.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
 		entity[col]['min'] = data[0]['min'];
 		entity[col]['max'] = data[0]['max'];

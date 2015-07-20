@@ -5,6 +5,7 @@
 var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService']);
 
 //angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
+
 ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
                                                       function($scope, $location, $window, $timeout, $sce, FacetsData, FacetsService) {
 
@@ -386,7 +387,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		}
 		return ret;
 	};
-	
+
 	this.getBookmark = function getBookmark(event) {
     	event.preventDefault();
 		var ret = {};
@@ -443,6 +444,5 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		alert(bookmark);
 		$window.location = bookmark;
 	};
-	
 }]);
 
