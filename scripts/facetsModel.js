@@ -57,6 +57,7 @@ facetsModel.factory('FacetsData', function() {
 			pageSize: 25,
 			currentPage: 1},
 			'pageRange': [],
+			'progress': false,
 			'ready': false,
 			'score': [],
 			'searchFilter': '',

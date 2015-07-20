@@ -37,12 +37,14 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		if (FacetsData.totalServerItems%FacetsData.pagingOptions.pageSize != 0) {
 			FacetsData.maxPages++;
 		}
+		FacetsData.progress = false;
 	};
 	
 	this.initTable = function () {
 		$('footer').hide();
 		$('#headerSearch').val('');
 		FacetsData.ready = false;
+		FacetsData.progress = false;
 		FacetsData.moreFlag = false;
 		FacetsData.isDetail = false;
 		FacetsData.enableAll = false;
@@ -180,6 +182,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		if (FacetsData.totalServerItems%FacetsData.pagingOptions.pageSize != 0) {
 			FacetsData.maxPages++;
 		}
+		FacetsData.progress = false;
 	};
 	
 	this.successGetMetadata = function (data, textStatus, jqXHR, successGetTableColumns) {
