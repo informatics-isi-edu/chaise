@@ -1239,6 +1239,9 @@ function getTables(tables, options, successCallback) {
 			}
 		});
 	});
+	if (options.table != null && options.table != '') {
+		DEFAULT_TABLE = options.table;
+	}
 	if (DEFAULT_TABLE == null) {
 		DEFAULT_TABLE = rootTables[0];
 	}

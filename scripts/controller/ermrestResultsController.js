@@ -439,7 +439,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		var filter = encodeSafeURIComponent(JSON.stringify(ret));
 		var len = $location.absUrl().length - $location.url().length;
 		var prefix = $location.absUrl().substr(0,len);
-		var bookmark = prefix + $location.path() + '?schema='+encodeSafeURIComponent(SCHEMA) + '&filter='+filter;
+		var bookmark = prefix + $location.path() + '?schema='+encodeSafeURIComponent(SCHEMA) + '&table='+$scope.FacetsData.table + '&filter='+filter;
 		alert(bookmark);
 		$window.location = bookmark;
 	};
