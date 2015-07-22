@@ -152,17 +152,17 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 		} else {
 			var login_url = '#/login';
 			if (CATALOG != null) {
-				url += '?catalog=' + CATALOG;
+				login_url += '?catalog=' + CATALOG;
 			}
 			if (SCHEMA != null) {
-				if (url == '#/login') {
-					url += '?';
+				if (login_url == '#/login') {
+					login_url += '?';
 				} else {
-					url += '&';
+					login_url += '&';
 				}
-				url += 'schema=' + SCHEMA;
+				login_url += 'schema=' + SCHEMA;
 			}
-			window.location = url;
+			window.location = login_url;
 		}
 		break;
 	default:
