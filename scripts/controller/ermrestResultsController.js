@@ -427,9 +427,9 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 							if (ret[table][key] == null) {
 								ret[table][key] = {};
 							}
-							ret[table][key]['min'] = value['min'];
+							ret[table][key]['min'] = ret[table][key]['left'] = value['min'];
 							ret[table][key]['floor'] = value['floor'];
-							ret[table][key]['max'] = value['max'];
+							ret[table][key]['max'] = ret[table][key]['right'] = value['max'];
 							ret[table][key]['ceil'] = value['ceil'];
 						}
 					}
