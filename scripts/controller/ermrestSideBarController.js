@@ -5,35 +5,57 @@
 var ermSideBarController = angular.module('ermSideBarController', ['facetsModel', 'facetsService']);
 
 //angular.module('ermrestApp').controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsData', 'FacetsService',
-ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsData', 'FacetsService', 'numberFilter',
-                                                      function($scope, $timeout, FacetsData, FacetsService, numberFilter) {
-	
-	$scope.FacetsData = FacetsData;
-	$scope.filtersStatus = {};
-	$scope.filtersMatch = {};
-	$scope.selectedCollection = '';
-	
-	$scope.translate = function(value)
+ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout', 'FacetsData', 'FacetsService', 'numberFilter',
+                                                      function($scope, $filter, $timeout, FacetsData, FacetsService, numberFilter) {
+
+    $scope.FacetsData = FacetsData;
+    $scope.filtersStatus = {};
+    $scope.filtersMatch = {};
+    $scope.selectedCollection = '';
+  	$scope.translate = function(value)
 	{
 	    return numberFilter(value);
 	}
-	
+
 	this.slideFilter = function slideFilter(event, toggle, tag) {
 		event.preventDefault();
 		$scope.FacetsData.tag = tag;
 		emptyJSON($scope.FacetsData.facetPreviousValues);
-    	if ($scope.if_type($scope.FacetsData.tag, 'bigint')) {
-    		$scope.FacetsData.facetPreviousValues['min'] = $scope.FacetsData.box[tag['table']][tag['name']]['min'];
-    		$scope.FacetsData.facetPreviousValues['max'] = $scope.FacetsData.box[tag['table']][tag['name']]['max'];
-    	} else if ($scope.if_type($scope.FacetsData.tag, 'text')) {
+		if ($scope.if_type($scope.FacetsData.tag, 'bigint')) {
+			$scope.FacetsData.facetPreviousValues['min'] = $scope.FacetsData.box[tag['table']][tag['name']]['min'];
+			$scope.FacetsData.facetPreviousValues['max'] = $scope.FacetsData.box[tag['table']][tag['name']]['max'];
+		} else if ($scope.if_type($scope.FacetsData.tag, 'date')) {
+			$scope.FacetsData.facetPreviousValues['min'] = $scope.FacetsData.box[tag['table']][tag['name']]['min'];
+			$scope.FacetsData.facetPreviousValues['max'] = $scope.FacetsData.box[tag['table']][tag['name']]['max'];
+
+			// Replaces hyphens with forward slashes in dates so Angular-Datepicker will display default date correctly
+			this.formatDefaultDatepickerDate = function formatDefaultDatepickerDate(date) {
+				return date.replace(/-/g, '/');
+			}
+
+			$scope.defaultMinDate = this.formatDefaultDatepickerDate($scope.FacetsData.box[tag['table']][tag['name']]['min']);
+			$scope.defaultMaxDate = this.formatDefaultDatepickerDate($scope.FacetsData.box[tag['table']][tag['name']]['max']);
+
+			//Offsetting Angular-Datepicker's date-max-limit attr by 2 days so that users can pick the max-limit date itself as well
+			this.adjustMaxDate = function adjustMaxDate(date) {
+				var newDate = new Date(date);
+				newDate = newDate.setDate(newDate.getDate() + 2);
+				newDate = $filter('date')(newDate, 'yyyy-MM-dd');
+				return newDate;
+			}
+
+			$scope.floorDate = this.adjustMaxDate($scope.FacetsData.box[tag['table']][tag['name']]['ceil']);
+
+		} else if ($scope.if_type($scope.FacetsData.tag, 'text')) {
     		$scope.FacetsData.facetPreviousValues['value'] = $scope.FacetsData.box[tag['table']][tag['name']]['value'];
     	} else if ($scope.if_type($scope.FacetsData.tag, 'enum')) {
-    		var values = {};
+			var values = {};
     		$.each($scope.FacetsData.box[tag['table']][tag['name']]['values'], function(key, value) {
     			values[key] = value;
     		});
     		$scope.FacetsData.facetPreviousValues['values'] = values;
     	}
+
 		//alert(JSON.stringify($scope.FacetsData.box[tag['table']][tag['name']], null, 4));
 		//alert(JSON.stringify($scope.FacetsData.facetPreviousValues, null, 4));
     	FacetsService.sidebarClick(toggle);
@@ -46,6 +68,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     		}, 1000);
     	}
 	};
+
 
     this.sidebarClick = function sidebarClick(event, toggle, done) {
     	event.stopPropagation();
@@ -71,10 +94,16 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
         		$scope.delay_slider($scope.FacetsData.tag);
     		}
     	} else if ($scope.if_type($scope.FacetsData.tag, 'text')) {
-    		if ($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['value'] != $scope.FacetsData.facetPreviousValues['value']) {
-        		$scope.delay_predicate($scope.FacetsData.tag, event.keyCode);
-    		}
-    	} else if ($scope.if_type($scope.FacetsData.tag, 'enum')) {
+			if ($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['value'] != $scope.FacetsData.facetPreviousValues['value']) {
+				$scope.delay_predicate($scope.FacetsData.tag, event.keyCode);
+			}
+		} else if ($scope.if_type($scope.FacetsData.tag, 'date')) {
+			if ($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['min'] != $scope.FacetsData.facetPreviousValues['min'] ||
+				$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['max'] != $scope.FacetsData.facetPreviousValues['max'] ||
+				$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['min'] == $scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['max']) {
+				$scope.delay_slider($scope.FacetsData.tag);
+			}
+		} else if ($scope.if_type($scope.FacetsData.tag, 'enum')) {
     		var hasChanged = false;
     		$.each($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'], function(key, value) {
     			hasChanged = $scope.FacetsData.facetPreviousValues['values'][key] == null && value ||
@@ -101,6 +130,9 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     		$scope.FacetsData.box[facet['table']][facet['name']]['max'] = $scope.FacetsData.box[facet['table']][facet['name']]['ceil'];
     	} else if ($scope.if_type(facet, 'text')) {
     		$scope.FacetsData.box[facet['table']][facet['name']]['value'] = '';
+		} else if ($scope.if_type(facet, 'date')) {
+			$scope.FacetsData.box[facet['table']][facet['name']]['min'] = $scope.FacetsData.box[facet['table']][facet['name']]['floor'];
+			$scope.FacetsData.box[facet['table']][facet['name']]['max'] = $scope.FacetsData.box[facet['table']][facet['name']]['ceil'];
     	} else if ($scope.if_type(facet, 'enum')) {
     		var hasChanged = false;
     		$.each($scope.FacetsData.box[facet['table']][facet['name']]['values'], function(key, value) {
@@ -122,8 +154,9 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 
 	this.showFacetMatch = function showFacetMatch(facet) {
 		var ret = ($scope.FacetsData.searchFilter.length > 0) && (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']) && 
-			($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
-					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet));
+			($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 ||
+					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet) ||
+					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'date' && hasCheckedValues($scope.FacetsData.box, facet));
 		if (ret) {
 			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = '';
 			if ($scope.filtersMatch[facet['table']] == null) {
@@ -188,7 +221,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     		} else {
     			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = false;
     		}
-    		if ($scope.if_type(facet, 'enum')) {
+    		if ($scope.if_type(facet, 'enum') || $scope.if_type(facet, 'date')) {
     			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = $scope.FacetsData.searchFilter;
     		}
     	});
@@ -439,8 +472,9 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
 	$scope.showSearchFilter = function showSearchFilter(facet) {
 		var ret = false;
 		if ($scope.FacetsData.box[facet['table']][facet['name']] != null) {
-			ret = $scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
-				$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet);
+			ret = $scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 ||
+				$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet) ||
+				$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'date' && hasCheckedValues($scope.FacetsData.box, facet);
 		}
 		return ret;
 	};
@@ -460,7 +494,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$timeout', 'FacetsDat
     		} else {
     			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = false;
     		}
-    		if ($scope.if_type(facet, 'enum')) {
+    		if ($scope.if_type(facet, 'enum') || $scope.if_type(facet, 'date')) {
     			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = '';
     		}
     	});

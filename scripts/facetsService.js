@@ -211,6 +211,8 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				ret = psqlNumeric.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
 			} else if (facet_type == 'text') {
 				ret = psqlText.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
+			} else if (facet_type == 'date') {
+				ret = psqlDate.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
 			}
 		}
 		return ret;
@@ -387,6 +389,10 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 						chiclet['type'] = 'bigint';
 						chiclet['min'] = FacetsData.box[facet['table']][facet['name']]['min'];
 						chiclet['max'] = FacetsData.box[facet['table']][facet['name']]['max'];
+					} else if (that.if_type(facet, 'date')) {
+						chiclet['type'] = 'date';
+						chiclet['min'] = FacetsData.box[facet['table']][facet['name']]['min'];
+						chiclet['max'] = FacetsData.box[facet['table']][facet['name']]['max'];
 					} else if (that.if_type(facet, 'text')) {
 						chiclet['type'] = 'text';
 						chiclet['value'] = FacetsData.box[facet['table']][facet['name']]['value'];
@@ -428,6 +434,8 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			facet_type = 'bigint';
 		} else if (this.if_type(facet, 'text')) {
 			facet_type = 'text';
+		} else if (this.if_type(facet, 'date')) {
+			facet_type = 'date';
 		} else if (this.if_type(facet, 'enum')) {
 			facet_type = 'enum';
 		}
@@ -443,6 +451,8 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				ret = value['left'] || value['right'];
 			} else if (facet_type == 'text') {
 				ret = value['value'].length > 0;
+			} else if (facet_type == 'date') {
+				ret = value['left'] || value['right'];
 			} else if (facet_type == 'enum') {
 				$.each(value['values'], function(checkbox_key, checkbox_value) {
 					if (checkbox_value) {
