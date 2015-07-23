@@ -14,18 +14,24 @@ system or httpd.
  
 # Installation
 
-To install from the Subversion repository:
+To install from the repository:
 
-  1. From a source directory run:
-     svn co https://svn2.misd.isi.edu/repos/tagfiler/ermrest-ui/trunk ermrest-ui
+1. From a source directory run:
 
-  2. From the source directory run the following command as root:
-     rsync -av --delete --exclude=".*" --exclude="README" ermrest-ui /var/www/html/
+   ```sh
+   git clone https://github.com/informatics-isi-edu/chaise.git
+   ```
+
+2. From the source directory run the following command as root:
+
+   ```sh
+   rsync -av --delete --exclude=".*" --exclude="README.md" chaise /var/www/html/
+   ```
 
 # Accessing the Application
 
-  1. In a browser type the following URL by replacing <hostname> with the one 
-     you have the installation:
+In a browser enter this URL and replace <hostname>:
 
-     http://<hostname>/ermrest-ui
-
+   ```
+   http://<hostname>/chaise/app.html
+   ```
