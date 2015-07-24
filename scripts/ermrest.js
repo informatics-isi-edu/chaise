@@ -44,43 +44,6 @@ var psqlText = [ 'character', 'character varying', 'text' ];
 
 var psqlDate = [ 'date', 'timestamp', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone' ];
 
-var visibleColumns = {
-		'dataset1': [
-		             'id',
-		             'owner',
-		             'title',
-		             'organism',
-		             // 'gender',
-		             'genotype',
-		             'age_stages',
-		             'chromosome'
-		             ],
-         'mouse': [
-                   'id',
-                   'owner',
-                   'title',
-                   'genotype',
-                   'age_stages',
-                   'chromosome'
-                   ],
-	      'human': [
-	                 'id',
-	                 'owner',
-	                 'title',
-	                 //'gender',
-	                 'genotype',
-	                 'age_stages',
-	                 'chromosome'
-	                 ],
-   	      'zebrafish': [
-                 'id',
-                 'owner',
-                 'title',
-                 'genotype',
-                 'age_stages'
-                 ]
-};
-
 var unsortableColumns = [];
 var suppressError = true;
 
@@ -435,8 +398,6 @@ function getTableColumns(options, successCallback) {
 	var columns_definitions = [];
 	var ret = [];
 	if (metadata != null) {
-		var htmlCellTemplate = '<div class="ngCellText" ng-class="col.colIndex()"><span ng-cell-text ng-bind-html="row.getProperty(col.field)"></span></div>';
-		var cellTemplate = '<div class="ngCellText" ng-class="col.colIndex()"><span ng-cell-text>{{row.getProperty(col.field)}}</span></div>';
 		var column_definitions = metadata['column_definitions'];
 		$.each(column_definitions, function(i, col) {
 			if (col['annotations'] != null && col['annotations'][COLUMNS_LIST_URI] != null) {
@@ -483,24 +444,7 @@ function getTableColumns(options, successCallback) {
 			}
 			var col_def = {};
 			col_def['field'] = col['name'];
-			col_def['cellTemplate'] = cellTemplate;
-			col_def['groupable'] = false;
-			/*
-			var b = $('<b>');
-			b.html(col['name']);
-			$('body').append(b);
-			var l = b.width() + 10;
-			col_def['minWidth'] = col_def['width'] = (l > MULTI_SELECT_LIMIT ? l : MULTI_SELECT_LIMIT);
-			 */
-			var visibleTableColumns = visibleColumns[metadata['table_name']];
-			if (visibleTableColumns != null && !visibleTableColumns.contains(col['name'])){
-				col_def['visible'] = false;
-			}
-			if (unsortableColumns.contains(col['name'])){
-				col_def['sortable'] = false;
-			}
 			columns_definitions.push(col_def);
-			//b.remove();
 			var display = getColumnDisplayName(col['name']);
 			if (col['annotations'] != null && col['annotations'][COLUMNS_MAP_URI] != null && col['annotations'][COLUMNS_MAP_URI]['display'] != null) {
 				display = col['annotations'][COLUMNS_MAP_URI]['display'];
