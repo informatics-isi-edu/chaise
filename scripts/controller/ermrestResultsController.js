@@ -419,7 +419,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 							}
 						});
 					}
-				} else if (psqlNumeric.contains(colsDescr[key]['type'])) {
+				} else if (psqlNumeric.contains(colsDescr[key]['type']) || psqlDate.contains(colsDescr[key]['type'])) {
 					if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
 						if (value['min'] != value['floor'] || value['max'] != value['ceil']) {
 							if (ret[table] == null) {
