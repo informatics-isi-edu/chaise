@@ -208,11 +208,11 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		if (facet != null && FacetsData.colsDescr[facet['table']] != null && FacetsData.colsDescr[facet['table']][facet['name']] != null) {
 			ret = (FacetsData.colsDescr[facet['table']][facet['name']]['type'] == facet_type);
 			if (facet_type == 'bigint') {
-				ret = psqlNumeric.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
+				ret = sliderPresentation.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
 			} else if (facet_type == 'text') {
-				ret = psqlText.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
+				ret = searchBoxPresentation.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
 			} else if (facet_type == 'date') {
-				ret = psqlDate.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
+				ret = datepickerPresentation.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
 			}
 		}
 		return ret;

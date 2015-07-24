@@ -37,12 +37,12 @@ var TABLES_MAP_URI = 'description';
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
 var viewer3dFileTypes = ['image/x.nifti'];
 
-var psqlNumeric = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4', 'int2',
+var sliderPresentation = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4', 'int2',
 		'smallint', 'float8' ];
 
-var psqlText = [ 'character', 'character varying', 'text' ];
+var searchBoxPresentation = [ 'character', 'character varying', 'text' ];
 
-var psqlDate = [ 'date', 'timestamp', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone' ];
+var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone' ];
 
 var unsortableColumns = [];
 var suppressError = true;
@@ -492,14 +492,14 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 			if (table == table_name && key == excludeColumn) {
 				return true;
 			}
-			if (psqlText.contains(colsDescr[key]['type'])) {
+			if (searchBoxPresentation.contains(colsDescr[key]['type'])) {
 				value = value['value'].split(' ');
 				$.each(value, function(i, val) {
 					if (val.length > 0) {
 						tablePredicate.push(encodeSafeURIComponent(key) + '::ciregexp::' + encodeSafeURIComponent(val));
 					}
 				});
-			} else if (psqlDate.contains(colsDescr[key]['type'])) {
+			} else if (datepickerPresentation.contains(colsDescr[key]['type'])) {
 				if (value['left']) {
 					tablePredicate.push(encodeSafeURIComponent(key) + '::geq::' + encodeSafeURIComponent(value['min']));
 				}
@@ -526,7 +526,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 				if (selectedValues.length > 0) {
 					tablePredicate.push(selectedValues);
 				}
-			} else if (psqlNumeric.contains(colsDescr[key]['type'])) {
+			} else if (sliderPresentation.contains(colsDescr[key]['type'])) {
 				if (value['left']) {
 					tablePredicate.push(encodeSafeURIComponent(key) + '::geq::' + encodeSafeURIComponent(value['min']));
 				}
@@ -630,13 +630,13 @@ function initModels(options, successCallback) {
 			sentRequests = true;
 		} else if (value['type'] == 'select') {
 			box[col]['value'] = [];
-		} else if (psqlText.contains(value['type'])) {
+		} else if (searchBoxPresentation.contains(value['type'])) {
 			box[col]['value'] = '';
-		} else if (psqlDate.contains(value['type'])) {
+		} else if (datepickerPresentation.contains(value['type'])) {
 			box[col]['min'] = box[col]['floor'] = value['min'];
 			box[col]['max'] = box[col]['ceil'] = value['max'];
 			sentRequests = true;
-		} else if (psqlNumeric.contains(value['type'])) {
+		} else if (sliderPresentation.contains(value['type'])) {
 			box[col]['min'] = box[col]['floor'] = value['min'];
 			box[col]['max'] = box[col]['ceil'] = value['max'];
 			sentRequests = true;
@@ -665,13 +665,13 @@ function initModels(options, successCallback) {
 				sentRequests = true;
 			} else if (value['type'] == 'select') {
 				box[col]['value'] = [];
-			} else if (psqlText.contains(value['type'])) {
+			} else if (searchBoxPresentation.contains(value['type'])) {
 				box[col]['value'] = '';
-			} else if (psqlDate.contains(value['type'])) {
+			} else if (datepickerPresentation.contains(value['type'])) {
 				box[col]['min'] = box[col]['floor'] = value['min'];
 				box[col]['max'] = box[col]['ceil'] = value['max'];
 				sentRequests = true;
-			} else if (psqlNumeric.contains(value['type'])) {
+			} else if (sliderPresentation.contains(value['type'])) {
 				box[col]['min'] = box[col]['floor'] = value['min'];
 				box[col]['max'] = box[col]['ceil'] = value['max'];
 				sentRequests = true;
@@ -958,7 +958,7 @@ function getColumnDescriptions(options, successCallback) {
 		});
 		var alertObject = {'display': true};
 		$.each(ret, function(col, obj) {
-			if (psqlText.contains(obj['type'])) {
+			if (searchBoxPresentation.contains(obj['type'])) {
 				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 				var param = {};
 				param['options'] = options;
@@ -967,7 +967,7 @@ function getColumnDescriptions(options, successCallback) {
 				param['entity'] = ret;
 				param['col'] = col;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
-			} else if (psqlDate.contains(obj['type'])) {
+			} else if (datepickerPresentation.contains(obj['type'])) {
 				var param = {};
 				param['options'] = options;
 				param['alert'] = alertObject;
@@ -977,7 +977,7 @@ function getColumnDescriptions(options, successCallback) {
 				param['col'] = col;
 				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
-			} else if (psqlNumeric.contains(obj['type'])) {
+			} else if (sliderPresentation.contains(obj['type'])) {
 				var param = {};
 				param['options'] = options;
 				param['alert'] = alertObject;
@@ -1002,7 +1002,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var options = param['options'];
 	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
-	if (psqlText.contains(entity[col]['type'])) {
+	if (searchBoxPresentation.contains(entity[col]['type'])) {
 		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
@@ -1044,11 +1044,11 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			}
 		});
 		entity[col]['values'] = values;
-	} else if (psqlNumeric.contains(entity[col]['type'])) {
+	} else if (sliderPresentation.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
 		entity[col]['min'] = data[0]['min'];
 		entity[col]['max'] = data[0]['max'];
-	} else if (psqlDate.contains(entity[col]['type'])) {
+	} else if (datepickerPresentation.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
 		entity[col]['min'] = data[0]['min'];
 		entity[col]['max'] = data[0]['max'];
@@ -1399,11 +1399,11 @@ function setFacetClass(options, facet, facetClass) {
 	var cssClass = '';
 	var colsDescr = options['colsDescr'][facet['table']];
 	var value = options['box'][facet['table']][facet['name']];
-	if (psqlText.contains(colsDescr[facet['name']]['type'])) {
+	if (searchBoxPresentation.contains(colsDescr[facet['name']]['type'])) {
 		if (value) {
 			cssClass = 'selectedFacet';
 		}
-	} else if (psqlDate.contains(colsDescr[facet['name']]['type'])) {
+	} else if (datepickerPresentation.contains(colsDescr[facet['name']]['type'])) {
 		if (value['left'] || value['right']) {
 			cssClass = 'selectedFacet';
 		}
@@ -1419,7 +1419,7 @@ function setFacetClass(options, facet, facetClass) {
 		if (value['value'].length > 0) {
 			cssClass = 'selectedFacet';
 		}
-	} else if (psqlNumeric.contains(colsDescr[facet['name']]['type'])) {
+	} else if (sliderPresentation.contains(colsDescr[facet['name']]['type'])) {
 		if (value['left'] || value['right']) {
 			cssClass = 'selectedFacet';
 		}
@@ -1932,7 +1932,7 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 	});
 	$.each(ret, function(table, value) {
 		$.each(value, function(col, obj) {
-			if (psqlText.contains(obj['type'])) {
+			if (searchBoxPresentation.contains(obj['type'])) {
 				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options, table) + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 				var param = {};
 				param['options'] = options;
@@ -1942,7 +1942,7 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 				param['col'] = col;
 				param['table'] = table;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
-			} else if (psqlDate.contains(obj['type'])) {
+			} else if (datepickerPresentation.contains(obj['type'])) {
 				var param = {};
 				param['options'] = options;
 				param['alert'] = alertObject;
@@ -1952,7 +1952,7 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 				param['table'] = table;
 				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options, table) + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
-			} else if (psqlNumeric.contains(obj['type'])) {
+			} else if (sliderPresentation.contains(obj['type'])) {
 				var param = {};
 				param['options'] = options;
 				param['alert'] = alertObject;
@@ -1977,7 +1977,7 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 	var options = param['options'];
 	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
-	if (psqlText.contains(entity[col]['type'])) {
+	if (searchBoxPresentation.contains(entity[col]['type'])) {
 		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !isTextColumn(table, col)) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
@@ -2021,11 +2021,11 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 			}
 		});
 		entity[col]['values'] = values;
-	} else if (psqlNumeric.contains(entity[col]['type'])) {
+	} else if (sliderPresentation.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
 		entity[col]['min'] = data[0]['min'];
 		entity[col]['max'] = data[0]['max'];
-	} else if (psqlDate.contains(entity[col]['type'])) {
+	} else if (datepickerPresentation.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
 		entity[col]['min'] = data[0]['min'];
 		entity[col]['max'] = data[0]['max'];

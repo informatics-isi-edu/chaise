@@ -394,7 +394,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		$.each($scope.FacetsData.box, function(table,columns) {
 			var colsDescr = $scope.FacetsData['colsDescr'][table];
 			$.each(columns, function(key, value) {
-				if (psqlText.contains(colsDescr[key]['type'])) {
+				if (searchBoxPresentation.contains(colsDescr[key]['type'])) {
 					if (value['value'] != '') {
 						if (ret[table] == null) {
 							ret[table] = {};
@@ -419,7 +419,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 							}
 						});
 					}
-				} else if (psqlNumeric.contains(colsDescr[key]['type']) || psqlDate.contains(colsDescr[key]['type'])) {
+				} else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
 					if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
 						if (value['min'] != value['floor'] || value['max'] != value['ceil']) {
 							if (ret[table] == null) {
