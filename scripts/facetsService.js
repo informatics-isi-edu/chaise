@@ -199,7 +199,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	this.hide = function (facet) {
 		return (FacetsData.narrow[facet['table']][facet['name']] == null || !FacetsData.chooseColumns[facet['table']][facet['name']] || 
 				(FacetsData.box[facet['table']][facet['name']]['facetcount'] == 0 && 
-						(FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'bigint' ||
+						(FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'slider' ||
 								FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && !hasCheckedValues(FacetsData.box, facet))));
 	};
 	
@@ -207,7 +207,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		var ret = false;
 		if (facet != null && FacetsData.colsDescr[facet['table']] != null && FacetsData.colsDescr[facet['table']][facet['name']] != null) {
 			ret = (FacetsData.colsDescr[facet['table']][facet['name']]['type'] == facet_type);
-			if (facet_type == 'bigint') {
+			if (facet_type == 'slider') {
 				ret = sliderPresentation.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
 			} else if (facet_type == 'text') {
 				ret = searchBoxPresentation.contains(FacetsData.colsDescr[facet['table']][facet['name']]['type']);
@@ -385,8 +385,8 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 					}
 					var chiclet = {};
 					chiclet['display'] = that.display(FacetsData.table, facet['name']);
-					if (that.if_type(facet, 'bigint')) {
-						chiclet['type'] = 'bigint';
+					if (that.if_type(facet, 'slider')) {
+						chiclet['type'] = 'slider';
 						chiclet['min'] = FacetsData.box[facet['table']][facet['name']]['min'];
 						chiclet['max'] = FacetsData.box[facet['table']][facet['name']]['max'];
 					} else if (that.if_type(facet, 'date')) {
@@ -430,8 +430,8 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	
 	this.showChiclet = function showChiclet(facet) {
 		var facet_type = null;
-		if (this.if_type(facet, 'bigint')) {
-			facet_type = 'bigint';
+		if (this.if_type(facet, 'slider')) {
+			facet_type = 'slider';
 		} else if (this.if_type(facet, 'text')) {
 			facet_type = 'text';
 		} else if (this.if_type(facet, 'date')) {
@@ -447,7 +447,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		var ret = false;
 		var value = FacetsData.box[facet['table']][facet['name']];
 		if (value != null) {
-			if (facet_type == 'bigint') {
+			if (facet_type == 'slider') {
 				ret = value['left'] || value['right'];
 			} else if (facet_type == 'text') {
 				ret = value['value'].length > 0;

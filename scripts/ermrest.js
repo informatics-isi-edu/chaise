@@ -37,10 +37,10 @@ var TABLES_MAP_URI = 'description';
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
 var viewer3dFileTypes = ['image/x.nifti'];
 
-var sliderPresentation = [ 'bigint', 'double precision', 'integer', 'numeric', 'real', 'int8', 'int4', 'int2',
-		'smallint', 'float8' ];
+var sliderPresentation = [ 'numeric', 'float4', 'int8', 'int4', 'int2',
+		'float8' ];
 
-var searchBoxPresentation = [ 'character', 'character varying', 'text' ];
+var searchBoxPresentation = [ 'character', 'text' ];
 
 var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time without time zone', 'time with time zone', 'timestamp without time zone', 'timestamp with time zone' ];
 

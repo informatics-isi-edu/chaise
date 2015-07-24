@@ -32,7 +32,7 @@
 						</div>
 						<div class="filter-item" ng-repeat="(name,chiclet) in item['chiclets']">
 							<span class="filter-item-field">{{name}}</span>&nbsp;
-	                    	<span ng-if="chiclet['type']=='bigint'" class="filter-item-value" ng-attr-title="{{chiclet['min'] | number}} - {{chiclet['max'] | number}}">
+	                    	<span ng-if="chiclet['type']=='slider'" class="filter-item-value" ng-attr-title="{{chiclet['min'] | number}} - {{chiclet['max'] | number}}">
 	                    		{{chiclet['min'] | number}} - {{chiclet['max'] | number}}
 	                    	</span>
 							<span ng-if="chiclet['type']=='date'" class="filter-item-value" ng-attr-title="{{chiclet['min']}} - {{chiclet['max']}}">
@@ -75,7 +75,7 @@
 		                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
 		                    <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
 		                    <a href="#" ng-click="facetResults.editFacet($event, facet)"><span class="filter-item-field">{{facet['display']}}</span>&nbsp;</a>
-	                    	<span ng-if="facetResults.if_type(facet, 'bigint')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}">
+	                    	<span ng-if="facetResults.if_type(facet, 'slider')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}">
 	                    		{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}
 	                    	</span>
 							<span ng-if="facetResults.if_type(facet, 'date')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min']}} - {{FacetsData.box[facet['table']][facet['name']]['max']}}">

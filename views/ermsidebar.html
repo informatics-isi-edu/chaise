@@ -204,7 +204,7 @@
 	                <div class="filter-item">
 	                    <a href="#" ng-click="sideBar.removeFilter($event, FacetsData.tag);"><i class="md-cancel md-lg"></i>
 	                    <span class="filter-item-field">{{FacetsData.tag['display']}}</span>&nbsp;
-	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'bigint')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}">
+	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'slider')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}">
 	                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}
 	                    	</span>
 	                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']}}">
@@ -252,7 +252,7 @@
 	        <div class="col-md-12">
 	        	<div class="editvalue-container">
 					<ul class="nav filteritems" ng-hide="sideBar.hide(FacetsData.tag)">
-						<li ng-if="sideBar.if_type(FacetsData.tag, 'bigint')"><rzslider
+						<li ng-if="sideBar.if_type(FacetsData.tag, 'slider')"><rzslider
 								rz-slider-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']"
 								rz-slider-high="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']"
 								rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"

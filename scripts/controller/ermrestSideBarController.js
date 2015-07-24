@@ -21,7 +21,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		event.preventDefault();
 		$scope.FacetsData.tag = tag;
 		emptyJSON($scope.FacetsData.facetPreviousValues);
-		if ($scope.if_type($scope.FacetsData.tag, 'bigint')) {
+		if ($scope.if_type($scope.FacetsData.tag, 'slider')) {
 			$scope.FacetsData.facetPreviousValues['min'] = $scope.FacetsData.box[tag['table']][tag['name']]['min'];
 			$scope.FacetsData.facetPreviousValues['max'] = $scope.FacetsData.box[tag['table']][tag['name']]['max'];
 		} else if ($scope.if_type($scope.FacetsData.tag, 'date')) {
@@ -87,7 +87,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     	if (!done) {
     		event.preventDefault();
     	}
-    	if ($scope.if_type($scope.FacetsData.tag, 'bigint')) {
+    	if ($scope.if_type($scope.FacetsData.tag, 'slider')) {
     		if ($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['min'] != $scope.FacetsData.facetPreviousValues['min'] ||
     				$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['max'] != $scope.FacetsData.facetPreviousValues['max'] ||
     				$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['min'] == $scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['max']) {
@@ -125,7 +125,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     this.removeFilter = function removeFilter(event, facet) {
     	//event.stopPropagation();
     	event.preventDefault();
-    	if ($scope.if_type(facet, 'bigint')) {
+    	if ($scope.if_type(facet, 'slider')) {
     		$scope.FacetsData.box[facet['table']][facet['name']]['min'] = $scope.FacetsData.box[facet['table']][facet['name']]['floor'];
     		$scope.FacetsData.box[facet['table']][facet['name']]['max'] = $scope.FacetsData.box[facet['table']][facet['name']]['ceil'];
     	} else if ($scope.if_type(facet, 'text')) {

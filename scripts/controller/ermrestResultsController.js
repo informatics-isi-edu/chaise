@@ -250,8 +250,8 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		$.each($scope.FacetsData.facets, function(i, facet) {
 			if ($scope.FacetsData.colsDescr[facet['table']] != null && $scope.FacetsData.colsDescr[facet['table']][facet['name']] != null) {
 				var facet_type = $scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'];
-				if ($scope.if_type(facet, 'bigint')) {
-					facet_type = 'bigint';
+				if ($scope.if_type(facet, 'slider')) {
+					facet_type = 'slider';
 				} else if ($scope.if_type(facet, 'text')) {
 					facet_type = 'text';
 				}
@@ -272,7 +272,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
     this.removeFilter = function removeFilter(event, facet) {
     	//event.stopPropagation();
     	event.preventDefault();
-    	if ($scope.if_type(facet, 'bigint')) {
+    	if ($scope.if_type(facet, 'slider')) {
     		$scope.FacetsData.box[facet['table']][facet['name']]['min'] = $scope.FacetsData.box[facet['table']][facet['name']]['floor'];
     		$scope.FacetsData.box[facet['table']][facet['name']]['max'] = $scope.FacetsData.box[facet['table']][facet['name']]['ceil'];
     		$scope.delay_slider(facet);
@@ -325,7 +325,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		//event.preventDefault();
 		$scope.FacetsData.tag = tag;
 		emptyJSON($scope.FacetsData.facetPreviousValues);
-    	if ($scope.if_type($scope.FacetsData.tag, 'bigint')) {
+    	if ($scope.if_type($scope.FacetsData.tag, 'slider')) {
     		$scope.FacetsData.facetPreviousValues['min'] = $scope.FacetsData.box[tag['table']][tag['name']]['min'];
     		$scope.FacetsData.facetPreviousValues['max'] = $scope.FacetsData.box[tag['table']][tag['name']]['max'];
     	} else if ($scope.if_type($scope.FacetsData.tag, 'text')) {
