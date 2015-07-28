@@ -1939,14 +1939,17 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 			param['entity'] = ret;
 			param['col'] = col;
 			param['table'] = table;
+			var url = null;
 			if (searchBoxPresentation.contains(obj['type'])) {
-				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options, table) + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
+				url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options, table) + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 			} else if (datepickerPresentation.contains(obj['type']) || sliderPresentation.contains(obj['type'])) {
-				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options, table) + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
+				url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options, table) + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
 			} else {
 				console.log('Type for association column was not found: '+obj['type'])
 			}
-			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
+			if (url != null) {
+				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
+			}
 		});
 	});
 }
@@ -1974,8 +1977,11 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 			entity[col]['type'] = 'select';
 		} else {
 			entity[col]['ready'] = true;
+			url = null;
 		}
-		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
+		if (url != null) {
+			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
+		}
 	} else if (entity[col]['type'] == 'enum' || entity[col]['type'] == 'select') {
 		entity[col]['ready'] = true;
 		var values = [];
@@ -2736,7 +2742,7 @@ function setBookmark(options) {
 						}
 					});
 				}
-			} else if (sliderPresentation.contains(colsDescr[key]['type']) || psqlDate.contains(colsDescr[key]['type'])) {
+			} else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
 				if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
 					if (value['min'] != value['floor'] || value['max'] != value['ceil']) {
 						if (ret[table] == null) {
