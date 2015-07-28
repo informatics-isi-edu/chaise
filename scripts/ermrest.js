@@ -554,6 +554,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 
 function getErmrestData(options, successCallback, successUpdateModels) {
 	options.progress = true;
+	setBookmark(options);
 	updateCount(options, successUpdateModels);
 	var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options);
 	var predicate = getPredicate(options, null, null, null, null);
@@ -2094,7 +2095,6 @@ function getAssociationThumbnail(table_name, row) {
 	return ret;
 }
 
-var trace=false;
 function getReferenceThumbnail(table_name, row) {
 	var ret = null;
 	var predicate = [];
@@ -2113,7 +2113,6 @@ function getReferenceThumbnail(table_name, row) {
 		thumbnailPredicate.push(predicate.join('&'));
 		thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
 		var url = thumbnailPredicate.join('/') + '?limit=1';
-		trace = true;
 		var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
 		ret = data.length == 0 ? null : data[0]['uri'];
 	}
@@ -2707,3 +2706,56 @@ function setAssociationTablesNames(table) {
 	}
 }
 
+function setBookmark(options) {
+	var ret = {};
+	$.each(options.box, function(table,columns) {
+		var colsDescr = options['colsDescr'][table];
+		$.each(columns, function(key, value) {
+			if (searchBoxPresentation.contains(colsDescr[key]['type'])) {
+				if (value['value'] != '') {
+					if (ret[table] == null) {
+						ret[table] = {};
+					}
+					if (ret[table][key] == null) {
+						ret[table][key] = {};
+					}
+					ret[table][key]['value'] = value['value'];
+				}
+			} else if (colsDescr[key]['type'] == 'enum') {
+				if (value['values'] != null) {
+					$.each(value['values'], function(checkbox_key, checkbox_value) {
+						if (checkbox_value) {
+							if (ret[table] == null) {
+								ret[table] = {};
+							}
+							if (ret[table][key] == null) {
+								ret[table][key] = {};
+								ret[table][key]['values'] = {}
+							}
+							ret[table][key]['values'][checkbox_key] = true;
+						}
+					});
+				}
+			} else if (sliderPresentation.contains(colsDescr[key]['type']) || psqlDate.contains(colsDescr[key]['type'])) {
+				if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+					if (value['min'] != value['floor'] || value['max'] != value['ceil']) {
+						if (ret[table] == null) {
+							ret[table] = {};
+						}
+						if (ret[table][key] == null) {
+							ret[table][key] = {};
+						}
+						ret[table][key]['min'] = ret[table][key]['left'] = value['min'];
+						ret[table][key]['floor'] = value['floor'];
+						ret[table][key]['max'] = ret[table][key]['right'] = value['max'];
+						ret[table][key]['ceil'] = value['ceil'];
+					}
+				}
+			}
+		});
+	});
+	var filter = encodeSafeURIComponent(JSON.stringify(ret));
+	var len = options.location.absUrl().length - options.location.url().length;
+	var prefix = options.location.absUrl().substr(0,len);
+	options.bookmark = prefix + options.location.path() + '?schema='+encodeSafeURIComponent(SCHEMA) + '&table='+options.table + '&filter='+filter;
+}

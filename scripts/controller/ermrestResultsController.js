@@ -387,62 +387,10 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		}
 		return ret;
 	};
-
-	this.getBookmark = function getBookmark(event) {
-    	event.preventDefault();
-		var ret = {};
-		$.each($scope.FacetsData.box, function(table,columns) {
-			var colsDescr = $scope.FacetsData['colsDescr'][table];
-			$.each(columns, function(key, value) {
-				if (searchBoxPresentation.contains(colsDescr[key]['type'])) {
-					if (value['value'] != '') {
-						if (ret[table] == null) {
-							ret[table] = {};
-						}
-						if (ret[table][key] == null) {
-							ret[table][key] = {};
-						}
-						ret[table][key]['value'] = value['value'];
-					}
-				} else if (colsDescr[key]['type'] == 'enum') {
-					if (value['values'] != null) {
-						$.each(value['values'], function(checkbox_key, checkbox_value) {
-							if (checkbox_value) {
-								if (ret[table] == null) {
-									ret[table] = {};
-								}
-								if (ret[table][key] == null) {
-									ret[table][key] = {};
-									ret[table][key]['values'] = {}
-								}
-								ret[table][key]['values'][checkbox_key] = true;
-							}
-						});
-					}
-				} else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
-					if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
-						if (value['min'] != value['floor'] || value['max'] != value['ceil']) {
-							if (ret[table] == null) {
-								ret[table] = {};
-							}
-							if (ret[table][key] == null) {
-								ret[table][key] = {};
-							}
-							ret[table][key]['min'] = ret[table][key]['left'] = value['min'];
-							ret[table][key]['floor'] = value['floor'];
-							ret[table][key]['max'] = ret[table][key]['right'] = value['max'];
-							ret[table][key]['ceil'] = value['ceil'];
-						}
-					}
-				}
-			});
-		});
-		var filter = encodeSafeURIComponent(JSON.stringify(ret));
-		var len = $location.absUrl().length - $location.url().length;
-		var prefix = $location.absUrl().substr(0,len);
-		var bookmark = prefix + $location.path() + '?schema='+encodeSafeURIComponent(SCHEMA) + '&table='+$scope.FacetsData.table + '&filter='+filter;
-		alert(bookmark);
-		$window.location = bookmark;
+	
+	this.urlBookmark = function urlBookmark() {
+		return $scope.FacetsData.bookmark;
 	};
+
 }]);
 

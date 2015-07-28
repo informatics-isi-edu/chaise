@@ -8,6 +8,7 @@ var facetsModel = angular.module('facetsModel', []);
 facetsModel.factory('FacetsData', function() {
 	return {
 		'box': {},
+		'bookmark': '#',
 		'chooseColumns': {},
 		'collectionsPredicate': '',
 		'colsDefs': [],
@@ -44,6 +45,7 @@ facetsModel.factory('FacetsData', function() {
 		'level': 0,
 		'linearizeView': {},
 		'isDetail': false,
+		'location': null,
 		'maxPages': 0,
 		'metadata': {},
 		'modalIndex': -1,

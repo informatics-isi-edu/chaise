@@ -65,6 +65,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		FacetsData.detailRows = [];
 		FacetsData.textEntryRow = [];
 		FacetsData.entry3Dview = '';
+		FacetsData.bookmark = '#';
 		FacetsData.entryTitle = '';
 		FacetsData.searchFilter = '';
 		FacetsData.narrowFilter = '';
