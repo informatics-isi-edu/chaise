@@ -78,6 +78,7 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	initApplication();
 	
 	this.hideSpinner = function hideSpinner() {
-		return !$scope.FacetsData.progress;
+		//return !$scope.FacetsData.progress;
+		return true;
 	};
 }]);
