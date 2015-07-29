@@ -36,7 +36,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 	};
 
 	this.canPageForward = function canPageForward() {
-		return $scope.FacetsData.pagingOptions.currentPage < $scope.FacetsData.maxPages;
+		return $scope.FacetsData.ermrestData.length > 0 && $scope.FacetsData.pagingOptions.currentPage < $scope.FacetsData.maxPages;
 	};
 
 	// "m" is the number of columns per row
@@ -391,6 +391,10 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 	this.urlBookmark = function urlBookmark() {
 		return $scope.FacetsData.bookmark;
 	};
+	
+	this.displayRange = function displayRange() {
+		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
+	}
 
 }]);
 

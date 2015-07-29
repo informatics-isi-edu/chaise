@@ -164,7 +164,7 @@
 			
 			<div id="results_tally" class="row">
 				<div class="col-md-10">
-					<p>Displaying results <strong>1-{{FacetsData.ermrestData.length}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
+					<p>Displaying results <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
 				</div>
 				<div class="col-md-2">
 					<div class="btn-group view-toggle pull-right" role="group" id="views">

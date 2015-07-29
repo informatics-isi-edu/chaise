@@ -563,7 +563,8 @@ function getErmrestData(options, successCallback, successUpdateModels) {
 	}
 	updateGroups(options, successUpdateModels);
 	updateSliders(options, successUpdateModels);
-	url += '/$A/cnt:=cnt(*)';
+	var aggregateFunction = (PRIMARY_KEY.length == 1) ? 'cnt_d(' + PRIMARY_KEY[0] + ')' : 'cnt(*)';
+	url += '/$A/cnt:=' + aggregateFunction;
 	var param = {};
 	param['options'] = options;
 	param['successCallback'] = successCallback;
@@ -988,7 +989,7 @@ function getColumnDescriptions(options, successCallback) {
 				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
 			} else {
-				alert('Type not found: '+obj['type'])
+				console.log('Type not found: '+obj['type']);
 			}
 		});
 	} else {
@@ -2131,7 +2132,6 @@ function getReferenceThumbnailTable(table_name) {
 		if (table["table_name"] == table_name) {
 			$.each(table['foreign_keys'], function(i, fk) {
 				if (fk['annotations']['comment'] != null && fk['annotations']['comment'].contains('thumbnail')) {
-					//alert('found fk');
 					ret = fk['referenced_columns'][0]['table_name'];
 					return false;
 				}

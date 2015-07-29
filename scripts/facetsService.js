@@ -170,11 +170,11 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	
 	this.successGetErmrestData = function (data, totalItems, page, pageSize) {
 		if (page == 1) {
-			FacetsData.ermrestData = data;
+			FacetsData.ermrestData = (FacetsData.filter == null) ? data : [];
 		} else {
 			FacetsData.ermrestData = FacetsData.ermrestData.concat(data);
 		}
-		FacetsData.totalServerItems = totalItems;
+		FacetsData.totalServerItems = (FacetsData.filter == null) ? totalItems : 0;
 		FacetsData.collectionsPredicate = getCollectionsPredicate(FacetsData.entityPredicates, FacetsData);
 		if (FacetsData.selectedEntity != null) {
 			FacetsData.selectedEntity['count'] = totalItems;
