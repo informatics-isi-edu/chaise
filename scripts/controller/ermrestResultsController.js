@@ -10,6 +10,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
                                                       function($scope, $location, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
+	$('[data-toggle="tooltip"]').tooltip();
 	
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
