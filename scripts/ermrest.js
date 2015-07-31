@@ -37,7 +37,7 @@ var TABLES_MAP_URI = 'description';
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
 var viewer3dFileTypes = ['image/x.nifti'];
 
-var sliderPresentation = [ 'float4', 'int8', 'int4', 'int2', 'float8' ];
+var sliderPresentation = [ 'float4', 'int8', 'int4', 'int2', 'float8', 'serial4', 'serial8' ];
 
 var searchBoxPresentation = [ 'text' ];
 
