@@ -82,7 +82,7 @@ facetsModel.factory('FacetsData', function() {
 			'tiles': [],
 			'totalServerItems': 0,
 			'tree': [],
-			'view': 'list',
+			'view': null,
 			'viewer3dFile': []
 	};
 });

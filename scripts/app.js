@@ -22,6 +22,7 @@ var ermrestApp = angular.module('ermrestApp', [
 ermrestApp.provider('ermrest', function () {
 	var catalog;
 	var authnProvider;
+	var layout;
 	
 	return {
 		setCatalog: function (value) {
@@ -30,10 +31,14 @@ ermrestApp.provider('ermrest', function () {
 		setAuthnProvider: function (value) {
 			authnProvider = value;
 		},
+		setLayout: function (value) {
+			layout = value;
+		},
 		$get: function () {
 			return {
 				'catalog': catalog,
-				'authnProvider': authnProvider
+				'authnProvider': authnProvider,
+				'layout': layout
 			}
 		}
 	}
@@ -43,6 +48,7 @@ ermrestApp.config(['ermrestProvider',
                    function(ermrestProvider) {
 	ermrestProvider.setCatalog(1);
 	ermrestProvider.setAuthnProvider('goauth');
+	ermrestProvider.setLayout('list');
 }]);
 
 ermrestApp.config(['$routeProvider',
