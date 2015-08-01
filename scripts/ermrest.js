@@ -13,7 +13,18 @@ var URL_ESCAPE = new String("~!()'");
 var PRIMARY_KEY = [];
 var uniquenessColumns = [];
 var textColumns = [];
-var display_columns = {};
+
+// initialize here as Angular might need no null values for them while rendering a page too early...
+var display_columns = {
+		'text_columns': [],
+		'file': [],
+		'thumbnail': [],
+		'zoomify': [],
+		'3dview': [],
+		'hidden': [],
+		'url': []		
+};
+
 var back_references = {};
 var association_tables = {};
 var association_tables_names = [];
@@ -372,6 +383,8 @@ function getTableColumns(options, successCallback) {
 	uniquenessColumns = [];
 	textColumns = [];
 	unsortableColumns = [];
+	
+	// reset
 	display_columns = {
 		'text_columns': [],
 		'file': [],
@@ -381,6 +394,7 @@ function getTableColumns(options, successCallback) {
 		'hidden': [],
 		'url': []
 	};
+	
 	PRIMARY_KEY = [];
 	if (metadata['keys'] != null) {
 		var unique_columns = [];

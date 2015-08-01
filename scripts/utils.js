@@ -261,7 +261,7 @@ function getEntrySubtitle(row) {
 }
 
 function getEntryThumbnail(row) {
-	return display_columns['thumbnail'] != null && display_columns['thumbnail'].length > 0 ? row[display_columns['thumbnail'][0]] : null;
+	return display_columns['thumbnail'].length > 0 ? row[display_columns['thumbnail'][0]] : null;
 }
 
 function updatePageTag(direction, currentPage, pageMap, tagPages, maxPages) {
