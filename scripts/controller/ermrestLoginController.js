@@ -21,27 +21,18 @@ ermLoginController.controller('LoginCtrl', ['$scope', '$location', 'ermrest',
 				var index = referrer.indexOf('#/login');
 				referrer = referrer.substring(0, index);
 			}
-			getGoauth(referrer);
+			getGoauth(encodeSafeURIComponent(referrer));
 		} else {
-			if ($location.search()['schema'] != null) {
-				SCHEMA = $location.search()['schema'];
-			} else if (SCHEMA == null) {
-				SCHEMA = 'legacy';
-			}
-			if ($location.search()['catalog'] != null) {
-				CATALOG = $location.search()['catalog'];
-			} else if (CATALOG == null) {
-				CATALOG = 1;
-			}
-			
 			if (authnProvider == 'globusonline') {
 				// nexus
 				var myToken = submitGlobusLogin($scope.username, $scope.password);
 				if (myToken != null) {
-					window.location = '#/retrieve?catalog=' + CATALOG + '&schema=' + SCHEMA;
+					var referrer = $location.search()['referrer'];
+					window.location = referrer;
 				}
 			} else {
-				submitLogin($scope.username, $scope.password);
+				var referrer = $location.search()['referrer'];
+				submitLogin($scope.username, $scope.password, referrer);
 			}
 		}
 	};
