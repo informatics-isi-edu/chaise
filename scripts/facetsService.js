@@ -4,7 +4,6 @@
 
 var facetsService = angular.module('facetsService', ['facetsModel']);
 
-//angular.module('ermrestApp').service('FacetsService', ['$sce', 'FacetsData', function($sce, FacetsData) {
 facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, FacetsData) {
 	this.closeModal = function (event) {
 		FacetsData.spinner[FacetsData.modalIndex] = false;
