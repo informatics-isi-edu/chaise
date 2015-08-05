@@ -2145,7 +2145,6 @@ function getReferenceThumbnail(table_name, row) {
 			predicate.push(encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(row[key]));
 		});
 	}
-	getReferenceThumbnailTable(table_name);
 	var fileTable = getReferenceThumbnailTable(table_name);
 	if (fileTable != null) {
 		var thumbnailPredicate = [];
