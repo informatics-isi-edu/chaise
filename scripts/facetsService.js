@@ -5,10 +5,6 @@
 var facetsService = angular.module('facetsService', ['facetsModel']);
 
 facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, FacetsData) {
-	this.closeModal = function (event) {
-		FacetsData.spinner[FacetsData.modalIndex] = false;
-	};
-	
 	this.display = function (table, column) {
 		return COLUMNS_ALIAS[table] != null ? COLUMNS_ALIAS[table][column] : '';
 	};
@@ -70,8 +66,6 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		FacetsData.narrowFilter = '';
 		FacetsData.entrySubtitle = '';
 		this.initPageRange();
-        FacetsData.spinner = [];
-        FacetsData.modalIndex = -1;
 		clearFacets(FacetsData);
 	};
 	

@@ -57,8 +57,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
             $scope.FacetsData.viewer3dFile = [];
             $scope.FacetsData.externalReferenceRows = [];
 		} else {
-            $scope.FacetsData.modalIndex = index;
-            $scope.FacetsData.spinner[index] = true;
 			$scope.FacetsData.entryRow = row;
 			$scope.FacetsData.detailColumns = getDetailColumns(row);
 			$scope.FacetsData.detailRows = getDetailRows(row, m);
@@ -81,10 +79,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		}
 	};
 	
-    this.closeModal = function closeModal(event) {
-    	FacetsService.closeModal(event);
-	}
-
 	this.delay_search_all = function delay_search_all() {
 		if ($scope.FacetsData.filterSearchAllTimeout != null) {
 			$timeout.cancel($scope.FacetsData.filterSearchAllTimeout);
@@ -185,10 +179,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		return !$scope.FacetsData.isDetail;
 	};
 
-	this.showSpinner = function showSpinner(index) {
-		return $scope.FacetsData.spinner[index] == true;
-	};
-	
 	this.selectView = function selectView(event, view) {
 		event.preventDefault();
 		$scope.FacetsData.view = view;

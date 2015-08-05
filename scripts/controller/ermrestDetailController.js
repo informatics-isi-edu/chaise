@@ -10,10 +10,6 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 	
 	$scope.FacetsData = FacetsData;
 	
-    this.closeModal = function closeModal(event) {
-    	FacetsService.closeModal(event);
-	}
-    
 	this.detailValue = function detailValue(table, column, data) {
 		return hasAnnotation(table, column, 'html') ? '' : data;
 	};

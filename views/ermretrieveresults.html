@@ -1,5 +1,5 @@
 		<!-- Search Results -->
-		<div  id="resultscontent" ng-controller="ResultsListCtrl as facetResults" ng-show="facetResults.showResults()" ng-click="facetResults.closeModal($event);">
+		<div  id="resultscontent" ng-controller="ResultsListCtrl as facetResults" ng-show="facetResults.showResults()">
 			<!-- nested row 20: Dashboard link / Name of saved query / Bookmarks button -->
 			<div id="dashboard-link" class="row">
 				<div class="col-md-12">
@@ -192,13 +192,8 @@
 					</div>
 				</div>
 			</div>
-			<div id="resultstable" class="row" ng-init="FacetsData.spinner=[]" >
+			<div id="resultstable" class="row">
 				<div ng-if="FacetsData.view=='list'" class="col-md-12" ng-repeat="row in FacetsData.ermrestData">
-                    <div ng-init="FacetsData.spinner[$index]=false" class="ng-hide" ng-show="facetResults.showSpinner($index)">
-                            <img src="images/ajax-loader.gif"
-                                    title="Processing..." alt="Spinner" ng-show="facetResults.showSpinner($index)"
-                                    class="center" />
-                    </div>
                     <div ng-if="FacetsData.view=='list'" class="panel panel-default">
                     	<div class="panel-heading">
                     		<input ng-show="false" type="checkbox">
