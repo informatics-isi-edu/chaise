@@ -371,11 +371,18 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 	};
 	
 	this.urlLink = function urlLink(table, column, value) {
-		var ret = value;
-		var urlPattern = getUrlPattern(table, column, 'url_pattern');
-		if (urlPattern != null) {
-			ret = urlPattern.replace('{value}', value);
-		}
+		var ret = [];
+		var values = value.split(',');
+		$.each(values, function(i, val) {
+			var vals = [];
+			vals.push(val);
+			var urlPattern = getUrlPattern(table, column, 'url_pattern');
+			if (urlPattern != null) {
+				val = urlPattern.replace('{value}', val);
+			}
+			vals.push(val);
+			ret.push(vals);
+		});
 		return ret;
 	};
 	

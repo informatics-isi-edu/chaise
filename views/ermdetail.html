@@ -14,10 +14,13 @@
 							<tr ng-repeat="name in FacetsData.detailColumns">
 								<td class="key">{{facetDetail.display(FacetsData.table,name)}}:</td>
 								<td class="value">
-									<span ng-if="facetDetail.isUrl(FacetsData.table,name)">
-										<a ng-href="{{facetDetail.urlLink(FacetsData.table,name,FacetsData.entryRow[name])}}">
-											{{FacetsData.entryRow[name]}}
-										</a>
+									<span ng-if="facetDetail.isUrl(FacetsData.table,name)" ng-init="urlValues=facetDetail.urlLink(FacetsData.table,name,FacetsData.entryRow[name])">
+										<span ng-repeat="urlValue in urlValues track by $index" >
+											<a ng-href="{{urlValue[1]}}">
+												{{urlValue[0]}}
+											</a>
+											<span ng-if="!$first">, </span>
+										</span>
 									</span>
 									<span ng-if="facetDetail.isThumbnail(FacetsData.table,name)">
 										<a ng-href="{{FacetsData.entryRow[name]}}">
@@ -52,7 +55,14 @@
 									<ul ng-class="facetDetail.setListClass(data['rows'])">
 										<li ng-if="!facetDetail.isMultiAttribute(data['table'],name,value)" ng-repeat="value in data['rows']">
 											<span ng-if="facetDetail.isAttribute(data['table'],name,value)">{{facetDetail.itemDenormalizedValue(data['table'],value,name,value[name])}}</span>
-											<span ng-if="facetDetail.isUrl(data['table'],name)"><a ng-href="{{facetDetail.urlLink(data['table'],name,value[name])}}">{{value[name]}}</a></span>
+											<span ng-if="facetDetail.isUrl(data['table'],name)" ng-init="urlValues=facetDetail.urlLink(data['table'],name,value[name])">
+												<span ng-repeat="urlValue in urlValues track by $index" >
+													<a ng-href="{{urlValue[1]}}">
+														{{urlValue[0]}}
+													</a>
+													<span ng-if="!$first">, </span>
+												</span>
+											</span>
 										</li>
 									</ul>
 								</td>
@@ -103,8 +113,15 @@
 										<td class="key">{{facetDetail.display(detail,name)}}:</td>
 										<td class="value">
 											<table>
-												<tr ng-if="facetDetail.isUrl(detail,name)">
-													<td><a ng-href="{{facetDetail.urlLink(detail,name,val)}}">{{val}}</a></td>
+												<tr ng-if="facetDetail.isUrl(detail,name)" ng-init="urlValues=facetDetail.urlLink(detail,name,val)">
+													<td>
+														<span ng-repeat="urlValue in urlValues track by $index" >
+															<a ng-href="{{urlValue[1]}}">
+																{{urlValue[0]}}
+															</a>
+															<span ng-if="!$first">, </span>
+														</span>
+													</td>
 												</tr>
 												<tr ng-if="!facetDetail.isUrl(detail,name)">
 													<td>{{val}}</td>

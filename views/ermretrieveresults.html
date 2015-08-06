@@ -212,10 +212,13 @@
 									<div class="col-md-2" ng-show="values['top_columns'].length>0" ng-repeat="value in values['top_columns']">
 										<dl class="attribute-group" ng-repeat="col in value track by $index" >
 											<dt ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.display(FacetsData.table,col)}}</dt>
-											<dd ng-if="facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">
-												<a ng-href="{{facetResults.urlLink(FacetsData.table,col,row[col])}}">
-													{{row[col]}}
+											<dd ng-if="facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
+											<span ng-repeat="urlValue in urlValues track by $index" >
+												<a ng-href="{{urlValue[1]}}">
+													{{urlValue[0]}}
 												</a>
+												<span ng-if="!$first">, </span>
+											</span>
 											</dd>
 											<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
 										</dl>
@@ -257,10 +260,13 @@
 											<a href="#" ng-click="facetResults.clicker($event, row, 3, $index);"><span class="results-title" ng-bind-html="facetResults.itemTitle(row)"></span></a>
 										</td>
 										<td ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="col-md-2 top-columns">
-											<span ng-if="facetResults.isUrl(FacetsData.table,col)">
-												<a ng-href="{{facetResults.urlLink(FacetsData.table,col,row[col])}}">
-													{{row[col]}}
-												</a>
+											<span ng-if="facetResults.isUrl(FacetsData.table,col)" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
+												<span ng-repeat="urlValue in urlValues track by $index" >
+													<a ng-href="{{urlValue[1]}}">
+														{{urlValue[0]}}
+													</a>
+													<span ng-if="!$first">, </span>
+												</span>
 											</span>
 											<span ng-if="!facetResults.isUrl(FacetsData.table,col)">
 												{{facetResults.html(FacetsData.table,col,row[col])}}
@@ -294,10 +300,13 @@
 											<div class="col-sm-3" ng-show="values['top_columns'].length>0" ng-repeat="value in values['top_columns']">
 												<dl class="attribute-group" ng-repeat="col in value track by $index" >
 													<dt ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.display(FacetsData.table,col)}}</dt>
-													<dd ng-if="facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">
-														<a ng-href="{{facetResults.urlLink(FacetsData.table,col,row[col])}}">
-															{{row[col]}}
-														</a>
+													<dd ng-if="facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
+														<span ng-repeat="urlValue in urlValues track by $index" >
+															<a ng-href="{{urlValue[1]}}">
+																{{urlValue[0]}}
+															</a>
+															<span ng-if="!$first">, </span>
+														</span>
 													</dd>
 													<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
 												</dl>
