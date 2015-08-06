@@ -214,10 +214,10 @@
 											<dt ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.display(FacetsData.table,col)}}</dt>
 											<dd ng-if="facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
 											<span ng-repeat="urlValue in urlValues track by $index" >
+												<span ng-if="!$first">, </span>
 												<a ng-href="{{urlValue[1]}}">
 													{{urlValue[0]}}
 												</a>
-												<span ng-if="!$first">, </span>
 											</span>
 											</dd>
 											<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
@@ -262,10 +262,10 @@
 										<td ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="col-md-2 top-columns">
 											<span ng-if="facetResults.isUrl(FacetsData.table,col)" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
 												<span ng-repeat="urlValue in urlValues track by $index" >
+													<span ng-if="!$first">, </span>
 													<a ng-href="{{urlValue[1]}}">
 														{{urlValue[0]}}
 													</a>
-													<span ng-if="!$first">, </span>
 												</span>
 											</span>
 											<span ng-if="!facetResults.isUrl(FacetsData.table,col)">
@@ -302,10 +302,10 @@
 													<dt ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.display(FacetsData.table,col)}}</dt>
 													<dd ng-if="facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
 														<span ng-repeat="urlValue in urlValues track by $index" >
+															<span ng-if="!$first">, </span>
 															<a ng-href="{{urlValue[1]}}">
 																{{urlValue[0]}}
 															</a>
-															<span ng-if="!$first">, </span>
 														</span>
 													</dd>
 													<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>

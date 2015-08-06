@@ -16,10 +16,10 @@
 								<td class="value">
 									<span ng-if="facetDetail.isUrl(FacetsData.table,name)" ng-init="urlValues=facetDetail.urlLink(FacetsData.table,name,FacetsData.entryRow[name])">
 										<span ng-repeat="urlValue in urlValues track by $index" >
+											<span ng-if="!$first">, </span>
 											<a ng-href="{{urlValue[1]}}">
 												{{urlValue[0]}}
 											</a>
-											<span ng-if="!$first">, </span>
 										</span>
 									</span>
 									<span ng-if="facetDetail.isThumbnail(FacetsData.table,name)">
@@ -57,10 +57,10 @@
 											<span ng-if="facetDetail.isAttribute(data['table'],name,value)">{{facetDetail.itemDenormalizedValue(data['table'],value,name,value[name])}}</span>
 											<span ng-if="facetDetail.isUrl(data['table'],name)" ng-init="urlValues=facetDetail.urlLink(data['table'],name,value[name])">
 												<span ng-repeat="urlValue in urlValues track by $index" >
+													<span ng-if="!$first">, </span>
 													<a ng-href="{{urlValue[1]}}">
 														{{urlValue[0]}}
 													</a>
-													<span ng-if="!$first">, </span>
 												</span>
 											</span>
 										</li>
@@ -81,7 +81,14 @@
 									<tbody>
 										<tr ng-repeat="value in data['rows']">
 											<td class="multiple_values" ng-if="facetDetail.isAssociationAttribute(data['table'], column)" ng-repeat="(column,val) in value">
-												<span ng-if="facetDetail.isUrl(data['table'],column)"><a ng-href="{{facetDetail.urlLink(data['table'],column,val)}}">{{val}}</a></span>
+												<span ng-if="facetDetail.isUrl(data['table'],column)" ng-init="urlValues=facetDetail.urlLink(data['table'],column,val)">
+													<span ng-repeat="urlValue in urlValues track by $index" >
+														<span ng-if="!$first">, </span>
+														<a ng-href="{{urlValue[1]}}">
+															{{urlValue[0]}}
+														</a>
+													</span>
+												</span>
 												<span ng-if="facetDetail.isCommonAttribute(data['table'],column)">{{val}}</span>
 											</td>
 										</tr>
@@ -116,10 +123,10 @@
 												<tr ng-if="facetDetail.isUrl(detail,name)" ng-init="urlValues=facetDetail.urlLink(detail,name,val)">
 													<td>
 														<span ng-repeat="urlValue in urlValues track by $index" >
+															<span ng-if="!$first">, </span>
 															<a ng-href="{{urlValue[1]}}">
 																{{urlValue[0]}}
 															</a>
-															<span ng-if="!$first">, </span>
 														</span>
 													</td>
 												</tr>
