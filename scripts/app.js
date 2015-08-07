@@ -59,7 +59,7 @@ ermrestApp.config(['$routeProvider',
 			//controller: 'LoginCtrl'
 	}).
 	when('/logout', {
-		templateUrl: 'views/ermlogout.html',
+		templateUrl: 'views/ermlogout.html'//,
 		//controller: 'LogoutCtrl'
 	}).
 	when('/retrieve', {
