@@ -1,0 +1,33 @@
+{
+  "name": "chaise",
+  "description": "An adaptive User Interface for ERMrest data sources",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "main": "chaise.js",
+  "scripts": {
+    "build": "make build",
+    "pretest": "make build",
+    "test": "make test",
+    "test:testem": "make testem",
+    "docs": "make doc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/informatics-isi-edu/chaise.git"
+  },
+  "keywords": [
+    "database",
+    "ui"
+  ],
+  "devDependencies": {
+      "bower": "x",
+      "mocha": "x",
+      "chai": "x",
+      "testem": "x",
+      "closurecompiler": "x",
+      "jshint": "x",
+      "jsdoc": "x",
+      "jsdoc-to-markdown": "x"
+  }
+}
