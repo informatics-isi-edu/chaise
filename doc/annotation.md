@@ -9,7 +9,7 @@ It is expected in the future these keys to be renamed to some useful URLs.
 
 The below tables explains the meaning of the possible values for the two keys.
 
-- _comment_ _key_ _values_
+- **_comment_** _key_ _values_
 
 | Value | Meaning |
 |-------|---------|
@@ -23,7 +23,7 @@ The below tables explains the meaning of the possible values for the two keys.
 | preview | The table has a column that is a FOREIGN KEY to a table containing the 3-D image file. The images will be rendered with a 3-D viewer. |
 | reference | The table has columns with external references links. | 
 
-- _description_ _key_ _values_
+- **_description_** _key_ _values_
 
 | Value | Meaning |
 |-------|---------|
@@ -43,7 +43,7 @@ It is expected in the future these keys to be renamed to some useful URLs.
 
 The below tables explains the meaning of the possible values for the two keys.
 
-- _comment_ _key_ _values_
+- **_comment_** _key_ _values_
 
 | Value | Meaning |
 |-------|---------|
@@ -65,9 +65,9 @@ The below tables explains the meaning of the possible values for the two keys.
 | url | The column will be displayed as an URL link. | 
 | viewer | The column represents the value of a 3-D image file. | 
 
-- _description_ _key_ _values_
+- **_description_** _key_ _values_
 
 | Value | Meaning |
 |-------|---------|
 | display | The name with which the column will be displayed. | 
-| url_pattern | The column contains an URL with a pattern. The URL will be build by replacing the pattern with the column value. The pattern is surrounded by the "**{**" and "**}**" characters. Example of url_pattern value: "http://www.ncbi.nlm.nih.gov/pubmed/{value}" | 
+| url_pattern | The column contains an URL with a pattern. The URL will be build by replacing the pattern with the column value. The pattern is surrounded by the "**{**" and "**}**" characters. Example of url_pattern value: ```"http://www.ncbi.nlm.nih.gov/pubmed/{value}"``` | 
