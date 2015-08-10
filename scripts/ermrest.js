@@ -23,7 +23,7 @@ var display_columns = {
 		'zoomify': [],
 		'3dview': [],
 		'hidden': [],
-		'url': []		
+		'url': []
 };
 
 var back_references = {};
@@ -32,6 +32,10 @@ var association_tables_names = [];
 var catalog_association_tables = {};
 var catalog_association_tables_names = {};
 var catalog_back_references = {};
+
+// Set this to the specific deployment (e.g. FaceBase, GPCR, etc.)
+// Used to determine deployment-specific content (e.g. URL for feedback form)
+var DEPLOYMENT_NAME = 'FaceBase';
 
 var SCHEMA_METADATA = [];
 var DEFAULT_TABLE = null;
@@ -379,7 +383,7 @@ function getTableColumns(options, successCallback) {
 	uniquenessColumns = [];
 	textColumns = [];
 	unsortableColumns = [];
-	
+
 	// reset
 	display_columns = {
 		'text_columns': [],
@@ -390,7 +394,7 @@ function getTableColumns(options, successCallback) {
 		'hidden': [],
 		'url': []
 	};
-	
+
 	PRIMARY_KEY = [];
 	if (metadata['keys'] != null) {
 		var unique_columns = [];

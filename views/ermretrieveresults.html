@@ -9,7 +9,7 @@
 					</p>
 				</div>
 			</div>
-			
+
 			<div id="browser-header" class="row">
 				<div class="col-md-10">
 					<h1>This is the name of a saved query <i class="md-bookmark-outline"></i></h1>
@@ -18,7 +18,7 @@
 					<button type="button" class="btn btn-default btn-lg pull-right" >Bookmark Query</button>
 				</div>
 			</div>
-			
+
 			<div id="search-within" class="row" ng-show="true">
 				<div id="filters" ng-repeat="item in FacetsData.tablesStack" class="col-md-10">
 					<div class="filter-button">
@@ -59,7 +59,7 @@
 				</div>
 				<div class="col-md-5">
 					<div class="pull-right">
-   						<a data-toggle="tooltip" data-placement="left" title="This link stores your search results as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}">Bookmark</a> | <a href="/help/using-the-data-browser/">Using the Data Browser</a> | <a href="http://goo.gl/forms/f30sfheh4H">Send us your feedback</a>
+   						<a data-toggle="tooltip" data-placement="left" title="This link stores your search results as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}">Bookmark</a> | <a ng-href="{{helpURL}}">Using the Data Browser</a> | <a ng-href="{{feedbackURL}}">Send us your feedback</a>
 					</div>
 				</div>
 			</div>
@@ -99,7 +99,7 @@
 							<button class="btn btn-default" id="sort-btn" aria-label="Sort" type="button" title="Sort">
 								<i class="md-sort md-lg" aria-hidden="true"></i>
 							</button>
-	
+
 							<button class="btn btn-default" id="settings-btn" aria-label="Settings" type="button" title="Configure settings">
 								<i class="md-settings md-lg" aria-hidden="true"></i>
 							</button>
@@ -112,7 +112,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="row ng-hide" id="searchsort" ng-show="FacetsData.pageNavigation">
 				<form class="form-inline" role="form">
 					<div class="ng-hide" ng-show="FacetsData.pageNavigation" ng-bind-html="FacetsData.collectionsPredicate">
@@ -161,7 +161,7 @@
 					of <strong>{{FacetsData.totalServerItems}}.</strong>
 				</p>
 			</div>
-			
+
 			<div id="results_tally" class="row">
 				<div class="col-md-10">
 					<p>Displaying results <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
@@ -348,5 +348,3 @@
 				</div>
 			</div>
 		</div>
-
-		
