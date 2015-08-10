@@ -70,4 +70,4 @@ The below tables explains the meaning of the possible values for the two keys.
 | Value | Meaning |
 |-------|---------|
 | display | The name with which the column will be displayed. | 
-| url_pattern | The column contains an URL with a pattern. The URL will be build by replacing the pattern with the column value. The pattern is surrounded by the "**{**" and "**}**" characters. Example of url_pattern value: ```"http://www.ncbi.nlm.nih.gov/pubmed/{value}"``` | 
+| url_pattern | The column contains an URL with a pattern. The URL will be build by replacing the **{value}** string from the pattern with the column value. Example of url_pattern value: ```"http://www.ncbi.nlm.nih.gov/pubmed/{value}"``` | 
