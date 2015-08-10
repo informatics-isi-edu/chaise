@@ -1,3 +1,7 @@
+// Set this to the specific deployment (e.g. FaceBase, GPCR, etc.)
+// Used to determine deployment-specific content (e.g. URL for feedback form)
+var deploymentName = 'FaceBase';
+
 var MULTI_SELECT_LIMIT = 1000;
 var AJAX_TIMEOUT = 300000;
 var goauth_cookie = 'globusonline-goauth';
@@ -32,10 +36,6 @@ var association_tables_names = [];
 var catalog_association_tables = {};
 var catalog_association_tables_names = {};
 var catalog_back_references = {};
-
-// Set this to the specific deployment (e.g. FaceBase, GPCR, etc.)
-// Used to determine deployment-specific content (e.g. URL for feedback form)
-var DEPLOYMENT_NAME = 'FaceBase';
 
 var SCHEMA_METADATA = [];
 var DEFAULT_TABLE = null;

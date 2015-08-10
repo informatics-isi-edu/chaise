@@ -12,7 +12,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 	$scope.FacetsData = FacetsData;
 	$('[data-toggle="tooltip"]').tooltip();
 
-  switch (DEPLOYMENT_NAME) {
+  switch (deploymentName) {
     case 'FaceBase':
       $scope.feedbackURL = 'http://goo.gl/forms/f30sfheh4H';
       $scope.helpURL = '/help/using-the-data-browser/';
