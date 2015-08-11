@@ -71,3 +71,19 @@ The below tables explains the meaning of the possible values for the two keys.
 |-------|---------|
 | display | The name with which the column will be displayed. | 
 | url_pattern | The column contains an URL with a pattern. The URL will be build by replacing the **{value}** string from the pattern with the column value. Example of url_pattern value: ```"http://www.ncbi.nlm.nih.gov/pubmed/{value}"``` | 
+
+# Foreign Key Annotations
+
+**Chaise** is using the following current [foreign key annotations](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#foreign-key-annotations):
+
+ - **comment**: contains a JSON array
+
+It is expected in the future that key to be renamed to some useful URL.
+
+The below table explains the meaning of the possible values for the key.
+
+- **_comment_** _key_ _values_
+
+| Value | Meaning |
+|-------|---------|
+| thumbnail | The column of the _from\_table_ is a reference to the column of the _to\_table_. The _to\_table_ table contains thumbnail entities. | 
