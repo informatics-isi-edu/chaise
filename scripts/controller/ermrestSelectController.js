@@ -14,7 +14,7 @@ ermSelectController.controller('SelectCtrl', ['$scope', '$window', '$timeout', '
 	$scope.FacetsData = FacetsData;
 	if (catalogIds.length==0){
 	    $scope.FacetsData.showSelect = false;
-	    $('#sidebar-overlay').removeClass('active');
+	    $('.sidebar-overlay').removeClass('active');
 	}
 
 	for (var i = 0; i < catalogIds.length; i++){
