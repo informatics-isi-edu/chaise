@@ -37,6 +37,8 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	});
 
 
+	$scope.FacetsData = FacetsData;
+
 	if ($location.search()['schema'] != null) {
 		SCHEMA = $location.search()['schema'];
 	} else if (SCHEMA == null) {
@@ -46,10 +48,9 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 		CATALOG = $location.search()['catalog'];
 	} else if (CATALOG == null) {
 		CATALOG = ermrest.catalog;
+	    $scope.FacetsData.showSelect = true;
 	}
 	authnProvider = ermrest.authnProvider;
-	
-	$scope.FacetsData = FacetsData;
 	
 	FacetsService.initTable();
 
