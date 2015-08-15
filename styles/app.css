@@ -2,7 +2,7 @@
 
 #catalog-selector{
     position:fixed;
-    z-index:1000;
+    z-index:1035;
     background:#FFF;
     border: 1px solid #CCC;    
     padding:20px;

@@ -49,6 +49,7 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	} else if (CATALOG == null) {
 		CATALOG = ermrest.catalog;
 	    $scope.FacetsData.showSelect = true;
+	    $('.sidebar-overlay').addClass('active');
 	}
 	authnProvider = ermrest.authnProvider;
 	

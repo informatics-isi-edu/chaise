@@ -14,6 +14,7 @@ ermSelectController.controller('SelectCtrl', ['$scope', '$window', '$timeout', '
 	$scope.FacetsData = FacetsData;
 	if (catalogIds.length==0){
 	    $scope.FacetsData.showSelect = false;
+	    $('#sidebar-overlay').removeClass('active');
 	}
 
 	for (var i = 0; i < catalogIds.length; i++){
@@ -22,11 +23,13 @@ ermSelectController.controller('SelectCtrl', ['$scope', '$window', '$timeout', '
 							  
 	this.selectorClose = function selectorClose (){
 	    $scope.FacetsData.showSelect = false;
+	     $('.sidebar-overlay').removeClass('active');
 	}
 
 	this.selectCatalog = function selectCatalog (catalogId){
 	    $location.search("catalog", catalogId);
 	    $scope.FacetsData.showSelect = false;
+	    $('.sidebar-overlay').removeClass('active');
 	 }
 							  
 }]);
