@@ -9,6 +9,10 @@
     border-radius: 25px;
 }
 
+.selector-header{
+    margin:5px;
+}
+
 .tables-preview:{
     margin:5px;
 }

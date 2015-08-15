@@ -9,7 +9,7 @@ ermSelectController.controller('SelectCtrl', ['$scope', '$window', '$timeout', '
                                                       function($scope, $window, $timeout, $sce, FacetsData, FacetsService, $location) {
 
 	//TODO: GET THIS FROM ERMREST EVENTUALLY
-	var catalogIds = [1,2];
+	var catalogIds = [];
 
 	$scope.FacetsData = FacetsData;
 	if (catalogIds.length==0){
