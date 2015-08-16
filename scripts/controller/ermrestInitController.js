@@ -28,6 +28,7 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	$('.sidebar-overlay').click(function(event) {
     	if (!$('#editfilter').hasClass('open') && $('.sidebar-overlay').hasClass('active')) {
 	        $('.sidebar-overlay').removeClass('active');
+	        $scope.FacetsData.showSelect = false;
     		if ($('#sidebar').hasClass('open')) {
     	        $('#sidebar').toggleClass('open');
     		} else if ($('#collectionsTree').hasClass('open')) {
