@@ -23,7 +23,7 @@ var display_columns = {
 		'zoomify': [],
 		'3dview': [],
 		'hidden': [],
-		'url': []		
+		'url': []
 };
 
 var back_references = {};
@@ -379,7 +379,7 @@ function getTableColumns(options, successCallback) {
 	uniquenessColumns = [];
 	textColumns = [];
 	unsortableColumns = [];
-	
+
 	// reset
 	display_columns = {
 		'text_columns': [],
@@ -390,7 +390,7 @@ function getTableColumns(options, successCallback) {
 		'hidden': [],
 		'url': []
 	};
-	
+
 	PRIMARY_KEY = [];
 	if (metadata['keys'] != null) {
 		var unique_columns = [];

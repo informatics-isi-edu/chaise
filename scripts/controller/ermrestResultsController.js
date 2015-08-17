@@ -12,6 +12,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 	$scope.FacetsData = FacetsData;
 	// $('[data-toggle="tooltip"]').tooltip();
   $scope.chaiseConfig = chaiseConfig;
+  
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
 		$scope.FacetsData.pagingOptions.currentPage = 1;
