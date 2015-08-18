@@ -10,8 +10,8 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
                                                       function($scope, $location, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
-	$('[data-toggle="tooltip"]').tooltip();
-	
+  $('[data-toggle="tooltip"]').tooltip();
+
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
 		$scope.FacetsData.pagingOptions.currentPage = 1;
@@ -78,7 +78,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
             }
 		}
 	};
-	
+
 	this.delay_search_all = function delay_search_all() {
 		if ($scope.FacetsData.filterSearchAllTimeout != null) {
 			$timeout.cancel($scope.FacetsData.filterSearchAllTimeout);
@@ -106,7 +106,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		}
 		return ret;
 	};
-	
+
 	this.itemTitle = function itemTitle(row) {
 		return getEntryTitle(row);
 	};
@@ -186,7 +186,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 			$scope.$apply();
 		}
 	}
-	
+
     this.sidebarClick = function sidebarClick(event, toggle, selection) {
     	event.stopPropagation();
     	if (toggle == 'collections-toggle') {
@@ -231,11 +231,11 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 	this.getFacetValues = $scope.getFacetValues = function getFacetValues(facet) {
 		return FacetsService.getFacetValues(facet);
 	};
-	
+
 	this.displayTitle = function displayTitle(facet) {
 		return FacetsService.displayTitle(facet);
 	};
-	
+
 	this.hasFilters = $scope.hasFilters = function hasFilters() {
 		var ret = false;
 		$.each($scope.FacetsData.facets, function(i, facet) {
@@ -252,10 +252,10 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 				}
 			}
 		});
-		
+
 		return ret;
 	};
-	
+
 	this.setFilterClass = function setFilterClass() {
 		return $scope.hasFilters() ? 'filter-bg-hide' : 'filter-bg';
 	};
@@ -277,7 +277,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
     		$scope.predicate_checkbox(facet);
     	}
 	}
-    
+
 	$scope.predicate_slider = function predicate_slider(facet) {
     	FacetsService.predicate_slider(facet, $scope.successSearchFacets, $scope.successUpdateModels);
 	};
@@ -365,11 +365,11 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		}
 		return ret;
 	};
-	
+
 	this.isUrl = function isUrl(table, column) {
 		return hasAnnotation(table, column, 'url');
 	};
-	
+
 	this.urlLink = function urlLink(table, column, value) {
 		var ret = [];
 		var values = value.split(',');
@@ -385,14 +385,12 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 		});
 		return ret;
 	};
-	
+
 	this.urlBookmark = function urlBookmark() {
 		return $scope.FacetsData.bookmark;
 	};
-	
+
 	this.displayRange = function displayRange() {
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
-	}
-
+	};
 }]);
-
