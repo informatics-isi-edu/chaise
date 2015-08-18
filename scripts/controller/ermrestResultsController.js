@@ -10,9 +10,9 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
                                                       function($scope, $location, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
-	// $('[data-toggle="tooltip"]').tooltip();
   $scope.chaiseConfig = chaiseConfig;
-  
+  $('[data-toggle="tooltip"]').tooltip();
+
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
 		$scope.FacetsData.pagingOptions.currentPage = 1;
@@ -393,6 +393,5 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 
 	this.displayRange = function displayRange() {
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
-	}
-
+	};
 }]);
