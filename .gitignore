@@ -11,3 +11,5 @@ node_modules
 dist
 jsdoc
 deployment-config.json
+*~
+#*
