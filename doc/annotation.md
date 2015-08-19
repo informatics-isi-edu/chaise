@@ -4,9 +4,9 @@
 
  - **comment**: contains a JSON array
 
-It is expected in the future these keys to be renamed to some useful URLs.
+It is expected in the future that key to be renamed to some useful URL.
 
-The below tables explains the meaning of the possible values for the two keys.
+The below tables explains the meaning of the possible values for the key.
 
 - **_comment_** _key_ _values_
 
