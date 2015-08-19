@@ -76,6 +76,10 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 
 	$scope.FacetsData.location = $location;
 	$scope.FacetsData.view = ermrest.layout;
+	if ($location.search()['layout'] != null) {
+		$scope.FacetsData.view = $location.search()['layout'];
+	}
+
 	initApplication();
 	
 	this.hideSpinner = function hideSpinner() {

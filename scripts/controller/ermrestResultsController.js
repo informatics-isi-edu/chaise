@@ -183,6 +183,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 	this.selectView = function selectView(event, view) {
 		event.preventDefault();
 		$scope.FacetsData.view = view;
+		setBookmark($scope.FacetsData);
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
@@ -373,17 +374,19 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 
 	this.urlLink = function urlLink(table, column, value) {
 		var ret = [];
-		var values = value.split(',');
-		$.each(values, function(i, val) {
-			var vals = [];
-			vals.push(val);
-			var urlPattern = getUrlPattern(table, column, 'url_pattern');
-			if (urlPattern != null) {
-				val = urlPattern.replace('{value}', val);
-			}
-			vals.push(val);
-			ret.push(vals);
-		});
+		if (value != null) {
+			var values = value.split(',');
+			$.each(values, function(i, val) {
+				var vals = [];
+				vals.push(val);
+				var urlPattern = getUrlPattern(table, column, 'url_pattern');
+				if (urlPattern != null) {
+					val = urlPattern.replace('{value}', val);
+				}
+				vals.push(val);
+				ret.push(vals);
+			});
+		}
 		return ret;
 	};
 
