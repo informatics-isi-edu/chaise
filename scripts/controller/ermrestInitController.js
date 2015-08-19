@@ -28,6 +28,7 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	$('.sidebar-overlay').click(function(event) {
     	if (!$('#editfilter').hasClass('open') && $('.sidebar-overlay').hasClass('active')) {
 	        $('.sidebar-overlay').removeClass('active');
+	        $scope.FacetsData.showSelect = false;
     		if ($('#sidebar').hasClass('open')) {
     	        $('#sidebar').toggleClass('open');
     		} else if ($('#collectionsTree').hasClass('open')) {
@@ -36,6 +37,8 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
     	}
 	});
 
+
+	$scope.FacetsData = FacetsData;
 
 	if ($location.search()['schema'] != null) {
 		SCHEMA = $location.search()['schema'];
@@ -46,10 +49,10 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 		CATALOG = $location.search()['catalog'];
 	} else if (CATALOG == null) {
 		CATALOG = ermrest.catalog;
+	    $scope.FacetsData.showSelect = true;
+	    $('.sidebar-overlay').addClass('active');
 	}
 	authnProvider = ermrest.authnProvider;
-	
-	$scope.FacetsData = FacetsData;
 	
 	FacetsService.initTable();
 

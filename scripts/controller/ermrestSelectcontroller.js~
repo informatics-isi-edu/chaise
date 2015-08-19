@@ -1,0 +1,29 @@
+'use strict';
+
+/* Controllers */
+
+var ermSelectController = angular.module('ermSelectController', ['facetsModel', 'facetsService']);
+
+//angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
+ermSelectController.controller('SelectCtrl', ['$scope', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService', '$location',
+                                                      function($scope, $window, $timeout, $sce, FacetsData, FacetsService, $location) {
+
+	$scope.FacetsData = FacetsData;
+	//TODO: GET THIS FROM ERMREST EVENTUALLY
+	//$scope.FacetsData.catalogs.ids = [1,3];
+	var ids = [1,2];
+	for (var i = 0; i < ids.length; i++){
+	    $scope.FacetsData.catalogs[ids[i]] = getCatalogPreview(ids[i]);
+	    }
+	this.selectorClose = function selectorClose (){
+	    $scope.FacetsData.showSelect = false;
+	}
+	this.selectCatalog = function selectCatalog (catalogId){
+	    $location.search("catalog", catalogId);
+	    $scope.FacetsData.showSelect = false;
+	    
+	}
+							  
+							  
+}]);
+

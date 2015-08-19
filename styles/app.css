@@ -1,5 +1,27 @@
 /* Styles for the FB Data app main content - header styles are in appheader.css */
 
+#catalog-selector{
+    position:fixed;
+    z-index:1035;
+    background:#FFF;
+    border: 1px solid #CCC;    
+    padding:20px;
+    border-radius: 25px;
+}
+
+.selector-header{
+    margin:5px;
+}
+
+.tables-preview:{
+    margin:5px;
+}
+
+.selector-header{
+    text-align:center;
+}
+
+
 h1 {
 	margin-top: 0;
 	font-size: 1.7em;
@@ -171,6 +193,14 @@ a.field-toggle .md-chevron-right {
 	height: 36px;
 	border-radius: 0;
 }
+
+#view-buttons .btn-default, #settings .btn-default {
+	background-color: #F2F2F2;
+	width: 36px;
+	height: 36px;
+	padding:3px;
+	border-radius: 0;
+}
 /*
 #view-buttons .btn-default .md-2x {
 	line-height: .8;
@@ -195,6 +225,12 @@ a.filter-link-cancel {
 }
 
 #view-buttons .btn-group.view-toggle {
+	margin-left: -1px;
+}
+
+
+
+#view-buttons .btn-group.settings-toggle {
 	margin-left: -1px;
 }
 

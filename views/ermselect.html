@@ -1,0 +1,39 @@
+		<!-- Search Results -->
+
+<div id="catalog-selector" class="col-md-8 col-md-offset-1" ng-controller="SelectCtrl as selectCatalog" ng-show="FacetsData.showSelect">
+	
+  <div class="row selector-header">
+
+	    <div class="col-md-offset-3 col-md-6"> <h1 class="selector-header"> SELECT A CATALOG:</h1></div>
+
+
+
+<div>
+<a class="btn btn-default col-md-offset-1 col-md-2" ng-click="selectCatalog.selectorClose()" >CONTINUE</a>
+</div>
+</div>
+
+			<div  ng-repeat="catalog in FacetsData.catalogs" class="panel panel-default">
+			  <div class="panel-heading">
+<a href="" ng-click="selectCatalog.selectCatalog(catalog.id)">
+<span>
+	 {{catalog.name}}
+</span>
+</a>
+
+</div>
+<div class="panel-body">
+
+				<dl ng-repeat="schema in catalog.schemas" class="schema-preview col-md-4">
+				 <dt>Schema:</dt>  <dd>{{schema.schema_name}}</dd>
+			<li ng-repeat="table in schema.tables" ng-if="$index<3" class="tables-preview">
+				Table: {{table.table_name}}
+				</li>
+</ul>
+
+
+</div>
+</div>
+
+</div>
+
