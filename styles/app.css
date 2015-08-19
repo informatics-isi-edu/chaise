@@ -193,6 +193,14 @@ a.field-toggle .md-chevron-right {
 	height: 36px;
 	border-radius: 0;
 }
+
+#view-buttons .btn-default, #settings .btn-default {
+	background-color: #F2F2F2;
+	width: 36px;
+	height: 36px;
+	padding:3px;
+	border-radius: 0;
+}
 /*
 #view-buttons .btn-default .md-2x {
 	line-height: .8;
@@ -217,6 +225,12 @@ a.filter-link-cancel {
 }
 
 #view-buttons .btn-group.view-toggle {
+	margin-left: -1px;
+}
+
+
+
+#view-buttons .btn-group.settings-toggle {
 	margin-left: -1px;
 }
 
