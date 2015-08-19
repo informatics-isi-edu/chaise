@@ -2698,14 +2698,16 @@ function getCatalogPreview(catalogId) {
     var meta = {};
     var url = HOME + ERMREST_CATALOG_PATH + catalogId;
     meta = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null)['meta'];
-    preview["schemas"] = ERMREST.fetch((url + '/schema'), 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null)['schemas'];
     for (var index in meta){
 	if (meta[index]["k"] == "name") {
    preview["name"] = meta[index]["v"];
 	}
-	if (!preview["name"]){
-	    preview["name"] = catalogId;
-   	}
+    }
+    if (!preview["name"]){
+	preview["name"] = catalogId;
+    }
+    if (!preview["descriptor"]){
+	preview["descriptor"] = "No description";
     }
     preview["id"] = catalogId;
     return preview;

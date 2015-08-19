@@ -1,6 +1,6 @@
 <div ng-controller="SettingsCtrl as settings">
-	<!-- Collections sidebar -->
-	<aside id="collectionsTree" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+	<!-- Filters sidebar -->
+	<aside id="settings" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
 	    <!-- Sidebar header -->
 	    <div class="sidebar-header header-cover">
 	        <!-- Sidebar toggle button -->
@@ -9,13 +9,32 @@
 				        <h5>Settings</h5>
 				</div>
 				<div class="col-md-2">
-				        <button id="settingDoneButton" type="button" class="btn btn-default btn-sm pull-right collections-toggle" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
+				        <button type="button" class="btn btn-default btn-sm pull-right sidebar-toggle" ng-click="settings.sidebarClick($event, 'settings-toggle', true);">
 				            DONE
 				        </button>
 				    </div>
-			</div>
+		</div>
 	    </div>
+
+	    <div class="col-md-10">
+				        <h5>Choose a New Catalog</h5>
+				</div>
+		
+	    <div>
+	      <ul class="nav sidebar-nav">
+			<li class="ng-scope" ng-repeat="catalog in FacetsData.catalogs">
+<a href="" class="catalog-select" ng-click="settings.selectCatalog(catalog.id)">
+  <span class="badge ng-binding"> {{catalog.name}}</span> {{catalog.descriptor}}
+  <span class="md-chevron-right md-lg">
+  </span>
+  </a>
+			</li>
+</ul>
+
+	    <!-- Sidebar divider -->
+	    <!-- <div class="sidebar-divider"></div> -->
+	    
+	    <!-- Sidebar text -->
+	    <!--  <div class="sidebar-text">Text</div> -->
 	</aside>	
 </div>
-
-

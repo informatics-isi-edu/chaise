@@ -168,6 +168,14 @@ a.field-toggle .md-chevron-right {
 	padding-right: 10px;
 }
 
+
+a.catalog-select .md-chevron-right {
+	position: absolute;
+	right:0;
+	top:12px;
+	padding-right: 10px;
+}
+
 .filter-item-field {
 	color: #999;
 }
@@ -187,14 +195,15 @@ a.field-toggle .md-chevron-right {
 	color: #fc868d;
 }
 
-#view-buttons .btn-default, #views .btn-default {
+#view-buttons .btn-default, #views .btn-default, #settings-toggle .btn-default {
 	background-color: #F2F2F2;
 	width: 36px;
 	height: 36px;
 	border-radius: 0;
+	padding:3px;
 }
 
-#view-buttons .btn-default, #settings .btn-default {
+#view-buttons .btn-default {
 	background-color: #F2F2F2;
 	width: 36px;
 	height: 36px;
@@ -225,12 +234,6 @@ a.filter-link-cancel {
 }
 
 #view-buttons .btn-group.view-toggle {
-	margin-left: -1px;
-}
-
-
-
-#view-buttons .btn-group.settings-toggle {
 	margin-left: -1px;
 }
 
@@ -304,6 +307,17 @@ dl.attribute-group dd {
      max-width: 500px;
      overflow: hidden;
      text-overflow: ellipsis;
+}
+
+/*Settings style*/
+
+.settings.open {
+	max-width: 380px;
+	width: 380px;
+}
+
+.settings .btn-default {
+	border-color: #a4a4a4;
 }
 
 /* Edit filters in sidebar */

@@ -90,7 +90,6 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	
 	this.sidebarClick = function (toggle) {
 	    var overlay = $('.sidebar-overlay');
-	    
 	    if (toggle == 'sidebar-toggle') {
 	        var sidebar = $('#sidebar');
 	        sidebar.toggleClass('open');
@@ -104,8 +103,14 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	        sidebar.toggleClass('open');
 	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
 	            //overlay.addClass('active');
+	        }
+	    } else if (toggle == 'settings-toggle') {
+		var sidebar = $('#settings');
+	        sidebar.toggleClass('open');
+	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
+	            overlay.addClass('active');
 	        } else {
-	            //overlay.removeClass('active');
+	            overlay.removeClass('active');
 	        }
 	    } else if (toggle == 'collections-toggle') {
 	        var sidebar = $('#collectionsTree');

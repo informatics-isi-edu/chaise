@@ -163,13 +163,20 @@
 			</div>
 			
 			<div id="results_tally" class="row">
-				<div class="col-md-10">
+				<div class="col-md-9">
 					<p>Displaying results <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
 				</div>
-				<div class="col-md-2">
+				<div class="col-md-3">
+				  
+	<div class="btn-group pull-right settings-toggle" role="group" id="settings-toggle">
+						<button type="button" id="settings-btn" class="btn btn-default settings-toggle" ng-click="facetResults.sidebarClick($event, 'settings-toggle', true);" aria-expanded="false" title="Change settings">
+	      					<i class="md-settings md-lg" aria-hidden="true"></i>
+	    				</button>
+					</div>
+	
 					<div class="btn-group view-toggle pull-right" role="group" id="views">
 						<p class="btn btn-label">Switch layout:</p>
-						<button type="button" id="views-btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="Switch layout">
+						<button type="button" id="views-btn" data-toggle="dropdown" class="btn btn-default dropdown-toggle" aria-expanded="false" title="Switch layout">
 	      					<i ng-class="facetResults.setViewClass()" aria-hidden="true"></i>
 	    				</button>
 					    <ul class="dropdown-menu" role="menu">
@@ -189,9 +196,14 @@
 					      	</a>
 					      </li>
 					    </ul>
-					</div>
-				</div>
 			</div>
+		
+			</div>
+			</div>
+		
+
+
+
 			<div id="resultstable" class="row">
 				<div ng-if="FacetsData.view=='list'" class="col-md-12" ng-repeat="row in FacetsData.ermrestData">
                     <div ng-if="FacetsData.view=='list'" class="panel panel-default">

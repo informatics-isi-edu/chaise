@@ -17,7 +17,7 @@ var ermrestApp = angular.module('ermrestApp', [
   'ermFilterController',
   'ermResultsController',
   'ermSideBarController',
-  'ermSelectController'
+  'ermSettingsController'
 ]);
 
 ermrestApp.provider('ermrest', function () {
