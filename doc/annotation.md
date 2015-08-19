@@ -1,3 +1,19 @@
+# Schema Annotations
+
+**Chaise** is using the following current [schema annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#schema-annotations):
+
+ - **comment**: contains a JSON array
+
+It is expected in the future these keys to be renamed to some useful URLs.
+
+The below tables explains the meaning of the possible values for the two keys.
+
+- **_comment_** _key_ _values_
+
+| Value | Meaning |
+|-------|---------|
+| exclude | The schema is "excluded" from the catalog. None of its tables will be displayed in the list of the available tables. | 
+
 # Table Annotations
 
 **Chaise** is using the following current [table annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#table-annotations):

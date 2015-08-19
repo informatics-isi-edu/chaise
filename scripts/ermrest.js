@@ -43,6 +43,7 @@ var CATALOG_COLUMNS_ALIAS = {};
 
 var COLUMNS_LIST_URI = 'comment';
 var TABLES_LIST_URI = 'comment';
+var SCHEMAS_LIST_URI = 'comment';
 var COLUMNS_MAP_URI = 'description';
 var TABLES_MAP_URI = 'description';
 
@@ -2672,16 +2673,8 @@ function getSchemas() {
 	CATALOG_SCHEMAS = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null)['schemas'];
 	var excludeSchemas = [];
 	$.each(CATALOG_SCHEMAS, function(schema, value) {
-		var tables = value['tables'];
-		var exclude = true;
-		$.each(tables, function(table, tableDef) {
-			if (tableDef['annotations'] == null || tableDef['annotations'][TABLES_LIST_URI] == null ||
-				!tableDef['annotations'][TABLES_LIST_URI].contains('exclude')) {
-				exclude = false;
-				return false;
-			}
-		});
-		if (exclude) {
+		var annotations = value['annotations'];
+		if (annotations != null && annotations[SCHEMAS_LIST_URI] != null && annotations[SCHEMAS_LIST_URI].contains('exclude')) {
 			excludeSchemas.push(schema);
 		}
 	});
