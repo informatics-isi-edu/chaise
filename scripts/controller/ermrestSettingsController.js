@@ -9,7 +9,7 @@ ermSettingsController.controller('SettingsCtrl', ['$scope', '$filter', '$timeout
                                                   function($scope, $filter, $timeout, FacetsData, FacetsService, numberFilter, $location)
 {
     $scope.FacetsData = FacetsData;
-    var catalogIds = [1,2];
+    var catalogIds = [];
     $scope.FacetsData = FacetsData;
     if (catalogIds.length==0){
 	$scope.FacetsData.showSelect = false;
