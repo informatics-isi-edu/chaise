@@ -13,3 +13,5 @@ jsdoc
 deployment-config.json
 *~
 #*
+*.in
+.make-script-block
