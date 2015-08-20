@@ -17,19 +17,20 @@ BOWER=bower_components
 
 # JavaScript source and test specs
 JS=scripts
-SOURCE=$(JS)/app.js \
-	   $(JS)/controller/ermrestDetailController.js \
+SOURCE=$(JS)/variables.js \
+		 $(JS)/utils.js \
+		 $(JS)/ermrest.js \
+		 chaise-config.js \
+		 $(JS)/app.js \
+		 $(JS)/facetsModel.js \
+	   $(JS)/facetsService.js \
+		 $(JS)/controller/ermrestDetailController.js \
 	   $(JS)/controller/ermrestFilterController.js \
 	   $(JS)/controller/ermrestInitController.js \
 	   $(JS)/controller/ermrestLoginController.js \
 	   $(JS)/controller/ermrestLogoutController.js \
 	   $(JS)/controller/ermrestResultsController.js \
-	   $(JS)/controller/ermrestSideBarController.js \
-	   $(JS)/ermrest.js \
-	   $(JS)/facetsModel.js \
-	   $(JS)/facetsService.js \
-	   $(JS)/utils.js \
-	   $(JS)/variables.js
+	   $(JS)/controller/ermrestSideBarController.js
 
 # List test specs here
 #SPECS=$(JS)/main_spec.js
@@ -153,3 +154,14 @@ usage:
 	@echo "    clean     - cleans the dist dir"
 	@echo "    distclean - cleans the dist dir and the dependencies"
 
+
+# Rules to attach checksums to JavaScript source in the header
+app.html: app.html.in .make-script-block
+	sed -e '/%SCRIPTS%/ {' -e 'r .make-script-block' -e 'd' -e '}' -i app.html
+
+.make-script-block: $(SOURCE)
+	> .make-script-block
+	for file in $(SOURCE); do \
+		checksum=$$(md5sum $$file | cut -c -32) ; \
+		echo "<script src='$$file?v=$$checksum'></script>" >> .make-script-block ; \
+	done
