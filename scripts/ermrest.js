@@ -84,6 +84,15 @@ function initApplication() {
 function setSchema() {
 	if (SCHEMA == null) {
 		$.each(CATALOG_SCHEMAS, function(schema, value) {
+			var annotations = value['annotations'];
+			if (annotations != null && annotations[SCHEMAS_LIST_URI] != null && annotations[SCHEMAS_LIST_URI].contains('default')) {
+				SCHEMA = schema;
+				return false;
+			}
+		});
+	}
+	if (SCHEMA == null) {
+		$.each(CATALOG_SCHEMAS, function(schema, value) {
 			$.each(value['tables'], function(i, table) {
 				var isDefault = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null &&
 					table['annotations'][TABLES_LIST_URI].contains('default');
