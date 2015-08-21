@@ -45,9 +45,16 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	if ($location.search()['catalog'] != null) {
 		CATALOG = $location.search()['catalog'];
 	} else if (CATALOG == null) {
-		CATALOG = ermrest.catalog;
+		if (chaiseConfig['catalog'] != null) {
+			CATALOG = chaiseConfig['catalog'];
+		} else {
+			CATALOG = ermrest.catalog;
+		}
 	}
 	authnProvider = ermrest.authnProvider;
+	if (chaiseConfig['authnProvider'] != null) {
+		authnProvider = chaiseConfig['authnProvider'];
+	}
 	
 	$scope.FacetsData = FacetsData;
 	
@@ -78,6 +85,8 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	$scope.FacetsData.view = ermrest.layout;
 	if ($location.search()['layout'] != null) {
 		$scope.FacetsData.view = $location.search()['layout'];
+	} else if (chaiseConfig['layout'] != null) {
+		$scope.FacetsData.view = chaiseConfig['layout'];
 	}
 
 	initApplication();

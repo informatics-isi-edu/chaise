@@ -57,7 +57,7 @@ var searchBoxPresentation = [ 'text' ];
 var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz' ];
 
 var unsortableColumns = [];
-var suppressError = true;
+var suppressError = false;
 
 function isSortable(table, column) {
 	return !unsortableColumns.contains(column);
@@ -306,12 +306,39 @@ function submitLogin(username, password, referrer) {
 	};
 	var param = {};
 	param['referrer'] = referrer;
-	ERMREST.POST(url, 'application/x-www-form-urlencoded; charset=UTF-8', true, true, obj, successSubmitLogin, null, param);
+	ERMREST.POST(url, 'application/x-www-form-urlencoded; charset=UTF-8', true, true, obj, successSubmitLogin, errorSubmitLogin, param);
 }
 
 function successSubmitLogin(data, textStatus, jqXHR, param) {
 	var options = param['referrer'];
 	window.location = referrer;
+}
+
+function errorSubmitLogin(jqXHR, textStatus, errorThrown, url, param) {
+	if (jqXHR.status != 401) {
+		handleError(jqXHR, textStatus, errorThrown, url);
+	} else {
+		var msg = '';
+		var err = jqXHR.status;
+		if (err != null) {
+			msg += 'Status: ' + err + '\n';
+		}
+		err = jqXHR.responseText;
+		if (err != null) {
+			msg += 'ResponseText: ' + err + '\n';
+		}
+		if (textStatus != null) {
+			msg += 'TextStatus: ' + textStatus + '\n';
+		}
+		if (errorThrown != null) {
+			msg += 'ErrorThrown: ' + errorThrown + '\n';
+		}
+		msg += 'URL: ' + url + '\n';
+		document.body.style.cursor = 'default';
+		if (!suppressError) {
+			alert(msg);
+		}
+	}
 }
 
 function submitGlobusLogin(username, password) {
@@ -1703,17 +1730,19 @@ function getDenormalizedValues(table, url, result) {
 			var keyUrl = url + '/' + key;
 			getDenormalizedValues(key, keyUrl, result);
 			var data = ERMREST.fetch(keyUrl, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-			$.each(data, function(i, row) {
-				$.each(row, function(name, value) {
-					if (value == null || value === '' || hasAnnotation(key, name, 'hidden')) {
-						delete data[i][name];
-					}
+			if (data != null) {
+				$.each(data, function(i, row) {
+					$.each(row, function(name, value) {
+						if (value == null || value === '' || hasAnnotation(key, name, 'hidden')) {
+							delete data[i][name];
+						}
+					});
 				});
-			});
-			if (result[key] == null) {
-				result[key] = [];
+				if (result[key] == null) {
+					result[key] = [];
+				}
+				result[key] = result[key].concat(data);
 			}
-			result[key] = result[key].concat(data);
 		});
 	}
 }
@@ -2142,7 +2171,7 @@ function getAssociationThumbnail(table_name, row) {
 		thumbnailPredicate.push(contentTypePredicate.join(';'));
 		var url = thumbnailPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
 		var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-		ret = data.length == 0 ? null : data[0][thumbnail];
+		ret = (data == null || data.length == 0) ? null : data[0][thumbnail];
 	}
 	return ret;
 }
@@ -2165,7 +2194,7 @@ function getReferenceThumbnail(table_name, row) {
 		thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
 		var url = thumbnailPredicate.join('/') + '?limit=1';
 		var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-		ret = data.length == 0 ? null : data[0]['uri'];
+		ret = (data == null || data.length == 0) ? null : data[0]['uri'];
 	}
 	return ret;
 }
@@ -2277,7 +2306,7 @@ function getDenormalizedThumbnail(table_name, row, column_name, dataset) {
 			thumbnailPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
 			var url = thumbnailPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
 			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-			if (data.length == 1) {
+			if (data != null && data.length == 1) {
 				ret = data[0][thumbnail];
 			}
 		}
@@ -2369,7 +2398,7 @@ function getDenormalized3dView(table_name, row, column_name, dataset) {
 			viewerPredicate.push(contentTypePredicate.join(';'));
 			var url = viewerPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
 			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-			if (data.length == 1) {
+			if (data != null && data.length == 1) {
 				ret = getTableAnnotation(fileTable, TABLES_MAP_URI, 'viewer_url');
 				ret += '?url=' + data[0][viewer];
 			}
@@ -2452,7 +2481,7 @@ function getDenormalizedFile(table_name, row, column_name, dataset) {
 			downloadPredicate.push(contentTypePredicate.join(';'));
 			var url = downloadPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
 			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-			if (data.length == 1) {
+			if (data != null && data.length == 1) {
 				ret = data[0][download];
 			}
 		}
@@ -2519,7 +2548,7 @@ function getItemDenormalizedValue(table_name, row, column_name, val, dataset) {
 			downloadPredicate.push(encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable));
 			var url = downloadPredicate.join('/') + '@sort(' + encodeSafeURIComponent(sortColumn) + ')?limit=1';
 			var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-			if (data.length == 1) {
+			if (data != null && data.length == 1) {
 				ret = data[0][nameColumn];
 			}
 		}
@@ -2625,14 +2654,16 @@ function getTableDisplayName(table_name, schema) {
 		schema = SCHEMA_METADATA;
 	}
 	var ret = table_name;
-	$.each(schema, function(i, table) {
-		if (table_name == table['table_name']) {
-			if (table['annotations'][TABLES_MAP_URI] != null && table['annotations'][TABLES_MAP_URI]['display'] != null) {
-				ret = table['annotations'][TABLES_MAP_URI]['display'];
+	if (schema != null) {
+		$.each(schema, function(i, table) {
+			if (table_name == table['table_name']) {
+				if (table['annotations'][TABLES_MAP_URI] != null && table['annotations'][TABLES_MAP_URI]['display'] != null) {
+					ret = table['annotations'][TABLES_MAP_URI]['display'];
+				}
+				return false;
 			}
-			return false;
-		}
-	});
+		});
+	}
 	return ret;
 }
 
@@ -2679,19 +2710,22 @@ function entityLinearize(denormalizedView, linearizeView) {
 
 function getSchemas() {
 	var url = ERMREST_DATA_HOME + '/schema';
-	CATALOG_SCHEMAS = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null)['schemas'];
-	var excludeSchemas = [];
-	$.each(CATALOG_SCHEMAS, function(schema, value) {
-		var annotations = value['annotations'];
-		if (annotations != null && annotations[SCHEMAS_LIST_URI] != null && annotations[SCHEMAS_LIST_URI].contains('exclude')) {
-			excludeSchemas.push(schema);
-		}
-	});
-	$.each(excludeSchemas, function(i, schema) {
-		delete CATALOG_SCHEMAS[schema];
-	});
-	setSchema();
-	setCatalogTables();
+	var data = ERMREST.fetch(url, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+	if (data != null) {
+		CATALOG_SCHEMAS = data['schemas'];
+		var excludeSchemas = [];
+		$.each(CATALOG_SCHEMAS, function(schema, value) {
+			var annotations = value['annotations'];
+			if (annotations != null && annotations[SCHEMAS_LIST_URI] != null && annotations[SCHEMAS_LIST_URI].contains('exclude')) {
+				excludeSchemas.push(schema);
+			}
+		});
+		$.each(excludeSchemas, function(i, schema) {
+			delete CATALOG_SCHEMAS[schema];
+		});
+		setSchema();
+		setCatalogTables();
+	}
 }
 
 function setCatalogTables() {

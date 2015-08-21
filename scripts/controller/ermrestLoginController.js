@@ -30,9 +30,11 @@ ermLoginController.controller('LoginCtrl', ['$scope', '$location', 'ermrest',
 					var referrer = $location.search()['referrer'];
 					window.location = referrer;
 				}
-			} else {
+			} else if (authnProvider == 'session') {
 				var referrer = $location.search()['referrer'];
 				submitLogin($scope.username, $scope.password, referrer);
+			} else {
+				alert('Authentication "' + authnProvider + '" is not supported.');
 			}
 		}
 	};

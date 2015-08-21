@@ -15,7 +15,7 @@
       </table>
     </fieldset>
   </div>
-  <div ng-show="authnProvider=='goauth'" ng-init="loginController.login()">
+  <div ng-if="authnProvider=='goauth'" ng-init="loginController.login()">
   </div>
 </div>
 
