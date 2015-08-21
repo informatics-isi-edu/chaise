@@ -139,7 +139,8 @@ testem:
 
 # Rules to attach checksums to JavaScript source in the header
 app.html: app.html.in .make-script-block
-	sed -e '/%SCRIPTS%/ {' -e 'r .make-script-block' -e 'd' -e '}' app.html.in > $(DIST)/app.html
+	sed -e '/%SCRIPTS%/ {' -e 'r .make-script-block' -e 'd' -e '}' app.html.in > app.html
+
 .make-script-block: $(SOURCE)
 	> .make-script-block
 	for file in $(SOURCE); do \
