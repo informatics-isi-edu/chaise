@@ -144,7 +144,7 @@ app.html: app.html.in .make-script-block
 .make-script-block: $(SOURCE)
 	> .make-script-block
 	for file in $(SOURCE); do \
-		checksum=$$(md5sum $$file | awk '{ print $$1 }') ; \
+		checksum=$$(md5 -q $$file | awk '{ print $$1 }') ; \
 		echo "<script src='$$file?v=$$checksum'></script>" >> .make-script-block ; \
 	done
 
