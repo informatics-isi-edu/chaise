@@ -144,9 +144,16 @@ app.html: app.html.in .make-script-block
 .make-script-block: $(SOURCE)
 	> .make-script-block
 	for file in $(SOURCE); do \
-		checksum=$$(md5 -q $$file) ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='$$file?v=$$checksum'></script>" >> .make-script-block ; \
 	done
+
+# Rule to determine MD5 utility
+ifeq ($(shell which md5),)
+    MD5 = md5sum
+else
+    MD5 = md5 -q
+endif
 
 # Rules for help/usage
 .PHONY: help usage
