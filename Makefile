@@ -55,7 +55,7 @@ TEST=.make-test.js
 all: lint build test $(DOC)
 
 .PHONY: build
-build: $(PKG) $(MIN)
+build: $(PKG) $(MIN) app.html
 
 # Rule to build the full library
 $(PKG): $(SOURCE) $(BIN)
