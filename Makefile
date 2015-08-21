@@ -25,19 +25,19 @@ BOWER=bower_components
 # JavaScript source and test specs
 JS=scripts
 SOURCE=$(JS)/variables.js \
-					$(JS)/utils.js \
-					$(JS)/ermrest.js \
-					chaise-config.js \
-					$(JS)/app.js \
-					$(JS)/facetsModel.js \
-					$(JS)/facetsService.js \
-					$(JS)/controller/ermrestDetailController.js \
-					$(JS)/controller/ermrestFilterController.js \
-					$(JS)/controller/ermrestInitController.js \
-					$(JS)/controller/ermrestLoginController.js \
-					$(JS)/controller/ermrestLogoutController.js \
-					$(JS)/controller/ermrestResultsController.js \
-					$(JS)/controller/ermrestSideBarController.js
+	   $(JS)/utils.js \
+	   $(JS)/ermrest.js \
+	   chaise-config.js \
+	   $(JS)/app.js \
+	   $(JS)/facetsModel.js \
+	   $(JS)/facetsService.js \
+	   $(JS)/controller/ermrestDetailController.js \
+	   $(JS)/controller/ermrestFilterController.js \
+	   $(JS)/controller/ermrestInitController.js \
+	   $(JS)/controller/ermrestLoginController.js \
+	   $(JS)/controller/ermrestLogoutController.js \
+	   $(JS)/controller/ermrestResultsController.js \
+	   $(JS)/controller/ermrestSideBarController.js
 
 # List test specs here
 #SPECS=$(JS)/main_spec.js
@@ -121,6 +121,7 @@ updeps:
 # Rule to clean project directory
 .PHONY: clean
 clean:
+	rm app.html
 	rm -rf $(DIST)
 	rm -rf $(JSDOC)
 	rm -f .make-*
