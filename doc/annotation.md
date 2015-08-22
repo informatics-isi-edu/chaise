@@ -13,6 +13,7 @@ The below tables explains the meaning of the possible values for the key.
 | Value | Meaning |
 |-------|---------|
 | exclude | The schema is "excluded" from the catalog. None of its tables will be displayed in the list of the available tables. | 
+| default | By default (when the schema name is not specified in the URL or in the _chaise-config.js_ file), the tables of that schema will be used. | 
 
 # Table Annotations
 
