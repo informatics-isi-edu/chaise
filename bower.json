@@ -28,7 +28,10 @@
     "doc"
   ],
   "dependencies": {
-      "jquery": "x",
-      "bootstrap": "x"
+    "jquery": "x",
+    "bootstrap": "x"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.4.4"
   }
 }
