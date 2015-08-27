@@ -47,7 +47,7 @@ ermrestApp.provider('ermrest', function () {
 ermrestApp.config(['ermrestProvider',
                    function(ermrestProvider) {
 	ermrestProvider.setCatalog(1);
-	ermrestProvider.setAuthnProvider('goauth');
+	ermrestProvider.setAuthnProvider('session');
 	ermrestProvider.setLayout('list');
 }]);
 
