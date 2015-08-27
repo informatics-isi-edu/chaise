@@ -21,6 +21,7 @@ The below tables explains the meaning of the possible values for the key.
 
  - **comment**: contains a JSON array
  - **description**: contains a JSON object
+ - **facet**: contains a JSON string
 
 It is expected in the future these keys to be renamed to some useful URLs.
 
@@ -49,12 +50,19 @@ The below tables explains the meaning of the possible values for the two keys.
 | preview_url | The URL of the 3-D preview (view on load). | 
 | viewer_url | The URL of the 3-D viewer. | 
 
+- **facet** _key_ _values_
+
+| Value | Meaning |
+|-------|---------|
+| hidden | All the table columns will not be displayed in the facets sidebar. | 
+
 # Column Annotations
 
 **Chaise** is using the following current [column annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#column-annotations):
 
  - **comment**: contains a JSON array
  - **description**: contains a JSON object
+ - **facet**: contains a JSON string
 
 It is expected in the future these keys to be renamed to some useful URLs.
 
@@ -88,6 +96,12 @@ The below tables explains the meaning of the possible values for the two keys.
 |-------|---------|
 | display | The name with which the column will be displayed. | 
 | url_pattern | The column contains an URL with a pattern. The URL will be build by replacing the **{value}** string from the pattern with the column value. Example of url_pattern value: ```"http://www.ncbi.nlm.nih.gov/pubmed/{value}"``` | 
+
+- **facet** _key_ _values_
+
+| Value | Meaning |
+|-------|---------|
+| hidden | The column will not be displayed in the facets sidebar. | 
 
 # Foreign Key Annotations
 
