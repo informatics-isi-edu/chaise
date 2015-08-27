@@ -56,6 +56,10 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 		authnProvider = chaiseConfig['authnProvider'];
 	}
 	
+	if (chaiseConfig['facetPolicy'] != null) {
+		facetPolicy = chaiseConfig['facetPolicy'];
+	}
+
 	$scope.FacetsData = FacetsData;
 	
 	FacetsService.initTable();

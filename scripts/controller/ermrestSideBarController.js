@@ -516,4 +516,18 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 	};
 	
+	this.clickFacet = function clickFacet(event, facet) {
+		updateFacetCount($scope.FacetsData, facet, $scope.refresh);
+	};
+	
+	this.displayFacetCount = function displayFacetCount(facet) {
+		return getFacetCount($scope.FacetsData, facet);
+	};
+	
+	$scope.refresh = function refresh() {
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
+	};
+
 }]);
