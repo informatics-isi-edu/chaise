@@ -314,7 +314,7 @@ function submitLogin(username, password, referrer) {
 }
 
 function successSubmitLogin(data, textStatus, jqXHR, param) {
-	var options = param['referrer'];
+	var referrer = param['referrer'];
 	window.location = referrer;
 }
 
