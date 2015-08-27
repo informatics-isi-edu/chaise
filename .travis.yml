@@ -3,9 +3,9 @@ node_js:
   - "0.12"
   - "0.11"
   - "0.10"
-  - "0.8"
-  - "0.6"
   - "iojs"
   - "iojs-v1.0.4"
 notifications:
-  email: true
+  email:
+    on_success: change
+    on_failure: always
