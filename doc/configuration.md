@@ -12,6 +12,6 @@ The below table explains the usage of them:
 | authnProvider | session <br> goauth <br> globusonline | goauth | "authnProvider":\<value\> | N/A | The _ermrest_config.json_ file must be configured adequately for the used authnProvider. |
 | layout | list <br> table <br> card | list | "layout":\<value\> | layout=\<value\> | The view the summary page will be rendered. |
 | facetPolicy | on_demand | N/A | "facetPolicy":\<value\> | N/A | If present with the _on_demand_ value, requests (for facets count and for facets distinct values) will be issued only for the selected facets. <br> At start up, the facets with the "top" annotation will be selected.<br>  On demand, you can check also other facets. |
-| feedbackURL | An URL for a form to provide feedback. | The FaceBase feedback form page. | "feedbackURL":\<URL\> | |
-| helpURL | An URL for getting help using Chaise. | The URL for getting help in using the Data Browser of FaceBase. | "helpURL":\<URL\> | |
+| feedbackURL | An URL for a form to provide feedback. | The FaceBase feedback form page. | "feedbackURL":\<URL\> | N/A | |
+| helpURL | An URL for getting help using Chaise. | The URL for getting help in using the Data Browser of FaceBase. | "helpURL":\<URL\> | N/A | |
 
