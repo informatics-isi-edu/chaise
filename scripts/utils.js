@@ -16,7 +16,11 @@ function emptyJSON(obj) {
 }
 
 function initLocation() {
-	HOME = window.location.protocol + '//' + window.location.host;
+	if (chaiseConfig['ermrestLocation'] != null) {
+		HOME = chaiseConfig['ermrestLocation'];
+	} else {
+		HOME = window.location.protocol + '//' + window.location.host;
+	}
 }
 
 function clearFacets(options) {
