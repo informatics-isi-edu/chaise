@@ -21,13 +21,23 @@
     "ui"
   ],
   "devDependencies": {
-      "bower": "x",
-      "mocha": "x",
-      "chai": "x",
-      "testem": "x",
-      "closurecompiler": "x",
-      "jshint": "x",
-      "jsdoc": "x",
-      "jsdoc-to-markdown": "x"
+    "angular-mocks": "^1.4.4",
+    "bower": "x",
+    "chai": "x",
+    "closurecompiler": "x",
+    "jsdoc": "x",
+    "jsdoc-to-markdown": "x",
+    "jshint": "x",
+    "karma": "^0.13.9",
+    "karma-chrome-launcher": "^0.2.0",
+    "karma-firefox-launcher": "^0.1.6",
+    "karma-ie-launcher": "^0.2.0",
+    "karma-mocha": "^0.2.0",
+    "karma-phantomjs-launcher": "^0.2.1",
+    "karma-safari-launcher": "^0.1.1",
+    "mocha": "x",
+    "phantomjs": "^1.9.18",
+    "sinon": "x",
+    "testem": "x"
   }
 }

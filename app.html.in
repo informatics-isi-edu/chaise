@@ -15,20 +15,6 @@
   <link rel="stylesheet" href="styles/ermrest.css">
   <link rel="stylesheet" type="text/css" href="styles/app.css">
   <link rel="stylesheet" type="text/css" href="styles/appheader.css">
-
-  <script src="scripts/vendor/jquery-latest.min.js"></script>
-  <script src="scripts/vendor/jquery-ui-tooltip.min.js"></script>
-  <script src="scripts/vendor/jquery.nouislider.all.min.js"></script>
-  <script src="scripts/vendor/bootstrap.min.js"></script>
-  <script src="scripts/vendor/jquery.cookie.js"></script>
-  <script src="scripts/vendor/angular.js"></script>
-  <script src="scripts/vendor/angular-route.js"></script>
-  <script src="scripts/vendor/angular-sanitize.js"></script>
-  <script src="scripts/vendor/rzslider.js"></script>
-  <script src="scripts/vendor/angular-datepicker.js"></script>
-  <script src="scripts/vendor/ng-grid.js"></script>
-  <script src="scripts/respond.js"></script>
-
   %SCRIPTS%
 </head>
 <body>
