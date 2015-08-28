@@ -2958,7 +2958,8 @@ function hasColumnFacetHidden(table_name, column_name) {
 			var column_definitions = table['column_definitions'];
 			$.each(column_definitions, function(i, col) {
 				if (col['name'] == column_name) {
-					if (col['annotations'] != null && col['annotations'][COLUMNS_FACET_URI] != null && col['annotations'][COLUMNS_FACET_URI] == 'hidden') {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_FACET_URI] != null && col['annotations'][COLUMNS_FACET_URI] == 'hidden' || 
+							hasAnnotation(table_name, column_name, 'hidden')) {
 						ret = true;
 					}
 					return false;
