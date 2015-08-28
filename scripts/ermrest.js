@@ -56,6 +56,7 @@ var viewer3dFileTypes = ['image/x.nifti'];
 var sliderPresentation = [ 'float4', 'int8', 'int4', 'int2', 'float8', 'serial4', 'serial8' ];
 
 var searchBoxPresentation = [ 'text' ];
+var checkBoxPresentation = [ 'boolean' ];
 
 var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz' ];
 
@@ -550,7 +551,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 						tablePredicate.push(encodeSafeURIComponent(key) + '::ciregexp::' + encodeSafeURIComponent(val));
 					}
 				});
-			} else if (datepickerPresentation.contains(colsDescr[key]['type'])) {
+			} else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
 				if (value['left']) {
 					tablePredicate.push(encodeSafeURIComponent(key) + '::geq::' + encodeSafeURIComponent(value['min']));
 				}
@@ -576,13 +577,6 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 				selectedValues = selectedValues.join(';');
 				if (selectedValues.length > 0) {
 					tablePredicate.push(selectedValues);
-				}
-			} else if (sliderPresentation.contains(colsDescr[key]['type'])) {
-				if (value['left']) {
-					tablePredicate.push(encodeSafeURIComponent(key) + '::geq::' + encodeSafeURIComponent(value['min']));
-				}
-				if (value['right']) {
-					tablePredicate.push(encodeSafeURIComponent(key) + '::leq::' + encodeSafeURIComponent(value['max']));
 				}
 			}
 		});
@@ -1055,43 +1049,33 @@ function getColumnDescriptions(options, successCallback) {
 			}
 		});
 		var alertObject = {'display': true};
+		var sentRequests = false;
 		$.each(ret, function(col, obj) {
 			if (obj['ready']) {
 				return true;
 			}
-			if (searchBoxPresentation.contains(obj['type'])) {
-				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
-				var param = {};
-				param['options'] = options;
-				param['alert'] = alertObject;
-				param['successCallback'] = successCallback;
-				param['entity'] = ret;
-				param['col'] = col;
-				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
-			} else if (datepickerPresentation.contains(obj['type'])) {
-				var param = {};
-				param['options'] = options;
-				param['alert'] = alertObject;
-				var col_name = encodeSafeURIComponent(col);
-				param['successCallback'] = successCallback;
-				param['entity'] = ret;
-				param['col'] = col;
-				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
-				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
-			} else if (sliderPresentation.contains(obj['type'])) {
-				var param = {};
-				param['options'] = options;
-				param['alert'] = alertObject;
-				var col_name = encodeSafeURIComponent(col);
-				param['successCallback'] = successCallback;
-				param['entity'] = ret;
-				param['col'] = col;
-				var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
-				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
+			var url = null;
+			if (searchBoxPresentation.contains(obj['type']) || checkBoxPresentation.contains(obj['type'])) {
+				url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
+			} else if (sliderPresentation.contains(obj['type']) || datepickerPresentation.contains(obj['type'])) {
+				url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
 			} else {
 				console.log('Type not found: '+obj['type']);
 			}
+			if (url != null) {
+				sentRequests = true;
+				var param = {};
+				param['options'] = options;
+				param['alert'] = alertObject;
+				param['successCallback'] = successCallback;
+				param['entity'] = ret;
+				param['col'] = col;
+				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
+			}
 		});
+		if (!sentRequests) {
+			successCallback({}, null, null);
+		}
 	} else {
 		successCallback({}, null, null);
 	}
@@ -1103,7 +1087,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var options = param['options'];
 	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
-	if (searchBoxPresentation.contains(entity[col]['type'])) {
+	if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
 		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 			var param = {};
@@ -2103,7 +2087,7 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 			param['col'] = col;
 			param['table'] = table;
 			var url = null;
-			if (searchBoxPresentation.contains(obj['type'])) {
+			if (searchBoxPresentation.contains(obj['type']) || checkBoxPresentation.contains(obj['type'])) {
 				url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options, table) + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 			} else if (datepickerPresentation.contains(obj['type']) || sliderPresentation.contains(obj['type'])) {
 				url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options, table) + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
@@ -2129,7 +2113,7 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 	var options = param['options'];
 	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
-	if (searchBoxPresentation.contains(entity[col]['type'])) {
+	if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
 		var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 		var param = {};
 		param['successCallback'] = successCallback;
@@ -2959,7 +2943,7 @@ function hasColumnFacetHidden(table_name, column_name) {
 			$.each(column_definitions, function(i, col) {
 				if (col['name'] == column_name) {
 					if (col['annotations'] != null && col['annotations'][COLUMNS_FACET_URI] != null && col['annotations'][COLUMNS_FACET_URI] == 'hidden' || 
-							hasAnnotation(table_name, column_name, 'hidden')) {
+							facetPolicy == 'on_demand' && hasAnnotation(table_name, column_name, 'hidden')) {
 						ret = true;
 					}
 					return false;
@@ -2999,12 +2983,12 @@ function initFacetGroups(options, facet, successCallback) {
 			}
 		});
 		var url = null;
-		if (searchBoxPresentation.contains(col_type)) {
+		if (searchBoxPresentation.contains(col_type) || checkBoxPresentation.contains(col_type)) {
 			url = ERMREST_DATA_HOME + '/aggregate/' + queryPredicate + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 		} else if (datepickerPresentation.contains(col_type) || sliderPresentation.contains(col_type)) {
 			url = ERMREST_DATA_HOME + '/aggregate/' + queryPredicate + '/min:=min(' + encodeSafeURIComponent(col) + '),max:=max(' + encodeSafeURIComponent(col) + ')';
 		} else {
-			console.log('Type not found: '+obj['type']);
+			console.log('Type not found: '+col_type);
 		}
 		if (url != null) {
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successInitFacetGroups, errorErmrest, param);
@@ -3025,7 +3009,7 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 		queryPredicate = getQueryPredicate(options, table);
 	}
 	var ready = false;
-	if (searchBoxPresentation.contains(col_type)) {
+	if (searchBoxPresentation.contains(col_type) || checkBoxPresentation.contains(col_type)) {
 		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 			param['col_type'] = 'enum';
 			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
