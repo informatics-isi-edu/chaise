@@ -27,32 +27,32 @@ BOWER=bower_components
 
 # JavaScript source and test specs
 JS=scripts
-SOURCE=$(JS)/vendor/jquery-latest.min.js \
-					$(JS)/vendor/jquery-ui-tooltip.min.js \
-				  $(JS)/vendor/jquery.nouislider.all.min.js \
-				  $(JS)/vendor/bootstrap.min.js \
-				  $(JS)/vendor/jquery.cookie.js \
-				  $(JS)/vendor/angular.js \
-				  $(JS)/vendor/angular-route.js \
-				  $(JS)/vendor/angular-sanitize.js \
-				  $(JS)/vendor/rzslider.js \
-				  $(JS)/vendor/angular-datepicker.js \
-				  $(JS)/vendor/ng-grid.js \
-				  $(JS)/respond.js \
-					$(JS)/variables.js \
-					$(JS)/utils.js \
-					$(JS)/ermrest.js \
-					chaise-config.js \
-					$(JS)/app.js \
-					$(JS)/facetsModel.js \
-					$(JS)/facetsService.js \
-					$(JS)/controller/ermrestDetailController.js \
-					$(JS)/controller/ermrestFilterController.js \
-					$(JS)/controller/ermrestInitController.js \
-					$(JS)/controller/ermrestLoginController.js \
-					$(JS)/controller/ermrestLogoutController.js \
-					$(JS)/controller/ermrestResultsController.js \
-					$(JS)/controller/ermrestSideBarController.js
+JSDEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/jquery-ui-tooltip.min.js \
+	$(JS)/vendor/jquery.nouislider.all.min.js \
+	$(JS)/vendor/bootstrap.min.js \
+	$(JS)/vendor/jquery.cookie.js \
+	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-route.js \
+	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/rzslider.js \
+	$(JS)/vendor/angular-datepicker.js \
+	$(JS)/vendor/ng-grid.js
+SOURCE=$(JS)/respond.js \
+	$(JS)/variables.js \
+	$(JS)/utils.js \
+	$(JS)/ermrest.js \
+	chaise-config.js \
+	$(JS)/app.js \
+	$(JS)/facetsModel.js \
+	$(JS)/facetsService.js \
+	$(JS)/controller/ermrestDetailController.js \
+	$(JS)/controller/ermrestFilterController.js \
+	$(JS)/controller/ermrestInitController.js \
+	$(JS)/controller/ermrestLoginController.js \
+	$(JS)/controller/ermrestLogoutController.js \
+	$(JS)/controller/ermrestResultsController.js \
+	$(JS)/controller/ermrestSideBarController.js
 
 # Distribution target
 DIST=dist
@@ -162,8 +162,11 @@ karma:
 app.html: app.html.in .make-script-block
 	sed -e '/%SCRIPTS%/ {' -e 'r .make-script-block' -e 'd' -e '}' app.html.in > app.html
 
-.make-script-block: $(SOURCE)
+.make-script-block: $(JSDEPS) $(SOURCE)
 	> .make-script-block
+	for file in $(JSDEPS); do \
+		echo "<script src='$$file'></script>" >> .make-script-block ; \
+	done
 	for file in $(SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='$$file?v=$$checksum'></script>" >> .make-script-block ; \
