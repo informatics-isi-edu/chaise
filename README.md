@@ -1,4 +1,4 @@
-# Chaise
+# Chaise [![Build Status](https://travis-ci.org/informatics-isi-edu/chaise.svg?branch=master)](https://travis-ci.org/informatics-isi-edu/chaise)
 
 [Chaise](https://github.com/informatics-isi-edu/chaise) is a Web UI for the
 [ERMrest](https://github.com/informatics-isi-edu/ermrest) service.
