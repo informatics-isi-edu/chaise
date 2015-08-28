@@ -4,18 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data :: ERMREST</title>
-  <link rel="stylesheet" href="styles/vendor/bootstrap.css">
-  <link rel="stylesheet" href="styles/vendor/ng-grid.css">
-  <link rel="stylesheet" href="styles/vendor/rzslider.css">
-  <link rel="stylesheet" href="styles/vendor/angular-datepicker.css">
-  <link rel="stylesheet" type="text/css" href="styles/vendor/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css" href="styles/swoop-sidebar.css">
-  <link rel="stylesheet" type="text/css" href="styles/jquery.nouislider.min.css">
-  <link rel="stylesheet" type="text/css" href="styles/material-design/css/material-design-iconic-font.min.css">
-  <link rel="stylesheet" href="styles/ermrest.css">
-  <link rel="stylesheet" type="text/css" href="styles/app.css">
-  <link rel="stylesheet" type="text/css" href="styles/appheader.css">
-  %SCRIPTS%
+  %ASSETS%
 </head>
 <body>
 	<!-- Overlay for fixed sidebar -->

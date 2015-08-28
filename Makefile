@@ -25,9 +25,22 @@ endif
 # Bower front end components
 BOWER=bower_components
 
+# CSS source
+CSS=styles
+CSS_DEPS=$(CSS)/vendor/bootstrap.css \
+	$(CSS)/vendor/ng-grid.css \
+	$(CSS)/vendor/rzslider.css \
+	$(CSS)/vendor/angular-datepicker.css
+CSS_SOURCE=$(CSS)/swoop-sidebar.css \
+	$(CSS)/jquery.nouislider.min.css \
+	$(CSS)/material-design/css/material-design-iconic-font.min.css \
+	$(CSS)/ermrest.css \
+	$(CSS)/app.css \
+	$(CSS)/appheader.css
+
 # JavaScript source and test specs
 JS=scripts
-JSDEPS=$(JS)/vendor/jquery-latest.min.js \
+JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
 	$(JS)/vendor/bootstrap.min.js \
@@ -38,7 +51,7 @@ JSDEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/ng-grid.js
-SOURCE=$(JS)/respond.js \
+JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \
 	$(JS)/ermrest.js \
@@ -76,18 +89,18 @@ all: lint build test $(DOC)
 build: $(PKG) $(MIN) app.html
 
 # Rule to build the full library
-$(PKG): $(SOURCE) $(BIN)
+$(PKG): $(JS_SOURCE) $(BIN)
 	mkdir -p $(DIST)
-	cat $(SOURCE) > $(PKG)
+	cat $(JS_SOURCE) > $(PKG)
 
 # Rule to build the minified package
-$(MIN): $(SOURCE) $(BIN)
+$(MIN): $(JS_SOURCE) $(BIN)
 	mkdir -p $(DIST)
-	$(BIN)/ccjs $(SOURCE) > $(MIN)
+	$(BIN)/ccjs $(JS_SOURCE) > $(MIN)
 
 # Rule to lint the source (only changed source is linted)
-$(LINT): $(SOURCE) $(BIN)
-	$(BIN)/jshint $(filter $(SOURCE), $?)
+$(LINT): $(JS_SOURCE) $(BIN)
+	$(BIN)/jshint $(filter $(JS_SOURCE), $?)
 	@touch $(LINT)
 
 .PHONY: lint
@@ -97,14 +110,14 @@ lint: $(LINT)
 $(DOC): $(API)
 
 # Rule for making API doc
-$(API): $(SOURCE) $(BIN)
+$(API): $(JS_SOURCE) $(BIN)
 	mkdir -p $(DOC)
-	$(BIN)/jsdoc2md $(SOURCE) > $(API)
+	$(BIN)/jsdoc2md $(JS_SOURCE) > $(API)
 
 # jsdoc: target for html docs produced (using 'jsdoc')
-$(JSDOC): $(SOURCE) $(BIN)
+$(JSDOC): $(JS_SOURCE) $(BIN)
 	mkdir -p $(JSDOC)
-	$(BIN)/jsdoc --pedantic -d $(JSDOC) $(SOURCE)
+	$(BIN)/jsdoc --pedantic -d $(JSDOC) $(JS_SOURCE)
 	@touch $(JSDOC)
 
 # Rule to ensure Node bin scripts are present
@@ -159,17 +172,24 @@ karma:
 	$(BIN)/karma start
 
 # Rules to attach checksums to JavaScript source in the header
-app.html: app.html.in .make-script-block
-	sed -e '/%SCRIPTS%/ {' -e 'r .make-script-block' -e 'd' -e '}' app.html.in > app.html
+app.html: app.html.in .make-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' app.html.in > app.html
 
-.make-script-block: $(JSDEPS) $(SOURCE)
-	> .make-script-block
-	for file in $(JSDEPS); do \
-		echo "<script src='$$file'></script>" >> .make-script-block ; \
+.make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE)
+	> .make-asset-block
+	for file in $(CSS_DEPS); do \
+		echo "<link rel='stylesheet' type='text/css' href='$$file'>" >> .make-asset-block ; \
 	done
-	for file in $(SOURCE); do \
+	for file in $(CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='$$file?v=$$checksum'></script>" >> .make-script-block ; \
+		echo "<link rel='stylesheet' type='text/css' href='$$file?v=$$checksum'>" >> .make-asset-block ; \
+	done
+	for file in $(JS_DEPS); do \
+		echo "<script src='$$file'></script>" >> .make-asset-block ; \
+	done
+	for file in $(JS_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
 
 # Rules for help/usage
