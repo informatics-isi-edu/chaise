@@ -58,7 +58,7 @@ var sliderPresentation = [ 'float4', 'int8', 'int4', 'int2', 'float8', 'serial4'
 var searchBoxPresentation = [ 'text' ];
 var checkBoxPresentation = [ 'boolean' ];
 
-var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz' ];
+var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
 
 var unsortableColumns = [];
 var suppressError = false;
