@@ -703,36 +703,38 @@ function initModels(options, successCallback) {
 		var box = options['box'][table];
 		var colsDescr = options['colsDescr'][table];
 		var colsGroup = options['colsGroup'][table];
-		$.each(colsDescr, function(col, value) {
-			var hasTop = (hasTableFacetsHidden(table) || hasColumnFacetHidden(table, col)) ? false : hasAnnotation(table, col, 'top');
-			options['chooseColumns'][table][col] = hasTop;
-			options['searchFilterValue'][table][col] = '';
-			if (hasTop) {
-				topCount++;
-			}
-			options['facetClass'][table][col] = '';
-			box[col] = {};
-			box[col]['count'] = col;
-			box[col]['facetcount'] = 0;
-			if (value['type'] == 'enum') {
-				colsGroup[col] = {};
-				colsGroup[col]['ready'] = false;
-				box[col]['values'] = {};
-				sentRequests = true;
-			} else if (value['type'] == 'select') {
-				box[col]['value'] = [];
-			} else if (searchBoxPresentation.contains(value['type'])) {
-				box[col]['value'] = '';
-			} else if (datepickerPresentation.contains(value['type'])) {
-				box[col]['min'] = box[col]['floor'] = value['min'];
-				box[col]['max'] = box[col]['ceil'] = value['max'];
-				sentRequests = true;
-			} else if (sliderPresentation.contains(value['type'])) {
-				box[col]['min'] = box[col]['floor'] = value['min'];
-				box[col]['max'] = box[col]['ceil'] = value['max'];
-				sentRequests = true;
-			}
-		});
+		if (colsDescr != null) {
+			$.each(colsDescr, function(col, value) {
+				var hasTop = (hasTableFacetsHidden(table) || hasColumnFacetHidden(table, col)) ? false : hasAnnotation(table, col, 'top');
+				options['chooseColumns'][table][col] = hasTop;
+				options['searchFilterValue'][table][col] = '';
+				if (hasTop) {
+					topCount++;
+				}
+				options['facetClass'][table][col] = '';
+				box[col] = {};
+				box[col]['count'] = col;
+				box[col]['facetcount'] = 0;
+				if (value['type'] == 'enum') {
+					colsGroup[col] = {};
+					colsGroup[col]['ready'] = false;
+					box[col]['values'] = {};
+					sentRequests = true;
+				} else if (value['type'] == 'select') {
+					box[col]['value'] = [];
+				} else if (searchBoxPresentation.contains(value['type'])) {
+					box[col]['value'] = '';
+				} else if (datepickerPresentation.contains(value['type'])) {
+					box[col]['min'] = box[col]['floor'] = value['min'];
+					box[col]['max'] = box[col]['ceil'] = value['max'];
+					sentRequests = true;
+				} else if (sliderPresentation.contains(value['type'])) {
+					box[col]['min'] = box[col]['floor'] = value['min'];
+					box[col]['max'] = box[col]['ceil'] = value['max'];
+					sentRequests = true;
+				}
+			});
+		}
 	});
 	var index = 10 - topCount;
 	var table = options['table'];
@@ -2067,6 +2069,7 @@ function getAssociationColumn(table, column_name) {
 function getAssociationColumnsDescriptions(options, successCallback) {
 	var alertObject = {'display': true};
 	var ret = {};
+	var sentRequests = false;
 	$.each(association_tables, function(table_name, value) {
 		if (!hasTableFacetsHidden(table_name)) {
 			var metadata = association_tables[table_name]['metadata'];
@@ -2108,10 +2111,14 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 				console.log('Type for association column was not found: '+obj['type'])
 			}
 			if (url != null) {
+				sentRequests = true;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetAssociationColumnsDescriptions, errorErmrest, param);
 			}
 		});
 	});
+	if (!sentRequests) {
+		successCallback();
+	}
 }
 
 function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param) {
