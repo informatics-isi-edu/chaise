@@ -2101,6 +2101,9 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 		});
 	});
 	if (!sentRequests) {
+		$.each(ret, function(table, value) {
+			options['colsDescr'][table] = value;
+		});
 		successCallback();
 	}
 }
