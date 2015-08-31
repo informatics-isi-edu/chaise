@@ -1773,7 +1773,9 @@ function addTreeReference(table, nodes, level, parent, rootNode, schema) {
 	nodes.push(node);
 	if (catalog_back_references[schema][table] != null) {
 		$.each(catalog_back_references[schema][table], function(i, key) {
-			addTreeReference(key, subNodes, level+1, node, rootNode, schema);
+			if (key != table) {
+				addTreeReference(key, subNodes, level+1, node, rootNode, schema);
+			}
 		});
 	}
 }
