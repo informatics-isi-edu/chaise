@@ -2931,10 +2931,12 @@ function initLogin() {
 function hasTableFacetsHidden(table_name) {
 	var ret = false;
 	$.each(SCHEMA_METADATA, function(i, table) {
-		if (table_name == table['table_name'] && table['annotations'] != null &&
-			table['annotations'][TABLES_FACET_URI] != null && table['annotations'][TABLES_FACET_URI] == 'hidden') {
-			ret = true;
-			return false;
+		if (table_name == table['table_name'] && table['annotations'] != null) {
+			if (table['annotations'][TABLES_FACET_URI] != null && table['annotations'][TABLES_FACET_URI] == 'hidden' ||
+					table['annotations'][TABLES_LIST_URI] != null && table['annotations'][TABLES_LIST_URI].contains('exclude')) {
+				ret = true;
+				return false;
+			}
 		}
 	});
 	return ret;
