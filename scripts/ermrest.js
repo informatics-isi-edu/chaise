@@ -1794,21 +1794,23 @@ function entityDenormalize(table, row, result) {
 function getDenormalizedValues(table, url, result) {
 	if (back_references[table] != null) {
 		$.each(back_references[table], function(i, key) {
-			var keyUrl = url + '/' + key;
-			getDenormalizedValues(key, keyUrl, result);
-			var data = ERMREST.fetch(keyUrl, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
-			if (data != null) {
-				$.each(data, function(i, row) {
-					$.each(row, function(name, value) {
-						if (value == null || value === '' || hasAnnotation(key, name, 'hidden')) {
-							delete data[i][name];
-						}
+			if (!hasTableAnnotation(key, 'exclude') && !hasTableAnnotation(key, 'hidden')) {
+				var keyUrl = url + '/' + key;
+				getDenormalizedValues(key, keyUrl, result);
+				var data = ERMREST.fetch(keyUrl, 'application/x-www-form-urlencoded; charset=UTF-8', false, true, [], null, null, null);
+				if (data != null) {
+					$.each(data, function(i, row) {
+						$.each(row, function(name, value) {
+							if (value == null || value === '' || hasAnnotation(key, name, 'hidden')) {
+								delete data[i][name];
+							}
+						});
 					});
-				});
-				if (result[key] == null) {
-					result[key] = [];
+					if (result[key] == null) {
+						result[key] = [];
+					}
+					result[key] = result[key].concat(data);
 				}
-				result[key] = result[key].concat(data);
 			}
 		});
 	}
