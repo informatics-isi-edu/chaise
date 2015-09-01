@@ -146,7 +146,8 @@ ermDetailController.controller('DetailListCtrl', ['$scope', '$sce', 'FacetsData'
 	this.goBack = function goBack() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
         if (!isIE) {
-    		window.history.back();
+    		//window.history.back();
+    		$scope.FacetsData.isDetail = false;
         } else {
     		$scope.FacetsData.isDetail = false;
         }

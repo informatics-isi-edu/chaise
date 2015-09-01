@@ -75,7 +75,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
             $scope.FacetsData.isDetail = true;
             var isIE = /*@cc_on!@*/false || !!document.documentMode;
             if (!isIE) {
-                $window.history.pushState({'ermrest': 'detail'}, '', '');
+                //$window.history.pushState({'ermrest': 'detail'}, '', '');
             }
 		}
 	};
