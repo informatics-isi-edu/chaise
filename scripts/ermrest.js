@@ -61,7 +61,7 @@ var checkBoxPresentation = [ 'boolean' ];
 var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
 
 var unsortableColumns = [];
-var suppressError = false;
+var suppressError = true;
 var facetPolicy = null;
 
 function isSortable(table, column) {
@@ -749,7 +749,7 @@ function initModels(options, successCallback) {
 		});
 	}
 	if (!sentRequests) {
-		successCallback();
+		successCallback(true);
 	} else {
 		updateGroups(options, successCallback);
 		updateSliders(options, successCallback);

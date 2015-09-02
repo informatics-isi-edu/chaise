@@ -12,6 +12,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     $scope.filtersStatus = {};
     $scope.filtersMatch = {};
     $scope.selectedCollection = '';
+    $scope.requestCounter = 0;
   	$scope.translate = function(value)
 	{
 	    return numberFilter(value);
@@ -274,7 +275,22 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		//console.log(JSON.stringify($scope.options, null, 4));
 	};
 
-	$scope.successInitModels = function successInitModels() {
+	$scope.successInitModels = function successInitModels(done) {
+		var ready = false;
+		if (done) {
+			ready = true;
+			$scope.requestCounter = 0;
+		} else {
+			if ($scope.requestCounter > 0) {
+				ready = true;
+				$scope.requestCounter = 0;
+			} else {
+				$scope.requestCounter++;
+			}
+		}
+		if (!ready) {
+			return;
+		}
 		updateCount($scope.FacetsData, $scope.successUpdateCount);
 		var sessionFilters = $scope.FacetsData['sessionFilters'];
 		emptyJSON(sessionFilters);
@@ -297,6 +313,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	};
 
 	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
+	    $scope.requestCounter = 0;
 		initModels($scope.FacetsData, $scope.successInitModels);
 	};
 
