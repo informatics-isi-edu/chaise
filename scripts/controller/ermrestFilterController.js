@@ -69,62 +69,12 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'FacetsD
 		}
 	};
 
-	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
-		initModels($scope.FacetsData, $scope.successInitModels);
-	};
-
-	$scope.successGetErmrestData = function successGetErmrestData(data, totalItems, page, pageSize) {
-    	FacetsService.successGetErmrestData(data, totalItems, page, pageSize);
-		if (!$scope.$$phase) {
-			$scope.$apply();
-		}
-		$('div.ngSortButtonUp').addClass('ng-hide');
-		getColumnDescriptions($scope.FacetsData, $scope.successGetColumnDescriptions);
-	};
-
-	$scope.successGetTableColumns = function successGetTableColumns(columns) {
-    	FacetsService.successGetTableColumns(columns);
-		if (!$scope.$$phase) {
-			$scope.$apply();
-		}
-		getTableColumnsUniques($scope.FacetsData, $scope.successGetTableColumnsUniques);
-	};
-	
-	$scope.successGetTableColumnsUniques = function successGetTableColumnsUniques() {
-		//alert(JSON.stringify($scope.score, null, 4));
-		FacetsService.setSortOption();
-		getErmrestData($scope.FacetsData, $scope.successGetErmrestData, $scope.successUpdateModels);
-	};
-
 	$scope.successGetTables = function successGetTables() {
 		$('#headerSearch').attr('disabled', 'disabled');
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
 		selectCollection();
-	};
-
-	$scope.successInitModels = function successInitModels() {
-		updateCount($scope.FacetsData, $scope.successUpdateCount);
-		if (!$scope.$$phase) {
-			$scope.$apply();
-		}
-	};
-
-	$scope.successUpdateCount = function successUpdateCount() {
-		$scope.FacetsData.ready = true;
-		$('footer').show();
-		if (!$scope.$$phase) {
-			$scope.$apply();
-		}
-		//console.log(JSON.stringify($scope.options, null, 4));
-	};
-
-	$scope.successUpdateModels = function successUpdateModels() {
-		if (!$scope.$$phase) {
-			$scope.$apply();
-		}
-		$scope.$broadcast('reCalcViewDimensions');
 	};
 
 	$scope.initPageRange();
