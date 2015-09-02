@@ -26,7 +26,10 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	});
 	
 	$('.sidebar-overlay').click(function(event) {
-    	if (!$('#editfilter').hasClass('open') && $('.sidebar-overlay').hasClass('active')) {
+    	if ($('.sidebar-overlay').hasClass('active')) {
+    		if ($('#editfilter').hasClass('open')) {
+    			$('#editfilter').toggleClass('open');
+    		}
 	        $('.sidebar-overlay').removeClass('active');
     		if ($('#sidebar').hasClass('open')) {
     	        $('#sidebar').toggleClass('open');
