@@ -31,6 +31,13 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
     			$('#editFilterDoneButton').click();
     			return;
     		}
+    		if ($('#morefilters').hasClass('open')) {
+    			$('#moreFilterDoneButton').click();
+	    		setTimeout(function () {
+	    		    $('#sidebarDoneButton').click();
+	    		}, 1);
+	    		return;
+    		}
 	        $('.sidebar-overlay').removeClass('active');
     		if ($('#sidebar').hasClass('open')) {
     	        $('#sidebar').toggleClass('open');
