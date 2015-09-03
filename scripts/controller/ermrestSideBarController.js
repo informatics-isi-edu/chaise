@@ -309,8 +309,31 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		if ($scope.FacetsData.filter != null) {
 			$scope.FacetsData.filter = null;
 			getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
+			if ($scope.FacetsData.bookmarkPage != null) {
+	    		setTimeout(function () {
+	    			$scope.morePage();
+	    		}, 200);
+			}
 		}
 	};
+	
+	$scope.morePage = function morePage() {
+		var page = $scope.FacetsData.bookmark.match(/page=([^&]+)/)[1];
+		if ($scope.FacetsData.bookmarkPage != $scope.FacetsData.pagingOptions.currentPage) {
+			if (page >= $scope.FacetsData.pagingOptions.currentPage) {
+			    $('#moreButton').click();
+		   		setTimeout(function () {
+	    			$scope.morePage();
+	    		}, 200);
+			} else {
+		   		setTimeout(function () {
+	    			$scope.morePage();
+	    		}, 1);
+			}
+ 		} else {
+			$scope.FacetsData.bookmarkPage = null;
+		}
+	}
 
 	$scope.successGetColumnDescriptions = function successGetColumnDescriptions(data, textStatus, jqXHR) {
 	    $scope.requestCounter = 0;

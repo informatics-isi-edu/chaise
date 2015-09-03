@@ -81,6 +81,12 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 		$scope.FacetsData.table = '';
 	}
 
+	if ($location.search()['page'] != null) {
+		$scope.FacetsData.bookmarkPage = $location.search()['page'];
+	} else {
+		$scope.FacetsData.bookmarkPage = null;
+	}
+
 	if ($location.search()['filter'] != null) {
 		$scope.FacetsData.filter = JSON.parse(decodeURIComponent($location.search()['filter']));
 	} else {

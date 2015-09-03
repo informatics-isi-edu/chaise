@@ -2922,7 +2922,7 @@ function setBookmark(options) {
 	var filter = encodeSafeURIComponent(JSON.stringify(ret));
 	var len = options.location.absUrl().length - options.location.url().length;
 	var prefix = options.location.absUrl().substr(0,len);
-	options.bookmark = prefix + options.location.path() + '?schema='+encodeSafeURIComponent(SCHEMA) + '&table='+options.table + '&filter='+filter + '&layout='+options.view;
+	options.bookmark = prefix + options.location.path() + '?schema='+encodeSafeURIComponent(SCHEMA) + '&table='+options.table + '&filter='+filter + '&layout='+options.view + '&page='+options.pagingOptions.currentPage;
 }
 
 function initLogin() {

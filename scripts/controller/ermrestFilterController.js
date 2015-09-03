@@ -64,6 +64,7 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'FacetsD
 		if ($scope.FacetsData.totalServerItems%$scope.FacetsData.pagingOptions.pageSize != 0) {
 			$scope.FacetsData.maxPages++;
 		}
+		setBookmark($scope.FacetsData);
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}

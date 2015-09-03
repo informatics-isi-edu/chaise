@@ -9,6 +9,7 @@ facetsModel.factory('FacetsData', function() {
 	return {
 		'box': {},
 		'bookmark': '#',
+		'bookmarkPage': null,
 		'chooseColumns': {},
 		'collectionsPredicate': '',
 		'colsDefs': [],
