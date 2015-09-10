@@ -15,6 +15,26 @@ The below tables explains the meaning of the possible values for the key.
 | exclude | The schema is "excluded" from the catalog. None of its tables will be displayed in the list of the available tables. | 
 | default | By default (when the schema name is not specified in the URL or in the _chaise-config.js_ file), the tables of that schema will be used. | 
 
+## Examples
+
+Set the _legacy_ schema as the default one:
+
+    PUT /ermrest/catalog/1/schema/legacy/annotation/comment HTTP/1.1
+    Host: www.example.com
+    Content-Type: text/csv
+    Accept: text/csv
+
+    ["default"]
+    
+Exclude the tables of the _Microscopy_ schema:
+
+    PUT /ermrest/catalog/1/schema/Microscopy/annotation/comment HTTP/1.1
+    Host: www.example.com
+    Content-Type: text/csv
+    Accept: text/csv
+
+    ["exclude"]
+    
 # Table Annotations
 
 **Chaise** is using the following current [table annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#table-annotations):
@@ -56,6 +76,26 @@ The below tables explains the meaning of the possible values for the two keys.
 |-------|---------|
 | hidden | All the table columns will not be displayed in the facets sidebar. | 
 
+## Examples
+
+Set the _dataset_ table as the default one:
+
+    PUT /ermrest/catalog/1/schema/legacy/table/dataset/annotation/comment HTTP/1.1
+    Host: www.example.com
+    Content-Type: text/csv
+    Accept: text/csv
+
+    ["default"]
+    
+Display the _dataset_ table as _FaceBase 1 Data_:
+
+    PUT /ermrest/catalog/1/schema/legacy/table/dataset/annotation/description HTTP/1.1
+    Host: www.example.com
+    Content-Type: text/csv
+    Accept: text/csv
+
+    {"display": "FaceBase 1 Data"}
+    
 # Column Annotations
 
 **Chaise** is using the following current [column annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#column-annotations):
@@ -63,6 +103,7 @@ The below tables explains the meaning of the possible values for the two keys.
  - **comment**: contains a JSON array
  - **description**: contains a JSON object
  - **facet**: contains a JSON string
+ - **facetOrder**: contains an integer
 
 It is expected in the future these keys to be renamed to some useful URLs.
 
@@ -103,6 +144,41 @@ The below tables explains the meaning of the possible values for the two keys.
 |-------|---------|
 | hidden | The column will not be displayed in the facets sidebar. | 
 
+- **facetOrder** _key_ _values_
+
+| Value | Meaning |
+|-------|---------|
+| <integer> | The position of the facet in the facets sidebar. | 
+
+## Examples
+
+Display the _geo_gds_ column as a link:
+
+    PUT /ermrest/catalog/1/schema/legacy/table/dataset_geo/column/geo_gds/annotation/comment HTTP/1.1
+    Host: www.example.com
+    Content-Type: text/csv
+    Accept: text/csv
+
+    ["url"]
+    
+Display the _geo_gds_ column as _GEO Curated_:
+
+    PUT /ermrest/catalog/1/schema/legacy/table/dataset_geo/column/geo_gds/annotation/description HTTP/1.1
+    Host: www.example.com
+    Content-Type: text/csv
+    Accept: text/csv
+
+    {"display": "GEO Curated"}
+    
+Display the _organism_ column in the first position of the facets:
+
+    PUT /ermrest/catalog/1/schema/legacy/table/dataset_organism/column/organism/annotation/facetOrder HTTP/1.1
+    Host: www.example.com
+    Content-Type: text/csv
+    Accept: text/csv
+
+    1
+    
 # Foreign Key Annotations
 
 **Chaise** is using the following current [foreign key annotations](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#foreign-key-annotations):
