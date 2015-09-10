@@ -148,7 +148,7 @@ The below tables explains the meaning of the possible values for the two keys.
 
 | Value | Meaning |
 |-------|---------|
-| \<integer>\ | The position of the facet in the facets sidebar. | 
+| \<integer> | The position of the facet in the facets sidebar. | 
 
 ## Examples
 
