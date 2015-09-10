@@ -49,6 +49,7 @@ var COLUMNS_MAP_URI = 'description';
 var TABLES_MAP_URI = 'description';
 var COLUMNS_FACET_URI = 'facet';
 var TABLES_FACET_URI = 'facet';
+var COLUMNS_FACET_ORDER_URI = 'facetOrder';
 
 var thumbnailFileTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/tiff'];
 var viewer3dFileTypes = ['image/x.nifti'];
@@ -1508,6 +1509,24 @@ function compareCollections(item1, item2) {
 	return compareIgnoreCase(val1, val2);
 }
 
+function compareFacets(facet1, facet2) {
+	var val1 = getFacetOrder(facet1);
+	var val2 = getFacetOrder(facet2);
+	var ret = 0;
+	if (val1 != null && val2 != null) {
+		if (val1 < val2) {
+			ret = -1;
+		} else if (val1 > val2) {
+			ret = 1;
+		}
+	} else if (val1 != null) {
+		ret = -1;
+	} else if (val2 != null) {
+		ret = 1;
+	}
+	return ret;
+}
+
 function setFacetClass(options, facet, facetClass) {
 	var cssClass = '';
 	var colsDescr = options['colsDescr'][facet['table']];
@@ -2020,9 +2039,9 @@ function isTextColumn(table, column) {
 }
 
 function getAssociationTableColumns(options, successCallback, columns) {
+	var facets = columns['facets'];
 	if (association_tables_names.length > 0) {
 		//getAssociationColumnsDescriptions(options, successCallback, columns);
-		var facets = columns['facets'];
 		$.each(association_tables, function(table, value) {
 			options['box'][table] = {};
 			options['colsGroup'][table] = {};
@@ -2037,8 +2056,10 @@ function getAssociationTableColumns(options, successCallback, columns) {
 					'alias': value['alias']});
 			});
 		});
+		facets.sort(compareFacets);
 		successCallback(columns);
 	} else {
+		facets.sort(compareFacets);
 		successCallback(columns);
 	}
 }
@@ -3245,6 +3266,27 @@ function isSelectedColumnFacetOnDemand(options, table, col) {
 			ret = hasAnnotation(table, col, 'top');
 		}
 	}
+	return ret;
+}
+
+function getFacetOrder(facet) {
+	var ret = null;
+	var table_name = facet['table'];
+	var column_name = facet['name'];
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name']) {
+			var column_definitions = table['column_definitions'];
+			$.each(column_definitions, function(i, col) {
+				if (col['name'] == column_name) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_FACET_ORDER_URI] != null) {
+						ret = col['annotations'][COLUMNS_FACET_ORDER_URI];
+					}
+					return false;
+				}
+			});
+			return false;
+		}
+	});
 	return ret;
 }
 
