@@ -59,22 +59,20 @@
 	    <!-- Sidebar header -->
 	    <div class="sidebar-header header-cover">
 	        <!-- Sidebar toggle button -->
-	        <div class="row">
+	        <div class="row" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
 	        	<div class="col-md-10">
-				        <h5>Fields &amp; Values</h5>
+				        <h5>Hide Sidebar</h5>
 				</div>
 				<div class="col-md-2">
-				        <button id="sidebarDoneButton" type="button" class="btn btn-default btn-sm pull-right sidebar-toggle" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
-				            DONE
-				        </button>
+					<i class="md-chevron-right md-lg"></i>
 				    </div>
 			</div>
 		</div>
-	        <!-- Sidebar brand image 
+	        <!-- Sidebar brand image
 	        <div class="sidebar-image">
 	            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/53474/atom_profile_01.jpg">
 	        </div> -->
-	        <!-- Sidebar brand name 
+	        <!-- Sidebar brand name
 	        <a data-toggle="dropdown" class="sidebar-brand" href="#settings-dropdown">
 	            john.doe@gmail.com
 	            <b class="caret"></b>
@@ -116,7 +114,7 @@
 
 	    <!-- Sidebar divider -->
 	    <!-- <div class="sidebar-divider"></div> -->
-	    
+
 	    <!-- Sidebar text -->
 	    <!--  <div class="sidebar-text">Text</div> -->
 	</aside>
@@ -195,7 +193,7 @@
 				</div>
 			</div>
 	    </div>
-	
+
 	    <!-- Edit Filter Container -->
 	    <div ng-if="FacetsData.tag!=null" class="row">
 	        <div class="col-md-12">
@@ -224,7 +222,7 @@
 	            </div>
 	        </div>
 	    </div>
-	    
+
 	    <div ng-show="false" ng-if="sideBar.if_type(FacetsData.tag, 'enum')">
 	    	<div class="row">
 	    		<div class="col-md-12">
@@ -236,7 +234,7 @@
 				</div>
 			</div>
 	    </div>
-	    
+
 		<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box">
 			<div class="input-group">
 				<span class="input-group-btn">
@@ -258,7 +256,7 @@
 								rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
 								rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
 								rz-slider-translate="translate"> </rzslider></li>
-						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search Data..." 
+						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search Data..."
 							type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
 							/></li>
 						<li ng-if="sideBar.if_type(FacetsData.tag, 'date')">
@@ -294,7 +292,7 @@
 	    </div>
 	    <!-- Sidebar divider -->
 	    <!-- <div class="sidebar-divider"></div> -->
-	    
+
 	    <!-- Sidebar text -->
 	    <!--  <div class="sidebar-text">Text</div> -->
 	</aside>
