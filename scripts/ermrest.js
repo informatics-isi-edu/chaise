@@ -402,11 +402,7 @@ function submitLogout() {
 }
 
 function encodeSafeURIComponent(value) {
-	var ret = encodeURIComponent(value);
-	$.each(URL_ESCAPE, function(i, c) {
-		ret = ret.replace(new RegExp('\\' + c, 'g'), escape(c));
-	});
-	return ret;
+	return fixedEncodeURIComponent(value);
 }
 
 function getMetadata(table, successCallback) {
@@ -652,12 +648,25 @@ function initModels(options, successCallback) {
 	var box = options['box'][table];
 	var colsDescr = options['colsDescr'][options['table']];
 	var colsGroup = options['colsGroup'][options['table']];
-	var topN = [];
+	var topN = {};
 	var j = 0;
+	$.each(options['chooseColumns'], function(facetTable, chooseColumns) {
+		$.each(chooseColumns, function(facetColumn, value) {
+			if (value) {
+				j++;
+				if (topN[facetTable] == null) {
+					topN[facetTable] = [];
+				}
+				topN[facetTable].push(facetColumn);
+			}
+		});
+	});
+	var facetOrder = j;
+	var extraFacets = [];
 	$.each(options['score'], function(i,col) {
 		if (!hasAnnotation(options['table'], col['name'], 'hidden') && !hasAnnotation(options['table'], col['name'], 'thumbnail')) {
 			if (j++ < 10) {
-				topN.push(col['name']);
+				extraFacets.push(col['name']);
 			} else {
 				return false;
 			}
@@ -665,7 +674,7 @@ function initModels(options, successCallback) {
 	});
 	var sentRequests = false;
 	$.each(colsDescr, function(col, value) {
-		options['chooseColumns'][table][col] = topN.contains(col);
+		options['chooseColumns'][table][col] = topN[options['table']] != null && topN[options['table']].contains(col) || extraFacets.contains(col);
 		options['searchFilterValue'][table][col] = '';
 		options['facetClass'][table][col] = '';
 		box[col] = {};
@@ -700,7 +709,7 @@ function initModels(options, successCallback) {
 		var colsGroup = options['colsGroup'][table];
 		if (colsDescr != null) {
 			$.each(colsDescr, function(col, value) {
-				var hasTop = (hasTableFacetsHidden(table) || hasColumnFacetHidden(table, col)) ? false : hasAnnotation(table, col, 'top');
+				var hasTop = (hasTableFacetsHidden(table) || hasColumnFacetHidden(table, col)) ? false : topN[table] != null && topN[table].contains(col) || hasAnnotation(table, col, 'top');
 				options['chooseColumns'][table][col] = hasTop;
 				options['searchFilterValue'][table][col] = '';
 				if (hasTop) {
@@ -731,14 +740,14 @@ function initModels(options, successCallback) {
 			});
 		}
 	});
-	var index = 10 - topCount;
+	var index = 10 - facetOrder - topCount;
 	var table = options['table'];
-	$.each(topN, function(i, col) {
-		if (i >= index) {
-			options['chooseColumns'][table][topN[i]] = false;
-			options['searchFilterValue'][table][topN[i]] = '';
-		}
-	})
+	if (index > 0) {
+		$.each(extraFacets, function(i, col) {
+			options['chooseColumns'][table][extraFacets[i]] = false;
+			options['searchFilterValue'][table][extraFacets[i]] = '';
+		});
+	}
 
 	if (options.filter != null) {
 		$.each(options.filter, function(table, columns) {
@@ -2057,9 +2066,15 @@ function getAssociationTableColumns(options, successCallback, columns) {
 			});
 		});
 		facets.sort(compareFacets);
+		$.each(facets, function(i, facet) {
+			options['chooseColumns'][facet['table']][facet['name']] = (getFacetOrder(facet) != null ? true : false);
+		});
 		successCallback(columns);
 	} else {
 		facets.sort(compareFacets);
+		$.each(facets, function(i, facet) {
+			options['chooseColumns'][facet['table']][facet['name']] = (getFacetOrder(facet) != null ? true : false);
+		});
 		successCallback(columns);
 	}
 }
@@ -2944,6 +2959,12 @@ function setBookmark(options) {
 	var len = options.location.absUrl().length - options.location.url().length;
 	var prefix = options.location.absUrl().substr(0,len);
 	options.bookmark = prefix + options.location.path() + '?schema='+encodeSafeURIComponent(SCHEMA) + '&table='+options.table + '&filter='+filter + '&layout='+options.view + '&page='+options.pagingOptions.currentPage;
+}
+
+function fixedEncodeURIComponent (str) {
+	return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+		return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+	});
 }
 
 function initLogin() {

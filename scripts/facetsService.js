@@ -221,7 +221,8 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	
 	this.showFacetCount = function (facet) {
 		return (FacetsData.chooseColumns[facet['table']][facet['name']] && 
-				(FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+				(FacetsData.box[facet['table']][facet['name']] != null && FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+						FacetsData.colsDescr[facet['table']] != null && FacetsData.colsDescr[facet['table']][facet['name']] != null &&
 						FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues(FacetsData.box, facet)));
 	};
 	
