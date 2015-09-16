@@ -1,31 +1,98 @@
 # Chaise [![Build Status](https://travis-ci.org/informatics-isi-edu/chaise.svg?branch=master)](https://travis-ci.org/informatics-isi-edu/chaise)
+_Computer-human access interface with schema evolution!_
 
-[Chaise](https://github.com/informatics-isi-edu/chaise) is a Web UI for the
-[ERMrest](https://github.com/informatics-isi-edu/ermrest) service.
+## Introduction
 
-## Runtime Dependencies
+Chaise is a model-driven web interface (more formally a [user agent]) for data
+discovery, analysis, visualization, editing, sharing and collaboration over
+tabular data (more specifically [relational data]) served up as [Web resources]
+by the [ERMrest] service. Chaise dynamically renders relational data resources
+based on a small set of baseline assumptions, combined with its rendering
+[heuristics], and finally user preferences in order to support common user
+interactions with the data. Chaise is developed in JavaScript, HTML, CSS, and
+runs in most modern Web browsers. It is the front-end component of the suite of
+tools including [ERMrest], [Hatrac], and [IObox].
 
-Everything needed is included in this package. Third party dependencies have
-been bundled under `scripts/vendors`.
+[heuristics]: https://en.wikipedia.org/wiki/Heuristic_%28computer_science%29
+[relational data]: https://en.wikipedia.org/wiki/Relational_database
+[user agent]: https://en.wikipedia.org/wiki/User_agent
+[Web resources]: https://en.wikipedia.org/wiki/Web_resource
+[ERMrest]: https://github.com/informatics-isi-edu/ermrest
+[Hatrac]: https://github.com/informatics-isi-edu/hatrac
+[IObox]: https://github.com/informatics-isi-edu/iobox
 
-The app can be hosted on any HTTP web server. Most likely you will want to
-deploy the app on the same host as *ERMrest*. If it is deployed on a separate
-host, you will need to enable *CORS* on the web server on which *ERMrest*
-is deployed.
+## Dynamic Rendering Approach
 
-## Development Dependencies
+Chaise is intended to support specific user interactions, as briefly introduced
+above (e.g., discovery, analysis, editing, etc.). As such, its presentation
+capabilities are narrowly scoped to support these interactions. Thus, Chaise
+makes a few assumptions about how users will interact with the underlying
+data.
 
-To run the build script you will need:
+A few representative but non-exhaustive examples of these assumptions include:
+- search, explore, and browse collections of data
+- navigate from one data record to the next by following their
+  relationships (i.e., following links)
+- add, edit, remove data records from the database
+- create, alter, or extend the data model itself
+- subset and export data collections
+- share data with other users
+- annotate data records with [tags] or [controlled vocabulary] terms
 
-* Node (See [nodejs](https://nodejs.org/))
-* Make (i.e., `make`, `gmake`, etc.)
+[tags]: https://en.wikipedia.org/wiki/Tag_(metadata)
+[controlled vocabulary]: https://en.wikipedia.org/wiki/Controlled_vocabulary
+[data model]: https://en.wikipedia.org/wiki/Data_model
+[denormalized]: https://en.wikipedia.org/wiki/Denormalization
 
-All other dependencies are described in the *Node* `package.json` file.
+Beyond these baseline assumptions about basic usage, Chaise makes almost no
+assumptions about the structure of the underlying [data model], such as its
+tables, columns, keys, foreign key relationships, etc. Chaise begins by
+introspecting the data model by getting the `catalog/N/schema` resource from
+[ERMrest]. The schema resource includes lightweight semantic annotations about
+the model in addition to the underlying relational database schema. Chaise uses
+its rending heuristics to decide, for instance, how to flatten a hierarchical
+structure into a simplified (or [denormalized]) presentation for searching and
+viewing. The schema annotations are then used to modify or override its
+rendering heuristics, for instance, to hide a column of a table or to use a
+specific display name in the interface that is different than the column name
+from the table definition of the schema. Chaise then applies user preferences
+to further override the rendering decisions and annotations, for instance, to
+present a nested table of data in a transposed layout (i.e., with the columns
+and rows flipped).
 
-# Build
+See the [heuristics guide](./doc/heuristics.md) for more information.
 
-Get the source and use the `Makefile`. See `make help` for information on
-alternative *make targets*.
+## Quick Start Guide
+### Runtime Dependencies
+
+Chaise depends on the following server- and client-side software.
+
+- **Relational data resources**: Chaise is intended to be deployed in an
+  environment that includes the [ERMrest] service for exposing tabular
+  (relational) data as Web resources.
+- **Web server**: Chaise can be hosted on any HTTP web server. Most likely you
+  will want to deploy the app on the same host as [ERMrest]. If it is deployed
+  on a separate host, you will need to enable [CORS] on the web server on which
+  ERMrest is deployed.
+- **Client-side JavaScript Libraries**: [AngularJS] and other client-side
+  JavaScript runtime dependencies are bundled in `scripts/vendors` in this
+  repository.
+
+[AngularJS]: https://angularjs.org
+[CORS]: https://en.wikipedia.org/wiki/Cross-origin_resource_sharing "Cross-origin resource sharing"
+
+### Development Dependencies
+
+Development dependencies include:
+
+* [Make](https://en.wikipedia.org/wiki/Make_%28software%29)
+* [Node](https://nodejs.org/)
+* Additional dependencies specified in [package.json](./package.json)
+
+### How to Build
+
+Get the source and run `make`. See `make help` for information on alternative
+make targets.
 
 ```sh
 git clone https://github.com/informatics-isi-edu/chaise.git
@@ -33,14 +100,19 @@ cd chaise
 make all
 ```
 
-# Install
+Make will invoke `npm install` to download and install all additional
+dependencies under the local `node_modules` directory relative to the project
+directory. This does not require administrative (i.e., root) privileges in
+order to install the development dependencies.
 
-After building (above), copy to your host (i.e., `/var/www/chaise`).
+### How to Install
 
-# Launch
+After building (above), copy to your host (i.e., `/var/www/path/to/chaise`).
 
-In a browser enter this URL and replace `<hostname>`.
+### How to Configure
 
-```
-http://<hostname>/chaise/app.html
-```
+See the [configuration guide](./doc/configuration.md).
+
+### How to Run
+
+Point a modern web browser at `http://<hostname>/path/to/chaise/app.html`.
