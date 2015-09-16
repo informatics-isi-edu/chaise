@@ -7,9 +7,9 @@ presentation of tabular data from an
 instance. They are intended to complement several sources of domain
 information:
 
-- [ERMrest model resources](http://github.com/informatics-isi-edu/ermrest/api-doc/model/rest.md#schemata-retrieval) a.k.a. table schemata
-- [ERMrest model annotations](http://github.com/informatics-isi-edu/ermrest/api-doc/index.md#model-annotations)
-  - [Proposed common ERMrest annotations](http://github.com/informatics-isi-edu/ermrest/user-doc/annotation.md)
+- [ERMrest model resources](http://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/rest.md#schemata-retrieval) a.k.a. table schemata
+- [ERMrest model annotations](http://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/index.md#model-annotations)
+  - [Proposed common ERMrest annotations](http://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md)
 - User preferences via GUI controls, cookies, etc.?
 
 ## Status
@@ -100,7 +100,7 @@ tabular set of all records matching the criteria.
 ### Paging
 
 Record-sets SHOULD be presented using
-[paged data access](http://github.com/informatics-isi-edu/ermrest/api-doc/data/naming.md#data-paging).
+[paged data access](http://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/data/naming.md#data-paging).
 
 - The paging key SHOULD be an existing key column (or composite key) found in the table definition of the model.
 - The number of records to show in one page SHOULD be chosen appropriately for the viewing application environment.
@@ -171,7 +171,7 @@ When presenting references to vocabulary entities, the following forms are RECOM
 
 ### Recognizing Vocabularies
 
-1. A use of the [vocabulary annotation](https://github.com/informatics-isi-edu/ermrest/user-doc/annotation.md#2015-vocabulary) identifies a vocabulary table and assigns a mapping to its columns.
+1. A use of the [vocabulary annotation](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md#2015-vocabulary) identifies a vocabulary table and assigns a mapping to its columns.
 2. A single-column table where its integer or textual column is also its key and one or more tables make foreign-key references to the table. Consider the single column to be the *identifier*.
 3. A table where an integer key has one or more foreign-key references to it from other tables and other keys also exist. Consider the referenced integer key to be the *internal identifier*.
   - A single textual key exists. Consider it to be the *identifier*.
