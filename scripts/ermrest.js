@@ -546,7 +546,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 				value = value['value'].split(' ');
 				$.each(value, function(i, val) {
 					if (val.length > 0) {
-						tablePredicate.push(encodeSafeURIComponent(key) + '::ciregexp::' + encodeSafeURIComponent(val));
+						tablePredicate.push(encodeSafeURIComponent(key) + '::ciregexp::' + encodeSafeURIComponent(encodeRegularExpression(val)));
 					}
 				});
 			} else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
@@ -591,7 +591,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 	});
 
 	if (filterAllText && filterAllText != '') {
-		predicate.push(encodeSafeURIComponent('*') + '::ciregexp::' + encodeSafeURIComponent(filterAllText));
+		predicate.push(encodeSafeURIComponent('*') + '::ciregexp::' + encodeSafeURIComponent(encodeRegularExpression(filterAllText)));
 	}
 	return predicate;
 }
@@ -3062,6 +3062,17 @@ function fixedEncodeURIComponent (str) {
 	return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
 		return '%' + c.charCodeAt(0).toString(16).toUpperCase();
 	});
+}
+
+function encodeRegularExpression (str) {
+	// encode first '[' and/or ']'
+	var str1 = str.replace(/[\[\]]/g, function(c) {
+		return '[' + c + ']';
+		});
+	var str2 = str1.replace(/[\^$.()*?{}+]/g, function(c) {
+		return '[' + c + ']';
+	});
+	return str2;
 }
 
 function initLogin() {
