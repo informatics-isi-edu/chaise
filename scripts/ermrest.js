@@ -1,3 +1,4 @@
+var WINDOW_LOCATION = window.location.href;
 var MULTI_SELECT_LIMIT = 1000;
 var AJAX_TIMEOUT = 300000;
 var goauth_cookie = 'globusonline-goauth';
@@ -2955,10 +2956,106 @@ function setBookmark(options) {
 			}
 		});
 	});
-	var filter = encodeSafeURIComponent(JSON.stringify(ret));
+	var filter = encodeFilter(ret);
 	var len = options.location.absUrl().length - options.location.url().length;
 	var prefix = options.location.absUrl().substr(0,len);
-	options.bookmark = prefix + options.location.path() + '?schema='+encodeSafeURIComponent(SCHEMA) + '&table='+options.table + '&filter='+filter + '&layout='+options.view + '&page='+options.pagingOptions.currentPage;
+	options.bookmark = prefix + options.location.path() + '?entity='+encodeSafeURIComponent(SCHEMA) + ':' +options.table + 
+		((filter != null) ? '&facets='+filter : '') + '&layout='+options.view + '&page='+options.pagingOptions.currentPage;
+}
+
+function getSearchQuery() {
+	var ret = {};
+	var query = null;
+	var index = WINDOW_LOCATION.indexOf('?');
+	if (index != -1) {
+		var query = WINDOW_LOCATION.substring(index+1);
+		var parameters = query.split('&');
+		$.each(parameters, function(i, parameter) {
+			var item = parameter.split('=');
+			ret[item[0]] = item[1];
+		});
+	}
+	return ret;
+}
+
+function setFilterValue(facet, separator, result) {
+	var name = facet[0].split(':');
+	var table = decodeURIComponent(name[0]);
+	var column = decodeURIComponent(name[1]);
+	if (result[table] == null) {
+		result[table] = {};
+	}
+	if (result[table][column] == null) {
+		result[table][column] = {};
+	}
+	if (separator == '::ciregexp::') {
+		result[table][column]['value'] = decodeURIComponent(facet[1]);
+	} else if (separator == '::eq::') {
+		result[table][column]['values'] = {};
+		var values = facet[1].substring(1,facet[1].length-1).split(';');
+		$.each(values, function(i, value) {
+			result[table][column]['values'][decodeURIComponent(value)] = true;
+		});
+	} else if (separator == '::geq::') {
+		var values = facet[1].substring(1,facet[1].length-1).split(';');
+		result[table][column]['min'] = values[0];
+		result[table][column]['floor'] = values[1];
+		result[table][column]['left'] = true;
+	} else if (separator == '::leq::') {
+		var values = facet[1].substring(1,facet[1].length-1).split(';');
+		result[table][column]['max'] = values[0];
+		result[table][column]['ceil'] = values[1];
+		result[table][column]['right'] = true;
+	}
+}
+
+function decodeFilter(filter) {
+	var ret = {};
+	var factors = filter.substring(1,filter.length-1).split(',');
+	$.each(factors, function(i, factor) {
+		if (factor.split('::ciregexp::').length == 2) {
+			setFilterValue(factor.split('::ciregexp::'), '::ciregexp::', ret);
+		} else if (factor.split('::eq::').length == 2) {
+			setFilterValue(factor.split('::eq::'), '::eq::', ret);
+		} else if (factor.split('::geq::').length == 2) {
+			setFilterValue(factor.split('::geq::'), '::geq::', ret);
+		} else if (factor.split('::leq::').length == 2) {
+			setFilterValue(factor.split('::leq::'), '::leq::', ret);
+		}
+	});
+	return ret;
+}
+
+function encodeFilter(filter) {
+	var ret = null;
+	var factors = [];
+	$.each(filter, function(table, columns) {
+		$.each(columns, function(column, values) {
+			var col_name = fixedEncodeURIComponent(table) + ':' + fixedEncodeURIComponent(column);
+			var found = false;
+			$.each(values, function(key, value) {
+				if (key == 'value') {
+					factors.push(col_name + '::ciregexp::' + fixedEncodeURIComponent(value));
+					found = true;
+				} else if (key == 'values') {
+					var terms = [];
+					$.each(value, function(term, val) {
+						terms.push(fixedEncodeURIComponent(term));
+					});
+					factors.push(col_name + '::eq::(' + terms.join(';') + ')');
+					found = true;
+				} 
+			});
+			if (!found) {
+				factors.push(col_name + '::geq::(' + values['min'] + ';' + values['floor'] + ')');
+				factors.push(col_name + '::leq::(' + values['max'] + ';' + values['ceil'] + ')');
+			}
+		});
+	});
+	if (factors.length > 0) {
+		ret = '(' + factors.join(',') + ')';
+	}
+	return ret;
 }
 
 function fixedEncodeURIComponent (str) {
