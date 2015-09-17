@@ -5,13 +5,11 @@
 	    <div class="sidebar-header header-cover">
 	        <!-- Sidebar toggle button -->
 	        <div class="row">
-	        	<div class="col-md-10">
+	        	<div class="col-md-6">
 				        <h5>Collections</h5>
 				</div>
-				<div class="col-md-2">
-				        <button id="collectionDoneButton" type="button" class="btn btn-default btn-sm pull-right collections-toggle" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
-				            DONE
-				        </button>
+				<div class="col-md-6">
+				      <a href="#" class="pull-right" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">Hide Sidebar <i class="md-chevron-right md-lg"></i></a>
 				    </div>
 			</div>
 	    </div>
@@ -60,14 +58,13 @@
 	    <div class="sidebar-header header-cover">
 	        <!-- Sidebar toggle button -->
 	        <div class="row" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
-	        	<div class="col-md-10">
-				        <h5>Hide Sidebar</h5>
-				</div>
-				<div class="col-md-2">
-					<i class="md-chevron-right md-lg"></i>
-				    </div>
+	        	<div class="col-md-6">
+						</div>
+						<div class="col-md-6">
+							<a href="#" class="pull-right" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">Hide Sidebar <i class="md-chevron-right md-lg"></i></a>
+						</div>
+					</div>
 			</div>
-		</div>
 	        <!-- Sidebar brand image
 	        <div class="sidebar-image">
 	            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/53474/atom_profile_01.jpg">
@@ -87,7 +84,7 @@
 									<i class="md-search md-lg"></i>
 								</a>
 							</span>
-							<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search Data..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
+							<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control pull-right" placeholder="Search filters by keyword..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 						</div>
 					</div>
 	        		<div class="editfilter-container">
@@ -124,13 +121,11 @@
 	<aside id="morefilters" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
 		<div class="sidebar-header header-cover">
 			<div class="row">
-				<div class="col-md-10">
-				   <h5><a href="#" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><i class="md-arrow-back md-lg"></i> Fields &amp; Values</a></h5>
+				<div class="col-md-6">
+				   <a href="#" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><i class="md-arrow-back md-lg"></i> Back</a>
 				</div>
-				<div class="col-md-2">
-				        <button id="moreFilterDoneButton" type="button" class="btn btn-default btn-sm pull-right field-toggle" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');">
-				            DONE
-				        </button>
+				<div class="col-md-6">
+		        <a href="#" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');" class="pull-right">Hide Sidebar <i class="md-chevron-right md-lg"></i></a>
 				</div>
 			</div>
 		</div>
@@ -183,13 +178,11 @@
 	    <div class="sidebar-header header-cover">
 	        <!-- Sidebar toggle button -->
 	        <div class="row">
-	        	<div class="col-md-10">
-				   <a href="#" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="md-arrow-back md-lg"></span> Fields &amp; Values</a>
+	        	<div class="col-md-6">
+				   <a href="#" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="md-arrow-back md-lg"></span> Back</a>
 				</div>
-				<div class="col-md-2">
-				        <button id="editFilterDoneButton" type="button" class="btn btn-default btn-sm pull-right field-toggle" ng-click="sideBar.editFilterDone($event, 'field-toggle', true);">
-				            DONE
-				        </button>
+				<div class="col-md-6">
+				  <a href="#" class="pull-right" ng-click="sideBar.editFilterDone($event, 'field-toggle', true);">Hide Sidebar <i class="md-chevron-right md-lg"></i></a>
 				</div>
 			</div>
 	    </div>
@@ -256,7 +249,7 @@
 								rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
 								rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
 								rz-slider-translate="translate"> </rzslider></li>
-						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search Data..."
+						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search filters by keyword..."
 							type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
 							/></li>
 						<li ng-if="sideBar.if_type(FacetsData.tag, 'date')">
