@@ -1,4 +1,3 @@
-var WINDOW_LOCATION = window.location.href;
 var MULTI_SELECT_LIMIT = 1000;
 var AJAX_TIMEOUT = 300000;
 var goauth_cookie = 'globusonline-goauth';
@@ -142,7 +141,7 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			if (authnProvider == 'goauth') {
 				getGoauth(window.location);
 			} else {
-				var login_url = '#/login?referrer=' + encodeSafeURIComponent(window.location);
+				var login_url = 'login.html?referrer=' + encodeSafeURIComponent(window.location);
 				window.location = login_url;
 			}
 			break;
@@ -398,7 +397,7 @@ function submitLogout() {
 	$('#login_user').html('');
 	$('#login_link').show();
 	$('#logout_link').hide();
-	var login_url = '#/login?referrer=' + encodeSafeURIComponent(window.location);
+	var login_url = 'login.html?referrer=' + encodeSafeURIComponent(window.location);
 	window.location = login_url;
 }
 
@@ -674,32 +673,34 @@ function initModels(options, successCallback) {
 		}
 	});
 	var sentRequests = false;
-	$.each(colsDescr, function(col, value) {
-		options['chooseColumns'][table][col] = topN[options['table']] != null && topN[options['table']].contains(col) || extraFacets.contains(col);
-		options['searchFilterValue'][table][col] = '';
-		options['facetClass'][table][col] = '';
-		box[col] = {};
-		box[col]['count'] = col;
-		box[col]['facetcount'] = 0;
-		if (value['type'] == 'enum') {
-			colsGroup[col] = {};
-			colsGroup[col]['ready'] = false;
-			box[col]['values'] = {};
-			sentRequests = true;
-		} else if (value['type'] == 'select') {
-			box[col]['value'] = [];
-		} else if (searchBoxPresentation.contains(value['type'])) {
-			box[col]['value'] = '';
-		} else if (datepickerPresentation.contains(value['type'])) {
-			box[col]['min'] = box[col]['floor'] = value['min'];
-			box[col]['max'] = box[col]['ceil'] = value['max'];
-			sentRequests = true;
-		} else if (sliderPresentation.contains(value['type'])) {
-			box[col]['min'] = box[col]['floor'] = value['min'];
-			box[col]['max'] = box[col]['ceil'] = value['max'];
-			sentRequests = true;
-		}
-	});
+	if (colsDescr != null) {
+		$.each(colsDescr, function(col, value) {
+			options['chooseColumns'][table][col] = topN[options['table']] != null && topN[options['table']].contains(col) || extraFacets.contains(col);
+			options['searchFilterValue'][table][col] = '';
+			options['facetClass'][table][col] = '';
+			box[col] = {};
+			box[col]['count'] = col;
+			box[col]['facetcount'] = 0;
+			if (value['type'] == 'enum') {
+				colsGroup[col] = {};
+				colsGroup[col]['ready'] = false;
+				box[col]['values'] = {};
+				sentRequests = true;
+			} else if (value['type'] == 'select') {
+				box[col]['value'] = [];
+			} else if (searchBoxPresentation.contains(value['type'])) {
+				box[col]['value'] = '';
+			} else if (datepickerPresentation.contains(value['type'])) {
+				box[col]['min'] = box[col]['floor'] = value['min'];
+				box[col]['max'] = box[col]['ceil'] = value['max'];
+				sentRequests = true;
+			} else if (sliderPresentation.contains(value['type'])) {
+				box[col]['min'] = box[col]['floor'] = value['min'];
+				box[col]['max'] = box[col]['ceil'] = value['max'];
+				sentRequests = true;
+			}
+		});
+	}
 	var topCount = 0;
 	$.each(association_tables_names, function(i, table) {
 		if (hasTableFacetsHidden(table)) {
@@ -750,15 +751,6 @@ function initModels(options, successCallback) {
 		});
 	}
 
-	if (options.filter != null) {
-		$.each(options.filter, function(table, columns) {
-			$.each(columns, function(column, values) {
-				$.each(values, function(key, value) {
-					options.box[table][column][key] = value;
-				});
-			});
-		});
-	}
 	if (!sentRequests) {
 		successCallback(true);
 	} else {
@@ -1085,10 +1077,18 @@ function getColumnDescriptions(options, successCallback) {
 			}
 		});
 		if (!sentRequests) {
-			successCallback({}, null, null);
+			$.each(ret, function(key, value) {
+				delete value['ready'];
+			});
+			options['colsDescr'][options['table']] = ret;
+			if (association_tables_names.length > 0) {
+				getAssociationColumnsDescriptions(options, successCallback);
+			} else {
+				successCallback();
+			}
 		}
 	} else {
-		successCallback({}, null, null);
+		successCallback();
 	}
 }
 
@@ -1592,7 +1592,7 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 
 function deleteSession(param) {
 	if (token == null) {
-		var url = '/ermrest/authn/session';
+		var url = HOME + '/ermrest/authn/session';
 		ERMREST.DELETE(url, successDeleteSession, null, param);
 	} else {
 		submitLogout();
@@ -1604,7 +1604,7 @@ function successDeleteSession(data, textStatus, jqXHR, param) {
 }
 
 function getSession(param) {
-	var url = '/ermrest/authn/session';
+	var url = HOME + '/ermrest/authn/session';
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetSession, errorGetSession, param);
 }
 
@@ -1615,11 +1615,18 @@ function successGetSession(data, textStatus, jqXHR, param) {
 		$('#login_link').hide();
 		$('#logout_link').show();
 	} else {
-		$('#login_user').html('');
-		$('#login_link').show();
-		$('#logout_link').hide();
-		if (param != null) {
-			window.location.href = param;
+		setUserFromCookie();
+		if (USER == null) {
+			$('#login_user').html('');
+			$('#login_link').show();
+			$('#logout_link').hide();
+			if (param != null) {
+				window.location.href = param;
+			}
+		} else {
+			$('#login_user').html(USER);
+			$('#login_link').hide();
+			$('#logout_link').show();
 		}
 	}
 }
@@ -1638,14 +1645,18 @@ function setUserFromCookie() {
 	}
 }
 
-function errorGetSession(jqXHR, textStatus, errorThrown, url) {
+function errorGetSession(jqXHR, textStatus, errorThrown, url, param) {
 	if (jqXHR.status == 401 || jqXHR.status == 404) {
+		document.body.style.cursor = 'default';
 		// Unauthorized or Not Found
 		setUserFromCookie();
 		if (USER == null) {
 			$('#login_user').html('');
 			$('#login_link').show();
 			$('#logout_link').hide();
+			if (param != null) {
+				window.location.href = param;
+			}
 		} else {
 			$('#login_user').html(USER);
 			$('#login_link').hide();
@@ -2957,18 +2968,24 @@ function setBookmark(options) {
 		});
 	});
 	var filter = encodeFilter(ret);
-	var len = options.location.absUrl().length - options.location.url().length;
-	var prefix = options.location.absUrl().substr(0,len);
-	options.bookmark = prefix + options.location.path() + '?entity='+encodeSafeURIComponent(SCHEMA) + ':' +options.table + 
+	var prefix = window.location.href;
+	var index = prefix.indexOf('#');
+	if (index != -1) {
+		prefix = prefix.substring(0, index);
+	}
+	options.bookmark = prefix + '#entity='+encodeSafeURIComponent(SCHEMA) + ':' +options.table + 
 		((filter != null) ? '&facets='+filter : '') + '&layout='+options.view + '&page='+options.pagingOptions.currentPage;
 }
 
 function getSearchQuery() {
 	var ret = {};
 	var query = null;
-	var index = WINDOW_LOCATION.indexOf('?');
+	var index = window.location.href.indexOf('#');
 	if (index != -1) {
-		var query = WINDOW_LOCATION.substring(index+1);
+		var query = window.location.href.substring(index+1);
+		if (query[0] == '/') {
+			query = query.substring(1);
+		}
 		var parameters = query.split('&');
 		$.each(parameters, function(i, parameter) {
 			var item = parameter.split('=');
@@ -2997,21 +3014,17 @@ function setFilterValue(facet, separator, result) {
 			result[table][column]['values'][decodeURIComponent(value)] = true;
 		});
 	} else if (separator == '::geq::') {
-		var values = facet[1].substring(1,facet[1].length-1).split(';');
-		result[table][column]['min'] = values[0];
-		result[table][column]['floor'] = values[1];
+		result[table][column]['min'] = facet[1];
 		result[table][column]['left'] = true;
 	} else if (separator == '::leq::') {
-		var values = facet[1].substring(1,facet[1].length-1).split(';');
-		result[table][column]['max'] = values[0];
-		result[table][column]['ceil'] = values[1];
+		result[table][column]['max'] = facet[1];
 		result[table][column]['right'] = true;
 	}
 }
 
 function decodeFilter(filter) {
 	var ret = {};
-	var factors = filter.substring(1,filter.length-1).split(',');
+	var factors = filter.substring(1,filter.length-1).split('/');
 	$.each(factors, function(i, factor) {
 		if (factor.split('::ciregexp::').length == 2) {
 			setFilterValue(factor.split('::ciregexp::'), '::ciregexp::', ret);
@@ -3047,13 +3060,13 @@ function encodeFilter(filter) {
 				} 
 			});
 			if (!found) {
-				factors.push(col_name + '::geq::(' + values['min'] + ';' + values['floor'] + ')');
-				factors.push(col_name + '::leq::(' + values['max'] + ';' + values['ceil'] + ')');
+				factors.push(col_name + '::geq::' + values['min']);
+				factors.push(col_name + '::leq::' + values['max']);
 			}
 		});
 	});
 	if (factors.length > 0) {
-		ret = '(' + factors.join(',') + ')';
+		ret = '(' + factors.join('/') + ')';
 	}
 	return ret;
 }
@@ -3076,7 +3089,7 @@ function encodeRegularExpression (str) {
 }
 
 function initLogin() {
-	var url = '#/login?referrer=' + encodeSafeURIComponent(window.location);
+	var url = 'login.html?referrer=' + encodeSafeURIComponent(window.location);
 	window.location = url;
 }
 

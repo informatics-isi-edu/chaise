@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data :: ERMREST</title>
+<link rel='stylesheet' type='text/css' href='styles/vendor/bootstrap.css'>
+<link rel='stylesheet' type='text/css' href='styles/vendor/ng-grid.css'>
+<link rel='stylesheet' type='text/css' href='styles/vendor/rzslider.css'>
+<link rel='stylesheet' type='text/css' href='styles/vendor/angular-datepicker.css'>
+<link rel='stylesheet' type='text/css' href='styles/swoop-sidebar.css?v=50ff396e242e4ac21b7ecae51dd54300'>
+<link rel='stylesheet' type='text/css' href='styles/jquery.nouislider.min.css?v=95dc6180040aca8a00de2b8a10a636c7'>
+<link rel='stylesheet' type='text/css' href='styles/material-design/css/material-design-iconic-font.min.css?v=ec9ff5458c2e4149f31547b02e192e8b'>
+<link rel='stylesheet' type='text/css' href='styles/ermrest.css?v=62406408c030f033ec2710230ef485ff'>
+<link rel='stylesheet' type='text/css' href='styles/app.css?v=3a9337d69d8b9934a73861df7df5a94c'>
+<link rel='stylesheet' type='text/css' href='styles/appheader.css?v=7e5aa4216d625023c55d9d16b2f8944d'>
+<script src='scripts/vendor/jquery-latest.min.js'></script>
+<script src='scripts/vendor/jquery-ui-tooltip.min.js'></script>
+<script src='scripts/vendor/jquery.nouislider.all.min.js'></script>
+<script src='scripts/vendor/bootstrap.min.js'></script>
+<script src='scripts/vendor/jquery.cookie.js'></script>
+<script src='scripts/vendor/angular.js'></script>
+<script src='scripts/vendor/angular-sanitize.js'></script>
+<script src='scripts/vendor/rzslider.js'></script>
+<script src='scripts/vendor/angular-datepicker.js'></script>
+<script src='scripts/vendor/ng-grid.js'></script>
+<script src='scripts/respond.js?v=14642d14550b82e5e933e2e02331d0a8'></script>
+<script src='scripts/variables.js?v=f9a242d35edafafcb990fd7e8881b8dc'></script>
+<script src='scripts/utils.js?v=1163578705a99a5a99b54652a4e21b4a'></script>
+<script src='scripts/ermrest.js?v=f1a586b5fde0bfd02bca45caa86905a6'></script>
+<script src='chaise-config.js?v=3a6fd94489b5788d148eeaf6b929f163'></script>
+<script src='scripts/app.js?v=c45d714998cd231228133cf46eea21e9'></script>
+<script src='scripts/facetsModel.js?v=01a94a2a46d7a3b9a2f81f3682cd8455'></script>
+<script src='scripts/facetsService.js?v=a74b03691357306a02ed8c9a80d51356'></script>
+<script src='scripts/controller/ermrestDetailController.js?v=5a417a48f6fd4845feafec7faf2b6cda'></script>
+<script src='scripts/controller/ermrestFilterController.js?v=1b44b1c9bba9f715f17fcc2bb11c621c'></script>
+<script src='scripts/controller/ermrestInitController.js?v=5daa604aa22512bba6b0cb56709ba465'></script>
+<script src='scripts/controller/ermrestLoginController.js?v=d5fe8e3b87930d9a4315bc724f3d69b5'></script>
+<script src='scripts/controller/ermrestLogoutController.js?v=3fb5a84d05eef6878e36073de72ea658'></script>
+<script src='scripts/controller/ermrestResultsController.js?v=f8ee99a0ad645c6a392d1a4616da50ba'></script>
+<script src='scripts/controller/ermrestSideBarController.js?v=e9e13039c88e0c07922390b91444c680'></script>
+</head>
+<body>
+	<!-- Overlay for fixed sidebar -->
+	<div class="sidebar-overlay"></div>
+	<div class="container-fluid">
+		<!-- Row 1: Logo and Main navigation -->
+		<div id="ermrestHeader"></div>
+	</div>
+	<div class="container">
+		<!-- Row 1: Logo and Main navigation -->
+		<div ng-app="ermrestApp">
+			<div ng-include="'views/ermlogin.html'"></div>
+		</div>
+	</div>
+	<!-- Row 3: Footer -->
+	<div id="ermrestFooter"></div>
+</body>
+</html>

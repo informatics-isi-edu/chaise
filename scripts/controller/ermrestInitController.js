@@ -4,13 +4,9 @@
 
 var ermInitController = angular.module('ermInitController', ['facetsModel', 'facetsService']);
 
-//angular.module('ermrestApp').controller('InitListCtrl', ['$scope', '$location', 'FacetsData',
-ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$location', '$window', 'FacetsData', 'FacetsService', 'ermrest',
-                                                      function($rootScope, $scope, $location, $window, FacetsData, FacetsService, ermrest) {
-	
-	$rootScope.$on("$routeChangeStart", function (event, next, current) {
-		WINDOW_LOCATION = window.location.href;
-	});
+//angular.module('ermrestApp').controller('InitListCtrl', ['$scope', 'FacetsData',
+ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$window', 'FacetsData', 'FacetsService', 'ermrest',
+                                                      function($rootScope, $scope, $window, FacetsData, FacetsService, ermrest) {
 	
 	$('footer').hide();
 	$('.panel-collapse').on('hide.bs.collapse', function () {
@@ -111,7 +107,6 @@ ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$location
 		}
 	});
 
-	$scope.FacetsData.location = $location;
 	$scope.FacetsData.view = ermrest.layout;
 	if (searchQuery['layout'] != null) {
 		$scope.FacetsData.view = searchQuery['layout'];

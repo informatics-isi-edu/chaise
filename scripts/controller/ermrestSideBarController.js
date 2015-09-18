@@ -307,6 +307,13 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 		
 		if ($scope.FacetsData.filter != null) {
+			$.each($scope.FacetsData.filter, function(table, columns) {
+				$.each(columns, function(column, values) {
+					$.each(values, function(key, value) {
+						$scope.FacetsData.box[table][column][key] = value;
+					});
+				});
+			});
 			$scope.FacetsData.filter = null;
 			getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
 			if ($scope.FacetsData.bookmarkPage != null) {

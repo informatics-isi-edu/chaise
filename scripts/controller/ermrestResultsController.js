@@ -6,8 +6,8 @@ var ermResultsController = angular.module('ermResultsController', ['facetsModel'
 
 //angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
 
-ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
-                                                      function($scope, $location, $window, $timeout, $sce, FacetsData, FacetsService) {
+ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
+                                                      function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
   $scope.chaiseConfig = chaiseConfig;
