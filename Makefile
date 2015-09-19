@@ -22,6 +22,8 @@ else
     MD5 = md5 -q
 endif
 
+CAT=cat
+
 # Bower front end components
 BOWER=bower_components
 
@@ -65,6 +67,15 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestLogoutController.js \
 	$(JS)/controller/ermrestResultsController.js \
 	$(JS)/controller/ermrestSideBarController.js
+
+TEMPLATES=views
+TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
+	$(TEMPLATES)/ermdetail.html \
+	$(TEMPLATES)/ermsidebar.html \
+	$(TEMPLATES)/ermretrievefilters.html \
+	$(TEMPLATES)/ermretrieveresults.html
+
+
 
 # Distribution target
 DIST=dist
@@ -171,8 +182,10 @@ karma:
 	$(BIN)/karma start
 
 # Rules to attach checksums to JavaScript source in the header
-app.html: app.html.in .make-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' app.html.in > app.html
+app.html: app.html.in .make-asset-block .make-template-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' app.html.in > app_temp.html
+	sed -e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' app_temp.html > app.html
+	rm app_temp.html
 
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE)
 	> .make-asset-block
@@ -189,6 +202,12 @@ app.html: app.html.in .make-asset-block
 	for file in $(JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='$$file?v=$$checksum'></script>" >> .make-asset-block ; \
+	done
+
+.make-template-block: $(TEMPLATES_DEPS)
+	> .make-template-block
+	for file in $(TEMPLATES_DEPS); do \
+		$(CAT) $$file >> .make-template-block ; \
 	done
 
 # Rules for help/usage
