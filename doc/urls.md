@@ -37,12 +37,12 @@ sign" or "number sign").
 
 The RFC states that:
 
- The fragment identifier component of a URI allows indirect identification of a
- secondary resource by reference to a primary resource and additional
- identifying information.  The identified secondary resource may be some
- portion or subset of the primary resource, some view on representations of the
- primary resource, or some other resource defined or described by those
- representations.
+> The fragment identifier component of a URI allows indirect identification of a
+  secondary resource by reference to a primary resource and additional
+  identifying information.  The identified secondary resource may be some
+  portion or subset of the primary resource, some view on representations of the
+  primary resource, or some other resource defined or described by those
+  representations.
 
 The portion of the URI up to the '#' identifies the primary resource while the
 fragment identifier (part that follows the '#') identifies secondary resources.
@@ -54,15 +54,15 @@ fragment identifier.
 
 As stated in the [heuristics](heuristics.md) section:
 
- Web-based data presentations SHOULD have a name in the form of a URL such that
- any meaningfully different presentation may be bookmarked and shared, even if
- the presentation is via a single-page AJAX or similar application.
+> Web-based data presentations SHOULD have a name in the form of a URL such that
+  any meaningfully different presentation may be bookmarked and shared, even if
+  the presentation is via a single-page AJAX or similar application.
 
- User actions that change to different data presentation SHOULD modify the
- browser history to allow back/forward navigation. The full URL SHOULD be
- available for the user to copy and/or share outside the browser. This MAY be
- in the form of a "permalink" anchor on the page since cutting and pasting from
- the browser location bar is sometimes problematic.
+> User actions that change to different data presentation SHOULD modify the
+  browser history to allow back/forward navigation. The full URL SHOULD be
+  available for the user to copy and/or share outside the browser. This MAY be
+  in the form of a "permalink" anchor on the page since cutting and pasting from
+  the browser location bar is sometimes problematic.
 
 ## Resource Names in Chaise
 
@@ -84,7 +84,7 @@ Chaise URI := <primary resource identifier> '#' <secondary resource identifier>
 <primary resource identifier> := https :// authority / path / to / chaise / search
 
 <secondary resource identifier> :=
-    '#' catalog '=' <id> '&' entity '=' <schema>:<table> '&' facets '=' '(' <predicates> ) '&' <TBD>
+    '#' catalog '=' <id> '&' entity '=' <schema>:<table> '&' facets '=' '(' <predicates> ')' '&' <TBD>
 
 <predicates> := <predicate> [ '/' <predicate> ]+
 
