@@ -2975,6 +2975,7 @@ function setBookmark(options) {
 	}
 	options.bookmark = prefix + '#entity='+encodeSafeURIComponent(SCHEMA) + ':' +options.table + 
 		((filter != null) ? '&facets='+filter : '') + '&layout='+options.view + '&page='+options.pagingOptions.currentPage;
+	window.location.assign(options.bookmark);
 }
 
 function getSearchQuery() {
