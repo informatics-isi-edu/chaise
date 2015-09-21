@@ -3010,7 +3010,7 @@ function setFilterValue(facet, separator, result) {
 		result[table][column]['value'] = decodeURIComponent(facet[1]);
 	} else if (separator == '::eq::') {
 		result[table][column]['values'] = {};
-		var values = facet[1].substring(1,facet[1].length-1).split(';');
+		var values = facet[1].split(';');
 		$.each(values, function(i, value) {
 			result[table][column]['values'][decodeURIComponent(value)] = true;
 		});
@@ -3056,7 +3056,7 @@ function encodeFilter(filter) {
 					$.each(value, function(term, val) {
 						terms.push(fixedEncodeURIComponent(term));
 					});
-					factors.push(col_name + '::eq::(' + terms.join(';') + ')');
+					factors.push(col_name + '::eq::' + terms.join(';'));
 					found = true;
 				} 
 			});
