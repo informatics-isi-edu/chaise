@@ -74,8 +74,8 @@ function initApplicationHeader(tables) {
 }
 
 function loadApplicationHeaderAndFooter() {
-	$( "#ermrestHeader" ).load( "views/ermheader.html" );
-	$( "#ermrestFooter" ).load( "views/ermfooter.html" );
+	$( "#ermrestHeader" ).load( "../views/ermheader.html" );
+	$( "#ermrestFooter" ).load( "../views/ermfooter.html" );
 }
 
 function initApplication() {
@@ -141,7 +141,7 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			if (authnProvider == 'goauth') {
 				getGoauth(window.location);
 			} else {
-				var login_url = 'login.html?referrer=' + encodeSafeURIComponent(window.location);
+				var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 				window.location = login_url;
 			}
 			break;
@@ -370,7 +370,8 @@ function submitGlobusLogin(username, password) {
 		if (result != null) {
 			token = result['access_token'];
 			//alert(token);
-			$.cookie(goauth_cookie, token, { expires: 7 });
+			var path = window.location.pathname.replace('/login/','/search/');
+			$.cookie(goauth_cookie, token, { path: path, expires: 7 });
 		} else {
 			return null;
 		}
@@ -397,7 +398,7 @@ function submitLogout() {
 	$('#login_user').html('');
 	$('#login_link').show();
 	$('#logout_link').hide();
-	var login_url = 'login.html?referrer=' + encodeSafeURIComponent(window.location);
+	var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	window.location = login_url;
 }
 
@@ -3090,7 +3091,7 @@ function encodeRegularExpression (str) {
 }
 
 function initLogin() {
-	var url = 'login.html?referrer=' + encodeSafeURIComponent(window.location);
+	var url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	window.location = url;
 }
 

@@ -16,7 +16,7 @@
 	<div class="container">
 		<!-- Row 1: Logo and Main navigation -->
 		<div ng-app="ermrestApp">
-			<div ng-include="'views/ermlogin.html'"></div>
+			<div ng-include="'../views/ermlogin.html'"></div>
 		</div>
 	</div>
 	<!-- Row 3: Footer -->
