@@ -96,7 +96,7 @@ LINT=.make-lint
 all: lint build test $(DOC)
 
 .PHONY: build
-build: $(PKG) $(MIN) app.html
+build: $(PKG) $(MIN) app.html login.html
 
 # Rule to build the full library
 $(PKG): $(JS_SOURCE) $(BIN)
@@ -156,6 +156,7 @@ updeps:
 .PHONY: clean
 clean:
 	rm app.html
+	rm login.html
 	rm -rf $(DIST)
 	rm -rf $(JSDOC)
 	rm -f .make-*
@@ -186,6 +187,9 @@ app.html: app.html.in .make-asset-block .make-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' app.html.in > app_temp.html
 	sed -e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' app_temp.html > app.html
 	rm app_temp.html
+
+login.html: login.html.in .make-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' login.html.in > login.html
 
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE)
 	> .make-asset-block
