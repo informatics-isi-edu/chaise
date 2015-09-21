@@ -92,29 +92,29 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	    var overlay = $('.sidebar-overlay');
 	    
 	    if (toggle == 'sidebar-toggle') {
-	        var sidebar = $('#sidebar');
-	        sidebar.toggleClass('open');
-	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
-	            overlay.addClass('active');
-	        } else {
-	            overlay.removeClass('active');
-	        }
+	      //  var sidebar = $('#sidebar');
+	      //  sidebar.toggleClass('open');
+	          var sidebar = $('.sidebar');
+	          var main = $('.main');
+	          var openbtn = $('.open-side');
+	          sidebar.removeClass('open');
+	          main.removeClass('col-md-9');
+	          main.addClass('col-md-12');
+	          openbtn.removeClass('hidden');
+	   // } else if (toggle == 'sidebar-open') {
+	   //     var sidebar = $('#sidebar');
+	   //       var main = $('.main');
+	   //       var openbtn = $('.open-side');
+	   //       sidebar.addClass('open');
+	   //       main.removeClass('col-md-12');
+	   //       main.addClass('col-md-8');
+	   //       openbtn.addClass('hidden');   
 	    } else if (toggle == 'field-toggle') {
 	        var sidebar = $('#editfilter');
 	        sidebar.toggleClass('open');
-	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
-	            //overlay.addClass('active');
-	        } else {
-	            //overlay.removeClass('active');
-	        }
 	    } else if (toggle == 'collections-toggle') {
 	        var sidebar = $('#collectionsTree');
 	        sidebar.toggleClass('open');
-	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
-	            overlay.addClass('active');
-	        } else {
-	            overlay.removeClass('active');
-	        }
 	    } else if (toggle == 'more-field-toggle') {
 	    	if (FacetsData.facetSelection) {
 		    	this.updateSessionFilter();
