@@ -47,7 +47,7 @@ ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$window',
     	}
 	});
 	
-	var searchQuery = getSearchQuery();
+	var searchQuery = getSearchQuery(window.location.href);
 	if (searchQuery['entity'] != null) {
 		var values = searchQuery['entity'].split(':');
 		searchQuery['schema'] = decodeURIComponent(values[0]);

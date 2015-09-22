@@ -64,6 +64,7 @@ var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
 var unsortableColumns = [];
 var suppressError = true;
 var facetPolicy = null;
+var assignBookmark = false;
 
 function isSortable(table, column) {
 	return !unsortableColumns.contains(column);
@@ -2981,15 +2982,17 @@ function setBookmark(options) {
 	parameters.push('layout='+options.view);
 	parameters.push('page='+options.pagingOptions.currentPage);
 	options.bookmark = prefix + '#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' +options.table + '?' + parameters.join('&');
+	assignBookmark = true;
 	window.location.assign(options.bookmark);
+	setTimeout(function() {assignBookmark = false;}, 1);
 }
 
-function getSearchQuery() {
+function getSearchQuery(url) {
 	var ret = {};
 	var query = null;
-	var index = window.location.href.indexOf('#');
+	var index = url.indexOf('#');
 	if (index != -1) {
-		var query = window.location.href.substring(index+1);
+		var query = url.substring(index+1);
 		var fragments = query.split('?');
 		if (fragments.length == 2) {
 			var path = fragments[0].split('/');
