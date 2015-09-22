@@ -278,41 +278,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
   	}
 	};
 
-  this.resetFacets = function resetFacets() {
-    $.each($scope.FacetsData.box, function(table, columns) {
-      var colsDescr = $scope.FacetsData['colsDescr'][table];
-      $.each(columns, function(key, value) {
-        if(searchBoxPresentation.contains(colsDescr[key]['type'])) {
-          if (value['value'] != '') {
-            value['value'] = '';
-          }
-        }
-        else if (colsDescr[key]['type'] == 'enum') {
-            if (value['values'] != null) {
-              $.each(value['values'], function(checkbox_key, checkbox_value) {
-                if(checkbox_value) {
-                  value['values'][checkbox_key] = false;
-                }
-              });
-            }
-        }
-        else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
-            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
-              if (value['left']) {
-                delete value['left'];
-              }
-              if (value['right']) {
-                delete value['right'];
-              }
-              value['min'] = value['floor'];
-              value['max'] = value['ceil'];
-            }
-        }
-      });
-    });
-    $scope.predicate_search_all();
-  };
-
 	$scope.predicate_slider = function predicate_slider(facet) {
     	FacetsService.predicate_slider(facet, $scope.successSearchFacets, $scope.successUpdateModels);
 	};

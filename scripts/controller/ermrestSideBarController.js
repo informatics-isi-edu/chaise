@@ -20,6 +20,12 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	    return numberFilter(value);
 	}
 
+  $scope.predicate_search_all = function predicate_search_all() {
+    FacetsService.setSortOption();
+    $scope.FacetsData.pagingOptions.currentPage = 1;
+    getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
+  };
+
 	this.slideFilter = function slideFilter(event, toggle, tag) {
 		event.preventDefault();
 		$scope.FacetsData.tag = tag;
@@ -569,6 +575,41 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
   this.urlBookmark = function urlBookmark() {
 		return $scope.FacetsData.bookmark;
 	};
+
+  this.resetFacets = function resetFacets() {
+    $.each($scope.FacetsData.box, function(table, columns) {
+      var colsDescr = $scope.FacetsData['colsDescr'][table];
+      $.each(columns, function(key, value) {
+        if(searchBoxPresentation.contains(colsDescr[key]['type'])) {
+          if (value['value'] != '') {
+            value['value'] = '';
+          }
+        }
+        else if (colsDescr[key]['type'] == 'enum') {
+            if (value['values'] != null) {
+              $.each(value['values'], function(checkbox_key, checkbox_value) {
+                if(checkbox_value) {
+                  value['values'][checkbox_key] = false;
+                }
+              });
+            }
+        }
+        else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
+            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+              if (value['left']) {
+                delete value['left'];
+              }
+              if (value['right']) {
+                delete value['right'];
+              }
+              value['min'] = value['floor'];
+              value['max'] = value['ceil'];
+            }
+        }
+      });
+    });
+    $scope.predicate_search_all();
+  };
 
 	$scope.refresh = function refresh() {
 		if (!$scope.$$phase) {
