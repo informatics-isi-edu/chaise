@@ -2974,8 +2974,13 @@ function setBookmark(options) {
 	if (index != -1) {
 		prefix = prefix.substring(0, index);
 	}
-	options.bookmark = prefix + '#entity='+encodeSafeURIComponent(SCHEMA) + ':' +options.table + 
-		((filter != null) ? '&facets='+filter : '') + '&layout='+options.view + '&page='+options.pagingOptions.currentPage;
+	var parameters = [];
+	if (filter != null) {
+		parameters.push('facets='+filter);
+	}
+	parameters.push('layout='+options.view);
+	parameters.push('page='+options.pagingOptions.currentPage);
+	options.bookmark = prefix + '#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' +options.table + '?' + parameters.join('&');
 	window.location.assign(options.bookmark);
 }
 
@@ -2985,8 +2990,20 @@ function getSearchQuery() {
 	var index = window.location.href.indexOf('#');
 	if (index != -1) {
 		var query = window.location.href.substring(index+1);
-		if (query[0] == '/') {
-			query = query.substring(1);
+		var fragments = query.split('?');
+		if (fragments.length == 2) {
+			var path = fragments[0].split('/');
+			if (path.length == 2) {
+				ret['catalog'] = path[0];
+				ret['entity'] = path[1];
+			} else {
+				if (path[0].indexOf(':') == -1) {
+					ret['catalog'] = path[0];
+				} else {
+					ret['entity'] = path[0];
+				}
+			}
+			query = fragments[1];
 		}
 		var parameters = query.split('&');
 		$.each(parameters, function(i, parameter) {
