@@ -1,11 +1,9 @@
-
 # Heuristics and Guidelines for Data Presentation
 
 The heuristics proposed here are intended to support the model-driven
 presentation of tabular data from an
-[ERMrest](http://github.com/informatics-isi-edu/ermrest) service
-instance. They are intended to complement several sources of domain
-information:
+[ERMrest](http://github.com/informatics-isi-edu/ermrest) service instance. They
+are intended to complement several sources of domain information:
 
 - [ERMrest model resources](http://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/rest.md#schemata-retrieval) a.k.a. table schemata
 - [ERMrest model annotations](http://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/index.md#model-annotations)
@@ -14,47 +12,51 @@ information:
 
 ## Status
 
-This is intended as a living document to capture proposed behaviors
-and (eventually) implementation status. Changes should be suggested in
-the form of pull-requests and/or discussion in the issue-tracker.
+This is intended as a living document to capture proposed behaviors and
+(eventually) implementation status. Changes should be suggested in the form of
+pull-requests and/or discussion in the issue-tracker.
 
 ## General Presentation
 
 ### Bookmarking
 
-Web-based data presentations SHOULD have a _name_ in the form of a URL
-such that any meaningfully different presentation may be bookmarked
-and shared, even if the presentation is via a single-page AJAX or
-similar application.
+Web-based data presentations SHOULD have a _name_ in the form of a URL such
+that any meaningfully different presentation may be bookmarked and shared, even
+if the presentation is via a single-page AJAX or similar application.
 
-- User actions that change to different data presentation SHOULD modify the browser history to allow back/forward navigation.
-- The full URL SHOULD be available for the user to copy and/or share outside the browser. This MAY be in the form of a "permalink" anchor on the page since cutting and pasting from the browser location bar is sometimes problematic.
+- User actions that change to different data presentation SHOULD modify the
+  browser history to allow back/forward navigation.
+- The full URL SHOULD be available for the user to copy and/or share outside
+  the browser. This MAY be in the form of a "permalink" anchor on the page
+  since cutting and pasting from the browser location bar is sometimes
+  problematic.
 
 See [Guidelines for Resource Naming](urls.md) for more details.
 
 ### Linked-Data Presentation
 
-Closely related to [bookmarking](#bookmarking), many data presentation scenarios
-can offer connections to other *related* data presentations. A
+Closely related to [bookmarking](#bookmarking), many data presentation
+scenarios can offer connections to other *related* data presentations. A
 web-based presentation SHOULD offer these as simple embedded URLs.
 
 - Anchors or buttons to navigate to an alternate presentation of the same data.
-- Anchors to navigate to a presentation of related data, e.g. another record linked to the entity in an entity-relationship model.
+- Anchors to navigate to a presentation of related data, e.g. another record
+  linked to the entity in an entity-relationship model.
 - Embedded image tags showing graphical representations of the entity.
-- Download links to retrieve an alternate representation of the entity, e.g. bulk science data being presented in a catalog.
+- Download links to retrieve an alternate representation of the entity, e.g.
+  bulk science data being presented in a catalog.
 
-It is RECOMMENDED that these links be rendered into HTML pages as
-explicit anchors, image tags, etc. so that they are discoverable and
-accessible by different client software.
+It is RECOMMENDED that these links be rendered into HTML pages as explicit
+anchors, image tags, etc. so that they are discoverable and accessible by
+different client software.
 
 ### Type-Appropriate Presentation of Values
 
-ERMrest data in general has type information available at the level of
-the scalar values stored in columns of tables. Type-appropriate
-presentation for input and output SHOULD be used wherever feasible. In
-some cases, relevant type information MAY be found in the annotations
-on tables or columns, because the presentation type is not
-distinguishable merely from scalar types.
+ERMrest data in general has type information available at the level of the
+scalar values stored in columns of tables. Type-appropriate presentation for
+input and output SHOULD be used wherever feasible. In some cases, relevant type
+information MAY be found in the annotations on tables or columns, because the
+presentation type is not distinguishable merely from scalar types.
 
 - Numbers
 - Dates
@@ -68,10 +70,10 @@ distinguishable merely from scalar types.
 
 ### Alternate Interpretation of Entities
 
-At a basic level, all entities are structured data. In the absence of
-any higher-level semantic information, all ERMrest data results SHOULD
-be presented as structured tuples of scalar values. Optionally,
-annotations MAY indicate other presentation modes.
+At a basic level, all entities are structured data. In the absence of any
+higher-level semantic information, all ERMrest data results SHOULD be presented
+as structured tuples of scalar values. Optionally, annotations MAY indicate
+other presentation modes.
 
 - Entities with thumbnail or other alternate representations
 - Entities representing external content, e.g. entries in a data catalog
@@ -81,37 +83,40 @@ annotations MAY indicate other presentation modes.
 
 ## Record-Set Presentation
 
-Consider presentations that are focused on a tabular (monomorphic) set
-of entity records, e.g. those matching particular query criteria and
-drawn from one entity table. For these presentations, we might have
-the following parameters:
+Consider presentations that are focused on a tabular (monomorphic) set of
+entity records, e.g. those matching particular query criteria and drawn from
+one entity table. For these presentations, we might have the following
+parameters:
 
-1. The _base URL_ of the ERMrest catalog containing the data, e.g. `https://example.com/ermrest/catalog/42`.
+1. The _base URL_ of the ERMrest catalog containing the data, e.g.
+   `https://example.com/ermrest/catalog/42`.
 2. The _entity type_ of the entity-type being presented, e.g. `Schema1:Table2`.
-3. The _entity path_ that embodies a query, e.g. `Schema1:Table2/category=foo,bar`.
+3. The _entity path_ that embodies a query, e.g.
+   `Schema1:Table2/category=foo,bar`.
 
-The _entity type_ can be inferred from the _entity path_ but let's
-consider them as separate parameters to simplify discussion. The
-resulting ERMrest URL combines these as _base URL_ + `/entity/` +
-_entity path_ + _query options_,
+The _entity type_ can be inferred from the _entity path_ but let's consider
+them as separate parameters to simplify discussion. The resulting ERMrest URL
+combines these as _base URL_ + `/entity/` + _entity path_ + _query options_,
 e.g. `https://example.com/ermrest/catalog/42/entity/Schema1:Table2/category=foo,bar?limit=none`.
 
-The results of retrieving the full (unlimited) query resource is a
-tabular set of all records matching the criteria.
+The results of retrieving the full (unlimited) query resource is a tabular set
+of all records matching the criteria.
 
 ### Paging
 
 Record-sets SHOULD be presented using
 [paged data access](http://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/data/naming.md#data-paging).
 
-- The paging key SHOULD be an existing key column (or composite key) found in the table definition of the model.
-- The number of records to show in one page SHOULD be chosen appropriately for the viewing application environment.
+- The paging key SHOULD be an existing key column (or composite key) found in
+  the table definition of the model.
+- The number of records to show in one page SHOULD be chosen appropriately for
+  the viewing application environment.
 
 ### Alternate Interpretation of Entity Sets
 
-As described above in (#alternate-interpretation-of-entities), a set
-of entities SHOULD be presentable as a table. Alternate presentations
-MAY be meaningful for the set:
+As described above in (#alternate-interpretation-of-entities), a set of
+entities SHOULD be presentable as a table. Alternate presentations MAY be
+meaningful for the set:
 
 - Transposable table
 - Thumbnail gallery
@@ -125,46 +130,56 @@ MAY be meaningful for the set:
 
 ### Alternate Presentation of Relationships
 
-- Replace foreign key references (outbound) with preferred names for related entities, if known. This MAY replace multiple columns with a single column in the case of composite foreign keys.
-- Add psuedo-record fields populated with arrays of preferred names for related entities with inbound foreign key references to this record set.
+- Replace foreign key references (outbound) with preferred names for related
+  entities, if known. This MAY replace multiple columns with a single column in
+  the case of composite foreign keys.
+- Add psuedo-record fields populated with arrays of preferred names for related
+  entities with inbound foreign key references to this record set.
 - Offer two levels of navigable relationship links:
   - Transition to record-detail presentation for one related entity name.
-  - Transition to related record-set presentation for all entities related by one particular mode linkage.
+  - Transition to related record-set presentation for all entities related by
+    one particular mode linkage.
 
 ## Record-Detail Presentation
 
-Consider presentations that are focused on a specific entity
-record. This is essentially a degenerate case of the
-(#record-set-presentation). Because the set has only a single member,
-default presentation modes SHOULD be tuned for that case and
-additional related information and navigation SHOULD be offered.
+Consider presentations that are focused on a specific entity record. This is
+essentially a degenerate case of the (#record-set-presentation). Because the
+set has only a single member, default presentation modes SHOULD be tuned for
+that case and additional related information and navigation SHOULD be offered.
 
 1. Present the single record with multiple alternative (simultaneous?) views
   - As structured set of fields
   - With an in-line image or thumbnail
   - With a download link
 2. Present related entities as record-sets
-  - Exception: present *simple* related entity sets as a psuedo-column of the detailed record?
+  - Exception: present *simple* related entity sets as a psuedo-column of the
+    detailed record?
 
 Entity-relationships should be presented as either a psuedo-column or
-supplementary record-set, and SHOULD NOT be presented simultaneously
-in both forms.
+supplementary record-set, and SHOULD NOT be presented simultaneously in both
+forms.
 
 ## Vocabulary Presentation
 
-A vocabulary is a convention of use for interpreting an entity-type as
-a set of controlled vocabulary terms. A vocabulary has four parts,
-though some may be omitted:
+A vocabulary is a convention of use for interpreting an entity-type as a set of
+controlled vocabulary terms. A vocabulary has four parts, though some may be
+omitted:
 
-1. internal identifier: a key that has no particular meaning to users, e.g. a system-generated serial number
-2. *identifier*: a key that has meaning to users, i.e. an externally-assigned concept identifier in a standard vocabulary
-3. *term*: a textual key that has meaning to users, i.e. a standard keyword or phrase in a controlled vocabulary
+1. internal identifier: a key that has no particular meaning to users, e.g. a
+   system-generated serial number
+2. *identifier*: a key that has meaning to users, i.e. an externally-assigned
+   concept identifier in a standard vocabulary
+3. *term*: a textual key that has meaning to users, i.e. a standard keyword or
+   phrase in a controlled vocabulary
 4. *description*: a textual field explaining the meaning to users
 
-When presenting references to vocabulary entities, the following forms are RECOMMENDED:
+When presenting references to vocabulary entities, the following forms are
+RECOMMENDED:
 
-- Allow a user preference to override generic heuristics where multiple options are available.
-- In dense table views, prefer *identifier* to *term* as they are usually more compact. Offer *term* as a tooltip where available.
+- Allow a user preference to override generic heuristics where multiple options
+  are available.
+- In dense table views, prefer *identifier* to *term* as they are usually more
+  compact. Offer *term* as a tooltip where available.
 - In detailed entity views, present both *identifier* and *term*.
 - In manual user input contexts also consider *description*
   - In a term-definitions listing
@@ -173,19 +188,23 @@ When presenting references to vocabulary entities, the following forms are RECOM
 
 ### Recognizing Vocabularies
 
-1. A use of the [vocabulary annotation](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md#2015-vocabulary) identifies a vocabulary table and assigns a mapping to its columns.
-2. A single-column table where its integer or textual column is also its key and one or more tables make foreign-key references to the table. Consider the single column to be the *identifier*.
-3. A table where an integer key has one or more foreign-key references to it from other tables and other keys also exist. Consider the referenced integer key to be the *internal identifier*.
+1. A use of the [vocabulary annotation](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md#2015-vocabulary)
+   identifies a vocabulary table and assigns a mapping to its columns.
+2. A single-column table where its integer or textual column is also its key
+   and one or more tables make foreign-key references to the table. Consider
+   the single column to be the *identifier*.
+3. A table where an integer key has one or more foreign-key references to it
+   from other tables and other keys also exist. Consider the referenced integer
+   key to be the *internal identifier*.
   - A single textual key exists. Consider it to be the *identifier*.
   - Multiple textual keys exist.
     - Any keys with foreign key references are potentially *identifier*.
     - Any keys without foreign key references are potentially *term*.
   - Any non-key textual columns are potential *description*.
 
-In the case of multiple *identifier* fields, whichever is referenced
-in a particular entity context will be presented as an identifier
-while others are ignored. It is assumed that the table referenced the
-particular *identifier* due to its appropriateness in that
-context. However, when presenting *term* or *description* details, all
-candidate values SHOULD be presented because it is unknown which would
-benefit the user.
+In the case of multiple *identifier* fields, whichever is referenced in a
+particular entity context will be presented as an identifier while others are
+ignored. It is assumed that the table referenced the particular *identifier*
+due to its appropriateness in that context. However, when presenting *term* or
+*description* details, all candidate values SHOULD be presented because it is
+unknown which would benefit the user.
