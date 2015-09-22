@@ -34,7 +34,7 @@ See [Guidelines for Resource Naming](urls.md) for more details.
 
 ### Linked-Data Presentation
 
-Closely related to (#bookmarking), many data presentation scenarios
+Closely related to [bookmarking](#bookmarking), many data presentation scenarios
 can offer connections to other *related* data presentations. A
 web-based presentation SHOULD offer these as simple embedded URLs.
 
