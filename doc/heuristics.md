@@ -30,6 +30,8 @@ similar application.
 - User actions that change to different data presentation SHOULD modify the browser history to allow back/forward navigation.
 - The full URL SHOULD be available for the user to copy and/or share outside the browser. This MAY be in the form of a "permalink" anchor on the page since cutting and pasting from the browser location bar is sometimes problematic.
 
+See [Guidelines for Resource Naming](urls.md) for more details.
+
 ### Linked-Data Presentation
 
 Closely related to (#bookmarking), many data presentation scenarios
