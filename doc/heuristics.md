@@ -208,3 +208,52 @@ ignored. It is assumed that the table referenced the particular *identifier*
 due to its appropriateness in that context. However, when presenting *term* or
 *description* details, all candidate values SHOULD be presented because it is
 unknown which would benefit the user.
+
+## Facet Presentation
+
+A presentation layer built on top of an ERM (entity-relationship model) enables
+the exploration and query of rich, complex data structures, in contrast to the
+[Bag of words model](https://en.wikipedia.org/wiki/Bag-of-words_model) typical
+of search engines. The downside of more complex query capabilities, however, is
+that it introduces a complexity for the end user to comprehend and navigate. A
+faceted presentation needs to strike a balance between exposing the data
+structure to enable complex queries without overwhelming the user with its
+complexity. In addition, there are details of the
+[physical schema](https://en.wikipedia.org/wiki/Physical_schema) which may be
+unnecessary to the end user's comprehension of the model. For instance, the
+many-to-many relationship in relational schema is implemented with an
+"association table," which may be critical to the implementation of the data
+model but a search presentation layer can simplify the presentation of the model
+without sacrificing the query capabilities.
+
+The heuristics here are RECOMMENDED in order to address these types of issues.
+The heuristics SHOULD apply unless specifically overridden by schema annotation
+or user preference. These heuristics assume the context of faceting over the
+attributes of a specific entity-type and related entity-types. In a relational
+model, these may be referred to as the columns, table, and related tables,
+respectively.
+
+1. Include the columns of the table currently being faceted on.
+  - Exclude surrogate key columns (e.g., sequential numeric primary keys).
+  - Exclude foreign key columns.
+  - Unless otherwise directed, display columns in the natural order from the
+    table definition from the schema.
+2. For table columns that are foreign keys to vocabulary tables, include the
+   `term` column from the vocabulary table (see [vocabulary annotation](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md#2015-vocabulary)).
+3. If there exists many-to-many relationships between the table and vocabulary
+   tables, include the `term` column from the vocabulary table.
+  - Note that this is a scenario where an "association table" will have been
+    used to model the many-to-many relationship, but such a table need not be
+    shown in the faceted search display as it is unnecessary for the purpose of
+    building a complex query and yet overcomplicates the display.
+4. For table columns that are foreign keys to other non-vocabulary tables:
+  - Allow navigation from the current faceting context to the context of the
+    related table and recursively apply these heuristics.
+  - Alternatively: Display a grouped set of columns which are drawn from the
+    related table. Grouped columns could be displayed in an accordion or
+    expandable tree style. These heuristics are not meant to be prescriptive of
+    the exact form of presentation.
+5. Apply rule #4 to related tables that have a foreign key relationship to the
+   table that is being faceted on.
+6. TBD, rule #4 could also be applied to related tables that are related by way
+   of an association table (i.e., many-to-many relationship).
