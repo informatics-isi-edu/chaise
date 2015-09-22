@@ -1,4 +1,3 @@
-		
 		<div class="row">
 			<!-- Search Results -->
 			<div class="col-md-9 main">
@@ -327,7 +326,7 @@
 									ng-click="facetResults.pageBackward($event)">&lt;</a></li>
 								<li class="ng-hide" ng-show="FacetsData.pageNavigation" ng-repeat="page in FacetsData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
 									ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
-								<li class="next"><a href="#" id="moreButton" 
+								<li class="next"><a href="#" id="moreButton"
 									class="ng-hide" ng-show="facetResults.canPageForward()"
 									ng-click="facetResults.pageForward($event)">More...</a></li>
 								<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="next"><a href="#"

@@ -5,8 +5,8 @@
 	    <div class="sidebar-header">
 	        <!-- Sidebar toggle button -->
 	        <div class="row">
-	        	<div id="toggle-side" class="col-md-12" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
-	        		<a href="#" class="sidebar-toggle" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
+	        	<div id="toggle-side" class="col-md-12" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
+	        		<a href="#" class="sidebar-toggle" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
 			        	<h5>Hide Sidebar</h5>
 			        	<span class="glyphicon glyphicon-forward pull-right"></span>
 			        </a>
@@ -35,7 +35,7 @@
 				<!--
 				<div class="row">
 					<div class="col-md-12">
-						
+
 						<div class="editfilter-container">
 		        			<div class="filter-item">
 		        				<span class="filter-item-field">enabled &nbsp;<span class="filter-item-value">{{selectedCollection}}</span></span>
@@ -77,7 +77,6 @@
 		</div>
 
 	</aside>
-
 	<!-- Selected Attributes sidebar -->
 	<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right open" role="navigation">
 		<div class="sidebar-wrap">
@@ -127,13 +126,6 @@
 			        </li>
 		        </ul>
 	        </div>
-	        <!--
-	        <div class="editfilter-container">
-				<a class="field-toggle" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')" title="Click to view all attributes">
-					<span class="filter-item-field">View all {{FacetsData.facets.length}} attributes</span><span class="md-chevron-right md-lg pull-right"></span>
-				</a>
-			</div>
-		-->
 		</div>
 	</aside>
 
@@ -173,8 +165,7 @@
 			    </span>
 			</div>
 		<div class="editvalue-container">
-			<p class="backlink"><a href="#" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="md-chevron-left"></span>
-				<!-- <i class="md-chevron-left"></i> --> Back</a></p>
+			<p class="backlink"><a href="#" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="md-chevron-left"></span>Back</a></p>
 			<!-- here is where we would put the filter name -->
 			<div ng-show="false" class="field-enable">
 				<input ng-model="FacetsData.enableAll" type="checkbox" ng-click="sideBar.enableDisableAll()" />
@@ -209,35 +200,6 @@
 			        </a>
 				</div>
 		    </div>
-		
-		    <!-- Edit Filter Container 
-		    <div ng-if="FacetsData.tag!=null" class="row">
-		        <div class="col-md-12">
-		            <div class="editfilter-container">
-		                <div class="filter-item">
-		                    <a href="#" ng-click="sideBar.removeFilter($event, FacetsData.tag);"><i class="md-cancel md-lg"></i>
-		                    <span class="filter-item-field">{{FacetsData.tag['display']}}</span>&nbsp;
-		                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'slider')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}">
-		                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min'] | number}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max'] | number}}
-		                    	</span>
-		                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']}}">
-		                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']}}
-		                    	</span>
-								<span ng-if="sideBar.if_type(FacetsData.tag, 'date')" class="filter-item-value" ng-attr-title="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']}} - {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']}}">
-		                    		{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']}} to {{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']}}
-		                    	</span>
-		                    	<span ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="filter-item-value" ng-attr-title="{{sideBar.displayTitle(FacetsData.tag)}}">
-					    			<span ng-repeat="value in sideBar.getFacetValues(FacetsData.tag)">
-					    				<span ng-if="!$first">, </span>
-					    					{{value}}
-					    			</span>
-		                    	</span>
-		                    </a>
-		                </div>
-		            </div>
-		        </div>
-		    </div>
-			-->
 		    <div ng-show="false" ng-if="sideBar.if_type(FacetsData.tag, 'enum')">
 				<div class="editfilter-container">
 	                <span class="filter-item-field">enabled {{sideBar.getFacetValues(FacetsData.tag).length}} of {{FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values'].length}}</span>
@@ -262,7 +224,7 @@
 								rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
 								rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
 								rz-slider-translate="translate"> </rzslider></li>
-						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')" class="attr-text"><input placeholder="Search Data..." 
+						<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search filters by keyword..."
 							type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
 							/></li>
 						<li ng-if="sideBar.if_type(FacetsData.tag, 'date')" class="attr-date">

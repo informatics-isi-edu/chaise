@@ -3,12 +3,11 @@
 /* Controllers */
 
 var ermInitController = angular.module('ermInitController', ['facetsModel', 'facetsService']);
-
 //angular.module('ermrestApp').controller('InitListCtrl', ['$scope', '$location', 'FacetsData',
 ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 'FacetsData', 'FacetsService', 'ermrest',
                                                       function($scope, $location, $window, FacetsData, FacetsService, ermrest) {
-	
-	$('footer').hide();
+
+  $('footer').hide();
 	$('.panel-collapse').on('hide.bs.collapse', function () {
 	      $(this).prev('.panel-heading').find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
 	});
@@ -24,29 +23,28 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 		$("#attrsort span.glyphicon").removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes");
 		}
 	});
-	
-//	$('.sidebar-overlay').click(function(event) {
-//    	if ($('.sidebar-overlay').hasClass('active')) {
-//    		if ($('#editfilter').hasClass('open')) {
-//    			$('#editFilterDoneButton').click();
-//    			return;
-//    		}
-//    		if ($('#morefilters').hasClass('open')) {
-//    			$('#moreFilterDoneButton').click();
-//	    		setTimeout(function () {
-//	    		    $('#sidebarDoneButton').click();
-//	    		}, 1);
-//	    		return;
-//    		}
-//	        $('.sidebar-overlay').removeClass('active');
-//    		if ($('#sidebar').hasClass('open')) {
-//    	        $('#sidebar').toggleClass('open');
-//    		} else if ($('#collectionsTree').hasClass('open')) {
-//    	        $('#collectionsTree').toggleClass('open');
-//    		}
-//    	}
-//	});
 
+	// $('.sidebar-overlay').click(function(event) {
+  //  	if ($('.sidebar-overlay').hasClass('active')) {
+  //  		if ($('#editfilter').hasClass('open')) {
+  //  			$('#editFilterDoneButton').click();
+  //  			return;
+  //  		}
+  //  		if ($('#morefilters').hasClass('open')) {
+  //  			$('#moreFilterDoneButton').click();
+	//     		setTimeout(function () {
+	//     		    $('#sidebarDoneButton').click();
+	//     		}, 1);
+	//     		return;
+  //  		}
+	//         $('.sidebar-overlay').removeClass('active');
+  //  		if ($('#sidebar').hasClass('open')) {
+  //  	        $('#sidebar').toggleClass('open');
+  //  		} else if ($('#collectionsTree').hasClass('open')) {
+  //  	        $('#collectionsTree').toggleClass('open');
+  //  		}
+  //  	}
+	// });
 
 	if ($location.search()['schema'] != null) {
 		SCHEMA = $location.search()['schema'];
@@ -66,13 +64,13 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	if (chaiseConfig['authnProvider'] != null) {
 		authnProvider = chaiseConfig['authnProvider'];
 	}
-	
+
 	if (chaiseConfig['facetPolicy'] != null) {
 		facetPolicy = chaiseConfig['facetPolicy'];
 	}
 
 	$scope.FacetsData = FacetsData;
-	
+
 	FacetsService.initTable();
 
 	if ($location.search()['table'] != null) {
@@ -94,7 +92,7 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	}
 
 	$window.addEventListener('popstate', function(event) {
-    	event.stopPropagation();
+    event.stopPropagation();
 		event.preventDefault();
 		$scope.FacetsData.isDetail = false;
 		if (!$scope.$$phase) {
@@ -111,7 +109,6 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 	}
 
 	initApplication();
-	
 	this.hideSpinner = function hideSpinner() {
 		//return !$scope.FacetsData.progress;
 		return true;
