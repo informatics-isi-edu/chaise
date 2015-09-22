@@ -18,7 +18,9 @@ label {
 	/* line-height: inherit; */
 }
 
-
+.modal-content {
+	z-index: 4000;
+}
 
 /*
 .form-group .glyphicon {
