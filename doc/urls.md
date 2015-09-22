@@ -5,9 +5,9 @@ Chaise._
 
 Chaise should use the URI to name much (if not all) of the state of the
 application. For example, the state of the app currently includes things like:
-- the current entity set that the user is browsing, 
-- the attributes that the have been used to filter the entity set, 
-- the current layout (list, card, or table), 
+- the current entity set that the user is browsing,
+- the attributes that the have been used to filter the entity set,
+- the current layout (list, card, or table),
 - whether the slide out is shown and which panel is displayed, and
 - the sort ordering and paging used to view the resulting entity set.
 
@@ -67,53 +67,61 @@ As stated in the [heuristics](heuristics.md) section:
 ## Resource Names in Chaise
 
 The primary resource names in Chaise are:
-- `chaise/search`: the search interface
-- `chaise`: top level redirect to `chaise/search`, effectively an alias
-- `chaise/detail`: the entity detail interface (TBD: should this be called browse?)
-- `chaise/login`: the login form
-- `chaise/logout`: the logout form
+- `chaise/search`: resource for searching within a catalog (aliased from `chaise`)
+- `chaise/record`: resource for interacting with a record in the catalog
+- `chaise/login`: resource for establishing a session
 
-### Secondary Resource Naming in `chaise/search`
+### Resource Naming in `chaise/search`
 
 The `chaise/search` resource identifies secondary resources using the following
-fragment identifier format.
+format.
 
 ```
-Chaise URI := <primary resource identifier> '#' <secondary resource identifier>
+SEARCH_URI := BASE_URI 'chaise/search' '#' CATALOG_ID '/' SCHEMA ':' TABLE '?' SEARCH_OPTION [ '&' SEARCH_OPTION ]*
 
-<primary resource identifier> := https :// authority / path / to / chaise / search
+BASE_URI := a standard HTTP URL ending in the base path to the 'chaise' resource
 
-<secondary resource identifier> :=
-    '#' catalog '=' <id> '&' entity '=' <schema>:<table> '&' facets '=' '(' <predicates> ')' '&' <TBD>
+CATALOG_ID := a catalog identifier
 
-<predicates> := <predicate> [ '/' <predicate> ]+
+SCHEMA := a schema name
 
-<predicate> := <facet> <op> <values>
+TABLE := a table name
 
-<value> := <value> [ ',' <value> ]+
+SEARCH_OPTIONS := 'facets' '=' PREDICATE [ '/' PREDICATE ]+ |
+                  <TBD>
+
+PREDICATE := ATTRIBUTE OP VALUE [',' VALUE]+
+
+ATTRIBUTE := [SCHEMA] [':' TABLE] [':' COLUMN]
+
+COLUMN := a column name
+
+OP := '::eq::' | '::neq::' | '::gt::' | '::lt::' | other valid EMRrest operators
+
+VALUE := URL encoded string literal
+
+<TBD> := a placeholder for one or more parameters needed to represent the state
+         of the UI beyond the basic parameters needed for faceting. These may
+         include the current layout (list, card, table) etc.
 ```
 
-and where:
-
-- `id`: the catalog id
-- `schema:table`: the qualified table name that is the target of the faceting
-- `facet`: the qualified `schema:table:column` name used in the faceting
-  predicate (TODO: there are known issues with this method of referencing a
-  column for the purpose of faceting)
-- `op`: the operator in predicate should match those used in ERMrest predicates
-- `value`: the value of the predicate must be a literal (should follow ERMrest
-   as well unless there are issue with encoding)
-- `TBD`: a placeholder for one or more parameters needed to represent the state
-  of the UI beyond the basic parameters needed for faceting. These may include
-  the current layout (list, card, table) etc.
+Notes:
+- In the `facets` search option, the list of predicates form a conjunction
+  (i.e., a logical AND) separated by the '/' character.
+- The right-hand side of a `PREDICATE` may be a single literal `VALUE` or a list
+  of values separated by the `,` character. The meaning of the value list is a
+  short-hand form of a disjunction that reuses the same `ATTRIBUTE` and `OP`.
+  Thus `attr::eq::abc,def,ghi` means "attr equals abc or attr equals def or
+  attr equals ghi".
 
 At a minimum, all parameter values (id, schema, table, attribute, value, etc.)
 would need to be URL encoded. But as long as no special characters are used in
 them (such as spaces) the value will be unchanged and user-friendly.
 
-The `<predicates>` is a conjunction of clauses where each clause is separated
-by a `/` character as used in ERMrest. The `<values>` is a disjunction of
-`<value>`s where each value is separate by a `,` character.
+Example Chaise Search URI:
+```
+https://.../path/to/chaise/search#5/xyz:experiments?facets=investigator::eq::'bill'/created::gt::'2015-04-20'
+```
 
 ### Secondary Resource Naming in `chaise/detail`
 
@@ -132,10 +140,9 @@ Chaise URI := <primary resource identifier> '#' <secondary resource identifier>
 **TBD**:
 
 1. Should we define interchangeable aliases like 'c' in place of the long form
-   of "catalog" to make more compact 
+   of "catalog" to make more compact
 
 2. Should might want to make the fragment identifiers for `search` and `detail`
    more uniform where applicable.
 
 3. We probably want to make these more similar with ERMrest.
-
