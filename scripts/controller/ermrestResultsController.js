@@ -10,8 +10,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
                                                       function($scope, $location, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
-  $scope.chaiseConfig = chaiseConfig;
-  $('[data-toggle="tooltip"]').tooltip();
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
@@ -423,10 +421,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$location', '$win
 			});
 		}
 		return ret;
-	};
-
-	this.urlBookmark = function urlBookmark() {
-		return $scope.FacetsData.bookmark;
 	};
 
 	this.displayRange = function displayRange() {
