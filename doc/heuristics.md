@@ -35,7 +35,7 @@ See [Guidelines for Resource Naming](urls.md) for more details.
 
 ### Linked-Data Presentation
 
-Closely related to [bookmarking](#bookmarking), many data presentation
+Closely related to [Bookmarking](#bookmarking), many data presentation
 scenarios can offer connections to other *related* data presentations. A
 web-based presentation SHOULD offer these as simple embedded URLs.
 
@@ -114,9 +114,8 @@ Record-sets SHOULD be presented using
 
 ### Alternate Interpretation of Entity Sets
 
-As described above in (#alternate-interpretation-of-entities), a set of
-entities SHOULD be presentable as a table. Alternate presentations MAY be
-meaningful for the set:
+As described above in [Alternate Interpretation of Entities](#alternate-interpretation-of-entities), a set of entities SHOULD be presentable as a table. Alternate presentations
+MAY be meaningful for the set:
 
 - Transposable table
 - Thumbnail gallery
@@ -143,9 +142,10 @@ meaningful for the set:
 ## Record-Detail Presentation
 
 Consider presentations that are focused on a specific entity record. This is
-essentially a degenerate case of the (#record-set-presentation). Because the
-set has only a single member, default presentation modes SHOULD be tuned for
-that case and additional related information and navigation SHOULD be offered.
+essentially a degenerate case of the [Record Set Presentation](#record-set-presentation).
+Because the set has only a single member, default presentation modes SHOULD be
+tuned for that case and additional related information and navigation SHOULD be
+offered.
 
 1. Present the single record with multiple alternative (simultaneous?) views
   - As structured set of fields
