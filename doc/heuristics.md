@@ -233,26 +233,34 @@ attributes of a specific entity-type and related entity-types. In a relational
 model, these may be referred to as the columns, table, and related tables,
 respectively.
 
-1. Include the columns of the table currently being faceted on.
+1. Include the columns of the table currently being faceted on. Facets should
+   be displayed according to relevant heuristics described in this guide such
+   as [Type-Appropriate Presentation of Values](#type-appropriate-presentation-of-values).
+   In addition, apply the following rules.
   - Exclude surrogate key columns (e.g., sequential numeric primary keys).
   - Exclude foreign key columns.
   - Unless otherwise directed, display columns in the natural order from the
     table definition from the schema.
-2. For table columns that are foreign keys to vocabulary tables, include the
-   `term` column from the vocabulary table (see [vocabulary annotation](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md#2015-vocabulary)).
+2. For table columns that are foreign keys to vocabulary tables, adopt 
+   heuristics as described under the [Vocabulary Presentation](#vocabulary-presentation)
+   section. Faceting on vocabulary should be done over the `term` column from
+   the vocabulary table, but more complex interactions specific to vocabulary
+   are ultimately required, such as faceting based on synonyms, ancestor, or
+   descendent relationships.
 3. If there exists many-to-many relationships between the table and vocabulary
-   tables, include the `term` column from the vocabulary table.
+   tables, apply rule #2 for each.
   - Note that this is a scenario where an "association table" will have been
     used to model the many-to-many relationship, but such a table need not be
     shown in the faceted search display as it is unnecessary for the purpose of
     building a complex query and yet overcomplicates the display.
-4. For table columns that are foreign keys to other non-vocabulary tables:
-  - Allow navigation from the current faceting context to the context of the
-    related table and recursively apply these heuristics.
-  - Alternatively: Display a grouped set of columns which are drawn from the
-    related table. Grouped columns could be displayed in an accordion or
-    expandable tree style. These heuristics are not meant to be prescriptive of
-    the exact form of presentation.
+4. For table columns that are foreign keys to other non-vocabulary tables, 
+   include a grouped set of facets built from the columns of the related table.
+  - To determine which columns from the related table to use as the grouped set
+    of facets, apply these [Facet Presentation](#facet-presentation) heuristics
+    recursively.
+  - The exact style for displaying grouped facets is open to the implementation
+    and could take a variety of forms such as accordion controls, tree view
+    controls, cascading slide out controls, or others.
 5. Apply rule #4 to related tables that have a foreign key relationship to the
    table that is being faceted on.
 6. TBD, rule #4 could also be applied to related tables that are related by way
