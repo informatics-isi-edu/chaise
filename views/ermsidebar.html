@@ -6,7 +6,7 @@
 	        <!-- Sidebar toggle button -->
 	        <div class="row">
 	        	<div id="toggle-side" class="col-md-12" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
-	        		<a href="#" class="sidebar-toggle" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
+	        		<a href="#" class="sidebar-toggle">
 			        	<h5>Hide Sidebar</h5>
 			        	<span class="glyphicon glyphicon-forward pull-right"></span>
 			        </a>
@@ -18,10 +18,10 @@
 				<div class="col-md-6 col-sm-6">
 				</div>
 				<div class="col-md-6 col-sm-6 meta-icons">
-					<a data-toggle="tooltip" data-placement="bottom" title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
+					<a title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
 						<span class="glyphicon glyphicon-bookmark"></span>
 					</a>
-					<a data-toggle="tooltip" data-placement="bottom" ng-href="{{chaiseConfig.helpURL}}" title="Tips for using the Data Browser">
+					<a ng-href="{{chaiseConfig.helpURL}}" title="Tips for using the Data Browser">
 						<span class="glyphicon glyphicon-question-sign"></span>
 					</a>
 					<a data-toggle="tooltip" data-placement="bottom" ng-href="{{chaiseConfig.feedbackURL}}" title="Send us your feedback">
@@ -96,13 +96,13 @@
 							<button ng-click="sideBar.resetFacets();" type="button" class="badge reset">Reset Search</button>
 					</div>
 					<div class="col-md-6 col-sm-6 meta-icons">
-						<a data-toggle="tooltip" data-placement="left" title="This link stores your search results as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}">
+						<a data-toggle="tooltip" data-placement="bottom" title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
 							<span class="glyphicon glyphicon-bookmark"></span>
 						</a>
-						<a ng-href="{{chaiseConfig.helpURL}}" title="Tips for using the Data Browser">
+						<a data-toggle="tooltip" data-placement="bottom" ng-href="{{chaiseConfig.helpURL}}" title="Tips for using the Data Browser">
 							<span class="glyphicon glyphicon-question-sign"></span>
 						</a>
-						<a ng-href="{{chaiseConfig.feedbackURL}}" title="Send us your feedback">
+						<a data-toggle="tooltip" data-placement="bottom" ng-href="{{chaiseConfig.feedbackURL}}" title="Send us your feedback">
 							<span class="glyphicon glyphicon-comment"></span>
 						</a>
 					</div>
@@ -134,7 +134,7 @@
 	<aside id="morefilters" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
 		<div class="sidebar-header">
 			<div id="toggle-side">
-				<a href="#" class="sidebar-toggle" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
+				<a href="#" class="sidebar-toggle" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');">
 			    	<h5>Hide Sidebar</h5>
 			    	<span class="glyphicon glyphicon-forward pull-right"></span>
 			    </a>
@@ -191,10 +191,7 @@
 		    <div class="sidebar-header">
 		        <!-- Sidebar toggle button -->
 	        	<div id="toggle-side">
-	        		<!--
 	        		<a href="#" class="field-toggle" ng-click="sideBar.editFilterDone($event, 'field-toggle', true);">
-	        		-->
-	        		<a href="#" class="sidebar-toggle" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
 			        	<h5>Hide Sidebar</h5>
 			        	<span class="glyphicon glyphicon-forward pull-right"></span>
 			        </a>

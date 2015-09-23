@@ -28,7 +28,7 @@ label {
 }
 */
 .form-horizontal .control-label {
-	padding-top: 0;	
+	padding-top: 0;
 }
 
 .filtertitle {
@@ -92,7 +92,7 @@ label {
 }
 
 .filter-container {
-	display: block; 
+	display: block;
 	/* margin-right: 79px; */
 	/* min-height: 80px; */
 	background-color: #FFF;
@@ -229,11 +229,10 @@ a.filter-link-cancel {
 	font-weight: 400;
 }
 
-.badge.reset {
+.badge.reset, .badge.open-side {
 	background-color: #428bca;
 	border-color: #428bca;
 }
-
 
 @-moz-document url-prefix() {
   fieldset { display: table-cell; }
@@ -352,7 +351,7 @@ dl.attribute-group dd {
 	/* margin: 0px auto 30px; */
 }
 .editfilter-container {
-	display: block; 
+	display: block;
 	/* background-color: #F2F2F2; */
 	border-top: 1px solid #CCC;
 	border-bottom: 1px solid #CCC;
@@ -380,23 +379,23 @@ dl.attribute-group dd {
 }
 
 .editvalue-container {
-	display: block; 
+	display: block;
 	padding: 10px 15px;
 	margin-bottom: 70px; /* why? the visible margin is about 15-20px worth so the sidebar thinks it's longer than it is */
 }
 
 .sidebar-nav a.field-toggle .md-chevron-right, .editfilter-container a.field-toggle .md-chevron-right  {
-	position: absolute; 
+	position: absolute;
 	right:10px; /* was 0 */
-	top:0; 
-	padding-right: 5px; 
+	top:0;
+	padding-right: 5px;
 	color: #bbb;
 }
 
 .sidebar .glyphicon-forward {
-	padding-right: 5px; 
+	padding-right: 5px;
 	color: #bbb;
-	line-height: inherit;	
+	line-height: inherit;
 }
 
 .sidebar .sidebar-nav li {
@@ -462,17 +461,8 @@ dl.attribute-group dd {
 	top: -6px;
 }
 
-
-.open-side {
-	position: absolute;
-	top: 70px;
-	right: 15px;
-	z-index: 1000;
-}
-
 .open-side .glyphicon-backward {
 	color: #bbb;
-	line-height: inherit;	
 }
 
 #toggle-side .md-play-circle-outline {
@@ -580,15 +570,15 @@ dl.attribute-group dd {
 }
 
 .sidebar-search.form-control:-moz-placeholder { /* Firefox 18- */
-   color: #a6a6a6;  
+   color: #a6a6a6;
 }
 
 .sidebar-search.form-control::-moz-placeholder {  /* Firefox 19+ */
-   color: #a6a6a6;  
+   color: #a6a6a6;
 }
 
-.sidebar-search.form-control:-ms-input-placeholder {  
-   color: #a6a6a6;  
+.sidebar-search.form-control:-ms-input-placeholder {
+   color: #a6a6a6;
 }
 
 #sidebar .editfilter-container .filter-item, #collectionsTree .editfilter-container .filter-item {
@@ -863,4 +853,3 @@ th.table-more-bt {
 #browser-header, #add-filter-btn, #view-buttons, #dashboard-link {
 	display: none;
 }
-

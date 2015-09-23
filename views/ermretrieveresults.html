@@ -17,7 +17,7 @@
 							<h1>This is the name of a saved query <i class="md-bookmark-outline"></i></h1>
 						</div>
 						<div class="col-md-2">
-							<button type="button" class="btn btn-default btn-lg pull-right" >Bookmark Query</button>
+							<button type="button" class="btn btn-default btn-lg pull-right">Bookmark Query</button>
 						</div>
 					</div>
 
@@ -60,11 +60,8 @@
 							</p>
 						</div>
 						<div class="col-md-7">
-							<div class="pull-right">
-								<!--
-		   						<a data-toggle="tooltip" data-placement="left" title="This link stores your search results as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}">Bookmark</a> | <a ng-href="{{chaiseConfig.helpURL}}">Using the Data Browser</a> |
-		   						<a ng-href="{{chaiseConfig.feedbackURL}}">Send us your feedback</a>
-		   						 -->
+							<div class="open-side pull-right hidden">
+								<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);" type="button" class="badge open-side"><span class="glyphicon glyphicon-backward"></span> Show Sidebar</button>
 							</div>
 						</div>
 					</div>
