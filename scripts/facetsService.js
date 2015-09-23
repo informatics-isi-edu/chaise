@@ -92,8 +92,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	    var overlay = $('.sidebar-overlay');
 	    if (toggle == 'sidebar-toggle') {
 				$('#sidebar').toggleClass('open');
-				var main = $('.main');
-				main.toggleClass('col-md-9 col-md-12');
+				$('.main').toggleClass('col-md-9 col-md-12');
 				$('div.open-side').toggleClass('hidden show');
 	    } else if (toggle == 'field-toggle') {
         $('#editfilter').toggleClass('open');
@@ -105,7 +104,6 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	    	}
         $('#morefilters').toggleClass('open');
 	    }
-
 	};
 
 	this.initSortOption = function () {

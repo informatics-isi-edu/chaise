@@ -61,12 +61,15 @@
 						</div>
 						<div class="col-md-7">
 							<div class="open-side pull-right hidden">
-								<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);" type="button" class="badge open-side"><span class="glyphicon glyphicon-backward"></span> Show Sidebar</button>
+								<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);" type="button" class="badge open-side"><span class="glyphicon glyphicon-backward"></span> Open Sidebar</button>
 							</div>
 						</div>
 					</div>
 					<div class="row" id="filterarea">
 						<div id="filter" class="col-md-12">
+							<div id="defaultMessage" class="jumbotron" ng-if="!facetResults.hasSelectedFacets()">
+								<h1>Use the sidebar to select your search attributes. <span class="glyphicon glyphicon-arrow-right"></span></h1>
+							</div>
 							<div class="filter-container">
 				                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
 				                    <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
@@ -157,8 +160,7 @@
 							of <strong>{{FacetsData.totalServerItems}}.</strong>
 						</p>
 					</div>
-
-					<div id="results_tally" class="row">
+					<div id="results_tally" class="row" ng-show="facetResults.hasSelectedFacets()">
 						<div class="col-md-8">
 							<p>Displaying results <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
 						</div>
@@ -177,7 +179,7 @@
 							<span class="btn btn-label pull-right">Switch view:</span>
 						</div>
 					</div>
-					<div id="resultstable" class="row">
+					<div id="resultstable" class="row" ng-show="facetResults.hasSelectedFacets()">
 						<div ng-if="FacetsData.view=='list'" class="col-md-12" ng-repeat="row in FacetsData.ermrestData">
 		                    <div ng-if="FacetsData.view=='list'" class="panel panel-default">
 		                    	<div class="panel-heading">
@@ -312,7 +314,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="row bottompgr">
+					<div class="row bottompgr" ng-show="facetResults.hasSelectedFacets()">
 						<div class="form-group col-md-12">
 							<ul class="pagination bottompagination">
 								<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="prev"><a href="#"
