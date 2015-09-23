@@ -575,6 +575,44 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
   this.urlBookmark = function urlBookmark() {
 		return $scope.FacetsData.bookmark;
 	};
+  
+  this.hasSelectedFacets = function hasSelectedFacets() {
+    var selectedFacets = false;
+    $.each($scope.FacetsData.box, function(table, columns) {
+      var colsDescr = $scope.FacetsData['colsDescr'][table];
+      $.each(columns, function(key, value) {
+        if(searchBoxPresentation.contains(colsDescr[key]['type'])) {
+          if (value['value'] != '') {
+            selectedFacets = true;
+            return false;
+          }
+        }
+        else if (colsDescr[key]['type'] == 'enum') {
+            if (value['values'] != null) {
+              $.each(value['values'], function(checkbox_key, checkbox_value) {
+                if(checkbox_value) {
+                  selectedFacets = true;
+                  return true;
+                }
+              });
+            }
+        }
+        else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
+            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+              if (value['left']) {
+                selectedFacets = true;
+                return true;
+              }
+              if (value['right']) {
+                selectedFacets = true;
+                return true;
+              }
+            }
+        }
+      });
+    });
+    return selectedFacets;
+  };
 
   this.resetFacets = function resetFacets() {
     $.each($scope.FacetsData.box, function(table, columns) {
