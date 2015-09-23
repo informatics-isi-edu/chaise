@@ -63,6 +63,7 @@ var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
 
 var unsortableColumns = [];
 var suppressError = true;
+var suppressBookmark = false;
 var facetPolicy = null;
 var assignBookmark = false;
 
@@ -2982,9 +2983,11 @@ function setBookmark(options) {
 	parameters.push('layout='+options.view);
 	parameters.push('page='+options.pagingOptions.currentPage);
 	options.bookmark = prefix + '#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' +options.table + '?' + parameters.join('&');
-	assignBookmark = true;
-	window.location.assign(options.bookmark);
-	setTimeout(function() {assignBookmark = false;}, 1);
+	if (!suppressBookmark) {
+		assignBookmark = true;
+		window.location.assign(options.bookmark);
+		setTimeout(function() {assignBookmark = false;}, 1);
+	}
 }
 
 function getSearchQuery(url) {

@@ -79,11 +79,14 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 				});
 			}
 			$scope.FacetsData.filter = null;
+			suppressBookmark = true;
 			getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
 			if ($scope.FacetsData.bookmarkPage != null) {
 	    		setTimeout(function () {
 	    			$scope.morePage();
 	    		}, 200);
+			} else {
+				suppressBookmark = false;
 			}
  		}
   	};
@@ -411,6 +414,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 			}
  		} else {
 			$scope.FacetsData.bookmarkPage = null;
+			suppressBookmark = false;
 		}
 	}
 
