@@ -18,15 +18,12 @@ label {
 	/* line-height: inherit; */
 }
 
-.modal-content {
-	z-index: 4000;
-}
-
 /*
 .form-group .glyphicon {
 	vertical-align: middle;
 }
 */
+
 .form-horizontal .control-label {
 	padding-top: 0;
 }

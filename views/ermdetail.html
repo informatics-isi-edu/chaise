@@ -1,5 +1,4 @@
 	<div ng-controller="DetailListCtrl as facetDetail" ng-show="facetDetail.showDetail()">
-		<div>
 			<div class="modal-content panel panel-default">
 				<div class="panel-heading">
 					<h2 class="modal-title panel-title ng-binding">{{FacetsData.entryTitle}}<button type="button" class="btn btn-default btn-sm pull-right" ng-click="facetDetail.goBack();">
@@ -48,7 +47,7 @@
 									</span>
 								</td>
 							</tr>
-							
+
 							<tr ng-if="facetDetail.isAssociation(data['table'], data['rows'])" ng-repeat="(name, data) in FacetsData.linearizeView">
 								<td ng-if="!facetDetail.isMultipleAttribute(data['rows'][0]) && !facetDetail.isGEO(data['table'])" class="key">{{facetDetail.display(data['table'],name,data['rows'])}}:</td>
 								<td class="value">
@@ -166,7 +165,7 @@
 								</table>
 							</div>
 						</div>
-						
+
                         <h3 ng-show="FacetsData.tiles.length>0">2D Images:</h3>
                         <table>
                             <tr ng-repeat="values in FacetsData.tiles">
@@ -232,4 +231,3 @@
 				</div>
 			</div>
 		</div>
-	</div>

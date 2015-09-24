@@ -89,10 +89,12 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	};
 
 	this.sidebarClick = function (toggle) {
+		var mainContent = $('#main-content');
+		var openSideBtn = $('div.open-side');
 	    if (toggle == 'sidebar-toggle') {
 				$('#sidebar').toggleClass('open');
-				$('.main').toggleClass('col-md-9 col-md-12');
-				$('div.open-side').toggleClass('hidden show');
+				mainContent.toggleClass('col-xs-5 col-xs-12').toggleClass('col-sm-6 col-sm-12').toggleClass('col-md-7 col-md-12').toggleClass('col-lg-8 col-lg-12');
+				openSideBtn.toggleClass('hidden show');
 	    } else if (toggle == 'field-toggle') {
         $('#editfilter').toggleClass('open');
 	    } else if (toggle == 'collections-toggle') {
@@ -101,10 +103,10 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
         sidebar.toggleClass('open');
 				$('#sidebar').removeClass('open');
 				if (sidebar.hasClass('open')) {
-					$('.main').removeClass('col-md-12').addClass('col-md-9');
+					mainContent.removeClass('col-xs-12 col-sm-12 col-md-12 col-lg-12').addClass('col-xs-6 col-sm-6 col-md-7 col-lg-8');
 				} else {
-					$('.main').removeClass('col-md-9').addClass('col-md-12');
-					$('div.open-side').removeClass('hidden').addClass('show');
+					mainContent.removeClass('col-xs-6 col-sm-6 col-md-7 col-lg-8').addClass('col-xs-12 col-sm-12 col-md-12 col-lg-12');
+					openSideBtn.removeClass('hidden').addClass('show');
 				}
         if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
             overlay.addClass('active');
