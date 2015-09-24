@@ -89,7 +89,6 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	};
 
 	this.sidebarClick = function (toggle) {
-	    var overlay = $('.sidebar-overlay');
 	    if (toggle == 'sidebar-toggle') {
 				$('#sidebar').toggleClass('open');
 				$('.main').toggleClass('col-md-9 col-md-12');
@@ -97,7 +96,21 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	    } else if (toggle == 'field-toggle') {
         $('#editfilter').toggleClass('open');
 	    } else if (toggle == 'collections-toggle') {
-        $('#collectionsTree').toggleClass('open');
+				var sidebar = $('#collectionsTree');
+				var overlay = $('.sidebar-overlay');
+        sidebar.toggleClass('open');
+				$('#sidebar').removeClass('open');
+				if (sidebar.hasClass('open')) {
+					$('.main').removeClass('col-md-12').addClass('col-md-9');
+				} else {
+					$('.main').removeClass('col-md-9').addClass('col-md-12');
+					$('div.open-side').removeClass('hidden').addClass('show');
+				}
+        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
+            overlay.addClass('active');
+        } else {
+            overlay.removeClass('active');
+        }
 	    } else if (toggle == 'more-field-toggle') {
 	    	if (FacetsData.facetSelection) {
 		    	this.updateSessionFilter();

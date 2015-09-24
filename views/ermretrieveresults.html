@@ -61,14 +61,14 @@
 						</div>
 						<div class="col-md-7">
 							<div class="open-side pull-right hidden">
-								<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);" type="button" class="badge open-side"><span class="glyphicon glyphicon-backward"></span> Open Sidebar</button>
+								<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');" type="button" class="badge open-side"><span class="glyphicon glyphicon-backward"></span> Open Sidebar</button>
 							</div>
 						</div>
 					</div>
 					<div class="row" id="filterarea">
 						<div id="filter" class="col-md-12">
-							<div id="defaultMessage" class="jumbotron" ng-if="!facetResults.hasSelectedFacets()">
-								<h1>Use the sidebar to select your search attributes. <span class="glyphicon glyphicon-arrow-right"></span></h1>
+							<div class="jumbotron" ng-if="!facetResults.hasSelectedFacets()">
+								<h1>Use the <a href="#" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');">sidebar</a> to select search attributes.</h1>
 							</div>
 							<div class="filter-container">
 				                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
