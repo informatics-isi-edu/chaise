@@ -60,9 +60,14 @@ label {
 	line-height: 1;
 	border-radius: 0;
 }
+
 /* fix cross browser box model issue */
-#filter .btn, #view-buttons .btn, #views .btn {
+#view-buttons .btn, #views .btn {
 	padding: 0;
+}
+
+#welcome-button {
+	padding: 15px 20px;
 }
 
 /* parent element for the filter button and filter container */

@@ -67,9 +67,13 @@
 					</div>
 					<div class="row" id="filterarea">
 						<div id="filter" class="col-md-12">
-							<div class="jumbotron" ng-if="!facetResults.hasSelectedFacets()">
-								<h1>Use the <a href="#" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');">sidebar</a> to select search attributes.</h1>
-							</div>
+							<div class="jumbotron text-center" ng-if="!facetResults.hasSelectedFacets();">
+								<h1>{{FacetsData.selectedEntity.display}}</h1>
+								<p class="lead">Use the sidebar to the right to select search attributes.</p>
+								<div class="open-side hidden">
+									<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');" type="button" id="welcome-button" class="btn btn-primary">Open Sidebar to Search</button>
+								</div>
+						  </div>
 							<div class="filter-container">
 				                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
 				                    <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
