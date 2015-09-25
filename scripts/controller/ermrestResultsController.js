@@ -67,7 +67,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 
 		event.preventDefault();
 
-        var detailPath = window.location.origin + '/chaise/record/#!' + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
+        var detailPath = window.location.origin + '/chaise/record/#' + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
         window.location.href = detailPath;
         return false;
 

@@ -6,17 +6,18 @@
     
 // Invalid
 
-// file:///Users/bennettl/Desktop/Project/Chaise/Detail/detail.html#c=1&t=tom&username=efef
-// file:///Users/bennettl/Desktop/Project/Chaise/Detail/detail.html#c=1&t=person&username=efef
+// file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:tom/username=efef
+// file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:person/username=efef
 
 // Valid
 
-// - file:///Users/bennettl/Desktop/Project/Chaise/Detail/detail.html#c=1&t=person&username=Jim%20F.%20Brinkley
-// - file:///Users/bennettl/Desktop/Project/Chaise/Detail/detail.html#c=1&t=mouse_gene&term=ABCA4
-// - file:///Users/bennettl/Desktop/Project/Chaise/Detail/detail.html#c=1&t=dataset&accession=FB00000177
-// - file:///Users/bennettl/Desktop/Project/Chaise/Detail/detail.html#c=6&t=construct&id=1243
-// - file:///Users/bennettl/Desktop/Project/Chaise/Detail/detail.html#c=6&t=target&id=110
-// file:///Users/bennettl/Desktop/Project/Chaise/Detail/detail.html#c=6&t=construct&id=1243
+// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:person/username=Jim%20F.%20Brinkley
+    // https://vm-dev-030.misd.isi.edu/chaise/detail/index.html#1/legacy:person/username=Jim%20F.%20Brinkley
+// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:mouse_gene/term=ABCA4
+// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:dataset/accession=FB00000177
+// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:construct/id=1243
+// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:target/id=110
+// file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:construct/id=1243
 
 // Ermrest
 
@@ -32,7 +33,8 @@
 // - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/target/id=90"
 
 
-var chaiseDetailApp = angular.module("chaiseDetailApp", ['ngResource', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'ngCookies', 'ngSanitize']);
+var CR_BASE_URL = 'https://vm-dev-030.misd.isi.edu/ermrest/catalog/';
+var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'ngCookies', 'ngSanitize']);
 
 /*
   ____             __ _       
@@ -43,11 +45,11 @@ var chaiseDetailApp = angular.module("chaiseDetailApp", ['ngResource', 'ngRoute'
                         |___/ 
 */
 
-chaiseDetailApp.config(['$locationProvider', function($locationProvider) {
-    $locationProvider.html5Mode({
-      enabled: true,
-      requireBase: false
-    });
+chaiseRecordApp.config(['$locationProvider', function($locationProvider) {
+    // $locationProvider.html5Mode({
+    //   enabled: true,
+    //   requireBase: false
+    // });
 }]);
 
 /*
@@ -60,42 +62,7 @@ chaiseDetailApp.config(['$locationProvider', function($locationProvider) {
 */
 
 // REST API for Ermrest
-chaiseDetailApp.service('ermrestService', ['$http', '$location', '$rootScope', 'spinnerService', 'notFoundService', function($http, $location, $rootScope, spinnerService, notFoundService){
-    
-    var baseUrl = 'https://vm-dev-030.misd.isi.edu/ermrest/catalog/';
-    var schema  = {};
-
-    // Get the catalogue's schema
-    this.getSchema = function(cid, onSuccess){
-        
-        // Start spinner
-        spinnerService.show('Loading...');
-
-        // Build the schema path
-        var path = baseUrl + cid + '/schema';
-        
-        // Reference to service
-        var self = this;
-
-        // Execute API Request tog get schema
-        $http.get(path).success(function(data, status, headers, config) {
-
-            // Set schema
-            self.schema     = data.schemas.legacy;
-            self.schema.cid = cid;
-
-            spinnerService.hide();
-            onSuccess(data);
-
-            console.log('schema', self.schema);
-        }).
-        error(function(data, status, headers, config) {
-            console.log("Error querying schema", data);
-            notFoundService.show("We're sorry, the catalogue id " + cid + " does not exist. Please try again!");
-            spinnerService.hide();
-        });
-    };
-
+chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService', 'spinnerService', 'notFoundService', function($http, $rootScope, schemaService, spinnerService, notFoundService){
 
     // Get the entity in JSON format
     // Note: By this point,the schema should be loaded already
@@ -108,18 +75,18 @@ chaiseDetailApp.service('ermrestService', ['$http', '$location', '$rootScope', '
         var self = this;
 
         // Make sure the schema is loaded
-        if (!self.schema){
+        if (!schemaService.schema){
             return;
         }
 
         // Only continue if tableName is valid
-        if (!self.isValidTable(tableName)){
+        if (!schemaService.isValidTable(tableName)){
             notFoundService.show("We're sorry, the tablename '" + tableName + "' does not exist. Please try again!");
             return;
         }
               
         // Build the entity path
-        var path = baseUrl + self.schema.cid + '/entity/' + tableName + '/' + self.buildPredicate(keys);
+        var path = CR_BASE_URL + schemaService.schema.cid + '/entity/' + tableName + '/' + self.buildPredicate(keys);
 
         // Execute API Request to get main entity
         $http.get(path).success(function(data, status, headers, config) {
@@ -169,7 +136,7 @@ chaiseDetailApp.service('ermrestService', ['$http', '$location', '$rootScope', '
                         if (references.length > 0){
 
                             // Get the references annotations from the schema
-                            var annotations =  self.schema.tables[rt['tableName']].annotations;
+                            var annotations =  schemaService.schema.tables[rt['tableName']].annotations;
 
                             // Base on the annotation, treat the reference differently
 
@@ -276,7 +243,7 @@ chaiseDetailApp.service('ermrestService', ['$http', '$location', '$rootScope', '
                 delete reference[parentTableName];
             // If it doesn't find the column value connecting to the parent table, then delete that
             } else{
-                var parentColumnKey = this.getParentColumnName(parentTableName, rt['tableName']);
+                var parentColumnKey = schemaService.getParentColumnName(parentTableName, rt['tableName']);
                 delete reference[parentColumnKey];
             }
 
@@ -292,7 +259,7 @@ chaiseDetailApp.service('ermrestService', ['$http', '$location', '$rootScope', '
                 // ASSUMPTION: Assumes key is id, but can be something else!!!
                 var params = { 'id': rValue };
 
-                if (this.isVocabularyTable(rKey)){
+                if (schemaService.isVocabularyTable(rKey)){
 
                     // Only get the entity, not any nested tables
                     // curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/cleavagesite/id=12"
@@ -309,7 +276,7 @@ chaiseDetailApp.service('ermrestService', ['$http', '$location', '$rootScope', '
                     }(j,rKey));
 
                 // Else it's an 'id' key or reference to table, place a link to it
-                } else if (rKey.toLowerCase() == 'id' || this.isValidTable(rKey)){
+                } else if (rKey.toLowerCase() == 'id' || schemaService.isValidTable(rKey)){
                     // If the key is id, set the table name to the reference table's table name (construct), else the table name is key (i.e. cleavagesite)
                     var tableName = (rKey.toLowerCase() == 'id') ? rt['tableName'] : rKey;
                     // Mock entity object with params
@@ -319,7 +286,155 @@ chaiseDetailApp.service('ermrestService', ['$http', '$location', '$rootScope', '
         }
     };
 
-    // HELPERS
+    // Get the entity display title
+    this.getEntityTitle = function(entity){
+
+        var entityTableSchema = schemaService.schema.tables[entity.internal.tableName];
+        var validTitleColumns = ['name', 'label', 'title'];
+
+        // Inspect each column in the table schema to find the one with the annotation 'title'
+        for (var c in entityTableSchema.column_definitions){
+
+            var cd      = entityTableSchema.column_definitions[c];
+            var cn      = cd.name.toLowerCase();
+            var annotations = cd.annotations.comment;
+            
+            // If the annotation is a 'title'
+            if (annotations != null && annotations.indexOf('title') > -1){
+            
+                return entity[cd.name];
+
+            // If column name fits the array in validTitleColumns
+            } else if (validTitleColumns.indexOf(cn) > -1){
+                return entity[cd.name];
+            }
+        }
+
+        return null;
+    };
+
+    // Get the Chaise Detail lin for entity
+    this.getEntityLink = function(tableName, entity){
+        return window.location.href.replace(window.location.hash, '') + '#!' + schemaService.schema.cid + '/' +  schemaService.schema + ':' + tableName+ '/id=' + entity.id;
+    };
+
+    // Scan through schema to find related tables
+    // Include tables with outbound foregin key (construct), to entity (target). If the foreign table (construct) is an 'asssociation' table, we will go another level deep and get all associations 
+    this.getForeignTablesForEntity = function(entity){
+
+        // Goes through every table in the schema, looking for a forgein_key_column: table_name that matches entity table name
+        var foreignTables = [];
+
+        // EACH TABLE
+        for (var tableKey in schemaService.schema.tables){
+            var tableSchema             = schemaService.schema.tables[tableKey];
+            var referencedColumnMatch   = false; // if our table name is part of foreign key -> reference columns
+
+            // EACH FORGEIN KEY 
+            for (var i = 0; i < tableSchema.foreign_keys.length; i++){
+               var fk =  tableSchema.foreign_keys[i];
+
+                // EACH REFERENCED COLUMNS
+                for (var j = 0; j < fk.referenced_columns.length; j++){
+                    var rc = fk.referenced_columns[j];
+
+                    // If a reference column table name matches our table name, then it has an outbound forgein key to entity. i.e. construct -> target (entity)
+                    if (rc.table_name == entity.internal.tableName){
+                        referencedColumnMatch = true;
+
+                        var foreignTable = {
+                                                    'tableName':            tableKey,
+                                                    'referencedTableName':  rc.table_name,
+                                                    'path':                 entity.internal.path + '/' + tableKey
+                                                };
+                        // If this is a binary table, switch the path to bring out the referenced table instead
+
+                        //  If foreign table it's a binary table, continue
+                        if (schemaService.isBinaryTable(foreignTable.tableName)){
+                            var parentTableName     = entity.internal.tableName;
+                            // ASSUMPTION: Column name = tablename
+                            var referenceTableName  = schemaService.getReferencedColumnName(parentTableName, foreignTable.tableName); 
+
+                           
+                            // CASE A: If foreign table references a vocabulary table, set vocabularyTable varialbe to true (dataset_mouse_mutation -> mouse_mutation)
+                            if (schemaService.isVocabularyTable(referenceTableName)){
+                                foreignTable.vocabularyTable            = true;
+                                foreignTable.referencedTableName        = referenceTableName;
+                                foreignTable.path                       += '/'+ referenceTableName;
+                            // CASE B: If foreign table references a complex table, switch the path to be the table it references (project member -> project)
+                            } else if (schemaService.isComplexTable(referenceTableName)){
+                                foreignTable.path   += '/'+ referenceTableName;
+                            }
+
+                        }
+
+                        foreignTables.push(foreignTable);
+
+
+                    }
+                }
+            }
+        }
+
+        return foreignTables;
+
+    };
+
+    // Build ermrest predicate base on JSON params
+    this.buildPredicate = function(params){
+
+        // Build an array of predicates for the Ermrest Filter lanaguage
+        var predicates = [];
+
+        for (var key in params){
+            var predicate = encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+            predicates.push(predicate);
+        }
+        // Join predicates with a conjunctive filter '&'
+        return predicates.join('&');
+    };
+
+   
+
+}]);
+
+// Service use to introspect scheam
+chaiseRecordApp.service('schemaService', ['$http', '$location', '$rootScope', 'spinnerService', 'notFoundService', function($http, $location, $rootScope, spinnerService, notFoundService){
+    
+    var schema  = {};
+
+    // Get the catalogue's schema
+    this.getSchema = function(cid, schemaName, onSuccess){
+        
+        // Start spinner
+        spinnerService.show('Loading...');
+
+        // Build the schema path
+        var path = CR_BASE_URL + cid + '/schema';
+        
+        // Reference to service
+        var self = this;
+
+        // Execute API Request tog get schema
+        $http.get(path).success(function(data, status, headers, config) {
+            console.log('scheams', data.schemas);
+            console.log('schemaName', schemaName);
+            // Set schema
+            self.schema     = data.schemas[schemaName];
+            self.schema.cid = cid;
+
+            spinnerService.hide();
+            onSuccess(data);
+
+            console.log('schema', self.schema);
+        }).
+        error(function(data, status, headers, config) {
+            console.log("Error querying schema", data);
+            notFoundService.show("We're sorry, the catalogue id " + cid + " does not exist. Please try again!");
+            spinnerService.hide();
+        });
+    };
+
 
     // For a given nested entity, get the parent column name
     this.getParentColumnName = function(parentTableName, tableName){
@@ -422,125 +537,11 @@ chaiseDetailApp.service('ermrestService', ['$http', '$location', '$rootScope', '
         return table.column_definitions.length > 2;
     };
 
-    // Get the entity display title
-    this.getEntityTitle = function(entity){
-
-        var entityTableSchema = this.schema.tables[entity.internal.tableName];
-        var validTitleColumns = ['name', 'label', 'title'];
-
-        // Inspect each column in the table schema to find the one with the annotation 'title'
-        for (var c in entityTableSchema.column_definitions){
-
-            var cd      = entityTableSchema.column_definitions[c];
-            var cn      = cd.name.toLowerCase();
-            console.log('cn', cn);
-            var annotations = cd.annotations.comment;
-            
-            // If the annotation is a 'title'
-            if (annotations != null && annotations.indexOf('title') > -1){
-            
-                return entity[cd.name];
-
-            // If column name fits the array in validTitleColumns
-            } else if (validTitleColumns.indexOf(cn) > -1){
-                return entity[cd.name];
-            }
-        }
-
-        return null;
-    };
-
-    // Get the Chaise Detail lin for entity
-    this.getEntityLink = function(tableName, entity){
-        return window.location.href.replace(window.location.hash, '') + '#c=' + this.schema.cid + '&t=' + tableName+ '&id=' + entity.id;
-    };
-
-    // Scan through schema to find related tables
-    // Include tables with outbound foregin key (construct), to entity (target). If the foreign table (construct) is an 'asssociation' table, we will go another level deep and get all associations 
-    this.getForeignTablesForEntity = function(entity){
-
-        // Goes through every table in the schema, looking for a forgein_key_column: table_name that matches entity table name
-        var foreignTables = [];
-
-        // EACH TABLE
-        for (var tableKey in this.schema.tables){
-            var tableSchema             = this.schema.tables[tableKey];
-            var referencedColumnMatch   = false; // if our table name is part of foreign key -> reference columns
-
-            // EACH FORGEIN KEY 
-            for (var i = 0; i < tableSchema.foreign_keys.length; i++){
-               var fk =  tableSchema.foreign_keys[i];
-
-                // EACH REFERENCED COLUMNS
-                for (var j = 0; j < fk.referenced_columns.length; j++){
-                    var rc = fk.referenced_columns[j];
-
-                    // If a reference column table name matches our table name, then it has an outbound forgein key to entity. i.e. construct -> target (entity)
-                    if (rc.table_name == entity.internal.tableName){
-                        referencedColumnMatch = true;
-
-                        var foreignTable = {
-                                                    'tableName':            tableKey,
-                                                    'referencedTableName':  rc.table_name,
-                                                    'path':                 entity.internal.path + '/' + tableKey
-                                                };
-                        // If this is a binary table, switch the path to bring out the referenced table instead
-
-                        //  If foreign table it's a binary table, continue
-                        if (this.isBinaryTable(foreignTable.tableName)){
-                            var parentTableName     = entity.internal.tableName;
-                            // ASSUMPTION: Column name = tablename
-                            var referenceTableName  = this.getReferencedColumnName(parentTableName, foreignTable.tableName); 
-
-                           
-                            // CASE A: If foreign table references a vocabulary table, set vocabularyTable varialbe to true (dataset_mouse_mutation -> mouse_mutation)
-                            if (this.isVocabularyTable(referenceTableName)){
-                                foreignTable.vocabularyTable            = true;
-                                foreignTable.referencedTableName        = referenceTableName;
-                                foreignTable.path                       += '/'+ referenceTableName;
-                            // CASE B: If foreign table references a complex table, switch the path to be the table it references (project member -> project)
-                            } else if (this.isComplexTable(referenceTableName)){
-                                foreignTable.path   += '/'+ referenceTableName;
-                            }
-
-                        }
-
-                        foreignTables.push(foreignTable);
-
-
-                    }
-                }
-            }
-        }
-
-        return foreignTables;
-
-    };
-
-    // Build ermrest predicate base on JSON params
-    this.buildPredicate = function(params){
-        // Build an array of predicates for the Ermrest Filter lanaguage
-        var predicates = [];
-
-        for (var key in params){
-            var predicate = encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
-            predicates.push(predicate);
-        }
-
-        // Join predicates with a conjunctive filter '&'
-        return predicates.join('&');
-    };
-
-}]);
-
-// Service for schema interaction and introspection
-chaiseDetailApp.service('spinnerService', ['$rootScope', function($rootScope){
-
 }]);
 
 
 // Service for spinner
-chaiseDetailApp.service('spinnerService', ['$rootScope', function($rootScope){
+chaiseRecordApp.service('spinnerService', ['$rootScope', function($rootScope){
 
     // Show spinner with a message
     this.show = function(msg){
@@ -556,7 +557,7 @@ chaiseDetailApp.service('spinnerService', ['$rootScope', function($rootScope){
 }]);
 
 // Service for not found
-chaiseDetailApp.service('notFoundService', ['$rootScope', function($rootScope){
+chaiseRecordApp.service('notFoundService', ['$rootScope', function($rootScope){
     
     // Show not found with rootScope
     this.show = function(msg){
@@ -572,23 +573,39 @@ chaiseDetailApp.service('notFoundService', ['$rootScope', function($rootScope){
 }]);
 
 // Helper service for utilties methods 
-chaiseDetailApp.service('helperService', function(){
+chaiseRecordApp.service('locationService', function(){
     
 
     // Return the has params in an JSON object
     this.getHashParams = function () {
         var hashParams = {};
-        var e,
-            a = /\+/g,  // Regex for replacing addition symbol with a space
-            r = /([^&;=]+)=?([^&;]*)/g,
-            d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
-            q = window.location.hash.substring(1);
 
-        while (e = r.exec(q)){
-           hashParams[d(e[1])] = d(e[2]);
-        }
+        // "6/legacy:target/id=110"
+        var path                    = window.location.hash.substring(2);
+        var params                  = path.split('/');
+        var namespace               = params[1].split(':');
+
+        hashParams['catalogueId']   = params[0];
+        hashParams['schemaName']    = namespace[0];
+        hashParams['tableName']     = namespace[1];
+        hashParams['keys']          = this.convertParamsToObject(params[2]);
 
         return hashParams;
+    };
+
+     // 
+    this.convertParamsToObject = function(params){
+        var obj = {};
+        var predicates = params.split('&');
+
+        for (var i = 0; i < predicates.length; i++){
+            var key = predicates[i].split('=');
+            obj[key[0]] = key[1];
+        }
+
+        // Join predicates with a conjunctive filter '&'
+        return obj;
+
     };
 });
 
@@ -602,7 +619,7 @@ chaiseDetailApp.service('helperService', function(){
 ***/
 
 // Header Controller
-chaiseDetailApp.controller('HeaderCtrl', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location){
+chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location){
 
     $scope.active = "Home";
 
@@ -614,28 +631,27 @@ chaiseDetailApp.controller('HeaderCtrl', ['$rootScope', '$scope', '$location', f
 }]);
 
 // Detail controller
-chaiseDetailApp.controller('DetailCtrl', ['$rootScope', '$scope', 'ermrestService', 'helperService', 'notFoundService', function($rootScope, $scope, ermrestService, helperService, notFoundService){
+chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, ermrestService, schemaService, locationService, notFoundService){
     // C: Catalogue id
     // T: Table name
     // K: Key
 
     // Set up the parameters base on url
-    var params      = helperService.getHashParams(); 
+    var params      = locationService.getHashParams(); 
     // var params      = $location.search();  query parameters
-    var cid         = params['c'];
-    var tableName   = params['t'];
-
-    // Remove c (catalogue id) and t (tablename) keys
-    delete params['c'];
-    delete params['t'];
+    var cid         = params['catalogueId'];
+    var tableName   = params['tableName'];
+    var schema      = params['schemaName'];
+    var keys        = params['keys'];
 
     // cid 
     var cidRegex = /^[0-9]+$/;
     var tableNameRegex = /^[0-9a-zA-z_-]+$/;
 
-    // cid = 1;
+    // catalogueId = 1;
     // tableName = 'person';
-    // value = 'Jim F. Brinkley';
+    // schemaName = 'legacy';
+    // keys { username = 'Jim F. Brinkley' } ;
 
     $scope.openReferenceLink = function(url){
         window.open(url, '_blank');
@@ -657,7 +673,7 @@ chaiseDetailApp.controller('DetailCtrl', ['$rootScope', '$scope', 'ermrestServic
         
         notFoundService.show("'" + tableName + "' is an invalid table name. Please try again!");
 
-    } else if (Object.keys(params).length === 0){
+    } else if (Object.keys(keys).length === 0){
 
         notFoundService.show("Please provide keys to search for an entity");
 
@@ -665,10 +681,10 @@ chaiseDetailApp.controller('DetailCtrl', ['$rootScope', '$scope', 'ermrestServic
     } else{
 
         // Call Ermrest service to get schema
-        ermrestService.getSchema(cid, function(data){
+        schemaService.getSchema(cid, schema, function(data){
 
             // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
-            ermrestService.getEntity(tableName, params, true, function(data){
+            ermrestService.getEntity(tableName, keys, true, function(data){
                 // console.log('data is ', data);
                 $scope.entity = data;
             });
@@ -684,7 +700,7 @@ chaiseDetailApp.controller('DetailCtrl', ['$rootScope', '$scope', 'ermrestServic
 }]);
 
 // Images controller
-chaiseDetailApp.controller('ImagesCtrl', ['$scope', function($scope){
+chaiseRecordApp.controller('ImagesCtrl', ['$scope', function($scope){
     // When ng-repeat has been finished, apply jQuery UI to entity-images
     $scope.$on('ngRepeatFinished', function(){
 
@@ -713,7 +729,7 @@ chaiseDetailApp.controller('ImagesCtrl', ['$scope', function($scope){
     });
 }]);
 
-chaiseDetailApp.controller('NestedTablesCtrl', ['$scope', function($scope){
+chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
     // When ng-repeat has been finished, fixed header to nested tables
     $scope.$on('ngRepeatFinished', function(){
         $('.table.nested').floatThead({
@@ -736,7 +752,7 @@ chaiseDetailApp.controller('NestedTablesCtrl', ['$scope', function($scope){
 */
 
 // Return an entity object who's values are not arrays with objects, also remove title from entity
-chaiseDetailApp.filter('filteredEntity', function(){
+chaiseRecordApp.filter('filteredEntity', function(){
     return function(input){
         var filteredEntity = {};
 
@@ -754,7 +770,7 @@ chaiseDetailApp.filter('filteredEntity', function(){
 });
 
 // Removes underscores from input
-chaiseDetailApp.filter('removeUnderScores', function(){
+chaiseRecordApp.filter('removeUnderScores', function(){
     return function(input){
         //console.log('input ' + input);
         return input.replace(/_/g, ' ');
@@ -762,7 +778,7 @@ chaiseDetailApp.filter('removeUnderScores', function(){
 });
 
 // Stringify arrays
-chaiseDetailApp.filter('stringifyArray', function(){
+chaiseRecordApp.filter('stringifyArray', function(){
     return function(value){
 
         // Inspect if the key is a table in the schema and if so, is it a vocabulary table
@@ -779,7 +795,7 @@ chaiseDetailApp.filter('stringifyArray', function(){
 
 // Input: MIME type, Output: Uri to image preview
 // http://www.yolinux.com/TUTORIALS/LinuxTutorialMimeTypesAndApplications.html
-chaiseDetailApp.filter('iconPreviewUri', function(){
+chaiseRecordApp.filter('iconPreviewUri', function(){
     return function(input){
             var preview = 'assets/images/FilePreviews/';
             switch (input){
@@ -834,7 +850,7 @@ chaiseDetailApp.filter('iconPreviewUri', function(){
 });
 
 // Input: bytes. Output: H human readable file size description
-chaiseDetailApp.filter('filesize', function(){
+chaiseRecordApp.filter('filesize', function(){
     return function(input){
         return filesize(parseInt(input, 10));
     };
@@ -850,7 +866,7 @@ chaiseDetailApp.filter('filesize', function(){
 */
 
 // Will call ngRepeatFinished when last ng-repeat element has been rendered
-chaiseDetailApp.directive('onFinishRender', function ($timeout) {
+chaiseRecordApp.directive('onFinishRender', function ($timeout) {
     return {
         restrict: 'A',
         link: function (scope, element, attr) {

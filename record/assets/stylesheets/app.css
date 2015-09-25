@@ -46,6 +46,8 @@ a:hover{
 }
 
 #entity-title{
+    clear: both;
+    padding-top: 10px;
     color: rgb(126, 126, 126);
     font-size: 26px;
     font-weight: 300;
@@ -345,4 +347,10 @@ tbody{
     font-size: 230px;
     color: #78B8D6;
     margin-top: 70px;
+}
+
+#back-btn{
+    color: rgb(123, 123, 123);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }

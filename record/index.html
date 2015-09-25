@@ -1,4 +1,4 @@
-<html ng-app="chaiseDetailApp">
+<html ng-app="chaiseRecordApp">
     <head>
         <!-- STYLESHEETS -->
         <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />  
@@ -23,6 +23,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     </head>
     <body>
+
     <!-- HEADER -->
     <div ng-controller="HeaderCtrl" id="header" class="navbar navbar-fixed-top">
         <a id="brand" href="#">Chaise</a>
@@ -40,6 +41,8 @@
     </div>
     <div ng-controller="DetailCtrl" class="col-xs-10 col-xs-offset-1">
         <div ng-if="entity">
+        
+            <a id="back-btn" class="pull-left" href="javascript:history.back()">&#8592; Back</a>
 
             <!-- MAIN TABLE -->
             <div id="entity-title">{{ entity.internal.displayTitle }}</div>
