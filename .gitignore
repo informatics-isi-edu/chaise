@@ -13,4 +13,4 @@ dist
 jsdoc
 deployment-config.json
 .make-*
-app.html
+index.html
