@@ -3,37 +3,51 @@
 _This document describes the proposed guidelines for resource naming used by
 Chaise._
 
-Chaise should use the URI to name much (if not all) of the state of the
-application. For example, the state of the app currently includes things like:
-- the current entity set that the user is browsing, 
-- the attributes that the have been used to filter the entity set, 
-- the current layout (list, card, or table), 
+Web-based data presentation resources SHOULD have a _name_ in the form of a URL
+such that any meaningfully different presentation may be referenced, bookmarked
+and shared, even if the presentation is via a single-page "[AJAX](https://en.wikipedia.org/wiki/Ajax_%28programming%29)"
+or similar application.
+
+User actions that change to different data presentation SHOULD modify the
+browser history to allow backward/forward navigation, natively in the Web
+browser. The full URL SHOULD be available for the user to copy and/or share
+outside the browser. This MAY be in the form of a "permalink" anchor on the
+page since cutting and pasting from the browser location bar is sometimes
+problematic.
+
+Chaise should use the URL to name much (if not all) of the state of the
+application. At present, Chaise's internal state includes many aspects that
+determine the presentation of data. These include:
+- the current entity set that the user is browsing,
+- the attributes that the have been used to filter the entity set,
+- the current layout (e.g., list, card, or table),
 - whether the slide out is shown and which panel is displayed, and
 - the sort ordering and paging used to view the resulting entity set.
 
-All of this state could and should be identified in the URL and recoverable by
-returning to a state of the app based on the URL. If it were represented in the
-URL then a user could:
-
+All of this state SHOULD be named (i.e., identified) in the URL and recoverable
+by returning to a state of the application based on the URL. If represented in
+the URL a user could:
 - link directly to it from another web page,
-- bookmark it for later viewing, or
-- share it (email, text, etc) to a colleague.
+- bookmark it for later viewing,
+- share it (email, text, etc) to a colleague,
+- or it could be crawled by a Web search engine.
 
-To do this properly, the state of the application should come in the [fragment
-identifier](http://en.wikipedia.org/wiki/Fragment_identifier) portion of the
-URL scheme. That means that it should be after the '#' character in the URL:
-
-```
-https://<authority>/path/to/resource?query-options#fragment-identifier
-```
+This guide defines some of the principles that should be followed when designing
+names for data presentation resources and specifies the names for the current
+set of resources provided by Chaise.
 
 ## Background: Primary and Secondary Resource Names
+
+Over the past few years, the handling of and naming of state by presentation
+resources of single-page (or Ajax) Web applications has evolved considerably.
+Chaise takes a decidedly conservative approach in its interpretation and
+adherence to the W3C standards.
 
 [RFC3986](https://tools.ietf.org/html/rfc3986) specifies the "Uniform Resource
 Identifier (URI): Generic Syntax." The URI syntax allows for the identification
 of a primary resource and for secondary resources within its context, by way of
-the "fragment identifier" or the part of the URI following the '#' (the "hash
-sign" or "number sign").
+the "fragment identifier" or the part of the URI following the '#' (the pound
+character, also known as the "hash" or "number sign").
 
 The RFC states that:
 
@@ -46,96 +60,163 @@ The RFC states that:
 
 The portion of the URI up to the '#' identifies the primary resource while the
 fragment identifier (part that follows the '#') identifies secondary resources.
-The secondary resource identifier is commonly used in dynamic web applications,
-sometimes called AJAX applications, that maintain complex information in the
-fragment identifier.
+The secondary resource identifier is commonly used in modern Web applications,
+so called AJAX applications, that maintain complex information in the fragment
+identifier.
 
-## Use of Primary and Secondary Resource Names
+Thus, in Chaise, when naming resources the primary identifier SHOULD be used to
+name the presentation resource (i.e., a Web application used for generating data
+presentations and supporting user interactions) while the state of the
+application SHOULD be represented as the secondary resource identifier in the
+[fragment identifier](http://en.wikipedia.org/wiki/Fragment_identifier) part
+of the URL scheme.
 
-As stated in the [heuristics](heuristics.md) section:
-
-> Web-based data presentations SHOULD have a name in the form of a URL such that
-  any meaningfully different presentation may be bookmarked and shared, even if
-  the presentation is via a single-page AJAX or similar application.
-
-> User actions that change to different data presentation SHOULD modify the
-  browser history to allow back/forward navigation. The full URL SHOULD be
-  available for the user to copy and/or share outside the browser. This MAY be
-  in the form of a "permalink" anchor on the page since cutting and pasting from
-  the browser location bar is sometimes problematic.
+```
+https://<authority>/path/to/resource?query-options#fragment-identifier
+\________________________________________________/ \_________________/
+                      |                                    |
+        primary resource identifier          secondary resource identifier
+                      |                                    |
+ ___________________________________________________   _______________________
+/                                                   \ /                       \
+https://example.org/path/to/chaise/app?server=options#state/of/chaise?client=opt
+```
 
 ## Resource Names in Chaise
 
-The primary resource names in Chaise are:
-- `chaise/search`: the search interface
-- `chaise`: top level redirect to `chaise/search`, effectively an alias
-- `chaise/detail`: the entity detail interface (TBD: should this be called browse?)
-- `chaise/login`: the login form
-- `chaise/logout`: the logout form
+The primary resources (Web applications) and thus resource names in Chaise are:
+- `chaise/search`: resource for searching within a catalog (aliased from `chaise`)
+- `chaise/record`: resource for interacting with a record in the catalog
+- `chaise/login`: resource for establishing a session
 
-### Secondary Resource Naming in `chaise/search`
+These resources are inter-dependent Web applications loaded in distinct client
+contexts (i.e., Web pages).
 
-The `chaise/search` resource identifies secondary resources using the following
-fragment identifier format.
+### `chaise/search` Resource Names
 
-```
-Chaise URI := <primary resource identifier> '#' <secondary resource identifier>
+The `chaise/search` resource is an application for searching over collections
+of entities in an ERMrest catalog. It MUST represent the search criteria in use
+at well-defined states. It SHOULD represent other factors that influence the
+data presentation, such as whether the search results are displayed in a list,
+table, card, or other layout for example. However, since the underlying data
+model may change, even within a current session, the application MAY encounter
+resource names (URLs) that are no longer satisfiable. In such cases, the
+application MUST notify the user of its inability to satisfy the search and MAY
+fall back to a best effort attempt at satisfying the search criteria. For
+instance, if the URL names a secondary resource that includes an attribute that
+no longer exists in the catalog's data model at present, the application MAY
+attempt to drop the predicate from the search expression and show results for
+the predicates that are still satisfiable. However, again it MUST notify the
+user that it was not able to satisfy all of the predicates in the original
+resource name.
 
-<primary resource identifier> := https :// authority / path / to / chaise / search
-
-<secondary resource identifier> :=
-    '#' catalog '=' <id> '&' entity '=' <schema>:<table> '&' facets '=' '(' <predicates> ')' '&' <TBD>
-
-<predicates> := <predicate> [ '/' <predicate> ]+
-
-<predicate> := <facet> <op> <values>
-
-<value> := <value> [ ',' <value> ]+
-```
-
-and where:
-
-- `id`: the catalog id
-- `schema:table`: the qualified table name that is the target of the faceting
-- `facet`: the qualified `schema:table:column` name used in the faceting
-  predicate (TODO: there are known issues with this method of referencing a
-  column for the purpose of faceting)
-- `op`: the operator in predicate should match those used in ERMrest predicates
-- `value`: the value of the predicate must be a literal (should follow ERMrest
-   as well unless there are issue with encoding)
-- `TBD`: a placeholder for one or more parameters needed to represent the state
-  of the UI beyond the basic parameters needed for faceting. These may include
-  the current layout (list, card, table) etc.
-
-At a minimum, all parameter values (id, schema, table, attribute, value, etc.)
-would need to be URL encoded. But as long as no special characters are used in
-them (such as spaces) the value will be unchanged and user-friendly.
-
-The `<predicates>` is a conjunction of clauses where each clause is separated
-by a `/` character as used in ERMrest. The `<values>` is a disjunction of
-`<value>`s where each value is separate by a `,` character.
-
-### Secondary Resource Naming in `chaise/detail`
-
-The `chaise/detail` resource identifies secondary resources using the following
-fragment identifier format.
+The following grammar is used for `chaise/search` resource naming.
 
 ```
-Chaise URI := <primary resource identifier> '#' <secondary resource identifier>
+SEARCH_URI := BASE_URI 'chaise/search' '#' CATALOG_ID '/' SCHEMA ':' TABLE '?' OPTION [ '&' OPTION ]*
 
-<primary resource identifier> := https :// authority / path / to / chaise / detail
+BASE_URI := <a standard HTTP URL ending in the base path to the 'chaise' resource>
 
-<secondary resource identifier> :=
-    '#' catalog '=' <id> '&' entity '=' <schema>:<table> '&' <attribute> '=' <value> [ '&' <attribute> '=' <value> ]+
+CATALOG_ID := <a catalog identifier>
+
+SCHEMA := <a schema name>
+
+TABLE := <a table name>
+
+COLUMN := <a column name>
+
+PREDICATE := ATTRIBUTE OP VALUE [',' VALUE]+
+
+ATTRIBUTE := [ [SCHEMA ':'] TABLE ':' ] COLUMN
+
+OP := '::eq::' | '::neq::' | '::gt::' | '::lt::' | <other valid EMRrest operators>
+
+VALUE := <an URL encoded string literal>
+
+OPTION := 'facets' '=' PREDICATE [ '/' PREDICATE ]+ | TBD
+
+TBD := <a placeholder for one or more parameters needed to represent the state
+       of the UI beyond the basic parameters needed for faceting. These may
+       include the current layout (list, card, table) etc.>
 ```
 
-**TBD**:
+Notes:
+- In the `facets` search option, the list of predicates form a conjunction
+  (i.e., a logical AND) separated by the '/' character.
+- The right-hand side of a `PREDICATE` may be a single literal `VALUE` or a list
+  of values separated by the `,` character. The meaning of the value list is a
+  short-hand form of a disjunction that reuses the same `ATTRIBUTE` and `OP`.
+  Thus `attr::eq::abc,def,ghi` means "attr equals abc or attr equals def or
+  attr equals ghi".
 
-1. Should we define interchangeable aliases like 'c' in place of the long form
-   of "catalog" to make more compact 
+All user-specified parameter values (id, schema, table, attribute, value, etc.)
+MUST be URL encoded. As long as no special characters are used in them (such as
+spaces) the values will be unchanged and user-friendly.
 
-2. Should might want to make the fragment identifiers for `search` and `detail`
-   more uniform where applicable.
+Example `chaise\search` URL:
 
-3. We probably want to make these more similar with ERMrest.
+```
+https://example.org/chaise/search#5/xyz:experiments?facets=investigator::eq::'bill'/created::gt::'2015-04-20'
+```
 
+### `chaise/record` Resource Names
+
+The `chaise/record` resource is an application for viewing and editing a single
+data record (i.e., an entity) from a catalog of an ERMrest service. Along with
+the data record, the application also display sets of related entities as part
+of the record display. The application also supports browsing between records
+by navigating the foreign key relationships in the data model and between
+related entities. It MUST represent the identification of the record in its
+resource name. It SHOULD represent other factors that influence the data
+presentation, such as whether a nested table of related entities is display in
+a standard or transposed table layout. However, as specified in the
+`chase\search` resource, the `chaise\record` application may encounter URLs
+that are no longer satisfiable due to changes in the model or the data. In such
+cases, the application MUST notify the user of its inability to display the
+record. Unlike, the search resource, the record resource may not have a way to
+fallback and may only be able to direct the user to the search interface.
+
+The following grammar is used for `chaise/record` resource naming.
+
+```
+RECORD_URI := BASE_URI 'chaise/record' '#' CATALOG_ID '/' SCHEMA ':' TABLE '/' PREDICATE [ '/' PREDICATE ]* '?' OPTION [ '&' OPTION ]*
+BASE_URI := <a standard HTTP URL ending in the base path to the 'chaise' resource>
+
+CATALOG_ID := <a catalog identifier>
+
+SCHEMA := <a schema name>
+
+TABLE := <a table name>
+
+COLUMN := <a column name>
+
+PREDICATE := ATTRIBUTE OP VALUE [',' VALUE]+
+
+ATTRIBUTE := [ [SCHEMA ':'] TABLE ':' ] COLUMN
+
+OP := '::eq::' | '::neq::' | '::gt::' | '::lt::' | <other valid EMRrest operators>
+
+VALUE := <an URL encoded string literal>
+
+OPTION := <TBD>
+
+<TBD> := a placeholder for one or more parameters needed to represent the state
+         of the UI beyond the basic parameters needed for faceting. These may
+         include the current layout (list, card, table) etc.
+```
+
+All user-specified parameter values (id, schema, table, attribute, value, etc.)
+MUST be URL encoded. As long as no special characters are used in them (such as
+spaces) the values will be unchanged and user-friendly.
+
+Example `chaise\record` URL:
+
+```
+https://example.org/chaise/record#5/xyz:experiments/id::eq::123
+```
+
+### `chaise/login` Resource Names
+
+TBD. This should probably include a referral URL so that when other applications
+send the user to the login resource, the user can be returned to the originating
+application with its state restored.

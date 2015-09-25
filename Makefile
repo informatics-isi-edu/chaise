@@ -96,7 +96,7 @@ LINT=.make-lint
 all: lint build test $(DOC)
 
 .PHONY: build
-build: $(PKG) $(MIN) app.html
+build: $(PKG) $(MIN) app.html login.html
 
 # Rule to build the full library
 $(PKG): $(JS_SOURCE) $(BIN)
@@ -155,7 +155,8 @@ updeps:
 # Rule to clean project directory
 .PHONY: clean
 clean:
-	rm app.html
+	rm search/index.html
+	rm login/index.html
 	rm -rf $(DIST)
 	rm -rf $(JSDOC)
 	rm -f .make-*
@@ -182,26 +183,29 @@ karma:
 	$(BIN)/karma start
 
 # Rules to attach checksums to JavaScript source in the header
-app.html: app.html.in .make-asset-block .make-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' app.html.in > app_temp.html
-	sed -e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' app_temp.html > app.html
+app.html: search/app.html.in .make-asset-block .make-template-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' search/app.html.in > app_temp.html
+	sed -e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' app_temp.html > search/index.html
 	rm app_temp.html
+
+login.html: login/login.html.in .make-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' login/login.html.in > login/index.html
 
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE)
 	> .make-asset-block
 	for file in $(CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='$$file'>" >> .make-asset-block ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-asset-block ; \
 	done
 	for file in $(CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='$$file?v=$$checksum'>" >> .make-asset-block ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
 	done
 	for file in $(JS_DEPS); do \
-		echo "<script src='$$file'></script>" >> .make-asset-block ; \
+		echo "<script src='../$$file'></script>" >> .make-asset-block ; \
 	done
 	for file in $(JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='$$file?v=$$checksum'></script>" >> .make-asset-block ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
 
 .make-template-block: $(TEMPLATES_DEPS)

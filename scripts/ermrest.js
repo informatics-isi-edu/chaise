@@ -63,7 +63,9 @@ var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
 
 var unsortableColumns = [];
 var suppressError = true;
+var suppressBookmark = false;
 var facetPolicy = null;
+var assignBookmark = false;
 
 function isSortable(table, column) {
 	return !unsortableColumns.contains(column);
@@ -74,8 +76,8 @@ function initApplicationHeader(tables) {
 }
 
 function loadApplicationHeaderAndFooter() {
-	$( "#ermrestHeader" ).load( "views/ermheader.html" );
-	$( "#ermrestFooter" ).load( "views/ermfooter.html" );
+	$( "#ermrestHeader" ).load( "../views/ermheader.html" );
+	$( "#ermrestFooter" ).load( "../views/ermfooter.html" );
 }
 
 function initApplication() {
@@ -141,7 +143,7 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			if (authnProvider == 'goauth') {
 				getGoauth(window.location);
 			} else {
-				var login_url = 'login.html?referrer=' + encodeSafeURIComponent(window.location);
+				var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 				window.location = login_url;
 			}
 			break;
@@ -370,7 +372,8 @@ function submitGlobusLogin(username, password) {
 		if (result != null) {
 			token = result['access_token'];
 			//alert(token);
-			$.cookie(goauth_cookie, token, { expires: 7 });
+			var path = window.location.pathname.replace('/login/','/search/');
+			$.cookie(goauth_cookie, token, { path: path, expires: 7 });
 		} else {
 			return null;
 		}
@@ -397,7 +400,7 @@ function submitLogout() {
 	$('#login_user').html('');
 	$('#login_link').show();
 	$('#logout_link').hide();
-	var login_url = 'login.html?referrer=' + encodeSafeURIComponent(window.location);
+	var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	window.location = login_url;
 }
 
@@ -2973,19 +2976,40 @@ function setBookmark(options) {
 	if (index != -1) {
 		prefix = prefix.substring(0, index);
 	}
-	options.bookmark = prefix + '#entity='+encodeSafeURIComponent(SCHEMA) + ':' +options.table + 
-		((filter != null) ? '&facets='+filter : '') + '&layout='+options.view + '&page='+options.pagingOptions.currentPage;
-	window.location.assign(options.bookmark);
+	var parameters = [];
+	if (filter != null) {
+		parameters.push('facets='+filter);
+	}
+	parameters.push('layout='+options.view);
+	parameters.push('page='+options.pagingOptions.currentPage);
+	options.bookmark = prefix + '#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' +options.table + '?' + parameters.join('&');
+	if (!suppressBookmark) {
+		assignBookmark = true;
+		window.location.assign(options.bookmark);
+		setTimeout(function() {assignBookmark = false;}, 1);
+	}
 }
 
-function getSearchQuery() {
+function getSearchQuery(url) {
 	var ret = {};
 	var query = null;
-	var index = window.location.href.indexOf('#');
+	var index = url.indexOf('#');
 	if (index != -1) {
-		var query = window.location.href.substring(index+1);
-		if (query[0] == '/') {
-			query = query.substring(1);
+		var query = url.substring(index+1);
+		var fragments = query.split('?');
+		if (fragments.length == 2) {
+			var path = fragments[0].split('/');
+			if (path.length == 2) {
+				ret['catalog'] = path[0];
+				ret['entity'] = path[1];
+			} else {
+				if (path[0].indexOf(':') == -1) {
+					ret['catalog'] = path[0];
+				} else {
+					ret['entity'] = path[0];
+				}
+			}
+			query = fragments[1];
 		}
 		var parameters = query.split('&');
 		$.each(parameters, function(i, parameter) {
@@ -3010,7 +3034,7 @@ function setFilterValue(facet, separator, result) {
 		result[table][column]['value'] = decodeURIComponent(facet[1]);
 	} else if (separator == '::eq::') {
 		result[table][column]['values'] = {};
-		var values = facet[1].substring(1,facet[1].length-1).split(';');
+		var values = facet[1].split(';');
 		$.each(values, function(i, value) {
 			result[table][column]['values'][decodeURIComponent(value)] = true;
 		});
@@ -3056,7 +3080,7 @@ function encodeFilter(filter) {
 					$.each(value, function(term, val) {
 						terms.push(fixedEncodeURIComponent(term));
 					});
-					factors.push(col_name + '::eq::(' + terms.join(';') + ')');
+					factors.push(col_name + '::eq::' + terms.join(';'));
 					found = true;
 				} 
 			});
@@ -3090,7 +3114,7 @@ function encodeRegularExpression (str) {
 }
 
 function initLogin() {
-	var url = 'login.html?referrer=' + encodeSafeURIComponent(window.location);
+	var url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	window.location = url;
 }
 
