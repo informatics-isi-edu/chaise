@@ -14,4 +14,4 @@ The below table explains the usage of them:
 | facetPolicy | on_demand | N/A | "facetPolicy":\<value\> | N/A | If present with the _on_demand_ value, requests (for facets count and for facets distinct values) will be issued only for the selected facets. <br> At start up, the facets with the "top" annotation will be selected.<br>  On demand, you can check also other facets. |
 | feedbackURL | An URL for a form to provide feedback. | The FaceBase feedback form page. | "feedbackURL":\<URL\> | N/A | |
 | helpURL | An URL for getting help using Chaise. | The URL for getting help in using the Data Browser of FaceBase. | "helpURL":\<URL\> | N/A | |
-
+| ermrestLocation | The base URL for the ERMrest service | window.location.protocol + // + window.location.host | "ermrestLocation": \<URL\> | N/A | The location of the ERMrest service. |

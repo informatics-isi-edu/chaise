@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data :: ERMREST</title>
+  <title>Login :: ERMREST</title>
   %ASSETS%
 </head>
 <body>
@@ -15,8 +15,8 @@
 	</div>
 	<div class="container">
 		<!-- Row 1: Logo and Main navigation -->
-		<div id="main-content" class="col-md-7 col-sm-6 col-lg-8 col-xs-6" ng-app="ermrestApp">
-			<div ng-view></div>
+		<div ng-app="ermrestApp">
+			<div ng-include="'../views/ermlogin.html'"></div>
 		</div>
 	</div>
 	<!-- Row 3: Footer -->

@@ -46,7 +46,6 @@ facetsModel.factory('FacetsData', function() {
 		'level': 0,
 		'linearizeView': {},
 		'isDetail': false,
-		'location': null,
 		'maxPages': 0,
 		'metadata': {},
 		'moreFlag': false,

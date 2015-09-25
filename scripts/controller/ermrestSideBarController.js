@@ -20,6 +20,81 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	    return numberFilter(value);
 	}
 
+  	$scope.hashHasChanged = function hashHasChanged(event) {
+  		if (!assignBookmark) {
+	  	  	var searchQuery = getSearchQuery(event.newURL);
+	  	  	if (searchQuery['entity'] != null) {
+	  	  		var values = searchQuery['entity'].split(':');
+	  	  		searchQuery['schema'] = decodeURIComponent(values[0]);
+	  	  		searchQuery['table'] = decodeURIComponent(values[1]);
+	  	  	}
+	  	  	if (searchQuery['schema'] != null) {
+	  	  		SCHEMA = searchQuery['schema'];
+	  	  	}
+	  	  	if (searchQuery['catalog'] != null) {
+	  	  		CATALOG = searchQuery['catalog'];
+	  	  	}
+	  	  	if (searchQuery['table'] != null) {
+	  	  		$scope.FacetsData.table = searchQuery['table'];
+	  	  	}
+	  	  	if (searchQuery['page'] != null) {
+	  	  		$scope.FacetsData.bookmarkPage = searchQuery['page'];
+	  	  	}
+	  	  	if (searchQuery['facets'] != null) {
+	  	  		$scope.FacetsData.filter = decodeFilter(searchQuery['facets']);
+	  	  	}
+	  	  	if (searchQuery['layout'] != null) {
+	  	  		$scope.FacetsData.view = searchQuery['layout'];
+	  	  	}
+	  		$.each($scope.FacetsData.box, function(table,columns) {
+	  			var colsDescr = $scope.FacetsData['colsDescr'][table];
+	  			$.each(columns, function(key, value) {
+	  				if (searchBoxPresentation.contains(colsDescr[key]['type'])) {
+	  					columns[key]['value'] = '';
+	  				} else if (colsDescr[key]['type'] == 'enum') {
+	  					if (value['values'] != null) {
+	  						$.each(value['values'], function(checkbox_key, checkbox_value) {
+	  							value['values'][checkbox_key] = false;
+	  						});
+	  					}
+	  				} else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
+	  					if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+	  						if (value['left']) {
+	  							delete columns[key]['left'];
+	  						}
+	  						if (value['right']) {
+	  							delete columns[key]['right'];
+	  						}
+	  						columns[key]['min'] = columns[key]['floor'];
+	  						columns[key]['max'] = columns[key]['ceil'];
+	  					}
+	  				}
+	  			});
+	  		});
+			if ($scope.FacetsData.filter != null) {
+				$.each($scope.FacetsData.filter, function(table, columns) {
+					$.each(columns, function(column, values) {
+						$.each(values, function(key, value) {
+							$scope.FacetsData.box[table][column][key] = value;
+						});
+					});
+				});
+			}
+			$scope.FacetsData.filter = null;
+			suppressBookmark = true;
+			getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
+			if ($scope.FacetsData.bookmarkPage != null) {
+	    		setTimeout(function () {
+	    			$scope.morePage();
+	    		}, 200);
+			} else {
+				suppressBookmark = false;
+			}
+ 		}
+  	};
+
+    window.onhashchange = $scope.hashHasChanged;
+
   $scope.predicate_search_all = function predicate_search_all() {
     FacetsService.setSortOption();
     $scope.FacetsData.pagingOptions.currentPage = 1;
@@ -315,6 +390,13 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 
 		if ($scope.FacetsData.filter != null) {
+			$.each($scope.FacetsData.filter, function(table, columns) {
+				$.each(columns, function(column, values) {
+					$.each(values, function(key, value) {
+						$scope.FacetsData.box[table][column][key] = value;
+					});
+				});
+			});
 			$scope.FacetsData.filter = null;
 			getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
 			if ($scope.FacetsData.bookmarkPage != null) {
@@ -340,6 +422,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 			}
  		} else {
 			$scope.FacetsData.bookmarkPage = null;
+			suppressBookmark = false;
 		}
 	}
 
@@ -575,7 +658,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
   this.urlBookmark = function urlBookmark() {
 		return $scope.FacetsData.bookmark;
 	};
-  
+
   this.hasSelectedFacets = function hasSelectedFacets() {
     var selectedFacets = false;
     $.each($scope.FacetsData.box, function(table, columns) {

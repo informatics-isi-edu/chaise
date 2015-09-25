@@ -3,7 +3,6 @@
 /* App Module */
 
 var ermrestApp = angular.module('ermrestApp', [
-  'ngRoute',
   'ngSanitize',
   'ngGrid',
   'rzModule',
@@ -49,25 +48,5 @@ ermrestApp.config(['ermrestProvider',
 	ermrestProvider.setCatalog(1);
 	ermrestProvider.setAuthnProvider('session');
 	ermrestProvider.setLayout('list');
-}]);
-
-ermrestApp.config(['$routeProvider',
-                   function($routeProvider) {
-	$routeProvider.
-	when('/login', {
-		templateUrl: 'views/ermlogin.html'//,
-			//controller: 'LoginCtrl'
-	}).
-	when('/logout', {
-		templateUrl: 'views/ermlogout.html'//,
-		//controller: 'LogoutCtrl'
-	}).
-	when('/retrieve', {
-		templateUrl: 'views/ermretrieve.html'//,
-			//controller: 'ExplorerListCtrl'
-	}).
-	otherwise({
-		redirectTo: '/retrieve'
-	});
 }]);
 

@@ -3,11 +3,13 @@
 /* Controllers */
 
 var ermInitController = angular.module('ermInitController', ['facetsModel', 'facetsService']);
-//angular.module('ermrestApp').controller('InitListCtrl', ['$scope', '$location', 'FacetsData',
-ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 'FacetsData', 'FacetsService', 'ermrest',
-                                                      function($scope, $location, $window, FacetsData, FacetsService, ermrest) {
 
-  $('footer').hide();
+//angular.module('ermrestApp').controller('InitListCtrl', ['$scope', 'FacetsData',
+ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$window', 'FacetsData', 'FacetsService', 'ermrest',
+                                                      function($rootScope, $scope, $window, FacetsData, FacetsService, ermrest) {
+
+	$('footer').hide();
+
 	$('.panel-collapse').on('hide.bs.collapse', function () {
 	      $(this).prev('.panel-heading').find('.glyphicon').removeClass('glyphicon-minus').addClass('glyphicon-plus');
 	});
@@ -24,35 +26,41 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 		}
 	});
 
-	// $('.sidebar-overlay').click(function(event) {
-  //  	if ($('.sidebar-overlay').hasClass('active')) {
-  //  		if ($('#editfilter').hasClass('open')) {
-  //  			$('#editFilterDoneButton').click();
-  //  			return;
-  //  		}
-  //  		if ($('#morefilters').hasClass('open')) {
-  //  			$('#moreFilterDoneButton').click();
-	//     		setTimeout(function () {
-	//     		    $('#sidebarDoneButton').click();
-	//     		}, 1);
-	//     		return;
-  //  		}
-	//         $('.sidebar-overlay').removeClass('active');
-  //  		if ($('#sidebar').hasClass('open')) {
-  //  	        $('#sidebar').toggleClass('open');
-  //  		} else if ($('#collectionsTree').hasClass('open')) {
-  //  	        $('#collectionsTree').toggleClass('open');
-  //  		}
-  //  	}
-	// });
+	$('.sidebar-overlay').click(function(event) {
+    	if ($('.sidebar-overlay').hasClass('active')) {
+    		if ($('#editfilter').hasClass('open')) {
+    			$('#editFilterDoneButton').click();
+    			return;
+    		}
+    		if ($('#morefilters').hasClass('open')) {
+    			$('#moreFilterDoneButton').click();
+	    		setTimeout(function () {
+	    		    $('#sidebarDoneButton').click();
+	    		}, 1);
+	    		return;
+    		}
+	        $('.sidebar-overlay').removeClass('active');
+    		if ($('#sidebar').hasClass('open')) {
+    	        $('#sidebar').toggleClass('open');
+    		} else if ($('#collectionsTree').hasClass('open')) {
+    	        $('#collectionsTree').toggleClass('open');
+    		}
+    	}
+	});
 
-	if ($location.search()['schema'] != null) {
-		SCHEMA = $location.search()['schema'];
+	var searchQuery = getSearchQuery(window.location.href);
+	if (searchQuery['entity'] != null) {
+		var values = searchQuery['entity'].split(':');
+		searchQuery['schema'] = decodeURIComponent(values[0]);
+		searchQuery['table'] = decodeURIComponent(values[1]);
+	}
+	if (searchQuery['schema'] != null) {
+		SCHEMA = searchQuery['schema'];
 	} else if (SCHEMA == null) {
 		//SCHEMA = 'legacy';
 	}
-	if ($location.search()['catalog'] != null) {
-		CATALOG = $location.search()['catalog'];
+	if (searchQuery['catalog'] != null) {
+		CATALOG = searchQuery['catalog'];
 	} else if (CATALOG == null) {
 		if (chaiseConfig['catalog'] != null) {
 			CATALOG = chaiseConfig['catalog'];
@@ -73,20 +81,20 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 
 	FacetsService.initTable();
 
-	if ($location.search()['table'] != null) {
-		$scope.FacetsData.table = $location.search()['table'];
+	if (searchQuery['table'] != null) {
+		$scope.FacetsData.table = searchQuery['table'];
 	} else {
 		$scope.FacetsData.table = '';
 	}
 
-	if ($location.search()['page'] != null) {
-		$scope.FacetsData.bookmarkPage = $location.search()['page'];
+	if (searchQuery['page'] != null) {
+		$scope.FacetsData.bookmarkPage = searchQuery['page'];
 	} else {
 		$scope.FacetsData.bookmarkPage = null;
 	}
 
-	if ($location.search()['filter'] != null) {
-		$scope.FacetsData.filter = JSON.parse(decodeURIComponent($location.search()['filter']));
+	if (searchQuery['facets'] != null) {
+		$scope.FacetsData.filter = decodeFilter(searchQuery['facets']);
 	} else {
 		$scope.FacetsData.filter = null;
 	}
@@ -100,10 +108,9 @@ ermInitController.controller('InitListCtrl', ['$scope', '$location', '$window', 
 		}
 	});
 
-	$scope.FacetsData.location = $location;
 	$scope.FacetsData.view = ermrest.layout;
-	if ($location.search()['layout'] != null) {
-		$scope.FacetsData.view = $location.search()['layout'];
+	if (searchQuery['layout'] != null) {
+		$scope.FacetsData.view = searchQuery['layout'];
 	} else if (chaiseConfig['layout'] != null) {
 		$scope.FacetsData.view = chaiseConfig['layout'];
 	}
