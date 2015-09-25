@@ -697,7 +697,12 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     return selectedFacets;
   };
 
-  this.resetFacets = function resetFacets() {
+  this.resetSearch = function resetSearch() {
+    // Reset the search box
+    $scope.FacetsData.searchFilter = '';
+    this.clear();
+
+    // Reset selected facets
     $.each($scope.FacetsData.box, function(table, columns) {
       var colsDescr = $scope.FacetsData['colsDescr'][table];
       $.each(columns, function(key, value) {
