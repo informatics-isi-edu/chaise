@@ -27,25 +27,12 @@ ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$window',
 	});
 
 	$('.sidebar-overlay').click(function(event) {
-    	if ($('.sidebar-overlay').hasClass('active')) {
-    		if ($('#editfilter').hasClass('open')) {
-    			$('#editFilterDoneButton').click();
-    			return;
-    		}
-    		if ($('#morefilters').hasClass('open')) {
-    			$('#moreFilterDoneButton').click();
-	    		setTimeout(function () {
-	    		    $('#sidebarDoneButton').click();
-	    		}, 1);
-	    		return;
-    		}
-	        $('.sidebar-overlay').removeClass('active');
-    		if ($('#sidebar').hasClass('open')) {
-    	        $('#sidebar').toggleClass('open');
-    		} else if ($('#collectionsTree').hasClass('open')) {
-    	        $('#collectionsTree').toggleClass('open');
-    		}
-    	}
+    if ($('.sidebar-overlay').hasClass('active')) {
+      mainContent.removeClass('col-xs-6 col-sm-6 col-md-7 col-lg-8').addClass('col-xs-12 col-sm-12 col-md-12 col-lg-12');
+      openSideBtn.removeClass('hidden').addClass('show');
+      $('#collectionsTree').removeClass('open');
+      $('.sidebar-overlay').removeClass('active');
+    }
 	});
 
 	var searchQuery = getSearchQuery(window.location.href);

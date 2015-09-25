@@ -93,21 +93,14 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		var openSideBtn = $('div.open-side');
 	    if (toggle == 'sidebar-toggle') {
 				$('#sidebar').toggleClass('open');
-				mainContent.toggleClass('col-xs-5 col-xs-12').toggleClass('col-sm-6 col-sm-12').toggleClass('col-md-7 col-md-12').toggleClass('col-lg-8 col-lg-12');
-				openSideBtn.toggleClass('hidden show');
 	    } else if (toggle == 'field-toggle') {
         $('#editfilter').toggleClass('open');
 	    } else if (toggle == 'collections-toggle') {
-				var sidebar = $('#collectionsTree');
 				var overlay = $('.sidebar-overlay');
-        sidebar.toggleClass('open');
 				$('#sidebar').removeClass('open');
-				if (sidebar.hasClass('open')) {
-					mainContent.removeClass('col-xs-12 col-sm-12 col-md-12 col-lg-12').addClass('col-xs-6 col-sm-6 col-md-7 col-lg-8');
-				} else {
-					mainContent.removeClass('col-xs-6 col-sm-6 col-md-7 col-lg-8').addClass('col-xs-12 col-sm-12 col-md-12 col-lg-12');
-					openSideBtn.removeClass('hidden').addClass('show');
-				}
+
+				var sidebar = $('#collectionsTree');
+        sidebar.toggleClass('open');
         if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
             overlay.addClass('active');
         } else {
@@ -119,6 +112,15 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	    	}
         $('#morefilters').toggleClass('open');
 	    }
+		// Resize main content pane depending on sidebar open or close
+		// Show/hide .open-side button depending on sidebar open or close
+		if ($('.sidebar').hasClass('open')) {
+			mainContent.removeClass('col-xs-12 col-sm-12 col-md-12 col-lg-12').addClass('col-xs-6 col-sm-6 col-md-7 col-lg-8');
+			openSideBtn.removeClass('show').addClass('hidden');
+		} else {
+			mainContent.removeClass('col-xs-6 col-sm-6 col-md-7 col-lg-8').addClass('col-xs-12 col-sm-12 col-md-12 col-lg-12');
+			openSideBtn.removeClass('hidden').addClass('show');
+		}
 	};
 
 	this.initSortOption = function () {
