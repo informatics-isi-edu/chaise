@@ -19,6 +19,7 @@
 // - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:target/id=110
 // file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:construct/id=1243
 
+
 // Ermrest
 
 // - curl -k -H "Accept: application/json" https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/aggregate/construct/a:=cnt(*)
@@ -282,8 +283,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 // Else it's an 'id' key or reference to table, place a link to it
                 } else if (rKey.toLowerCase() == 'id' || schemaService.isValidTable(rKey)){
                     // If the key is id, set the table name to the reference table's table name (construct), else the table name is key (i.e. cleavagesite)
-                    var tableName = (rKey.toLowerCase() == 'id') ? rt['referencedTableName'] : rKey;
-                    console.log('rt', rt, 'rkey', rKey);
+                    var tableName = (rKey.toLowerCase() == 'id') ? rt['tableName'] : rKey;
                     // Mock entity object with params
                     references[j][rKey + '_link'] = self.getEntityLink(tableName, keys);
                 }
@@ -392,7 +392,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         var predicates = [];
 
         for (var key in params){
-            var predicate = encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+            var predicate = encodeURIComponent(key) + '=';
+            console.log('parmas key', params[key]);
+                predicate += params[key].toString().indexOf('%') > -1 ? params[key] : encodeURIComponent(params[key]);
+             
             predicates.push(predicate);
         }
         // Join predicates with a conjunctive filter '&'
