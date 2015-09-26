@@ -182,7 +182,7 @@ tbody{
 }
 
 .table-wrapper{
-    height: 400px;
+    max-height: 400px;
     overflow: auto;
     position: relative;
     width: 100%;
@@ -320,6 +320,10 @@ tbody{
     border-radius: 5px;
     font-size: 11px;
     cursor: default;
+}
+
+.entity-term a{
+    color: #fff;
 }
 
 /****************** NOT FOUND ******************/

@@ -56,7 +56,9 @@
                     <td class="entity-key col-xs-2">{{ association.referencedTableName | removeUnderScores }}</td>
                     <td class="entity-value col-xs-10">
                         <ul class="entity-terms">
-                            <li class="entity-term" ng-repeat="term in association.terms">{{term}}</li>
+                            <li class="entity-term" ng-repeat="term in association.terms">
+                                <a ng-href="{{term.link}}" target="_blank">{{term.vocab}}</a>
+                            </li>
                         </ul>
                     </td>
                 </tr>
@@ -79,7 +81,7 @@
                     <div id="thumbnail-box" class="clearfix">
                       <ul class="thumbs" class="clearfix">
                             <li ng-repeat="imagea in entity.images" \>
-                                <a href="#{{ $index + 1 }}" data-att-slide="{{ $index + 1 }}">
+                                <a href="" data-att-slide="{{ $index + 1 }}">
                                     <img ng-src="{{ imagea.uri }}" />
                                 </a>
                             </li>

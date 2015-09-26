@@ -46,10 +46,9 @@ var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute'
 */
 
 chaiseRecordApp.config(['$locationProvider', function($locationProvider) {
-    // $locationProvider.html5Mode({
-    //   enabled: true,
-    //   requireBase: false
-    // });
+        // $locationProvider.hashPrefix('!');
+
+    $locationProvider.html5Mode({rewriteLinks: false});
 }]);
 
 /*
@@ -102,7 +101,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
             // If nested == false, then we're only interested in the entity and not any nested tables, references, or associations
             if (!nested){
-                entity.link         = self.getEntityLink(tableName, entity);
+                var keys = { id: entity.id };
+                entity.link         = self.getEntityLink(tableName, keys);
                 onSuccess(entity);
                 return;
             }
@@ -157,9 +157,13 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                             } else if (rt.vocabularyTable != undefined){
                                 // references (i.e [{'term':'P0'}], [{'term':'microCT images'}], etc)
                                 var terms = [];
-                                // convert  [{ 'term':'P0', 'term':'P323', 'term':'weg33k'}] -> ['P0', 'P323', 'weg33k']
+                                // convert  [{ 'term':'P0', 'term':'P323', 'term':'weg33k'}] -> [{ vocab: 'P0', link: ''} , { vocab: 'P323', link: ''}, { vocab: 'weg33k', link: '' }]
                                 for (var j = 0; j < references.length; j++){
-                                    terms.push(references[j].term);
+                                    var reference   = references[j];
+                                    var term        = {};
+                                    term.vocab      = references[j].term,
+                                    term.link       = self.getEntityLink(rt['referencedTableName'], { 'term': term.vocab }),
+                                    terms.push(term);
                                 }
 
                                 var formattedAssoication    = { 
@@ -168,7 +172,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                                 'referencedTableName':  rt['referencedTableName']
                                                             };
 
-                                                            // console.log(formattedAssoication);
+                                                            console.log(formattedAssoication);
 
                                 entity.associations.push(formattedAssoication);
 
@@ -257,7 +261,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                     continue;
                 }
                 // ASSUMPTION: Assumes key is id, but can be something else!!!
-                var params = { 'id': rValue };
+                var keys = { 'id': rValue };
 
                 if (schemaService.isVocabularyTable(rKey)){
 
@@ -280,7 +284,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                     // If the key is id, set the table name to the reference table's table name (construct), else the table name is key (i.e. cleavagesite)
                     var tableName = (rKey.toLowerCase() == 'id') ? rt['tableName'] : rKey;
                     // Mock entity object with params
-                    references[j][rKey + '_link'] = self.getEntityLink(tableName, params);
+                    references[j][rKey + '_link'] = self.getEntityLink(tableName, keys);
                 }
             }
         }
@@ -290,7 +294,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     this.getEntityTitle = function(entity){
 
         var entityTableSchema = schemaService.schema.tables[entity.internal.tableName];
-        var validTitleColumns = ['name', 'label', 'title'];
+        var validTitleColumns = ['name', 'label', 'title', 'term', 'username'];
 
         // Inspect each column in the table schema to find the one with the annotation 'title'
         for (var c in entityTableSchema.column_definitions){
@@ -313,9 +317,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         return null;
     };
 
-    // Get the Chaise Detail lin for entity
-    this.getEntityLink = function(tableName, entity){
-        return window.location.href.replace(window.location.hash, '') + '#!' + schemaService.schema.cid + '/' +  schemaService.schema + ':' + tableName+ '/id=' + entity.id;
+    // Get the Chaise Detail lin for entity, keys are the key value pair to search for
+    this.getEntityLink = function(tableName, keys){
+        console.log(' schemaService.schema',  schemaService.schema);
+        return window.location.href.replace(window.location.hash, '') + '#' + schemaService.schema.cid + '/' +  schemaService.schema.schema_name + ':' + tableName+ '/' + this.buildPredicate(keys);
     };
 
     // Scan through schema to find related tables
@@ -399,7 +404,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 }]);
 
 // Service use to introspect scheam
-chaiseRecordApp.service('schemaService', ['$http', '$location', '$rootScope', 'spinnerService', 'notFoundService', function($http, $location, $rootScope, spinnerService, notFoundService){
+chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerService', 'notFoundService', function($http, $rootScope, spinnerService, notFoundService){
     
     var schema  = {};
 
@@ -425,6 +430,9 @@ chaiseRecordApp.service('schemaService', ['$http', '$location', '$rootScope', 's
 
             spinnerService.hide();
             onSuccess(data);
+
+        // window.location.href = '#' + '1';
+        // replace(window.location.hash, '') + '#' + schemaService.schema.cid + '/' +  schemaService.schema.schema_name + ':' + tableName+ '/' + this.buildPredicate(keys);
 
             console.log('schema', self.schema);
         }).
@@ -581,7 +589,7 @@ chaiseRecordApp.service('locationService', function(){
         var hashParams = {};
 
         // "6/legacy:target/id=110"
-        var path                    = window.location.hash.substring(2);
+        var path                    = window.location.hash.substring(1);
         var params                  = path.split('/');
         var namespace               = params[1].split(':');
 
@@ -619,14 +627,14 @@ chaiseRecordApp.service('locationService', function(){
 ***/
 
 // Header Controller
-chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location){
+chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($rootScope, $scope){
 
     $scope.active = "Home";
 
     // Determines wheather the page is active
-    $scope.isActive = function(page){
-        return  $location.path() == page;
-    };
+    // $scope.isActive = function(page){
+    //     return  $location.path() == page;
+    // };
 
 }]);
 
@@ -715,6 +723,7 @@ chaiseRecordApp.controller('ImagesCtrl', ['$scope', function($scope){
         });
 
         jQuery(document).on('click', '.thumbs a', function (e){
+            e.preventDefault();
             // console.log('data slide', jQuery(this).data('att-slide'));
             thumbs.goToSlide(jQuery(this).data('att-slide'));
             return false;
