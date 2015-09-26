@@ -186,7 +186,7 @@
                     <div ng-if="FacetsData.view=='list'" class="panel panel-default">
                     	<div class="panel-heading">
                     		<input ng-show="false" type="checkbox">
-                    		<a ng-href="facetResults.rowPath(row)">www
+                    		<a ng-href="{{facetResults.rowPath(row)}}">www
                     			<span class="panel-title" ng-bind-html="facetResults.itemTitle(row)"></span>
                     		</a>
                     	</div>
@@ -273,7 +273,7 @@
 							<div class="panel panel-default">
 								<div class="panel-heading">
 									<input ng-show="false" type="checkbox">
-                    		<a ng-href="facetResults.rowPath(row)">www
+                    		<a ng-href="{{facetResults.rowPath(row)}"
 			                    			<span class="panel-title" ng-bind-html="facetResults.itemTitle(row)"></span>
 			                    		</a>
 								</div>

@@ -58,7 +58,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
     // Returns the path for a given row
     this.rowPath = function(row){
 
-        var detailPath = window.location.origin + '/chaise/record/#!' + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
+        var detailPath = window.location.origin + '/chaise/record/#' + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
         return detailPath;
     };
 
@@ -67,8 +67,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 
 		event.preventDefault();
 
-        var detailPath = window.location.origin + '/chaise/record/#' + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
-        window.location.href = detailPath;
+        window.location.href = this.rowPath(row);
         return false;
 
 		if (row == null) {

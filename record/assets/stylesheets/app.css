@@ -312,6 +312,7 @@ tbody{
     padding: 0;
 }
 .entity-term{
+    margin-right: 10px;
     display: inline-block;
     background-color: #406C90;
     color: #fff;
