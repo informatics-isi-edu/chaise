@@ -26,7 +26,7 @@
 
     <!-- HEADER -->
     <div ng-controller="HeaderCtrl" id="header" class="navbar navbar-fixed-top">
-        <a id="brand" href="#">Chaise</a>
+        <a id="brand" href="https://vm-dev-030.misd.isi.edu/chaise/app.html">Chaise</a>
     </div>
     <!-- SPINNER -->
     <div ng-init="spinnerVisible = false" ng-show="spinnerVisible" id="spinner">
@@ -42,7 +42,7 @@
     <div ng-controller="DetailCtrl" class="col-xs-10 col-xs-offset-1">
         <div ng-if="entity">
         
-            <a id="back-btn" class="pull-left" href="javascript:history.back()">&#8592; Back</a>
+            <a id="back-btn" class="pull-left" href="javascript:history.back();">&#8592; Back</a>
 
             <!-- MAIN TABLE -->
             <div id="entity-title">{{ entity.internal.displayTitle }}</div>
@@ -57,7 +57,7 @@
                     <td class="entity-value col-xs-10">
                         <ul class="entity-terms">
                             <li class="entity-term" ng-repeat="term in association.terms">
-                                <a ng-href="{{term.link}}" target="_blank">{{term.vocab}}</a>
+                                <a ng-href="{{term.link}}" ng-click="reloadPage()">{{term.vocab}}</a>
                             </li>
                         </ul>
                     </td>
@@ -136,7 +136,7 @@
                                     <tr ng-repeat="key in referenceArr.keys" on-finish-render>
                                         <th class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
                                         <td ng-repeat="reference in referenceArr.list" class="entity-value col-xs-10">
-                                            <a ng-if="reference[key + '_link']" ng-click="openReferenceLink(reference[key + '_link'])">
+                                            <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()">
                                                 {{reference[key] | stringifyArray }}
                                             </a>
                                             <span ng-if="!reference[key + '_link']">{{reference[key] | stringifyArray }}</span>
@@ -164,7 +164,7 @@
                                     <tbody>
                                         <tr ng-repeat="reference in referenceArr.list" on-finish-render>
                                             <td ng-repeat="key in referenceArr.keys"  class="entity-value col-xs-10" >
-                                                <a ng-if="reference[key + '_link']" ng-click="openReferenceLink(reference[key + '_link'])">
+                                                <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()">
                                                     {{reference[key] | stringifyArray }}
                                                 </a>
                                                 <span ng-if="!reference[key + '_link']">{{reference[key] | stringifyArray }}</span>

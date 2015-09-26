@@ -172,7 +172,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                                 'referencedTableName':  rt['referencedTableName']
                                                             };
 
-                                                            console.log(formattedAssoication);
+                                                            // console.log(formattedAssoication);
 
                                 entity.associations.push(formattedAssoication);
 
@@ -269,7 +269,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                     // curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/cleavagesite/id=12"
                     // Need to preserve j and rKey variable in a closure
                     (function(j, rKey){
-                        self.getEntity(rKey, params, false, function(data){
+                        self.getEntity(rKey, keys, false, function(data){
                             var vocabEntity = data;
                             // ASSUMPTION: Assumes key is name, but can be something else!!!
                             // This is the value we want to replace i.e. id 12 -> name "Precision"
@@ -282,7 +282,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 // Else it's an 'id' key or reference to table, place a link to it
                 } else if (rKey.toLowerCase() == 'id' || schemaService.isValidTable(rKey)){
                     // If the key is id, set the table name to the reference table's table name (construct), else the table name is key (i.e. cleavagesite)
-                    var tableName = (rKey.toLowerCase() == 'id') ? rt['tableName'] : rKey;
+                    var tableName = (rKey.toLowerCase() == 'id') ? rt['referencedTableName'] : rKey;
+                    console.log('rt', rt, 'rkey', rKey);
                     // Mock entity object with params
                     references[j][rKey + '_link'] = self.getEntityLink(tableName, keys);
                 }
@@ -319,7 +320,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
     // Get the Chaise Detail lin for entity, keys are the key value pair to search for
     this.getEntityLink = function(tableName, keys){
-        console.log(' schemaService.schema',  schemaService.schema);
         return window.location.href.replace(window.location.hash, '') + '#' + schemaService.schema.cid + '/' +  schemaService.schema.schema_name + ':' + tableName+ '/' + this.buildPredicate(keys);
     };
 
@@ -639,7 +639,7 @@ chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($root
 }]);
 
 // Detail controller
-chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, ermrestService, schemaService, locationService, notFoundService){
+chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, ermrestService, schemaService, locationService, notFoundService){
     // C: Catalogue id
     // T: Table name
     // K: Key
@@ -661,8 +661,8 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'ermrestServic
     // schemaName = 'legacy';
     // keys { username = 'Jim F. Brinkley' } ;
 
-    $scope.openReferenceLink = function(url){
-        window.open(url, '_blank');
+    $scope.reloadPage = function(url){
+        location.reload();
     };
 
     // Validation
