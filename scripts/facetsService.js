@@ -97,15 +97,20 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
         $('#editfilter').toggleClass('open');
 	    } else if (toggle == 'collections-toggle') {
 				var overlay = $('.sidebar-overlay');
-				$('#sidebar').removeClass('open');
-
+				$('#sidebar,#editfilter,#morefilters').removeClass('open');
 				var sidebar = $('#collectionsTree');
-        sidebar.toggleClass('open');
-        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
+				if (sidebar.hasClass('open')) {
+					sidebar.removeClass('open');
+				} else {
+					sidebar.addClass('open');
+				}
+
+				if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
             overlay.addClass('active');
         } else {
             overlay.removeClass('active');
         }
+
 	    } else if (toggle == 'more-field-toggle') {
 	    	if (FacetsData.facetSelection) {
 		    	this.updateSessionFilter();
