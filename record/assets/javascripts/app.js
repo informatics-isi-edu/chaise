@@ -20,6 +20,8 @@
 // file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:construct/id=1243
 
 
+
+
 // Ermrest
 
 // - curl -k -H "Accept: application/json" https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/aggregate/construct/a:=cnt(*)
@@ -140,17 +142,17 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                             var annotations =  schemaService.schema.tables[rt['tableName']].annotations;
 
                             // Base on the annotation, treat the reference differently
-
+                            
                             // If annotations is 'download', store it in the entity's 'files' atributes
-                            if (annotations.comment.indexOf('download') > -1){
+                            if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
                                 entity['files']         = references;
 
                             // If annotations is 'previews', store it in the entity's 'previews' atributes
-                            } else if (annotations.comment.indexOf('preview') > -1){
+                            } else if (annotations.comment !== undefined && annotations.comment.indexOf('preview') > -1){
                                 entity['previews']      = references;
 
                             // If annotations is 'images', store it in the entity's 'images' atributes
-                            } else if (annotations.comment.indexOf('image') > -1){
+                            } else if (annotations.comment !== undefined && annotations.comment.indexOf('image') > -1){
                                 entity['images']        = references;
 
                             // If the annotation is an 'association', then collapse the array of objects into an array of values
@@ -188,8 +190,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                 
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
                                 var formattedReference     = { 
-                                                                'tableName':            rt['tableName'],
-                                                                'list':                 references,
+                                                                'displayTableName':     rt['displayTableName'], // the title of nested tables
+                                                                'tableName':            rt['tableName'], // the table the nested entities belong to
+                                                                'list':                 references, // list of nested entities
                                                                 'referencedTableName':  rt['referencedTableName'],
                                                                 'transpose':            false,
                                                                 'open':                 true
@@ -284,6 +287,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 } else if (rKey.toLowerCase() == 'id' || schemaService.isValidTable(rKey)){
                     // If the key is id, set the table name to the reference table's table name (construct), else the table name is key (i.e. cleavagesite)
                     var tableName = (rKey.toLowerCase() == 'id') ? rt['tableName'] : rKey;
+                    console.log('rtable ', rt['tableName']);
+
                     // Mock entity object with params
                     references[j][rKey + '_link'] = self.getEntityLink(tableName, keys);
                 }
@@ -348,6 +353,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         referencedColumnMatch = true;
 
                         var foreignTable = {
+
+                                                    'displayTableName':     tableKey,
                                                     'tableName':            tableKey,
                                                     'referencedTableName':  rc.table_name,
                                                     'path':                 entity.internal.path + '/' + tableKey
@@ -369,6 +376,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                             // CASE B: If foreign table references a complex table, switch the path to be the table it references (project member -> project)
                             } else if (schemaService.isComplexTable(referenceTableName)){
                                 foreignTable.path   += '/'+ referenceTableName;
+                                foreignTable.tableName = referenceTableName;
+                                console.log('case B', referenceTableName);
                             }
 
                         }
@@ -392,9 +401,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         var predicates = [];
 
         for (var key in params){
-            var predicate = encodeURIComponent(key) + '=';
-            console.log('parmas key', params[key]);
-                predicate += params[key].toString().indexOf('%') > -1 ? params[key] : encodeURIComponent(params[key]);
+            var predicate   = encodeURIComponent(key) + '=';
+            // Do not encoude already encoded string
+            predicate       += params[key].toString().indexOf('%') > -1 ? params[key] : encodeURIComponent(params[key]);
              
             predicates.push(predicate);
         }
@@ -789,18 +798,36 @@ chaiseRecordApp.filter('removeUnderScores', function(){
     };
 });
 
-// Stringify arrays
-chaiseRecordApp.filter('stringifyArray', function(){
+// If value is url -> wraps it in an <a> 
+// If value is array -> stringify arrays
+chaiseRecordApp.filter('sanitizeValue', function($sce){
     return function(value){
 
-        // Inspect if the key is a table in the schema and if so, is it a vocabulary table
+        var urls = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
+        var emails = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim;
+        console.log('va', value);
         if (Array.isArray(value)){
+      
             return value.join(', ');
+
         } else if (value === null){
+      
             return 'N/A';
+
+        } else if (typeof value == "string" && value.match(urls)) {
+            
+            value = value.replace(urls, '<a href="$1" target="_blank">$1</a>');
+            return $sce.trustAsHtml(value);
+
+        } else if (typeof value == "string" && value.match(emails)) {
+            
+            value = value.replace(emails, '<a href=\"mailto:$1\">$1</a>');
+            return $sce.trustAsHtml(value);
+
         } else{
             return value;
         }
+
         
     };
 });

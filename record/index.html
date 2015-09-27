@@ -50,7 +50,7 @@
             <table class="table">
                 <tr ng-repeat="(key, value) in entity | filteredEntity">
                     <td class="entity-key col-xs-2">{{ key | removeUnderScores }}</td>
-                    <td class="entity-value col-xs-10">{{ value | stringifyArray }}</td>
+                    <td class="entity-value col-xs-10">{{ value | sanitizeValue }}</td>
                 </tr>
                 <tr ng-repeat="association in entity.associations">
                     <td class="entity-key col-xs-2">{{ association.referencedTableName | removeUnderScores }}</td>
@@ -122,7 +122,7 @@
                 <!-- REFERENCES -->
                 <accordion-group ng-repeat="referenceArr in entity.references" is-open="referenceArr.open">
 
-                    <accordion-heading><div ng-class="{'active': referenceArr.open }">{{ referenceArr.tableName | removeUnderScores }}</div></accordion-heading>
+                    <accordion-heading><div ng-class="{'active': referenceArr.open }">{{ referenceArr.displayTableName | removeUnderScores }}</div></accordion-heading>
 
                     <div ng-controller="NestedTablesCtrl" ng-if="referenceArr.transpose">
                         <ul class="reference-views clearfix">
@@ -137,9 +137,9 @@
                                         <th class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
                                         <td ng-repeat="reference in referenceArr.list" class="entity-value col-xs-10">
                                             <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()">
-                                                {{reference[key] | stringifyArray }}
+                                                {{reference[key] | sanitizeValue }}
                                             </a>
-                                            <span ng-if="!reference[key + '_link']">{{reference[key] | stringifyArray }}</span>
+                                            <span ng-if="!reference[key + '_link']" ng-bind-html="reference[key] | sanitizeValue"></span>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -165,9 +165,9 @@
                                         <tr ng-repeat="reference in referenceArr.list" on-finish-render>
                                             <td ng-repeat="key in referenceArr.keys"  class="entity-value col-xs-10" >
                                                 <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()">
-                                                    {{reference[key] | stringifyArray }}
+                                                    {{reference[key] | sanitizeValue }}
                                                 </a>
-                                                <span ng-if="!reference[key + '_link']">{{reference[key] | stringifyArray }}</span>
+                                                <span ng-if="!reference[key + '_link']" ng-bind-html="reference[key] | sanitizeValue"></span>
                                                 
                                             </td>
                                         </tr>
