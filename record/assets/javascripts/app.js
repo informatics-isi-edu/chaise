@@ -139,10 +139,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         if (references.length > 0){
 
                             // Get the references annotations from the schema
-                            var annotations =  schemaService.schema.tables[rt['tableName']].annotations;
+                            var annotations =  schemaService.schema.tables[rt['displayTableName']].annotations;
 
                             // Base on the annotation, treat the reference differently
-                            
                             // If annotations is 'download', store it in the entity's 'files' atributes
                             if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
                                 entity['files']         = references;
