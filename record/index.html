@@ -50,7 +50,7 @@
             <table class="table">
                 <tr ng-repeat="(key, value) in entity | filteredEntity">
                     <td class="entity-key col-xs-2">{{ key | removeUnderScores }}</td>
-                    <td class="entity-value col-xs-10">{{ value | sanitizeValue }}</td>
+                    <td class="entity-value col-xs-10" ng-bind-html="value | sanitizeValue"></td>
                 </tr>
                 <tr ng-repeat="association in entity.associations">
                     <td class="entity-key col-xs-2">{{ association.referencedTableName | removeUnderScores }}</td>

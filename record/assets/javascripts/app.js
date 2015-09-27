@@ -300,7 +300,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     this.getEntityTitle = function(entity){
 
         var entityTableSchema = schemaService.schema.tables[entity.internal.tableName];
-        var validTitleColumns = ['name', 'label', 'title', 'term', 'username'];
+        var validTitleColumns = ['name', 'label', 'title', 'term', 'username', 'filename'];
 
         // Inspect each column in the table schema to find the one with the annotation 'title'
         for (var c in entityTableSchema.column_definitions){
@@ -798,14 +798,15 @@ chaiseRecordApp.filter('removeUnderScores', function(){
     };
 });
 
+
 // If value is url -> wraps it in an <a> 
 // If value is array -> stringify arrays
 chaiseRecordApp.filter('sanitizeValue', function($sce){
     return function(value){
 
-        var urls = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
-        var emails = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim;
-        console.log('va', value);
+        var urls    = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
+        var emails  = /(\w+@[a-zA-Z_\\.]+?\.(edu|com|net|gov|io))/gim;
+
         if (Array.isArray(value)){
       
             return value.join(', ');
@@ -828,7 +829,6 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
             return value;
         }
 
-        
     };
 });
 
