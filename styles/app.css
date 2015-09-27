@@ -225,10 +225,11 @@ a.filter-link-cancel {
 .badge {
 	background-color: #cc0c0f; /* F55B5D */
 	/* background-color: #FFF; */
-	border: 1px solid #e5e5e5;
+	/* border: 1px solid #e5e5e5;
 	color: #FFF;
 	/* color: #333; */
 	font-weight: 400;
+	font-size: 1em;
 }
 
 .badge.reset, .badge.open-side {
@@ -316,10 +317,16 @@ dl.attribute-group dd {
 	z-index: none;
 }
 
-.sidebar-nav .badge, #editfilter .field-count .badge {
+.sidebar-nav .badge {
 	position: absolute;
 	top: 5px;
 	right: 30px;
+}
+
+#editfilter .field-count .badge {
+	position: absolute;
+	top: 5px;
+	right: 0;
 }
 
 .sidebar .md-lg {
@@ -407,7 +414,7 @@ dl.attribute-group dd {
 .sidebar .sidebar-nav li a, .sidebar .field-enable {
 	height: 30px;
 	line-height: 30px;
-	font-size: .9em;
+	font-size: 1em;
 }
 
 .sidebar .sidebar-header h5 {
@@ -484,6 +491,7 @@ dl.attribute-group dd {
 
 .meta-actions .meta-icons {
 	text-align: right;
+	font-size: 1.25em;
 }
 
 .meta-actions .meta-icons .glyphicon {
@@ -598,7 +606,7 @@ p.backlink {
 }
 
 .backlink a {
-	font-size: .9em;
+	font-size: 1.1em;
 }
 
 .collectionsSelect .radio {
@@ -707,13 +715,13 @@ dt, dd {
 	overflow: hidden;
 	text-overflow:ellipsis;
 	white-space:nowrap;
-	max-width: 240px;
+	max-width: 260px;
 }
 
 .toggle, .toggler {
 
   display: inline-block;
-  vertical-align: middle;
+  /* vertical-align: middle; */
   margin-right: 10px;
  /* position: relative;
   font-weight: normal; */
