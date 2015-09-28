@@ -115,4 +115,4 @@ See the [configuration guide](./doc/configuration.md).
 
 ### How to Run
 
-Point a modern web browser at `http://<hostname>/path/to/chaise/app.html`.
+Point a modern web browser at `http://<hostname>/path/to/chaise/search`.
