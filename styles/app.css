@@ -13,13 +13,19 @@ label {
 	margin-bottom: 0px;
 	vertical-align: middle;
 }
+
+[class*=" md-"], [class^="md-"] {
+	/* line-height: inherit; */
+}
+
 /*
 .form-group .glyphicon {
 	vertical-align: middle;
 }
 */
+
 .form-horizontal .control-label {
-	padding-top: 0;	
+	padding-top: 0;
 }
 
 .filtertitle {
@@ -51,17 +57,22 @@ label {
 	line-height: 1;
 	border-radius: 0;
 }
+
 /* fix cross browser box model issue */
-#filter .btn, #view-buttons .btn, #views .btn {
+#view-buttons .btn, #views .btn {
 	padding: 0;
+}
+
+#welcome-button {
+	padding: 15px 20px;
 }
 
 /* parent element for the filter button and filter container */
 
 #filter {
-	min-height: 80px;
+	/* min-height: 80px;
 	height: 100%;
-	/* float: left; */
+	 float: left; */
 }
 .filter-button {
 	width: 80px;
@@ -83,11 +94,11 @@ label {
 }
 
 .filter-container {
-	display: block; 
-	margin-right: 79px;
-	min-height: 80px; 
+	display: block;
+	/* margin-right: 79px; */
+	/* min-height: 80px; */
 	background-color: #FFF;
-	border: 1px solid #CCC;
+	/* border: 1px solid #CCC; */
 	padding: 5px;
 	position: relative;
 }
@@ -138,13 +149,6 @@ label {
 	font-size: .9em;
 }
 */
-
-a.field-toggle .md-chevron-right {
-	position: absolute;
-	right:0;
-	top:12px;
-	padding-right: 10px;
-}
 
 .filter-item-field {
 	color: #999;
@@ -219,10 +223,18 @@ a.filter-link-cancel {
 }
 
 .badge {
-	background-color: #FFF;
-	border: 1px solid #e5e5e5;
-	color: #333;
+	background-color: #cc0c0f; /* F55B5D */
+	/* background-color: #FFF; */
+	/* border: 1px solid #e5e5e5;
+	color: #FFF;
+	/* color: #333; */
 	font-weight: 400;
+	font-size: 1em;
+}
+
+.badge.reset, .badge.open-side {
+	background-color: #428bca;
+	border-color: #428bca;
 }
 
 @-moz-document url-prefix() {
@@ -272,13 +284,63 @@ dl.attribute-group dd {
 
 /* Edit filters in sidebar */
 
-.sidebar.open {
-	max-width: 380px;
-	width: 380px;
+.sidebar-outer {
+	position: relative;
 }
 
-.sidebar-header {
+.sidebar {
+	position:fixed;
+	top: 55px; /* corresponds to height of header */
+	bottom: 0;
+	/* z-index: inherit; */
+	transform: none;
+	transition: none;
+}
+
+.sidebar.open {
+	max-width: 340px; /* was 380px */
+	width: 340px;
+	transform: none;
+}
+
+.sidebar-fixed-right {
+	box-shadow: none;
+	border-left: 1px solid #ccc;
+	transform: none;
+}
+
+.sidebar-fixed-right.open {
+	transform: none;
+}
+
+.input-group .form-control {
+	z-index: none;
+}
+
+.sidebar-nav .badge {
+	position: absolute;
+	top: 5px;
+	right: 30px;
+}
+
+#editfilter .field-count .badge {
+	position: absolute;
+	top: 5px;
+	right: 0;
+}
+
+.sidebar .md-lg {
+	line-height: inherit;
+}
+
+.sidebar-wrap {
+	position: relative;
+	min-height: 100%;
+}
+
+.sidebar .sidebar-header {
 	border-bottom: 1px solid #CCC;
+	padding: 5px;
 }
 
 .sidebar .btn-default {
@@ -291,11 +353,31 @@ dl.attribute-group dd {
 	margin-top: 2px;
 }
 
+#navcontainer {
+	position: relative;
+	margin-bottom: 70px;
+	/* min-height: 100%;  trying to make sticky footer */
+	/* margin: 0px auto 30px; */
+}
 .editfilter-container {
-	display: block; 
-	background-color: #F2F2F2;
+	display: block;
+	/* background-color: #F2F2F2; */
+	border-top: 1px solid #CCC;
 	border-bottom: 1px solid #CCC;
-	padding: 5px 10px;
+	padding: 5px; /* 5px 10px */
+	position: relative;
+	width: 340px;
+	margin-top: 30px;
+}
+/*
+.editfilter-container a.field-toggle .md-chevron-right {
+	position: relative;
+	top: 5px;
+	color: #bbb;
+	}
+*/
+.editfilter-container a:hover {
+	text-decoration: none;
 }
 
 .editfilter-container p {
@@ -306,14 +388,38 @@ dl.attribute-group dd {
 }
 
 .editvalue-container {
-	display: block; 
-	padding: 10px;
+	display: block;
+	padding: 10px 15px;
+	margin-bottom: 70px; /* why? the visible margin is about 15-20px worth so the sidebar thinks it's longer than it is */
 }
 
-.sidebar .sidebar-nav li a {
+.sidebar-nav a.field-toggle .md-chevron-right, .editfilter-container a.field-toggle .md-chevron-right  {
+	position: absolute;
+	right:10px; /* was 0 */
+	top:0;
+	padding-right: 5px;
+	color: #bbb;
+}
+
+.sidebar .glyphicon-forward {
+	padding-right: 5px;
+	color: #bbb;
+	line-height: inherit;
+}
+
+.sidebar .sidebar-nav li {
+	border-bottom: 1px solid #EEE;
+}
+
+.sidebar .sidebar-nav li a, .sidebar .field-enable {
 	height: 30px;
 	line-height: 30px;
-	font-size: .9em;
+	font-size: 1em;
+}
+
+.sidebar .sidebar-header h5 {
+	display: inline-block;
+	font-size: .85em;
 }
 
 .sidebar .filter-item .md-chevron-right {
@@ -364,17 +470,85 @@ dl.attribute-group dd {
 	top: -6px;
 }
 
-.search-box .input-group {
-	border: 0;
+#toggle-side .md-play-circle-outline {
+	padding-top: 5px;
 }
 
-.sidebar .search-box, .sidebar .field-enable {
-	border-bottom: 2px solid #e5e5e5;
-	padding: 5px 10px;
+#toggle-side .md-lg {
+	line-height: normal;
+}
+
+#toggle-side a, .editfilter-container a {
+	display: block;
+	text-decoration: none;
+}
+
+.meta-actions {
+	padding: 10px 15px;
+	display: block;
+	margin-right: 15px;
+}
+
+.meta-actions .meta-icons {
+	text-align: right;
+	font-size: 1.25em;
+}
+
+.meta-actions .meta-icons .glyphicon {
+		padding-left: 5px;
+		color: #4D4D4D;
+}
+
+.sidebar .field-enable {
+	border-bottom: 1px solid #eee;
+}
+
+.sidebar h4 {
+	font-size: .9em;
+	font-weight: bold;
+	margin-left: 10px;
+	text-transform: uppercase;
+}
+
+.sidebar .sidebar-header {
+	padding: 0;
+}
+
+.sidebar a.view-attr, .sidebar .sidebar-header a {
+	display: block;
+	color: #333;
+	height: 30px;
+	line-height: 30px;
+}
+
+.sidebar a.view-attr:hover, .sidebar .sidebar-header a:hover {
+	text-decoration: none;
+	background-color:#e0e0e0;
+}
+
+.sidebar a.view-attr h4 {
+	padding: 5px;
+}
+.sidebar a.view-attr small {
+	font-size: .9em;
+	margin-left: 5px;
 }
 
 #editfilter-config .editvalue-container {
 	padding: 0 0 10px 0;
+}
+
+.sidebar .search-box {
+	/* border-bottom: 2px solid #e5e5e5; */
+	padding: 10px 15px;
+}
+
+.sidebar .search-box span{
+    background-color: #FFF;
+}
+
+.sidebar .search-box input{
+    border-right-style:none;
 }
 
 .sidebar .search-box a.btn-default {
@@ -382,12 +556,19 @@ dl.attribute-group dd {
 	border: none;
 }
 
-input.sidebar-search.form-control {
-	border: 0;
-	font-size: 1.5em;
+.search-box input.sidebar-search.form-control {
+	font-size: 1.25em;
+	/* border-radius: 20px; */
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 	box-shadow: none;
+	border-top-left-radius: 20px;
+	border-bottom-left-radius: 20px;
+}
+
+.sidebar .search-box .input-group-addon {
+	border-top-right-radius: 20px;
+	border-bottom-right-radius: 20px;
 }
 
 .sidebar-search.form-control::-webkit-input-placeholder {
@@ -395,15 +576,15 @@ input.sidebar-search.form-control {
 }
 
 .sidebar-search.form-control:-moz-placeholder { /* Firefox 18- */
-   color: #a6a6a6;  
+   color: #a6a6a6;
 }
 
 .sidebar-search.form-control::-moz-placeholder {  /* Firefox 19+ */
-   color: #a6a6a6;  
+   color: #a6a6a6;
 }
 
-.sidebar-search.form-control:-ms-input-placeholder {  
-   color: #a6a6a6;  
+.sidebar-search.form-control:-ms-input-placeholder {
+   color: #a6a6a6;
 }
 
 #sidebar .editfilter-container .filter-item, #collectionsTree .editfilter-container .filter-item {
@@ -416,8 +597,28 @@ input.sidebar-search.form-control {
 	right: -10px;
 }
 
+.sidebar ul.nav {
+	border-top: 1px solid #EEE;
+}
+
+p.backlink {
+	margin: 0 0 0 5px;
+}
+
+.backlink a {
+	font-size: 1.1em;
+}
+
 .collectionsSelect .radio {
 	padding-left: 5px;
+}
+
+.nav.filteritems li.attr-slider, .nav.filteritems li.attr-text, .nav.filteritems li.attr-date  {
+  padding-top: 15px;
+}
+
+ul.filteritems {
+	padding-left: 10px;
 }
 
 /* Details page styles */
@@ -505,36 +706,41 @@ dt, dd {
 .field-enable {
 	font-weight: normal;
 }
-
+/*
 #filt-css {
 	display: none;
 }
-
+*/
 .truncate {
 	overflow: hidden;
 	text-overflow:ellipsis;
 	white-space:nowrap;
-	max-width: 240px;
+	max-width: 260px;
 }
 
 .toggle, .toggler {
+
   display: inline-block;
-  vertical-align: middle;
+  /* vertical-align: middle; */
   margin-right: 10px;
-  position: relative;
-  font-weight: normal;
+ /* position: relative;
+  font-weight: normal; */
 }
 
 .toggler {
+	/*
   color: #333;
   transition: .2s;
   font-size: 14px;
   width: 250px;
+  */
 }
 
 .toggler--is-active {
+	/*
   color: #333;
   font-weight: normal;
+  */
 }
 
 .b {
@@ -542,6 +748,7 @@ dt, dd {
 }
 
 .toggle {
+	/*
   width: 20px;
   height: 12px;
   border-radius: 20px;
@@ -549,13 +756,17 @@ dt, dd {
   overflow: hidden;
   box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.05);
   vertical-align: middle;
+  */
 }
 
 .toggle.disabled {
+	/*
 	background-color: #a6a6a6;
+	*/
 }
 
 .check {
+	/*
   position: absolute;
   display: block;
   cursor: pointer;
@@ -565,17 +776,21 @@ dt, dd {
   height: 100%;
   opacity: 0;
   z-index: 6;
+  */
 }
 
 .check:checked ~ .switch {
+	/*
   right: 2px;
   left: 37.5%;
   transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
   transition-property: left, right;
   transition-delay: .08s, 0s;
+  */
 }
 
 .switch {
+	/*
   position: absolute;
   left: 2px;
   top: 2px;
@@ -588,6 +803,7 @@ dt, dd {
   transition-property: left, right;
   transition-delay: 0s, .08s;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  */
 }
 .detail_text {
 	word-wrap: break-word;
@@ -643,4 +859,3 @@ th.table-more-bt {
 #browser-header, #add-filter-btn, #view-buttons, #dashboard-link {
 	display: none;
 }
-

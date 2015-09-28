@@ -15,7 +15,7 @@
 	</div>
 	<div class="container">
 		<!-- Row 1: Logo and Main navigation -->
-		<div ng-app="ermrestApp">
+		<div id="main-content" class="col-md-7 col-sm-6 col-lg-8 col-xs-6" ng-app="ermrestApp">
 			%TEMPLATES%
 		</div>
 	</div>

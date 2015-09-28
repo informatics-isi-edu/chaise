@@ -2116,7 +2116,7 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 				var column_definitions = metadata['column_definitions'];
 				ret[table_name] = {};
 				$.each(column_definitions, function(i, col) {
-					if (col['type']['typename'] != 'json' && getAssociationColumn(table_name, col['name']) != null && 
+					if (col['type']['typename'] != 'json' && getAssociationColumn(table_name, col['name']) != null &&
 							!hasColumnFacetHidden(table_name, col['name'])) {
 						var col_name = col['name'];
 						var col_type = col['type']['typename'];
@@ -3139,7 +3139,7 @@ function hasColumnFacetHidden(table_name, column_name) {
 			var column_definitions = table['column_definitions'];
 			$.each(column_definitions, function(i, col) {
 				if (col['name'] == column_name) {
-					if (col['annotations'] != null && col['annotations'][COLUMNS_FACET_URI] != null && col['annotations'][COLUMNS_FACET_URI] == 'hidden' || 
+					if (col['annotations'] != null && col['annotations'][COLUMNS_FACET_URI] != null && col['annotations'][COLUMNS_FACET_URI] == 'hidden' ||
 							facetPolicy == 'on_demand' && hasAnnotation(table_name, column_name, 'hidden')) {
 						ret = true;
 					}
@@ -3411,7 +3411,7 @@ function getFacetCount(options, facet) {
 
 function isColumnFacetOnDemand(options, table, col) {
 	var ret = false;
-	
+
 	if (facetPolicy == 'on_demand') {
 		if (options != null && options['chooseColumns'] != null && options['chooseColumns'][table] != null && options['chooseColumns'][table][col] != null) {
 			ret = !options['chooseColumns'][table][col];
@@ -3419,13 +3419,13 @@ function isColumnFacetOnDemand(options, table, col) {
 			ret = false;
 		}
 	}
-	
+
 	return ret;
 }
 
 function isSelectedColumnFacetOnDemand(options, table, col) {
 	var ret = false;
-	
+
 	if (facetPolicy == 'on_demand') {
 		if (options != null && options['chooseColumns'] != null && options['chooseColumns'][table] != null && options['chooseColumns'][table][col] != null) {
 			ret = options['chooseColumns'][table][col];
@@ -3456,4 +3456,3 @@ function getFacetOrder(facet) {
 	});
 	return ret;
 }
-
