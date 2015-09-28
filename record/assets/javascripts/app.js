@@ -48,11 +48,40 @@ var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute'
                         |___/ 
 */
 
-chaiseRecordApp.config(['$locationProvider', function($locationProvider) {
-        // $locationProvider.hashPrefix('!');
+document.onmouseover = function() {
+    //User's mouse is inside the page.
+    window.innerDocClick = true;
+}
 
-    $locationProvider.html5Mode({rewriteLinks: false});
-}]);
+document.onmouseleave = function() {
+    //User's mouse has left the page.
+    window.innerDocClick = false;
+}
+
+
+window.onhashchange = function() {
+    if (window.innerDocClick) {
+        window.innerDocClick = false;
+    } else {
+        if (window.location.hash != '#undefined') {
+            location.reload();
+        } else {
+            history.pushState("", document.title, window.location.pathname);
+            location.reload();
+        }
+    }
+
+    function goBack() {
+        window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
+        //blah blah blah
+        window.location.lasthash.pop();
+    }
+}
+
+
+// chaiseRecordApp.config(['$locationProvider', function($locationProvider) {
+//     $locationProvider.html5Mode({rewriteLinks: false});
+// }]);
 
 /*
  ____                  _               
@@ -286,7 +315,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 } else if (rKey.toLowerCase() == 'id' || schemaService.isValidTable(rKey)){
                     // If the key is id, set the table name to the reference table's table name (construct), else the table name is key (i.e. cleavagesite)
                     var tableName = (rKey.toLowerCase() == 'id') ? rt['tableName'] : rKey;
-                    console.log('rtable ', rt['tableName']);
 
                     // Mock entity object with params
                     references[j][rKey + '_link'] = self.getEntityLink(tableName, keys);
@@ -376,7 +404,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                             } else if (schemaService.isComplexTable(referenceTableName)){
                                 foreignTable.path   += '/'+ referenceTableName;
                                 foreignTable.tableName = referenceTableName;
-                                console.log('case B', referenceTableName);
                             }
 
                         }
@@ -433,8 +460,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
 
         // Execute API Request tog get schema
         $http.get(path).success(function(data, status, headers, config) {
-            console.log('scheams', data.schemas);
-            console.log('schemaName', schemaName);
+            // console.log('scheams', data.schemas);
             // Set schema
             self.schema     = data.schemas[schemaName];
             self.schema.cid = cid;
@@ -804,7 +830,7 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
     return function(value){
 
         var urls    = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
-        var emails  = /(\w+@[a-zA-Z_\\.]+?\.(edu|com|net|gov|io))/gim;
+        var emails  = /([a-zA-Z0-9_\.]+@[a-zA-Z_\.]+\.(edu|com|net|gov|io))/gim;
 
         if (Array.isArray(value)){
       
