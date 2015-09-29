@@ -186,9 +186,9 @@ karma:
 
 # Rules to attach checksums to JavaScript source in the header
 app.html: search/app.html.in .make-asset-block .make-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' search/app.html.in > app_temp.html
-	sed -e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' app_temp.html > search/index.html
-	rm app_temp.html
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
+	  -e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
+	  search/app.html.in > search/index.html
 
 login.html: login/login.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' login/login.html.in > login/index.html
