@@ -102,46 +102,9 @@
 										<i class="md-sort md-lg" aria-hidden="true"></i>
 									</button>
 
-<<<<<<< .merge_file_sj9qoe
-			<div id="results_tally" class="row">
-				<div class="col-md-9">
-					<p>Displaying results <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
-				</div>
-				<div class="col-md-3">
-					<div id="views" class="btn-group view-toggle pull-right" role="group">
-						<button data-toggle="tooltip" data-placement="top" title="List" ng-click="facetResults.selectView($event, 'list');" type="button" class="btn btn-default">
-							<i class="md-view-list md-lg" aria-hidden="true"></i>
-						</button>
-						<button data-toggle="tooltip" data-placement="top" title="Table" ng-click="facetResults.selectView($event, 'table');" type="button" class="btn btn-default">
-							<i class="md-view-column md-lg" aria-hidden="true"></i>
-						</button>
-  					<button data-toggle="tooltip" data-placement="top" title="Card" ng-click="facetResults.selectView($event, 'card');" type="button" class="btn btn-default">
-							<i class="md-view-module md-lg" aria-hidden="true"></i>
-						</button>
-					</div>
-					<span class="btn btn-label pull-right">Switch view:</span>
-				</div>
-			</div>
-			<div id="resultstable" class="row">
-				<div ng-if="FacetsData.view=='list'" class="col-md-12" ng-repeat="row in FacetsData.ermrestData">
-                    <div ng-if="FacetsData.view=='list'" class="panel panel-default">
-                    	<div class="panel-heading">
-                    		<input ng-show="false" type="checkbox">
-                    		<a ng-href="{{facetResults.rowPath(row)}}">www
-                    			<span class="panel-title" ng-bind-html="facetResults.itemTitle(row)"></span>
-                    		</a>
-                    	</div>
-                    	<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
-                    		<div class="row">
-                    			<div class="col-md-2" ng-show="thumbnail!=null">
-									<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
-										<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
-									</a>
-=======
 									<button class="btn btn-default" id="settings-btn" aria-label="Settings" type="button" title="Configure settings">
 										<i class="md-settings md-lg" aria-hidden="true"></i>
 									</button>
->>>>>>> .merge_file_151oFe
 								</div>
 								<div class="btn-group" id="add-filter" role="group">
 									<button class="btn btn-default" id="add-filter-btn" aria-label="Add Filter Layer" type="button">
@@ -219,22 +182,6 @@
 							<span class="btn btn-label pull-right">Switch view:</span>
 						</div>
 					</div>
-<<<<<<< .merge_file_sj9qoe
-				</div>
-				<div ng-if="FacetsData.view=='card'">
-					<div id="results-group" class="row">
-						<div class="col-md-6" ng-repeat="row in FacetsData.ermrestData">
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									<input ng-show="false" type="checkbox">
-                    		<a ng-href="{{facetResults.rowPath(row)}"
-			                    			<span class="panel-title" ng-bind-html="facetResults.itemTitle(row)"></span>
-			                    		</a>
-								</div>
-								<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
-									<div class="row">
-										<div class="col-md-3" ng-show="thumbnail!=null">
-=======
 					<div id="resultstable" class="row" ng-show="facetResults.hasSelectedFacets()">
 						<div ng-if="FacetsData.view=='list'" class="col-md-12" ng-repeat="row in FacetsData.ermrestData">
 		                    <div ng-if="FacetsData.view=='list'" class="panel panel-default">
@@ -247,7 +194,6 @@
 		                    	<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
 		                    		<div class="row">
 		                    			<div class="col-md-2" ng-show="thumbnail!=null">
->>>>>>> .merge_file_151oFe
 											<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
 												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 											</a>
