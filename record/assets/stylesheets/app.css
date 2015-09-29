@@ -34,12 +34,12 @@ a:hover, a:focus{
 
 #header{
     width: 100%;
-    background: rgb(116, 116, 116);
+    background: #4D4D4D;
     position: relative;
 }
 #brand{
-    color: #8DD7FA;
-    font-size: 30px;
+    color: #fff;
+    font-size: 20px;
     font-weight: lighter;
     letter-spacing: 1px;
     padding: 11px 20px;
