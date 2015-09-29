@@ -1,167 +1,108 @@
-		<!-- Search Results -->
-		<div  id="resultscontent" ng-controller="ResultsListCtrl as facetResults" ng-show="facetResults.showResults()">
-			<!-- nested row 20: Dashboard link / Name of saved query / Bookmarks button -->
-			<div id="dashboard-link" class="row">
-				<div class="col-md-12">
-					<p>
-						<i class="md-dashboard md-lg"></i>
-						<a href="#" ng-click="facetResults.preventDefault($event);">Dashboard</a>
-					</p>
-				</div>
-			</div>
+		<div class="row">
+			<!-- Search Results -->
+				<div  id="resultscontent" ng-controller="ResultsListCtrl as facetResults" ng-show="facetResults.showResults()">
+					<!-- nested row: Dashboard link (hidden) -->
+					<div id="dashboard-link" class="row">
+						<div class="col-md-12">
+							<p>
+								<i class="md-dashboard md-lg"></i>
+								<a href="#" ng-click="facetResults.preventDefault($event);">Dashboard</a>
+							</p>
+						</div>
+					</div>
+					<!-- nested row: Bookmark Query Button (hidden) -->
+					<div id="browser-header" class="row">
+						<div class="col-md-10">
+							<h1>This is the name of a saved query <i class="md-bookmark-outline"></i></h1>
+						</div>
+						<div class="col-md-2">
+							<button type="button" class="btn btn-default btn-lg pull-right">Bookmark Query</button>
+						</div>
+					</div>
 
-			<div id="browser-header" class="row">
-				<div class="col-md-10">
-					<h1>This is the name of a saved query <i class="md-bookmark-outline"></i></h1>
-				</div>
-				<div class="col-md-2">
-					<button type="button" class="btn btn-default btn-lg pull-right" >Bookmark Query</button>
-				</div>
-			</div>
+					<div id="search-within" class="row" ng-show="true">
+						<div id="filters" ng-repeat="item in FacetsData.tablesStack" class="col-md-10">
+							<div class="filter-button">
+							</div>
+							<div class="filter-container">
+								<div class="filter-item">
+									<span class="filter-item-field">Collection</span>&nbsp;
+									<span class="filter-item-value">
+										{{item['Collection']}}
+									</span>
+								</div>
+								<div class="filter-item" ng-repeat="(name,chiclet) in item['chiclets']">
+									<span class="filter-item-field">{{name}}</span>&nbsp;
+			                    	<span ng-if="chiclet['type']=='slider'" class="filter-item-value" ng-attr-title="{{chiclet['min'] | number}} - {{chiclet['max'] | number}}">
+			                    		{{chiclet['min'] | number}} - {{chiclet['max'] | number}}
+			                    	</span>
+									<span ng-if="chiclet['type']=='date'" class="filter-item-value" ng-attr-title="{{chiclet['min']}} - {{chiclet['max']}}">
+			                    		{{chiclet['min']}} to {{chiclet['max']}}
+			                    	</span>
+			                    	<span ng-if="chiclet['type']=='text'" class="filter-item-value" ng-attr-title="{{chiclet['value']}}">
+			                    		{{chiclet['value']}}
+			                    	</span>
+			                    	<span ng-if="chiclet['type']=='enum'" class="filter-item-value" ng-attr-title="{{chiclet['value']}}">
+			                    		{{chiclet['value']}}
+			                    	</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row collections">
+						<div class="col-md-5">
+							<p>
+								<span class="search-collections filter-item-value">
+									<span class="filter-item-field">Search within: </span>&nbsp;
+									<a href="#" class="collections-toggle" ng-click="facetResults.sidebarClick($event, 'collections-toggle');">{{FacetsData.selectedEntity.display}} {{facetResults.displayTreeCount(FacetsData.selectedEntity)}}</a>
+								</span>
+							</p>
+						</div>
+						<div class="col-md-7">
+							<div class="open-side pull-right hidden">
+								<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');" type="button" class="badge open-side"><span class="glyphicon glyphicon-backward"></span> Open Sidebar</button>
+							</div>
+						</div>
+					</div>
+					<div class="row" id="filterarea">
+						<div id="filter" class="col-md-12">
+							<div class="jumbotron text-center" ng-show="!facetResults.hasSelectedFacets();">
+								<h1>{{FacetsData.selectedEntity.display}}</h1>
+								<p class="lead">Use the sidebar to the right to select search attributes.</p>
+								<div class="open-side hidden">
+									<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');" type="button" id="welcome-button" class="btn btn-primary">Open Sidebar to Search</button>
+								</div>
+						  </div>
+							<div class="filter-container">
+				                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
+				                    <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
+				                    <a href="#" ng-click="facetResults.editFacet($event, facet)"><span class="filter-item-field">{{facet['display']}}</span>&nbsp;</a>
+			                    	<span ng-if="facetResults.if_type(facet, 'slider')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}">
+			                    		{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}
+			                    	</span>
+									<span ng-if="facetResults.if_type(facet, 'date')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min']}} - {{FacetsData.box[facet['table']][facet['name']]['max']}}">
+			                    		{{FacetsData.box[facet['table']][facet['name']]['min']}} to {{FacetsData.box[facet['table']][facet['name']]['max']}}
+			                    	</span>
+			                    	<span ng-if="facetResults.if_type(facet, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['value']}}">
+			                    		{{FacetsData.box[facet['table']][facet['name']]['value']}}
+			                    	</span>
+			                    	<span ng-if="facetResults.if_type(facet, 'enum')" class="filter-item-value" ng-attr-title="{{facetResults.displayTitle(facet)}}">
+						    			<span ng-repeat="value in facetResults.getFacetValues(facet)">
+					    					<span ng-if="!$first">, </span>
+						    					{{value}}
+						    			</span>
+			                    	</span>
+				                </div>
+							</div>
+						</div>
+						<div id="view-buttons" class="col-md-2">
+							<div class="btn-toolbar pull-right" role="toolbar">
+								<div class="btn-group" role="group">
+									<button class="btn btn-default" id="sort-btn" aria-label="Sort" type="button" title="Sort">
+										<i class="md-sort md-lg" aria-hidden="true"></i>
+									</button>
 
-			<div id="search-within" class="row" ng-show="true">
-				<div id="filters" ng-repeat="item in FacetsData.tablesStack" class="col-md-10">
-					<div class="filter-button">
-					</div>
-					<div class="filter-container">
-						<div class="filter-item">
-							<span class="filter-item-field">Collection</span>&nbsp;
-							<span class="filter-item-value">
-								{{item['Collection']}}
-							</span>
-						</div>
-						<div class="filter-item" ng-repeat="(name,chiclet) in item['chiclets']">
-							<span class="filter-item-field">{{name}}</span>&nbsp;
-	                    	<span ng-if="chiclet['type']=='slider'" class="filter-item-value" ng-attr-title="{{chiclet['min'] | number}} - {{chiclet['max'] | number}}">
-	                    		{{chiclet['min'] | number}} - {{chiclet['max'] | number}}
-	                    	</span>
-							<span ng-if="chiclet['type']=='date'" class="filter-item-value" ng-attr-title="{{chiclet['min']}} - {{chiclet['max']}}">
-	                    		{{chiclet['min']}} to {{chiclet['max']}}
-	                    	</span>
-	                    	<span ng-if="chiclet['type']=='text'" class="filter-item-value" ng-attr-title="{{chiclet['value']}}">
-	                    		{{chiclet['value']}}
-	                    	</span>
-	                    	<span ng-if="chiclet['type']=='enum'" class="filter-item-value" ng-attr-title="{{chiclet['value']}}">
-	                    		{{chiclet['value']}}
-	                    	</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-7">
-					<p>
-						<span class="search-collections filter-item-value">
-							<span class="filter-item-field">Search within: </span>&nbsp;
-							<a href="#" class="collections-toggle" ng-click="facetResults.sidebarClick($event, 'collections-toggle');">{{FacetsData.selectedEntity.display}} {{facetResults.displayTreeCount(FacetsData.selectedEntity)}}</a>
-						</span>
-					</p>
-				</div>
-				<div class="col-md-5">
-					<div class="pull-right">
-   						<a data-toggle="tooltip" data-placement="left" title="This link stores your search results as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}">Bookmark</a> | <a ng-href="{{chaiseConfig.helpURL}}">Using the Data Browser</a> | <a ng-href="{{chaiseConfig.feedbackURL}}">Send us your feedback</a>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div id="filter" class="col-md-12">
-					<div class="filter-button">
-						<button id="filterButton" type="button" title="Click to apply filters to your data" class="btn btn-default btn-filter sidebar-toggle" ng-click="facetResults.sidebarClick($event, 'sidebar-toggle', true);"><i class="md-filter-list md-lg"></i><br/><div class="filter-lbl">Filter</div></button>
-					</div>
-					<div class="filter-container">
-						<div ng-class="facetResults.setFilterClass()">
-							Click <strong>Filter</strong> to refine your results by various fields <i class="glyphicon glyphicon-chevron-right"></i>
-						</div>
-		                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
-		                    <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
-		                    <a href="#" ng-click="facetResults.editFacet($event, facet)"><span class="filter-item-field">{{facet['display']}}</span>&nbsp;</a>
-	                    	<span ng-if="facetResults.if_type(facet, 'slider')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}">
-	                    		{{FacetsData.box[facet['table']][facet['name']]['min'] | number}} - {{FacetsData.box[facet['table']][facet['name']]['max'] | number}}
-	                    	</span>
-							<span ng-if="facetResults.if_type(facet, 'date')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['min']}} - {{FacetsData.box[facet['table']][facet['name']]['max']}}">
-	                    		{{FacetsData.box[facet['table']][facet['name']]['min']}} to {{FacetsData.box[facet['table']][facet['name']]['max']}}
-	                    	</span>
-	                    	<span ng-if="facetResults.if_type(facet, 'text')" class="filter-item-value" ng-attr-title="{{FacetsData.box[facet['table']][facet['name']]['value']}}">
-	                    		{{FacetsData.box[facet['table']][facet['name']]['value']}}
-	                    	</span>
-	                    	<span ng-if="facetResults.if_type(facet, 'enum')" class="filter-item-value" ng-attr-title="{{facetResults.displayTitle(facet)}}">
-				    			<span ng-repeat="value in facetResults.getFacetValues(facet)">
-			    					<span ng-if="!$first">, </span>
-				    					{{value}}
-				    			</span>
-	                    	</span>
-		                </div>
-					</div>
-				</div>
-				<div id="view-buttons" class="col-md-2">
-					<div class="btn-toolbar pull-right" role="toolbar">
-						<div class="btn-group" role="group">
-							<button class="btn btn-default" id="sort-btn" aria-label="Sort" type="button" title="Sort">
-								<i class="md-sort md-lg" aria-hidden="true"></i>
-							</button>
-
-							<button class="btn btn-default" id="settings-btn" aria-label="Settings" type="button" title="Configure settings">
-								<i class="md-settings md-lg" aria-hidden="true"></i>
-							</button>
-						</div>
-						<div class="btn-group" id="add-filter" role="group">
-							<button class="btn btn-default" id="add-filter-btn" aria-label="Add Filter Layer" type="button">
-								<i class="md-add md-lg" aria-hidden="true"></i>
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="row ng-hide" id="searchsort" ng-show="FacetsData.pageNavigation">
-				<form class="form-inline" role="form">
-					<div class="ng-hide" ng-show="FacetsData.pageNavigation" ng-bind-html="FacetsData.collectionsPredicate">
-					</div>
-					<div class="ng-hide" ng-show="FacetsData.pageNavigation" class="col-sm-6 col-md-5 col-lg-4">
-						<div class="form-group has-feedback">
-							<label class="control-label sr-only">Search Data</label>
-							<input id="dataSearch" type="text" ng-model="FacetsData.filterAllText" class="form-control"
-								placeholder="Search data..." size="44" maxlength="120"
-								ng-change="facetResults.delay_search_all($event.keyCode)">
-						</div>
-					</div>
-					<div class="ng-hide" ng-show="FacetsData.pageNavigation" class="col-sm-4 col-md-3 col-lg-2">
-						<div class="form-group">
-							<label for="show">Show</label> <select class="form-control"
-								name="field-pick" id="show" ng-model="FacetsData.pagingOptions.pageSize"
-								ng-options="value for value in FacetsData.pagingOptions.pageSizes"></select>
-						</div>
-					</div>
-					<div class="ng-hide" ng-show="FacetsData.pageNavigation" class="col-sm-4 col-md-4 col-lg-3">
-						<div class="form-group">
-							<ul class="pagination toppagination">
-								<li class="prev"><a href="#"
-									ng-hide="facetResults.cantPageBackward()"
-									ng-click="facetResults.pageToFirst($event)">&laquo;</a></li>
-								<li class="prev"><a href="#"
-									ng-hide="facetResults.cantPageBackward()"
-									ng-click="facetResults.pageBackward($event)">&lt;</a></li>
-								<li ng-repeat="page in FacetsData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
-									ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
-								<li class="next"><a href="#"
-									ng-show="facetResults.canPageForward()"
-									ng-click="facetResults.pageForward($event)">&gt;</a></li>
-								<li class="next"><a href="#"
-									ng-show="facetResults.canPageForward()"
-									ng-click="facetResults.pageToLast($event)">&raquo;</a></li>
-							</ul>
-						</div>
-					</div>
-				</form>
-			</div>
-			<div class="ng-hide" ng-show="FacetsData.pageNavigation" id="results_tally">
-				<p>
-					Page {{FacetsData.pagingOptions.currentPage}} of {{FacetsData.maxPages}}. Showing results
-					<strong>{{(FacetsData.pagingOptions.currentPage-1)*FacetsData.pagingOptions.pageSize+1}}-{{facetResults.lastRecord()}}</strong>
-					of <strong>{{FacetsData.totalServerItems}}.</strong>
-				</p>
-			</div>
-
+<<<<<<< .merge_file_sj9qoe
 			<div id="results_tally" class="row">
 				<div class="col-md-9">
 					<p>Displaying results <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
@@ -196,76 +137,89 @@
 									<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
 										<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 									</a>
+=======
+									<button class="btn btn-default" id="settings-btn" aria-label="Settings" type="button" title="Configure settings">
+										<i class="md-settings md-lg" aria-hidden="true"></i>
+									</button>
+>>>>>>> .merge_file_151oFe
 								</div>
-								<div ng-init="values=facetResults.viewColumns(row, 2, 3)">
-									<div class="col-md-2" ng-show="values['top_columns'].length>0" ng-repeat="value in values['top_columns']">
-										<dl class="attribute-group" ng-repeat="col in value track by $index" >
-											<dt ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.display(FacetsData.table,col)}}</dt>
-											<dd ng-if="facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
-											<span ng-repeat="urlValue in urlValues track by $index" >
-												<span ng-if="!$first">, </span>
-												<a ng-href="{{urlValue[1]}}">
-													{{urlValue[0]}}
-												</a>
-											</span>
-											</dd>
-											<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
-										</dl>
-									</div>
-									<div class="col-md-6" ng-show="values['summary']!=null">
-										<dl class="attribute-group">
-											<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
-											<dd>{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</dd>
-										</dl>
-									</div>
+								<div class="btn-group" id="add-filter" role="group">
+									<button class="btn btn-default" id="add-filter-btn" aria-label="Add Filter Layer" type="button">
+										<i class="md-add md-lg" aria-hidden="true"></i>
+									</button>
 								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-				<div ng-if="FacetsData.view=='table' && FacetsData.ermrestData.length>0">
-					<div id="results-group" class="row">
-						<div class="col-md-12">
-							<table class="col-md-12 table table-condensed table-responsive table-hover table-bordered" id="results-table-view">
-								<thead>
-									<tr class="active">
-										<th ng-if="facetResults.itemThumbnail(FacetsData.ermrestData[0])!=null" class="col-md-2">
-											<span>Thumbnail</span>
-										</th>
-										<th ng-if="facetResults.titleName()!=null" class="col-md-2">{{facetResults.display(FacetsData.table,facetResults.titleName())}}
-										</th>
-										<th ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="col-md-2">{{facetResults.display(FacetsData.table,col)}}
-										</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr ng-repeat="row in FacetsData.ermrestData" ng-init="thumbnail=facetResults.itemThumbnail(row)">
-										<td ng-if="thumbnail!=null" class="col-md-2">
-											<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
-												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
-											</a>
-										</td>
-										<td ng-if="facetResults.titleName()!=null" class="col-md-2 results-title">
-											<a href="#" ng-click="facetResults.clicker($event, row, 3, $index);"><span class="results-title" ng-bind-html="facetResults.itemTitle(row)"></span></a>
-										</td>
-										<td ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="col-md-2 top-columns">
-											<span ng-if="facetResults.isUrl(FacetsData.table,col)" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
-												<span ng-repeat="urlValue in urlValues track by $index" >
-													<span ng-if="!$first">, </span>
-													<a ng-href="{{urlValue[1]}}">
-														{{urlValue[0]}}
-													</a>
-												</span>
-											</span>
-											<span ng-if="!facetResults.isUrl(FacetsData.table,col)">
-												{{facetResults.html(FacetsData.table,col,row[col])}}
-											</span>
-										</td>
-									</tr>
-								</tbody>
-							</table>
+
+					<div class="row ng-hide" id="searchsort" ng-show="FacetsData.pageNavigation">
+						<form class="form-inline" role="form">
+							<div class="ng-hide" ng-show="FacetsData.pageNavigation" ng-bind-html="FacetsData.collectionsPredicate">
+							</div>
+							<div class="ng-hide" ng-show="FacetsData.pageNavigation" class="col-sm-6 col-md-5 col-lg-4">
+								<div class="form-group has-feedback">
+									<label class="control-label sr-only">Search Data</label>
+									<input id="dataSearch" type="text" ng-model="FacetsData.filterAllText" class="form-control"
+										placeholder="Search data..." size="44" maxlength="120"
+										ng-change="facetResults.delay_search_all($event.keyCode)">
+								</div>
+							</div>
+							<div class="ng-hide" ng-show="FacetsData.pageNavigation" class="col-sm-4 col-md-3 col-lg-2">
+								<div class="form-group">
+									<label for="show">Show</label> <select class="form-control"
+										name="field-pick" id="show" ng-model="FacetsData.pagingOptions.pageSize"
+										ng-options="value for value in FacetsData.pagingOptions.pageSizes"></select>
+								</div>
+							</div>
+							<div class="ng-hide" ng-show="FacetsData.pageNavigation" class="col-sm-4 col-md-4 col-lg-3">
+								<div class="form-group">
+									<ul class="pagination toppagination">
+										<li class="prev"><a href="#"
+											ng-hide="facetResults.cantPageBackward()"
+											ng-click="facetResults.pageToFirst($event)">&laquo;</a></li>
+										<li class="prev"><a href="#"
+											ng-hide="facetResults.cantPageBackward()"
+											ng-click="facetResults.pageBackward($event)">&lt;</a></li>
+										<li ng-repeat="page in FacetsData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
+											ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
+										<li class="next"><a href="#"
+											ng-show="facetResults.canPageForward()"
+											ng-click="facetResults.pageForward($event)">&gt;</a></li>
+										<li class="next"><a href="#"
+											ng-show="facetResults.canPageForward()"
+											ng-click="facetResults.pageToLast($event)">&raquo;</a></li>
+									</ul>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="ng-hide" ng-show="FacetsData.pageNavigation" id="results_tally">
+						<p>
+							Page {{FacetsData.pagingOptions.currentPage}} of {{FacetsData.maxPages}}. Showing results
+							<strong>{{(FacetsData.pagingOptions.currentPage-1)*FacetsData.pagingOptions.pageSize+1}}-{{facetResults.lastRecord()}}</strong>
+							of <strong>{{FacetsData.totalServerItems}}.</strong>
+						</p>
+					</div>
+					<div id="results_tally" class="row" ng-show="facetResults.hasSelectedFacets()">
+						<div class="col-md-8">
+							<p>Displaying results <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
+						</div>
+						<div class="col-md-4">
+							<div id="views" class="btn-group view-toggle pull-right" role="group">
+								<button data-toggle="tooltip" data-placement="top" title="List" ng-click="facetResults.selectView($event, 'list');" type="button" class="btn btn-default">
+									<i class="md-view-list md-lg" aria-hidden="true"></i>
+								</button>
+								<button data-toggle="tooltip" data-placement="top" title="Table" ng-click="facetResults.selectView($event, 'table');" type="button" class="btn btn-default">
+									<i class="md-view-column md-lg" aria-hidden="true"></i>
+								</button>
+		  					<button data-toggle="tooltip" data-placement="top" title="Card" ng-click="facetResults.selectView($event, 'card');" type="button" class="btn btn-default">
+									<i class="md-view-module md-lg" aria-hidden="true"></i>
+								</button>
+							</div>
+							<span class="btn btn-label pull-right">Switch view:</span>
 						</div>
 					</div>
+<<<<<<< .merge_file_sj9qoe
 				</div>
 				<div ng-if="FacetsData.view=='card'">
 					<div id="results-group" class="row">
@@ -280,60 +234,162 @@
 								<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
 									<div class="row">
 										<div class="col-md-3" ng-show="thumbnail!=null">
+=======
+					<div id="resultstable" class="row" ng-show="facetResults.hasSelectedFacets()">
+						<div ng-if="FacetsData.view=='list'" class="col-md-12" ng-repeat="row in FacetsData.ermrestData">
+		                    <div ng-if="FacetsData.view=='list'" class="panel panel-default">
+		                    	<div class="panel-heading">
+		                    		<input ng-show="false" type="checkbox">
+		                    		<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+		                    			<span class="panel-title" ng-bind-html="facetResults.itemTitle(row)"></span>
+		                    		</a>
+		                    	</div>
+		                    	<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
+		                    		<div class="row">
+		                    			<div class="col-md-2" ng-show="thumbnail!=null">
+>>>>>>> .merge_file_151oFe
 											<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
 												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
-												<br/>
 											</a>
 										</div>
-										<div ng-init="values=facetResults.viewColumns(row, 3, 2)">
-											<div class="col-sm-3" ng-show="values['top_columns'].length>0" ng-repeat="value in values['top_columns']">
+										<div ng-init="values=facetResults.viewColumns(row, 2, 3)">
+											<div class="col-md-2" ng-show="values['top_columns'].length>0" ng-repeat="value in values['top_columns']">
 												<dl class="attribute-group" ng-repeat="col in value track by $index" >
 													<dt ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.display(FacetsData.table,col)}}</dt>
 													<dd ng-if="facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
+													<span ng-repeat="urlValue in urlValues track by $index" >
+														<span ng-if="!$first">, </span>
+														<a ng-href="{{urlValue[1]}}">
+															{{urlValue[0]}}
+														</a>
+													</span>
+													</dd>
+													<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
+												</dl>
+											</div>
+											<div class="col-md-6" ng-show="values['summary']!=null">
+												<dl class="attribute-group">
+													<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
+													<dd>{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</dd>
+												</dl>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div ng-if="FacetsData.view=='table' && FacetsData.ermrestData.length>0">
+							<div id="results-group" class="row">
+								<div class="col-md-12">
+									<table class="col-md-12 table table-condensed table-responsive table-hover table-bordered" id="results-table-view">
+										<thead>
+											<tr class="active">
+												<th ng-if="facetResults.itemThumbnail(FacetsData.ermrestData[0])!=null" class="col-md-2">
+													<span>Thumbnail</span>
+												</th>
+												<th ng-if="facetResults.titleName()!=null" class="col-md-2">{{facetResults.display(FacetsData.table,facetResults.titleName())}}
+												</th>
+												<th ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="col-md-2">{{facetResults.display(FacetsData.table,col)}}
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-repeat="row in FacetsData.ermrestData" ng-init="thumbnail=facetResults.itemThumbnail(row)">
+												<td ng-if="thumbnail!=null" class="col-md-2">
+													<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+														<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
+													</a>
+												</td>
+												<td ng-if="facetResults.titleName()!=null" class="col-md-2 results-title">
+													<a href="#" ng-click="facetResults.clicker($event, row, 3, $index);"><span class="results-title" ng-bind-html="facetResults.itemTitle(row)"></span></a>
+												</td>
+												<td ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="col-md-2 top-columns">
+													<span ng-if="facetResults.isUrl(FacetsData.table,col)" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
 														<span ng-repeat="urlValue in urlValues track by $index" >
 															<span ng-if="!$first">, </span>
 															<a ng-href="{{urlValue[1]}}">
 																{{urlValue[0]}}
 															</a>
 														</span>
-													</dd>
-													<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
-												</dl>
-											</div>
+													</span>
+													<span ng-if="!facetResults.isUrl(FacetsData.table,col)">
+														{{facetResults.html(FacetsData.table,col,row[col])}}
+													</span>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div ng-if="FacetsData.view=='card'">
+							<div id="results-group" class="row">
+								<div class="col-md-6" ng-repeat="row in FacetsData.ermrestData">
+									<div class="panel panel-default">
+										<div class="panel-heading">
+											<input ng-show="false" type="checkbox">
+					                    		<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+					                    			<span class="panel-title" ng-bind-html="facetResults.itemTitle(row)"></span>
+					                    		</a>
 										</div>
-									</div>
-									<div class="row" ng-show="values['summary']!=null">
-										<div class="col-md-12">
-											<dl class="attribute-group summary-card">
-												<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
-												<dd class="summ-desc">{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</dd>
-											</dl>
+										<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
+											<div class="row">
+												<div class="col-md-3" ng-show="thumbnail!=null">
+													<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+														<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
+														<br/>
+													</a>
+												</div>
+												<div ng-init="values=facetResults.viewColumns(row, 3, 2)">
+													<div class="col-sm-3" ng-show="values['top_columns'].length>0" ng-repeat="value in values['top_columns']">
+														<dl class="attribute-group" ng-repeat="col in value track by $index" >
+															<dt ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.display(FacetsData.table,col)}}</dt>
+															<dd ng-if="facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
+																<span ng-repeat="urlValue in urlValues track by $index" >
+																	<span ng-if="!$first">, </span>
+																	<a ng-href="{{urlValue[1]}}">
+																		{{urlValue[0]}}
+																	</a>
+																</span>
+															</dd>
+															<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
+														</dl>
+													</div>
+												</div>
+											</div>
+											<div class="row" ng-show="values['summary']!=null">
+												<div class="col-md-12">
+													<dl class="attribute-group summary-card">
+														<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
+														<dd class="summ-desc">{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</dd>
+													</dl>
+												</div>
+											</div>
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
+					<div class="row bottompgr" ng-show="facetResults.hasSelectedFacets()">
+						<div class="form-group col-md-12">
+							<ul class="pagination bottompagination">
+								<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="prev"><a href="#"
+									ng-hide="facetResults.cantPageBackward()"
+									ng-click="facetResults.pageToFirst($event)">&laquo;</a></li>
+								<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="prev"><a href="#"
+									ng-hide="facetResults.cantPageBackward()"
+									ng-click="facetResults.pageBackward($event)">&lt;</a></li>
+								<li class="ng-hide" ng-show="FacetsData.pageNavigation" ng-repeat="page in FacetsData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
+									ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
+								<li class="next"><a href="#" id="moreButton"
+									class="ng-hide" ng-show="facetResults.canPageForward()"
+									ng-click="facetResults.pageForward($event)">More...</a></li>
+								<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="next"><a href="#"
+									ng-show="facetResults.canPageForward()"
+									ng-click="facetResults.pageToLast($event)">&raquo;</a></li>
+							</ul>
+						</div>
+					</div>
 				</div>
-			</div>
-			<div class="row bottompgr">
-				<div class="form-group col-md-12">
-					<ul class="pagination bottompagination">
-						<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="prev"><a href="#"
-							ng-hide="facetResults.cantPageBackward()"
-							ng-click="facetResults.pageToFirst($event)">&laquo;</a></li>
-						<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="prev"><a href="#"
-							ng-hide="facetResults.cantPageBackward()"
-							ng-click="facetResults.pageBackward($event)">&lt;</a></li>
-						<li class="ng-hide" ng-show="FacetsData.pageNavigation" ng-repeat="page in FacetsData.pageRange track by $index" ng-class="facetResults.setActiveClass($index)"><a href="#"
-							ng-click="facetResults.selectPage($event, page)" ng-show="facetResults.pageInRange(page)">{{facetResults.pageButton(page)}}<span class="sr-only">(current)</span></a></li>
-						<li class="next"><a href="#" id="moreButton" 
-							class="ng-hide" ng-show="facetResults.canPageForward()"
-							ng-click="facetResults.pageForward($event)">More...</a></li>
-						<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="next"><a href="#"
-							ng-show="facetResults.canPageForward()"
-							ng-click="facetResults.pageToLast($event)">&raquo;</a></li>
-					</ul>
-				</div>
-			</div>
 		</div>

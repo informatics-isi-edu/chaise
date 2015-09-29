@@ -8,11 +8,11 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	this.display = function (table, column) {
 		return COLUMNS_ALIAS[table] != null ? COLUMNS_ALIAS[table][column] : '';
 	};
-	
+
 	this.html = function (table, column, data) {
 		return hasAnnotation(table, column, 'html') ? $sce.trustAsHtml(data) : data;
 	};
-	
+
 	this.setSortOption = function () {
 		var sortOption = FacetsData.sortInfo;
 		if (sortOption != null && sortOption['fields'].length > 1) {
@@ -20,7 +20,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		}
 		FacetsData['sortOption'] = sortOption;
 	};
-	
+
 	this.successSearchFacets = function (data, totalItems, page, pageSize) {
 		FacetsData.ermrestData = data;
 		FacetsData.collectionsPredicate = getCollectionsPredicate(FacetsData.entityPredicates, FacetsData);
@@ -34,7 +34,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		}
 		FacetsData.progress = false;
 	};
-	
+
 	this.initTable = function () {
 		$('footer').hide();
 		$('#headerSearch').val('');
@@ -68,14 +68,14 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		this.initPageRange();
 		clearFacets(FacetsData);
 	};
-	
+
 	this.initPageRange = function () {
 	    for (var i = 1; i <= FacetsData.tagPages; i++) {
 	    	FacetsData.pageRange.push(i);
 	    	FacetsData.pageMap[i] = i;
 	    }
 	};
-	
+
 	this.updateSessionFilter = function () {
 		emptyJSON(FacetsData.sessionFilters);
     	$.each(FacetsData.facets, function(i, facet) {
@@ -87,44 +87,47 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
     		}
     	});
 	};
-	
+
 	this.sidebarClick = function (toggle) {
-	    var overlay = $('.sidebar-overlay');
-	    
+		var mainContent = $('#main-content');
+		var openSideBtn = $('div.open-side');
 	    if (toggle == 'sidebar-toggle') {
-	        var sidebar = $('#sidebar');
-	        sidebar.toggleClass('open');
-	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
-	            overlay.addClass('active');
-	        } else {
-	            overlay.removeClass('active');
-	        }
+				$('#sidebar').toggleClass('open');
 	    } else if (toggle == 'field-toggle') {
-	        var sidebar = $('#editfilter');
-	        sidebar.toggleClass('open');
-	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
-	            //overlay.addClass('active');
-	        } else {
-	            //overlay.removeClass('active');
-	        }
+        $('#editfilter').toggleClass('open');
 	    } else if (toggle == 'collections-toggle') {
-	        var sidebar = $('#collectionsTree');
-	        sidebar.toggleClass('open');
-	        if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
-	            overlay.addClass('active');
-	        } else {
-	            overlay.removeClass('active');
-	        }
+				var overlay = $('.sidebar-overlay');
+				$('#sidebar,#editfilter,#morefilters').removeClass('open');
+				var sidebar = $('#collectionsTree');
+				if (sidebar.hasClass('open')) {
+					sidebar.removeClass('open');
+				} else {
+					sidebar.addClass('open');
+				}
+
+				if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
+            overlay.addClass('active');
+        } else {
+            overlay.removeClass('active');
+        }
+
 	    } else if (toggle == 'more-field-toggle') {
 	    	if (FacetsData.facetSelection) {
 		    	this.updateSessionFilter();
 	    	}
-	        var sidebar = $('#morefilters');
-	        sidebar.toggleClass('open');
+        $('#morefilters').toggleClass('open');
 	    }
-
+		// Resize main content pane depending on sidebar open or close
+		// Show/hide .open-side button depending on sidebar open or close
+		if ($('.sidebar').hasClass('open')) {
+			mainContent.removeClass('col-xs-12 col-sm-12 col-md-12 col-lg-12').addClass('col-xs-6 col-sm-6 col-md-7 col-lg-8');
+			openSideBtn.removeClass('show').addClass('hidden');
+		} else {
+			mainContent.removeClass('col-xs-6 col-sm-6 col-md-7 col-lg-8').addClass('col-xs-12 col-sm-12 col-md-12 col-lg-12');
+			openSideBtn.removeClass('hidden').addClass('show');
+		}
 	};
-	
+
 	this.initSortOption = function () {
 		$.each(FacetsData.colsDefs, function(i, col) {
 			if (isSortable(FacetsData.table, col.field)) {
@@ -132,7 +135,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			}
 		});
 	};
-	
+
 	this.predicate = function (facet, keyCode, successSearchFacets, successUpdateModels) {
 		if (FacetsData.box[facet['table']][facet['name']]['value'] == '') {
 			FacetsData.facetClass[facet['table']][facet['name']] = '';
@@ -143,7 +146,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		FacetsData.pagingOptions.currentPage = 1;
 		getErmrestData(FacetsData, successSearchFacets, successUpdateModels);
 	};
-	
+
 	this.predicate_slider = function (facet, successSearchFacets, successUpdateModels) {
 		if (FacetsData.box[facet['table']][facet['name']]['min'] > FacetsData.box[facet['table']][facet['name']]['floor']) {
 			FacetsData.box[facet['table']][facet['name']]['left'] = true;
@@ -160,7 +163,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		FacetsData.pagingOptions.currentPage = 1;
 		getErmrestData(FacetsData, successSearchFacets, successUpdateModels);
 	};
-	
+
 	this.successGetErmrestData = function (data, totalItems, page, pageSize) {
 		if (page == 1) {
 			FacetsData.ermrestData = (FacetsData.filter == null) ? data : [];
@@ -178,25 +181,25 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		}
 		FacetsData.progress = false;
 	};
-	
+
 	this.successGetMetadata = function (data, textStatus, jqXHR, successGetTableColumns) {
 		FacetsData['metadata'] = data;
 		getTableColumns(FacetsData, successGetTableColumns);
 	};
-	
+
 	this.successGetTableColumns = function (columns) {
 		FacetsData['facets'] = columns['facets'];
 		FacetsData['colsDefs'] = columns['colsDefs'];
 		this.initSortOption();
 	};
-	
+
 	this.hide = function (facet) {
-		return (FacetsData.narrow[facet['table']][facet['name']] == null || !FacetsData.chooseColumns[facet['table']][facet['name']] || 
-				(FacetsData.box[facet['table']][facet['name']]['facetcount'] == 0 && 
+		return (FacetsData.narrow[facet['table']][facet['name']] == null || !FacetsData.chooseColumns[facet['table']][facet['name']] ||
+				(FacetsData.box[facet['table']][facet['name']]['facetcount'] == 0 &&
 						(FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'slider' ||
 								FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && !hasCheckedValues(FacetsData.box, facet))));
 	};
-	
+
 	this.if_type = function (facet, facet_type) {
 		var ret = false;
 		if (facet != null && FacetsData.colsDescr[facet['table']] != null && FacetsData.colsDescr[facet['table']][facet['name']] != null) {
@@ -211,21 +214,21 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		}
 		return ret;
 	};
-	
+
 	this.predicate_checkbox = function (facet, successSearchFacets, successUpdateModels) {
 		setFacetClass(FacetsData, facet, FacetsData.facetClass);
 		this.setSortOption();
 		FacetsData.pagingOptions.currentPage = 1;
 		getErmrestData(FacetsData, successSearchFacets, successUpdateModels);
 	};
-	
+
 	this.showFacetCount = function (facet) {
-		return (FacetsData.chooseColumns[facet['table']][facet['name']] && 
-				(FacetsData.box[facet['table']][facet['name']] != null && FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 || 
+		return (FacetsData.chooseColumns[facet['table']][facet['name']] &&
+				(FacetsData.box[facet['table']][facet['name']] != null && FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 ||
 						FacetsData.colsDescr[facet['table']] != null && FacetsData.colsDescr[facet['table']][facet['name']] != null &&
 						FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues(FacetsData.box, facet)));
 	};
-	
+
 	this.getEntityResults = function (event, data, successGetMetadata) {
 		var label = $(event.target).is('label') ? $(event.target) : $(event.target).parent();
 		var isNewSchema = (SCHEMA != data.schema);
@@ -319,7 +322,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			}
 		}
 	};
-	
+
 	this.getFacetValues = function getFacetValues(facet) {
 		var value = FacetsData.box[facet['table']][facet['name']];
 		var values = [];
@@ -330,7 +333,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		});
 		return values;
 	};
-	
+
 	this.displayTitle = function displayTitle(facet) {
 		var values = this.getFacetValues(facet);
 		var ret = '';
@@ -342,7 +345,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		});
 		return ret;
 	};
-	
+
 	this.setCollectionChiclets = function setCollectionChiclets(data, isNewSchema, that) {
 		var oldRoot = null;
 		var newRoot = null;
@@ -364,7 +367,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			}
 			newRoot = newRootParent.name;
 		}
-		
+
 		var isNewRoot = (oldRoot != newRoot);
 
 		if (isNewSchema || isNewRoot) {
@@ -422,7 +425,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			}
 		}
 	}
-	
+
 	this.showChiclet = function showChiclet(facet) {
 		var facet_type = null;
 		if (this.if_type(facet, 'slider')) {

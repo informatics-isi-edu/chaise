@@ -10,8 +10,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
                                                       function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
-  $scope.chaiseConfig = chaiseConfig;
-  $('[data-toggle="tooltip"]').tooltip();
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
@@ -288,23 +286,23 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return $scope.hasFilters() ? 'filter-bg-hide' : 'filter-bg';
 	};
 
-    this.removeFilter = function removeFilter(event, facet) {
-    	//event.stopPropagation();
-    	event.preventDefault();
-    	if ($scope.if_type(facet, 'slider')) {
-    		$scope.FacetsData.box[facet['table']][facet['name']]['min'] = $scope.FacetsData.box[facet['table']][facet['name']]['floor'];
-    		$scope.FacetsData.box[facet['table']][facet['name']]['max'] = $scope.FacetsData.box[facet['table']][facet['name']]['ceil'];
-    		$scope.delay_slider(facet);
-    	} else if ($scope.if_type(facet, 'text')) {
-    		$scope.FacetsData.box[facet['table']][facet['name']]['value'] = '';
-    		$scope.delay_predicate(facet, event.keyCode);
-    	} else if ($scope.if_type(facet, 'enum')) {
-    		$.each($scope.FacetsData.box[facet['table']][facet['name']]['values'], function(key, value) {
-    			$scope.FacetsData.box[facet['table']][facet['name']]['values'][key] = false;
-    		});
-    		$scope.predicate_checkbox(facet);
-    	}
-	}
+  this.removeFilter = function removeFilter(event, facet) {
+  	//event.stopPropagation();
+  	event.preventDefault();
+  	if ($scope.if_type(facet, 'slider')) {
+  		$scope.FacetsData.box[facet['table']][facet['name']]['min'] = $scope.FacetsData.box[facet['table']][facet['name']]['floor'];
+  		$scope.FacetsData.box[facet['table']][facet['name']]['max'] = $scope.FacetsData.box[facet['table']][facet['name']]['ceil'];
+  		$scope.delay_slider(facet);
+  	} else if ($scope.if_type(facet, 'text')) {
+  		$scope.FacetsData.box[facet['table']][facet['name']]['value'] = '';
+  		$scope.delay_predicate(facet, event.keyCode);
+  	} else if ($scope.if_type(facet, 'enum')) {
+  		$.each($scope.FacetsData.box[facet['table']][facet['name']]['values'], function(key, value) {
+  			$scope.FacetsData.box[facet['table']][facet['name']]['values'][key] = false;
+  		});
+  		$scope.predicate_checkbox(facet);
+  	}
+	};
 
 	$scope.predicate_slider = function predicate_slider(facet) {
     	FacetsService.predicate_slider(facet, $scope.successSearchFacets, $scope.successUpdateModels);
@@ -416,11 +414,47 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return ret;
 	};
 
-	this.urlBookmark = function urlBookmark() {
-		return $scope.FacetsData.bookmark;
-	};
-
 	this.displayRange = function displayRange() {
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
 	};
+
+  // Returns true if there are facets that have been selected.
+  this.hasSelectedFacets = function hasSelectedFacets() {
+    var selectedFacets = false;
+    $.each($scope.FacetsData.box, function(table, columns) {
+      var colsDescr = $scope.FacetsData['colsDescr'][table];
+      $.each(columns, function(key, value) {
+        if(searchBoxPresentation.contains(colsDescr[key]['type'])) {
+          if (value['value'] != '') {
+            selectedFacets = true;
+            return false;
+          }
+        }
+        else if (colsDescr[key]['type'] == 'enum') {
+            if (value['values'] != null) {
+              $.each(value['values'], function(checkbox_key, checkbox_value) {
+                if(checkbox_value) {
+                  selectedFacets = true;
+                  return true;
+                }
+              });
+            }
+        }
+        else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
+            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+              if (value['left']) {
+                selectedFacets = true;
+                return true;
+              }
+              if (value['right']) {
+                selectedFacets = true;
+                return true;
+              }
+            }
+        }
+      });
+    });
+    return selectedFacets;
+  };
+
 }]);

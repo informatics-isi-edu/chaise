@@ -13,11 +13,13 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     $scope.filtersMatch = {};
     $scope.selectedCollection = '';
     $scope.requestCounter = 0;
+    $scope.chaiseConfig = chaiseConfig;
+    $('[data-toggle="tooltip"]').tooltip();
   	$scope.translate = function(value)
 	{
 	    return numberFilter(value);
 	}
-  	
+
   	$scope.hashHasChanged = function hashHasChanged(event) {
   		if (!assignBookmark) {
 	  	  	var searchQuery = getSearchQuery(event.newURL);
@@ -91,8 +93,14 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
  		}
   	};
 
-  	window.onhashchange = $scope.hashHasChanged;
-  	
+    window.onhashchange = $scope.hashHasChanged;
+
+  $scope.predicate_search_all = function predicate_search_all() {
+    FacetsService.setSortOption();
+    $scope.FacetsData.pagingOptions.currentPage = 1;
+    getErmrestData($scope.FacetsData, $scope.successSearchFacets, $scope.successUpdateModels);
+  };
+
 	this.slideFilter = function slideFilter(event, toggle, tag) {
 		event.preventDefault();
 		$scope.FacetsData.tag = tag;
@@ -153,7 +161,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
         	FacetsService.sidebarClick('sidebar-toggle');
     	}
 	}
-    
+
 	this.preventDefault = function preventDefault(event) {
 		event.preventDefault();
 	};
@@ -197,7 +205,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
         	FacetsService.sidebarClick('sidebar-toggle');
     	}
 	}
-    
+
     this.removeFilter = function removeFilter(event, facet) {
     	//event.stopPropagation();
     	event.preventDefault();
@@ -216,7 +224,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     		});
     	}
 	}
-    
+
     // Function from Filters
 
 	this.displayMore = function displayMore(event) {
@@ -229,7 +237,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	};
 
 	this.showFacetMatch = function showFacetMatch(facet) {
-		var ret = ($scope.FacetsData.searchFilter.length > 0) && (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']) && 
+		var ret = ($scope.FacetsData.searchFilter.length > 0) && (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']) &&
 			($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 ||
 					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet) ||
 					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'date' && hasCheckedValues($scope.FacetsData.box, facet));
@@ -340,7 +348,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	$scope.initSortOption = function initSortOption() {
     	FacetsService.initSortOption();
 	};
-	
+
 	$scope.successUpdateCount = function successUpdateCount() {
 		$scope.FacetsData.ready = true;
 		$('footer').show();
@@ -375,12 +383,12 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     				sessionFilters[facet['table']] = [];
     			}
     			sessionFilters[facet['table']].push(facet['name']);
-    		} 
+    		}
     	});
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
-		
+
 		if ($scope.FacetsData.filter != null) {
 			$.each($scope.FacetsData.filter, function(table, columns) {
 				$.each(columns, function(column, values) {
@@ -398,7 +406,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 			}
 		}
 	};
-	
+
 	$scope.morePage = function morePage() {
 		var page = $scope.FacetsData.bookmark.match(/page=([^&]+)/)[1];
 		if ($scope.FacetsData.bookmarkPage != $scope.FacetsData.pagingOptions.currentPage) {
@@ -445,15 +453,15 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 		getTableColumnsUniques($scope.FacetsData, $scope.successGetTableColumnsUniques);
 	};
-	
+
 	$scope.successGetMetadata = function successGetMetadata(data, textStatus, jqXHR) {
     	FacetsService.successGetMetadata(data, textStatus, jqXHR, $scope.successGetTableColumns);
 	};
-	
+
 	this.getEntityResults = function getEntityResults(event, data) {
     	FacetsService.getEntityResults(event, data, $scope.successGetMetadata);
 	};
-	
+
 	this.searchCollection = function searchCollection(event, data) {
 		if (!$(event.target).is('span')) {
 			$scope.selectedCollection = data['display'];
@@ -465,7 +473,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	    	}
 		}
 	};
-	
+
 	this.displayTreeCount = function displayTreeCount(data) {
 		var ret = '';
 		if (data.count > 0) {
@@ -484,7 +492,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		});
 		return (values.length > 1) ? 'multi_values' : 'single_value';
 	};
-	
+
 	this.getFacetValues = $scope.getFacetValues = function getFacetValues(facet) {
 		var value = $scope.FacetsData.box[facet['table']][facet['name']];
 		var values = [];
@@ -495,7 +503,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		});
 		return values;
 	};
-	
+
 	this.displayTitle = function displayTitle(facet) {
 		var values = $scope.getFacetValues(facet);
 		var ret = '';
@@ -507,14 +515,14 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		});
 		return ret;
 	};
-	
+
 	this.checkedFilter = function checkedFilter(event) {
 		//var target = $(event.target).parent();
 		//target[0].classList.toggle('disabled');
 		//target.prev()[0].classList.toggle('toggler--is-active');
 		//target.next()[0].classList.toggle('toggler--is-active');
 	};
-	
+
 	this.getFilterClass = function getFilterClass(facet, value) {
 		var model = $scope.FacetsData.box[facet['table']][facet['name']]['values'][value];
 		var ret = 'toggler';
@@ -523,7 +531,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 		return ret;
 	};
-	
+
 	this.getFieldSwitchClass = function getFieldSwitchClass(facet, value) {
 		var model = $scope.FacetsData.box[facet['table']][facet['name']]['values'][value];
 		var ret = 'toggle';
@@ -532,7 +540,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 		return ret;
 	};
-	
+
 	this.getFieldValueClass = function getFieldValueClass(facet, value) {
 		var model = $scope.FacetsData.box[facet['table']][facet['name']]['values'][value];
 		var ret = 'toggler truncate';
@@ -541,7 +549,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 		return ret;
 	};
-	
+
 	this.getMoreFilterClass = function getMoreFilterClass(facet) {
 		var model = $scope.FacetsData.chooseColumns[facet['table']][facet['name']];
 		var ret = 'toggler';
@@ -550,7 +558,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 		return ret;
 	};
-	
+
 	this.getMoreFieldSwitchClass = function getMoreFieldSwitchClass(facet) {
 		var model = $scope.FacetsData.chooseColumns[facet['table']][facet['name']];
 		var ret = 'toggle';
@@ -559,7 +567,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 		return ret;
 	};
-	
+
 	this.getMoreFieldValueClass = function getMoreFieldValueClass(facet) {
 		var model = $scope.FacetsData.chooseColumns[facet['table']][facet['name']];
 		var ret = 'toggler truncate';
@@ -568,7 +576,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 		return ret;
 	};
-	
+
 	this.getEnabledFilters = function getEnabledFilters() {
 		var ret = 0;
 		$.each($scope.FacetsData.facets, function(i, facet) {
@@ -578,14 +586,14 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		});
 		return ret;
 	};
-	
+
     this.editMoreFilterDone = function editMoreFilterDone(event, toggle) {
     	event.stopPropagation();
 		event.preventDefault();
 		$scope.FacetsData.facetSelection = checkFacetSelection($scope.FacetsData, $scope.filtersStatus);
     	FacetsService.sidebarClick(toggle);
 	}
-    
+
 	this.slideMoreFilter = function slideMoreFilter(event, toggle) {
 		event.preventDefault();
 		$scope.filtersStatus = saveSessionFilters($scope.FacetsData);
@@ -626,27 +634,109 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 			$scope.$apply();
 		}
 	};
-	
+
 	this.enableDisableAll = function enableDisableAll() {
     	$.each($scope.FacetsData.facets, function(i, facet) {
 			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = $scope.FacetsData.enableAll;
     	});
 	};
-	
+
 	this.checkUncheck = function checkUncheck(event, value) {
 		if (!$(event.target).is('input')) {
 			$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value] = !$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value];
 		}
 	};
-	
+
 	this.clickFacet = function clickFacet(event, facet) {
 		updateFacetCount($scope.FacetsData, facet, $scope.refresh);
 	};
-	
+
 	this.displayFacetCount = function displayFacetCount(facet) {
 		return getFacetCount($scope.FacetsData, facet);
 	};
-	
+
+  this.urlBookmark = function urlBookmark() {
+		return $scope.FacetsData.bookmark;
+	};
+
+  this.hasSelectedFacets = function hasSelectedFacets() {
+    var selectedFacets = false;
+    $.each($scope.FacetsData.box, function(table, columns) {
+      var colsDescr = $scope.FacetsData['colsDescr'][table];
+      $.each(columns, function(key, value) {
+        if(searchBoxPresentation.contains(colsDescr[key]['type'])) {
+          if (value['value'] != '') {
+            selectedFacets = true;
+            return false;
+          }
+        }
+        else if (colsDescr[key]['type'] == 'enum') {
+            if (value['values'] != null) {
+              $.each(value['values'], function(checkbox_key, checkbox_value) {
+                if(checkbox_value) {
+                  selectedFacets = true;
+                  return true;
+                }
+              });
+            }
+        }
+        else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
+            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+              if (value['left']) {
+                selectedFacets = true;
+                return true;
+              }
+              if (value['right']) {
+                selectedFacets = true;
+                return true;
+              }
+            }
+        }
+      });
+    });
+    return selectedFacets;
+  };
+
+  this.resetSearch = function resetSearch() {
+    // Reset the search box
+    $scope.FacetsData.searchFilter = '';
+    this.clear();
+
+    // Reset selected facets
+    $.each($scope.FacetsData.box, function(table, columns) {
+      var colsDescr = $scope.FacetsData['colsDescr'][table];
+      $.each(columns, function(key, value) {
+        if(searchBoxPresentation.contains(colsDescr[key]['type'])) {
+          if (value['value'] != '') {
+            value['value'] = '';
+          }
+        }
+        else if (colsDescr[key]['type'] == 'enum') {
+            if (value['values'] != null) {
+              $.each(value['values'], function(checkbox_key, checkbox_value) {
+                if(checkbox_value) {
+                  value['values'][checkbox_key] = false;
+                }
+              });
+            }
+        }
+        else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
+            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+              if (value['left']) {
+                delete value['left'];
+              }
+              if (value['right']) {
+                delete value['right'];
+              }
+              value['min'] = value['floor'];
+              value['max'] = value['ceil'];
+            }
+        }
+      });
+    });
+    $scope.predicate_search_all();
+  };
+
 	$scope.refresh = function refresh() {
 		if (!$scope.$$phase) {
 			$scope.$apply();
