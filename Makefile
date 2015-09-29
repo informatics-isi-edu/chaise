@@ -27,6 +27,10 @@ CAT=cat
 # Bower front end components
 BOWER=bower_components
 
+# HTML
+HTML=search/index.html \
+	 login/index.html
+
 # CSS source
 CSS=styles
 
@@ -95,10 +99,11 @@ JSDOC=jsdoc
 LINT=.make-lint
 
 .PHONY: all
-all: lint build test $(DOC)
+# what 'all' should really do -- all: lint build $(HTML) test $(DOC)
+all: $(HTML)
 
 .PHONY: build
-build: $(PKG) $(MIN) app.html login.html
+build: $(PKG) $(MIN) $(HTML)
 
 # Rule to build the full library
 $(PKG): $(JS_SOURCE) $(BIN)
@@ -157,8 +162,7 @@ updeps:
 # Rule to clean project directory
 .PHONY: clean
 clean:
-	rm search/index.html || true
-	rm login/index.html || true
+	rm $(HTML) || true
 	rm -rf $(DIST)
 	rm -rf $(JSDOC)
 	rm -f .make-*
@@ -184,14 +188,19 @@ testem:
 karma:
 	$(BIN)/karma start
 
-# Rules to attach checksums to JavaScript source in the header
-app.html: search/app.html.in .make-asset-block .make-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-	  -e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
-	  search/app.html.in > search/index.html
+# Rule to make html
+.PHONY: html
+html: $(HTML)
 
-login.html: login/login.html.in .make-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' login/login.html.in > login/index.html
+# Rules to attach checksums to JavaScript source in the header
+search/index.html: search/index.html.in .make-asset-block .make-template-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
+		search/index.html.in > search/index.html
+
+login/index.html: login/index.html.in .make-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
+		login/index.html.in > login/index.html
 
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE)
 	> .make-asset-block
