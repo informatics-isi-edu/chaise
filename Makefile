@@ -60,7 +60,6 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \
 	$(JS)/ermrest.js \
-	chaise-config.js \
 	$(JS)/app.js \
 	$(JS)/facetsModel.js \
 	$(JS)/facetsService.js \
