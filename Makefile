@@ -75,6 +75,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestResultsController.js \
 	$(JS)/controller/ermrestSideBarController.js
 
+# HTML templates
 TEMPLATES=views
 
 TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
@@ -82,6 +83,9 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermsidebar.html \
 	$(TEMPLATES)/ermretrievefilters.html \
 	$(TEMPLATES)/ermretrieveresults.html
+
+# Config file
+JS_CONFIG=chaise-config.js
 
 # Distribution target
 DIST=dist
@@ -202,7 +206,7 @@ login/index.html: login/index.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		login/index.html.in > login/index.html
 
-.make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE)
+.make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
 	> .make-asset-block
 	for file in $(CSS_DEPS); do \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-asset-block ; \
@@ -214,7 +218,7 @@ login/index.html: login/index.html.in .make-asset-block
 	for file in $(JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-asset-block ; \
 	done
-	for file in $(JS_SOURCE); do \
+	for file in $(JS_SOURCE) $(JS_CONFIG); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
