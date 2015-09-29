@@ -29,10 +29,12 @@ BOWER=bower_components
 
 # CSS source
 CSS=styles
+
 CSS_DEPS=$(CSS)/vendor/bootstrap.css \
 	$(CSS)/vendor/ng-grid.css \
 	$(CSS)/vendor/rzslider.css \
 	$(CSS)/vendor/angular-datepicker.css
+
 CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/jquery.nouislider.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
@@ -42,6 +44,7 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 
 # JavaScript source and test specs
 JS=scripts
+
 JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
@@ -52,6 +55,7 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/ng-grid.js
+
 JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \
@@ -69,13 +73,12 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestSideBarController.js
 
 TEMPLATES=views
+
 TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermdetail.html \
 	$(TEMPLATES)/ermsidebar.html \
 	$(TEMPLATES)/ermretrievefilters.html \
 	$(TEMPLATES)/ermretrieveresults.html
-
-
 
 # Distribution target
 DIST=dist
@@ -155,8 +158,8 @@ updeps:
 # Rule to clean project directory
 .PHONY: clean
 clean:
-	rm search/index.html
-	rm login/index.html
+	rm search/index.html || true
+	rm login/index.html || true
 	rm -rf $(DIST)
 	rm -rf $(JSDOC)
 	rm -f .make-*
