@@ -46,7 +46,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 
         for (var i = 0; i< keys.length; i++){
             var key = keys[i];
-            var predicate = encodeURIComponent(key) + '=' + encodeURIComponent(entity[key]);
+            var predicate = encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(entity[key]);
             predicates.push(predicate);
         }
         // Join predicates with a conjunctive filter '&'
