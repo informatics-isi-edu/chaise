@@ -2983,7 +2983,7 @@ function setBookmark(options) {
 	parameters.push('layout='+options.view);
 	parameters.push('page='+options.pagingOptions.currentPage);
 	options.bookmark = prefix + '#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' +options.table + '?' + parameters.join('&');
-	if (!suppressBookmark) {
+	if (!suppressBookmark && options.filter == null && filter != null) {
 		assignBookmark = true;
 		window.location.assign(options.bookmark);
 		setTimeout(function() {assignBookmark = false;}, 1);
