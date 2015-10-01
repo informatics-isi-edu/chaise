@@ -39,9 +39,40 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return $scope.FacetsData.ermrestData.length > 0 && $scope.FacetsData.pagingOptions.currentPage < $scope.FacetsData.maxPages;
 	};
 
+    // Build ermrest predicate base on JSON params
+    this.buildPredicate = function(keys, entity){
+        // Build an array of predicates for the Ermrest Filter lanaguage
+        var predicates = [];
+
+        for (var i = 0; i< keys.length; i++){
+            var key = keys[i];
+            var predicate = encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(entity[key]);
+            predicates.push(predicate);
+        }
+        // Join predicates with a conjunctive filter '&'
+        return predicates.join('&');
+    };
+
+    // Returns the path for a given row
+    this.rowPath = function(row){
+
+    	var prefix = window.location.href;
+    	var index = prefix.indexOf('#');
+    	if (index != -1) {
+    		prefix = prefix.substring(0, index);
+    	}
+		var detailPath = prefix.replace('/search/','/record/#') + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
+        return detailPath;
+    };
+
 	// "m" is the number of columns per row
 	this.clicker = function clicker(event, row, m, index) {
+
 		event.preventDefault();
+
+        window.location.href = this.rowPath(row);
+        return false;
+
 		if (row == null) {
 			$scope.FacetsData.details = false;
 			$scope.FacetsData.entryRow = [];

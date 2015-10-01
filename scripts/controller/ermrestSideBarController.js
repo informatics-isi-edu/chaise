@@ -647,7 +647,10 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		}
 	};
 
-	this.clickFacet = function clickFacet(event, facet) {
+	this.clickFacet = function clickFacet(event, facet, from) {
+		if (from == 'label') {
+			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = !$scope.FacetsData.chooseColumns[facet['table']][facet['name']];
+		}
 		updateFacetCount($scope.FacetsData, facet, $scope.refresh);
 	};
 

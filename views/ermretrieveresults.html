@@ -187,14 +187,14 @@
 		                    <div ng-if="FacetsData.view=='list'" class="panel panel-default">
 		                    	<div class="panel-heading">
 		                    		<input ng-show="false" type="checkbox">
-		                    		<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+		                    		<a ng-href="{{facetResults.rowPath(row)}}">
 		                    			<span class="panel-title" ng-bind-html="facetResults.itemTitle(row)"></span>
 		                    		</a>
 		                    	</div>
 		                    	<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
 		                    		<div class="row">
 		                    			<div class="col-md-2" ng-show="thumbnail!=null">
-											<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+											<a ng-href="{{facetResults.rowPath(row)}}">
 												<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 											</a>
 										</div>
@@ -242,12 +242,12 @@
 										<tbody>
 											<tr ng-repeat="row in FacetsData.ermrestData" ng-init="thumbnail=facetResults.itemThumbnail(row)">
 												<td ng-if="thumbnail!=null" class="col-md-2">
-													<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+													<a ng-href="{{facetResults.rowPath(row)}}">
 														<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 													</a>
 												</td>
 												<td ng-if="facetResults.titleName()!=null" class="col-md-2 results-title">
-													<a href="#" ng-click="facetResults.clicker($event, row, 3, $index);"><span class="results-title" ng-bind-html="facetResults.itemTitle(row)"></span></a>
+													<a href="{{facetResults.rowPath(row)}}"><span class="results-title" ng-bind-html="facetResults.itemTitle(row)"></span></a>
 												</td>
 												<td ng-repeat="col in facetResults.tableColumns(FacetsData.table, 6)" class="col-md-2 top-columns">
 													<span ng-if="facetResults.isUrl(FacetsData.table,col)" ng-init="urlValues=facetResults.urlLink(FacetsData.table,col,row[col])">
@@ -274,14 +274,14 @@
 									<div class="panel panel-default">
 										<div class="panel-heading">
 											<input ng-show="false" type="checkbox">
-					                    		<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+					                    		<a ng-href="{{facetResults.rowPath(row)}}">
 					                    			<span class="panel-title" ng-bind-html="facetResults.itemTitle(row)"></span>
 					                    		</a>
 										</div>
 										<div class="panel-body" ng-init="thumbnail=facetResults.itemThumbnail(row)">
 											<div class="row">
 												<div class="col-md-3" ng-show="thumbnail!=null">
-													<a ng-href="#" ng-click="facetResults.clicker($event, row, 3, $index);">
+													<a ng-href="{{facetResults.rowPath(row)}}">
 														<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{thumbnail}}">
 														<br/>
 													</a>

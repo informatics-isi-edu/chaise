@@ -27,12 +27,18 @@ CAT=cat
 # Bower front end components
 BOWER=bower_components
 
+# HTML
+HTML=search/index.html \
+	 login/index.html
+
 # CSS source
 CSS=styles
+
 CSS_DEPS=$(CSS)/vendor/bootstrap.css \
 	$(CSS)/vendor/ng-grid.css \
 	$(CSS)/vendor/rzslider.css \
 	$(CSS)/vendor/angular-datepicker.css
+
 CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/jquery.nouislider.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
@@ -42,6 +48,7 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 
 # JavaScript source and test specs
 JS=scripts
+
 JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
@@ -52,11 +59,11 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/ng-grid.js
+
 JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \
 	$(JS)/ermrest.js \
-	chaise-config.js \
 	$(JS)/app.js \
 	$(JS)/facetsModel.js \
 	$(JS)/facetsService.js \
@@ -68,14 +75,17 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestResultsController.js \
 	$(JS)/controller/ermrestSideBarController.js
 
+# HTML templates
 TEMPLATES=views
+
 TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermdetail.html \
 	$(TEMPLATES)/ermsidebar.html \
 	$(TEMPLATES)/ermretrievefilters.html \
 	$(TEMPLATES)/ermretrieveresults.html
 
-
+# Config file
+JS_CONFIG=chaise-config.js
 
 # Distribution target
 DIST=dist
@@ -93,10 +103,11 @@ JSDOC=jsdoc
 LINT=.make-lint
 
 .PHONY: all
-all: lint build test $(DOC)
+# what 'all' should really do -- all: lint build $(HTML) test $(DOC)
+all: $(HTML)
 
 .PHONY: build
-build: $(PKG) $(MIN) app.html login.html
+build: $(PKG) $(MIN) $(HTML)
 
 # Rule to build the full library
 $(PKG): $(JS_SOURCE) $(BIN)
@@ -155,8 +166,7 @@ updeps:
 # Rule to clean project directory
 .PHONY: clean
 clean:
-	rm search/index.html
-	rm login/index.html
+	rm $(HTML) || true
 	rm -rf $(DIST)
 	rm -rf $(JSDOC)
 	rm -f .make-*
@@ -182,16 +192,21 @@ testem:
 karma:
 	$(BIN)/karma start
 
+# Rule to make html
+.PHONY: html
+html: $(HTML)
+
 # Rules to attach checksums to JavaScript source in the header
-app.html: search/app.html.in .make-asset-block .make-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' search/app.html.in > app_temp.html
-	sed -e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' app_temp.html > search/index.html
-	rm app_temp.html
+search/index.html: search/index.html.in .make-asset-block .make-template-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
+		search/index.html.in > search/index.html
 
-login.html: login/login.html.in .make-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' login/login.html.in > login/index.html
+login/index.html: login/index.html.in .make-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
+		login/index.html.in > login/index.html
 
-.make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE)
+.make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
 	> .make-asset-block
 	for file in $(CSS_DEPS); do \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-asset-block ; \
@@ -203,7 +218,7 @@ login.html: login/login.html.in .make-asset-block
 	for file in $(JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-asset-block ; \
 	done
-	for file in $(JS_SOURCE); do \
+	for file in $(JS_SOURCE) $(JS_CONFIG); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
