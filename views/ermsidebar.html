@@ -89,6 +89,12 @@
 				        </a>
 					</div>
 				</div>
+				<div class="search-box input-group">
+					<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search within attributes..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
+					<span class="input-group-addon">
+				        <i class="glyphicon glyphicon-search"></i>
+				    </span>
+				</div>
 				<div class="meta-actions">
 					<div class="row">
 						<div class="col-md-6 col-sm-6">
@@ -106,12 +112,6 @@
 							</a>
 						</div>
 					</div>
-				</div>
-				<div class="search-box input-group">
-					<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search within attributes..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
-					<span class="input-group-addon">
-				        <i class="glyphicon glyphicon-search"></i>
-				    </span>
 				</div>
 		        <div id="navcontainer">
 	        		<a class="field-toggle view-attr" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')" title="Click to view all attributes"><h4>SELECTED ATTRIBUTES <small>View all {{FacetsData.facets.length}}</small></h4></a>
@@ -139,6 +139,12 @@
 				    </a>
 				</div>
 			</div>
+			<div class="search-box input-group">
+				<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
+				<span class="input-group-addon">
+							<i class="glyphicon glyphicon-search"></i>
+					</span>
+			</div>
 			<div class="meta-actions">
 				<div class="row">
 					<div class="col-md-6 col-sm-6">
@@ -157,12 +163,6 @@
 					</div>
 				</div>
 			</div>
-				<div class="search-box input-group">
-					<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
-					<span class="input-group-addon">
-				        <i class="glyphicon glyphicon-search"></i>
-				    </span>
-				</div>
 			<div class="editvalue-container">
 				<p class="backlink"><a href="#" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="md-chevron-left"></span>Back</a></p>
 				<!-- here is where we would put the filter name -->
@@ -196,6 +196,12 @@
 				        </a>
 					</div>
 			    </div>
+					<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box input-group">
+						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
+						<span class="input-group-addon">
+					        <i class="glyphicon glyphicon-search"></i>
+					    </span>
+					</div>
 					<div class="row">
 						<div class="meta-actions">
 							<div class="col-md-6 col-sm-6">
@@ -219,13 +225,6 @@
 		                <span class="filter-item-field">enabled {{sideBar.getFacetValues(FacetsData.tag).length}} of {{FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values'].length}}</span>
 					</div>
 			    </div>
-
-				<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box input-group">
-					<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
-					<span class="input-group-addon">
-				        <i class="glyphicon glyphicon-search"></i>
-				    </span>
-				</div>
 			    <!-- slider/value picker -->
 			    <div ng-if="FacetsData.tag!=null">
 		        	<div class="editvalue-container">
