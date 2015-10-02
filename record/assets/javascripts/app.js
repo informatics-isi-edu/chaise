@@ -36,7 +36,7 @@
 // - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/target/id=90"
 
 
-var CR_BASE_URL = 'http://dev.facebase.org/ermrest/catalog/';
+var CR_BASE_URL = window.location.origin + '/ermrest/catalog/';
 var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'ngCookies', 'ngSanitize']);
 
 /*
