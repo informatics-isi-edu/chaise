@@ -118,7 +118,7 @@
 			        <ul class="nav sidebar-nav">
 				        <li ng-show="sideBar.showFacetCount(facet) || sideBar.showFacetMatch(facet)" ng-repeat="facet in FacetsData.facets">
 				            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
-				            	<span class="badge">{{sideBar.displayFacetCount(facet)}}</span>
+				            	<!-- <span class="badge">{{sideBar.displayFacetCount(facet)}}</span> -->
 				            	{{facet['display']}}
 				                <span class="md-chevron-right md-lg"></span>
 				            </a>
@@ -176,7 +176,7 @@
 					</div>
 					<label ng-class="sideBar.getMoreFieldValueClass(facet)" ng-click="sideBar.clickFacet($event,facet,'label')">{{facet['display']}}</label>
 					<div class="field-count pull-right">
-						<span class="badge">{{sideBar.displayFacetCount(facet)}}</span>
+						<!-- <span class="badge">{{sideBar.displayFacetCount(facet)}}</span> -->
 					</div>
 				</div>
 			</div>
@@ -262,7 +262,7 @@
 									</div>
 									<label ng-class="sideBar.getFieldValueClass(FacetsData.tag, value)" ng-click="sideBar.checkUncheck($event,value)">{{value}}</label>
 									<div class="field-count pull-right">
-										<span class="badge">{{FacetsData.colsGroup[FacetsData.tag['table']][FacetsData.tag['name']][value]}}</span>
+										<!-- <span class="badge">{{FacetsData.colsGroup[FacetsData.tag['table']][FacetsData.tag['name']][value]}}</span> -->
 									</div>
 								</div>
 							</li>
