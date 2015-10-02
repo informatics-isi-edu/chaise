@@ -725,6 +725,7 @@ dt, dd {
   margin-right: 10px;
  /* position: relative;
   font-weight: normal; */
+  cursor: pointer;
 }
 
 .toggler {
