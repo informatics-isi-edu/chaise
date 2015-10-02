@@ -2082,13 +2082,17 @@ function getAssociationTableColumns(options, successCallback, columns) {
 		});
 		facets.sort(compareFacets);
 		$.each(facets, function(i, facet) {
-			options['chooseColumns'][facet['table']][facet['name']] = (getFacetOrder(facet) != null ? true : false);
+			if (getFacetOrder(facet) != null) {
+				options['chooseColumns'][facet['table']][facet['name']] = true;
+			}
 		});
 		successCallback(columns);
 	} else {
 		facets.sort(compareFacets);
 		$.each(facets, function(i, facet) {
-			options['chooseColumns'][facet['table']][facet['name']] = (getFacetOrder(facet) != null ? true : false);
+			if (getFacetOrder(facet) != null) {
+				options['chooseColumns'][facet['table']][facet['name']] = true;
+			}
 		});
 		successCallback(columns);
 	}
@@ -3431,6 +3435,9 @@ function isSelectedColumnFacetOnDemand(options, table, col) {
 			ret = options['chooseColumns'][table][col];
 		} else {
 			ret = hasAnnotation(table, col, 'top');
+			if (ret) {
+				options['chooseColumns'][table][col] = true;
+			}
 		}
 	}
 	return ret;
