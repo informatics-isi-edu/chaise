@@ -79,7 +79,6 @@ JS_SOURCE=$(JS)/respond.js \
 TEMPLATES=views
 
 TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
-	$(TEMPLATES)/ermdetail.html \
 	$(TEMPLATES)/ermsidebar.html \
 	$(TEMPLATES)/ermretrievefilters.html \
 	$(TEMPLATES)/ermretrieveresults.html
