@@ -4,7 +4,6 @@
 		<aside id="collectionsTree" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
 		    <!-- Sidebar header -->
 		    <div class="sidebar-header">
-		        <!-- Sidebar toggle button -->
 		        <div class="row">
 		        	<div id="toggle-side" class="col-md-12" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
 		        		<a href="#" class="sidebar-toggle">
@@ -19,12 +18,6 @@
 					<div class="col-md-offset-6 col-sm-offset-6 col-md-6 col-sm-6 meta-icons">
 						<a title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
 							<span class="glyphicon glyphicon-bookmark"></span>
-						</a>
-						<a ng-href="{{chaiseConfig.helpURL}}" title="Tips for using the Data Browser">
-							<span class="glyphicon glyphicon-question-sign"></span>
-						</a>
-						<a ng-href="{{chaiseConfig.feedbackURL}}" title="Send us your feedback">
-							<span class="glyphicon glyphicon-comment"></span>
 						</a>
 					</div>
 				</div>
@@ -80,16 +73,14 @@
 		<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right open" role="navigation">
 			<div class="sidebar-wrap">
 			    <!-- Sidebar header -->
-			    <div class="sidebar-header">
-			        <!-- Sidebar toggle button -->
-		        	<div id="toggle-side" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
-		        		<a href="#" class="sidebar-toggle" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');">
-				        	<h5>Hide Sidebar</h5>
-				        	<span class="glyphicon glyphicon-forward pull-right"></span>
-				        </a>
+			    <div class="sidebar-header row">
+							<div class="col-md-9">
+								<h4 class="text-left">Selected Attributes</h4>
+							</div>
+							<a class="sidebar-toggle pull-left" href="#" title="Apply Selections" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');"><span class="glyphicon glyphicon-ok-circle"></span></a>
+							<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');"><span class="glyphicon glyphicon-remove-circle"></span></a>
 					</div>
-				</div>
-				<div class="search-box input-group">
+				<div class="search-box input-group col-md-12">
 					<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search within attributes..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 					<span class="input-group-addon">
 				        <i class="glyphicon glyphicon-search"></i>
@@ -104,25 +95,19 @@
 							<a title="This link stores your search criteria as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
 								<span class="glyphicon glyphicon-bookmark"></span>
 							</a>
-							<a ng-href="{{chaiseConfig.helpURL}}" title="Tips for using the Data Browser">
-								<span class="glyphicon glyphicon-question-sign"></span>
-							</a>
-							<a ng-href="{{chaiseConfig.feedbackURL}}" title="Send us your feedback">
-								<span class="glyphicon glyphicon-comment"></span>
-							</a>
 						</div>
 					</div>
 				</div>
 		        <div id="navcontainer">
-	        		<a class="field-toggle view-attr" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')" title="Click to view all attributes"><h4>SELECTED ATTRIBUTES <small>View all {{FacetsData.facets.length}}</small></h4></a>
 			        <ul class="nav sidebar-nav">
 				        <li ng-show="sideBar.showFacetCount(facet) || sideBar.showFacetMatch(facet)" ng-repeat="facet in FacetsData.facets">
-				            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
-				            	<!-- <span class="badge">{{sideBar.displayFacetCount(facet)}}</span> -->
-				            	{{facet['display']}}
-				                <span class="md-chevron-right md-lg"></span>
-				            </a>
+			            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
+			            	<!-- <span class="badge">{{sideBar.displayFacetCount(facet)}}</span> -->
+			            	{{facet['display']}}
+			                <span class="md-chevron-right md-lg"></span>
+			            </a>
 				        </li>
+								<li class="small"><a class="field-toggle view-attr" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')" title="Click to view all attributes"><strong>View all attributes ({{FacetsData.facets.length}})<span class="md-chevron-right md-lg"></span></strong></a></li>
 			        </ul>
 		        </div>
 			</div>
@@ -131,13 +116,12 @@
 
 		<!-- View All Attributes sidebar -->
 		<aside id="morefilters" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
-			<div class="sidebar-header">
-				<div id="toggle-side">
-					<a href="#" class="sidebar-toggle" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');">
-				    	<h5>Hide Sidebar</h5>
-				    	<span class="glyphicon glyphicon-forward pull-right"></span>
-				    </a>
-				</div>
+			<div class="sidebar-header row">
+					<div class="col-md-9">
+						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
+					</div>
+					<a class="sidebar-toggle pull-left" href="#" title="Apply Selections" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="glyphicon glyphicon-ok-circle"></span></a>
+					<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="glyphicon glyphicon-remove-circle"></span></a>
 			</div>
 			<div class="search-box input-group">
 				<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
@@ -154,17 +138,10 @@
 						<a title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
 							<span class="glyphicon glyphicon-bookmark"></span>
 						</a>
-						<a ng-href="{{chaiseConfig.helpURL}}" title="Tips for using the Data Browser">
-							<span class="glyphicon glyphicon-question-sign"></span>
-						</a>
-						<a ng-href="{{chaiseConfig.feedbackURL}}" title="Send us your feedback">
-							<span class="glyphicon glyphicon-comment"></span>
-						</a>
 					</div>
 				</div>
 			</div>
 			<div class="editvalue-container">
-				<p class="backlink"><a href="#" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="md-chevron-left"></span>Back</a></p>
 				<!-- here is where we would put the filter name -->
 				<div ng-show="false" class="field-enable">
 					<input ng-model="FacetsData.enableAll" type="checkbox" ng-click="sideBar.enableDisableAll()" />
@@ -187,15 +164,13 @@
 		<aside id="editfilter" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
 			<div class="sidebar-wrap">
 			    <!-- Sidebar header -->
-			    <div class="sidebar-header">
-			        <!-- Sidebar toggle button -->
-		        	<div id="toggle-side">
-		        		<a href="#" class="field-toggle" ng-click="sideBar.editFilterDone($event, 'field-toggle', true);">
-				        	<h5>Hide Sidebar</h5>
-				        	<span class="glyphicon glyphicon-forward pull-right"></span>
-				        </a>
+					<div class="sidebar-header row">
+							<div class="col-md-9">
+								<h4 class="text-left">{{FacetsData.tag['display']}}</h4>
+							</div>
+							<a class="sidebar-toggle pull-left" href="#" title="Apply Selections" ng-click="sideBar.editFilterDone($event, 'field-toggle', true);"><span class="glyphicon glyphicon-ok-circle"></span></a>
+							<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="glyphicon glyphicon-remove-circle"></span></a>
 					</div>
-			    </div>
 					<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box input-group">
 						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 						<span class="input-group-addon">
@@ -211,12 +186,6 @@
 								<a title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
 									<span class="glyphicon glyphicon-bookmark"></span>
 								</a>
-								<a ng-href="{{chaiseConfig.helpURL}}" title="Tips for using the Data Browser">
-									<span class="glyphicon glyphicon-question-sign"></span>
-								</a>
-								<a ng-href="{{chaiseConfig.feedbackURL}}" title="Send us your feedback">
-									<span class="glyphicon glyphicon-comment"></span>
-								</a>
 							</div>
 						</div>
 					</div>
@@ -228,8 +197,6 @@
 			    <!-- slider/value picker -->
 			    <div ng-if="FacetsData.tag!=null">
 		        	<div class="editvalue-container">
-		        		<p class="backlink"><a href="#" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="md-chevron-left"></span> Back</a></p>
-		        		<h4>{{FacetsData.tag['display']}}</h4>
 						<ul class="nav filteritems" ng-hide="sideBar.hide(FacetsData.tag)">
 							<li ng-if="sideBar.if_type(FacetsData.tag, 'slider')" class="attr-slider"><rzslider
 									rz-slider-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']"
