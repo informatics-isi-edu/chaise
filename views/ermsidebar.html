@@ -1,5 +1,5 @@
 <div class="col-md-3 sidebar-outer">
-	<div ng-controller="SideBarCtrl as sideBar">
+	<div ng-init="FacetsData.progress=true" ng-controller="SideBarCtrl as sideBar" ng-show="sideBar.showSidebar()">
 		<!-- Collections sidebar -->
 		<aside id="collectionsTree" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
 		    <!-- Sidebar header -->
