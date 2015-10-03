@@ -347,7 +347,7 @@ dl.attribute-group dd {
 	border-color: #a4a4a4;
 }
 
-.sidebar-header .btn.filter-close, .sidebar-header .btn.sidebar-toggle {
+.sidebar-header .btn.filter-close, .sidebar-header .sidebar-toggle {
 	padding: 0 10px;
 	border-radius: 0;
 	margin-top: 2px;

@@ -599,7 +599,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 }
 
 function getErmrestData(options, successCallback, successUpdateModels) {
-	options.progress = true;
+	//options.progress = true;
 	setBookmark(options);
 	updateCount(options, successUpdateModels);
 	var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options);

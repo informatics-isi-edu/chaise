@@ -1,5 +1,6 @@
-<div ng-controller="InitListCtrl as facetInit" id="ajaxSpinnerContainer" class="ng-hide" ng-hide="facetInit.hideSpinner()">
-	<img class="ng-hide" src="../images/ajax-loader.gif" id="ajaxSpinnerImage"
-		title="Processing..." alt="Spinner" ng-hide="facetInit.hideSpinner()"
-		class="center" />
+<div ng-controller="InitListCtrl as facetInit">
+    <div ng-show="FacetsData.progress" id="spinner">
+        <img src="../record/assets/images/spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
+        <div style="margin-top: 15px;">Loading...</div>
+    </div>
 </div>
