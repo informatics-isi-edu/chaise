@@ -59,24 +59,29 @@ document.onmouseleave = function() {
 }
 
 
-window.onhashchange = function() {
-    if (window.innerDocClick) {
-        window.innerDocClick = false;
-    } else {
-        if (window.location.hash != '#undefined') {
-            location.reload();
+setTimeout(function(){
+
+    window.onhashchange = function() {
+      
+        if (window.innerDocClick) {
+            window.innerDocClick = false;
         } else {
-            history.pushState("", document.title, window.location.pathname);
-            location.reload();
+            if (window.location.hash != '#undefined') {
+                    location.reload();
+            } else {
+                    history.pushState("", document.title, window.location.pathname);
+                    location.reload();
+            }
+        }
+
+        function goBack() {
+            window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
+            //blah blah blah
+            window.location.lasthash.pop();
         }
     }
 
-    function goBack() {
-        window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
-        //blah blah blah
-        window.location.lasthash.pop();
-    }
-}
+}, 500);
 
 
 // chaiseRecordApp.config(['$locationProvider', function($locationProvider) {
@@ -699,7 +704,9 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
     // keys { username = 'Jim F. Brinkley' } ;
 
     $scope.reloadPage = function(url){
-        location.reload();
+        setTimeout(function(){
+            location.reload();            
+        }, 500);
     };
 
     // Validation
