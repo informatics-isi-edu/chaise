@@ -405,6 +405,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	    		}, 200);
 			}
 		}
+		$scope.FacetsData.progress = false;
 	};
 
 	$scope.morePage = function morePage() {
@@ -744,6 +745,10 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
+	};
+
+	this.showSidebar = function showSidebar() {
+		return !$scope.FacetsData.progress;
 	};
 
 }]);

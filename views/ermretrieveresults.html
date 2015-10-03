@@ -1,6 +1,6 @@
 		<div class="row">
 			<!-- Search Results -->
-				<div  id="resultscontent" ng-controller="ResultsListCtrl as facetResults" ng-show="facetResults.showResults()">
+				<div  ng-init="FacetsData.progress=true" id="resultscontent" ng-controller="ResultsListCtrl as facetResults" ng-show="facetResults.showResults()">
 					<!-- nested row: Dashboard link (hidden) -->
 					<div id="dashboard-link" class="row">
 						<div class="col-md-12">
@@ -165,7 +165,7 @@
 					</div>
 					<div id="results_tally" class="row" ng-show="facetResults.hasSelectedFacets()">
 						<div class="col-md-8">
-							<p>Displaying results <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
+							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
 						</div>
 						<div class="col-md-4">
 							<div id="views" class="btn-group view-toggle pull-right" role="group">
