@@ -499,6 +499,10 @@ dl.attribute-group dd {
 		color: #4D4D4D;
 }
 
+.meta-icons a:hover, .meta-icons a:focus {
+  text-decoration: none;
+}
+
 .sidebar .field-enable {
 	border-bottom: 1px solid #eee;
 }

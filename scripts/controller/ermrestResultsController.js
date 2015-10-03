@@ -206,7 +206,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	};
 
 	this.showResults = function showResults() {
-		return !$scope.FacetsData.isDetail;
+		return !$scope.FacetsData.progress;
 	};
 
 	this.selectView = function selectView(event, view) {
