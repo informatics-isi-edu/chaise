@@ -13,7 +13,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     $scope.filtersMatch = {};
     $scope.selectedCollection = '';
     $scope.requestCounter = 0;
-    $scope.chaiseConfig = chaiseConfig;
+    // $scope.chaiseConfig = chaiseConfig;
     $('[data-toggle="tooltip"]').tooltip();
   	$scope.translate = function(value)
 	{
@@ -657,10 +657,6 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 
 	this.displayFacetCount = function displayFacetCount(facet) {
 		return getFacetCount($scope.FacetsData, facet);
-	};
-
-  this.urlBookmark = function urlBookmark() {
-		return $scope.FacetsData.bookmark;
 	};
 
   this.hasSelectedFacets = function hasSelectedFacets() {

@@ -59,9 +59,9 @@
 							</p>
 						</div>
 						<div class="col-md-7">
-							<div class="open-side pull-right hidden">
-								<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');" type="button" class="badge open-side"><span class="glyphicon glyphicon-backward"></span> Open Sidebar</button>
-							</div>
+							<p class="pull-right">
+								<a title="This link stores your search criteria as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}"><span class="glyphicon glyphicon-bookmark"></span> <strong>Save Search</strong></a>
+							</p>
 						</div>
 					</div>
 					<div class="row" id="filterarea">

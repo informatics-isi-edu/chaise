@@ -10,6 +10,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
                                                       function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
+  $scope.chaiseConfig = chaiseConfig;
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
@@ -396,6 +397,10 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		}
 		return ret;
 	};
+
+  this.urlBookmark = function urlBookmark() {
+    return $scope.FacetsData.bookmark;
+  };
 
 	this.isUrl = function isUrl(table, column) {
 		return hasAnnotation(table, column, 'url');
