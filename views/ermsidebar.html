@@ -29,32 +29,21 @@
 
 		<!-- View All Attributes sidebar -->
 		<aside id="morefilters" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
-			<div class="sidebar-header row">
-					<div class="col-md-9">
-						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
-					</div>
-					<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');">Back</a>
-			</div>
 			<div class="search-box input-group">
 				<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 				<span class="input-group-addon">
 							<i class="glyphicon glyphicon-search"></i>
 					</span>
 			</div>
-			<div class="meta-actions">
-				<div class="row">
-					<div class="col-md-6 col-sm-6">
-							<!-- <button ng-if="sideBar.hasSelectedFacets();" ng-click="sideBar.resetSearch();" type="button" class="badge reset">Reset Search</button> -->
-					</div>
-					<div class="col-md-6 col-sm-6 meta-icons">
-						<!-- <a title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
-							<span class="glyphicon glyphicon-bookmark"></span>
-						</a> -->
-					</div>
+			<div class="sidebar-header row">
+				<div class="col-md-1">
+					<a href="#" class="sidebar-toggle pull-left"><span ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle')" class="glyphicon glyphicon-chevron-left"></span></a>
 				</div>
+					<div class="col-md-11">
+						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
+					</div>
 			</div>
 			<div class="editvalue-container">
-				<!-- here is where we would put the filter name -->
 				<div ng-show="false" class="field-enable">
 					<input ng-model="FacetsData.enableAll" type="checkbox" ng-click="sideBar.enableDisableAll()" />
 				</div>
@@ -76,12 +65,6 @@
 		<aside id="editfilter" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
 			<div class="sidebar-wrap">
 			    <!-- Sidebar header -->
-					<div class="sidebar-header row">
-							<div class="col-md-9">
-								<h4 class="text-left">{{FacetsData.tag['display']}}</h4>
-							</div>
-							<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);">Back</a>
-					</div>
 					<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box input-group">
 						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 						<span class="input-group-addon">
@@ -89,15 +72,11 @@
 					    </span>
 					</div>
 					<div class="row">
-						<div class="meta-actions">
-							<div class="col-md-6 col-sm-6">
-								<button ng-if="sideBar.hasSelectedFacets();" ng-click="sideBar.resetSearch();" type="button" class="badge reset">Reset Search</button>
-							</div>
-							<div class="col-md-6 col-sm-6 meta-icons">
-								<!-- <a title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
-									<span class="glyphicon glyphicon-bookmark"></span>
-								</a> -->
-							</div>
+						<div class="col-md-1">
+							<a href="#" class="sidebar-toggle pull-left" title="Go Back" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="glyphicon glyphicon-chevron-left"></span></a>
+						</div>
+						<div class="col-md-11">
+							<h4>{{FacetsData.tag['display']}}</h4>
 						</div>
 					</div>
 			    <div ng-show="false" ng-if="sideBar.if_type(FacetsData.tag, 'enum')">
