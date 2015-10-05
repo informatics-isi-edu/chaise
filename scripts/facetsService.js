@@ -89,22 +89,16 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	};
 
 	this.sidebarClick = function (toggle) {
-		var mainContent = $('#main-content');
-		var openSideBtn = $('div.open-side');
+		// var mainContent = $('#main-content');
+		// var openSideBtn = $('div.open-side');
 	    if (toggle == 'sidebar-toggle') {
 				$('#sidebar').toggleClass('open');
 	    } else if (toggle == 'field-toggle') {
         $('#editfilter').toggleClass('open');
 	    } else if (toggle == 'collections-toggle') {
 				var overlay = $('.sidebar-overlay');
-				$('#sidebar,#editfilter,#morefilters').removeClass('open');
 				var sidebar = $('#collectionsTree');
-				if (sidebar.hasClass('open')) {
-					sidebar.removeClass('open');
-				} else {
-					sidebar.addClass('open');
-				}
-
+				sidebar.toggleClass('open');
 				if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
             overlay.addClass('active');
         } else {
@@ -119,13 +113,13 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	    }
 		// Resize main content pane depending on sidebar open or close
 		// Show/hide .open-side button depending on sidebar open or close
-		if ($('.sidebar').hasClass('open')) {
-			mainContent.removeClass('col-xs-12 col-sm-12 col-md-12 col-lg-12').addClass('col-xs-6 col-sm-6 col-md-7 col-lg-8');
-			openSideBtn.removeClass('show').addClass('hidden');
-		} else {
-			mainContent.removeClass('col-xs-6 col-sm-6 col-md-7 col-lg-8').addClass('col-xs-12 col-sm-12 col-md-12 col-lg-12');
-			openSideBtn.removeClass('hidden').addClass('show');
-		}
+		// if ($('.sidebar').hasClass('open')) {
+		// 	mainContent.removeClass('col-xs-12 col-sm-12 col-md-12 col-lg-12').addClass('col-xs-6 col-sm-6 col-md-7 col-lg-8');
+		// 	openSideBtn.removeClass('show').addClass('hidden');
+		// } else {
+		// 	mainContent.removeClass('col-xs-6 col-sm-6 col-md-7 col-lg-8').addClass('col-xs-12 col-sm-12 col-md-12 col-lg-12');
+		// 	openSideBtn.removeClass('hidden').addClass('show');
+		// }
 	};
 
 	this.initSortOption = function () {

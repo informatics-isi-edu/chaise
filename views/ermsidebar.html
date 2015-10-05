@@ -1,71 +1,5 @@
 <div class="col-md-3 sidebar-outer">
 	<div ng-init="FacetsData.progress=true" ng-controller="SideBarCtrl as sideBar" ng-show="sideBar.showSidebar()">
-		<!-- Collections sidebar -->
-		<aside id="collectionsTree" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
-		    <!-- Sidebar header -->
-		    <div class="sidebar-header">
-		        <!-- <div class="row">
-		        	<div id="toggle-side" class="col-md-12" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
-		        		<a href="#" class="sidebar-toggle">
-				        	<h5>Hide Sidebar</h5>
-				        	<span class="glyphicon glyphicon-forward pull-right"></span>
-				        </a>
-					</div>
-				</div> -->
-			</div>
-			<div class="row">
-				<div class="meta-actions">
-					<div class="col-md-offset-6 col-sm-offset-6 col-md-6 col-sm-6 meta-icons">
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<!--
-					<div class="row">
-						<div class="col-md-12">
-
-							<div class="editfilter-container">
-			        			<div class="filter-item">
-			        				<span class="filter-item-field">enabled &nbsp;<span class="filter-item-value">{{selectedCollection}}</span></span>
-			        			</div>
-			        		</div>
-
-						</div>
-					</div>
-					-->
-					<div class="editvalue-container">
-						<div id="treeDiv">
-							<script type="text/ng-template" id="tree_item_renderer.html">
-	    						<label ng-show="false && data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, true)">+</label>
-								<label ng-show="false && !data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, false)">-</label>
-								<label ng-show="data.level!=-1" ng-click="sideBar.getEntityResults($event, data)">{{data.display}} {{sideBar.displayTreeCount(data)}}</label>
-	    						<ul ng-show="data.show" class="entity">
-	        						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
-	    						</ul>
-							</script>
-			 			<!--
-							<ul class="nav sidebar-nav">
-			 					<li ng-repeat="data in FacetsData.tree[0].nodes">
-			 						<label class="collection_badge pointer" ng-click="sideBar.searchCollection($event, data)">{{data.display}}</label>
-			 					</li>
-			 				</ul>
-						-->
-							<h4>Collection: {{selectedCollection}}</h4>
-			 				<div class="collectionsSelect sidebar-nav">
-								<div class="radio" ng-repeat="data in FacetsData.tree[0].nodes">
-								  <label class="collection_badge pointer ng-binding highlighted" ng-click="sideBar.searchCollection($event, data)">
-								    <input type="radio" name="collectionsRadios" id="optionsRadios1" value="option1" checked>
-								    <span>{{data.display}}</span>
-								  </label>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-		</aside>
 		<!-- Selected Attributes sidebar -->
 		<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right open" role="navigation">
 			<div class="sidebar-wrap">
@@ -231,6 +165,72 @@
 			        </div>
 			    </div>
 			</div>
+		</aside>
+		<!-- Collections sidebar -->
+		<aside id="collectionsTree" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+		    <!-- Sidebar header -->
+		    <div class="sidebar-header">
+		        <!-- <div class="row">
+		        	<div id="toggle-side" class="col-md-12" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
+		        		<a href="#" class="sidebar-toggle">
+				        	<h5>Hide Sidebar</h5>
+				        	<span class="glyphicon glyphicon-forward pull-right"></span>
+				        </a>
+					</div>
+				</div> -->
+			</div>
+			<div class="row">
+				<div class="meta-actions">
+					<div class="col-md-offset-6 col-sm-offset-6 col-md-6 col-sm-6 meta-icons">
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<!--
+					<div class="row">
+						<div class="col-md-12">
+
+							<div class="editfilter-container">
+			        			<div class="filter-item">
+			        				<span class="filter-item-field">enabled &nbsp;<span class="filter-item-value">{{selectedCollection}}</span></span>
+			        			</div>
+			        		</div>
+
+						</div>
+					</div>
+					-->
+					<div class="editvalue-container">
+						<div id="treeDiv">
+							<script type="text/ng-template" id="tree_item_renderer.html">
+	    						<label ng-show="false && data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, true)">+</label>
+								<label ng-show="false && !data.expand && data.nodes.length > 0 && data.level!=-1" ng-click="sideBar.expandCollapse(data, false)">-</label>
+								<label ng-show="data.level!=-1" ng-click="sideBar.getEntityResults($event, data)">{{data.display}} {{sideBar.displayTreeCount(data)}}</label>
+	    						<ul ng-show="data.show" class="entity">
+	        						<li class="entity" ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
+	    						</ul>
+							</script>
+			 			<!--
+							<ul class="nav sidebar-nav">
+			 					<li ng-repeat="data in FacetsData.tree[0].nodes">
+			 						<label class="collection_badge pointer" ng-click="sideBar.searchCollection($event, data)">{{data.display}}</label>
+			 					</li>
+			 				</ul>
+						-->
+							<h4>Collection: {{selectedCollection}}</h4>
+			 				<div class="collectionsSelect sidebar-nav">
+								<div class="radio" ng-repeat="data in FacetsData.tree[0].nodes">
+								  <label class="collection_badge pointer ng-binding highlighted" ng-click="sideBar.searchCollection($event, data)">
+								    <input type="radio" name="collectionsRadios" id="optionsRadios1" value="option1" checked>
+								    <span>{{data.display}}</span>
+								  </label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
 		</aside>
 	</div>
 </div>
