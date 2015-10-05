@@ -64,6 +64,11 @@
 							</p>
 						</div>
 					</div>
+					<div class="row" ng-show="facetResults.hasSelectedFacets()">
+						<div class="col-md-5">
+							<h3>Selected Attributes</h3>
+						</div>
+					</div>
 					<div class="row" id="filterarea">
 						<div id="filter" class="col-md-12">
 							<div class="jumbotron text-center" ng-show="!facetResults.hasSelectedFacets()">
@@ -71,7 +76,7 @@
 								<p class="lead">Use the sidebar to the right to select search attributes.</p>
 						  </div>
 							<div class="filter-container">
-								<div class="filter-item reset" ng-if="facetResults.hasSelectedFacets()">
+								<div class="filter-item" ng-if="facetResults.hasSelectedFacets()">
 									<a href="#" ng-click="facetResults.resetSearch()"><span class="filter-item-field" title="Click here to clear all selected attributes.">Clear All Attributes<span></a>
 								</div>
               	<div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
