@@ -13,7 +13,6 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     $scope.filtersMatch = {};
     $scope.selectedCollection = '';
     $scope.requestCounter = 0;
-    // $scope.chaiseConfig = chaiseConfig;
     $('[data-toggle="tooltip"]').tooltip();
   	$scope.translate = function(value)
 	{

@@ -69,9 +69,6 @@
 							<div class="jumbotron text-center" ng-show="!facetResults.hasSelectedFacets();">
 								<h1>{{FacetsData.selectedEntity.display}}</h1>
 								<p class="lead">Use the sidebar to the right to select search attributes.</p>
-								<div class="open-side hidden">
-									<button ng-click="facetResults.sidebarClick($event, 'sidebar-toggle');" type="button" id="welcome-button" class="btn btn-primary">Open Sidebar to Search</button>
-								</div>
 						  </div>
 							<div class="filter-container">
 				                <div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
