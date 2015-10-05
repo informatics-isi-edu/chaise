@@ -8,8 +8,6 @@
 							<div class="col-md-9">
 								<h4 class="text-left">Selected Attributes</h4>
 							</div>
-							<a class="sidebar-toggle pull-left" href="#" title="Apply Selections" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');"><span class="glyphicon glyphicon-ok-circle"></span></a>
-							<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');"><span class="glyphicon glyphicon-remove-circle"></span></a>
 					</div>
 				<div class="search-box input-group col-md-12">
 					<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search within attributes..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
@@ -48,8 +46,7 @@
 					<div class="col-md-9">
 						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
 					</div>
-					<a class="sidebar-toggle pull-left" href="#" title="Apply Selections" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="glyphicon glyphicon-ok-circle"></span></a>
-					<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="glyphicon glyphicon-remove-circle"></span></a>
+					<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');">Back</a>
 			</div>
 			<div class="search-box input-group">
 				<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
@@ -96,8 +93,7 @@
 							<div class="col-md-9">
 								<h4 class="text-left">{{FacetsData.tag['display']}}</h4>
 							</div>
-							<a class="sidebar-toggle pull-left" href="#" title="Apply Selections" ng-click="sideBar.editFilterDone($event, 'field-toggle', true);"><span class="glyphicon glyphicon-ok-circle"></span></a>
-							<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="glyphicon glyphicon-remove-circle"></span></a>
+							<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);">Back</a>
 					</div>
 					<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box input-group">
 						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
