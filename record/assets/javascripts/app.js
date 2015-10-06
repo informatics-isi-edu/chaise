@@ -62,13 +62,12 @@ setTimeout(function(){
 
     window.onhashchange = function() {
       
-            console.log('egegeg');
-            if (window.location.hash != '#undefined') {
-                location.reload();
-            } else {
-                history.pushState("", document.title, window.location.pathname);
-                location.reload();
-            }
+        if (window.location.hash != '#undefined') {
+            location.reload();
+        } else {
+            history.pushState("", document.title, window.location.pathname);
+            location.reload();
+        }
 
         function goBack() {
             window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
