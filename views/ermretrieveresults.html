@@ -188,7 +188,7 @@
 						</div>
 					</div>
 					<div id="resultstable" class="row" ng-show="facetResults.hasSelectedFacets()">
-						<div ng-if="FacetsData.view=='list'" class="col-md-12" ng-repeat="row in FacetsData.ermrestData">
+						<div ng-if="FacetsData.view=='list'" class="col-md-12 ng-hide" ng-repeat="row in FacetsData.ermrestData" ng-show="FacetsData.view=='list'">
 		                    <div ng-if="FacetsData.view=='list'" class="panel panel-default">
 		                    	<div class="panel-heading">
 		                    		<input ng-show="false" type="checkbox">
@@ -229,7 +229,7 @@
 								</div>
 							</div>
 						</div>
-						<div ng-if="FacetsData.view=='table' && FacetsData.ermrestData.length>0">
+						<div ng-if="FacetsData.view=='table' && FacetsData.ermrestData.length>0" class="ng-hide" ng-show="FacetsData.view=='table' && FacetsData.ermrestData.length>0">
 							<div id="results-group" class="row">
 								<div class="col-md-12">
 									<table class="col-md-12 table table-condensed table-responsive table-hover table-bordered" id="results-table-view">
@@ -273,7 +273,7 @@
 								</div>
 							</div>
 						</div>
-						<div ng-if="FacetsData.view=='card'">
+						<div ng-if="FacetsData.view=='card'" class="ng-hide" ng-show="FacetsData.view=='card'">
 							<div id="results-group" class="row">
 								<div class="col-md-6" ng-repeat="row in FacetsData.ermrestData">
 									<div class="panel panel-default">
