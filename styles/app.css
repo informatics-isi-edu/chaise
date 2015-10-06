@@ -268,7 +268,7 @@ dl.attribute-group dd {
 /* Standardize card view */
 
 #results-group .col-md-6 .panel {
-     height: 280px;
+     height: 265px;
      overflow: hidden;
 }
 
@@ -281,6 +281,7 @@ dl.attribute-group dd {
      height: 76px;
      line-height: 1.4;
      max-width: 500px;
+		 white-space: nowrap;
      overflow: hidden;
      text-overflow: ellipsis;
 }
