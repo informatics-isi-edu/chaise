@@ -96,6 +96,7 @@
 									rz-slider-translate="translate"> </rzslider></li>
 							<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search filters by keyword..."
 								type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
+								ng-keyup="sideBar.delay_predicate(FacetsData.tag,$event.keyCode)"
 								/></li>
 							<li ng-if="sideBar.if_type(FacetsData.tag, 'date')" class="attr-date">
 								From:<br>

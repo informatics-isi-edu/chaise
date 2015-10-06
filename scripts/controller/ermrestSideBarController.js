@@ -178,7 +178,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     		}
     	} else if ($scope.if_type($scope.FacetsData.tag, 'text')) {
 			if ($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['value'] != $scope.FacetsData.facetPreviousValues['value']) {
-				$scope.delay_predicate($scope.FacetsData.tag, event.keyCode);
+				//$scope.delay_predicate($scope.FacetsData.tag, event.keyCode);
 			}
 		} else if ($scope.if_type($scope.FacetsData.tag, 'date')) {
 			if ($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['min'] != $scope.FacetsData.facetPreviousValues['min'] ||
