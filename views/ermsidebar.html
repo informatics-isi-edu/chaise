@@ -35,13 +35,15 @@
 							<i class="glyphicon glyphicon-search"></i>
 					</span>
 			</div>
-			<div class="sidebar-header row">
-				<div class="col-md-1">
-					<a href="#" class="sidebar-toggle pull-left"><span ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle')" class="glyphicon glyphicon-chevron-left"></span></a>
-				</div>
+			<div class="sidebar-header container">
+				<div class="row">
+					<div class="col-md-1">
+						<a href="#" class="sidebar-toggle pull-left"><span ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle')" class="glyphicon glyphicon-chevron-left"></span></a>
+					</div>
 					<div class="col-md-11">
 						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
 					</div>
+				</div>
 			</div>
 			<div class="editvalue-container">
 				<div ng-show="false" class="field-enable">
