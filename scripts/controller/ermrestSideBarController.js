@@ -196,7 +196,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     			}
     		});
     		if (hasChanged) {
-        		$scope.predicate_checkbox($scope.FacetsData.tag);
+        		//$scope.predicate_checkbox($scope.FacetsData.tag);
     		}
     	}
     	FacetsService.sidebarClick(toggle);
@@ -645,6 +645,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		if (!$(event.target).is('input')) {
 			$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value] = !$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value];
 		}
+		$scope.predicate_checkbox($scope.FacetsData.tag);
 	};
 
 	this.clickFacet = function clickFacet(event, facet, from) {
