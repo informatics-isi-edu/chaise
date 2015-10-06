@@ -4,14 +4,32 @@
  * (c) Rafal Zajac <rzajac@gmail.com>
  * http://github.com/rzajac/angularjs-slider
  *
- * Version: v0.1.6
+ * Version: v0.1.34
  *
  * Licensed under the MIT license
  */
 
-/* global angular: false */
+/*jslint unparam: true */
+/*global angular: false, console: false, define, module */
+(function (root, factory) {
+  'use strict';
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(['angular'], factory);
+  } else if (typeof module === 'object' && module.exports) {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    // to support bundler like browserify
+    module.exports = factory(require('angular'));
+  } else {
+    // Browser globals (root is window)
+    factory(root.angular);
+  }
 
-angular.module('rzModule', [])
+}(this, function (angular) {
+  'use strict';
+var module = angular.module('rzModule', [])
 
 .value('throttle',
   /**
@@ -25,13 +43,14 @@ angular.module('rzModule', [])
    * @returns {Function}
    */
 function throttle(func, wait, options) {
+  'use strict';
   var getTime = (Date.now || function() {
     return new Date().getTime();
   });
   var context, args, result;
   var timeout = null;
   var previous = 0;
-  options || (options = {});
+  options = options || {};
   var later = function() {
     previous = options.leading === false ? 0 : getTime();
     timeout = null;
@@ -40,7 +59,7 @@ function throttle(func, wait, options) {
   };
   return function() {
     var now = getTime();
-    if (!previous && options.leading === false) previous = now;
+    if (!previous && options.leading === false) { previous = now; }
     var remaining = wait - (now - previous);
     context = this;
     args = arguments;
@@ -54,11 +73,13 @@ function throttle(func, wait, options) {
       timeout = setTimeout(later, remaining);
     }
     return result;
-  }
+  };
 })
 
-.factory('Slider', ['$timeout', '$document', 'throttle', function($timeout, $document, throttle)
+.factory('RzSlider', ['$timeout', '$document', '$window', 'throttle', function($timeout, $document, $window, throttle)
 {
+  'use strict';
+
   /**
    * Slider
    *
@@ -79,7 +100,7 @@ function throttle(func, wait, options) {
     /**
      * The slider attributes
      *
-     * @type {*}
+     * @type {Object}
      */
     this.attributes = attributes;
 
@@ -93,9 +114,30 @@ function throttle(func, wait, options) {
     /**
      * Slider type
      *
-     * @type {string}
+     * @type {boolean} Set to true for range slider
      */
     this.range = attributes.rzSliderHigh !== undefined && attributes.rzSliderModel !== undefined;
+
+    /**
+     * Whether to allow draggable range
+     *
+     * @type {boolean} Set to true for draggable range slider
+     */
+    this.dragRange = this.range && attributes.rzSliderDraggableRange === 'true';
+
+    /**
+     * Values recorded when first dragging the bar
+     *
+     * @type {Object}
+     */
+    this.dragging = {
+      active: false,
+      value: 0,
+      difference: 0,
+      offset: 0,
+      lowDist: 0,
+      highDist: 0
+    };
 
     /**
      * Half of the width of the slider handles
@@ -103,6 +145,13 @@ function throttle(func, wait, options) {
      * @type {number}
      */
     this.handleHalfWidth = 0;
+
+    /**
+     * Always show selection bar
+     *
+     * @type {boolean}
+     */
+    this.alwaysShowBar = !!attributes.rzSliderAlwaysShowBar;
 
     /**
      * Maximum left the slider handle can have
@@ -147,6 +196,36 @@ function throttle(func, wait, options) {
     this.maxValue = 0;
 
     /**
+     * Hide limit labels
+     *
+     * @type {boolean}
+     */
+    this.hideLimitLabels = !!attributes.rzSliderHideLimitLabels;
+
+    /**
+     * Only present model values
+     *
+     * Do not allow to change values
+     *
+     * @type {boolean}
+     */
+    this.presentOnly = attributes.rzSliderPresentOnly === 'true';
+
+    /**
+     * Display ticks on each possible value.
+     *
+     * @type {boolean}
+     */
+    this.showTicks = attributes.rzSliderShowTicks || attributes.rzSliderShowTicksValue;
+
+    /**
+     * Display the value on each tick.
+     *
+     * @type {boolean}
+     */
+    this.showTicksValue = attributes.rzSliderShowTicksValue;
+
+    /**
      * The delta between min and max value
      *
      * @type {number}
@@ -158,25 +237,33 @@ function throttle(func, wait, options) {
      *
      * @type {boolean}
      */
-    this.initRun = false;
+    this.initHasRun = false;
 
     /**
      * Custom translate function
      *
      * @type {function}
      */
-    this.customTrFn = null;
+    this.customTrFn = this.scope.rzSliderTranslate() || function(value) { return String(value); };
+
+    /**
+     * Array of de-registration functions to call on $destroy
+     *
+     * @type {Array.<Function>}
+     */
+    this.deRegFuncs = [];
 
     // Slider DOM elements wrapped in jqLite
-    this.fullBar = null; // The whole slider bar
-    this.selBar = null;  // Highlight between two handles
-    this.minH = null;  // Left slider handle
-    this.maxH = null;  // Right slider handle
-    this.flrLab = null;  // Floor label
-    this.ceilLab = null; // Ceiling label
-    this.minLab =  null; // Label above the low value
-    this.maxLab = null; // Label above the high value
-    this.cmbLab = null;  // Combined label
+    this.fullBar = null;  // The whole slider bar
+    this.selBar = null;   // Highlight between two handles
+    this.minH = null;     // Left slider handle
+    this.maxH = null;     // Right slider handle
+    this.flrLab = null;   // Floor label
+    this.ceilLab = null;  // Ceiling label
+    this.minLab =  null;  // Label above the low value
+    this.maxLab = null;   // Label above the high value
+    this.cmbLab = null;   // Combined label
+    this.ticks = null;  // The ticks
 
     // Initialize slider
     this.init();
@@ -192,17 +279,14 @@ function throttle(func, wait, options) {
      */
     init: function()
     {
-      var self = this;
-
-      if(this.scope.rzSliderTranslate)
-      {
-        this.customTrFn = this.scope.rzSliderTranslate();
-      }
+      var thrLow, thrHigh, unRegFn,
+        calcDimFn = angular.bind(this, this.calcViewDimensions),
+        self = this;
 
       this.initElemHandles();
       this.calcViewDimensions();
-
       this.setMinAndMax();
+
       this.precision = this.scope.rzSliderPrecision === undefined ? 0 : +this.scope.rzSliderPrecision;
       this.step = this.scope.rzSliderStep === undefined ? 1 : +this.scope.rzSliderStep;
 
@@ -211,37 +295,40 @@ function throttle(func, wait, options) {
         self.updateCeilLab();
         self.updateFloorLab();
         self.initHandles();
-        self.bindEvents();
+        if (!self.presentOnly) { self.bindEvents(); }
       });
 
       // Recalculate slider view dimensions
-      this.scope.$on('reCalcViewDimensions', angular.bind(this, this.calcViewDimensions));
+      unRegFn = this.scope.$on('reCalcViewDimensions', calcDimFn);
+      this.deRegFuncs.push(unRegFn);
 
       // Recalculate stuff if view port dimensions have changed
-      angular.element(window).on('resize', angular.bind(this, this.calcViewDimensions));
+      angular.element($window).on('resize', calcDimFn);
 
-      this.initRun = true;
+      this.initHasRun = true;
 
       // Watch for changes to the model
 
-      var thrLow = throttle(function()
+      thrLow = throttle(function()
       {
         self.setMinAndMax();
         self.updateLowHandle(self.valueToOffset(self.scope.rzSliderModel));
+        self.updateSelectionBar();
+        self.updateTicksScale();
 
         if(self.range)
         {
-          self.updateSelectionBar();
           self.updateCmbLabel();
         }
 
       }, 350, { leading: false });
 
-      var thrHigh = throttle(function()
+      thrHigh = throttle(function()
       {
         self.setMinAndMax();
         self.updateHighHandle(self.valueToOffset(self.scope.rzSliderHigh));
         self.updateSelectionBar();
+        self.updateTicksScale();
         self.updateCmbLabel();
       }, 350, { leading: false });
 
@@ -249,34 +336,63 @@ function throttle(func, wait, options) {
       {
         self.resetLabelsValue();
         thrLow();
-        thrHigh();
+        if(self.range) { thrHigh(); }
         self.resetSlider();
       });
 
       // Watchers
 
-      this.scope.$watch('rzSliderModel', function(newValue, oldValue)
+      unRegFn = this.scope.$watch('rzSliderModel', function(newValue, oldValue)
       {
-        if(newValue === oldValue) return;
+        if(newValue === oldValue) { return; }
         thrLow();
       });
+      this.deRegFuncs.push(unRegFn);
 
-      this.scope.$watch('rzSliderHigh', function(newValue, oldValue)
+      unRegFn = this.scope.$watch('rzSliderHigh', function(newValue, oldValue)
       {
-        if(newValue === oldValue) return;
+        if(newValue === oldValue) { return; }
         thrHigh();
       });
+      this.deRegFuncs.push(unRegFn);
 
       this.scope.$watch('rzSliderFloor', function(newValue, oldValue)
       {
-        if(newValue === oldValue) return;
+        if(newValue === oldValue) { return; }
         self.resetSlider();
       });
+      this.deRegFuncs.push(unRegFn);
 
-      this.scope.$watch('rzSliderCeil', function(newValue, oldValue)
+      unRegFn = this.scope.$watch('rzSliderCeil', function(newValue, oldValue)
       {
-        if(newValue === oldValue) return;
+        if(newValue === oldValue) { return; }
         self.resetSlider();
+      });
+      this.deRegFuncs.push(unRegFn);
+
+      unRegFn = this.scope.$watch('rzSliderShowTicks', function(newValue, oldValue)
+      {
+        if(newValue === oldValue) { return; }
+        self.resetSlider();
+      });
+      this.deRegFuncs.push(unRegFn);
+
+      unRegFn = this.scope.$watch('rzSliderShowTicksValue', function(newValue, oldValue)
+      {
+        if(newValue === oldValue) { return; }
+        self.resetSlider();
+      });
+      this.deRegFuncs.push(unRegFn);
+
+      this.scope.$on('$destroy', function()
+      {
+        self.minH.off();
+        self.maxH.off();
+        self.fullBar.off();
+        self.selBar.off();
+        self.ticks.off();
+        angular.element($window).off('resize', calcDimFn);
+        self.deRegFuncs.map(function(unbind) { unbind(); });
       });
     },
 
@@ -288,9 +404,9 @@ function throttle(func, wait, options) {
     resetSlider: function()
     {
       this.setMinAndMax();
-      this.calcViewDimensions();
       this.updateCeilLab();
       this.updateFloorLab();
+      this.calcViewDimensions();
     },
 
     /**
@@ -318,9 +434,11 @@ function throttle(func, wait, options) {
       if(this.range)
       {
         this.updateHighHandle(this.valueToOffset(this.scope.rzSliderHigh));
-        this.updateSelectionBar();
         this.updateCmbLabel();
       }
+
+      this.updateSelectionBar();
+      this.updateTicksScale();
     },
 
     /**
@@ -328,17 +446,17 @@ function throttle(func, wait, options) {
      *
      * @param {number|string} value
      * @param {jqLite} label
-     * @param {bool?} useCustomTr
+     * @param {boolean} [useCustomTr]
      * @returns {undefined}
      */
     translateFn: function(value, label, useCustomTr)
     {
       useCustomTr = useCustomTr === undefined ? true : useCustomTr;
 
-      var valStr = this.customTrFn && useCustomTr ? '' + this.customTrFn(value) : '' + value,
-        getWidth = false;
+      var valStr = (useCustomTr ? this.customTrFn(value) : value).toString(),
+          getWidth = false;
 
-      if(label.rzsv === undefined || label.rzsv.length != valStr.length || (label.rzsv.length > 0 && label.rzsw == 0))
+      if(label.rzsv === undefined || label.rzsv.length !== valStr.length || (label.rzsv.length > 0 && label.rzsw === 0))
       {
         getWidth = true;
         label.rzsv = valStr;
@@ -372,7 +490,12 @@ function throttle(func, wait, options) {
       }
       else
       {
-        this.scope.rzSliderCeil = this.maxValue = this.range ? this.scope.rzSliderHigh : this.scope.rzSliderModel;
+        this.maxValue = this.scope.rzSliderCeil = this.range ? this.scope.rzSliderHigh : this.scope.rzSliderModel;
+      }
+
+      if(this.scope.rzSliderStep)
+      {
+        this.step = +this.scope.rzSliderStep;
       }
 
       this.valueRange = this.maxValue - this.minValue;
@@ -387,27 +510,28 @@ function throttle(func, wait, options) {
      */
     initElemHandles: function()
     {
+      // Assign all slider elements to object properties for easy access
       angular.forEach(this.sliderElem.children(), function(elem, index)
       {
-        var _elem = angular.element(elem);
+        var jElem = angular.element(elem);
 
         switch(index)
         {
-          case 0: this.fullBar = _elem; break;
-          case 1: this.selBar = _elem; break;
-          case 2: this.minH = _elem; break;
-          case 3: this.maxH = _elem; break;
-          case 4: this.flrLab = _elem; break;
-          case 5: this.ceilLab = _elem; break;
-          case 6: this.minLab = _elem; break;
-          case 7: this.maxLab = _elem; break;
-          case 8: this.cmbLab = _elem; break;
+          case 0: this.fullBar = jElem; break;
+          case 1: this.selBar = jElem; break;
+          case 2: this.minH = jElem; break;
+          case 3: this.maxH = jElem; break;
+          case 4: this.flrLab = jElem; break;
+          case 5: this.ceilLab = jElem; break;
+          case 6: this.minLab = jElem; break;
+          case 7: this.maxLab = jElem; break;
+          case 8: this.cmbLab = jElem; break;
+          case 9: this.ticks = jElem; break;
         }
 
       }, this);
 
-      // Initialize offsets
-      this.fullBar.rzsl = 0;
+      // Initialize offset cache properties
       this.selBar.rzsl = 0;
       this.minH.rzsl = 0;
       this.maxH.rzsl = 0;
@@ -417,13 +541,50 @@ function throttle(func, wait, options) {
       this.maxLab.rzsl = 0;
       this.cmbLab.rzsl = 0;
 
+      // Hide limit labels
+      if(this.hideLimitLabels)
+      {
+        this.flrLab.rzAlwaysHide = true;
+        this.ceilLab.rzAlwaysHide = true;
+        this.hideEl(this.flrLab);
+        this.hideEl(this.ceilLab);
+      }
+
+      if(this.showTicksValue) {
+        this.flrLab.rzAlwaysHide = true;
+        this.ceilLab.rzAlwaysHide = true;
+        this.minLab.rzAlwaysHide = true;
+        this.maxLab.rzAlwaysHide = true;
+        this.hideEl(this.flrLab);
+        this.hideEl(this.ceilLab);
+        this.hideEl(this.minLab);
+        this.hideEl(this.maxLab);
+      }
+
       // Remove stuff not needed in single slider
-      if( ! this.range)
+      if(this.range === false)
       {
         this.cmbLab.remove();
         this.maxLab.remove();
+
+        // Hide max handle
+        this.maxH.rzAlwaysHide = true;
+        this.maxH[0].style.zIndex = '-1000';
+        this.hideEl(this.maxH);
+      }
+
+      // Show selection bar for single slider or not
+      if(this.range === false && this.alwaysShowBar === false)
+      {
         this.maxH.remove();
         this.selBar.remove();
+      }
+
+      // If using draggable range, use appropriate cursor for this.selBar.
+      if (this.dragRange)
+      {
+        this.selBar.css('cursor', 'move');
+        this.selBar.addClass('rz-draggable');
       }
     },
 
@@ -446,11 +607,40 @@ function throttle(func, wait, options) {
       this.getWidth(this.sliderElem);
       this.sliderElem.rzsl = this.sliderElem[0].getBoundingClientRect().left;
 
-      if(this.initRun)
+      if(this.initHasRun)
       {
         this.updateCeilLab();
         this.initHandles();
       }
+    },
+
+    /**
+     * Update the ticks position
+     *
+     * @returns {undefined}
+     */
+    updateTicksScale: function() {
+      if(!this.showTicks) return;
+      if(!this.step) return; //if step is 0, the following loop will be endless.
+
+      var positions = '';
+      for (var i = this.minValue; i <= this.maxValue; i += this.step) {
+        var selectedClass = this.isTickSelected(i) ? 'selected': false;
+        positions += '<li class="tick '+ selectedClass +'">';
+        if(this.showTicksValue)
+          positions += '<span class="tick-value">'+ this.getDisplayValue(i) +'</span>';
+        positions += '</li>';
+      }
+      this.ticks.html(positions);
+    },
+
+    isTickSelected: function(value) {
+      var tickLeft = this.valueToOffset(value);
+      if(!this.range && this.alwaysShowBar && value <= this.scope.rzSliderModel)
+        return true;
+      if(this.range && value >= this.scope.rzSliderModel && value <= this.scope.rzSliderHigh)
+        return true;
+      return false;
     },
 
     /**
@@ -477,6 +667,48 @@ function throttle(func, wait, options) {
     },
 
     /**
+     * Call the onStart callback if defined
+     *
+     * @returns {undefined}
+     */
+    callOnStart: function() {
+      if(this.scope.rzSliderOnStart) {
+        var self = this;
+        $timeout(function() {
+            self.scope.rzSliderOnStart();
+        });
+      }
+    },
+
+    /**
+     * Call the onChange callback if defined
+     *
+     * @returns {undefined}
+     */
+    callOnChange: function() {
+      if(this.scope.rzSliderOnChange) {
+        var self = this;
+        $timeout(function() {
+            self.scope.rzSliderOnChange();
+        });
+      }
+    },
+
+    /**
+     * Call the onEnd callback if defined
+     *
+     * @returns {undefined}
+     */
+    callOnEnd: function() {
+      if(this.scope.rzSliderOnEnd) {
+        var self = this;
+        $timeout(function() {
+            self.scope.rzSliderOnEnd();
+        });
+      }
+    },
+
+    /**
      * Update slider handles and label positions
      *
      * @param {string} which
@@ -487,9 +719,11 @@ function throttle(func, wait, options) {
       if(which === 'rzSliderModel')
       {
         this.updateLowHandle(newOffset);
+        this.updateSelectionBar();
+        this.updateTicksScale();
+
         if(this.range)
         {
-          this.updateSelectionBar();
           this.updateCmbLabel();
         }
         return;
@@ -498,9 +732,11 @@ function throttle(func, wait, options) {
       if(which === 'rzSliderHigh')
       {
         this.updateHighHandle(newOffset);
+        this.updateSelectionBar();
+        this.updateTicksScale();
+
         if(this.range)
         {
-          this.updateSelectionBar();
           this.updateCmbLabel();
         }
         return;
@@ -510,6 +746,7 @@ function throttle(func, wait, options) {
       this.updateLowHandle(newOffset);
       this.updateHighHandle(newOffset);
       this.updateSelectionBar();
+      this.updateTicksScale();
       this.updateCmbLabel();
     },
 
@@ -521,6 +758,10 @@ function throttle(func, wait, options) {
      */
     updateLowHandle: function(newOffset)
     {
+      var delta = Math.abs(this.minH.rzsl - newOffset);
+
+      if(this.minLab.rzsv && delta < 1) { return; }
+
       this.setLeft(this.minH, newOffset);
       this.translateFn(this.scope.rzSliderModel, this.minLab);
       this.setLeft(this.minLab, newOffset - this.minLab.rzsw / 2 + this.handleHalfWidth);
@@ -604,8 +845,8 @@ function throttle(func, wait, options) {
      */
     updateSelectionBar: function()
     {
-      this.setWidth(this.selBar, this.maxH.rzsl - this.minH.rzsl);
-      this.setLeft(this.selBar, this.minH.rzsl + this.handleHalfWidth);
+      this.setWidth(this.selBar, Math.abs(this.maxH.rzsl - this.minH.rzsl));
+      this.setLeft(this.selBar, this.range ? this.minH.rzsl + this.handleHalfWidth : 0);
     },
 
     /**
@@ -619,16 +860,8 @@ function throttle(func, wait, options) {
 
       if(this.minLab.rzsl + this.minLab.rzsw + 10 >= this.maxLab.rzsl)
       {
-        if(this.customTrFn)
-        {
-          lowTr = this.customTrFn(this.scope.rzSliderModel);
-          highTr = this.customTrFn(this.scope.rzSliderHigh);
-        }
-        else
-        {
-          lowTr = this.scope.rzSliderModel;
-          highTr = this.scope.rzSliderHigh;
-        }
+        lowTr = this.getDisplayValue(this.scope.rzSliderModel);
+        highTr = this.getDisplayValue(this.scope.rzSliderHigh);
 
         this.translateFn(lowTr + ' - ' + highTr, this.cmbLab, false);
         this.setLeft(this.cmbLab, this.selBar.rzsl + this.selBar.rzsw / 2 - this.cmbLab.rzsw / 2);
@@ -645,6 +878,15 @@ function throttle(func, wait, options) {
     },
 
     /**
+     * Return the translated value if a translate function is provided else the original value
+     * @param value
+     * @returns {*}
+     */
+    getDisplayValue: function(value) {
+      return  this.customTrFn ? this.customTrFn(value): value;
+    },
+
+    /**
      * Round value to step and precision
      *
      * @param {number} value
@@ -653,10 +895,11 @@ function throttle(func, wait, options) {
     roundStep: function(value)
     {
       var step = this.step,
-        remainder = (value - this.minValue) % step,
-        steppedValue = remainder > (step / 2) ? value + step - remainder : value - remainder;
+          remainder = +((value - this.minValue) % step).toFixed(3),
+          steppedValue = remainder > (step / 2) ? value + step - remainder : value - remainder;
 
-      return +(steppedValue).toFixed(this.precision);
+      steppedValue = steppedValue.toFixed(this.precision);
+      return +steppedValue;
     },
 
     /**
@@ -678,6 +921,8 @@ function throttle(func, wait, options) {
      */
     showEl: function (element)
     {
+      if(!!element.rzAlwaysHide) { return element; }
+
       return element.css({opacity: 1});
     },
 
@@ -713,7 +958,7 @@ function throttle(func, wait, options) {
      *
      * @param {jqLite} elem  The jqLite wrapped DOM element
      * @param {number} width
-     * @returns {*}
+     * @returns {number}
      */
     setWidth: function(elem, width)
     {
@@ -730,7 +975,7 @@ function throttle(func, wait, options) {
      */
     valueToOffset: function(val)
     {
-      return (val - this.minValue) * this.maxLeft / this.valueRange;
+      return (val - this.minValue) * this.maxLeft / this.valueRange || 0;
     },
 
     /**
@@ -747,51 +992,119 @@ function throttle(func, wait, options) {
     // Events
 
     /**
+     * Get the X-coordinate of an event
+     *
+     * @param {Object} event  The event
+     * @returns {number}
+     */
+    getEventX: function(event)
+    {
+      /* http://stackoverflow.com/a/12336075/282882 */
+      //noinspection JSLint
+      if('clientX' in event)
+      {
+        return event.clientX;
+      }
+
+      return event.originalEvent === undefined ?
+          event.touches[0].clientX
+          : event.originalEvent.touches[0].clientX;
+    },
+
+    /**
+     * Get the handle closest to an event.
+     *
+     * @param event {Event} The event
+     * @returns {jqLite} The handle closest to the event.
+     */
+    getNearestHandle: function(event)
+    {
+      if (!this.range) { return this.minH; }
+      var offset = this.getEventX(event) - this.sliderElem.rzsl - this.handleHalfWidth;
+      return Math.abs(offset - this.minH.rzsl) < Math.abs(offset - this.maxH.rzsl) ? this.minH : this.maxH;
+    },
+
+    /**
      * Bind mouse and touch events to slider handles
      *
      * @returns {undefined}
      */
     bindEvents: function()
     {
+      var barTracking, barStart, barMove;
+
+      if (this.dragRange)
+      {
+        barTracking = 'rzSliderDrag';
+        barStart = this.onDragStart;
+        barMove = this.onDragMove;
+      }
+      else
+      {
+        barTracking = 'rzSliderModel';
+        barStart = this.onStart;
+        barMove = this.onMove;
+      }
+
       this.minH.on('mousedown', angular.bind(this, this.onStart, this.minH, 'rzSliderModel'));
-      if(this.range) { this.maxH.on('mousedown', angular.bind(this, this.onStart, this.maxH, 'rzSliderHigh')) }
+      if(this.range) { this.maxH.on('mousedown', angular.bind(this, this.onStart, this.maxH, 'rzSliderHigh')); }
+      this.fullBar.on('mousedown', angular.bind(this, this.onStart, null, null));
+      this.fullBar.on('mousedown', angular.bind(this, this.onMove, this.fullBar));
+      this.selBar.on('mousedown', angular.bind(this, barStart, null, barTracking));
+      this.selBar.on('mousedown', angular.bind(this, barMove, this.selBar));
+      this.ticks.on('mousedown', angular.bind(this, this.onStart, null, null));
+      this.ticks.on('mousedown', angular.bind(this, this.onMove, this.ticks));
 
       this.minH.on('touchstart', angular.bind(this, this.onStart, this.minH, 'rzSliderModel'));
-      if(this.range) { this.maxH.on('touchstart', angular.bind(this, this.onStart, this.maxH, 'rzSliderHigh')) }
+      if(this.range) { this.maxH.on('touchstart', angular.bind(this, this.onStart, this.maxH, 'rzSliderHigh')); }
+      this.fullBar.on('touchstart', angular.bind(this, this.onStart, null, null));
+      this.fullBar.on('touchstart', angular.bind(this, this.onMove, this.fullBar));
+      this.selBar.on('touchstart', angular.bind(this, barStart, null, barTracking));
+      this.selBar.on('touchstart', angular.bind(this, barMove, this.selBar));
+      this.ticks.on('touchstart', angular.bind(this, this.onStart, null, null));
+      this.ticks.on('touchstart', angular.bind(this, this.onMove, this.ticks));
     },
 
     /**
      * onStart event handler
      *
-     * @param {Object} pointer The jqLite wrapped DOM element
-     * @param {string} ref     One of the refLow, refHigh values
-     * @param {Event}  event   The event
+     * @param {?Object} pointer The jqLite wrapped DOM element; if null, the closest handle is used
+     * @param {?string} ref     The name of the handle being changed; if null, the closest handle's value is modified
+     * @param {Event}   event   The event
      * @returns {undefined}
      */
     onStart: function (pointer, ref, event)
     {
+      var ehMove, ehEnd,
+          eventNames = this.getEventNames(event);
+
       event.stopPropagation();
       event.preventDefault();
 
-      if(this.tracking !== '') { return }
+      if(this.tracking !== '') { return; }
 
       // We have to do this in case the HTML where the sliders are on
       // have been animated into view.
       this.calcViewDimensions();
-      this.tracking = ref;
 
-      pointer.addClass('active');
-
-      if(event.touches || (typeof(event.originalEvent) != 'undefined' && event.originalEvent.touches))
+      if(pointer)
       {
-        $document.on('touchmove.rzslider', angular.bind(this, this.onMove, pointer));
-        $document.on('touchend.rzslider', angular.bind(this, this.onEnd));
+        this.tracking = ref;
       }
       else
       {
-        $document.on('mousemove.rzslider', angular.bind(this, this.onMove, pointer));
-        $document.on('mouseup.rzslider', angular.bind(this, this.onEnd));
+        pointer = this.getNearestHandle(event);
+        this.tracking = pointer === this.minH ? 'rzSliderModel' : 'rzSliderHigh';
       }
+
+      pointer.addClass('rz-active');
+
+      ehMove = angular.bind(this, this.dragging.active ? this.onDragMove : this.onMove, pointer);
+      ehEnd = angular.bind(this, this.onEnd, ehMove);
+
+      $document.on(eventNames.moveEvent, ehMove);
+      $document.one(eventNames.endEvent, ehEnd);
+      this.callOnStart();
     },
 
     /**
@@ -803,55 +1116,154 @@ function throttle(func, wait, options) {
      */
     onMove: function (pointer, event)
     {
-      var eventX = event.clientX || (typeof(event.originalEvent) != 'undefined' ? event.originalEvent.touches[0].clientX : event.touches[0].clientX),
-        sliderLO = this.sliderElem.rzsl,
-        newOffset = eventX - sliderLO - this.handleHalfWidth,
-        newValue;
+      var eventX = this.getEventX(event),
+          sliderLO, newOffset, newValue;
+
+      sliderLO = this.sliderElem.rzsl;
+      newOffset = eventX - sliderLO - this.handleHalfWidth;
 
       if(newOffset <= 0)
       {
-        if(pointer.rzsl !== 0)
-        {
-          this.scope[this.tracking] = this.minValue;
-          this.updateHandles(this.tracking, 0);
-          this.scope.$apply();
-        }
+        if(pointer.rzsl === 0)
+          return;
+        newValue = this.minValue;
+        newOffset = 0;
+      }
+      else if(newOffset >= this.maxLeft)
+      {
+        if(pointer.rzsl === this.maxLeft)
+          return;
+        newValue = this.maxValue;
+        newOffset = this.maxLeft;
+      }
+      else {
+        newValue = this.offsetToValue(newOffset);
+        newValue = this.roundStep(newValue);
+        newOffset = this.valueToOffset(newValue);
+      }
+      this.positionTrackingHandle(newValue, newOffset);
+    },
 
-        return;
+    /**
+     * onDragStart event handler
+     *
+     * Handles dragging of the middle bar.
+     *
+     * @param {Object} pointer The jqLite wrapped DOM element
+     * @param {string} ref     One of the refLow, refHigh values
+     * @param {Event}  event   The event
+     * @returns {undefined}
+     */
+    onDragStart: function(pointer, ref, event)
+    {
+      var offset = this.getEventX(event) - this.sliderElem.rzsl - this.handleHalfWidth;
+      this.dragging = {
+        active: true,
+        value: this.offsetToValue(offset),
+        difference: this.scope.rzSliderHigh - this.scope.rzSliderModel,
+        offset: offset,
+        lowDist: offset - this.minH.rzsl,
+        highDist: this.maxH.rzsl - offset
+      };
+      this.minH.addClass('rz-active');
+      this.maxH.addClass('rz-active');
+
+      this.onStart(pointer, ref, event);
+    },
+
+    /**
+     * onDragMove event handler
+     *
+     * Handles dragging of the middle bar.
+     *
+     * @param {jqLite} pointer
+     * @param {Event}  event The event
+     * @returns {undefined}
+     */
+    onDragMove: function(pointer, event)
+    {
+      var newOffset = this.getEventX(event) - this.sliderElem.rzsl - this.handleHalfWidth,
+          newMinOffset, newMaxOffset,
+          newMinValue, newMaxValue;
+
+      if (newOffset <= this.dragging.lowDist)
+      {
+        if (pointer.rzsl === this.dragging.lowDist) { return; }
+        newMinValue = this.minValue;
+        newMinOffset = 0;
+        newMaxValue = this.dragging.difference;
+        newMaxOffset = this.valueToOffset(newMaxValue);
+      }
+      else if (newOffset >= this.maxLeft - this.dragging.highDist)
+      {
+        if (pointer.rzsl === this.dragging.highDist) { return; }
+        newMaxValue = this.maxValue;
+        newMaxOffset = this.maxLeft;
+        newMinValue = this.maxValue - this.dragging.difference;
+        newMinOffset = this.valueToOffset(newMinValue);
+      }
+      else
+      {
+        newMinValue = this.offsetToValue(newOffset - this.dragging.lowDist);
+        newMinValue = this.roundStep(newMinValue);
+        newMinOffset = this.valueToOffset(newMinValue);
+        newMaxValue = newMinValue + this.dragging.difference;
+        newMaxOffset = this.valueToOffset(newMaxValue);
       }
 
-      if(newOffset >= this.maxLeft)
+      this.positionTrackingBar(newMinValue, newMaxValue, newMinOffset, newMaxOffset);
+    },
+
+    /**
+     * Set the new value and offset for the entire bar
+     *
+     * @param {number} newMinValue   the new minimum value
+     * @param {number} newMaxValue   the new maximum value
+     * @param {number} newMinOffset  the new minimum offset
+     * @param {number} newMaxOffset  the new maximum offset
+     */
+    positionTrackingBar: function(newMinValue, newMaxValue, newMinOffset, newMaxOffset)
+    {
+      this.scope.rzSliderModel = newMinValue;
+      this.scope.rzSliderHigh = newMaxValue;
+      this.updateHandles('rzSliderModel', newMinOffset);
+      this.updateHandles('rzSliderHigh', newMaxOffset);
+      this.scope.$apply();
+      this.callOnChange();
+    },
+
+    /**
+     * Set the new value and offset to the current tracking handle
+     *
+     * @param {number} newValue new model value
+     * @param {number} newOffset new offset value
+     */
+    positionTrackingHandle: function(newValue, newOffset)
+    {
+      if(this.range)
       {
-        if(pointer.rzsl !== this.maxLeft)
-        {
-          this.scope[this.tracking] = this.maxValue;
-          this.updateHandles(this.tracking, this.maxLeft);
-          this.scope.$apply();
-        }
-
-        return;
-      }
-
-      newValue = this.offsetToValue(newOffset);
-      newValue = this.roundStep(newValue);
-
-      if (this.range)
-      {
+        /* This is to check if we need to switch the min and max handles*/
         if (this.tracking === 'rzSliderModel' && newValue >= this.scope.rzSliderHigh)
         {
           this.scope[this.tracking] = this.scope.rzSliderHigh;
           this.updateHandles(this.tracking, this.maxH.rzsl);
           this.tracking = 'rzSliderHigh';
-          this.minH.removeClass('active');
-          this.maxH.addClass('active');
+          this.minH.removeClass('rz-active');
+          this.maxH.addClass('rz-active');
+           /* We need to apply here because we are not sure that we will enter the next block */
+          this.scope.$apply();
+          this.callOnChange();
         }
         else if(this.tracking === 'rzSliderHigh' && newValue <= this.scope.rzSliderModel)
         {
           this.scope[this.tracking] = this.scope.rzSliderModel;
           this.updateHandles(this.tracking, this.minH.rzsl);
           this.tracking = 'rzSliderModel';
-          this.maxH.removeClass('active');
-          this.minH.addClass('active');
+          this.maxH.removeClass('rz-active');
+          this.minH.addClass('rz-active');
+           /* We need to apply here because we are not sure that we will enter the next block */
+          this.scope.$apply();
+          this.callOnChange();
         }
       }
 
@@ -860,44 +1272,68 @@ function throttle(func, wait, options) {
         this.scope[this.tracking] = newValue;
         this.updateHandles(this.tracking, newOffset);
         this.scope.$apply();
+        this.callOnChange();
       }
     },
 
     /**
      * onEnd event handler
      *
-     * @param {Event} event    The event
+     * @param {Event}    event    The event
+     * @param {Function} ehMove   The the bound move event handler
      * @returns {undefined}
      */
-    onEnd: function(event)
+    onEnd: function(ehMove, event)
     {
-      this.minH.removeClass('active');
-      this.maxH.removeClass('active');
+      var moveEventName = this.getEventNames(event).moveEvent;
 
-      if(event.touches || (typeof(event.originalEvent) != 'undefined' && event.originalEvent.touches))
+      this.minH.removeClass('rz-active');
+      this.maxH.removeClass('rz-active');
+
+      $document.off(moveEventName, ehMove);
+
+      this.scope.$emit('slideEnded');
+      this.tracking = '';
+
+      this.dragging.active = false;
+      this.callOnEnd();
+    },
+
+    /**
+     * Get event names for move and event end
+     *
+     * @param {Event}    event    The event
+     *
+     * @return {{moveEvent: string, endEvent: string}}
+     */
+    getEventNames: function(event)
+    {
+      var eventNames = {moveEvent: '', endEvent: ''};
+
+      if(event.touches || (event.originalEvent !== undefined && event.originalEvent.touches))
       {
-        $document.unbind('touchmove.rzslider');
-        $document.unbind('touchend.rzslider');
+        eventNames.moveEvent = 'touchmove';
+        eventNames.endEvent = 'touchend';
       }
       else
       {
-        $document.unbind('mousemove.rzslider');
-        $document.unbind('mouseup.rzslider');
+        eventNames.moveEvent = 'mousemove';
+        eventNames.endEvent = 'mouseup';
       }
 
-      this.scope.$emit('slideEnded');
-
-      this.tracking = '';
+      return eventNames;
     }
   };
 
   return Slider;
 }])
 
-.directive('rzslider', ['Slider', function(Slider)
+.directive('rzslider', ['RzSlider', function(RzSlider)
 {
+  'use strict';
+
   return {
-    restrict: 'EA',
+    restrict: 'E',
     scope: {
       rzSliderFloor: '=?',
       rzSliderCeil: '=?',
@@ -905,21 +1341,33 @@ function throttle(func, wait, options) {
       rzSliderPrecision: '@',
       rzSliderModel: '=?',
       rzSliderHigh: '=?',
-      rzSliderTranslate: '&'
+      rzSliderDraggable: '@',
+      rzSliderTranslate: '&',
+      rzSliderHideLimitLabels: '=?',
+      rzSliderAlwaysShowBar: '=?',
+      rzSliderPresentOnly: '@',
+      rzSliderOnStart: '&',
+      rzSliderOnChange: '&',
+      rzSliderOnEnd: '&',
+      rzSliderShowTicks: '=?',
+      rzSliderShowTicksValue: '=?'
     },
-    template:   '<span class="bar"></span>' + // 0 The slider bar
-                '<span class="bar selection"></span>' + // 1 Highlight between two handles
-                '<span class="pointer"></span>' + // 2 Left slider handle
-                '<span class="pointer"></span>' + // 3 Right slider handle
-                '<span class="bubble limit"></span>' + // 4 Floor label
-                '<span class="bubble limit"></span>' + // 5 Ceiling label
-                '<span class="bubble"></span>' + // 6 Label above left slider handle
-                '<span class="bubble"></span>' + // 7 Label above right slider handle
-                '<span class="bubble"></span>', // 8 Range label when the slider handles are close ex. 15 - 17
+
+    /**
+     * Return template URL
+     *
+     * @param {jqLite} elem
+     * @param {Object} attrs
+     * @return {string}
+     */
+    templateUrl: function(elem, attrs) {
+      //noinspection JSUnresolvedVariable
+      return attrs.rzSliderTplUrl || 'rzSliderTpl.html';
+    },
 
     link: function(scope, elem, attr)
     {
-      return new Slider(scope, elem, attr);
+      return new RzSlider(scope, elem, attr);
     }
   };
 }]);
@@ -937,9 +1385,9 @@ function throttle(func, wait, options) {
 /**
  * @name jqLite
  *
- * @property {number|undefined} rzsl
- * @property {number|undefined} rzsw
- * @property {string|undefined} rzsv
+ * @property {number|undefined} rzsl rzslider label left offset
+ * @property {number|undefined} rzsw rzslider element width
+ * @property {string|undefined} rzsv rzslider label value/text
  * @property {Function} css
  * @property {Function} text
  */
@@ -947,11 +1395,24 @@ function throttle(func, wait, options) {
 /**
  * @name Event
  * @property {Array} touches
+ * @property {Event} originalEvent
  */
 
 /**
  * @name ThrottleOptions
  *
- * @property {bool} leading
- * @property {bool} trailing
+ * @property {boolean} leading
+ * @property {boolean} trailing
  */
+
+  module.run(['$templateCache', function($templateCache) {
+  'use strict';
+
+  $templateCache.put('rzSliderTpl.html',
+    "<span class=rz-bar-wrapper><span class=rz-bar></span></span> <span class=rz-bar-wrapper><span class=\"rz-bar rz-selection\"></span></span> <span class=rz-pointer></span> <span class=rz-pointer></span> <span class=\"rz-bubble rz-limit\"></span> <span class=\"rz-bubble rz-limit\"></span> <span class=rz-bubble></span> <span class=rz-bubble></span> <span class=rz-bubble></span><ul class=rz-ticks></ul>"
+  );
+
+}]);
+
+  return module
+}));
