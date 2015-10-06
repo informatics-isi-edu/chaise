@@ -1,24 +1,150 @@
 <div class="col-md-3 sidebar-outer">
-	<div ng-init="FacetsData.progress=true" ng-controller="SideBarCtrl as sideBar" ng-show="sideBar.showSidebar()">
+	<div ng-init="FacetsData.progress=true" ng-controller="SideBarCtrl as sideBar" class="ng-hide" ng-show="sideBar.showSidebar()">
+		<!-- Selected Attributes sidebar -->
+		<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right open" role="navigation">
+			<div class="sidebar-wrap">
+			    <!-- Sidebar header -->
+					<div class="search-box input-group col-md-12">
+						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search within attributes..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
+						<span class="input-group-addon">
+					        <i class="glyphicon glyphicon-search"></i>
+					    </span>
+					</div>
+		        <div id="navcontainer">
+							<h4>Choose Attributes:</h4>
+			        <ul class="nav sidebar-nav">
+				        <li ng-show="sideBar.showFacetCount(facet) || sideBar.showFacetMatch(facet)" ng-repeat="facet in FacetsData.facets">
+			            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
+			            	<!-- <span class="badge">{{sideBar.displayFacetCount(facet)}}</span> -->
+			            	{{facet['display']}}
+			                <span class="md-chevron-right md-lg"></span>
+			            </a>
+				        </li>
+								<li class="small"><a class="field-toggle view-attr" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')" title="Click to view all attributes"><strong>View all attributes ({{FacetsData.facets.length}})<span class="md-chevron-right md-lg"></span></strong></a></li>
+			        </ul>
+		        </div>
+			</div>
+		</aside>
+
+
+		<!-- View All Attributes sidebar -->
+		<aside id="morefilters" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+			<div class="search-box input-group">
+				<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
+				<span class="input-group-addon">
+							<i class="glyphicon glyphicon-search"></i>
+					</span>
+			</div>
+			<div class="sidebar-header row">
+				<div class="col-md-1">
+					<a href="#" class="sidebar-toggle pull-left"><span ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle')" class="glyphicon glyphicon-chevron-left"></span></a>
+				</div>
+					<div class="col-md-11">
+						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
+					</div>
+			</div>
+			<div class="editvalue-container">
+				<div ng-show="false" class="field-enable">
+					<input ng-model="FacetsData.enableAll" type="checkbox" ng-click="sideBar.enableDisableAll()" />
+				</div>
+				<div class="field-enable" ng-repeat="facet in FacetsData.facets" ng-show="sideBar.showUsableFilter(facet)">
+					<div ng-class="sideBar.getMoreFieldSwitchClass(facet)">
+						<input type="checkbox" ng-model="FacetsData.chooseColumns[facet['table']][facet['name']]"
+							class="check" ng-click="sideBar.clickFacet($event,facet,'input')"/>
+					</div>
+					<label ng-class="sideBar.getMoreFieldValueClass(facet)" ng-click="sideBar.clickFacet($event,facet,'label')">{{facet['display']}}</label>
+					<div class="field-count pull-right">
+						<!-- <span class="badge">{{sideBar.displayFacetCount(facet)}}</span> -->
+					</div>
+				</div>
+			</div>
+		</aside>
+
+		<!-- Adjust value ranges per field sidebar -->
+
+		<aside id="editfilter" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+			    <!-- Sidebar header -->
+					<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box input-group">
+						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
+						<span class="input-group-addon">
+					        <i class="glyphicon glyphicon-search"></i>
+					    </span>
+					</div>
+					<div class="sidebar-header container">
+						<div class="row">
+							<div class="col-md-1">
+								<a href="#" class="sidebar-toggle pull-left" title="Go Back" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="glyphicon glyphicon-chevron-left"></span></a>
+							</div>
+							<div class="col-md-11">
+								<h4>{{FacetsData.tag['display']}}</h4>
+							</div>
+						</div>
+					</div>
+			    <div ng-show="false" ng-if="sideBar.if_type(FacetsData.tag, 'enum')">
+					<div class="editfilter-container">
+		                <span class="filter-item-field">enabled {{sideBar.getFacetValues(FacetsData.tag).length}} of {{FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values'].length}}</span>
+					</div>
+			    </div>
+			    <!-- slider/value picker -->
+			    <div ng-if="FacetsData.tag!=null">
+		        	<div class="editvalue-container">
+						<ul class="nav filteritems" ng-hide="sideBar.hide(FacetsData.tag)">
+							<li ng-if="sideBar.if_type(FacetsData.tag, 'slider')" class="attr-slider"><rzslider
+									rz-slider-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']"
+									rz-slider-high="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']"
+									rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
+									rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
+									rz-slider-translate="translate"> </rzslider></li>
+							<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search filters by keyword..."
+								type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
+								ng-keyup="sideBar.delay_predicate(FacetsData.tag,$event.keyCode)"
+								/></li>
+							<li ng-if="sideBar.if_type(FacetsData.tag, 'date')" class="attr-date">
+								From:<br>
+								<datepicker date-format="yyyy-MM-dd" date-set="{{defaultMinDate}}" date-min-limit="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']}}" date-max-limit="{{floorDate}}">
+									<input ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']" type="text">
+								</datepicker>
+								<br><br>
+								To:<br>
+								<datepicker date-format="yyyy-MM-dd" date-set="{{defaultMaxDate}}" date-min-limit="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']}}" date-max-limit="{{floorDate}}">
+									<input ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']" type="text">
+								</datepicker>
+							</li>
+							<li ng-if="sideBar.if_type(FacetsData.tag, 'enum')"
+								ng-repeat="value in FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values']"
+								ng-hide="sideBar.showFacetValue(FacetsData.tag, value)">
+								<div class="field-enable">
+									<div ng-class="sideBar.getFieldSwitchClass(FacetsData.tag, value)" ng-click="sideBar.checkUncheck($event,value)">
+										<input
+											type="checkbox" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['values'][value]"
+											class="check"/><b class="b switch"></b>
+									</div>
+									<label ng-class="sideBar.getFieldValueClass(FacetsData.tag, value)" ng-click="sideBar.checkUncheck($event,value)">{{value}}</label>
+									<div class="field-count pull-right">
+										<!-- <span class="badge">{{FacetsData.colsGroup[FacetsData.tag['table']][FacetsData.tag['name']][value]}}</span> -->
+									</div>
+								</div>
+							</li>
+						</ul>
+			        </div>
+			    </div>
+		</aside>
 		<!-- Collections sidebar -->
 		<aside id="collectionsTree" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
 		    <!-- Sidebar header -->
 		    <div class="sidebar-header">
-		        <div class="row">
+		        <!-- <div class="row">
 		        	<div id="toggle-side" class="col-md-12" ng-click="sideBar.sidebarClick($event, 'collections-toggle');">
 		        		<a href="#" class="sidebar-toggle">
 				        	<h5>Hide Sidebar</h5>
 				        	<span class="glyphicon glyphicon-forward pull-right"></span>
 				        </a>
 					</div>
-				</div>
+				</div> -->
 			</div>
 			<div class="row">
 				<div class="meta-actions">
 					<div class="col-md-offset-6 col-sm-offset-6 col-md-6 col-sm-6 meta-icons">
-						<a title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
-							<span class="glyphicon glyphicon-bookmark"></span>
-						</a>
 					</div>
 				</div>
 			</div>
@@ -68,175 +194,6 @@
 				</div>
 			</div>
 
-		</aside>
-		<!-- Selected Attributes sidebar -->
-		<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right open" role="navigation">
-			<div class="sidebar-wrap">
-			    <!-- Sidebar header -->
-			    <div class="sidebar-header row">
-							<div class="col-md-9">
-								<h4 class="text-left">Selected Attributes</h4>
-							</div>
-							<a class="sidebar-toggle pull-left" href="#" title="Apply Selections" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');"><span class="glyphicon glyphicon-ok-circle"></span></a>
-							<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.sidebarClick($event, 'sidebar-toggle');"><span class="glyphicon glyphicon-remove-circle"></span></a>
-					</div>
-				<div class="search-box input-group col-md-12">
-					<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search within attributes..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
-					<span class="input-group-addon">
-				        <i class="glyphicon glyphicon-search"></i>
-				    </span>
-				</div>
-				<div class="meta-actions">
-					<div class="row">
-						<div class="col-md-6 col-sm-6">
-								<button ng-if="sideBar.hasSelectedFacets();" ng-click="sideBar.resetSearch();" type="button" class="badge reset">Reset Search</button>
-						</div>
-						<div class="col-md-6 col-sm-6 meta-icons">
-							<a title="This link stores your search criteria as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
-								<span class="glyphicon glyphicon-bookmark"></span>
-							</a>
-						</div>
-					</div>
-				</div>
-		        <div id="navcontainer">
-			        <ul class="nav sidebar-nav">
-				        <li ng-show="sideBar.showFacetCount(facet) || sideBar.showFacetMatch(facet)" ng-repeat="facet in FacetsData.facets">
-			            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
-			            	<!-- <span class="badge">{{sideBar.displayFacetCount(facet)}}</span> -->
-			            	{{facet['display']}}
-			                <span class="md-chevron-right md-lg"></span>
-			            </a>
-				        </li>
-								<li class="small"><a class="field-toggle view-attr" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')" title="Click to view all attributes"><strong>View all attributes ({{FacetsData.facets.length}})<span class="md-chevron-right md-lg"></span></strong></a></li>
-			        </ul>
-		        </div>
-			</div>
-		</aside>
-
-
-		<!-- View All Attributes sidebar -->
-		<aside id="morefilters" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
-			<div class="sidebar-header row">
-					<div class="col-md-9">
-						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
-					</div>
-					<a class="sidebar-toggle pull-left" href="#" title="Apply Selections" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="glyphicon glyphicon-ok-circle"></span></a>
-					<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle');"><span class="glyphicon glyphicon-remove-circle"></span></a>
-			</div>
-			<div class="search-box input-group">
-				<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
-				<span class="input-group-addon">
-							<i class="glyphicon glyphicon-search"></i>
-					</span>
-			</div>
-			<div class="meta-actions">
-				<div class="row">
-					<div class="col-md-6 col-sm-6">
-							<button ng-if="sideBar.hasSelectedFacets();" ng-click="sideBar.resetSearch();" type="button" class="badge reset">Reset Search</button>
-					</div>
-					<div class="col-md-6 col-sm-6 meta-icons">
-						<a title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
-							<span class="glyphicon glyphicon-bookmark"></span>
-						</a>
-					</div>
-				</div>
-			</div>
-			<div class="editvalue-container">
-				<!-- here is where we would put the filter name -->
-				<div ng-show="false" class="field-enable">
-					<input ng-model="FacetsData.enableAll" type="checkbox" ng-click="sideBar.enableDisableAll()" />
-				</div>
-				<div class="field-enable" ng-repeat="facet in FacetsData.facets" ng-show="sideBar.showUsableFilter(facet)">
-					<div ng-class="sideBar.getMoreFieldSwitchClass(facet)">
-						<input type="checkbox" ng-model="FacetsData.chooseColumns[facet['table']][facet['name']]"
-							class="check" ng-click="sideBar.clickFacet($event,facet,'input')"/>
-					</div>
-					<label ng-class="sideBar.getMoreFieldValueClass(facet)" ng-click="sideBar.clickFacet($event,facet,'label')">{{facet['display']}}</label>
-					<div class="field-count pull-right">
-						<!-- <span class="badge">{{sideBar.displayFacetCount(facet)}}</span> -->
-					</div>
-				</div>
-			</div>
-		</aside>
-
-		<!-- Adjust value ranges per field sidebar -->
-
-		<aside id="editfilter" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
-			<div class="sidebar-wrap">
-			    <!-- Sidebar header -->
-					<div class="sidebar-header row">
-							<div class="col-md-9">
-								<h4 class="text-left">{{FacetsData.tag['display']}}</h4>
-							</div>
-							<a class="sidebar-toggle pull-left" href="#" title="Apply Selections" ng-click="sideBar.editFilterDone($event, 'field-toggle', true);"><span class="glyphicon glyphicon-ok-circle"></span></a>
-							<a class="sidebar-toggle pull-left" href="#" title="Go Back" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="glyphicon glyphicon-remove-circle"></span></a>
-					</div>
-					<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box input-group">
-						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
-						<span class="input-group-addon">
-					        <i class="glyphicon glyphicon-search"></i>
-					    </span>
-					</div>
-					<div class="row">
-						<div class="meta-actions">
-							<div class="col-md-6 col-sm-6">
-								<button ng-if="sideBar.hasSelectedFacets();" ng-click="sideBar.resetSearch();" type="button" class="badge reset">Reset Search</button>
-							</div>
-							<div class="col-md-6 col-sm-6 meta-icons">
-								<a title="This link stores your search results as a URL. Right click and save." ng-href="{{sideBar.urlBookmark()}}">
-									<span class="glyphicon glyphicon-bookmark"></span>
-								</a>
-							</div>
-						</div>
-					</div>
-			    <div ng-show="false" ng-if="sideBar.if_type(FacetsData.tag, 'enum')">
-					<div class="editfilter-container">
-		                <span class="filter-item-field">enabled {{sideBar.getFacetValues(FacetsData.tag).length}} of {{FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values'].length}}</span>
-					</div>
-			    </div>
-			    <!-- slider/value picker -->
-			    <div ng-if="FacetsData.tag!=null">
-		        	<div class="editvalue-container">
-						<ul class="nav filteritems" ng-hide="sideBar.hide(FacetsData.tag)">
-							<li ng-if="sideBar.if_type(FacetsData.tag, 'slider')" class="attr-slider"><rzslider
-									rz-slider-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']"
-									rz-slider-high="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']"
-									rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
-									rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
-									rz-slider-translate="translate"> </rzslider></li>
-							<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search filters by keyword..."
-								type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
-								/></li>
-							<li ng-if="sideBar.if_type(FacetsData.tag, 'date')" class="attr-date">
-								From:<br>
-								<datepicker date-format="yyyy-MM-dd" date-set="{{defaultMinDate}}" date-min-limit="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']}}" date-max-limit="{{floorDate}}">
-									<input ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']" type="text">
-								</datepicker>
-								<br><br>
-								To:<br>
-								<datepicker date-format="yyyy-MM-dd" date-set="{{defaultMaxDate}}" date-min-limit="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']}}" date-max-limit="{{floorDate}}">
-									<input ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']" type="text">
-								</datepicker>
-							</li>
-							<li ng-if="sideBar.if_type(FacetsData.tag, 'enum')"
-								ng-repeat="value in FacetsData.colsDescr[FacetsData.tag['table']][FacetsData.tag['name']]['values']"
-								ng-hide="sideBar.showFacetValue(FacetsData.tag, value)">
-								<div class="field-enable">
-									<div ng-class="sideBar.getFieldSwitchClass(FacetsData.tag, value)" ng-click="sideBar.checkUncheck($event,value)">
-										<input
-											type="checkbox" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['values'][value]"
-											class="check"/><b class="b switch"></b>
-									</div>
-									<label ng-class="sideBar.getFieldValueClass(FacetsData.tag, value)" ng-click="sideBar.checkUncheck($event,value)">{{value}}</label>
-									<div class="field-count pull-right">
-										<!-- <span class="badge">{{FacetsData.colsGroup[FacetsData.tag['table']][FacetsData.tag['name']][value]}}</span> -->
-									</div>
-								</div>
-							</li>
-						</ul>
-			        </div>
-			    </div>
-			</div>
 		</aside>
 	</div>
 </div>

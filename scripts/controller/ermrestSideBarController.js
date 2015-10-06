@@ -13,7 +13,6 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     $scope.filtersMatch = {};
     $scope.selectedCollection = '';
     $scope.requestCounter = 0;
-    $scope.chaiseConfig = chaiseConfig;
     $('[data-toggle="tooltip"]').tooltip();
   	$scope.translate = function(value)
 	{
@@ -179,7 +178,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     		}
     	} else if ($scope.if_type($scope.FacetsData.tag, 'text')) {
 			if ($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['value'] != $scope.FacetsData.facetPreviousValues['value']) {
-				$scope.delay_predicate($scope.FacetsData.tag, event.keyCode);
+				//$scope.delay_predicate($scope.FacetsData.tag, event.keyCode);
 			}
 		} else if ($scope.if_type($scope.FacetsData.tag, 'date')) {
 			if ($scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['min'] != $scope.FacetsData.facetPreviousValues['min'] ||
@@ -197,7 +196,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     			}
     		});
     		if (hasChanged) {
-        		$scope.predicate_checkbox($scope.FacetsData.tag);
+        		//$scope.predicate_checkbox($scope.FacetsData.tag);
     		}
     	}
     	FacetsService.sidebarClick(toggle);
@@ -646,6 +645,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		if (!$(event.target).is('input')) {
 			$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value] = !$scope.FacetsData.box[$scope.FacetsData.tag['table']][$scope.FacetsData.tag['name']]['values'][value];
 		}
+		$scope.predicate_checkbox($scope.FacetsData.tag);
 	};
 
 	this.clickFacet = function clickFacet(event, facet, from) {
@@ -658,88 +658,6 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	this.displayFacetCount = function displayFacetCount(facet) {
 		return getFacetCount($scope.FacetsData, facet);
 	};
-
-  this.urlBookmark = function urlBookmark() {
-		return $scope.FacetsData.bookmark;
-	};
-
-  this.hasSelectedFacets = function hasSelectedFacets() {
-    var selectedFacets = false;
-    $.each($scope.FacetsData.box, function(table, columns) {
-      var colsDescr = $scope.FacetsData['colsDescr'][table];
-      $.each(columns, function(key, value) {
-        if(searchBoxPresentation.contains(colsDescr[key]['type'])) {
-          if (value['value'] != '') {
-            selectedFacets = true;
-            return false;
-          }
-        }
-        else if (colsDescr[key]['type'] == 'enum') {
-            if (value['values'] != null) {
-              $.each(value['values'], function(checkbox_key, checkbox_value) {
-                if(checkbox_value) {
-                  selectedFacets = true;
-                  return true;
-                }
-              });
-            }
-        }
-        else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
-            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
-              if (value['left']) {
-                selectedFacets = true;
-                return true;
-              }
-              if (value['right']) {
-                selectedFacets = true;
-                return true;
-              }
-            }
-        }
-      });
-    });
-    return selectedFacets;
-  };
-
-  this.resetSearch = function resetSearch() {
-    // Reset the search box
-    $scope.FacetsData.searchFilter = '';
-    this.clear();
-
-    // Reset selected facets
-    $.each($scope.FacetsData.box, function(table, columns) {
-      var colsDescr = $scope.FacetsData['colsDescr'][table];
-      $.each(columns, function(key, value) {
-        if(searchBoxPresentation.contains(colsDescr[key]['type'])) {
-          if (value['value'] != '') {
-            value['value'] = '';
-          }
-        }
-        else if (colsDescr[key]['type'] == 'enum') {
-            if (value['values'] != null) {
-              $.each(value['values'], function(checkbox_key, checkbox_value) {
-                if(checkbox_value) {
-                  value['values'][checkbox_key] = false;
-                }
-              });
-            }
-        }
-        else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
-            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
-              if (value['left']) {
-                delete value['left'];
-              }
-              if (value['right']) {
-                delete value['right'];
-              }
-              value['min'] = value['floor'];
-              value['max'] = value['ceil'];
-            }
-        }
-      });
-    });
-    $scope.predicate_search_all();
-  };
 
 	$scope.refresh = function refresh() {
 		if (!$scope.$$phase) {

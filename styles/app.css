@@ -14,6 +14,10 @@ label {
 	vertical-align: middle;
 }
 
+.sidebar label {
+	font-weight: normal;
+}
+
 [class*=" md-"], [class^="md-"] {
 	/* line-height: inherit; */
 }
@@ -99,7 +103,6 @@ label {
 	/* min-height: 80px; */
 	background-color: #FFF;
 	/* border: 1px solid #CCC; */
-	padding: 5px;
 	position: relative;
 }
 
@@ -339,8 +342,10 @@ dl.attribute-group dd {
 }
 
 .sidebar .sidebar-header {
-	border-bottom: 1px solid #CCC;
-	padding: 5px;
+	/* border-bottom: 1px solid #CCC; */
+	padding: 0;
+	display: block;
+	width: 340px;
 }
 
 .sidebar .btn-default {
@@ -391,6 +396,14 @@ dl.attribute-group dd {
 	display: block;
 	padding: 10px 15px;
 	margin-bottom: 70px; /* why? the visible margin is about 15-20px worth so the sidebar thinks it's longer than it is */
+}
+
+#morefilters .editvalue-container {
+	padding: 0 15px;
+}
+
+#editfilter .editvalue-container {
+	padding: 0;
 }
 
 .sidebar-nav a.field-toggle .md-chevron-right, .editfilter-container a.field-toggle .md-chevron-right  {
@@ -514,10 +527,6 @@ dl.attribute-group dd {
 	text-transform: uppercase;
 }
 
-.sidebar .sidebar-header {
-	padding: 0;
-}
-
 .sidebar a.view-attr, .sidebar .sidebar-header a {
 	display: block;
 	color: #333;
@@ -536,6 +545,10 @@ dl.attribute-group dd {
 .sidebar a.view-attr small {
 	font-size: .9em;
 	margin-left: 5px;
+}
+
+.sidebar .sidebar-header a.sidebar-toggle {
+	width: 36px;
 }
 
 #editfilter-config .editvalue-container {
