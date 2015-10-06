@@ -550,6 +550,7 @@ dl.attribute-group dd {
 
 .sidebar .sidebar-header a.sidebar-toggle {
 	width: 36px;
+	color: #428bca;
 }
 
 #editfilter-config .editvalue-container {
