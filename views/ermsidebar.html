@@ -11,7 +11,10 @@
 					    </span>
 					</div>
 		        <div id="navcontainer">
-							<h4>Choose Attributes:</h4>
+							<h4>
+								<span ng-if="FacetsData.searchFilter.length==0">Choose Attributes:</span>
+								<span ng-if="FacetsData.searchFilter.length>0">&ldquo;{{FacetsData.searchFilter}}&rdquo; found in:</span>
+							 </h4>
 			        <ul class="nav sidebar-nav">
 				        <li ng-show="sideBar.showFacetCount(facet) || sideBar.showFacetMatch(facet)" ng-repeat="facet in FacetsData.facets">
 			            <a class="field-toggle" href="#" ng-click="sideBar.slideFilter($event, 'field-toggle', facet)">
