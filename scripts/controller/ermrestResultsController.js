@@ -428,7 +428,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
 	};
 
-  // Returns true if there are facets that have been selected.
   this.hasSelectedFacets = function hasSelectedFacets() {
     var selectedFacets = false;
     $.each($scope.FacetsData.box, function(table, columns) {
@@ -451,7 +450,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
             }
         }
         else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
-            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+            if (!hasAnnotation(table, key, 'download')) {
               if (value['left']) {
                 selectedFacets = true;
                 return true;
@@ -491,7 +490,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
             }
         }
         else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
-            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+            if (!hasAnnotation(table, key, 'download')) {
               if (value['left']) {
                 delete value['left'];
               }
@@ -506,7 +505,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
     });
     $scope.predicate_search_all();
   };
-  
+
   this.clear = $scope.clear = function clear() {
 		$scope.FacetsData.narrowFilter = '';
     	$.each($scope.FacetsData.facets, function(i, facet) {
