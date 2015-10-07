@@ -73,6 +73,10 @@ label {
 
 /* parent element for the filter button and filter container */
 
+#filterarea {
+	padding-top: 5px;
+}
+
 #filter {
 	/* min-height: 80px;
 	height: 100%;

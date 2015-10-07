@@ -7,7 +7,7 @@
 
     <!-- HEADER -->
     <div ng-controller="HeaderCtrl" id="header" class="navbar navbar-fixed-top">
-        <a id="brand" href="/">Chaise</a>
+        <a id="brand" href="/" class="navbar-brand">Chaise</a>
     </div>
     <!-- SPINNER -->
     <div ng-init="spinnerVisible = false" ng-show="spinnerVisible" id="spinner">
