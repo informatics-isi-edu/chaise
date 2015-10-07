@@ -566,12 +566,14 @@ dl.attribute-group dd {
 	display: inline-block;
   	cursor: pointer;
   	margin-left: 5px;
+  	margin-top: 2px; /* only needed to offset vertical align in .sidebar-title for Safari */
 }
 
 .sidebar-title {
 	display: inline-block;
   	margin-right: 0;
   	cursor: pointer;
+  	vertical-align: top; /* only needed for Safari workaround */
   	/* from truncate */
   	overflow: hidden;
 	text-overflow:ellipsis;
