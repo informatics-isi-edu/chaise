@@ -1,22 +1,6 @@
 <html ng-app="chaiseRecordApp">
     <head>
-<link rel='stylesheet' type='text/css' href='../styles/vendor/bootstrap.min.css'>
-<link rel='stylesheet' type='text/css' href='../record/assets/lib/slippry/slippry.css'>
-<link rel='stylesheet' type='text/css' href='../record/assets/lib/fancybox/jquery.fancybox.css'>
-<link rel='stylesheet' type='text/css' href='../record/assets/stylesheets/app.css?v=f654f096e8755eec39b52e3eb7049357'></script>
-<script src='../scripts/vendor/jquery-latest.min.js'></script>
-<script src='../scripts/vendor/angular.js'></script>
-<script src='../scripts/vendor/angular-sanitize.js'></script>
-<script src='../record/assets/lib/angular-route.min.js'></script>
-<script src='../record/assets/lib/angular-resource.min.js'></script>
-<script src='../record/assets/lib/angular-animate.min.js'></script>
-<script src='../record/assets/lib/angular-cookies.min.js'></script>
-<script src='../record/assets/lib/ui-bootstrap-tpls-0.12.1.min.js'></script>
-<script src='../record/assets/lib/filesize.min.js'></script>
-<script src='../record/assets/lib/slippry/slippry.min.js'></script>
-<script src='../record/assets/lib/fancybox/jquery.fancybox.pack.js'></script>
-<script src='../record/assets/lib/jquery.floatThead.min.js'></script>
-<script src='../record/assets/javascripts/app.js?v=710efd70195367cb1189f13d08cef16d'></script>
+        %ASSETS%
         <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     </head>
     <body>

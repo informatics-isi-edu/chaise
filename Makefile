@@ -29,12 +29,13 @@ BOWER=bower_components
 
 # HTML
 HTML=search/index.html \
-	 login/index.html
+	 login/index.html \
+	 record/index.html
 
 # CSS source
 CSS=styles
 
-CSS_DEPS=$(CSS)/vendor/bootstrap.css \
+CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/ng-grid.css \
 	$(CSS)/vendor/rzslider.css \
 	$(CSS)/vendor/angular-datepicker.css
@@ -82,6 +83,32 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermsidebar.html \
 	$(TEMPLATES)/ermretrievefilters.html \
 	$(TEMPLATES)/ermretrieveresults.html
+
+# JavaScript and CSS source for Record app
+RECORD_ASSETS=record/assets
+
+RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-sanitize.js
+
+RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
+	$(RECORD_ASSETS)/lib/angular-resource.min.js \
+	$(RECORD_ASSETS)/lib/angular-animate.min.js \
+	$(RECORD_ASSETS)/lib/angular-cookies.min.js \
+	$(RECORD_ASSETS)/lib/ui-bootstrap-tpls-0.12.1.min.js \
+	$(RECORD_ASSETS)/lib/filesize.min.js \
+	$(RECORD_ASSETS)/lib/slippry/slippry.min.js \
+	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.pack.js \
+	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js
+
+RECORD_JS_SOURCE=$(RECORD_ASSETS)/javascripts/app.js
+
+RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css
+
+RECORD_CSS_DEPS=$(RECORD_ASSETS)/lib/slippry/slippry.css \
+	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css
+
+RECORD_CSS_SOURCE=$(RECORD_ASSETS)/stylesheets/app.css
 
 # Config file
 JS_CONFIG=chaise-config.js
@@ -195,7 +222,7 @@ karma:
 .PHONY: html
 html: $(HTML)
 
-# Rules to attach checksums to JavaScript source in the header
+# Rules to attach checksums to JavaScript and CSS source in the header
 search/index.html: search/index.html.in .make-asset-block .make-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
@@ -204,6 +231,10 @@ search/index.html: search/index.html.in .make-asset-block .make-template-block
 login/index.html: login/index.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		login/index.html.in > login/index.html
+
+record/index.html: record/index.html.in .make-record-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
+		record/index.html.in > record/index.html
 
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
 	> .make-asset-block
@@ -220,6 +251,23 @@ login/index.html: login/index.html.in .make-asset-block
 	for file in $(JS_SOURCE) $(JS_CONFIG); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
+	done
+
+.make-record-asset-block: $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_DEPS) $(RECORD_CSS_SOURCE) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_DEPS) $(RECORD_JS_SOURCE)
+	> .make-record-asset-block
+	for file in $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_DEPS); do \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-record-asset-block ; \
+	done
+	for file in $(RECORD_CSS_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
+	done
+	for file in $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_DEPS); do \
+		echo "<script src='../$$file'></script>" >> .make-record-asset-block ; \
+	done
+	for file in $(RECORD_JS_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 
 .make-template-block: $(TEMPLATES_DEPS)
