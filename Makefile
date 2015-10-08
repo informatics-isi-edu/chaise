@@ -101,7 +101,11 @@ RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
 	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.pack.js \
 	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js
 
-RECORD_JS_SOURCE=$(RECORD_ASSETS)/javascripts/app.js
+RECORD_JS_SOURCE= $(JS)/respond.js \
+	$(JS)/variables.js \
+	$(JS)/utils.js \
+	$(JS)/ermrest.js \
+	$(RECORD_ASSETS)/javascripts/app.js
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css
 
@@ -253,7 +257,7 @@ record/index.html: record/index.html.in .make-record-asset-block
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
 
-.make-record-asset-block: $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_DEPS) $(RECORD_CSS_SOURCE) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_DEPS) $(RECORD_JS_SOURCE)
+.make-record-asset-block: $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_DEPS) $(RECORD_CSS_SOURCE) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_DEPS) $(RECORD_JS_SOURCE) $(JS_CONFIG)
 	> .make-record-asset-block
 	for file in $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_DEPS); do \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-record-asset-block ; \
@@ -265,7 +269,7 @@ record/index.html: record/index.html.in .make-record-asset-block
 	for file in $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-record-asset-block ; \
 	done
-	for file in $(RECORD_JS_SOURCE); do \
+	for file in $(RECORD_JS_SOURCE) $(JS_CONFIG); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
