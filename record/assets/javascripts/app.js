@@ -2,8 +2,8 @@
 
 // one level -> big construct table
 //     -> inbound/outbound forgein key
-//     -> nested forgein table inline into construct 
-    
+//     -> nested forgein table inline into construct
+
 // Invalid
 
 // file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:tom/username=efef
@@ -40,12 +40,12 @@ var CR_BASE_URL = window.location.origin + '/ermrest/catalog/';
 var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'ngCookies', 'ngSanitize']);
 
 /*
-  ____             __ _       
- / ___|___  _ __  / _(_) __ _ 
+  ____             __ _
+ / ___|___  _ __  / _(_) __ _
 | |   / _ \| '_ \| |_| |/ _` |
 | |__| (_) | | | |  _| | (_| |
  \____\___/|_| |_|_| |_|\__, |
-                        |___/ 
+                        |___/
 */
 
 document.onmouseover = function() {
@@ -61,7 +61,7 @@ document.onmouseleave = function() {
 setTimeout(function(){
 
     window.onhashchange = function() {
-      
+
         if (window.location.hash != '#undefined') {
             location.reload();
         } else {
@@ -82,8 +82,8 @@ setTimeout(function(){
 // }]);
 
 /*
- ____                  _               
-/ ___|  ___ _ ____   _(_) ___ ___  ___ 
+ ____                  _
+/ ___|  ___ _ ____   _(_) ___ ___  ___
 \___ \ / _ \ '__\ \ / / |/ __/ _ \/ __|
  ___) |  __/ |   \ V /| | (_|  __/\__ \
 |____/ \___|_|    \_/ |_|\___\___||___/
@@ -96,7 +96,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     // Get the entity in JSON format
     // Note: By this point,the schema should be loaded already
     this.getEntity = function(tableName, keys, nested, onSuccess){
-        
+
         // Start spinner
         spinnerService.show('Loading...');
 
@@ -113,13 +113,13 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             notFoundService.show("We're sorry, the tablename '" + tableName + "' does not exist. Please try again!");
             return;
         }
-              
+
         // Build the entity path
         var path = CR_BASE_URL + schemaService.schema.cid + '/entity/' + tableName + '/' + self.buildPredicate(keys);
 
         // Execute API Request to get main entity
         $http.get(path).success(function(data, status, headers, config) {
-        
+
             // If entity was NOT found, it's because no entity match the keys that were provided
             if (data.length == 0){
                 notFoundService.show("We're sorry, an entity with keys '" + JSON.stringify(keys) + "' does not exist. Please try again!");
@@ -195,7 +195,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                     terms.push(term);
                                 }
 
-                                var formattedAssoication    = { 
+                                var formattedAssoication    = {
                                                                 'tableName':            rt['tableName'],
                                                                 'terms':                terms,
                                                                 'referencedTableName':  rt['referencedTableName']
@@ -208,14 +208,14 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                             // Else, append the 'formattedReference' to the entity's references
                             } else{
 
-                                // If refernce table is a binary table that refernces a more 
+                                // If refernce table is a binary table that refernces a more
                                 // If reference table is a binary table that references a more complex table, bump the complex table up
                                 // If reference table is a complex table, swap vocab
 
                                 self.processForeignKeyRefencesForTables(tableName, rt, references);
-                                
+
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
-                                var formattedReference     = { 
+                                var formattedReference     = {
                                                                 'displayTableName':     rt['displayTableName'], // the title of nested tables
                                                                 'tableName':            rt['tableName'], // the table the nested entities belong to
                                                                 'list':                 references, // list of nested entities
@@ -232,7 +232,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                 entity.references.push(formattedReference);
                             }
                         }
-                        
+
                         counter++;
 
                         // Once all the request have been made, invoke the onSuccess callback
@@ -260,7 +260,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             notFoundService.show("We're sorry, we could not find a match with the keys you provided");
             spinnerService.hide();
         });
-       
+
     };
 
     // If the reference table has a column that links to a vocabulary table, swape
@@ -333,10 +333,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             var cd      = entityTableSchema.column_definitions[c];
             var cn      = cd.name.toLowerCase();
             var annotations = cd.annotations.comment;
-            
+
             // If the annotation is a 'title'
             if (annotations != null && annotations.indexOf('title') > -1){
-            
+
                 return entity[cd.name];
 
             // If column name fits the array in validTitleColumns
@@ -354,7 +354,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     };
 
     // Scan through schema to find related tables
-    // Include tables with outbound foregin key (construct), to entity (target). If the foreign table (construct) is an 'asssociation' table, we will go another level deep and get all associations 
+    // Include tables with outbound foregin key (construct), to entity (target). If the foreign table (construct) is an 'asssociation' table, we will go another level deep and get all associations
     this.getForeignTablesForEntity = function(entity){
 
         // Goes through every table in the schema, looking for a forgein_key_column: table_name that matches entity table name
@@ -365,7 +365,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             var tableSchema             = schemaService.schema.tables[tableKey];
             var referencedColumnMatch   = false; // if our table name is part of foreign key -> reference columns
 
-            // EACH FORGEIN KEY 
+            // EACH FORGEIN KEY
             for (var i = 0; i < tableSchema.foreign_keys.length; i++){
                var fk =  tableSchema.foreign_keys[i];
 
@@ -390,9 +390,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         if (schemaService.isBinaryTable(foreignTable.tableName)){
                             var parentTableName     = entity.internal.tableName;
                             // ASSUMPTION: Column name = tablename
-                            var referenceTableName  = schemaService.getReferencedColumnName(parentTableName, foreignTable.tableName); 
+                            var referenceTableName  = schemaService.getReferencedColumnName(parentTableName, foreignTable.tableName);
 
-                           
+
                             // CASE A: If foreign table references a vocabulary table, set vocabularyTable varialbe to true (dataset_mouse_mutation -> mouse_mutation)
                             if (schemaService.isVocabularyTable(referenceTableName)){
                                 foreignTable.vocabularyTable            = true;
@@ -428,31 +428,31 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             var predicate   = encodeURIComponent(key) + '=';
             // Do not encoude already encoded string
             predicate       += params[key].toString().indexOf('%') > -1 ? params[key] : encodeURIComponent(params[key]);
-             
+
             predicates.push(predicate);
         }
         // Join predicates with a conjunctive filter '&'
         return predicates.join('&');
     };
 
-   
+
 
 }]);
 
 // Service use to introspect scheam
 chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerService', 'notFoundService', function($http, $rootScope, spinnerService, notFoundService){
-    
+
     var schema  = {};
 
     // Get the catalogue's schema
     this.getSchema = function(cid, schemaName, onSuccess){
-        
+
         // Start spinner
         spinnerService.show('Loading...');
 
         // Build the schema path
         var path = CR_BASE_URL + cid + '/schema';
-        
+
         // Reference to service
         var self = this;
 
@@ -488,7 +488,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         for (var i = 0; i < foreignKeys.length; i++){
             var fk                  = foreignKeys[i];
             var referencedColumns   = fk.referenced_columns;
-            
+
             if (referencedColumns == undefined || referencedColumns.length == 0){
                 continue;
             }
@@ -513,7 +513,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         for (var i = 0; i < foreignKeys.length; i++){
             var fk                  = foreignKeys[i];
             var referencedColumns   = fk.referenced_columns;
-            
+
             if (referencedColumns == undefined || referencedColumns.length == 0){
                 continue;
             }
@@ -531,7 +531,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
 
     // Valid if table name is part of schema
     this.isValidTable = function(tableName){
-        // Iterate through the tables defined in the schema to find a match with tableName        
+        // Iterate through the tables defined in the schema to find a match with tableName
         var match = false;
         for (var t in this.schema.tables){
             // If there is a match
@@ -601,7 +601,7 @@ chaiseRecordApp.service('spinnerService', ['$rootScope', function($rootScope){
 
 // Service for not found
 chaiseRecordApp.service('notFoundService', ['$rootScope', function($rootScope){
-    
+
     // Show not found with rootScope
     this.show = function(msg){
         $rootScope.notFoundVisible  = true;
@@ -615,9 +615,9 @@ chaiseRecordApp.service('notFoundService', ['$rootScope', function($rootScope){
 
 }]);
 
-// Helper service for utilties methods 
+// Helper service for utilties methods
 chaiseRecordApp.service('locationService', function(){
-    
+
 
     // Return the has params in an JSON object
     this.getHashParams = function () {
@@ -636,7 +636,7 @@ chaiseRecordApp.service('locationService', function(){
         return hashParams;
     };
 
-     // 
+     //
     this.convertParamsToObject = function(params){
         var obj = {};
         var predicates = params.split('&');
@@ -652,18 +652,18 @@ chaiseRecordApp.service('locationService', function(){
     };
 });
 
-/*** 
-  ____            _             _ _             
- / ___|___  _ __ | |_ _ __ ___ | | | ___ _ __ ___ 
+/***
+  ____            _             _ _
+ / ___|___  _ __ | |_ _ __ ___ | | | ___ _ __ ___
 | |   / _ \| '_ \| __| '__/ _ \| | |/ _ \ '__/ __|
 | |__| (_) | | | | |_| | | (_) | | |  __/ |  \__ \
  \____\___/|_| |_|\__|_|  \___/|_|_|\___|_|  |___/
-                                                  
+
 ***/
 
 // Header Controller
 chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($rootScope, $scope){
-
+    HOME = window.location.origin;
     $scope.active = "Home";
 
     // Determines wheather the page is active
@@ -680,14 +680,14 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
     // K: Key
 
     // Set up the parameters base on url
-    var params      = locationService.getHashParams(); 
+    var params      = locationService.getHashParams();
     // var params      = $location.search();  query parameters
     var cid         = params['catalogueId'];
     var tableName   = params['tableName'];
     var schema      = params['schemaName'];
     var keys        = params['keys'];
 
-    // cid 
+    // cid
     var cidRegex = /^[0-9]+$/;
     var tableNameRegex = /^[0-9a-zA-z_-]+$/;
 
@@ -698,7 +698,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
 
     $scope.reloadPage = function(url){
         setTimeout(function(){
-            location.reload();            
+            location.reload();
         }, 500);
     };
 
@@ -707,15 +707,15 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
         notFoundService.show("Please provide a catalogue id");
 
     } else if (!cidRegex.test(cid)){
-        
-        notFoundService.show("'" + cid + "' is an invalid catalogue id. Please try again!");        
+
+        notFoundService.show("'" + cid + "' is an invalid catalogue id. Please try again!");
 
     } else if (tableName == undefined){
-        
+
         notFoundService.show("Please provide a table name");
 
     } else if (!tableNameRegex.test(tableName)){
-        
+
         notFoundService.show("'" + tableName + "' is an invalid table name. Please try again!");
 
     } else if (Object.keys(keys).length === 0){
@@ -738,8 +738,8 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
 
     $scope.$watch('entity.open', function(isOpen){
         if (isOpen) {
-          console.log('First group was opened'); 
-        }    
+          console.log('First group was opened');
+        }
     });
 
 }]);
@@ -789,8 +789,8 @@ chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
 
 
 /*
- _____ _ _ _                
-|  ___(_) | |_ ___ _ __ ___ 
+ _____ _ _ _
+|  ___(_) | |_ ___ _ __ ___
 | |_  | | | __/ _ \ '__/ __|
 |  _| | | | ||  __/ |  \__ \
 |_|   |_|_|\__\___|_|  |___/
@@ -824,7 +824,7 @@ chaiseRecordApp.filter('removeUnderScores', function(){
 });
 
 
-// If value is url -> wraps it in an <a> 
+// If value is url -> wraps it in an <a>
 // If value is array -> stringify arrays
 chaiseRecordApp.filter('sanitizeValue', function($sce){
     return function(value){
@@ -833,20 +833,20 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
         var emails  = /([a-zA-Z0-9_\.]+@[a-zA-Z_\.]+\.(edu|com|net|gov|io))/gim;
 
         if (Array.isArray(value)){
-      
+
             return value.join(', ');
 
         } else if (value === null){
-      
+
             return 'N/A';
 
         } else if (typeof value == "string" && value.match(urls)) {
-            
+
             value = value.replace(urls, '<a href="$1" target="_blank">$1</a>');
             return $sce.trustAsHtml(value);
 
         } else if (typeof value == "string" && value.match(emails)) {
-            
+
             value = value.replace(emails, '<a href=\"mailto:$1\">$1</a>');
             return $sce.trustAsHtml(value);
 
@@ -921,8 +921,8 @@ chaiseRecordApp.filter('filesize', function(){
 });
 
 /*
- ____  _               _   _                
-|  _ \(_)_ __ ___  ___| |_(_)_   _____  ___ 
+ ____  _               _   _
+|  _ \(_)_ __ ___  ___| |_(_)_   _____  ___
 | | | | | '__/ _ \/ __| __| \ \ / / _ \/ __|
 | |_| | | | |  __/ (__| |_| |\ V /  __/\__ \
 |____/|_|_|  \___|\___|\__|_| \_/ \___||___/
