@@ -583,6 +583,7 @@ dl.attribute-group dd {
 
 .sidebar-title {
 	display: inline-block; 
+	color: #333;
   	/* margin-right: 0;
   	cursor: pointer;*/
   	vertical-align: top; /* only needed for Safari workaround */
