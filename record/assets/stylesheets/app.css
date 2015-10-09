@@ -168,6 +168,13 @@ a:hover, a:focus{
     word-wrap: break-word;
 }
 
+#record-bookmark-container{
+    text-align: right;
+    position: absolute;
+    top: 20px;
+}
+
+
 /*** NESTED TABLES ***/
 
 .panel-body{

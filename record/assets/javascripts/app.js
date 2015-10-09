@@ -51,38 +51,31 @@ var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute'
 document.onmouseover = function() {
     //User's mouse is inside the page.
     window.innerDocClick = true;
-}
+};
 
 document.onmouseleave = function() {
     //User's mouse has left the page.
     window.innerDocClick = false;
-}
-
+};
 
 setTimeout(function(){
 
     window.onhashchange = function() {
       
-        if (window.innerDocClick) {
-            window.innerDocClick = false;
+        if (window.location.hash != '#undefined') {
+            location.reload();
         } else {
-            if (window.location.hash != '#undefined') {
-                    location.reload();
-            } else {
-                    history.pushState("", document.title, window.location.pathname);
-                    location.reload();
-            }
+            history.pushState("", document.title, window.location.pathname);
+            location.reload();
         }
 
         function goBack() {
             window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
-            //blah blah blah
             window.location.lasthash.pop();
         }
     }
 
-}, 500);
-
+}, 0);
 
 // chaiseRecordApp.config(['$locationProvider', function($locationProvider) {
 //     $locationProvider.html5Mode({rewriteLinks: false});
@@ -138,7 +131,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
             // If nested == false, then we're only interested in the entity and not any nested tables, references, or associations
             if (!nested){
-                var keys = { id: entity.id };
+                var keys            = { id: entity.id };
                 entity.link         = self.getEntityLink(tableName, keys);
                 onSuccess(entity);
                 return;
