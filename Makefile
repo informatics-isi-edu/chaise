@@ -88,6 +88,7 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 RECORD_ASSETS=record/assets
 
 RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js
 
