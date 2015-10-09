@@ -580,6 +580,30 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         return table.column_definitions.length > 2;
     };
 
+    // Returns if a column is hidden
+    this.isHiddenColumn = function(tableName, columnName){
+        
+        var columnDefinitions = this.schema.tables[tableName].column_definitions;
+
+        // Look for the column defition
+        for (var i = 0; i < columnDefinitions.length; i++){
+
+            var cd = columnDefinitions[i];
+
+            // Column definition found
+            if (cd.name == columnName){
+
+                // If hidden annotation is present, column is hidden
+                if (cd.annotations.comment !== undefined && cd.annotations.comment.indexOf('hidden') > -1){
+                    return true;
+                } else{
+                    return false;
+                }
+            }
+        }
+
+    };
+
 }]);
 
 
@@ -798,22 +822,27 @@ chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
 */
 
 // Return an entity object who's values are not arrays with objects, also remove title from entity
-chaiseRecordApp.filter('filteredEntity', function(){
-    return function(input){
+chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaService){
+    return function(entity){
         var filteredEntity = {};
 
-        for (var key in input){
-            var value = input[key];
+        for (var key in entity){
+            var value = entity[key];
             // Only insert values into filteredEntity if value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object AND if the key is not 'interal'
             if ((!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) && key != 'internal'){
-                filteredEntity[key] = input[key];
+
+                // Only include column (key) if column is not hidden
+                if (!schemaService.isHiddenColumn(entity.internal.tableName, key)){
+                    console.log('not including', key);
+                    filteredEntity[key] = entity[key];
+                }
             }
         }
 
         return filteredEntity;
 
     };
-});
+}]);
 
 // Removes underscores from input
 chaiseRecordApp.filter('removeUnderScores', function(){
