@@ -503,7 +503,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
       });
     });
     $scope.predicate_search_all();
-    // Close open sidebar and then open top level sidebar
+    // Resets sidebar view to top-level facet view
     $('#morefilters.open,#editfilter.open,#collectionsTree.open').removeClass('open');
   };
 
