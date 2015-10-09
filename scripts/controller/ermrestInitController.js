@@ -28,8 +28,6 @@ ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$window',
 
 	$('.sidebar-overlay').click(function(event) {
     if ($('.sidebar-overlay').hasClass('active')) {
-      $('#main-content').removeClass('col-xs-6 col-sm-6 col-md-7 col-lg-8').addClass('col-xs-12 col-sm-12 col-md-12 col-lg-12');
-      $('div.open-side').removeClass('hidden').addClass('show');
       $('#collectionsTree').removeClass('open');
       $('.sidebar-overlay').removeClass('active');
     }

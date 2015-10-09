@@ -14,6 +14,10 @@ label {
 	vertical-align: middle;
 }
 
+.sidebar label {
+	font-weight: normal;
+}
+
 [class*=" md-"], [class^="md-"] {
 	/* line-height: inherit; */
 }
@@ -69,6 +73,10 @@ label {
 
 /* parent element for the filter button and filter container */
 
+#filterarea {
+	padding-top: 5px;
+}
+
 #filter {
 	/* min-height: 80px;
 	height: 100%;
@@ -99,7 +107,6 @@ label {
 	/* min-height: 80px; */
 	background-color: #FFF;
 	/* border: 1px solid #CCC; */
-	padding: 5px;
 	position: relative;
 }
 
@@ -141,14 +148,6 @@ label {
 	margin-bottom: 5px;
 	display: inline-block;
 }
-
-/*
-.filter-item .glyphicon, .field-toggle .glyphicon {
-	color: #999;
-	font-weight: normal;
-	font-size: .9em;
-}
-*/
 
 .filter-item-field {
 	color: #999;
@@ -265,7 +264,7 @@ dl.attribute-group dd {
 /* Standardize card view */
 
 #results-group .col-md-6 .panel {
-     height: 280px;
+     height: 265px;
      overflow: hidden;
 }
 
@@ -278,6 +277,7 @@ dl.attribute-group dd {
      height: 76px;
      line-height: 1.4;
      max-width: 500px;
+		 white-space: nowrap;
      overflow: hidden;
      text-overflow: ellipsis;
 }
@@ -339,8 +339,10 @@ dl.attribute-group dd {
 }
 
 .sidebar .sidebar-header {
-	border-bottom: 1px solid #CCC;
-	padding: 5px;
+	/* border-bottom: 1px solid #CCC; */
+	padding: 0;
+	display: block;
+	width: 340px;
 }
 
 .sidebar .btn-default {
@@ -391,6 +393,14 @@ dl.attribute-group dd {
 	display: block;
 	padding: 10px 15px;
 	margin-bottom: 70px; /* why? the visible margin is about 15-20px worth so the sidebar thinks it's longer than it is */
+}
+
+#morefilters .editvalue-container {
+	padding: 0 15px;
+}
+
+#editfilter .editvalue-container {
+	padding: 0;
 }
 
 .sidebar-nav a.field-toggle .md-chevron-right, .editfilter-container a.field-toggle .md-chevron-right  {
@@ -511,11 +521,15 @@ dl.attribute-group dd {
 	font-size: .9em;
 	font-weight: bold;
 	margin-left: 10px;
+	margin-top: 10px;
+	margin-right: 0;
 	text-transform: uppercase;
+	display: inline-block;
 }
 
-.sidebar .sidebar-header {
-	padding: 0;
+.sidebar .sidebar-title h4 {
+	margin-left: 0;
+	margin-top: 0;
 }
 
 .sidebar a.view-attr, .sidebar .sidebar-header a {
@@ -523,6 +537,7 @@ dl.attribute-group dd {
 	color: #333;
 	height: 30px;
 	line-height: 30px;
+	padding: 10px;
 }
 
 .sidebar a.view-attr:hover, .sidebar .sidebar-header a:hover {
@@ -536,6 +551,37 @@ dl.attribute-group dd {
 .sidebar a.view-attr small {
 	font-size: .9em;
 	margin-left: 5px;
+}
+
+.sidebar .sidebar-header a.sidebar-toggle {
+	width: 34px;
+	color: #428bca;
+	margin-top: 0;
+	padding: 0;
+}
+
+.sidebar .sidebar-header a.sidebar-toggle .glyphicon {
+	top: 0;
+	left: 10px;
+}
+
+
+.sidebar-back {
+	display: inline-block;
+  	cursor: pointer;
+  	margin-left: 5px;
+  	margin-top: 2px; /* only needed to offset vertical align in .sidebar-title for Safari */
+}
+
+.sidebar-title {
+	display: inline-block;
+  	margin-right: 0;
+  	cursor: pointer;
+  	vertical-align: top; /* only needed for Safari workaround */
+  	/* from truncate */
+  	overflow: hidden;
+	text-overflow:ellipsis;
+	white-space:nowrap;
 }
 
 #editfilter-config .editvalue-container {
@@ -622,7 +668,7 @@ p.backlink {
 }
 
 ul.filteritems {
-	padding-left: 10px;
+	padding-left: 15px;
 }
 
 /* Details page styles */
@@ -710,11 +756,7 @@ dt, dd {
 .field-enable {
 	font-weight: normal;
 }
-/*
-#filt-css {
-	display: none;
-}
-*/
+
 .truncate {
 	overflow: hidden;
 	text-overflow:ellipsis;
@@ -725,91 +767,14 @@ dt, dd {
 .toggle, .toggler {
 
   display: inline-block;
-  /* vertical-align: middle; */
   margin-right: 10px;
- /* position: relative;
-  font-weight: normal; */
   cursor: pointer;
-}
-
-.toggler {
-	/*
-  color: #333;
-  transition: .2s;
-  font-size: 14px;
-  width: 250px;
-  */
-}
-
-.toggler--is-active {
-	/*
-  color: #333;
-  font-weight: normal;
-  */
 }
 
 .b {
   display: block;
 }
 
-.toggle {
-	/*
-  width: 20px;
-  height: 12px;
-  border-radius: 20px;
-  background-color: #2ecc71;
-  overflow: hidden;
-  box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.05);
-  vertical-align: middle;
-  */
-}
-
-.toggle.disabled {
-	/*
-	background-color: #a6a6a6;
-	*/
-}
-
-.check {
-	/*
-  position: absolute;
-  display: block;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  z-index: 6;
-  */
-}
-
-.check:checked ~ .switch {
-	/*
-  right: 2px;
-  left: 37.5%;
-  transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
-  transition-property: left, right;
-  transition-delay: .08s, 0s;
-  */
-}
-
-.switch {
-	/*
-  position: absolute;
-  left: 2px;
-  top: 2px;
-  bottom: 2px;
-  right: 37.5%;
-  background-color: #fff;
-  border-radius: 36px;
-  z-index: 1;
-  transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
-  transition-property: left, right;
-  transition-delay: 0s, .08s;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  */
-}
 .detail_text {
 	word-wrap: break-word;
 }

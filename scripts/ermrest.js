@@ -66,6 +66,7 @@ var suppressError = true;
 var suppressBookmark = false;
 var facetPolicy = null;
 var assignBookmark = false;
+var loadPage = true;
 
 function isSortable(table, column) {
 	return !unsortableColumns.contains(column);
@@ -2987,11 +2988,12 @@ function setBookmark(options) {
 	parameters.push('layout='+options.view);
 	parameters.push('page='+options.pagingOptions.currentPage);
 	options.bookmark = prefix + '#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' +options.table + '?' + parameters.join('&');
-	if (!suppressBookmark && options.filter == null && filter != null) {
+	if (!loadPage && !suppressBookmark && options.filter == null) {
 		assignBookmark = true;
 		window.location.assign(options.bookmark);
 		setTimeout(function() {assignBookmark = false;}, 1);
 	}
+	loadPage = false;
 }
 
 function getSearchQuery(url) {

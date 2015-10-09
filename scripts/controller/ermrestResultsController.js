@@ -10,6 +10,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
                                                       function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
+  $scope.chaiseConfig = chaiseConfig;
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
@@ -397,6 +398,10 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return ret;
 	};
 
+  this.urlBookmark = function urlBookmark() {
+    return $scope.FacetsData.bookmark;
+  };
+
 	this.isUrl = function isUrl(table, column) {
 		return hasAnnotation(table, column, 'url');
 	};
@@ -423,7 +428,6 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
 	};
 
-  // Returns true if there are facets that have been selected.
   this.hasSelectedFacets = function hasSelectedFacets() {
     var selectedFacets = false;
     $.each($scope.FacetsData.box, function(table, columns) {
@@ -446,7 +450,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
             }
         }
         else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
-            if (!hasAnnotation(table, key, 'hidden') && !hasAnnotation(table, key, 'download')) {
+            if (!hasAnnotation(table, key, 'download')) {
               if (value['left']) {
                 selectedFacets = true;
                 return true;
@@ -461,5 +465,63 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
     });
     return selectedFacets;
   };
+
+  this.resetSearch = function resetSearch() {
+    // Reset the search box
+    $scope.FacetsData.searchFilter = '';
+    this.clear();
+
+    // Reset selected facets
+    $.each($scope.FacetsData.box, function(table, columns) {
+      var colsDescr = $scope.FacetsData['colsDescr'][table];
+      $.each(columns, function(key, value) {
+        if(searchBoxPresentation.contains(colsDescr[key]['type'])) {
+          if (value['value'] != '') {
+            value['value'] = '';
+          }
+        }
+        else if (colsDescr[key]['type'] == 'enum') {
+            if (value['values'] != null) {
+              $.each(value['values'], function(checkbox_key, checkbox_value) {
+                if(checkbox_value) {
+                  value['values'][checkbox_key] = false;
+                }
+              });
+            }
+        }
+        else if (sliderPresentation.contains(colsDescr[key]['type']) || datepickerPresentation.contains(colsDescr[key]['type'])) {
+            if (!hasAnnotation(table, key, 'download')) {
+              if (value['left']) {
+                delete value['left'];
+              }
+              if (value['right']) {
+                delete value['right'];
+              }
+              value['min'] = value['floor'];
+              value['max'] = value['ceil'];
+            }
+        }
+      });
+    });
+    $scope.predicate_search_all();
+  };
+
+  this.clear = $scope.clear = function clear() {
+		$scope.FacetsData.narrowFilter = '';
+    	$.each($scope.FacetsData.facets, function(i, facet) {
+    		if ($scope.FacetsData['sessionFilters'][facet['table']] != null && $scope.FacetsData['sessionFilters'][facet['table']].contains(facet['name'])) {
+    			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = true;
+    		} else {
+    			$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = false;
+    		}
+    		if ($scope.if_type(facet, 'enum') || $scope.if_type(facet, 'date')) {
+    			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = '';
+    		}
+    	});
+    	$scope.FacetsData.narrowFilter = '';
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
+	};
 
 }]);

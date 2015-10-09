@@ -39,40 +39,40 @@ a:hover, a:focus{
 }
 #brand{
     color: #fff;
-    font-size: 20px;
+/*    font-size: 20px;
     font-weight: lighter;
     letter-spacing: 1px;
     padding: 11px 20px;
-    display: inline-block;
+    display: inline-block; */
 }
 
 #entity-title{
     clear: both;
     padding-top: 10px;
-    color: rgb(126, 126, 126);
+    /* color: rgb(126, 126, 126);
     font-size: 26px;
     font-weight: 300;
-    letter-spacing: 2px;
+    letter-spacing: 2px; */
 }
 #entity-subtitle{
     text-transform: uppercase;
-    color: rgb(179, 179, 179);
+    /* color: rgb(179, 179, 179); */
     font-size: 14px;
-    font-weight: 300;
-    letter-spacing: 1.5px;
+    /* font-weight: 300;
+    letter-spacing: 1.5px; */
     margin: 0px 0 12px 0;
 }
 
 .entity-key{
-    font-weight: bold;
+    /*font-weight: bold;
     color: rgb(118, 118, 118);
-    font-size: 14px;
+    font-size: 14px; */
     text-transform: capitalize;
 }
 
 .entity-value{
-    font-size: 14px;
-    color: rgb(111, 111, 111);
+    /* font-size: 14px;
+    color: rgb(111, 111, 111); */
 }
 
 /****************** ACCORDION ******************/
@@ -86,8 +86,8 @@ a:hover, a:focus{
 }
 
 .panel-title{
-    font-weight: 400;
-    color: #838383;
+    /* font-weight: 400;
+    color: #838383; */
 }
 
 .panel-title>a:hover, .panel-title>a:focus{
@@ -98,8 +98,8 @@ a:hover, a:focus{
 .panel-default>.panel-heading{
     background: #fff;
     text-transform: uppercase;
-    font-weight: lighter;
-    letter-spacing: 2px;
+   /*  font-weight: lighter;
+    letter-spacing: 2px; */
     border-bottom: 1px solid #ddd;
 }
 .panel-default>.panel-heading div:before{
@@ -138,23 +138,23 @@ a:hover, a:focus{
 .reference-views .reference-view-title{
     padding: 3px 1px 5px 0;
     text-transform: uppercase;
-    font-size: 13px;
-    color: #8A8A8A;
+  /*  font-size: 13px;
+    color: #8A8A8A; */
 }
 
 .transpose-toggle{
     display: inline-block;
-    font-weight: 400;
+   /* font-weight: 400; */
     padding: 1px 17px;
     border-radius: 3px;
     cursor: pointer;
-    color: #B7B7B7;
+  /*  color: #B7B7B7; */
     background: #fff;
     width: 81px;
 }
 .transpose-toggle.active{
-    color: #2364AB;
-    font-weight: bold;
+  /*  color: #2364AB;
+    font-weight: bold; */
 }
 
 .transpose-toggle:hover, .transpose-toggle:focus, .transpose-toggle:active{
@@ -212,7 +212,7 @@ tbody{
     text-transform: capitalize;
     background-color: rgb(116, 116, 116);
     color: #fff;
-    letter-spacing: 0.5px;
+ /*   letter-spacing: 0.5px; */
     font-weight: normal;
     padding: 10px 20px !important;
 }
@@ -367,3 +367,50 @@ tbody{
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
+/* Bringing styles more in line with rest of Chaise */
+
+#entity-title {
+    font-size: 1.7em;
+    font-weight: 500;
+    color: #333;
+}
+
+#entity-subtitle {
+    
+}
+
+.entity-key {
+    color: #999;
+    font-weight: normal;
+    font-size: 1em;
+    letter-spacing: 
+}
+
+.entity-value {
+    font-size: 1em;
+    color: #333;
+}
+
+.entity-term {
+    background-color: #428bca;
+    font-size: .8em;
+}
+
+.panel-title {
+    color: inherit;
+}
+
+.reference-views .reference-view-title {
+    color: #999;
+}
+
+.transpose-toggle {
+    color: #999;
+}
+
+.transpose-toggle.active {
+    color: #428bca;
+}
+
+
