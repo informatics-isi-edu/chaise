@@ -20,6 +20,7 @@
 // file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:construct/id=1243
 
 
+//curl -k -H "Accept: application/json" http://vm-dev-030.misd.isi.edu/ermrest/catalog/1/entity/dataset/id=4894
 
 
 // Ermrest
@@ -427,7 +428,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         for (var key in params){
             var predicate   = encodeURIComponent(key) + '=';
             // Do not encoude already encoded string
-            predicate       += params[key].toString().indexOf('%') > -1 ? params[key] : encodeURIComponent(params[key]);
+            predicate       += params[key].toString().indexOf('%') > -1 ? params[key] : fixedEncodeURIComponent(params[key]);
 
             predicates.push(predicate);
         }
@@ -833,7 +834,7 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
 
                 // Only include column (key) if column is not hidden
                 if (!schemaService.isHiddenColumn(entity.internal.tableName, key)){
-                    console.log('not including', key);
+                    console.log('not including', key, 'form ');
                     filteredEntity[key] = entity[key];
                 }
             }
