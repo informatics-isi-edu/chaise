@@ -207,6 +207,11 @@ tbody{
     background: #F1F1F1;
 }
 
+.table-striped>tbody>tr:nth-child(odd) th{
+    color: rgb(116, 116, 116);
+}
+
+
 .table-reference .entity-key{
     font-size: 14px;
     text-transform: capitalize;
