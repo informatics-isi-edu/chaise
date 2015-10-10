@@ -181,7 +181,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                             // If annotations is 'images', store it in the entity's 'images' atributes
                             } else if (annotations.comment !== undefined && annotations.comment.indexOf('image') > -1){
                                 entity['images']        = references;
-
                             // If the annotation is an 'association', then collapse the array of objects into an array of values
                             // Association scenario #1: If table connects to a vocabulary table
                             } else if (rt.vocabularyTable != undefined){
@@ -767,6 +766,9 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
         }
     });
 
+
+
+
 }]);
 
 // Images controller
@@ -781,7 +783,7 @@ chaiseRecordApp.controller('ImagesCtrl', ['$scope', function($scope){
 
         var thumbs = jQuery('#entity-images').slippry({
           // general elements & wrapper
-          slippryWrapper: '<div class="slippry_box entity-image" />',
+          slippryWrapper: '<div class="slippry_box entity-image" />'
         });
 
         jQuery(document).on('click', '.thumbs a', function (e){
@@ -799,6 +801,29 @@ chaiseRecordApp.controller('ImagesCtrl', ['$scope', function($scope){
         });
     });
 }]);
+
+// When the slippry images have been loaded
+chaiseRecordApp.directive('slippryimageonload', function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+
+            element.bind('load', function() {
+                // Find the image with the longest height, then set the sliprry box's height to be the height of that image
+                var maxImageHeight = 0;
+                
+                jQuery('#entity-images li img').each(function(){
+                    if ($(this).height() > maxImageHeight){
+                        maxImageHeight = $(this).height();
+                    }
+                });
+
+                jQuery('.slippry_box').css('height', maxImageHeight + 'px');
+
+            });
+        }
+    };
+});
 
 chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
     // When ng-repeat has been finished, fixed header to nested tables
@@ -834,7 +859,6 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
 
                 // Only include column (key) if column is not hidden
                 if (!schemaService.isHiddenColumn(entity.internal.tableName, key)){
-                    console.log('not including', key, 'form ');
                     filteredEntity[key] = entity[key];
                 }
             }

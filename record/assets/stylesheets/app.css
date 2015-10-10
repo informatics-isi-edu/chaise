@@ -229,12 +229,14 @@ tbody{
     width: 100%;
 }
 .slippry_box{
-    height: 500px;
+    height: 100%;
     margin-right: 1%;
     padding-right: 1%;
     border-right: 1px solid #868686;
     width: 50%;
 }
+
+
 
 .slippry_box.previews{
     height: 600px;
