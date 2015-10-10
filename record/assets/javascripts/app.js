@@ -330,18 +330,18 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         // Inspect each column in the table schema to find the one with the annotation 'title'
         for (var c in entityTableSchema.column_definitions){
 
-            var cd      = entityTableSchema.column_definitions[c];
-            var cn      = cd.name.toLowerCase();
+            var cd          = entityTableSchema.column_definitions[c];
+            var cn          = cd.name.toLowerCase();
             var annotations = cd.annotations.comment;
 
-            // If the annotation is a 'title'
-            if (annotations != null && annotations.indexOf('title') > -1){
+            // If the annotation is a 'title' or if column name fits the array in validTitleColumns
+            if ((annotations != null && annotations.indexOf('title') > -1) || validTitleColumns.indexOf(cn) > -1){
+                var title = entity[cd.name];
+                
+                // Remove the entity attribute, because 
+                delete entity[cd.name];
 
-                return entity[cd.name];
-
-            // If column name fits the array in validTitleColumns
-            } else if (validTitleColumns.indexOf(cn) > -1){
-                return entity[cd.name];
+                return title;
             }
         }
 
