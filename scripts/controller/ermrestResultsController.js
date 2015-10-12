@@ -375,6 +375,9 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
     	event.preventDefault();
 		setTimeout(function () {
 			$('#filterButton').click();
+	    	if ($('#editfilter').hasClass('open')) {
+	            $('#editfilter').toggleClass('open');
+	    	}
 			setTimeout(function () {
 				$scope.slideFilter(null, 'field-toggle', facet);
 			}, 1);
