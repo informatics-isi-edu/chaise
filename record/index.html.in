@@ -33,7 +33,7 @@
     <div ng-controller="DetailCtrl" class="col-xs-10 col-xs-offset-1">
         <div ng-if="entity">
         <div id="record-bookmark-container" class="col-xs-12 meta-icons">
-            <a title="This link stores your search criteria as a URL. Right click and save." ng-href="{{window.location.href}}">
+            <a title="This link stores your search criteria as a URL. Right click and save." ng-href="{{permanentLink()}}">
             <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
             </a>
         </div>

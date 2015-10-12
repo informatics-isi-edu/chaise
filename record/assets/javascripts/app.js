@@ -767,7 +767,9 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
         }
     });
 
-
+    $scope.permanentLink = function() {
+    	return window.location.href;
+    };
 
 
 }]);
