@@ -108,7 +108,9 @@ RECORD_JS_SOURCE= $(JS)/respond.js \
 	$(JS)/ermrest.js \
 	$(RECORD_ASSETS)/javascripts/app.js
 
-RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css
+RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/material-design/css/material-design-iconic-font.min.css \
+	$(CSS)/appheader.css
 
 RECORD_CSS_DEPS=$(RECORD_ASSETS)/lib/slippry/slippry.css \
 	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css

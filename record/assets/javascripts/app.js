@@ -689,6 +689,7 @@ chaiseRecordApp.service('locationService', function(){
 chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($rootScope, $scope){
     HOME = window.location.origin;
     $scope.active = "Home";
+    getSession();
 
     // Determines wheather the page is active
     // $scope.isActive = function(page){
