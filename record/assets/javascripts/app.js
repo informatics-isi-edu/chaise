@@ -20,6 +20,7 @@
 // file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:construct/id=1243
 
 
+//curl -k -H "Accept: application/json" http://vm-dev-030.misd.isi.edu/ermrest/catalog/1/entity/dataset/id=4894
 
 
 // Ermrest
@@ -180,7 +181,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                             // If annotations is 'images', store it in the entity's 'images' atributes
                             } else if (annotations.comment !== undefined && annotations.comment.indexOf('image') > -1){
                                 entity['images']        = references;
-
                             // If the annotation is an 'association', then collapse the array of objects into an array of values
                             // Association scenario #1: If table connects to a vocabulary table
                             } else if (rt.vocabularyTable != undefined){
@@ -330,18 +330,18 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         // Inspect each column in the table schema to find the one with the annotation 'title'
         for (var c in entityTableSchema.column_definitions){
 
-            var cd      = entityTableSchema.column_definitions[c];
-            var cn      = cd.name.toLowerCase();
+            var cd          = entityTableSchema.column_definitions[c];
+            var cn          = cd.name.toLowerCase();
             var annotations = cd.annotations.comment;
 
-            // If the annotation is a 'title'
-            if (annotations != null && annotations.indexOf('title') > -1){
+            // If the annotation is a 'title' or if column name fits the array in validTitleColumns
+            if ((annotations != null && annotations.indexOf('title') > -1) || validTitleColumns.indexOf(cn) > -1){
+                var title = entity[cd.name];
+                
+                // Remove the entity attribute, because 
+                delete entity[cd.name];
 
-                return entity[cd.name];
-
-            // If column name fits the array in validTitleColumns
-            } else if (validTitleColumns.indexOf(cn) > -1){
-                return entity[cd.name];
+                return title;
             }
         }
 
@@ -427,7 +427,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         for (var key in params){
             var predicate   = encodeURIComponent(key) + '=';
             // Do not encoude already encoded string
-            predicate       += params[key].toString().indexOf('%') > -1 ? params[key] : encodeURIComponent(params[key]);
+            predicate       += params[key].toString().indexOf('%') > -1 ? params[key] : fixedEncodeURIComponent(params[key]);
 
             predicates.push(predicate);
         }
@@ -578,6 +578,30 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         // It's a complex table if the table columns < 2
         var table = this.schema.tables[tableName];
         return table.column_definitions.length > 2;
+    };
+
+    // Returns if a column is hidden
+    this.isHiddenColumn = function(tableName, columnName){
+        
+        var columnDefinitions = this.schema.tables[tableName].column_definitions;
+
+        // Look for the column defition
+        for (var i = 0; i < columnDefinitions.length; i++){
+
+            var cd = columnDefinitions[i];
+
+            // Column definition found
+            if (cd.name == columnName){
+
+                // If hidden annotation is present, column is hidden
+                if (cd.annotations.comment !== undefined && cd.annotations.comment.indexOf('hidden') > -1){
+                    return true;
+                } else{
+                    return false;
+                }
+            }
+        }
+
     };
 
 }]);
@@ -742,6 +766,9 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
         }
     });
 
+
+
+
 }]);
 
 // Images controller
@@ -756,7 +783,7 @@ chaiseRecordApp.controller('ImagesCtrl', ['$scope', function($scope){
 
         var thumbs = jQuery('#entity-images').slippry({
           // general elements & wrapper
-          slippryWrapper: '<div class="slippry_box entity-image" />',
+          slippryWrapper: '<div class="slippry_box entity-image" />'
         });
 
         jQuery(document).on('click', '.thumbs a', function (e){
@@ -774,6 +801,29 @@ chaiseRecordApp.controller('ImagesCtrl', ['$scope', function($scope){
         });
     });
 }]);
+
+// When the slippry images have been loaded
+chaiseRecordApp.directive('slippryimageonload', function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+
+            element.bind('load', function() {
+                // Find the image with the longest height, then set the sliprry box's height to be the height of that image
+                var maxImageHeight = 0;
+                
+                jQuery('#entity-images li img').each(function(){
+                    if ($(this).height() > maxImageHeight){
+                        maxImageHeight = $(this).height();
+                    }
+                });
+
+                jQuery('.slippry_box').css('height', maxImageHeight + 'px');
+
+            });
+        }
+    };
+});
 
 chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
     // When ng-repeat has been finished, fixed header to nested tables
@@ -798,22 +848,26 @@ chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
 */
 
 // Return an entity object who's values are not arrays with objects, also remove title from entity
-chaiseRecordApp.filter('filteredEntity', function(){
-    return function(input){
+chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaService){
+    return function(entity){
         var filteredEntity = {};
 
-        for (var key in input){
-            var value = input[key];
+        for (var key in entity){
+            var value = entity[key];
             // Only insert values into filteredEntity if value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object AND if the key is not 'interal'
             if ((!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) && key != 'internal'){
-                filteredEntity[key] = input[key];
+
+                // Only include column (key) if column is not hidden
+                if (!schemaService.isHiddenColumn(entity.internal.tableName, key)){
+                    filteredEntity[key] = entity[key];
+                }
             }
         }
 
         return filteredEntity;
 
     };
-});
+}]);
 
 // Removes underscores from input
 chaiseRecordApp.filter('removeUnderScores', function(){

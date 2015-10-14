@@ -22,17 +22,9 @@
     </div>
     <div ng-controller="DetailCtrl" class="col-xs-10 col-xs-offset-1">
         <div ng-if="entity">
-<<<<<<< HEAD:record/index.html
-        
-        <div id="record-bookmark-container" class="col-xs-12 meta-icons">
-            <a title="This link stores your search criteria as a URL. Right click and save." ng-href="{{window.location.href}}">
-            <span class="glyphicon glyphicon-bookmark"></span>
-=======
-
         <div id="record-bookmark-container" class="col-xs-12 meta-icons">
             <a title="This link stores your search criteria as a URL. Right click and save." ng-href="{{window.location.href}}">
             <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
->>>>>>> 829554c081eaa9e124636dcb9fa659db50877327:record/index.html.in
             </a>
         </div>
 
@@ -59,14 +51,14 @@
             <accordion close-others="oneAtATime">
 
                 <!-- IMAGES -->
-                <accordion-group ng-if="entity.images" is-open="images.open">
+                <accordion-group ng-if="entity.images" ng-init="images.open = true" is-open="images.open">
                 <accordion-heading><div ng-class="{'active': images.open }">Images</div></accordion-heading>
                 <div ng-controller="ImagesCtrl">
                     <ul id="entity-images">
                         <li ng-repeat="image in entity.images" class="image" on-finish-render>
                             <!-- <a href="slide{{ $index + 1 }}"> -->
                             <a class="fancybox" href="{{ image.uri }}">
-                                <img ng-src="{{ image.uri }}" class="image-thumbnail" />
+                                <img ng-src="{{ image.uri }}" class="image-thumbnail" slippryimageonload />
                             </a>
                         </li>
                     </ul>
