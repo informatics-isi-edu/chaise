@@ -10,7 +10,5 @@ exports.config = {
   jasmineNodeOpts: {
     showColors: true
   },
-  // If ng-app isn't an attribute on <body>, tell Protractor where ng-app is
-  rootElement: '#recordApp',
   baseUrl: 'http://dev.facebase.org/data/record'
 };

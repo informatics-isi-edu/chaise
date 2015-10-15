@@ -10,7 +10,7 @@ exports.config = {
   jasmineNodeOpts: {
     showColors: true
   },
-  // If ng-app isn't an attribute on <body>, tell Protractor where ng-app is
+  // If ng-app attribute is in a descendant <body>, tell Protractor where ng-app is
   rootElement: '#loginApp',
   baseUrl: 'http://dev.facebase.org'
 };
