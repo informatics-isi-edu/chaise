@@ -517,6 +517,10 @@ dl.attribute-group dd {
 	border-bottom: 1px solid #eee;
 }
 
+.sidebar .sidebar-header .field-enable {
+	width: 100%;
+}
+
 .sidebar h4 {
 	font-size: .9em;
 	font-weight: bold;
@@ -540,7 +544,7 @@ dl.attribute-group dd {
 	padding: 10px;
 }
 
-.sidebar a.view-attr:hover, .sidebar .sidebar-header a:hover {
+.sidebar a.view-attr:hover, .sidebar .sidebar-header a:hover, .sidebar .sidebar-header .sidebar-toggle:hover {
 	text-decoration: none;
 	background-color:#e0e0e0;
 }
@@ -553,30 +557,35 @@ dl.attribute-group dd {
 	margin-left: 5px;
 }
 
-.sidebar .sidebar-header a.sidebar-toggle {
-	width: 34px;
+.sidebar .sidebar-header .sidebar-toggle {
+	/* width: 34px; */
 	color: #428bca;
 	margin-top: 0;
 	padding: 0;
+	display: inline-block;
+  	cursor: pointer;
+  	margin-top: 2px; /* only needed to offset vertical align in .sidebar-title for Safari */
 }
 
-.sidebar .sidebar-header a.sidebar-toggle .glyphicon {
-	top: 0;
-	left: 10px;
+.sidebar .sidebar-header .sidebar-toggle .glyphicon {
+	top: 2px;
+	left: 14px;
 }
 
 
 .sidebar-back {
 	display: inline-block;
-  	cursor: pointer;
+	width: 34px;
+  	/* cursor: pointer;
   	margin-left: 5px;
   	margin-top: 2px; /* only needed to offset vertical align in .sidebar-title for Safari */
 }
 
 .sidebar-title {
-	display: inline-block;
-  	margin-right: 0;
-  	cursor: pointer;
+	display: inline-block; 
+	color: #333;
+  	/* margin-right: 0;
+  	cursor: pointer;*/
   	vertical-align: top; /* only needed for Safari workaround */
   	/* from truncate */
   	overflow: hidden;

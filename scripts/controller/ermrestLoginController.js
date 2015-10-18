@@ -58,7 +58,8 @@ ermLoginController.controller('LoginCtrl', ['$scope', 'ermrest',
 		$.each(parameters, function(i, parameter) {
 			var item = parameter.split('=');
 			if ([item[0]] == 'referrer') {
-				referrer = item[1];
+				item.shift();
+				referrer = item.join('=');
 			}
 		});
 		return referrer;

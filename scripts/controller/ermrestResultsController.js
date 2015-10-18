@@ -375,6 +375,9 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
     	event.preventDefault();
 		setTimeout(function () {
 			$('#filterButton').click();
+	    	if ($('#editfilter').hasClass('open')) {
+	            $('#editfilter').toggleClass('open');
+	    	}
 			setTimeout(function () {
 				$scope.slideFilter(null, 'field-toggle', facet);
 			}, 1);
@@ -470,8 +473,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
     // Reset the search box
     $scope.FacetsData.searchFilter = '';
     this.clear();
-
-    // Reset selected facets
+    // Reset selected facets & search again
     $.each($scope.FacetsData.box, function(table, columns) {
       var colsDescr = $scope.FacetsData['colsDescr'][table];
       $.each(columns, function(key, value) {
@@ -504,6 +506,8 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
       });
     });
     $scope.predicate_search_all();
+    // Resets sidebar view to top-level facet view
+    $('#morefilters.open,#editfilter.open,#collectionsTree.open').removeClass('open');
   };
 
   this.clear = $scope.clear = function clear() {

@@ -13,7 +13,7 @@
 		        <div id="navcontainer">
 							<h4>
 								<span ng-if="FacetsData.searchFilter.length==0">Choose Attributes:</span>
-								<span ng-if="FacetsData.searchFilter.length>0">Found &ldquo;{{FacetsData.searchFilter}}&rdquo; in {{sideBar.getEnabledFilters()}} attribute(s):
+								<span ng-if="FacetsData.searchFilter.length>0">&ldquo;{{FacetsData.searchFilter}}&rdquo; found in {{sideBar.getEnabledFilters()}} attribute(s):
 								</span>
 							 </h4>
 			        <ul class="nav sidebar-nav">
@@ -36,8 +36,8 @@
 			<div class="search-box input-group">
 				<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 				<span class="input-group-addon">
-							<i class="glyphicon glyphicon-search"></i>
-					</span>
+						<i class="glyphicon glyphicon-search"></i>
+				</span>
 			</div>
 			<!--
 			<div class="sidebar-header container">
@@ -52,13 +52,21 @@
 			</div>
 			-->
 			<div class="sidebar-header">
-				<div class="field-enable">
+				<div class="field-enable sidebar-toggle" ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle')" >
+					<div class="sidebar-back">
+						<span class="glyphicon glyphicon-chevron-left"></span>
+					</div>
+					<div class="sidebar-title">
+						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
+					</div>
+					<!--
 					<div class="sidebar-back">
 						<a ng-click="sideBar.editMoreFilterDone($event, 'more-field-toggle')" href="#" class="sidebar-toggle pull-left"><span class="glyphicon glyphicon-chevron-left"></span></a>
 					</div>
 					<div class="sidebar-title">
 						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
 					</div>
+				-->
 				</div>
 			</div>
 			<div class="editvalue-container">
@@ -89,9 +97,9 @@
 					    </span>
 					</div>
 					<div class="sidebar-header">
-						<div class="field-enable">
+						<div class="field-enable sidebar-toggle" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);" >
 							<div class="sidebar-back">
-								<a href="#" class="sidebar-toggle pull-left" title="Go Back" ng-click="sideBar.editFilterDone($event, 'field-toggle', false);"><span class="glyphicon glyphicon-chevron-left"></span></a>
+								<span class="glyphicon glyphicon-chevron-left"></span>
 							</div>
 							<div class="sidebar-title">
 								<h4 class="text-left">{{FacetsData.tag['display']}}</h4>

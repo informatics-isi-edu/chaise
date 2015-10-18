@@ -49,16 +49,7 @@ var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute'
                         |___/
 */
 
-document.onmouseover = function() {
-    //User's mouse is inside the page.
-    window.innerDocClick = true;
-};
-
-document.onmouseleave = function() {
-    //User's mouse has left the page.
-    window.innerDocClick = false;
-};
-
+// Refreshes page when fragment identifier changes
 setTimeout(function(){
 
     window.onhashchange = function() {
@@ -78,9 +69,6 @@ setTimeout(function(){
 
 }, 0);
 
-// chaiseRecordApp.config(['$locationProvider', function($locationProvider) {
-//     $locationProvider.html5Mode({rewriteLinks: false});
-// }]);
 
 /*
  ____                  _
@@ -115,7 +103,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             return;
         }
 
-        // Build the entity path
+        // Build the entity path. 
+        // TODO: ENCODE TABLENAME/ add encoded schema name = schema : tableName
         var path = CR_BASE_URL + schemaService.schema.cid + '/entity/' + tableName + '/' + self.buildPredicate(keys);
 
         // Execute API Request to get main entity
@@ -132,6 +121,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
             // If nested == false, then we're only interested in the entity and not any nested tables, references, or associations
             if (!nested){
+                // ASSUMPTION, entity has 'id' column
                 var keys            = { id: entity.id };
                 entity.link         = self.getEntityLink(tableName, keys);
                 onSuccess(entity);
@@ -325,7 +315,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     this.getEntityTitle = function(entity){
 
         var entityTableSchema = schemaService.schema.tables[entity.internal.tableName];
-        var validTitleColumns = ['name', 'label', 'title', 'term', 'username', 'filename'];
+        var validTitleColumns = ['name', 'label', 'title'];
+
+        // TODO: PRIORITIZE TITLE ANNOTATION, THEN LOOK AT VALID TITLE COLUMNS
 
         // Inspect each column in the table schema to find the one with the annotation 'title'
         for (var c in entityTableSchema.column_definitions){
@@ -689,6 +681,7 @@ chaiseRecordApp.service('locationService', function(){
 chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($rootScope, $scope){
     HOME = window.location.origin;
     $scope.active = "Home";
+    getSession();
 
     // Determines wheather the page is active
     // $scope.isActive = function(page){
@@ -766,7 +759,9 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
         }
     });
 
-
+    $scope.permanentLink = function() {
+    	return window.location.href;
+    };
 
 
 }]);

@@ -468,7 +468,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	    	FacetsService.getEntityResults(event, data, $scope.successGetMetadata);
 	    	if ($('#collectionsTree').hasClass('open')) {
 	    		setTimeout(function () {
-	    		    $('#collectionDoneButton').click();
+	    		    $('.sidebar-overlay').click();
 	    		}, 1);
 	    	}
 		}
