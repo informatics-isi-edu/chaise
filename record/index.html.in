@@ -117,21 +117,21 @@
                 <accordion-group ng-repeat="ft in entity.foreignTables" is-open="ft.open">
 
                     <accordion-heading>
-                        <div ng-class="{'active': ft.open }" ng-click="referenceToggle($index)">
+                        <div ng-class="{'active': ft.open }" ng-click="foreignTableToggle($index)">
                             {{ ft.displayTableName | removeUnderScores }}
-                            <span ng-if="ft.list.length > 0">({{ ft.list.length }})</span>
+                            <span ng-if="ft.count > 0">({{ ft.count }})</span>
                         </div>
                         
                     </accordion-heading>
 
                     <div id="ft-transpose" ng-controller="NestedTablesCtrl" ng-if="ft.transpose">
-                        <ul class="reference-views clearfix" ng-if="ft.list.length > 0">
+                        <ul class="reference-views clearfix" ng-if="ft.count > 0">
                             <li><div class="reference-view-title">View</div></li>
                             <li><a ng-click="ft.transpose = false" ng-class="{ 'active': !ft.transpose }" class="transpose-toggle">Default</a></li>
                             <li><a ng-click="ft.transpose = true" ng-class="{ 'active': ft.transpose }" class="transpose-toggle">Transpose</a></li>
                         </ul>
 
-                        <p ng-if="ft.initialLoad && ft.list.length == 0">No rows found</p>
+                        <p ng-if="ft.count == 0">No rows found</p>
 
                         <div class="table-wrapper wrapper">
                             <table class="table table-striped table-reference">
@@ -152,13 +152,13 @@
 
                     <div ng-controller="NestedTablesCtrl" ng-if="!ft.transpose">
 
-                        <ul class="reference-views clearfix" ng-if="ft.list.length > 0">
+                        <ul class="reference-views clearfix" ng-if="ft.count > 0">
                             <li><div class="reference-view-title">View</div></li>
                             <li><a ng-click="ft.transpose = false" ng-class="{ 'active': !ft.transpose }" class="transpose-toggle">Default</a></li>
                             <li><a ng-click="ft.transpose = true" ng-class="{ 'active': ft.transpose }" class="transpose-toggle">Transpose</a></li>
                         </ul>
 
-                        <p ng-if="ft.initialLoad && ft.list.length == 0">No rows found</p>
+                        <p ng-if="ft.count == 0">No rows found</p>
 
                         <div class="table-wrapper wrapper">
                             <table class="table table-striped nested table-reference">
