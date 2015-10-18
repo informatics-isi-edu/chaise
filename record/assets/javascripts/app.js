@@ -104,8 +104,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         }
 
         // Build the entity path. 
-        // TODO: ENCODE TABLENAME/ add encoded schema name = schema : tableName
-        var path = CR_BASE_URL + schemaService.schema.cid + '/entity/' + tableName + '/' + self.buildPredicate(keys);
+        var path = CR_BASE_URL + schemaService.schema.cid + '/entity/' + fixedEncodeURIComponent(schemaService.schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
 
         // Execute API Request to get main entity
         $http.get(path).success(function(data, status, headers, config) {
@@ -149,6 +148,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 // Need to preserve rt variable in a closure
                 (function(rt){
 
+                    // TODO: Lazy load nested entities
                     // Execute API request to get related entities information
                     $http.get(rt.path).success(function(data, status, headers, config) {
                         var references              = data;
@@ -273,6 +273,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
             // SWAP FORGEIN KEY ID WITH VOCABULARY
             // Inspect every key in the reference, and if they link to a vocabulary table, swap it with a vocabulary term
+            // TODO: Iterate through forgein keys instead of every column
             for (var rKey in reference){
                 var rValue = reference[rKey];
 
@@ -299,6 +300,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         });
                     }(j,rKey));
 
+                // ASSUMPTION: Assumes key is id, use primary keys
                 // Else it's an 'id' key or reference to table, place a link to it
                 } else if (rKey.toLowerCase() == 'id' || schemaService.isValidTable(rKey)){
                     // If the key is id, set the table name to the reference table's table name (construct), else the table name is key (i.e. cleavagesite)
@@ -317,7 +319,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         var entityTableSchema = schemaService.schema.tables[entity.internal.tableName];
         var validTitleColumns = ['name', 'label', 'title'];
 
-        // TODO: PRIORITIZE TITLE ANNOTATION, THEN LOOK AT VALID TITLE COLUMNS
+        // NOTE: We're prioritizing title annotation over 
 
         // Inspect each column in the table schema to find the one with the annotation 'title'
         for (var c in entityTableSchema.column_definitions){
@@ -326,8 +328,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             var cn          = cd.name.toLowerCase();
             var annotations = cd.annotations.comment;
 
-            // If the annotation is a 'title' or if column name fits the array in validTitleColumns
-            if ((annotations != null && annotations.indexOf('title') > -1) || validTitleColumns.indexOf(cn) > -1){
+            // If the annotation is a 'title' return it
+            if ((annotations != null && annotations.indexOf('title') > -1)){
                 var title = entity[cd.name];
                 
                 // Remove the entity attribute, because 
@@ -335,6 +337,20 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                 return title;
             }
+        }
+
+        // No columns with the annotation 'title' was found, iterate through valid title columns and see if the entity has those columns
+        for (var i = 0; i < validTitleColumns.length; i++){
+            
+            var title = entity[validTitleColumns[i]];
+
+            if (title != undefined){
+
+                delete entity[validTitleColumns[i]];
+
+                return title;
+            }
+
         }
 
         return null;
@@ -365,6 +381,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 for (var j = 0; j < fk.referenced_columns.length; j++){
                     var rc = fk.referenced_columns[j];
 
+                    // TODO: ENCODE TABLE NAMES
                     // If a reference column table name matches our table name, then it has an outbound forgein key to entity. i.e. construct -> target (entity)
                     if (rc.table_name == entity.internal.tableName){
                         referencedColumnMatch = true;
@@ -382,16 +399,18 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         if (schemaService.isBinaryTable(foreignTable.tableName)){
                             var parentTableName     = entity.internal.tableName;
                             // ASSUMPTION: Column name = tablename
-                            var referenceTableName  = schemaService.getReferencedColumnName(parentTableName, foreignTable.tableName);
+                            // parentTableName = person,  foreignTable.tableName = project member, referenceTableName project
+                            var referenceTableName  = schemaService.getReferencedTableName(parentTableName, foreignTable.tableName);
 
-
-                            // CASE A: If foreign table references a vocabulary table, set vocabularyTable varialbe to true (dataset_mouse_mutation -> mouse_mutation)
                             if (schemaService.isVocabularyTable(referenceTableName)){
+                                // CASE A: If foreign table references a vocabulary table, set vocabularyTable varialbe to true (dataset_mouse_mutation -> mouse_mutation)
                                 foreignTable.vocabularyTable            = true;
                                 foreignTable.referencedTableName        = referenceTableName;
                                 foreignTable.path                       += '/'+ referenceTableName;
-                            // CASE B: If foreign table references a complex table, switch the path to be the table it references (project member -> project)
                             } else if (schemaService.isComplexTable(referenceTableName)){
+                                // CASE B: If foreign table references a complex table, switch the path to be the table it references (project member -> project)
+                                
+                                // ERmrest/project_member/project
                                 foreignTable.path   += '/'+ referenceTableName;
                                 foreignTable.tableName = referenceTableName;
                             }
@@ -417,7 +436,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         var predicates = [];
 
         for (var key in params){
-            var predicate   = encodeURIComponent(key) + '=';
+            var predicate   = fixedEncodeURIComponent(key) + '=';
             // Do not encoude already encoded string
             predicate       += params[key].toString().indexOf('%') > -1 ? params[key] : fixedEncodeURIComponent(params[key]);
 
@@ -496,8 +515,8 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         return '';
     };
 
-    // Get the referenced column name that is NOT referencing the parentTableName
-    this.getReferencedColumnName = function(parentTableName, tableName){
+    // Get the referenced table name that is NOT referencing the parent table
+    this.getReferencedTableName = function(parentTableName, tableName){
         // Inspect the table foreignKeys
         var foreignKeys = this.schema.tables[tableName].foreign_keys;
 
