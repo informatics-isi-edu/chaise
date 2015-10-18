@@ -278,7 +278,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             self.processForeignKeyRefencesForTable(ft.tableName, ft, references);
 
             entity.foreignTables[index].list        = references;
-            entity.foreignTables[index].initialLoad = true;
 
             if (references.length > 0){
                 entity.foreignTables[index].keys =  Object.keys(references[0]);
