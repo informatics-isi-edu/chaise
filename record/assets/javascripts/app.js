@@ -127,10 +127,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 return;
             }
 
-            entity.references   = [];
-            entity.associations = [];
+            entity.foreignTables    = [];
+            entity.associations     = [];
             // Data use by helper methods
-            entity.internal     = { tableName: tableName, path: path, displayTitle: '' };
+            entity.internal         = { tableName: tableName, path: path, displayTitle: '' };
 
             // console.log('entity', entity);
 
@@ -138,26 +138,49 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             entity.internal.displayTitle = self.getEntityTitle(entity);
 
             // GET ENTITY REFERENCES TABLE
-            var foreignTables = self.getForeignTablesForEntity(entity);
+            var foreignTables   = self.getForeignTablesForEntity(entity);
+            var tablesToLoad    = 0;
+            var tablesLoaded    = 0;
 
             // For each of the table references, we'll execute an API request
             for (var i = 0; i < foreignTables.length; i++){
-                var rt          = foreignTables[i];
-                var counter     = 0;
+                var ft = foreignTables[i];
+                
+                // Table should not be initially loaded, show header, but not references
+                if (!ft.initialLoad){
 
-                // Need to preserve rt variable in a closure
-                (function(rt){
+                    // SWAP FORGEIN KEY ID WITH VOCABULARY
+                    var formattedForeignTable     = {
+                                                    'displayTableName':     ft['displayTableName'], // the title of nested tables
+                                                    'tableName':            ft['tableName'], // the table the nested entities belong to
+                                                    'list':                 [], // list of nested entities
+                                                    'referencedTableName':  ft['referencedTableName'],
+                                                    'transpose':            false,
+                                                    'open':                 false,
+                                                    'path':                 ft['path'] // ermrest path to load references
+                                                };
+
+                    entity.foreignTables.push(formattedForeignTable);
+
+                    continue;
+                }
+
+                tablesToLoad++;
+
+                // Need to preserve ft variable in a closure
+                (function(ft){
 
                     // TODO: Lazy load nested entities
                     // Execute API request to get related entities information
-                    $http.get(rt.path).success(function(data, status, headers, config) {
+                    $http.get(ft.path).success(function(data, status, headers, config) {
                         var references              = data;
+
 
                         // If the references doesn't return an empty array, continue
                         if (references.length > 0){
 
                             // Get the references annotations from the schema
-                            var annotations =  schemaService.schema.tables[rt['displayTableName']].annotations;
+                            var annotations =  schemaService.schema.tables[ft['displayTableName']].annotations;
 
                             // Base on the annotation, treat the reference differently
                             // If annotations is 'download', store it in the entity's 'files' atributes
@@ -173,60 +196,60 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                 entity['images']        = references;
                             // If the annotation is an 'association', then collapse the array of objects into an array of values
                             // Association scenario #1: If table connects to a vocabulary table
-                            } else if (rt.vocabularyTable != undefined){
+                            } else if (ft.vocabularyTable != undefined){
                                 // references (i.e [{'term':'P0'}], [{'term':'microCT images'}], etc)
                                 var terms = [];
-                                // convert  [{ 'term':'P0', 'term':'P323', 'term':'weg33k'}] -> [{ vocab: 'P0', link: ''} , { vocab: 'P323', link: ''}, { vocab: 'weg33k', link: '' }]
+                                // conveft  [{ 'term':'P0', 'term':'P323', 'term':'weg33k'}] -> [{ vocab: 'P0', link: ''} , { vocab: 'P323', link: ''}, { vocab: 'weg33k', link: '' }]
                                 for (var j = 0; j < references.length; j++){
                                     var reference   = references[j];
                                     var term        = {};
                                     term.vocab      = references[j].term,
-                                    term.link       = self.getEntityLink(rt['referencedTableName'], { 'term': term.vocab }),
+                                    term.link       = self.getEntityLink(ft['referencedTableName'], { 'term': term.vocab }),
                                     terms.push(term);
                                 }
 
                                 var formattedAssoication    = {
-                                                                'tableName':            rt['tableName'],
+                                                                'tableName':            ft['tableName'],
                                                                 'terms':                terms,
-                                                                'referencedTableName':  rt['referencedTableName']
+                                                                'referencedTableName':  ft['referencedTableName']
                                                             };
 
                                                             // console.log(formattedAssoication);
 
                                 entity.associations.push(formattedAssoication);
 
-                            // Else, append the 'formattedReference' to the entity's references
+                            // Else, append the 'formattedForeignTable' to the entity's references
                             } else{
 
-                                // If refernce table is a binary table that refernces a more
-                                // If reference table is a binary table that references a more complex table, bump the complex table up
-                                // If reference table is a complex table, swap vocab
+                                // // If refernce table is a binary table that refernces a more
+                                // // If reference table is a binary table that references a more complex table, bump the complex table up
+                                // // If reference table is a complex table, swap vocab
 
-                                self.processForeignKeyRefencesForTables(tableName, rt, references);
+                                // self.processForeignKeyRefencesForTables(tableName, ft, references);
 
-                                // SWAP FORGEIN KEY ID WITH VOCABULARY
-                                var formattedReference     = {
-                                                                'displayTableName':     rt['displayTableName'], // the title of nested tables
-                                                                'tableName':            rt['tableName'], // the table the nested entities belong to
-                                                                'list':                 references, // list of nested entities
-                                                                'referencedTableName':  rt['referencedTableName'],
-                                                                'transpose':            false,
-                                                                'open':                 true
-                                                            };
+                                // // SWAP FORGEIN KEY ID WITH VOCABULARY
+                                // var formattedForeignTable     = {
+                                //                                 'displayTableName':     ft['displayTableName'], // the title of nested tables
+                                //                                 'tableName':            ft['tableName'], // the table the nested entities belong to
+                                //                                 'list':                 references, // list of nested entities
+                                //                                 'referencedTableName':  ft['referencedTableName'],
+                                //                                 'transpose':            false,
+                                //                                 'open':                 true
+                                //                             };
 
-                                // Set the keys for the referenced, will be used as headers for transpose tables
-                                if (references.length > 0){
-                                    formattedReference.keys =  Object.keys(references[0]);
-                                }
+                                // // Set the keys for the referenced, will be used as headers for transpose tables
+                                // if (references.length > 0){
+                                //     formattedForeignTable.keys =  Object.keys(references[0]);
+                                // }
 
-                                entity.references.push(formattedReference);
+                                // entity.foreignTables.push(formattedForeignTable);
                             }
                         }
 
-                        counter++;
+                        tablesLoaded++;
 
                         // Once all the request have been made, invoke the onSuccess callback
-                        if (counter == foreignTables.length){
+                        if (tablesToLoad == tablesLoaded){
                             onSuccess(entity);
 
                             // Hide spinner
@@ -242,7 +265,17 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         spinnerService.hide();
                     });
 
-                }(rt));
+                }(ft));
+            }
+
+            // If there are no tables to load, call success callback
+            if (tablesToLoad == 0){
+                onSuccess(entity);
+
+                // Hide spinner
+                spinnerService.hide();
+
+                console.log('entity', entity);
             }
 
         }).error(function(data, status, headers, config) {
@@ -253,8 +286,46 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
     };
 
+
+    // Load nested entities for a given entity
+    this.loadReferencesForEntity = function(entity, index){
+
+        // Start spinner
+        spinnerService.show('Loading...');
+
+        var ft = entity.foreignTables[index];
+
+        if (entity.foreignTables[index].initialLoad){
+            return;
+        }
+
+
+        var self = this;
+
+        // TODO: Lazy load nested entities
+        // Execute API request to get related entities information
+        $http.get(ft.path).success(function(data, status, headers, config) {
+            // If refernce table is a binary table that refernces a more
+            // If reference table is a binary table that references a more complex table, bump the complex table up
+            // If reference table is a complex table, swap vocab
+            var references = data;
+            self.processForeignKeyRefencesForTables(ft.tableName, ft, references);
+
+            entity.foreignTables[index].list = references;
+            entity.foreignTables[index].initialLoad = true;
+
+            if (references.length > 0){
+                entity.foreignTables[index].keys =  Object.keys(references[0]);
+            }
+
+            // Hide spinner
+            spinnerService.hide();
+        });
+
+    };
+
     // If the reference table has a column that links to a vocabulary table, swape
-    this.processForeignKeyRefencesForTables = function(parentTableName, rt, references){
+    this.processForeignKeyRefencesForTables = function(parentTableName, ft, references){
         var self = this;
 
         // For each reference
@@ -267,7 +338,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 delete reference[parentTableName];
             // If it doesn't find the column value connecting to the parent table, then delete that
             } else{
-                var parentColumnKey = schemaService.getParentColumnName(parentTableName, rt['tableName']);
+                var parentColumnKey = schemaService.getParentColumnName(parentTableName, ft['tableName']);
                 delete reference[parentColumnKey];
             }
 
@@ -304,7 +375,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 // Else it's an 'id' key or reference to table, place a link to it
                 } else if (rKey.toLowerCase() == 'id' || schemaService.isValidTable(rKey)){
                     // If the key is id, set the table name to the reference table's table name (construct), else the table name is key (i.e. cleavagesite)
-                    var tableName = (rKey.toLowerCase() == 'id') ? rt['tableName'] : rKey;
+                    var tableName = (rKey.toLowerCase() == 'id') ? ft['tableName'] : rKey;
 
                     // Mock entity object with params
                     references[j][rKey + '_link'] = self.getEntityLink(tableName, keys);
@@ -326,7 +397,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
             var cd          = entityTableSchema.column_definitions[c];
             var cn          = cd.name.toLowerCase();
-            var annotations = cd.annotations.comment;
+            var annotations = cd.annotations ? cd.annotations.comment : undefined;
 
             // If the annotation is a 'title' return it
             if ((annotations != null && annotations.indexOf('title') > -1)){
@@ -391,8 +462,19 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                     'displayTableName':     tableKey,
                                                     'tableName':            tableKey,
                                                     'referencedTableName':  rc.table_name,
+                                                    'initialLoad':          false,
                                                     'path':                 entity.internal.path + '/' + tableKey
                                                 };
+
+
+                        // Get the references annotations from the schema
+                        var annotations =  schemaService.schema.tables[tableKey].annotations.comment;
+
+                        // If table is download, preview, or images, initially load them
+                        if (annotations !== undefined && (annotations.indexOf('download') > -1 || annotations.indexOf('preview') > -1 || annotations.indexOf('image') > -1)){
+                            foreignTable.initialLoad = true;
+                        }
+
                         // If this is a binary table, switch the path to bring out the referenced table instead
 
                         //  If foreign table it's a binary table, continue
@@ -405,6 +487,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                             if (schemaService.isVocabularyTable(referenceTableName)){
                                 // CASE A: If foreign table references a vocabulary table, set vocabularyTable varialbe to true (dataset_mouse_mutation -> mouse_mutation)
                                 foreignTable.vocabularyTable            = true;
+                                foreignTable.initialLoad                = true; // vocabulary tables should be initially loaded
                                 foreignTable.referencedTableName        = referenceTableName;
                                 foreignTable.path                       += '/'+ referenceTableName;
                             } else if (schemaService.isComplexTable(referenceTableName)){
@@ -782,6 +865,10 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
     	return window.location.href;
     };
 
+    $scope.referenceToggle = function(index){
+        ermrestService.loadReferencesForEntity($scope.entity, index);
+        console.log('wegwegew', index);
+    };
 
 }]);
 
