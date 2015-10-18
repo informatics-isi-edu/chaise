@@ -10,22 +10,19 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha'],
+    frameworks: ['mocha', 'sinon-chai', 'browserify'],
 
 
     // list of files / patterns to load in the browser
     files: [
-      'node_modules/chai/chai.js',
       'scripts/vendor/angular.js',
+      'node_modules/angular-mocks/angular-mocks.js',
       'scripts/vendor/jquery-latest.min.js',
       'scripts/vendor/bootstrap.js',
       'scripts/vendor/*.js',
-      'node_modules/angular-mocks/angular-mocks.js',
       'scripts/controller/*.js',
       'scripts/*.js',
-      'test/**/*.js',
-      'test/*.js',
-      'app.html'
+      'test/unit/*.js'
     ],
 
 
@@ -37,13 +34,14 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      'test/unit/*.js': ['browserify']
     },
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['dots'],
 
 
     // web server port
@@ -65,7 +63,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'Firefox', 'Safari', 'PhantomJS', 'IE'],
+    browsers: ['PhantomJS'],
 
 
     // Continuous Integration mode
