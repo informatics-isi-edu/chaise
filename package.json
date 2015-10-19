@@ -40,6 +40,7 @@
     "mocha": "x",
     "phantomjs": "^1.9.18",
     "sinon": "x",
-    "testem": "x"
+    "testem": "x",
+    "protractor": "x"
   }
 }
