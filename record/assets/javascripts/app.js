@@ -40,8 +40,6 @@
 // curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/legacy:target/id=90/construct/truncations"
 // curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/aggregate/legacy:cleavagesite/id=12/construct/row_count:=cnt(*)"
 
-
-var CR_BASE_URL     = window.location.origin + '/ermrest/catalog/';
 var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'ngCookies', 'ngSanitize']);
 
 // Refreshes page when fragment identifier changes
@@ -73,8 +71,15 @@ setTimeout(function(){
 
 */
 
+chaiseRecordApp.service('configService', function() {
+    this.CR_BASE_URL = window.location.origin + '/ermrest/catalog/';
+    if (chaiseConfig['ermrestLocation'] != null) {
+        this.CR_BASE_URL = chaiseConfig['ermrestLocation'] + '/ermrest/catalog/';
+    }
+});
+
 // REST API for Ermrest
-chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService', 'spinnerService', 'notFoundService', function($http, $rootScope, schemaService, spinnerService, notFoundService){
+chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService', 'spinnerService', 'notFoundService', 'configService', function($http, $rootScope, schemaService, spinnerService, notFoundService, configService){
 
     // Get the entity in JSON format
     // Note: By this point,the schema should be loaded already
@@ -98,8 +103,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         }
 
         // Build the entity path. 
-        var path            = CR_BASE_URL + schemaService.schema.cid + '/entity/' + fixedEncodeURIComponent(schemaService.schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
-        var aggregatePath   = CR_BASE_URL + schemaService.schema.cid + '/aggregate/' + fixedEncodeURIComponent(schemaService.schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
+        var path            = configService.CR_BASE_URL + schemaService.schema.cid + '/entity/' + fixedEncodeURIComponent(schemaService.schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
+        var aggregatePath   = configService.CR_BASE_URL + schemaService.schema.cid + '/aggregate/' + fixedEncodeURIComponent(schemaService.schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
 
         // Execute API Request to get main entity
         $http.get(path).success(function(data, status, headers, config) {
@@ -556,7 +561,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 }]);
 
 // Service use to introspect scheam
-chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerService', 'notFoundService', function($http, $rootScope, spinnerService, notFoundService){
+chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerService', 'notFoundService', 'configService', function($http, $rootScope, spinnerService, notFoundService, configService){
 
     var schema  = {};
 
@@ -567,7 +572,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         spinnerService.show('Loading...');
 
         // Build the schema path
-        var path = CR_BASE_URL + cid + '/schema';
+        var path = configService.CR_BASE_URL + cid + '/schema';
 
         // Reference to service
         var self = this;
