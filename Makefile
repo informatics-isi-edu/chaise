@@ -15,6 +15,11 @@ BIN=$(MODULES)/.bin
 # Mocha scripts
 UNIT=$(BIN)/mocha
 
+# Protractor scripts
+E2E=test/e2e/search/protractor.conf.js \
+	test/e2e/record/protractor.conf.js \
+	test/e2e/login/protractor.conf.js
+
 # Rule to determine MD5 utility
 ifeq ($(shell which md5),)
     MD5 = md5sum
@@ -211,10 +216,12 @@ distclean: clean
 	rm -rf $(MODULES)
 	rm -rf $(BOWER)
 
-# Rule to run unit tests
+# Rule to run tests
 .PHONY: test
 test:
-	$(UNIT)
+	for file in $(E2E); do \
+		$(BIN)/protractor $$file; \
+	done
 
 # Rule to run testem
 .PHONY: testem
