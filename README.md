@@ -116,3 +116,16 @@ See the [configuration guide](./doc/configuration.md).
 ### How to Run
 
 Point a modern web browser at `http://<hostname>/path/to/chaise/search`.
+
+### How to Test
+
+Before running the tests, you'll need a [Sauce Labs](https://saucelabs.com/)
+account (free for open source projects). Configure your Sauce Labs credentials
+in a terminal:
+```
+
+export SAUCE_USERNAME=YOUR_USERNAME
+export SAUCE_ACCESS_KEY=YOUR_ACCESS_KEY
+
+```
+Then run `make test`.
