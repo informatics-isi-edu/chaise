@@ -122,10 +122,9 @@ Point a modern web browser at `http://<hostname>/path/to/chaise/search`.
 Before running the tests, you'll need a [Sauce Labs](https://saucelabs.com/)
 account (free for open source projects). Configure your Sauce Labs credentials
 in a terminal:
-```
 
+```sh
 export SAUCE_USERNAME=YOUR_USERNAME
 export SAUCE_ACCESS_KEY=YOUR_ACCESS_KEY
-
 ```
 Then run `make test`.
