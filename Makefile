@@ -218,7 +218,7 @@ distclean: clean
 
 # Rule to run tests
 .PHONY: test
-test:
+test: deps
 	for file in $(E2E); do \
 		$(BIN)/protractor $$file; \
 	done

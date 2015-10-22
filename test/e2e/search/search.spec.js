@@ -16,7 +16,7 @@ describe('In the Chaise search app,', function() {
     it('should open the initial sidebar', function(done) {
       var spinner = element(by.id('spinner'));
       var sidebar = element(by.id('sidebar'));
-      browser.wait(EC.visibilityOf(sidebar), 5000).then(function() {
+      browser.wait(EC.visibilityOf(sidebar), 10000).then(function() {
         expect(sidebar.isDisplayed()).toBe(true);
         expect(spinner.isDisplayed()).toBe(false);
       });

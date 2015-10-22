@@ -9,7 +9,8 @@ exports.config = {
     '*.spec.js'
   ],
   jasmineNodeOpts: {
-    showColors: true
+    showColors: true,
+    defaultTimeoutInterval: 30000
   },
   baseUrl: 'http://dev.facebase.org/data/record'
 };
