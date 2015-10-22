@@ -56,13 +56,22 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 
     // Returns the path for a given row
     this.rowPath = function(row){
-
-    	var prefix = window.location.href;
-    	var index = prefix.indexOf('#');
-    	if (index != -1) {
-    		prefix = prefix.substring(0, index);
-    	}
-		var detailPath = prefix.replace('/search/','/record/#') + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
+        var prefix = window.location.href;
+        
+        // match /search/ of /search/index.html in the url
+        // everything before /search/ is the base url
+        var index = prefix.indexOf('\/search\/index.html');
+        if (index == -1) {
+        	index = prefix.indexOf('\/search\/');
+        }
+        if (index != -1) {
+            prefix = prefix.substring(0, index);
+        }
+        var recordResource = "/record";
+        if (chaiseConfig['recordResource'] != null) {
+            recordResource = chaiseConfig['recordResource'];
+        }
+        var detailPath = prefix + recordResource + '#' + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
         return detailPath;
     };
 
