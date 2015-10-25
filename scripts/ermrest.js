@@ -2998,30 +2998,39 @@ function setBookmark(options) {
 
 function getSearchQuery(url) {
 	var ret = {};
-	var query = null;
 	var index = url.indexOf('#');
 	if (index != -1) {
+		var path = [];
+		var catalog = null;
+		var entity = null;
+		var filter = null;
 		var query = url.substring(index+1);
 		var fragments = query.split('?');
+		path = fragments[0];
 		if (fragments.length == 2) {
-			var path = fragments[0].split('/');
-			if (path.length == 2) {
-				ret['catalog'] = path[0];
-				ret['entity'] = path[1];
-			} else {
-				if (path[0].indexOf(':') == -1) {
-					ret['catalog'] = path[0];
-				} else {
-					ret['entity'] = path[0];
-				}
-			}
-			query = fragments[1];
+			filter = fragments[1];
 		}
-		var parameters = query.split('&');
-		$.each(parameters, function(i, parameter) {
-			var item = parameter.split('=');
-			ret[item[0]] = item[1];
-		});
+		path = path.split('/');
+		catalog = path[0];
+		if (path.length == 2) {
+			entity = path[1];
+		}
+		if (catalog.length > 0) {
+			ret['catalog'] = catalog;
+		}
+		if (entity != null) {
+			var parts = entity.split(':');
+			if (parts.length == 2 && parts[0].length > 0 && parts[1].length > 0) {
+				ret['entity'] = entity;
+			}
+		}
+		if (filter != null) {
+			var parameters = filter.split('&');
+			$.each(parameters, function(i, parameter) {
+				var item = parameter.split('=');
+				ret[item[0]] = item[1];
+			});
+		}
 	}
 	return ret;
 }
