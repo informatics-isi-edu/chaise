@@ -13,5 +13,5 @@ exports.config = {
     defaultTimeoutInterval: 30000
   },
   // PTOR_BASE_URL should be http://dev.facebase.org for now.
-  baseUrl: process.env.PTOR_BASE_URL + '/data/record'
+  baseUrl: process.env.CHAISE_BASE_URL + '/data/record'
 };

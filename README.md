@@ -131,7 +131,7 @@ export SAUCE_ACCESS_KEY=YOUR_ACCESS_KEY
 Set a base URL for the Protractor tests (i.e. the path to your Chaise installation):
 
 ```sh
-export PTOR_BASE_URL=http://<hostname>/path/to/chaise/search
+export CHAISE_BASE_URL=http://<hostname>/path/to/chaise/search
 ```
 
 Then run `make test`.

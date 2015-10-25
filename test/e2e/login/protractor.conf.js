@@ -14,5 +14,5 @@ exports.config = {
   },
   // If ng-app attribute is in a descendant <body>, tell Protractor where ng-app is
   rootElement: '#loginApp',
-  baseUrl: process.env.PTOR_BASE_URL
+  baseUrl: process.env.CHAISE_BASE_URL
 };
