@@ -14,5 +14,5 @@ exports.config = {
   },
   // If ng-app attribute is in a descendant <body>, tell Protractor where ng-app is
   rootElement: '#loginApp',
-  baseUrl: 'http://dev.facebase.org'
+  baseUrl: process.env.PTOR_BASE_URL
 };

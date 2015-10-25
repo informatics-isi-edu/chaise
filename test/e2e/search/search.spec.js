@@ -43,10 +43,16 @@ describe('In the Chaise search app,', function() {
         searchBox.sendKeys('a;sd324ljr5858@#$%^&*(+-+-8+lkfjalk234j2;l543587dglij4r543df;iqw3');
       });
       setTimeout(function() {
-        var facets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope')).then(function() {
-          expect(facets.isDisplayed()).toBe(false);
+        var allFacets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope'));
+        allFacets.then(function() {
+          expect(allFacets.count()).toBeGreaterThan(0);
         });
-      }, 5000);
+        var hiddenFacets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope.ng-hide'));
+        hiddenFacets.then(function() {
+          expect(hiddenFacets.count()).toBeGreaterThan(0);
+        });
+        expect(allFacets.count()).toEqual(hiddenFacets.count());
+      }, 10000);
       done();
     });
   });

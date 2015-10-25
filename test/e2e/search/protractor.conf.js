@@ -14,5 +14,6 @@ exports.config = {
   },
   // If ng-app attribute is in a descendant of <body>, tell Protractor where ng-app is
   rootElement: '#main-content',
-  baseUrl: 'http://dev.facebase.org/data/search'
+  // PTOR_BASE_URL should be http://dev.facebase.org for now.
+  baseUrl: process.env.PTOR_BASE_URL + '/data/search'
 };
