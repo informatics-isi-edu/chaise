@@ -83,7 +83,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
     // Get the entity in JSON format
     // Note: By this point,the schema should be loaded already
-    this.getEntity = function(tableName, keys, nested, onSuccess){
+    this.getEntity = function(tableName, keys, onSuccess){
 
         // Start spinner
         spinnerService.show('Loading...');
@@ -117,15 +117,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
             // Extract the first entity
             var entity          = data[0];
-
-            // If nested == false, then we're only interested in the entity and not any nested tables, references, or associations
-            if (!nested){
-                // ASSUMPTION, entity has 'id' column
-                var keys            = { id: entity.id };
-                entity.link         = self.getEntityLink(tableName, keys);
-                onSuccess(entity);
-                return;
-            }
 
             entity.foreignTables    = [];
             entity.associations     = [];
@@ -875,7 +866,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
         schemaService.getSchema(cid, schema, function(data){
 
             // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
-            ermrestService.getEntity(tableName, keys, true, function(data){
+            ermrestService.getEntity(tableName, keys, function(data){
                 // console.log('data is ', data);
                 $scope.entity = data;
             });
