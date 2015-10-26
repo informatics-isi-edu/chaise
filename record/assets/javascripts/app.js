@@ -710,7 +710,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
             if (cd.name == columnName){
 
                 // If hidden annotation is present, column is hidden
-                if (cd.annotations.comment !== undefined && cd.annotations.comment.indexOf('hidden') > -1){
+                if (cd.annotations['tag:misd.isi.edu,2015:hidden'] !== undefined){
                     return true;
                 } else{
                     return false;
@@ -719,6 +719,28 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         }
 
     };
+
+    // get display column name
+    this.getColumnDisplayName = function(tableName, columnName){
+        var columnDefinitions = this.schema.tables[tableName].column_definitions;
+
+        // Look for the column defition
+        for (var i = 0; i < columnDefinitions.length; i++){
+
+            var cd = columnDefinitions[i];
+
+            // Column definition found
+            if (cd.name == columnName){
+
+                // If hidden annotation is present, column is hidden
+                if (cd.annotations['tag:misd.isi.edu,2015:display'] !== undefined && cd.annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
+                    return cd.annotations['tag:misd.isi.edu,2015:display'].name;
+                } else{
+                    return columnName;
+                }
+            }
+        }
+    }
 
 }]);
 
@@ -974,9 +996,13 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
             // Only insert values into filteredEntity if value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object AND if the key is not 'interal'
             if ((!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) && key != 'internal'){
 
+                // use display column name as key
+                // TODO inefficient to do this for each column?
+                var newKey = schemaService.getColumnDisplayName(entity.internal.tableName, key);
+
                 // Only include column (key) if column is not hidden
                 if (!schemaService.isHiddenColumn(entity.internal.tableName, key)){
-                    filteredEntity[key] = entity[key];
+                    filteredEntity[newKey] = entity[key];
                 }
             }
         }
