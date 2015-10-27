@@ -40,7 +40,7 @@
 
             <!-- MAIN TABLE -->
             <div id="entity-title">{{ entity.internal.displayTitle }}</div>
-            <div id="entity-subtitle">{{ entity.internal.tableName }}</div>
+            <div id="entity-subtitle">{{ entity.internal.displayTableName }}</div>
             <table class="table">
                 <tr ng-repeat="(key, value) in entity | filteredEntity">
                     <td class="entity-key col-xs-2">{{ key | removeUnderScores }}</td>
@@ -114,11 +114,11 @@
                 </accordion-group>
 
                 <!-- REFERENCES -->
-                <accordion-group ng-repeat="ft in entity.foreignTables" is-open="ft.open">
+                <accordion-group ng-repeat="ft in entity.foreignTables | orderBy:'title'" is-open="ft.open">
 
                     <accordion-heading>
                         <div ng-class="{'active': ft.open }" ng-click="foreignTableToggle($index)">
-                            {{ ft.displayTableName | removeUnderScores }}
+                            {{ ft.title | removeUnderScores }}
                             <span ng-if="ft.count > 0">({{ ft.count }})</span>
                         </div>
                         

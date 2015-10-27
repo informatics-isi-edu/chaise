@@ -121,12 +121,19 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             entity.foreignTables    = [];
             entity.associations     = [];
             // Data use by helper methods
-            entity.internal         = { tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: ''};
+            entity.internal         = { tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
             
             // console.log('entity', entity);
 
             // SET ENTITY DISPLAY TITLE
             entity.internal.displayTitle = self.getEntityTitle(entity);
+
+            // get table display name
+            var annotations = schemaService.schema.tables[tableName].annotations;
+            if (annotations['tag:misd.isi.edu,2015:display'] !== undefined &&
+                annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
+                entity.internal.displayTableName = annotations['tag:misd.isi.edu,2015:display'].name;
+            }
 
             // GET ENTITY REFERENCES TABLE
             var foreignTables   = self.getForeignTablesForEntity(entity);
@@ -199,6 +206,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
                                 var formattedForeignTable     = {
+                                                                'title':                ft['title'],
                                                                 'displayTableName':     ft['displayTableName'], // the title of nested tables
                                                                 'tableName':            ft['tableName'], // the table the nested entities belong to
                                                                 'list':                 [], // list of nested entities
@@ -214,6 +222,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         }
 
                         tablesLoaded++;
+
+                        entity.foreignTables.sort(function(ft1, ft2) { // sort by title, must use same order in index.html
+                            return ft1.title.localeCompare(ft2.title);
+                        });
 
                         // Once all the request have been made, invoke the onSuccess callback
                         if (tablesLoaded == foreignTables.length){
@@ -506,7 +518,12 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             var tableSchema             = schemaService.schema.tables[tableKey];
             var referencedColumnMatch   = false; // if our table name is part of foreign key -> reference columns
 
-            // EACH FORGEIN KEY
+            // skip table if hidden
+            if (tableSchema.annotations['tag:misd.isi.edu,2015:hidden'] !== undefined) {
+                continue;
+            }
+
+            // EACH FOREIGN KEY
             for (var i = 0; i < tableSchema.foreign_keys.length; i++){
                var fk =  tableSchema.foreign_keys[i];
 
@@ -519,8 +536,14 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                     if (rc.table_name == entity.internal.tableName){
                         referencedColumnMatch = true;
 
+                        // get table display name
+                        var title = tableKey;
+                        if (tableSchema.annotations['tag:misd.isi.edu,2015:display'] !== undefined &&
+                            tableSchema.annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
+                            title = tableSchema.annotations['tag:misd.isi.edu,2015:display'].name;
+                        }
                         var foreignTable = {
-
+                                                    'title':                title,
                                                     'displayTableName':     tableKey,
                                                     'tableName':            tableKey,
                                                     'referencedTableName':  rc.table_name,
