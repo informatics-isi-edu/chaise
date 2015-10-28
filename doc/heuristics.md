@@ -50,6 +50,32 @@ It is RECOMMENDED that these links be rendered into HTML pages as explicit
 anchors, image tags, etc. so that they are discoverable and accessible by
 different client software.
 
+### User-friendly Presentation of Schemata Names
+
+ERMrest provides access to the underlying schemata of the data source. The
+schemata of a data source indicates the schemas (i.e., namespaces), tables,
+columns, keys, etc. Many of these model elements have names, e.g., the name of
+a table or the names of the columns of a table. While the names within the
+schemata may be user-friendly, in some communities, a general practice is to
+name the elements by some convention such as `a_column_name` in all lower-case
+with parts separated by underscores ('`_`'). In other communities, all upper-case
+may be the norm instead.
+
+As a general rule, the presentation layer SHOULD present the various names
+within the schemata in a user-friendly style. The following rules are
+RECOMMENDED:
+
+- replace each underscore ('`_`') character with a whitespace ('` `') character
+- convert the name to title case (`A Column Name`)
+- by default, do not sort, instead present the schemata in the natural order
+  returned by ERMrest
+
+In addition, the presentation layer SHOULD support annotations to override
+these default rules, such as:
+
+- overrides for display names
+- overrides for sorting schemata by a different ordering
+
 ### Type-Appropriate Presentation of Values
 
 ERMrest data in general has type information available at the level of the
@@ -241,7 +267,7 @@ respectively.
   - Exclude foreign key columns.
   - Unless otherwise directed, display columns in the natural order from the
     table definition from the schema.
-2. For table columns that are foreign keys to vocabulary tables, adopt 
+2. For table columns that are foreign keys to vocabulary tables, adopt
    heuristics as described under the [Vocabulary Presentation](#vocabulary-presentation)
    section. Faceting on vocabulary should be done over the `term` column from
    the vocabulary table, but more complex interactions specific to vocabulary
@@ -253,7 +279,7 @@ respectively.
     used to model the many-to-many relationship, but such a table need not be
     shown in the faceted search display as it is unnecessary for the purpose of
     building a complex query and yet overcomplicates the display.
-4. For table columns that are foreign keys to other non-vocabulary tables, 
+4. For table columns that are foreign keys to other non-vocabulary tables,
    include a grouped set of facets built from the columns of the related table.
   - To determine which columns from the related table to use as the grouped set
     of facets, apply these [Facet Presentation](#facet-presentation) heuristics
