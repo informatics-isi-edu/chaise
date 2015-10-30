@@ -14,4 +14,5 @@ jsdoc
 deployment-config.json
 .make-*
 index.html
+chaise-config.js
 sftp-config.json
