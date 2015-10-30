@@ -272,7 +272,7 @@ respectively.
    section. Faceting on vocabulary should be done over the `term` column from
    the vocabulary table, but more complex interactions specific to vocabulary
    are ultimately required, such as faceting based on synonyms, ancestor, or
-   descendent relationships.
+   descendant relationships.
 3. If there exists many-to-many relationships between the table and vocabulary
    tables, apply rule #2 for each.
   - Note that this is a scenario where an "association table" will have been
