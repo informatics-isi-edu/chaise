@@ -139,6 +139,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 // If initialLoad is true, then we load the entities, else we load the aggregate (count)
                 var ermrestPath = (ft.initialLoad) ? ft.path : ft.aggregatePath;
                 
+                console.log('ermrest path is ', ermrestPath);
+
                 // Need to preserve ft variable in a closure
                 (function(ft){
 
@@ -149,6 +151,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                         // If the elements doesn't return an empty array, continue
                         if (elements.length > 0){
+    
 
                             // Get the elements annotations from the schema
                             var annotations =  schemaService.schema.tables[ft['displayTableName']].annotations;
@@ -191,6 +194,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                             // Else, append the 'formattedForeignTable' to the entity's elements
                             } else{
+    
+                                console.log('elements is', elements);
 
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
                                 var formattedForeignTable     = {
@@ -498,7 +503,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         //  If foreign table it's a binary table, continue
                         if (schemaService.isBinaryTable(foreignTable.tableName)){
                             var parentTableName     = entity.internal.tableName;
-                            // ASSUMPTION: Column name = tablename
                             // parentTableName = person,  foreignTable.tableName = project member, referenceTableName project
                             var referenceTableName  = schemaService.getReferencedTableName(parentTableName, foreignTable.tableName);
 
