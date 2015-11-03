@@ -121,12 +121,19 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             entity.foreignTables    = [];
             entity.associations     = [];
             // Data use by helper methods
-            entity.internal         = { tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: ''};
+            entity.internal         = { tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
             
             // console.log('entity', entity);
 
             // SET ENTITY DISPLAY TITLE
             entity.internal.displayTitle = self.getEntityTitle(entity);
+
+            // get table display name
+            var annotations = schemaService.schema.tables[tableName].annotations;
+            if (annotations['tag:misd.isi.edu,2015:display'] !== undefined &&
+                annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
+                entity.internal.displayTableName = annotations['tag:misd.isi.edu,2015:display'].name;
+            }
 
             // GET ENTITY REFERENCES TABLE
             var foreignTables   = self.getForeignTablesForEntity(entity);
@@ -199,6 +206,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
                                 var formattedForeignTable     = {
+                                                                'title':                ft['title'],
                                                                 'displayTableName':     ft['displayTableName'], // the title of nested tables
                                                                 'tableName':            ft['tableName'], // the table the nested entities belong to
                                                                 'list':                 [], // list of nested entities
@@ -214,6 +222,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         }
 
                         tablesLoaded++;
+
+                        entity.foreignTables.sort(function(ft1, ft2) { // sort by title, must use same order in index.html
+                            return ft1.title.localeCompare(ft2.title);
+                        });
 
                         // Once all the request have been made, invoke the onSuccess callback
                         if (tablesLoaded == foreignTables.length){
@@ -277,6 +289,46 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // If reference table is a complex table, swap vocab
             var references = data;
             self.processForeignKeyRefencesForTable(ft.tableName, ft, references);
+
+            if (references.length > 0) {
+                // get display columns
+                // this is a list of key values of column names and display column names
+                // where hidden columns are omitted
+                var displayColumns = schemaService.getDisplayColumns(ft.tableName);
+
+                // get actual columns
+                var actualColumns = Object.keys(references[0]);
+
+                // remove hidden columns and update column display name
+                for (var i = 0; i < actualColumns.length; i++) {
+                    var col = actualColumns[i];
+
+                    if (col.endsWith('_link')) {
+                        // rename col_link if col display name is different
+                        var subCol = col.substring(0, col.length - 5); // col name without _link
+                        if (displayColumns[subCol] !== subCol) {
+                            // if display name is different from column name
+                            // update display name
+                            for (var j = 0; j < references.length; j++) {
+                                references[j][displayColumns[subCol] + '_link'] = references[j][col];
+                                delete references[j][col];
+                            }
+                        }
+                    } else if (!col in displayColumns) {
+                        // if hidden column, delete
+                        for (var j = 0; j < references.length; j++) {
+                            delete references[j][col];
+                        }
+                    } else if (displayColumns[col] !== col) {
+                        // if display name is different from column name
+                        // update display name
+                        for (var j = 0; j < references.length; j++) {
+                            references[j][displayColumns[col]] = references[j][col];
+                            delete references[j][col];
+                        }
+                    }
+                }
+            }
 
             entity.foreignTables[index].list        = references;
 
@@ -466,7 +518,12 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             var tableSchema             = schemaService.schema.tables[tableKey];
             var referencedColumnMatch   = false; // if our table name is part of foreign key -> reference columns
 
-            // EACH FORGEIN KEY
+            // skip table if hidden
+            if (tableSchema.annotations['tag:misd.isi.edu,2015:hidden'] !== undefined) {
+                continue;
+            }
+
+            // EACH FOREIGN KEY
             for (var i = 0; i < tableSchema.foreign_keys.length; i++){
                var fk =  tableSchema.foreign_keys[i];
 
@@ -479,8 +536,14 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                     if (rc.table_name == entity.internal.tableName){
                         referencedColumnMatch = true;
 
+                        // get table display name
+                        var title = tableKey;
+                        if (tableSchema.annotations['tag:misd.isi.edu,2015:display'] !== undefined &&
+                            tableSchema.annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
+                            title = tableSchema.annotations['tag:misd.isi.edu,2015:display'].name;
+                        }
                         var foreignTable = {
-
+                                                    'title':                title,
                                                     'displayTableName':     tableKey,
                                                     'tableName':            tableKey,
                                                     'referencedTableName':  rc.table_name,
@@ -710,7 +773,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
             if (cd.name == columnName){
 
                 // If hidden annotation is present, column is hidden
-                if (cd.annotations.comment !== undefined && cd.annotations.comment.indexOf('hidden') > -1){
+                if (cd.annotations['tag:misd.isi.edu,2015:hidden'] !== undefined){
                     return true;
                 } else{
                     return false;
@@ -719,6 +782,53 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         }
 
     };
+
+    // get display column name
+    this.getColumnDisplayName = function(tableName, columnName){
+        var columnDefinitions = this.schema.tables[tableName].column_definitions;
+
+        // Look for the column defition
+        for (var i = 0; i < columnDefinitions.length; i++){
+
+            var cd = columnDefinitions[i];
+
+            // Column definition found
+            if (cd.name == columnName){
+
+                // If hidden annotation is present, column is hidden
+                if (cd.annotations['tag:misd.isi.edu,2015:display'] !== undefined && cd.annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
+                    return cd.annotations['tag:misd.isi.edu,2015:display'].name;
+                } else{
+                    return columnName;
+                }
+            }
+        }
+    }
+
+    // returns a list of key values of column names and display column names
+    // where hidden columns are omitted
+    this.getDisplayColumns = function(tableName) {
+
+        var columns = [];
+
+        var columnDefinitions = this.schema.tables[tableName].column_definitions;
+
+        for (var i = 0; i < columnDefinitions.length; i++) {
+            var cd = columnDefinitions[i];
+
+            // If hidden annotation is present, next
+            if (cd.annotations['tag:misd.isi.edu,2015:hidden'] === undefined){
+                // if column has a display name
+                if (cd.annotations['tag:misd.isi.edu,2015:display'] !== undefined && cd.annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
+                    columns[cd.name] = cd.annotations['tag:misd.isi.edu,2015:display'].name;
+                } else {
+                    columns[cd.name] = cd.name;
+                }
+            }
+        }
+
+        return columns;
+    }
 
 }]);
 
@@ -974,9 +1084,13 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
             // Only insert values into filteredEntity if value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object AND if the key is not 'interal'
             if ((!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) && key != 'internal'){
 
+                // use display column name as key
+                // TODO inefficient to do this for each column?
+                var newKey = schemaService.getColumnDisplayName(entity.internal.tableName, key);
+
                 // Only include column (key) if column is not hidden
                 if (!schemaService.isHiddenColumn(entity.internal.tableName, key)){
-                    filteredEntity[key] = entity[key];
+                    filteredEntity[newKey] = entity[key];
                 }
             }
         }
