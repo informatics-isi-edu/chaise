@@ -478,7 +478,8 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
     return selectedFacets;
   };
 
-  this.resetSearch = function resetSearch() {
+  this.resetSearch = function resetSearch(event) {
+  	event.preventDefault();
     // Reset the search box
     $scope.FacetsData.searchFilter = '';
     this.clear();

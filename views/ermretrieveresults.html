@@ -77,7 +77,7 @@
 						  </div>
 							<div class="filter-container">
 								<div class="filter-item" ng-if="facetResults.hasSelectedFacets()">
-									<a href="#" ng-click="facetResults.resetSearch()"><span class="filter-item-field" title="Click here to clear all selected filters.">Clear All Filters<span></a>
+									<a href="#" ng-click="facetResults.resetSearch($event)"><span class="filter-item-field" title="Click here to clear all selected filters.">Clear All Filters<span></a>
 								</div>
               	<div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
                   <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
