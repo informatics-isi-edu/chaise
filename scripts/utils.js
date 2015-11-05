@@ -404,7 +404,7 @@ function checkFacetSelection(facetsData, filtersStatus) {
 	var ret = false;
 	$.each(facetsData.chooseColumns, function(table, columns) {
 		$.each(columns, function(column, value) {
-			if (value != filtersStatus[table][column]) {
+			if (filtersStatus[table] != null && filtersStatus[table][column] != null && value != filtersStatus[table][column]) {
 				ret = true;
 				return false;
 			}
