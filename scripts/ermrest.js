@@ -668,7 +668,7 @@ function initModels(options, successCallback) {
 	var facetOrder = j;
 	var extraFacets = [];
 	$.each(options['score'], function(i,col) {
-		if (!hasAnnotation(options['table'], col['name'], 'hidden') && !hasAnnotation(options['table'], col['name'], 'thumbnail')) {
+		if (!topN[options['table']].contains(col['name']) && !hasAnnotation(options['table'], col['name'], 'hidden') && !hasAnnotation(options['table'], col['name'], 'thumbnail')) {
 			if (j++ < 10) {
 				extraFacets.push(col['name']);
 			} else {
