@@ -129,12 +129,12 @@
 							<li ng-if="sideBar.if_type(FacetsData.tag, 'date')" class="attr-date">
 								From:<br>
 								<datepicker date-format="yyyy-MM-dd" date-set="{{defaultMinDate}}" date-min-limit="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']}}" date-max-limit="{{floorDate}}">
-									<input ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']" type="text">
+									<input ng-change="sideBar.delay_slider(FacetsData.tag)" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['min']" type="text">
 								</datepicker>
 								<br><br>
 								To:<br>
 								<datepicker date-format="yyyy-MM-dd" date-set="{{defaultMaxDate}}" date-min-limit="{{FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']}}" date-max-limit="{{floorDate}}">
-									<input ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']" type="text">
+									<input ng-change="sideBar.delay_slider(FacetsData.tag)" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['max']" type="text">
 								</datepicker>
 							</li>
 							<li ng-if="sideBar.if_type(FacetsData.tag, 'enum')"
