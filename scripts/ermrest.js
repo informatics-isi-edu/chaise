@@ -512,7 +512,7 @@ function getTableColumns(options, successCallback) {
 	}
 	if (PRIMARY_KEY.length == 0) {
 		$.each(ret, function(i, col) {
-			PRIMARY_KEY.push(encodeSafeURIComponent(col));
+			PRIMARY_KEY.push(encodeSafeURIComponent(col['name']));
 		});
 	}
 
@@ -1257,9 +1257,9 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 			var firstKey = null;
 			$.each(PRIMARY_KEY, function(i, col) {
 				if (i==0) {
-					firstKey = encodeSafeURIComponent(col) + '::gt::' + encodeSafeURIComponent(data[(page-1)*pageSize][col]);
+					firstKey = col + '::gt::' + encodeSafeURIComponent(data[(page-1)*pageSize][col]);
 				}
-				primaryKeyPredicate.push(encodeSafeURIComponent(col) + (i==0 ? '=' : '::geq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
+				primaryKeyPredicate.push(col + (i==0 ? '=' : '::geq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
 			});
 			primaryKeyPredicate = [primaryKeyPredicate.join('&')];
 			primaryKeyPredicate.push(firstKey);
