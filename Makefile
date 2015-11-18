@@ -141,7 +141,7 @@ JSDOC=jsdoc
 LINT=.make-lint
 
 .PHONY: all
-# what 'all' should really do -- all: lint build $(HTML) test $(DOC)
+# all should just do the minimal needed to deploy chaise
 all: $(HTML)
 
 .PHONY: build
