@@ -1869,7 +1869,7 @@ function getQueryPredicate(options, table) {
 			ret = 'A:=' + ret;
 		} else {
 			ret = options['entityPredicates'].slice();
-			ret[ret.length-1] = 'A:=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(ret[ret.length-1]);
+			ret[ret.length-1] = 'A:=' + encodeSafeURIComponent(SCHEMA) + ':' + ret[ret.length-1];
 			ret = ret.join('/');
 		}
 	} else {
