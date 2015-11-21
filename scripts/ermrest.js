@@ -2091,7 +2091,7 @@ function getAssociationTableColumns(options, successCallback, columns) {
 	} else {
 		facets.sort(compareFacets);
 		$.each(facets, function(i, facet) {
-			if (getFacetOrder(facet) != null) {
+			if (getFacetOrder(facet) != null || hasAnnotation(facet['table'], facet['name'], 'top')) {
 				options['chooseColumns'][facet['table']][facet['name']] = true;
 			}
 		});
