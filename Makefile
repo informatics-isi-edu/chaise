@@ -21,7 +21,7 @@ E2E=test/e2e/search/protractor.conf.js \
 	test/e2e/login/protractor.conf.js
 
 # Rule to determine MD5 utility
-ifeq ($(shell which md5),)
+ifeq ($(shell which md5 2>/dev/null),)
     MD5 = md5sum
 else
     MD5 = md5 -q
