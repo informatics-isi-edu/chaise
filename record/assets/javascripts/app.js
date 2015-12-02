@@ -531,77 +531,76 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 	                continue;
 	            }
 	
-	            // EACH FOREIGN KEY
+	            // EACH FOREIGN KEY SET
 	            for (var i = 0; i < tableSchema.foreign_keys.length; i++){
-	               var fk =  tableSchema.foreign_keys[i];
+	                var fk =  tableSchema.foreign_keys[i];
 	
-	                // EACH REFERENCED COLUMNS
-	                for (var j = 0; j < fk.referenced_columns.length; j++){
-	                    var rc = fk.referenced_columns[j];
-	
-	                    // TODO: ENCODE TABLE NAMES
-	                    // If a reference column table name matches our table name, then it has an outbound forgein key to entity. i.e. construct -> target (entity)
-	                    if (rc.schema_name == entity.internal.schemaName &&
-	                    	 rc.table_name == entity.internal.tableName){
-	                        referencedColumnMatch = true;
-	
-	                        // get table display name
-	                        var title = tableKey;
-	                        if (tableSchema.annotations['tag:misd.isi.edu,2015:display'] !== undefined &&
-	                            tableSchema.annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
-	                            title = tableSchema.annotations['tag:misd.isi.edu,2015:display'].name;
-	                        }
-	                        var foreignTable = {
-	                                                    'title':                title,
-	                                                    'displayTableName':     tableKey,
-	                                                    'tableName':            tableKey,
-                                                        'schemaName':           schemaName,
-	                                                    'referencedTableName':  rc.table_name,
-	                                                    'initialLoad':          false, // should fetch entities on page load
-	                                                    'loaded':               false, // already loaded entities
-	                                                    'path':                 entity.internal.path + '/' + schemaName + ":" + tableKey,
-	                                                    'aggregatePath':        entity.internal.aggregatePath + '/' + schemaName + ":" + tableKey + '/row_count:=cnt(*)'
-	                                                };
-	
-	                        // Get the references annotations from the schema
-	                        var annotations =  tableSchema.annotations.comment;
-	
-	                        // If table is download, preview, or images, initially load them
-	                        if (annotations !== undefined && (annotations.indexOf('download') > -1 || annotations.indexOf('preview') > -1 || annotations.indexOf('image') > -1)){
-	                            foreignTable.initialLoad = true;
-	                        }
-	
-	                        // If this is a binary table, switch the path to bring out the referenced table instead
-	
-	                        //  If foreign table it's a binary table, continue
-	                        if (schemaService.isBinaryTable(schemaName, foreignTable.tableName)){
-	                            var parentTableName     = entity.internal.tableName;
-	                            // parentTableName = person,  foreignTable.tableName = project member, referenceTableName project
-	                            var referenceTable  = schemaService.getReferencedTable(parentTableName, schemaName, foreignTable.tableName);
-	                            var referenceTableName = referenceTable.table;
-                                var referenceSchemaName = referenceTable.schema;
+	                // GET TABLE FROM ONE OF THE REFERENCED COLUMNS
+                    // all columns should be under same table
+                    var rc = fk.referenced_columns[0];
 
-	                            if (schemaService.isVocabularyTable(referenceSchemaName, referenceTableName)){
-	                                // CASE A: If foreign table references a vocabulary table, set vocabularyTable varialbe to true (dataset_mouse_mutation -> mouse_mutation)
-	                                foreignTable.vocabularyTable            = true;
-	                                foreignTable.initialLoad                = true; // vocabulary tables should be initially loaded
-	                                foreignTable.referencedTableName        = referenceTableName;
-	                                foreignTable.path                       += '/'+ referenceSchemaName + ":" + referenceTableName;
-	                            } else if (schemaService.isComplexTable(referenceSchemaName, referenceTableName)){
-	                                // CASE B: If foreign table references a complex table, switch the path to be the table it references (project member -> project)
-	                                
-	                                // ERmrest/project_member/project
-	                                foreignTable.path   += '/'+ referenceSchemaName + ":" + referenceTableName;
-	                                foreignTable.tableName = referenceTableName;
-	                            }
-	
-	                        }
-	
-	                        foreignTables.push(foreignTable);
-	
-	
-	                    } // found match
-	                } // for each referenced column
+                    // TODO: ENCODE TABLE NAMES
+                    // If a reference column table name matches our table name, then it has an outbound forgein key to entity. i.e. construct -> target (entity)
+                    if (rc.schema_name == entity.internal.schemaName &&
+                         rc.table_name == entity.internal.tableName){
+                        referencedColumnMatch = true;
+
+                        // get table display name
+                        var title = tableKey;
+                        if (tableSchema.annotations['tag:misd.isi.edu,2015:display'] !== undefined &&
+                            tableSchema.annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
+                            title = tableSchema.annotations['tag:misd.isi.edu,2015:display'].name;
+                        }
+                        var foreignTable = {
+                                                    'title':                title,
+                                                    'displayTableName':     tableKey,
+                                                    'tableName':            tableKey,
+                                                    'schemaName':           schemaName,
+                                                    'referencedTableName':  rc.table_name,
+                                                    'initialLoad':          false, // should fetch entities on page load
+                                                    'loaded':               false, // already loaded entities
+                                                    'path':                 entity.internal.path + '/' + schemaName + ":" + tableKey,
+                                                    'aggregatePath':        entity.internal.aggregatePath + '/' + schemaName + ":" + tableKey + '/row_count:=cnt(*)'
+                                                };
+
+                        // Get the references annotations from the schema
+                        var annotations =  tableSchema.annotations.comment;
+
+                        // If table is download, preview, or images, initially load them
+                        if (annotations !== undefined && (annotations.indexOf('download') > -1 || annotations.indexOf('preview') > -1 || annotations.indexOf('image') > -1)){
+                            foreignTable.initialLoad = true;
+                        }
+
+                        // If this is a binary table, switch the path to bring out the referenced table instead
+
+                        //  If foreign table it's a binary table, continue
+                        if (schemaService.isBinaryTable(schemaName, foreignTable.tableName)){
+                            var parentTableName     = entity.internal.tableName;
+                            // parentTableName = person,  foreignTable.tableName = project member, referenceTableName project
+                            var referenceTable  = schemaService.getReferencedTable(parentTableName, schemaName, foreignTable.tableName);
+                            var referenceTableName = referenceTable.table;
+                            var referenceSchemaName = referenceTable.schema;
+
+                            if (schemaService.isVocabularyTable(referenceSchemaName, referenceTableName)){
+                                // CASE A: If foreign table references a vocabulary table, set vocabularyTable varialbe to true (dataset_mouse_mutation -> mouse_mutation)
+                                foreignTable.vocabularyTable            = true;
+                                foreignTable.initialLoad                = true; // vocabulary tables should be initially loaded
+                                foreignTable.referencedTableName        = referenceTableName;
+                                foreignTable.path                       += '/'+ referenceSchemaName + ":" + referenceTableName;
+                            } else if (schemaService.isComplexTable(referenceSchemaName, referenceTableName)){
+                                // CASE B: If foreign table references a complex table, switch the path to be the table it references (project member -> project)
+
+                                // ERmrest/project_member/project
+                                foreignTable.path   += '/'+ referenceSchemaName + ":" + referenceTableName;
+                                foreignTable.tableName = referenceTableName;
+                            }
+
+                        }
+
+                        foreignTables.push(foreignTable);
+
+
+                    } // found match
 	            } // for each foreign key
 	        } // for each table
         } // for each schema
