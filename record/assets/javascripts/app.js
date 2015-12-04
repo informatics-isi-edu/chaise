@@ -293,23 +293,31 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             var references = data;
             self.processForeignKeyRefencesForTable(ft.tableName, ft.schemaName, ft, references);
 
-            if (references.length > 0) {
-                // get display columns
-                // this is a list of key values of column names and display column names
-                // where hidden columns are omitted
-                var displayColumns = schemaService.getDisplayColumns(ft.schemaName, ft.tableName);
+            // get display columns
+            // this is a list of key values of column names and display column names
+            // where hidden columns are omitted
+            var displayColumns = schemaService.getDisplayColumns(ft.schemaName, ft.tableName);
 
-                // get actual columns
-                var actualColumns = Object.keys(references[0]);
+            // get actual columns
+            var actualColumns = Object.keys(references[0]);
+
+            if (references.length > 0) {
 
                 // remove hidden columns and update column display name
                 for (var i = 0; i < actualColumns.length; i++) {
                     var col = actualColumns[i];
 
                     if (col.endsWith('_link')) {
-                        // rename col_link if col display name is different
                         var subCol = col.substring(0, col.length - 5); // col name without _link
-                        if (displayColumns[subCol] !== subCol) {
+
+                        // if hidden, delete
+                        if (!displayColumns.hasOwnProperty(subCol)) {
+                            for (var j = 0; j < references.length; j++) {
+                                delete references[j][col];
+                            }
+                        }
+                        // rename col_link if col display name is different
+                        else if (displayColumns[subCol] !== subCol) {
                             // if display name is different from column name
                             // update display name
                             for (var j = 0; j < references.length; j++) {
@@ -317,7 +325,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                 delete references[j][col];
                             }
                         }
-                    } else if (!col in displayColumns) {
+                    } else if (!displayColumns.hasOwnProperty(col)) {
                         // if hidden column, delete
                         for (var j = 0; j < references.length; j++) {
                             delete references[j][col];
