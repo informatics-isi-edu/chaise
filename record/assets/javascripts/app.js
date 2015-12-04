@@ -163,7 +163,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     
 
                             // Get the elements annotations from the schema
-                            var annotations =  schemaService.schemas[ft.schemaName].tables[ft.displayTableName].annotations;
+                            var annotations =  schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations;
 
                             // Base on the annotation, treat the reference differently
                             // If annotations is 'download', store it in the entity's 'files' atributes
@@ -209,6 +209,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
                                 var formattedForeignTable     = {
                                                                 'title':                ft['title'],
+                                                                'displaySchemaName':    ft['displaySchemaName'],
                                                                 'displayTableName':     ft['displayTableName'], // the title of nested tables
                                                                 'tableName':            ft['tableName'], // the table the nested entities belong to
                                                                 'schemaName':           ft['schemaName'],
@@ -561,6 +562,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         }
                         var foreignTable = {
                                                     'title':                title,
+                                                    'displaySchemaName':    schemaName,
                                                     'displayTableName':     tableKey,
                                                     'tableName':            tableKey,
                                                     'schemaName':           schemaName,
@@ -755,7 +757,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
 
         // It's a vocabulary table if the table columns < 3
         var table = this.schemas[schemaName].tables[tableName];
-        return table.column_definitions.length == 2 && table.foreign_keys.length == 2;
+        return (table.column_definitions.length == 2 && table.foreign_keys.length == 2);
     };
 
     // Return if a table is a complex table (> 2 columns)
