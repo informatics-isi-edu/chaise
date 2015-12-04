@@ -83,7 +83,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
     // Get the entity in JSON format
     // Note: By this point,the schema should be loaded already
-    this.getEntity = function(tableName, keys, onSuccess){
+    this.getEntity = function(schemaName, tableName, keys, onSuccess){
 
         // Start spinner
         spinnerService.show('Loading...');
@@ -92,19 +92,21 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         var self = this;
 
         // Make sure the schema is loaded
-        if (!schemaService.schema){
+        if (!schemaService.schemas){
             return;
         }
 
         // Only continue if tableName is valid
-        if (!schemaService.isValidTable(tableName)){
+        if (!schemaService.isValidTable(schemaName, tableName)){
             notFoundService.show("We're sorry, the tablename '" + tableName + "' does not exist. Please try again!");
             return;
         }
 
+        var schema = schemaService.schemas[schemaName];
+
         // Build the entity path. 
-        var path            = configService.CR_BASE_URL + schemaService.schema.cid + '/entity/' + fixedEncodeURIComponent(schemaService.schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
-        var aggregatePath   = configService.CR_BASE_URL + schemaService.schema.cid + '/aggregate/' + fixedEncodeURIComponent(schemaService.schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
+        var path            = configService.CR_BASE_URL + schema.cid + '/entity/' + fixedEncodeURIComponent(schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
+        var aggregatePath   = configService.CR_BASE_URL + schema.cid + '/aggregate/' + fixedEncodeURIComponent(schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
 
         // Execute API Request to get main entity
         $http.get(path).success(function(data, status, headers, config) {
@@ -121,7 +123,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             entity.foreignTables    = [];
             entity.associations     = [];
             // Data use by helper methods
-            entity.internal         = { tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
+            entity.internal         = { schemaName: schemaName, tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
             
             // console.log('entity', entity);
 
@@ -129,7 +131,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             entity.internal.displayTitle = self.getEntityTitle(entity);
 
             // get table display name
-            var annotations = schemaService.schema.tables[tableName].annotations;
+            var annotations = schemaService.schemas[schemaName].tables[tableName].annotations;
             if (annotations['tag:misd.isi.edu,2015:display'] !== undefined &&
                 annotations['tag:misd.isi.edu,2015:display'].name !== undefined) {
                 entity.internal.displayTableName = annotations['tag:misd.isi.edu,2015:display'].name;
@@ -161,7 +163,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     
 
                             // Get the elements annotations from the schema
-                            var annotations =  schemaService.schema.tables[ft['displayTableName']].annotations;
+                            var annotations =  schemaService.schemas[ft.schemaName].tables[ft.displayTableName].annotations;
 
                             // Base on the annotation, treat the reference differently
                             // If annotations is 'download', store it in the entity's 'files' atributes
@@ -185,7 +187,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                     var reference   = elements[j];
                                     var term        = {};
                                     term.vocab      = elements[j].term,
-                                    term.link       = self.getEntityLink(ft['referencedTableName'], { 'term': term.vocab }),
+                                    term.link       = self.getEntityLink(ft.schemaName, ft['referencedTableName'], { 'term': term.vocab }),
                                     terms.push(term);
                                 }
 
@@ -209,6 +211,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                                 'title':                ft['title'],
                                                                 'displayTableName':     ft['displayTableName'], // the title of nested tables
                                                                 'tableName':            ft['tableName'], // the table the nested entities belong to
+                                                                'schemaName':           ft['schemaName'],
                                                                 'list':                 [], // list of nested entities
                                                                 'referencedTableName':  ft['referencedTableName'],
                                                                 'transpose':            false,
@@ -288,25 +291,33 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // If reference table is a binary table that references a more complex table, bump the complex table up
             // If reference table is a complex table, swap vocab
             var references = data;
-            self.processForeignKeyRefencesForTable(ft.tableName, ft, references);
+            self.processForeignKeyRefencesForTable(ft.tableName, ft.schemaName, ft, references);
+
+            // get display columns
+            // this is a list of key values of column names and display column names
+            // where hidden columns are omitted
+            var displayColumns = schemaService.getDisplayColumns(ft.schemaName, ft.tableName);
+
+            // get actual columns
+            var actualColumns = Object.keys(references[0]);
 
             if (references.length > 0) {
-                // get display columns
-                // this is a list of key values of column names and display column names
-                // where hidden columns are omitted
-                var displayColumns = schemaService.getDisplayColumns(ft.tableName);
-
-                // get actual columns
-                var actualColumns = Object.keys(references[0]);
 
                 // remove hidden columns and update column display name
                 for (var i = 0; i < actualColumns.length; i++) {
                     var col = actualColumns[i];
 
                     if (col.endsWith('_link')) {
-                        // rename col_link if col display name is different
                         var subCol = col.substring(0, col.length - 5); // col name without _link
-                        if (displayColumns[subCol] !== subCol) {
+
+                        // if hidden, delete
+                        if (!displayColumns.hasOwnProperty(subCol)) {
+                            for (var j = 0; j < references.length; j++) {
+                                delete references[j][col];
+                            }
+                        }
+                        // rename col_link if col display name is different
+                        else if (displayColumns[subCol] !== subCol) {
                             // if display name is different from column name
                             // update display name
                             for (var j = 0; j < references.length; j++) {
@@ -314,7 +325,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                 delete references[j][col];
                             }
                         }
-                    } else if (!col in displayColumns) {
+                    } else if (!displayColumns.hasOwnProperty(col)) {
                         // if hidden column, delete
                         for (var j = 0; j < references.length; j++) {
                             delete references[j][col];
@@ -343,10 +354,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     };
 
     // If the reference table has a column that links to a vocabulary table, swape
-    this.processForeignKeyRefencesForTable = function(parentTableName, foreignTable, references){
+    this.processForeignKeyRefencesForTable = function(parentTableName, ftSchema, foreignTable, references){
 
         // TODO: Delete parent table name
-        var foreignKeys = schemaService.schema.tables[foreignTable.tableName].foreign_keys;
+        var foreignKeys = schemaService.schemas[ftSchema].tables[foreignTable.tableName].foreign_keys;
         var self        = this;
 
         // For each foreign key
@@ -354,10 +365,11 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             var fk                  = foreignKeys[i];
             var foreignKeyColumn    = fk.foreign_key_columns[0].column_name; // i.e. cleavagesite (column)
             var referenceTable      = fk.referenced_columns[0].table_name; // i.e cleavagesite (table)
+            var referenceSchema     = fk.referenced_columns[0].schema_name;
             var referenceColumn     = fk.referenced_columns[0].column_name; // i.e. id (column)
 
             // If the table we're referencing is a vocabulary table, then query all vocab terms
-            if (schemaService.isVocabularyTable(referenceTable)){
+            if (schemaService.isVocabularyTable(referenceSchema, referenceTable)){
                 
                 // i.e.https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/legacy:target/id=110/construct/cleavagesite
                 var path = foreignTable.path + '/' + referenceTable;
@@ -384,7 +396,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                             // ASSUMPTION: VOCABULARY PRIMARY KEY IS 'ID' and TERM COLUMN IS 'NAME'
                             vocabDict[vocab['id']]   = {
                                                             'vocab':    vocab['name'],
-                                                            'link':     self.getEntityLink(referenceTable, keys)
+                                                            'link':     self.getEntityLink(referenceSchema, referenceTable, keys)
                                                         };
                         }
 
@@ -420,13 +432,13 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                     if (keys[referenceColumn] == null){
                         continue;
                     }
-                    references[j][foreignKeyColumn + '_link'] = self.getEntityLink(referenceTable, keys);
+                    references[j][foreignKeyColumn + '_link'] = self.getEntityLink(referenceSchema, referenceTable, keys);
                 }
             }
 
         }
 
-        var primaryKeys = schemaService.schema.tables[foreignTable.tableName].keys;
+        var primaryKeys = schemaService.schemas[foreignTable.schemaName].tables[foreignTable.tableName].keys;
 
         // For each primary key
         for (var i = 0; i < primaryKeys.length; i++){
@@ -437,7 +449,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                 var reference               = references[j];
                 var keys                    = {};
                 keys[pk]                    = reference[pk];
-                references[j][pk + '_link'] = self.getEntityLink(foreignTable.tableName, keys);
+                references[j][pk + '_link'] = self.getEntityLink(foreignTable.schemaName, foreignTable.tableName, keys);
             }
         }
 
@@ -446,7 +458,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     // Get the entity display title
     this.getEntityTitle = function(entity){
 
-        var entityTableSchema = schemaService.schema.tables[entity.internal.tableName];
+        var entityTableSchema = schemaService.schemas[entity.internal.schemaName].tables[entity.internal.tableName];
         var validTitleColumns = ['name', 'label', 'title'];
 
         // NOTE: We're prioritizing title annotation over 
@@ -489,7 +501,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     // Get the entity keys and associated values
     this.getEntityKeys = function(entity, tableName){
 
-        var keys = schemaService.schema.tables[tableName].keys;
+        var keys = schemaService.schemas[entity.internal.schemaName].tables[tableName].keys;
         var entityKeys = {};
 
         // For each key
@@ -502,8 +514,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     };
 
     // Get the Chaise Detail lin for entity, keys are the key value pair to search for
-    this.getEntityLink = function(tableName, keys){
-        return window.location.href.replace(window.location.hash, '') + '#' + schemaService.schema.cid + '/' +  fixedEncodeURIComponent(schemaService.schema.schema_name) + ':' + fixedEncodeURIComponent(tableName)+ '/' + this.buildPredicate(keys);
+    this.getEntityLink = function(schemaName, tableName, keys){
+        return window.location.href.replace(window.location.hash, '') + '#' + schemaService.schemas[schemaName].cid + '/' +  fixedEncodeURIComponent(schemaName) + ':' + fixedEncodeURIComponent(tableName)+ '/' + this.buildPredicate(keys);
     };
 
     // Scan through schema to find related tables
@@ -513,27 +525,32 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         // Goes through every table in the schema, looking for a forgein_key_column: table_name that matches entity table name
         var foreignTables = [];
 
-        // EACH TABLE
-        for (var tableKey in schemaService.schema.tables){
-            var tableSchema             = schemaService.schema.tables[tableKey];
-            var referencedColumnMatch   = false; // if our table name is part of foreign key -> reference columns
-
-            // skip table if hidden
-            if (tableSchema.annotations['tag:misd.isi.edu,2015:hidden'] !== undefined) {
-                continue;
-            }
-
-            // EACH FOREIGN KEY
-            for (var i = 0; i < tableSchema.foreign_keys.length; i++){
-               var fk =  tableSchema.foreign_keys[i];
-
-                // EACH REFERENCED COLUMNS
-                for (var j = 0; j < fk.referenced_columns.length; j++){
-                    var rc = fk.referenced_columns[j];
+        // EACH SCHEMA
+        for (var schemaName in schemaService.schemas) {
+        	var schema = schemaService.schemas[schemaName];
+        	
+        	// EACH TABLE
+        	for (var tableKey in schema.tables){
+	            var tableSchema             = schema.tables[tableKey];
+	            var referencedColumnMatch   = false; // if our table name is part of foreign key -> reference columns
+	
+	            // skip table if hidden
+	            if (tableSchema.annotations['tag:misd.isi.edu,2015:hidden'] !== undefined) {
+	                continue;
+	            }
+	
+	            // EACH FOREIGN KEY SET
+	            for (var i = 0; i < tableSchema.foreign_keys.length; i++){
+	                var fk =  tableSchema.foreign_keys[i];
+	
+	                // GET TABLE FROM ONE OF THE REFERENCED COLUMNS
+                    // all columns should be under same table
+                    var rc = fk.referenced_columns[0];
 
                     // TODO: ENCODE TABLE NAMES
                     // If a reference column table name matches our table name, then it has an outbound forgein key to entity. i.e. construct -> target (entity)
-                    if (rc.table_name == entity.internal.tableName){
+                    if (rc.schema_name == entity.internal.schemaName &&
+                         rc.table_name == entity.internal.tableName){
                         referencedColumnMatch = true;
 
                         // get table display name
@@ -546,15 +563,16 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                     'title':                title,
                                                     'displayTableName':     tableKey,
                                                     'tableName':            tableKey,
+                                                    'schemaName':           schemaName,
                                                     'referencedTableName':  rc.table_name,
                                                     'initialLoad':          false, // should fetch entities on page load
                                                     'loaded':               false, // already loaded entities
-                                                    'path':                 entity.internal.path + '/' + tableKey,
-                                                    'aggregatePath':        entity.internal.aggregatePath + '/' + tableKey + '/row_count:=cnt(*)'
+                                                    'path':                 entity.internal.path + '/' + schemaName + ":" + tableKey,
+                                                    'aggregatePath':        entity.internal.aggregatePath + '/' + schemaName + ":" + tableKey + '/row_count:=cnt(*)'
                                                 };
 
                         // Get the references annotations from the schema
-                        var annotations =  schemaService.schema.tables[tableKey].annotations.comment;
+                        var annotations =  tableSchema.annotations.comment;
 
                         // If table is download, preview, or images, initially load them
                         if (annotations !== undefined && (annotations.indexOf('download') > -1 || annotations.indexOf('preview') > -1 || annotations.indexOf('image') > -1)){
@@ -564,22 +582,25 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         // If this is a binary table, switch the path to bring out the referenced table instead
 
                         //  If foreign table it's a binary table, continue
-                        if (schemaService.isBinaryTable(foreignTable.tableName)){
+                        if (schemaService.isBinaryTable(schemaName, foreignTable.tableName)){
                             var parentTableName     = entity.internal.tableName;
                             // parentTableName = person,  foreignTable.tableName = project member, referenceTableName project
-                            var referenceTableName  = schemaService.getReferencedTableName(parentTableName, foreignTable.tableName);
+                            var referenceTable  = schemaService.getReferencedTable(parentTableName, schemaName, foreignTable.tableName);
+                            var referenceTableName = referenceTable.table;
+                            var referenceSchemaName = referenceTable.schema;
 
-                            if (schemaService.isVocabularyTable(referenceTableName)){
+                            if (schemaService.isVocabularyTable(referenceSchemaName, referenceTableName)){
                                 // CASE A: If foreign table references a vocabulary table, set vocabularyTable varialbe to true (dataset_mouse_mutation -> mouse_mutation)
                                 foreignTable.vocabularyTable            = true;
                                 foreignTable.initialLoad                = true; // vocabulary tables should be initially loaded
                                 foreignTable.referencedTableName        = referenceTableName;
-                                foreignTable.path                       += '/'+ referenceTableName;
-                            } else if (schemaService.isComplexTable(referenceTableName)){
+                                foreignTable.path                       += '/'+ referenceSchemaName + ":" + referenceTableName;
+                            } else if (schemaService.isComplexTable(referenceSchemaName, referenceTableName)){
                                 // CASE B: If foreign table references a complex table, switch the path to be the table it references (project member -> project)
-                                
+
                                 // ERmrest/project_member/project
-                                foreignTable.path   += '/'+ referenceTableName;
+                                foreignTable.path   += '/'+ referenceSchemaName + ":" + referenceTableName;
+                                foreignTable.schemaName = referenceSchemaName;
                                 foreignTable.tableName = referenceTableName;
                             }
 
@@ -588,10 +609,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         foreignTables.push(foreignTable);
 
 
-                    }
-                }
-            }
-        }
+                    } // found match
+	            } // for each foreign key
+	        } // for each table
+        } // for each schema
 
         return foreignTables;
 
@@ -621,13 +642,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 // Service use to introspect scheam
 chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerService', 'notFoundService', 'configService', function($http, $rootScope, spinnerService, notFoundService, configService){
 
-    var schema  = {};
+    var schemas; // list of schemas
 
-    // Get the catalogue's schema
-    this.getSchema = function(cid, schemaName, onSuccess){
-
-        // Start spinner
-        spinnerService.show('Loading...');
+    this.initSchemas = function(cid, onSuccess) {
 
         // Build the schema path
         var path = configService.CR_BASE_URL + cid + '/schema';
@@ -637,31 +654,24 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
 
         // Execute API Request tog get schema
         $http.get(path).success(function(data, status, headers, config) {
-            // console.log('scheams', data.schemas);
-            // Set schema
-            self.schema     = data.schemas[schemaName];
-            self.schema.cid = cid;
+            // Set schemas
+            self.schemas    = data.schemas;
+            for (var key in self.schemas) {
+                self.schemas[key].cid = cid;
+            }
 
-            spinnerService.hide();
             onSuccess(data);
-
-        // window.location.href = '#' + '1';
-        // replace(window.location.hash, '') + '#' + schemaService.schema.cid + '/' +  schemaService.schema.schema_name + ':' + tableName+ '/' + this.buildPredicate(keys);
-
-            console.log('schema', self.schema);
         }).
         error(function(data, status, headers, config) {
-            console.log("Error querying schema", data);
+            console.log("Error querying schemas", data);
             notFoundService.show("We're sorry, the catalogue id " + cid + " does not exist. Please try again!");
-            spinnerService.hide();
         });
-    };
-
+    }
 
     // For a given nested entity, get the parent column name
-    this.getParentColumnName = function(parentTableName, tableName){
+    this.getParentColumnName = function(schemaName, parentTableName, tableName){
         // Inspect the table foreignKeys
-        var foreignKeys = this.schema.tables[tableName].foreign_keys;
+        var foreignKeys = this.schemas[schemaName].tables[tableName].foreign_keys;
 
         // If a reference to parentTableName match, return the column name use to associate the parent table
         for (var i = 0; i < foreignKeys.length; i++){
@@ -684,9 +694,9 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
     };
 
     // Get the referenced table name that is NOT referencing the parent table
-    this.getReferencedTableName = function(parentTableName, tableName){
+    this.getReferencedTable = function(parentTableName, schemaName, tableName){
         // Inspect the table foreignKeys
-        var foreignKeys = this.schema.tables[tableName].foreign_keys;
+        var foreignKeys = this.schemas[schemaName].tables[tableName].foreign_keys;
 
         // If a reference to parentTableName match, return the column name use to associate the parent table
         for (var i = 0; i < foreignKeys.length; i++){
@@ -700,7 +710,8 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
             for (var j = 0; j < referencedColumns.length; j++){
                 var rc = referencedColumns[j];
                 if (rc.table_name != parentTableName){
-                    return rc.table_name;
+                    var res = {schema:rc.schema_name, table:rc.table_name}
+                    return res;
                 }
             }
         }
@@ -709,10 +720,10 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
     };
 
     // Valid if table name is part of schema
-    this.isValidTable = function(tableName){
+    this.isValidTable = function(schemaName, tableName){
         // Iterate through the tables defined in the schema to find a match with tableName
         var match = false;
-        for (var t in this.schema.tables){
+        for (var t in this.schemas[schemaName].tables){
             // If there is a match
             if (t == tableName){
                 match = true;
@@ -724,45 +735,45 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
     };
 
     // Return if a table is vocabulary table (< 3 columns)
-    this.isVocabularyTable = function(tableName){
+    this.isVocabularyTable = function(schemaName, tableName){
         // First check if it's a valid table
-        if (!this.isValidTable(tableName)){
+        if (!this.isValidTable(schemaName, tableName)){
             return false;
         }
 
         // It's a vocabulary table if the table columns < 3
-        var table = this.schema.tables[tableName];
+        var table = this.schemas[schemaName].tables[tableName];
         return table.column_definitions.length < 3;
     };
 
     // Return if a table is a binary table (2 columns)
-    this.isBinaryTable = function(tableName){
+    this.isBinaryTable = function(schemaName, tableName){
         // First check if it's a valid table
-        if (!this.isValidTable(tableName)){
+        if (!this.isValidTable(schemaName, tableName)){
             return false;
         }
 
         // It's a vocabulary table if the table columns < 3
-        var table = this.schema.tables[tableName];
-        return table.column_definitions.length == 2;
+        var table = this.schemas[schemaName].tables[tableName];
+        return table.column_definitions.length == 2 && table.foreign_keys.length == 2;
     };
 
     // Return if a table is a complex table (> 2 columns)
-    this.isComplexTable = function(tableName){
+    this.isComplexTable = function(schemaName, tableName){
         // First check if it's a valid table
-        if (!this.isValidTable(tableName)){
+        if (!this.isValidTable(schemaName, tableName)){
             return false;
         }
 
         // It's a complex table if the table columns < 2
-        var table = this.schema.tables[tableName];
+        var table = this.schemas[schemaName].tables[tableName];
         return table.column_definitions.length > 2;
     };
 
     // Returns if a column is hidden
-    this.isHiddenColumn = function(tableName, columnName){
+    this.isHiddenColumn = function(schemaName, tableName, columnName){
         
-        var columnDefinitions = this.schema.tables[tableName].column_definitions;
+        var columnDefinitions = this.schemas[schemaName].tables[tableName].column_definitions;
 
         // Look for the column defition
         for (var i = 0; i < columnDefinitions.length; i++){
@@ -784,8 +795,8 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
     };
 
     // get display column name
-    this.getColumnDisplayName = function(tableName, columnName){
-        var columnDefinitions = this.schema.tables[tableName].column_definitions;
+    this.getColumnDisplayName = function(schemaName, tableName, columnName){
+        var columnDefinitions = this.schemas[schemaName].tables[tableName].column_definitions;
 
         // Look for the column defition
         for (var i = 0; i < columnDefinitions.length; i++){
@@ -807,11 +818,11 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
 
     // returns a list of key values of column names and display column names
     // where hidden columns are omitted
-    this.getDisplayColumns = function(tableName) {
+    this.getDisplayColumns = function(schemaName, tableName) {
 
         var columns = [];
 
-        var columnDefinitions = this.schema.tables[tableName].column_definitions;
+        var columnDefinitions = this.schemas[schemaName].tables[tableName].column_definitions;
 
         for (var i = 0; i < columnDefinitions.length; i++) {
             var cd = columnDefinitions[i];
@@ -925,7 +936,7 @@ chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($root
 }]);
 
 // Detail controller
-chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, ermrestService, schemaService, locationService, notFoundService){
+chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, spinnerService, ermrestService, schemaService, locationService, notFoundService){
     // C: Catalogue id
     // T: Table name
     // K: Key
@@ -935,7 +946,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
     // var params      = $location.search();  query parameters
     var cid         = params['catalogueId'];
     var tableName   = params['tableName'];
-    var schema      = params['schemaName'];
+    var schemaName  = params['schemaName'];
     var keys        = params['keys'];
 
     // cid
@@ -976,15 +987,14 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope','ermrestService
     // Data is valid!
     } else{
 
-        // Call Ermrest service to get schema
-        schemaService.getSchema(cid, schema, function(data){
-
+        schemaService.initSchemas(cid, function(data) {
             // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
-            ermrestService.getEntity(tableName, keys, function(data){
+            ermrestService.getEntity(schemaName, tableName, keys, function(data){
                 // console.log('data is ', data);
                 $scope.entity = data;
             });
         });
+
     }
 
     $scope.permanentLink = function(){
@@ -1086,10 +1096,10 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
 
                 // use display column name as key
                 // TODO inefficient to do this for each column?
-                var newKey = schemaService.getColumnDisplayName(entity.internal.tableName, key);
+                var newKey = schemaService.getColumnDisplayName(entity.internal.schemaName, entity.internal.tableName, key);
 
                 // Only include column (key) if column is not hidden
-                if (!schemaService.isHiddenColumn(entity.internal.tableName, key)){
+                if (!schemaService.isHiddenColumn(entity.internal.schemaName, entity.internal.tableName, key)){
                     filteredEntity[newKey] = entity[key];
                 }
             }
