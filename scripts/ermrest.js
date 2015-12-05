@@ -495,19 +495,21 @@ function getTableColumns(options, successCallback) {
 					display_columns['url'].push(col['name']);
 				}
 			}
-			var col_def = {};
-			col_def['field'] = col['name'];
-			columns_definitions.push(col_def);
-			var display = getColumnDisplayName(col['name']);
-			if (col['annotations'] != null && col['annotations'][COLUMNS_MAP_URI] != null && col['annotations'][COLUMNS_MAP_URI]['display'] != null) {
-				display = col['annotations'][COLUMNS_MAP_URI]['display'];
+			if (!hasAnnotation(options['table'], col['name'], 'hidden')) {
+				var col_def = {};
+				col_def['field'] = col['name'];
+				columns_definitions.push(col_def);
+				var display = getColumnDisplayName(col['name']);
+				if (col['annotations'] != null && col['annotations'][COLUMNS_MAP_URI] != null && col['annotations'][COLUMNS_MAP_URI]['display'] != null) {
+					display = col['annotations'][COLUMNS_MAP_URI]['display'];
+				}
+				ret.push({'name': col['name'],
+					'display': display,
+					'table': options['table'],
+					'alias': 'A'});
+				sortInfo['fields'].push(col['name']);
+				sortInfo['directions'].push('desc');
 			}
-			ret.push({'name': col['name'],
-				'display': display,
-				'table': options['table'],
-				'alias': 'A'});
-			sortInfo['fields'].push(col['name']);
-			sortInfo['directions'].push('desc');
 		});
 	}
 	if (PRIMARY_KEY.length == 0) {
@@ -679,6 +681,9 @@ function initModels(options, successCallback) {
 	var sentRequests = false;
 	if (colsDescr != null) {
 		$.each(colsDescr, function(col, value) {
+			if (hasAnnotation(table, col, 'hidden')) {
+				return true;
+			}
 			options['chooseColumns'][table][col] = topN[options['table']] != null && topN[options['table']].contains(col) || extraFacets.contains(col);
 			options['searchFilterValue'][table][col] = '';
 			options['facetClass'][table][col] = '';
@@ -776,7 +781,7 @@ function updateCount(options, successCallback) {
 				}
 			});
 			$.each(box, function(col, value) {
-				if (!hasColumnFacetHidden(table, col) && !isColumnFacetOnDemand(options, table, col)) {
+				if (!hasColumnFacetHidden(table, col) && !isColumnFacetOnDemand(options, table, col) && !hasAnnotation(table, col, 'hidden')) {
 					var aliases = [];
 					var predicate = getPredicate(options, col, table, null, aliases);
 					var url = urlPrefix;
@@ -859,7 +864,7 @@ function updateGroups(options, successCallback) {
 	$.each(tables, function(i, table) {
 		if (!hasTableFacetsHidden(table)) {
 			$.each(options['colsGroup'][table], function(col, values) {
-				if (!hasColumnFacetHidden(table, col) && !isColumnFacetOnDemand(options, table, col)) {
+				if (!hasAnnotation(table, col, 'hidden') || !hasColumnFacetHidden(table, col) && !isColumnFacetOnDemand(options, table, col)) {
 					var aliases = [];
 					var predicate = getPredicate(options, col, table, null, aliases);
 					var aliasDef = '';
@@ -1046,7 +1051,7 @@ function getColumnDescriptions(options, successCallback) {
 	if (metadata != null) {
 		var column_definitions = metadata['column_definitions'];
 		$.each(column_definitions, function(i, col) {
-			if (col['type']['typename'] != 'json' && !hasColumnFacetHidden(options['table'], col['name'])) {
+			if (col['type']['typename'] != 'json' && !hasColumnFacetHidden(options['table'], col['name']) && !hasAnnotation(options['table'], col['name'], 'hidden')) {
 				var col_name = col['name'];
 				var col_type = col['type']['typename'];
 				var obj = {};
@@ -1386,7 +1391,7 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 	var column_definitions = metadata['column_definitions'];
 	var cols = {};
 	$.each(column_definitions, function(i,col) {
-		if (col['type']['typename'] != 'json') {
+		if (col['type']['typename'] != 'json' && !hasAnnotation(table_name, col['name'], 'hidden')) {
 			cols[col['name']] = {};
 			if (hasColumnFacetHidden(table_name, col['name'])) {
 				cols[col['name']]['cnt'] = 0;
@@ -1419,7 +1424,7 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 				var tableURL = (table == options['table'] ? '' : '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias'] + '/');
 				$.each(column_definitions, function(i,col) {
 					if (col['type']['typename'] != 'json' && !hasColumnFacetHidden(table, col['name'])) {
-						if (facetPolicy != 'on_demand' || hasAnnotation(table, col['name'], 'top')) {
+						if (facetPolicy != 'on_demand' && !hasAnnotation(table, col['name'], 'hidden') || hasAnnotation(table, col['name'], 'top')) {
 							var params = {};
 							params['alert'] = alertObject;
 							params['options'] = param['options'];
@@ -1458,7 +1463,7 @@ function successGetTableColumnsDistinct(data, textStatus, jqXHR, param) {
 		if (!hasTableFacetsHidden(table)) {
 			var cols = param['cols'][table];
 			$.each(cols, function(key, value) {
-				if (!hasColumnFacetHidden(table, key)) {
+				if (!hasColumnFacetHidden(table, key) || !hasAnnotation(table, key, 'hidden')) {
 					if (facetPolicy != 'on_demand' || hasAnnotation(table, key, 'top')) {
 						if (value['distinct'] == -1) {
 							ready = false;
@@ -2044,6 +2049,32 @@ function setAssociationTables(table_name) {
 						'alias': 'A' + (++index)
 					};
 				}
+			}
+		}
+	});
+	setVocabularyTables(index);
+}
+
+function setVocabularyTables(index) {
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (association_tables[table['table_name']] == null && association_tables_names.contains(table['table_name'])) {
+			var columns = [];
+			$.each(table['column_definitions'], function(k, column_definition) {
+				if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_LIST_URI] != null && !column_definition['annotations'][COLUMNS_LIST_URI].contains('hidden')) {
+					var display = getColumnDisplayName(column_definition['name']);
+					if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_MAP_URI] != null && column_definition['annotations'][COLUMNS_MAP_URI]['display'] != null) {
+						display = column_definition['annotations'][COLUMNS_MAP_URI]['display'];
+					}
+					columns.push({'name': column_definition['name'],
+						'display': display});
+				}
+			});
+			if (columns.length > 0) {
+				association_tables[table['table_name']] = {
+					'columns': columns,
+					'metadata': table,
+					'alias': 'A' + (++index)
+				};
 			}
 		}
 	});
@@ -2919,6 +2950,48 @@ function setAssociationTablesNames(table) {
 			}
 		});
 	}
+	var vocabularies = getAssociationTablesNames(table);
+	if (vocabularies != null) {
+		$.each(vocabularies, function(i, name) {
+			if (!association_tables_names.contains(name)) {
+				association_tables_names.push(name);
+			}
+		})
+	}
+}
+
+function getAssociationTablesNames(table) {
+	var ret = [];
+	var referenceTables = [];
+	var tableMetadata = null;
+	$.each(SCHEMA_METADATA, function(i, metadata) {
+		if (metadata['table_name'] == table) {
+			tableMetadata = metadata;
+			return false;
+		}
+	});
+	if (tableMetadata != null) {
+		$.each(tableMetadata['foreign_keys'], function(i, key) {
+			if (key['referenced_columns'] != null) {
+				$.each(key['referenced_columns'], function(j, refCol) {
+					referenceTables.push(refCol['table_name']);
+				});
+			}
+		});
+	}
+	$.each(referenceTables, function(i, referenceTable) {
+		$.each(SCHEMA_METADATA, function(i, metadata) {
+			if (metadata['table_name'] == referenceTable) {
+				if (metadata['annotations'] != null && metadata['annotations'][TABLES_LIST_URI] != null && metadata['annotations'][TABLES_LIST_URI].contains('association')) {
+					ret.push(metadata['table_name']);
+				}
+			}
+		});
+	});
+	if (ret.length == 0) {
+		ret = null;
+	}
+	return ret;
 }
 
 function setBookmark(options) {
