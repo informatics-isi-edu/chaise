@@ -299,10 +299,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // where hidden columns are omitted
             var displayColumns = schemaService.getDisplayColumns(ft.schemaName, ft.tableName);
 
-            // get actual columns
-            var actualColumns = Object.keys(references[0]);
-
             if (references.length > 0) {
+
+                // get actual columns
+                var actualColumns = Object.keys(references[0]);
 
                 // remove hidden columns and update column display name
                 for (var i = 0; i < actualColumns.length; i++) {
