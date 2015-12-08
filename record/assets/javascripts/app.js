@@ -1,44 +1,4 @@
-// Examples
-
-// one level -> big construct table
-//     -> inbound/outbound forgein key
-//     -> nested forgein table inline into construct
-
-// Invalid
-
-// file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:tom/username=efef
-// file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:person/username=efef
-
-// Valid
-
-// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:person/username=Jim%20F.%20Brinkley
-    // https://vm-dev-030.misd.isi.edu/chaise/detail/index.html#1/legacy:person/username=Jim%20F.%20Brinkley
-// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:mouse_gene/term=ABCA4
-// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#1/legacy:dataset/accession=FB00000177
-// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:construct/id=1243
-// - file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:target/id=110
-// file:///Users/bennettl/Desktop/Project/Chaise/record/index.html#6/legacy:construct/id=1243
-
-
-//curl -k -H "Accept: application/json" http://vm-dev-030.misd.isi.edu/ermrest/catalog/1/entity/dataset/id=4894
-
-
-// Ermrest
-
-// - curl -k -H "Accept: application/json" https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/aggregate/construct/a:=cnt(*)
-// - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/aggregate/construct/a:=cnt(*)"
-// - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/aggregate/construct/total_rows_yo:=cnt(*)"
-// - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/aggregate/construct/cnt(*)"
-// - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/aggregate/construct/"
-// - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/construct"
-// - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/construct/id=1243"
-// - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/construct/id=1243"
-// - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/target"
-// - curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/target/id=90"
-// curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/legacy:tagnterm/id=33"
-// curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/1/entity/legacy:organism/term=Mouse/dataset_organism/dataset/id=263/person"
-// curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/legacy:target/id=90/construct/truncations"
-// curl -k -H "Accept: application/json" "https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/aggregate/legacy:cleavagesite/id=12/construct/row_count:=cnt(*)"
+// Chaise Record App
 
 var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'ngCookies', 'ngSanitize']);
 
@@ -104,7 +64,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
         var schema = schemaService.schemas[schemaName];
 
-        // Build the entity path. 
+        // Build the entity path.
         var path            = configService.CR_BASE_URL + schema.cid + '/entity/' + fixedEncodeURIComponent(schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
         var aggregatePath   = configService.CR_BASE_URL + schema.cid + '/aggregate/' + fixedEncodeURIComponent(schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
 
@@ -124,7 +84,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             entity.associations     = [];
             // Data use by helper methods
             entity.internal         = { schemaName: schemaName, tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
-            
+
             // console.log('entity', entity);
 
             // SET ENTITY DISPLAY TITLE
@@ -144,10 +104,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // For each of the table references, we'll execute an API request
             for (var i = 0; i < foreignTables.length; i++){
                 var ft = foreignTables[i];
-                
+
                 // If initialLoad is true, then we load the entities, else we load the aggregate (count)
                 var ermrestPath = (ft.initialLoad) ? ft.path : ft.aggregatePath;
-                
+
                 console.log('ermrest path is ', ermrestPath);
 
                 // Need to preserve ft variable in a closure
@@ -160,7 +120,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                         // If the elements doesn't return an empty array, continue
                         if (elements.length > 0){
-    
+
 
                             // Get the elements annotations from the schema
                             var annotations =  schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations;
@@ -203,7 +163,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                             // Else, append the 'formattedForeignTable' to the entity's elements
                             } else{
-    
+
                                 console.log('elements is', elements);
 
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
@@ -371,29 +331,29 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
             // If the table we're referencing is a vocabulary table, then query all vocab terms
             if (schemaService.isVocabularyTable(referenceSchema, referenceTable)){
-                
+
                 // i.e.https://vm-dev-030.misd.isi.edu/ermrest/catalog/6/entity/legacy:target/id=110/construct/cleavagesite
                 var path = foreignTable.path + '/' + referenceTable;
-                
+
                 // Need to preserve foreignKeyColumn, referenceTable variable in a closure
                 (function(foreignKeyColumn, referenceTable){
 
                     // Execute GET request to fetch all terms
                     $http.get(path).success(function(data, status, headers, config) {
                         var vocabs      = data;
-                        
+
                         // Don't continue if vocabs is empty
                         if (vocabs.length == 0){
                             return;
                         }
 
                         var vocabDict   = {};
-                        
+
                         // Convert [ {"id":21,"name":"HA-10His-PP "}, {"id":22,"name":"HAFlag"} ] => { 21: { "vocab" :"HA-10His-PP", "link": "" }, 22: { "vocab": "HAFlag",  "link": "" }  }
                         for (var j = 0; j < vocabs.length; j++){
                             var vocab = vocabs[j];
                             var keys  =  self.getEntityKeys(vocab, referenceTable);
-                            
+
                             // ASSUMPTION: VOCABULARY PRIMARY KEY IS 'ID' and TERM COLUMN IS 'NAME'
                             vocabDict[vocab['id']]   = {
                                                             'vocab':    vocab['name'],
@@ -419,7 +379,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                     });
 
                 }(foreignKeyColumn, referenceTable));
-            
+
             // Else table is a reference to a complex table, set links
             } else{
 
@@ -444,7 +404,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         // For each primary key
         for (var i = 0; i < primaryKeys.length; i++){
             var pk = primaryKeys[i].unique_columns[0]; // i.e. id
-        
+
             // For each reference, create a link for the primary key
             for (var j = 0; j < references.length; j++){
                 var reference               = references[j];
@@ -462,7 +422,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         var entityTableSchema = schemaService.schemas[entity.internal.schemaName].tables[entity.internal.tableName];
         var validTitleColumns = ['name', 'label', 'title'];
 
-        // NOTE: We're prioritizing title annotation over 
+        // NOTE: We're prioritizing title annotation over
 
         // Inspect each column in the table schema to find the one with the annotation 'title'
         for (var c in entityTableSchema.column_definitions){
@@ -474,8 +434,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // If the annotation is a 'title' return it
             if ((annotations != null && annotations.indexOf('title') > -1)){
                 var title = entity[cd.name];
-                
-                // Remove the entity attribute, because 
+
+                // Remove the entity attribute, because
                 delete entity[cd.name];
 
                 return title;
@@ -484,7 +444,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
         // No columns with the annotation 'title' was found, iterate through valid title columns and see if the entity has those columns
         for (var i = 0; i < validTitleColumns.length; i++){
-            
+
             var title = entity[validTitleColumns[i]];
 
             if (title != undefined){
@@ -529,21 +489,21 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         // EACH SCHEMA
         for (var schemaName in schemaService.schemas) {
         	var schema = schemaService.schemas[schemaName];
-        	
+
         	// EACH TABLE
         	for (var tableKey in schema.tables){
 	            var tableSchema             = schema.tables[tableKey];
 	            var referencedColumnMatch   = false; // if our table name is part of foreign key -> reference columns
-	
+
 	            // skip table if hidden
 	            if (tableSchema.annotations['tag:misd.isi.edu,2015:hidden'] !== undefined) {
 	                continue;
 	            }
-	
+
 	            // EACH FOREIGN KEY SET
 	            for (var i = 0; i < tableSchema.foreign_keys.length; i++){
 	                var fk =  tableSchema.foreign_keys[i];
-	
+
 	                // GET TABLE FROM ONE OF THE REFERENCED COLUMNS
                     // all columns should be under same table
                     var rc = fk.referenced_columns[0];
@@ -774,7 +734,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
 
     // Returns if a column is hidden
     this.isHiddenColumn = function(schemaName, tableName, columnName){
-        
+
         var columnDefinitions = this.schemas[schemaName].tables[tableName].column_definitions;
 
         // Look for the column defition
@@ -955,11 +915,6 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerServic
     var cidRegex = /^[0-9]+$/;
     var tableNameRegex = /^[0-9a-zA-z_-]+$/;
 
-    // catalogueId = 1;
-    // tableName = 'person';
-    // schemaName = 'legacy';
-    // keys { username = 'Jim F. Brinkley' } ;
-
     $scope.reloadPage = function(url){
         setTimeout(function(){
             location.reload();
@@ -1050,7 +1005,7 @@ chaiseRecordApp.directive('slippryimageonload', function() {
             element.bind('load', function() {
                 // Find the image with the longest height, then set the sliprry box's height to be the height of that image
                 var maxImageHeight = 0;
-                
+
                 jQuery('#entity-images li img').each(function(){
                     if ($(this).height() > maxImageHeight){
                         maxImageHeight = $(this).height();
