@@ -1,6 +1,33 @@
-var openSeadragonApp = angular.module('openSeadragonApp', []);
+var openSeadragonApp = angular.module('OpenSeadragonApp', []);
 
-openSeadragonApp.controller('MainCtrl', ['$scope', '$sce', function($scope, $sce) {
-    $scope.entity = true;
-    $scope.viewerSource = $sce.trustAsResourceUrl('http://vm-dev-030.misd.isi.edu/~jessie/openseadragon-viewer/mview.html?url=http://vm-dev-030.misd.isi.edu/~mei/data/real3/DZC/DAPI/ImageProperties.xml&url=http://vm-dev-030.misd.isi.edu/~mei/data/real3/DZC/Alexa%20Fluor%20488/ImageProperties.xml&url=http://vm-dev-030.misd.isi.edu/~mei/data/real3/DZC/Alexa%20Fluor%20555/ImageProperties.xml&url=http://vm-dev-030.misd.isi.edu/~mei/data/real3/DZI/ImageProperties.xml&x=0.5&y=0.6452489905787349&z=0.45868459229311215');
+// API to fetch data from ERMrest
+openSeadragonApp.service('Ermrest', ['$http', '$location', function($http, $location) {
+    this.getEntity = function getEntityURI(catalogId, schemaName, tableName, entityId) {
+        var entityPath = 'http://' + $location.host() + '/ermrest/catalog/' + catalogId + '/entity/' + schemaName + ':' + tableName + '/id=' + entityId;
+        return $http.get(entityPath).then(function(response) {
+            if (response.data.length > 0) {
+                return response.data[0];
+            }
+        });
+    }
+}]);
+
+// CONTROLLER
+openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($scope, Ermrest) {
+    var catalogId = 1;
+    var entityId = 44;
+    var schemaName = 'rbk';
+    var tableName = 'image';
+    $scope.viewerSource = '';
+
+    Ermrest.getEntity(catalogId, schemaName, tableName, entityId).then(function(data) {
+        $scope.viewerSource = data.uri;
+    });
+}]);
+
+// FILTERS
+openSeadragonApp.filter('trusted', ['$sce', function($sce) {
+    return function(url) {
+        return $sce.trustAsResourceUrl(url);
+    };
 }]);
