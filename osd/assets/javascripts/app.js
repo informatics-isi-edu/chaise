@@ -31,6 +31,11 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($sc
 
     // Fetch uri from image table
     Ermrest.getEntity().then(function(data) {
+        // TODO: Remove me when OpenSeadragon is done! ///////
+        // https://dev.rebuildingakidney.org/openseadragon-viewer/mview.html?url=https://dev.rebuildingakidney.org/data/czi2dzi/81250cb4225cfa1fdb9730164ee224e64829700352cb78b8ee1830e1a5e21310.dzi/Brigh/ImageProperties.xml
+        // Splicing in my ~jessie directory in here so it redirects to my own version of OpenSeadragon and not the VM-wide version..
+        data.uri = data.uri.substring(0,34) + '~jessie/' + data.uri.substring(34);
+        /////////////////////////////////////
         $scope.viewerSource = data.uri;
     });
 }]);
