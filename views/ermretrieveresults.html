@@ -221,7 +221,12 @@
 											<div class="col-md-6" ng-show="values['summary']!=null">
 												<dl class="attribute-group">
 													<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
-													<dd>{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</dd>
+													<dd>
+														<a class="summary-list" ng-if="facetResults.isUrl(FacetsData.table,values['summary'])" ng-href="{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}">
+															{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}
+														</a>
+														<span ng-if="!facetResults.isUrl(FacetsData.table,values['summary'])">{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</span>
+													</dd>
 												</dl>
 											</div>
 										</div>
@@ -312,7 +317,12 @@
 												<div class="col-md-12">
 													<dl class="attribute-group summary-card">
 														<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
-														<dd class="summ-desc">{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</dd>
+														<dd class="summ-desc">
+															<a ng-if="facetResults.isUrl(FacetsData.table,values['summary'])" ng-href="{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}">
+																{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}
+															</a>
+															<span ng-if="!facetResults.isUrl(FacetsData.table,values['summary'])">{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</span>
+														</dd>
 													</dl>
 												</div>
 											</div>
