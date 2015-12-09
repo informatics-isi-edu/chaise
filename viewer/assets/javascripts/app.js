@@ -1,12 +1,19 @@
-var openSeadragonApp = angular.module('OpenSeadragonApp', []);
+var openSeadragonApp = angular.module('openSeadragonApp', []);
+
+setTimeout(function(){
+    // TODO: Abstract params into its own service.. currently repeated code in Ermrest service
+    var path = window.location.hash;
+    var params = path.split('/');
+    var catalogId = params[1];
+    var schemaName = params[2].split(':')[0];
+    var tableName = params[2].split(':')[1];
+    var entityId = params[3].split('=')[1];
+    var url = '#' + catalogId + '/' + schemaName + ':' + tableName + '/id=' + entityId;
+    window.history.pushState('', document.title, url);
+}, 0);
 
 // API to fetch data from ERMrest
 openSeadragonApp.service('Ermrest', ['$http', '$location', function($http, $location) {
-    var ERMREST_ENDPOINT = 'http://' + $location.host() + '/ermrest/catalog/';
-    if (chaiseConfig['ermrestLocation'] != null) {
-        ERMREST_ENDPOINT = chaiseConfig['ermrestLocation'] + '/ermrest/catalog';
-    }
-
     // Parse Chaise url to determine required parameters to find the requested entity
     var path = $location.path();
     var params = path.split('/');
@@ -14,6 +21,11 @@ openSeadragonApp.service('Ermrest', ['$http', '$location', function($http, $loca
     var schemaName = params[2].split(':')[0];
     var tableName = params[2].split(':')[1];
     var entityId = params[3].split('=')[1];
+
+    var ERMREST_ENDPOINT = 'http://' + $location.host() + '/ermrest/catalog/';
+    if (chaiseConfig['ermrestLocation'] != null) {
+        ERMREST_ENDPOINT = chaiseConfig['ermrestLocation'] + '/ermrest/catalog';
+    }
 
     this.getEntity = function getEntity() {
         var entityPath = ERMREST_ENDPOINT + catalogId + '/entity/' + schemaName + ':' + tableName + '/id=' + entityId;
@@ -34,7 +46,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($sc
         // TODO: Remove me when OpenSeadragon is done! ///////
         // https://dev.rebuildingakidney.org/openseadragon-viewer/mview.html?url=https://dev.rebuildingakidney.org/data/czi2dzi/81250cb4225cfa1fdb9730164ee224e64829700352cb78b8ee1830e1a5e21310.dzi/Brigh/ImageProperties.xml
         // Splicing in my ~jessie directory in here so it redirects to my own version of OpenSeadragon and not the VM-wide version..
-        data.uri = data.uri.substring(0,34) + '~jessie/' + data.uri.substring(34);
+        data.uri = data.uri.substring(0, 34) + '~jessie/' + data.uri.substring(34);
         /////////////////////////////////////
         $scope.viewerSource = data.uri;
     });
