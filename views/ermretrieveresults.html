@@ -215,15 +215,15 @@
 														</a>
 													</span>
 													</dd>
-													<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
+													<dd class="search-list" ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
 												</dl>
 											</div>
 											<div class="col-md-6" ng-show="values['summary']!=null">
 												<dl class="attribute-group">
 													<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
 													<dd>
-														<a class="summary-list" ng-if="facetResults.isUrl(FacetsData.table,values['summary'])" ng-href="{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}">
-															{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}
+														<a class="search-list" ng-if="facetResults.isUrl(FacetsData.table,values['summary'])" ng-href="{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}">
+															{{facetResults.urlText(FacetsData.table,values['summary'],facetResults.html(FacetsData.table,values['summary'],row[values['summary']]))}}
 														</a>
 														<span ng-if="!facetResults.isUrl(FacetsData.table,values['summary'])">{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</span>
 													</dd>
@@ -308,7 +308,7 @@
 																	</a>
 																</span>
 															</dd>
-															<dd ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
+															<dd class="search-list" ng-if="!facetResults.isUrl(FacetsData.table,col)" ng-show="facetResults.display(FacetsData.table,col)!=null">{{facetResults.html(FacetsData.table,col,row[col])}}</dd>
 														</dl>
 													</div>
 												</div>

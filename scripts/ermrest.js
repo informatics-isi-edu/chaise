@@ -3547,3 +3547,22 @@ function getFacetOrder(facet) {
 	});
 	return ret;
 }
+
+function getUrlText(table_name, column_name, url) {
+	var ret = url;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name']) {
+			var column_definitions = table['column_definitions'];
+			$.each(column_definitions, function(i, col) {
+				if (col['name'] == column_name) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_MAP_URI] != null && col['annotations'][COLUMNS_MAP_URI]['url_text'] != null) {
+						ret = col['annotations'][COLUMNS_MAP_URI]['url_text'];
+					}
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	return ret;
+}

@@ -435,6 +435,9 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		}
 		return ret;
 	};
+	this.urlText = function urlText(table, column, value) {
+		return getUrlText(table, column, value);
+	};
 
 	this.displayRange = function displayRange() {
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
