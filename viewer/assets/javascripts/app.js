@@ -1,28 +1,35 @@
 var openSeadragonApp = angular.module('openSeadragonApp', []);
-
+// Refreshes page when fragment identifier changes
 setTimeout(function(){
-    // TODO: Abstract params into its own service.. currently repeated code in Ermrest service
-    var path = window.location.hash;
-    var params = path.split('/');
-    var catalogId = params[1];
-    var schemaName = params[2].split(':')[0];
-    var tableName = params[2].split(':')[1];
-    var entityId = params[3].split('=')[1];
-    var url = '#' + catalogId + '/' + schemaName + ':' + tableName + '/id=' + entityId;
-    window.history.pushState('', document.title, url);
+
+    window.onhashchange = function() {
+
+        if (window.location.hash != '#undefined') {
+            location.reload();
+        } else {
+            history.pushState("", document.title, window.location.pathname);
+            location.reload();
+        }
+
+        function goBack() {
+            window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
+            window.location.lasthash.pop();
+        }
+    }
+
 }, 0);
 
 // API to fetch data from ERMrest
-openSeadragonApp.service('Ermrest', ['$http', '$location', function($http, $location) {
+openSeadragonApp.service('Ermrest', ['$http', function($http) {
     // Parse Chaise url to determine required parameters to find the requested entity
-    var path = $location.path();
+    var path = window.location.hash;
     var params = path.split('/');
-    var catalogId = params[1];
-    var schemaName = params[2].split(':')[0];
-    var tableName = params[2].split(':')[1];
-    var entityId = params[3].split('=')[1];
+    var catalogId = params[0].substring(1);
+    var schemaName = params[1].split(':')[0];
+    var tableName = params[1].split(':')[1];
+    var entityId = params[2].split('=')[1];
 
-    var ERMREST_ENDPOINT = 'http://' + $location.host() + '/ermrest/catalog/';
+    var ERMREST_ENDPOINT = window.location.origin + '/ermrest/catalog/';
     if (chaiseConfig['ermrestLocation'] != null) {
         ERMREST_ENDPOINT = chaiseConfig['ermrestLocation'] + '/ermrest/catalog';
     }
