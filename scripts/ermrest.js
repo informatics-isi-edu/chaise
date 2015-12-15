@@ -1635,7 +1635,11 @@ function successGetSession(data, textStatus, jqXHR, param) {
 			$('#login_link').show();
 			$('#logout_link').hide();
 			if (param != null) {
-				window.location.href = param;
+				if (window.location.href == param) {
+					window.location.reload(true);
+				} else {
+					window.location.href = param;
+				}
 			}
 		} else {
 			$('#login_user').html(USER);
