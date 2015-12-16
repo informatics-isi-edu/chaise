@@ -67,7 +67,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
         if (index != -1) {
             prefix = prefix.substring(0, index);
         }
-        var recordResource = "/record";
+        var recordResource = "/record/";
         if (chaiseConfig['recordResource'] != null) {
             recordResource = chaiseConfig['recordResource'];
         }
