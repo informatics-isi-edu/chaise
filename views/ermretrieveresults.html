@@ -319,7 +319,7 @@
 														<dt>{{facetResults.display(FacetsData.table,values['summary'])}}</dt>
 														<dd class="summ-desc">
 															<a ng-if="facetResults.isUrl(FacetsData.table,values['summary'])" ng-href="{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}">
-																{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}
+																{{facetResults.urlText(FacetsData.table,values['summary'],facetResults.html(FacetsData.table,values['summary'],row[values['summary']]))}}
 															</a>
 															<span ng-if="!facetResults.isUrl(FacetsData.table,values['summary'])">{{facetResults.html(FacetsData.table,values['summary'],row[values['summary']])}}</span>
 														</dd>
