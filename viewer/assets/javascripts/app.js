@@ -47,6 +47,11 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
 // CONTROLLER
 openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($scope, Ermrest) {
     $scope.viewerSource = '';
+    $scope.messages = [
+        {
+            'text': 'Sample text'
+        }
+    ];
 
     // Fetch uri from image table
     Ermrest.getEntity().then(function(data) {
@@ -56,6 +61,12 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($sc
         data.uri = data.uri.substring(0, 34) + '~jessie/' + data.uri.substring(34);
         /////////////////////////////////////
         $scope.viewerSource = data.uri;
+    });
+
+    $(window).on('message', function(event) {
+        var message = JSON.parse(event.originalEvent.data);
+        $scope.messages.push(message.data);
+        $scope.$apply();
     });
 }]);
 
