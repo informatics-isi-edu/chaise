@@ -16,7 +16,6 @@ setTimeout(function(){
             window.location.lasthash.pop();
         }
     }
-
 }, 0);
 
 // API to fetch data from ERMrest
@@ -34,20 +33,39 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
         ERMREST_ENDPOINT = chaiseConfig['ermrestLocation'] + '/ermrest/catalog';
     }
 
+    // Returns a row from rbk:image given an entity ID in URI
     this.getEntity = function getEntity() {
         var entityPath = ERMREST_ENDPOINT + catalogId + '/entity/' + schemaName + ':' + tableName + '/id=' + entityId;
         return $http.get(entityPath).then(function(response) {
             if (response.data.length > 0) {
                 return response.data[0];
+            } else {
+                console.log('Error: ', response.status, response.statusText);
             }
         });
+    }
+
+    this.insertROI = function insertROI(x, y, width, height, context) {
+        var timestamp = new Date().toISOString();
+        var coordinates = "{" + x + ", " + y + ", " + width + ", " + height + "}";
+        var roi = [{
+            "id": null,
+            "image_id": parseInt(entityId),
+            "author": null,
+            "timestamp": timestamp,
+            "coords": coordinates,
+            "context_uri": context,
+            "anatomy": null
+        }];
+        var entityPath = ERMREST_ENDPOINT + catalogId + '/entity/' + schemaName + ':roi?defaults=id,author';
+        return $http.post(entityPath, roi);
     }
 }]);
 
 // CONTROLLER
 openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($scope, Ermrest) {
     $scope.viewerSource = '';
-    $scope.messages = [
+    $scope.annotations = [
         {
             'text': 'Sample text'
         }
@@ -64,9 +82,16 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($sc
     });
 
     $(window).on('message', function(event) {
-        var message = JSON.parse(event.originalEvent.data);
-        $scope.messages.push(message.data);
-        $scope.$apply();
+        var annotation = JSON.parse(event.originalEvent.data);
+        var coordinates = annotation.data.shapes[0].geometry;
+        Ermrest.insertROI(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context)
+        .then(function(response) {
+            if (response.data) {
+                $scope.annotations.push(response.data);
+            } else {
+                console.log('Error: ', response.status, response.statusText);
+            }
+        });
     });
 }]);
 
