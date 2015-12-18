@@ -20,6 +20,10 @@ setTimeout(function(){
 
 // API to fetch data from ERMrest
 openSeadragonApp.service('Ermrest', ['$http', function($http) {
+
+    // Get a reference to the Ermrest service
+    var self = this;
+
     // Parse Chaise url to determine required parameters to find the requested entity
     var path = window.location.hash;
     var params = path.split('/');
@@ -43,9 +47,9 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
                 console.log('Error: ', response.status, response.statusText);
             }
         });
-    }
+    };
 
-    this.insertROI = function insertROI(x, y, width, height, context) {
+    this.insertRoi = function insertRoi(x, y, width, height, context) {
         var timestamp = new Date().toISOString();
         var coordinates = "{" + x + ", " + y + ", " + width + ", " + height + "}";
         var roi = [{
@@ -59,16 +63,48 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
         }];
         var entityPath = ERMREST_ENDPOINT + catalogId + '/entity/' + schemaName + ':roi?defaults=id,author';
         return $http.post(entityPath, roi);
-    }
+    };
+
+    this.insertRoiComment = function insertRoiComment(roiId, comment) {
+        var timestamp = new Date().toISOString();
+        var roiComment = [{
+            "id": null,
+            "roi_id": roiId,
+            "author": null,
+            "timestamp": timestamp,
+            "comment": comment
+        }];
+
+        var entityPath = ERMREST_ENDPOINT + catalogId + '/entity/' + schemaName + ':roi_comment?defaults=id,author';
+        return $http.post(entityPath, roiComment);
+    };
+
+    this.createAnnotation = function createAnnotation(x, y, width, height, context, comment) {
+        // First create a row in rbk:roi...
+        this.insertRoi(x, y, width, height, context).then(function(response) {
+            if (response.data) {
+                return response.data[0];
+            } else {
+                return 'Error: Region of interest could not be created. ' + response.status + ' ' + response.statusText;
+            }
+        // Then create a row in roi_comment, filling in the roi_id column with the result of insertRoi()
+        }).then(function(data) {
+            var roiId = data.id;
+            self.insertRoiComment(roiId, comment).then(function(response) {
+                if (response.data) {
+                    return response.data[0];
+                } else {
+                    return 'Error: Comment could not be created. ' + response.status + ' ' + response.statusText;
+                }
+            });
+        });
+    };
 }]);
 
 // CONTROLLER
 openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($scope, Ermrest) {
     $scope.viewerSource = '';
     $scope.annotations = [
-        {
-            'text': 'Sample text'
-        }
     ];
 
     // Fetch uri from image table
@@ -84,14 +120,9 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($sc
     $(window).on('message', function(event) {
         var annotation = JSON.parse(event.originalEvent.data);
         var coordinates = annotation.data.shapes[0].geometry;
-        Ermrest.insertROI(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context)
-        .then(function(response) {
-            if (response.data) {
-                $scope.annotations.push(response.data);
-            } else {
-                console.log('Error: ', response.status, response.statusText);
-            }
-        });
+
+        // Inserts annotation data into rbk:roi and rbk:roi_comment
+        Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text);
     });
 }]);
 
