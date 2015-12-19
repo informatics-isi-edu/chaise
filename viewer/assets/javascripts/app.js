@@ -18,6 +18,7 @@ setTimeout(function(){
     }
 }, 0);
 
+// SERVICE
 // API to fetch data from ERMrest
 openSeadragonApp.service('Ermrest', ['$http', function($http) {
 
@@ -104,8 +105,7 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
 // CONTROLLER
 openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($scope, Ermrest) {
     $scope.viewerSource = '';
-    $scope.annotations = [
-    ];
+    $scope.annotations = [];
 
     // Fetch uri from image table
     Ermrest.getEntity().then(function(data) {
@@ -117,12 +117,18 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($sc
         $scope.viewerSource = data.uri;
     });
 
+    // TODO: Figure out an Angular way to listen to the postMessage event
     $(window).on('message', function(event) {
-        var annotation = JSON.parse(event.originalEvent.data);
-        var coordinates = annotation.data.shapes[0].geometry;
-
-        // Inserts annotation data into rbk:roi and rbk:roi_comment
-        Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text);
+        var origin = event.originalEvent.source;
+        // TODO: Abstract away rebuildingakidney url
+        if (origin === 'http://dev.rebuildingakidney.org') {
+            var annotation = JSON.parse(event.originalEvent.data);
+            var coordinates = annotation.data.shapes[0].geometry;
+            // Inserts annotation data into rbk:roi and rbk:roi_comment
+            Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text);
+        } else {
+            console.log('Error: Invalid origin for annotation data.');
+        }
     });
 }]);
 
