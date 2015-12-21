@@ -26,12 +26,12 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
     var self = this;
 
     // Parse Chaise url to determine required parameters to find the requested entity
-    var path = window.location.hash;
-    var params = path.split('/');
-    var catalogId = params[0].substring(1);
-    var schemaName = params[1].split(':')[0];
-    var tableName = params[1].split(':')[1];
-    var entityId = params[2].split('=')[1];
+    this.path = window.location.hash;
+    this.params = this.path.split('/');
+    this.catalogId = this.params[0].substring(1);
+    this.schemaName = this.params[1].split(':')[0];
+    this.tableName = this.params[1].split(':')[1];
+    this.entityId = this.params[2].split('=')[1];
 
     var ERMREST_ENDPOINT = window.location.origin + '/ermrest/catalog/';
     if (chaiseConfig['ermrestLocation'] != null) {
@@ -40,7 +40,7 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
 
     // Returns a row from rbk:image given an entity ID in URI
     this.getEntity = function getEntity() {
-        var entityPath = ERMREST_ENDPOINT + catalogId + '/entity/' + schemaName + ':' + tableName + '/id=' + entityId;
+        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':' + this.tableName + '/id=' + this.entityId;
         return $http.get(entityPath).then(function(response) {
             if (response.data.length > 0) {
                 return response.data[0];
@@ -55,14 +55,14 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
         var coordinates = "{" + x + ", " + y + ", " + width + ", " + height + "}";
         var roi = [{
             "id": null,
-            "image_id": parseInt(entityId),
+            "image_id": parseInt(this.entityId),
             "author": null,
             "timestamp": timestamp,
             "coords": coordinates,
             "context_uri": context,
             "anatomy": null
         }];
-        var entityPath = ERMREST_ENDPOINT + catalogId + '/entity/' + schemaName + ':roi?defaults=id,author';
+        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi?defaults=id,author';
         return $http.post(entityPath, roi);
     };
 
@@ -76,7 +76,7 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
             "comment": comment
         }];
 
-        var entityPath = ERMREST_ENDPOINT + catalogId + '/entity/' + schemaName + ':roi_comment?defaults=id,author';
+        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment?defaults=id,author';
         return $http.post(entityPath, roiComment);
     };
 
@@ -100,7 +100,21 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
             });
         });
     };
+
+    this.getRoi = function getRoi() {
+        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi' + '/image_id=' + this.entityId;
+        console.log('Entity Path: ', entityPath);
+        return $http.get(entityPath).then(function(response) {
+            if (response.data.length > 0) {
+                return response.data;
+            } else {
+                console.log('Error: ', response.status, response.statusText);
+            }
+            console.log(response);
+        });
+    };
 }]);
+
 
 // CONTROLLER
 openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($scope, Ermrest) {
@@ -110,24 +124,32 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($sc
     // Fetch uri from image table
     Ermrest.getEntity().then(function(data) {
         // TODO: Remove me when OpenSeadragon is done! ///////
-        // https://dev.rebuildingakidney.org/openseadragon-viewer/mview.html?url=https://dev.rebuildingakidney.org/data/czi2dzi/81250cb4225cfa1fdb9730164ee224e64829700352cb78b8ee1830e1a5e21310.dzi/Brigh/ImageProperties.xml
         // Splicing in my ~jessie directory in here so it redirects to my own version of OpenSeadragon and not the VM-wide version..
         data.uri = data.uri.substring(0, 34) + '~jessie/' + data.uri.substring(34);
         /////////////////////////////////////
         $scope.viewerSource = data.uri;
     });
 
+    Ermrest.getRoi().then(function(data) {
+        // After getRoi, push annotations into scope.annotations
+        // And load each annotation into Annotorious
+        for (var i = 0; i < data.length; i++) {
+            $scope.annotations.push(data[i]);
+        }
+    });
+
+    // Listen for events from OpenSeadragon/iframe
     // TODO: Figure out an Angular way to listen to the postMessage event
     $(window).on('message', function(event) {
-        var origin = event.originalEvent.source;
+        var origin = event.originalEvent.origin;
         // TODO: Abstract away rebuildingakidney url
-        if (origin === 'http://dev.rebuildingakidney.org') {
+        if (origin === window.location.origin) {
             var annotation = JSON.parse(event.originalEvent.data);
             var coordinates = annotation.data.shapes[0].geometry;
             // Inserts annotation data into rbk:roi and rbk:roi_comment
             Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text);
         } else {
-            console.log('Error: Invalid origin for annotation data.');
+            console.log('Error: Invalid origin for annotation data. Event origin: ', origin, ' Expected origin: ', window.location.origin);
         }
     });
 }]);
