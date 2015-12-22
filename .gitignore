@@ -5,6 +5,8 @@
 ._*
 .Spotlight-V100
 .Trashes
+.idea
+.idea/
 ehthumbs.db
 Thumbs.db
 bower_components
