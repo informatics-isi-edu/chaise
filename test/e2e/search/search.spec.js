@@ -125,7 +125,7 @@ describe('In the Chaise search app,', function () {
         microarrayFilterLabel.click();
         setTimeout(function () {
           done();
-        }, 15000);
+        }, 10000);
       });
     });
 
@@ -146,6 +146,17 @@ describe('In the Chaise search app,', function () {
       });
     });
 
+    it('should go to the right URL and show details when clicked', function(done) {
+      var detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
+      //var titleSpan = element(by.cssContainingText('span.panel-title', titleTxt));
+      var titleSpan = element.all(by.css('span.panel-title.ng-binding')).first();
+      titleSpan.click();
+      setTimeout(function() {
+        browser.rootEl = "#recordApp";
+        expect(browser.getCurrentUrl()).toBe(detailUrl);
+        done();
+      }, 2000);
+    });
 
   });
 });
