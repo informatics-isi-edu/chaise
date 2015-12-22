@@ -101,17 +101,54 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
         });
     };
 
-    this.getRoi = function getRoi() {
+    this.getRegions = function getRegions() {
         var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi' + '/image_id=' + this.entityId;
-        console.log('Entity Path: ', entityPath);
         return $http.get(entityPath).then(function(response) {
-            if (response.data.length > 0) {
-                return response.data;
+            if (response.status == 200) {
+                if (response.data.length > 0) {
+                    return response.data;
+                } else {
+                    console.log('No regions of interest found.');
+                }
             } else {
                 console.log('Error: ', response.status, response.statusText);
             }
-            console.log(response);
         });
+    };
+
+    this.getRegionComments = function getRegionComments(roiId) {
+        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment' + '/roi_id=' + roiId;
+        return $http.get(entityPath).then(function(response) {
+            if (response.status == 200) {
+                if (response.data.length > 0) {
+                    return response.data;
+                } else {
+                    console.log('No comments found.');
+                    return;
+                }
+            } else {
+                return 'Error: ' + response.status + ' ' + response.statusText;
+            }
+        });
+    };
+
+    this.getAnnotations = function getAnnotations() {
+        var annotations = [];
+        this.getRegions().then(function(regions) {
+            if (regions) {
+                for (var j = 0; j < regions.length; j++) {
+                    var region = regions[j];
+                    var regionId = region.id;
+                    self.getRegionComments(regionId).then(function(comments) {
+                        region.comments = comments;
+                    });
+                    annotations.push(region);
+                }
+            } else {
+                return 'No regions of interest found.';
+            }
+        });
+        return annotations;
     };
 }]);
 
@@ -130,13 +167,9 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($sc
         $scope.viewerSource = data.uri;
     });
 
-    Ermrest.getRoi().then(function(data) {
-        // After getRoi, push annotations into scope.annotations
-        // And load each annotation into Annotorious
-        for (var i = 0; i < data.length; i++) {
-            $scope.annotations.push(data[i]);
-        }
-    });
+    // After getRoi, push annotations into scope.annotations
+    // And load each annotation into Annotorious
+    $scope.annotations = Ermrest.getAnnotations();
 
     // Listen for events from OpenSeadragon/iframe
     // TODO: Figure out an Angular way to listen to the postMessage event
