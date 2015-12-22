@@ -117,5 +117,35 @@ describe('In the Chaise search app,', function () {
         });
       });
     });
+
+    it('should find \'RNA express (microarray)\', click it and wait for 5s', function (done) {
+      var nameOfResultFilter = 'RNA expression (microarray)';
+      var microarrayFilterLabel = element(by.cssContainingText('label.ng-binding.toggler', nameOfResultFilter))
+      browser.wait(EC.visibilityOf(microarrayFilterLabel), 500).then(function () {
+        microarrayFilterLabel.click();
+        setTimeout(function () {
+          done();
+        }, 15000);
+      });
+    });
+
+    it('should show 25 out of 42 results', function (done) {
+      var expectedShownResultsNum = 25;
+      var expectedTotalResultsNum = 42;
+      var allResults = element.all(by.repeater('row in FacetsData.ermrestData'));
+      //choose the second #results_tally
+      var resultTally = element.all(by.css('#results_tally')).get(1);
+      var totalResults = resultTally.element(by.binding("FacetsData.totalServerItems"));
+      allResults.count().then(function (allResultsNum) {
+        totalResults.getText().then(function (totalResultsText) {
+          //test = "42"
+          expect(totalResultsText).toBe(expectedTotalResultsNum + "");
+          expect(allResultsNum).toBe(expectedShownResultsNum);
+          done();
+        });
+      });
+    });
+
+
   });
 });
