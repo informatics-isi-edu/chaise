@@ -155,21 +155,47 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
 
 // CONTROLLER
 openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($scope, Ermrest) {
-    $scope.viewerSource = '';
     $scope.annotations = [];
+    $scope.viewerSource = null;
+    $scope.viewerWindow = null;
 
-    // Fetch uri from image table
+    $scope.$watch('viewerSource', function() {
+        setTimeout(function waitForViewerToLoad() {
+            // setTimeout() used to queue this assignment to the end,
+            // which avoids $scope.viewer from being assigned before iframe is finished loading
+            // TODO: Isn't there a better way to do this w/o setTimeout?
+            // if (angular.element(document.getElementById('viewer'))[0]) {
+                // $scope.viewerWindow = angular.element(document.getElementById('viewer'))[0].contentWindow;
+                $scope.viewerWindow = window.frames[0];
+            // }
+        }, 0);
+    });
+
+    $scope.$watch('viewerWindow', function() {
+        if ($scope.viewerWindow) {
+            console.log('viewerWindow changed and not null!');
+            console.log('viewerWindow is currently: ', $scope.viewerWindow);
+            $scope.viewerWindow.postMessage('a dummy message', window.location.origin);
+            console.log('I posted the message!');
+        }
+    });
+
+    setInterval(function() {
+        $scope.viewerWindow.postMessage('a dummy message', window.location.origin);
+        console.log('interval ran');
+    }, 5000);
+    // Fetch uri from image table to load OpenSeadragon
     Ermrest.getEntity().then(function(data) {
-        // TODO: Remove me when OpenSeadragon is done! ///////
+        // TODO: Remove me after pushing to vm-wide version of OpenSeadragon ///////////////
         // Splicing in my ~jessie directory in here so it redirects to my own version of OpenSeadragon and not the VM-wide version..
         data.uri = data.uri.substring(0, 34) + '~jessie/' + data.uri.substring(34);
-        /////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////
         $scope.viewerSource = data.uri;
     });
 
-    // After getRoi, push annotations into scope.annotations
-    // And load each annotation into Annotorious
+    // Push pre-existing annotations in Ermrest into controller's scope
     $scope.annotations = Ermrest.getAnnotations();
+    // TODO: Load each annotation into Annotorious and redraw annotations.
 
     // Listen for events from OpenSeadragon/iframe
     // TODO: Figure out an Angular way to listen to the postMessage event
@@ -182,7 +208,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($sc
             // Inserts annotation data into rbk:roi and rbk:roi_comment
             Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text);
         } else {
-            console.log('Error: Invalid origin for annotation data. Event origin: ', origin, ' Expected origin: ', window.location.origin);
+            console.log('Error: Invalid origin for annotation data. Event origin: ', origin, '. Expected origin: ', window.location.origin);
         }
     });
 }]);
