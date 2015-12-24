@@ -20,7 +20,9 @@ setTimeout(function(){
 
 // SERVICE
 // API to fetch data from ERMrest
-openSeadragonApp.service('Ermrest', ['$http', function($http) {
+openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(ERMrestClientFactory, $http) {
+    var client = ERMrestClientFactory.getClient('https://dev.rebuildingakidney.org/ermrest', null);
+    var catalog = client.getCatalog(1);
 
     // Get a reference to the Ermrest service
     var self = this;
@@ -38,15 +40,19 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
         ERMREST_ENDPOINT = chaiseConfig['ermrestLocation'] + '/ermrest/catalog';
     }
 
+
+
     // Returns a row from rbk:image given an entity ID in URI
     this.getEntity = function getEntity() {
-        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':' + this.tableName + '/id=' + this.entityId;
-        return $http.get(entityPath).then(function(response) {
-            if (response.data.length > 0) {
-                return response.data[0];
-            } else {
-                console.log('Error: ', response.status, response.statusText);
-            }
+        return catalog.introspect().then(function(schemas) {
+            var table = schemas['rbk'].getTable('image');
+            return table.getRows().then(function(rows) {
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i].data.id == self.entityId) {
+                        return rows[i].data.uri;
+                    }
+                }
+            });
         });
     };
 
@@ -152,45 +158,68 @@ openSeadragonApp.service('Ermrest', ['$http', function($http) {
     };
 }]);
 
+openSeadragonApp.factory('ERMrestClientFactory', ['$http', '$q', function($http, $q) {
+    ERMrest.configure($http, $q);
+    return ERMrest.clientFactory;
+}]);
 
 // CONTROLLER
-openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', function($scope, Ermrest) {
+openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClientFactory', function($scope, Ermrest, ERMrestClientFactory) {
+    // var client = ERMrestClientFactory.getClient('https://dev.rebuildingakidney.org/ermrest', null);
+    // var catalog = client.getCatalog(1);
+    // catalog.introspect().then(function(schemas) {
+    //     console.log(schemas);
+    //     var table = schemas['rbk'].getTable('roi');
+    //     console.log(table);
+    //     table.getRows().then(function(rows) {
+    //         console.log(rows);
+    //         var relatedTable = rows[0].getRelatedTable('rbk', 'roi');
+    //         console.log(relatedTable);
+    //         var filteredTable = table.getFilteredTable(["id::gt::200", "id::lt::300"]);
+    //         console.log(filteredTable);
+    //         filteredTable.getRows().then(function(rows) {
+    //             console.log(rows);
+    //         });
+    //     });
+    // });
+
     $scope.annotations = [];
     $scope.viewerSource = null;
     $scope.viewerWindow = null;
 
-    $scope.$watch('viewerSource', function() {
-        setTimeout(function waitForViewerToLoad() {
-            // setTimeout() used to queue this assignment to the end,
-            // which avoids $scope.viewer from being assigned before iframe is finished loading
-            // TODO: Isn't there a better way to do this w/o setTimeout?
-            // if (angular.element(document.getElementById('viewer'))[0]) {
-                // $scope.viewerWindow = angular.element(document.getElementById('viewer'))[0].contentWindow;
-                $scope.viewerWindow = window.frames[0];
-            // }
-        }, 0);
-    });
+    // $scope.$watch('viewerSource', function() {
+    //     setTimeout(function waitForViewerToLoad() {
+    //         // setTimeout() used to queue this assignment to the end,
+    //         // which avoids $scope.viewer from being assigned before iframe is finished loading
+    //         // TODO: Isn't there a better way to do this w/o setTimeout?
+    //         // if (angular.element(document.getElementById('viewer'))[0]) {
+    //             // $scope.viewerWindow = angular.element(document.getElementById('viewer'))[0].contentWindow;
+    //             $scope.viewerWindow = window.frames[0];
+    //         // }
+    //     }, 0);
+    // });
+    //
+    // $scope.$watch('viewerWindow', function() {
+    //     if ($scope.viewerWindow) {
+    //         console.log('viewerWindow changed and not null!');
+    //         console.log('viewerWindow is currently: ', $scope.viewerWindow);
+    //         $scope.viewerWindow.postMessage('a dummy message', window.location.origin);
+    //         console.log('I posted the message!');
+    //     }
+    // });
 
-    $scope.$watch('viewerWindow', function() {
-        if ($scope.viewerWindow) {
-            console.log('viewerWindow changed and not null!');
-            console.log('viewerWindow is currently: ', $scope.viewerWindow);
-            $scope.viewerWindow.postMessage('a dummy message', window.location.origin);
-            console.log('I posted the message!');
-        }
-    });
+    // setInterval(function() {
+    //     $scope.viewerWindow.postMessage('a dummy message', window.location.origin);
+    //     console.log('interval ran');
+    // }, 5000);
 
-    setInterval(function() {
-        $scope.viewerWindow.postMessage('a dummy message', window.location.origin);
-        console.log('interval ran');
-    }, 5000);
     // Fetch uri from image table to load OpenSeadragon
     Ermrest.getEntity().then(function(data) {
         // TODO: Remove me after pushing to vm-wide version of OpenSeadragon ///////////////
         // Splicing in my ~jessie directory in here so it redirects to my own version of OpenSeadragon and not the VM-wide version..
-        data.uri = data.uri.substring(0, 34) + '~jessie/' + data.uri.substring(34);
+        data = data.substring(0, 34) + '~jessie/' + data.substring(34);
         ///////////////////////////////////////////////////////////////////////////////////
-        $scope.viewerSource = data.uri;
+        $scope.viewerSource = data;
     });
 
     // Push pre-existing annotations in Ermrest into controller's scope
