@@ -131,7 +131,7 @@ describe('In the Chaise search app,', function () {
             });
         });
 
-        xit('should show 25 out of 42 results', function (done) {
+        it('should show 25 out of 42 results', function (done) {
             var expectedShownResultsNum = 25;
             var expectedTotalResultsNum = 42;
             var allResults = element.all(by.repeater('row in FacetsData.ermrestData'));
