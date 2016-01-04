@@ -15,5 +15,5 @@ exports.config = {
   // If ng-app attribute is in a descendant of <body>, tell Protractor where ng-app is
   rootElement: '#main-content',
   // CHAISE_BASE_URL should be http://dev.misd.isi.edu/chaise for now.
-  baseUrl: process.env.CHAISE_BASE_URL + '/search'
+  baseUrl: 'http://dev.misd.isi.edu/chaise' + '/search'
 };
