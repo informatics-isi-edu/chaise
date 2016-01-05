@@ -247,9 +247,9 @@ var ERMrest = (function () {
      * Creates an instance of the Table object.
      */
     function Table(schema, jsonTable) {
-        this._schema = schema;
         this._uri = schema.catalog._uri + "/entity/" + schema.name + ":" + jsonTable.table_name;
         this.name = jsonTable.table_name;
+        this.schema = schema;
         this.columns = [];
         this.keys = jsonTable.keys;
         this.annotations = jsonTable.annotations;
@@ -296,6 +296,12 @@ var ERMrest = (function () {
      * @desc The name of the table.
      */
     Table.prototype.name = null;
+
+    /**
+     * @var
+     * @desc The schema that the table belongs to.
+     */
+    Table.prototype.schema = null;
 
     /**
      * @var
@@ -415,8 +421,8 @@ var ERMrest = (function () {
         }
 
         this.uri = table._uri;
-        for (var i = 0; i < keys.length; i++) {
-            this.uri = this.uri + "/" + keys[i] + "=" + jsonRow[keys[i]];
+        for (var k = 0; k < keys.length; k++) {
+            this.uri = this.uri + "/" + keys[k] + "=" + jsonRow[keys[k]];
         }
     }
 
@@ -451,8 +457,9 @@ var ERMrest = (function () {
         this._uri = row.uri + "/" + schemaName + ":" + tableName;
         this.name = tableName;
 
-        var table = row.table._schema.catalog.getSchemas()[schemaName].getTable(tableName);
-
+        // TODO we'll want to add more error handling here
+        var table = row.table.schema.catalog.getSchemas()[schemaName].getTable(tableName);
+        this.schema = table.schema;
         this.displayName = table.displayName;
         this.hidden = table.hidden;
         this.columns = table.columns;
@@ -482,6 +489,7 @@ var ERMrest = (function () {
         this.filters = filters;
         this.displayName = table.displayName;
         this.name = table.name;
+        this.schema = table.schema;
         this.hidden = table.hidden;
         this.columns = table.columns;
         this.keys = table.keys;
