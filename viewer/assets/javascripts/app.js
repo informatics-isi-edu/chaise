@@ -18,6 +18,11 @@ setTimeout(function(){
     }
 }, 0);
 
+openSeadragonApp.factory('ERMrestClientFactory', ['$http', '$q', function($http, $q) {
+    ERMrest.configure($http, $q);
+    return ERMrest.clientFactory;
+}]);
+
 // SERVICE
 // API to fetch data from ERMrest
 openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(ERMrestClientFactory, $http) {
@@ -40,25 +45,27 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
         ERMREST_ENDPOINT = chaiseConfig['ermrestLocation'] + '/ermrest/catalog';
     }
 
-
-
-    // Returns a row from rbk:image given an entity ID in URI
-    this.getEntity = function getEntity() {
+    // Returns a Schema object from ERMrest
+    this.getSchema = function getSchema() {
         return catalog.introspect().then(function(schemas) {
-            var table = schemas['rbk'].getTable('image');
-            return table.getRows().then(function(rows) {
-                for (var i = 0; i < rows.length; i++) {
-                    if (rows[i].data.id == self.entityId) {
-                        return rows[i].data.uri;
-                    }
-                }
+            return schemas[self.schemaName];
+        });
+    };
+
+    // Returns the uri value from a row in rbk:image (filtered by the id found in URL)
+    this.getEntity = function getEntity() {
+        return this.getSchema().then(function(schema) {
+            var table = schema.getTable(self.tableName);
+            var filteredTable = table.getFilteredTable(["id=" + self.entityId]);
+            return filteredTable.getRows().then(function(rows) {
+                return rows[0].data.uri;
             });
         });
     };
 
     this.insertRoi = function insertRoi(x, y, width, height, context) {
         var timestamp = new Date().toISOString();
-        var coordinates = "{" + x + ", " + y + ", " + width + ", " + height + "}";
+        var coordinates = [x, y, width, height];
         var roi = [{
             "id": null,
             "image_id": parseInt(this.entityId),
@@ -108,17 +115,17 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
     };
 
     this.getRegions = function getRegions() {
-        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi' + '/image_id=' + this.entityId;
-        return $http.get(entityPath).then(function(response) {
-            if (response.status == 200) {
-                if (response.data.length > 0) {
-                    return response.data;
+        return this.getSchema().then(function(schema) {
+            var roiTable = schema.getTable('roi');
+            var filteredRoiTable = roiTable.getFilteredTable(["image_id=" + self.entityId]);
+            filteredRoiTable.getRows().then(function(rows) {
+                if (rows.length > 0) {
+                    console.log(rows);
+                    return rows;
                 } else {
-                    console.log('No regions of interest found.');
+                    return 'No regions of interest found.';
                 }
-            } else {
-                console.log('Error: ', response.status, response.statusText);
-            }
+            });
         });
     };
 
@@ -140,49 +147,30 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
 
     this.getAnnotations = function getAnnotations() {
         var annotations = [];
-        this.getRegions().then(function(regions) {
-            if (regions) {
-                for (var j = 0; j < regions.length; j++) {
-                    var region = regions[j];
-                    var regionId = region.id;
-                    self.getRegionComments(regionId).then(function(comments) {
-                        region.comments = comments;
-                    });
-                    annotations.push(region);
+        this.getSchema().then(function(schema) {
+            var roiTable = schema.getTable('roi');
+            var filteredRoiTable = roiTable.getFilteredTable(["image_id=" + self.entityId]);
+            return filteredRoiTable.getRows().then(function(roiRows) {
+                if (roiRows.length > 0) {
+                    return Promise.all(roiRows.map(function(roi) {
+                        return roi.getRelatedTable(self.schemaName, 'roi_comment').getRows().then(function(commentRows) {
+                            return Promise.all(commentRows.map(function(comment) {
+                                roi.data.comments = comment.data.comment;
+                                annotations.push(roi);
+                            }));
+                        });
+                    }));
+                } else {
+                    return 'No annotations found.';
                 }
-            } else {
-                return 'No regions of interest found.';
-            }
+            });
         });
         return annotations;
     };
 }]);
 
-openSeadragonApp.factory('ERMrestClientFactory', ['$http', '$q', function($http, $q) {
-    ERMrest.configure($http, $q);
-    return ERMrest.clientFactory;
-}]);
-
 // CONTROLLER
 openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClientFactory', function($scope, Ermrest, ERMrestClientFactory) {
-    // var client = ERMrestClientFactory.getClient('https://dev.rebuildingakidney.org/ermrest', null);
-    // var catalog = client.getCatalog(1);
-    // catalog.introspect().then(function(schemas) {
-    //     console.log(schemas);
-    //     var table = schemas['rbk'].getTable('roi');
-    //     console.log(table);
-    //     table.getRows().then(function(rows) {
-    //         console.log(rows);
-    //         var relatedTable = rows[0].getRelatedTable('rbk', 'roi');
-    //         console.log(relatedTable);
-    //         var filteredTable = table.getFilteredTable(["id::gt::200", "id::lt::300"]);
-    //         console.log(filteredTable);
-    //         filteredTable.getRows().then(function(rows) {
-    //             console.log(rows);
-    //         });
-    //     });
-    // });
-
     $scope.annotations = [];
     $scope.viewerSource = null;
     $scope.viewerWindow = null;
