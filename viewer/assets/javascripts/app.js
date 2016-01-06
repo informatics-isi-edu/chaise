@@ -171,6 +171,10 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', 'ERMr
     $scope.pushAnnotationToScope = function pushAnnotationToScope(newAnnotation) {
         $scope.annotations.push(newAnnotation);
     };
+
+    $scope.highlightAnnotation = function highlightAnnotation(annotation) {
+        window.frames[0].postMessage({messageType: 'highlightAnnotation', content: annotation}, window.location.origin);
+    };
 }]);
 
 // Trusted: A filter that tells Angular when a url is trusted =========================================================================================================================
