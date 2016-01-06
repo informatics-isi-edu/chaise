@@ -1,31 +1,13 @@
-// Refreshes page when fragment identifier changes
-setTimeout(function(){
-
-    window.onhashchange = function() {
-
-        if (window.location.hash != '#undefined') {
-            location.reload();
-        } else {
-            history.replaceState("", document.title, window.location.pathname);
-            location.reload();
-        }
-
-        function goBack() {
-            window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
-            window.location.lasthash.pop();
-        }
-    }
-}, 0);
-
+// openSeadragonApp: Defines the Angular application ==================================================================================================================================
 var openSeadragonApp = angular.module('openSeadragonApp', []);
 
-// ERMrest API Client
+// ERMrestClientFactory: A factory for the ERMrest API client library =================================================================================================================
 openSeadragonApp.factory('ERMrestClientFactory', ['$http', '$q', function($http, $q) {
     ERMrest.configure($http, $q);
     return ERMrest.clientFactory;
 }]);
 
-// SERVICE to fetch data from ERMrest
+// ERMrestService: A service for operations that deal with the ERMrest db =============================================================================================================
 openSeadragonApp.service('ERMrestService', ['ERMrestClientFactory', '$http', function(ERMrestClientFactory, $http) {
     var client = ERMrestClientFactory.getClient('https://dev.rebuildingakidney.org/ermrest', null);
     var catalog = client.getCatalog(1);
@@ -143,7 +125,7 @@ openSeadragonApp.service('ERMrestService', ['ERMrestClientFactory', '$http', fun
     };
 }]);
 
-// CONTROLLER
+// MainController: An Angular controller to update the view ===========================================================================================================================
 openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', 'ERMrestClientFactory', function($scope, ERMrestService, ERMrestClientFactory) {
     $scope.annotations = ERMrestService.getAnnotations();
     $scope.viewerReady = false;
@@ -191,9 +173,23 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', 'ERMr
     };
 }]);
 
-// FILTERS
+// Trusted: A filter that tells Angular when a url is trusted =========================================================================================================================
 openSeadragonApp.filter('trusted', ['$sce', function($sce) {
     return function(url) {
         return $sce.trustAsResourceUrl(url);
     };
 }]);
+
+// Refreshes page when the window's hash changes
+window.onhashchange = function() {
+    if (window.location.hash != '#undefined') {
+        location.reload();
+    } else {
+        history.replaceState("", document.title, window.location.pathname);
+        location.reload();
+    }
+    function goBack() {
+        window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
+        window.location.lasthash.pop();
+    }
+}
