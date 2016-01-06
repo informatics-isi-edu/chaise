@@ -67,9 +67,13 @@ describe('In the Chaise search app,', function () {
                 });
             });
         });
+    });
+
+    describe('The sidebar filter input ', function() {
 
         it('should find 8 attributes when searching for \'RNA\' in the search box', function (done) {
             var expectedAttrNum = 8;
+            var searchBox = element.all(by.model('FacetsData.searchFilter')).first();
             browser.wait(EC.visibilityOf(searchBox), 500).then(function () {
                 // Set values (usually inputs) via sendKeys();
                 searchBox.clear();
@@ -95,6 +99,7 @@ describe('In the Chaise search app,', function () {
         });
 
         it('should show 3 attributes after clicking \"Experiment Type\"', function (done) {
+            var searchBox = element.all(by.model('FacetsData.searchFilter')).first();
             var expectedAttrNum = 3;
             var searchBoxInput = searchBox.getAttribute('value');
             expect(searchBoxInput).toBe('RNA');
@@ -124,14 +129,17 @@ describe('In the Chaise search app,', function () {
             var microarrayFilterLabelLi = element(by.cssContainingText('div.editvalue-container li', nameOfResultFilter));
             var microarrayFilterLabel = microarrayFilterLabelLi.element(by.css('input'));
             browser.wait(EC.visibilityOf(microarrayFilterLabel), 500).then(function () {
-                microarrayFilterLabel.click();
-                setTimeout(function() {
-                    done();
-                }, 10000);
+                microarrayFilterLabel.click().then(function() {
+                    setTimeout(function() {
+                        done();
+                    }, 5000);
+                });
             });
         });
+    });
 
-        xit('should show 25 out of 42 results', function (done) {
+    describe('Result content area ', function() {
+        it('should show 25 out of 42 results', function (done) {
             var expectedShownResultsNum = 25;
             var expectedTotalResultsNum = 42;
             var allResults = element.all(by.repeater('row in FacetsData.ermrestData'));
@@ -148,17 +156,34 @@ describe('In the Chaise search app,', function () {
             });
         });
 
-        xit('should go to the right URL and show details when clicked', function (done) {
+        it('should go to the correct URL when clicked', function (done) {
             var detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
             //var titleSpan = element(by.cssContainingText('span.panel-title', titleTxt));
             var titleSpan = element.all(by.css('span.panel-title.ng-binding')).first();
             titleSpan.click();
+            browser.rootEl = "#recordApp";
+            // 'browser.ignoreSynchronization = true' tells Protractor not to sync(wait for Angular's finishing async operations).
+            //It is not supposed to be used here, but somehow using it resolves the 'Hashtag' problem.
+            //Before, the problem was, Angualr(or Browser) adds automatically a slash after '#', making '/#1/' become '/#/1/'.
+            browser.ignoreSynchronization = true;
             setTimeout(function () {
-                browser.rootEl = "#recordApp";
                 expect(browser.getCurrentUrl()).toBe(detailUrl);
                 done();
-            }, 2000);
+            }, 5000);
         });
 
     });
+
+    describe('the record detail page', function() {
+        //turn on sync again
+        browser.ignoreSynchronization = false;
+        var detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
+        it('should show spinner', function(done) {
+            //make sure after turning on Sync, the URL is not changed.
+            expect(browser.getCurrentUrl()).toBe(detailUrl);
+            done();
+        });
+    });
+
+
 });
