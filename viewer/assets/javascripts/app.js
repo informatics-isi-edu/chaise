@@ -7,7 +7,7 @@ setTimeout(function(){
         if (window.location.hash != '#undefined') {
             location.reload();
         } else {
-            history.pushState("", document.title, window.location.pathname);
+            history.replaceState("", document.title, window.location.pathname);
             location.reload();
         }
 
@@ -129,6 +129,7 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
         });
     };
 
+    // TODO: Rewrite this function with ERMrest API
     this.getRegionComments = function getRegionComments(roiId) {
         var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment' + '/roi_id=' + roiId;
         return $http.get(entityPath).then(function(response) {
@@ -161,7 +162,7 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
                         });
                     }));
                 } else {
-                    return 'No annotations found.';
+                    console.log('No annotations found for this image.')
                 }
             });
         });
@@ -171,35 +172,10 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
 
 // CONTROLLER
 openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClientFactory', function($scope, Ermrest, ERMrestClientFactory) {
-    $scope.annotations = [];
+    $scope.annotations = Ermrest.getAnnotations();
+    $scope.viewerReady = false;
     $scope.viewerSource = null;
     $scope.viewerWindow = null;
-
-    // $scope.$watch('viewerSource', function() {
-    //     setTimeout(function waitForViewerToLoad() {
-    //         // setTimeout() used to queue this assignment to the end,
-    //         // which avoids $scope.viewer from being assigned before iframe is finished loading
-    //         // TODO: Isn't there a better way to do this w/o setTimeout?
-    //         // if (angular.element(document.getElementById('viewer'))[0]) {
-    //             // $scope.viewerWindow = angular.element(document.getElementById('viewer'))[0].contentWindow;
-    //             $scope.viewerWindow = window.frames[0];
-    //         // }
-    //     }, 0);
-    // });
-    //
-    // $scope.$watch('viewerWindow', function() {
-    //     if ($scope.viewerWindow) {
-    //         console.log('viewerWindow changed and not null!');
-    //         console.log('viewerWindow is currently: ', $scope.viewerWindow);
-    //         $scope.viewerWindow.postMessage('a dummy message', window.location.origin);
-    //         console.log('I posted the message!');
-    //     }
-    // });
-
-    // setInterval(function() {
-    //     $scope.viewerWindow.postMessage('a dummy message', window.location.origin);
-    //     console.log('interval ran');
-    // }, 5000);
 
     // Fetch uri from image table to load OpenSeadragon
     Ermrest.getEntity().then(function(data) {
@@ -210,22 +186,31 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClie
         $scope.viewerSource = data;
     });
 
-    // Push pre-existing annotations in Ermrest into controller's scope
-    $scope.annotations = Ermrest.getAnnotations();
-    // TODO: Load each annotation into Annotorious and redraw annotations.
+    // TODO: Load existing annotations from Ermrest into Annotorious and redraw annotations.
 
     // Listen for events from OpenSeadragon/iframe
-    // TODO: Figure out an Angular way to listen to the postMessage event
-    $(window).on('message', function(event) {
-        var origin = event.originalEvent.origin;
-        // TODO: Abstract away rebuildingakidney url
-        if (origin === window.location.origin) {
-            var annotation = JSON.parse(event.originalEvent.data);
-            var coordinates = annotation.data.shapes[0].geometry;
-            // Inserts annotation data into rbk:roi and rbk:roi_comment
-            Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text);
+    // TODO: Maybe figure out an Angular way to listen to the postMessage event
+    window.addEventListener('message', function(event) {
+        if (event.origin === window.location.origin) {
+            var data = event.data;
+            var messageType = data.messageType;
+            switch (messageType) {
+                case 'myAnnoReady':
+                    $scope.viewerReady = data.content;
+                    if ($scope.viewerReady) {
+                        window.frames[0].postMessage({messageType: 'annotationsList', content: $scope.annotations}, window.location.origin);
+                    }
+                    break;
+                case 'onAnnotationCreated':
+                    var annotation = JSON.parse(event.data.content);
+                    var coordinates = annotation.data.shapes[0].geometry;
+                    Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text);
+                    break;
+                default:
+                    console.log('Invalid message type. No action performed.');
+            }
         } else {
-            console.log('Error: Invalid origin for annotation data. Event origin: ', origin, '. Expected origin: ', window.location.origin);
+            console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
         }
     });
 }]);
