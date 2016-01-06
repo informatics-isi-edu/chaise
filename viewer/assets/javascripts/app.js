@@ -93,10 +93,12 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
         return $http.post(entityPath, roiComment);
     };
 
-    this.createAnnotation = function createAnnotation(x, y, width, height, context, comment) {
+    this.createAnnotation = function createAnnotation(x, y, width, height, context, comment, successCallback) {
+        var newAnnotation = {};
         // First create a row in rbk:roi...
         this.insertRoi(x, y, width, height, context).then(function(response) {
             if (response.data) {
+                newAnnotation = response.data[0];
                 return response.data[0];
             } else {
                 return 'Error: Region of interest could not be created. ' + response.status + ' ' + response.statusText;
@@ -106,11 +108,13 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
             var roiId = data.id;
             self.insertRoiComment(roiId, comment).then(function(response) {
                 if (response.data) {
+                    newAnnotation.comments = response.data[0].comment;
                     return response.data[0];
                 } else {
                     return 'Error: Comment could not be created. ' + response.status + ' ' + response.statusText;
                 }
             });
+            successCallback(newAnnotation);
         });
     };
 
@@ -157,7 +161,7 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
                         return roi.getRelatedTable(self.schemaName, 'roi_comment').getRows().then(function(commentRows) {
                             return Promise.all(commentRows.map(function(comment) {
                                 roi.data.comments = comment.data.comment;
-                                annotations.push(roi);
+                                annotations.push(roi.data);
                             }));
                         });
                     }));
@@ -186,7 +190,9 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClie
         $scope.viewerSource = data;
     });
 
-    // TODO: Load existing annotations from Ermrest into Annotorious and redraw annotations.
+    $scope.pushAnnotationToScope = function pushAnnotationToScope(newAnnotation) {
+        $scope.annotations.push(newAnnotation);
+    };
 
     // Listen for events from OpenSeadragon/iframe
     // TODO: Maybe figure out an Angular way to listen to the postMessage event
@@ -204,7 +210,10 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClie
                 case 'onAnnotationCreated':
                     var annotation = JSON.parse(event.data.content);
                     var coordinates = annotation.data.shapes[0].geometry;
-                    Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text);
+                    // $scope.$apply(function () {
+                    //     $scope.annotations.push(Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text));
+                    // });
+                    Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text, $scope.pushAnnotationToScope);
                     break;
                 default:
                     console.log('Invalid message type. No action performed.');
