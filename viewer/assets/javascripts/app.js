@@ -1,4 +1,3 @@
-var openSeadragonApp = angular.module('openSeadragonApp', []);
 // Refreshes page when fragment identifier changes
 setTimeout(function(){
 
@@ -18,18 +17,20 @@ setTimeout(function(){
     }
 }, 0);
 
+var openSeadragonApp = angular.module('openSeadragonApp', []);
+
+// ERMrest API Client
 openSeadragonApp.factory('ERMrestClientFactory', ['$http', '$q', function($http, $q) {
     ERMrest.configure($http, $q);
     return ERMrest.clientFactory;
 }]);
 
-// SERVICE
-// API to fetch data from ERMrest
-openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(ERMrestClientFactory, $http) {
+// SERVICE to fetch data from ERMrest
+openSeadragonApp.service('ERMrestService', ['ERMrestClientFactory', '$http', function(ERMrestClientFactory, $http) {
     var client = ERMrestClientFactory.getClient('https://dev.rebuildingakidney.org/ermrest', null);
     var catalog = client.getCatalog(1);
 
-    // Get a reference to the Ermrest service
+    // Get a reference to the ERMrestService service
     var self = this;
 
     // Parse Chaise url to determine required parameters to find the requested entity
@@ -143,13 +144,13 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
 }]);
 
 // CONTROLLER
-openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClientFactory', function($scope, Ermrest, ERMrestClientFactory) {
-    $scope.annotations = Ermrest.getAnnotations();
+openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', 'ERMrestClientFactory', function($scope, ERMrestService, ERMrestClientFactory) {
+    $scope.annotations = ERMrestService.getAnnotations();
     $scope.viewerReady = false;
     $scope.viewerSource = null;
 
     // Fetch uri from image table to load OpenSeadragon
-    Ermrest.getEntity().then(function(uri) {
+    ERMrestService.getEntity().then(function(uri) {
         // TODO: Remove me after pushing to vm-wide version of OpenSeadragon ///////////////
         // Splicing in my ~jessie directory in here so it redirects to my own version of OpenSeadragon and not the VM-wide version..
         uri = uri.substring(0, 34) + '~jessie/' + uri.substring(34);
@@ -174,7 +175,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClie
                 case 'onAnnotationCreated':
                     var annotation = JSON.parse(event.data.content);
                     var coordinates = annotation.data.shapes[0].geometry;
-                    Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text, $scope.pushAnnotationToScope);
+                    ERMrestService.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text, $scope.pushAnnotationToScope);
                     break;
                 default:
                     console.log('Invalid message type. No action performed.');
