@@ -130,6 +130,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', 'ERMr
     $scope.annotations = ERMrestService.getAnnotations();
     $scope.viewerReady = false;
     $scope.viewerSource = null;
+    $scope.highlightedAnnotation = null;
 
     // Fetch uri from image table to load OpenSeadragon
     ERMrestService.getEntity().then(function(uri) {
@@ -174,6 +175,10 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', 'ERMr
 
     $scope.highlightAnnotation = function highlightAnnotation(annotation) {
         window.frames[0].postMessage({messageType: 'highlightAnnotation', content: annotation}, window.location.origin);
+    };
+
+    $scope.setHighlightedAnnotation = function (annotationIndex) {
+        $scope.highlightedAnnotation = annotationIndex;
     };
 }]);
 
