@@ -1,0 +1,103 @@
+<div ng-controller="ermMatrixController as mCtrl">
+    <div ng-keyup="mCtrl.keyUp($event)">
+        <p class="matrix-intro">
+            <!--Each colored cell in the matrix below represents mouse data available for that anatomical feature and age stage.-->
+            Click a cell to see a list of links to the related datasets.</p>
+        <div>
+        </div>
+
+        <div class="experiment-table">
+            <table class="mousematrix table table-bordered">
+                <thead>
+                <tr class="features">
+                    <th class="rotate">&nbsp;</th>
+                    <th class="text-center rotate" ng-repeat="col in mCtrl.columns">
+                        <div ng-bind="col">
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="row in mCtrl.dataSetTypes" ng-init="rowIndex = $index">
+                    <th class="row-header" ng-bind="mCtrl.rows[$index]"></th>
+                    <td ng-repeat="cell in row track by $index">
+                        <div ng-if="cell.length == 0">
+                            &nbsp;
+                        </div>
+                        <div ng-if="cell.length > 0" class="exp-div"
+                             title="{{mCtrl.columns[$index]}} + {{mCtrl.rows[rowIndex]}}"
+                             ng-click="mCtrl.openModal(rowIndex, $index)"
+                             data-toggle="modal" data-target="#dataset-modal">
+                            <div ng-repeat="dt in cell" ng-style="mCtrl.getDataTypeStyle(dt, cell.length)">
+
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="table-legend">
+                <tr class="table-colors">
+                    <th ng-repeat="color in mCtrl.dataTypeColors">
+                        <div ng-style="{'background-color': color}"></div>
+                    </th>
+                </tr>
+                <tr class="colors">
+                    <td ng-repeat="dt in mCtrl.dataTypes">
+                        <div ng-bind="dt">
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="dataset-modal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h5 class="modal-title" ng-bind="mCtrl.modalContent.header"></h5>
+                    </div>
+                    <div class="modal-body">
+                        <div ng-if="mCtrl.modalContent.nextCol >= 0"
+                             ng-click="mCtrl.openModal(mCtrl.modalContent.row, mCtrl.modalContent.nextCol)"
+                             class="modal-nav-btn" title="Next {{ mCtrl.colLabel }}" id="next-col">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </div>
+                        <div ng-if="mCtrl.modalContent.prevCol >= 0"
+                             ng-click="mCtrl.openModal(mCtrl.modalContent.row, mCtrl.modalContent.prevCol)"
+                             class="modal-nav-btn" title="Previous {{ mCtrl.colLabel }}" id="prev-col">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </div>
+                        <div ng-if="mCtrl.modalContent.prevRow >= 0"
+                             ng-click="mCtrl.openModal(mCtrl.modalContent.prevRow, mCtrl.modalContent.col)"
+                             class="modal-nav-btn" title="Previous {{ mCtrl.rowLabel }}" id="prev-row">
+                            <span class="glyphicon glyphicon-chevron-left up"></span>
+                        </div>
+                        <div ng-if="mCtrl.modalContent.nextRow >= 0"
+                             ng-click="mCtrl.openModal(mCtrl.modalContent.nextRow, mCtrl.modalContent.col)"
+                             class="modal-nav-btn" title="Next {{ mCtrl.rowLabel }}" id="next-row">
+                            <span class="glyphicon glyphicon-chevron-right down"></span>
+                        </div>
+                        <div class="content-here">
+                            <div ng-repeat="dataSet in mCtrl.modalContent.dataset">
+                                <h5>
+                                    <a ng-href="{{dataSet.uri}}" ng-bind="dataSet.title"></a>
+                                </h5>
+                                <ol>
+                                    <li ng-repeat="data in dataSet.data">
+                                        <a ng-href="{{data.uri}}" ng-bind="data.title"></a>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
