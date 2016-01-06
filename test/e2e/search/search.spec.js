@@ -69,7 +69,7 @@ describe('In the Chaise search app,', function () {
         });
     });
 
-    describe('The sidebar filter input ', function() {
+    describe('The sidebar filter input ', function () {
 
         it('should find 8 attributes when searching for \'RNA\' in the search box', function (done) {
             var expectedAttrNum = 8;
@@ -129,8 +129,8 @@ describe('In the Chaise search app,', function () {
             var microarrayFilterLabelLi = element(by.cssContainingText('div.editvalue-container li', nameOfResultFilter));
             var microarrayFilterLabel = microarrayFilterLabelLi.element(by.css('input'));
             browser.wait(EC.visibilityOf(microarrayFilterLabel), 500).then(function () {
-                microarrayFilterLabel.click().then(function() {
-                    setTimeout(function() {
+                microarrayFilterLabel.click().then(function () {
+                    setTimeout(function () {
                         done();
                     }, 5000);
                 });
@@ -138,7 +138,9 @@ describe('In the Chaise search app,', function () {
         });
     });
 
-    describe('Result content area ', function() {
+    var expectedEntityTitle = '';
+    var detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
+    describe('Result content area ', function () {
         it('should show 25 out of 42 results', function (done) {
             var expectedShownResultsNum = 25;
             var expectedTotalResultsNum = 42;
@@ -156,8 +158,18 @@ describe('In the Chaise search app,', function () {
             });
         });
 
+        it('should get the entity title and it\'s not empty', function (done) {
+            var titleSpan = element.all(by.css('span.panel-title.ng-binding')).first();
+            titleSpan.getText().then(function (text) {
+                //get the entity title in results list
+                expectedEntityTitle = text;
+                expect(text).not.toBe('');
+                done();
+            });
+        });
+
+        detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
         it('should go to the correct URL when clicked', function (done) {
-            var detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
             //var titleSpan = element(by.cssContainingText('span.panel-title', titleTxt));
             var titleSpan = element.all(by.css('span.panel-title.ng-binding')).first();
             titleSpan.click();
@@ -174,14 +186,87 @@ describe('In the Chaise search app,', function () {
 
     });
 
-    describe('the record detail page', function() {
+    describe('the record detail page', function () {
         //turn on sync again
         browser.ignoreSynchronization = false;
-        var detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
-        it('should show spinner', function(done) {
+        it('should still have the correct URL when sync is turned on', function (done) {
             //make sure after turning on Sync, the URL is not changed.
             expect(browser.getCurrentUrl()).toBe(detailUrl);
             done();
+        });
+
+        it('should have the correct title', function (done) {
+            var entityTitleEle = element(by.css('#entity-title'));
+            entityTitleEle.getText().then(function (entityTitle) {
+                expect(entityTitleEle.isDisplayed()).toBe(true);
+                expect(entityTitle).toBe(expectedEntityTitle);
+                done();
+            });
+        });
+
+        it('should have non-empty Description', function (done) {
+            var descriptionEle = element(by.cssContainingText('.entity-key.ng-binding', 'description'));
+            descriptionEle.getText().then(function (text) {
+                expect(descriptionEle.isDisplayed()).toBe(true);
+                expect(text).not.toBe('');
+                var descriptionValueEle = descriptionEle.element(by.xpath('following-sibling::td'));
+                descriptionValueEle.getText().then(function (desText) {
+                    expect(desText).not.toBe('');
+                    done();
+                });
+            });
+        });
+
+        it('should have \'Data Type\' and its label is clickable', function (done) {
+            var dataTypeEle = element(by.cssContainingText('.entity-key.ng-binding', 'data type'));
+            dataTypeEle.getText().then(function (text) {
+                expect(dataTypeEle.isDisplayed()).toBe(true);
+                expect(text).not.toBe('');
+                var dataTypeValueLabelEle = dataTypeEle.element(by.xpath('following-sibling::td')).element(by.css('a'));
+                dataTypeValueLabelEle.getText().then(function (labelText) {
+                    expect(labelText).not.toBe('');
+                    done();
+                })
+            });
+        });
+
+        it('should open a table when \'DATA SOMITE COUNT\' is clicked', function (done) {
+            var dataEle = element(by.cssContainingText('.panel-heading', 'dataset somite count'));
+            //click on the DATA SOMITE COUNT
+            dataEle.click().then(function () {
+                var datasetSomiteTableEle = dataEle.element(by.xpath('following-sibling::div'));
+                expect(datasetSomiteTableEle.isDisplayed()).toBe(true);
+
+                var wrapperEle = datasetSomiteTableEle.element(by.css('.table-wrapper.wrapper'));
+                var wrapperEleTbody = wrapperEle.element(by.css('tbody'));
+                var ftListArray = wrapperEleTbody.all(by.repeater('reference in ft.list'));
+                var firstRow = ftListArray.first();
+                var firstRowKeyArray = firstRow.all(by.repeater('key in ft.keys'));
+                var UrlEle = firstRowKeyArray.last();
+                UrlEle.element(by.css('a')).getAttribute('href').then(function (linkText) {
+                    expect(firstRow.isDisplayed()).toBe(true);
+                    expect(firstRowKeyArray.count()).toBe(3);
+                    expect(linkText).toContain('http');
+                    done();
+                });
+            });
+        });
+
+        it('should show one file when \'FILES\' is clicked', function(done) {
+            var expectedFileName = 'FB00000008.zip';
+            var fileEle = element(by.cssContainingText('.panel-heading', 'Files'));
+            var fileCollapedEle = fileEle.element(by.xpath('following-sibling::div'));
+            expect(fileCollapedEle.isDisplayed()).toBe(false);
+
+            fileEle.click().then(function() {
+                expect(fileCollapedEle.isDisplayed()).toBe(true);
+                var fileList = fileCollapedEle.all(by.repeater('file in entity.files'));
+                var imgEle = fileList.first().element(by.css('img'));
+                var fileNameEle = imgEle.all(by.xpath('following-sibling::div')).first();
+                expect(fileNameEle.getText()).toBe(expectedFileName);
+                expect(fileList.count()).toBe(1);
+                done();
+            });
         });
     });
 

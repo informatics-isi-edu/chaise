@@ -7,6 +7,8 @@ exports.config = {
     //browserName: 'firefox',
     //version: '40.0', //to specify the browser version
     browserName: 'chrome',
+    //using firefox causes problems - not showing the right result and -
+    //Apache log shows firefox is not requesting the server.
   },
   specs: [
     '*.spec.js'
