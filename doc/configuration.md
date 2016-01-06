@@ -16,3 +16,4 @@ The below table explains the usage of them:
 | helpURL | An URL for getting help using Chaise. | The URL for getting help in using the Data Browser of FaceBase. | "helpURL":\<URL\> | N/A | |
 | ermrestLocation | The base URL for the ERMrest service | window.location.protocol + // + window.location.host | "ermrestLocation": \<URL\> | N/A | The location of the ERMrest service. |
 | recordResource | The sub path for the record resource | /record | "recordResource":\<value\> | N/A | |
+| showBadgeCounts | true <br> false | false | "showBadgeCounts":\<value\> | N/A | If true, facet counts will be displayed in the sidebar. |

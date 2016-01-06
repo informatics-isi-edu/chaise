@@ -285,7 +285,7 @@ td.key {
 	white-space:nowrap;
 }
 
-td.value {
+td.value, .search-list {
     word-wrap: break-word;
     word-break: break-all;
 }

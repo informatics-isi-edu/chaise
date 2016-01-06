@@ -67,7 +67,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
         if (index != -1) {
             prefix = prefix.substring(0, index);
         }
-        var recordResource = "/record";
+        var recordResource = "/record/";
         if (chaiseConfig['recordResource'] != null) {
             recordResource = chaiseConfig['recordResource'];
         }
@@ -434,6 +434,9 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 			});
 		}
 		return ret;
+	};
+	this.urlText = function urlText(table, column, value) {
+		return getUrlText(table, column, value);
 	};
 
 	this.displayRange = function displayRange() {

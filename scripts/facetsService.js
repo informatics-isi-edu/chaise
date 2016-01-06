@@ -320,11 +320,13 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	this.getFacetValues = function getFacetValues(facet) {
 		var value = FacetsData.box[facet['table']][facet['name']];
 		var values = [];
-		$.each(value['values'], function(checkbox_key, checkbox_value) {
-			if (checkbox_value) {
-				values.push(checkbox_key);
-			}
-		});
+		if (value != null) {
+			$.each(value['values'], function(checkbox_key, checkbox_value) {
+				if (checkbox_value) {
+					values.push(checkbox_key);
+				}
+			});
+		}
 		return values;
 	};
 
