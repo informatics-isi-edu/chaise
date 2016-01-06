@@ -118,38 +118,6 @@ openSeadragonApp.service('Ermrest', ['ERMrestClientFactory', '$http', function(E
         });
     };
 
-    this.getRegions = function getRegions() {
-        return this.getSchema().then(function(schema) {
-            var roiTable = schema.getTable('roi');
-            var filteredRoiTable = roiTable.getFilteredTable(["image_id=" + self.entityId]);
-            filteredRoiTable.getRows().then(function(rows) {
-                if (rows.length > 0) {
-                    console.log(rows);
-                    return rows;
-                } else {
-                    return 'No regions of interest found.';
-                }
-            });
-        });
-    };
-
-    // TODO: Rewrite this function with ERMrest API
-    this.getRegionComments = function getRegionComments(roiId) {
-        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment' + '/roi_id=' + roiId;
-        return $http.get(entityPath).then(function(response) {
-            if (response.status == 200) {
-                if (response.data.length > 0) {
-                    return response.data;
-                } else {
-                    console.log('No comments found.');
-                    return;
-                }
-            } else {
-                return 'Error: ' + response.status + ' ' + response.statusText;
-            }
-        });
-    };
-
     this.getAnnotations = function getAnnotations() {
         var annotations = [];
         this.getSchema().then(function(schema) {
@@ -179,20 +147,16 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClie
     $scope.annotations = Ermrest.getAnnotations();
     $scope.viewerReady = false;
     $scope.viewerSource = null;
-    $scope.viewerWindow = null;
 
     // Fetch uri from image table to load OpenSeadragon
-    Ermrest.getEntity().then(function(data) {
+    Ermrest.getEntity().then(function(uri) {
         // TODO: Remove me after pushing to vm-wide version of OpenSeadragon ///////////////
         // Splicing in my ~jessie directory in here so it redirects to my own version of OpenSeadragon and not the VM-wide version..
-        data = data.substring(0, 34) + '~jessie/' + data.substring(34);
+        uri = uri.substring(0, 34) + '~jessie/' + uri.substring(34);
         ///////////////////////////////////////////////////////////////////////////////////
-        $scope.viewerSource = data;
+        // Initialize OpenSeadragon with the uri
+        $scope.viewerSource = uri;
     });
-
-    $scope.pushAnnotationToScope = function pushAnnotationToScope(newAnnotation) {
-        $scope.annotations.push(newAnnotation);
-    };
 
     // Listen for events from OpenSeadragon/iframe
     // TODO: Maybe figure out an Angular way to listen to the postMessage event
@@ -210,9 +174,6 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClie
                 case 'onAnnotationCreated':
                     var annotation = JSON.parse(event.data.content);
                     var coordinates = annotation.data.shapes[0].geometry;
-                    // $scope.$apply(function () {
-                    //     $scope.annotations.push(Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text));
-                    // });
                     Ermrest.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text, $scope.pushAnnotationToScope);
                     break;
                 default:
@@ -222,6 +183,11 @@ openSeadragonApp.controller('MainController', ['$scope', 'Ermrest', 'ERMrestClie
             console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
         }
     });
+
+    // A success callback fn to push new annotations into this controller's scope
+    $scope.pushAnnotationToScope = function pushAnnotationToScope(newAnnotation) {
+        $scope.annotations.push(newAnnotation);
+    };
 }]);
 
 // FILTERS
