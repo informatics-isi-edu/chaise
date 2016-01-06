@@ -134,10 +134,6 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', 'ERMr
 
     // Fetch uri from image table to load OpenSeadragon
     ERMrestService.getEntity().then(function(uri) {
-        // TODO: Remove me after pushing to vm-wide version of OpenSeadragon ///////////////
-        // Splicing in my ~jessie directory in here so it redirects to my own version of OpenSeadragon and not the VM-wide version..
-        uri = uri.substring(0, 34) + '~jessie/' + uri.substring(34);
-        ///////////////////////////////////////////////////////////////////////////////////
         // Initialize OpenSeadragon with the uri
         $scope.viewerSource = uri;
     });
