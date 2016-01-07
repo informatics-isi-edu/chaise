@@ -126,6 +126,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
     $scope.viewerReady = false;
     $scope.viewerSource = null;
     $scope.highlightedAnnotation = null;
+    $scope.creatingANewAnnotation = false;
 
     // Fetch uri from image table to load OpenSeadragon
     ERMrestService.getEntity().then(function(uri) {
@@ -174,8 +175,16 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
     };
 
     $scope.drawNewAnnotation = function drawNewAnnotation() {
+        $scope.creatingANewAnnotation = true;
         $scope.viewer.postMessage({messageType: 'drawNewAnnotation'}, window.location.origin);
-    }
+    };
+
+    // TODO: Finish this.
+    $scope.writtenNewAnnotation = function writtenNewAnnotation() {
+        // 1. Create the new annotation in ERMrest and Annotorious
+
+        $scope.creatingANewAnnotation = false;
+    };
 }]);
 
 // Trusted: A filter that tells Angular when a url is trusted =========================================================================================================================
