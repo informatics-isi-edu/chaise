@@ -1,15 +1,9 @@
 // openSeadragonApp: Defines the Angular application ==================================================================================================================================
-var openSeadragonApp = angular.module('openSeadragonApp', []);
-
-// ERMrestClientFactory: A factory for the ERMrest API client library =================================================================================================================
-openSeadragonApp.factory('ERMrestClientFactory', ['$http', '$q', function($http, $q) {
-    ERMrest.configure($http, $q);
-    return ERMrest.clientFactory;
-}]);
+var openSeadragonApp = angular.module('openSeadragonApp', ['ERMrest']);
 
 // ERMrestService: A service for operations that deal with the ERMrest db =============================================================================================================
-openSeadragonApp.service('ERMrestService', ['ERMrestClientFactory', '$http', function(ERMrestClientFactory, $http) {
-    var client = ERMrestClientFactory.getClient('https://dev.rebuildingakidney.org/ermrest', null);
+openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', function(ermrestClientFactory, $http) {
+    var client = ermrestClientFactory.getClient(window.location.origin + '/ermrest', null);
     var catalog = client.getCatalog(1);
 
     // Get a reference to the ERMrestService service
@@ -75,7 +69,7 @@ openSeadragonApp.service('ERMrestService', ['ERMrestClientFactory', '$http', fun
         var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment?defaults=id,author';
         return $http.post(entityPath, roiComment);
     };
-
+    // TODO: Rewrite this with ermrestjs
     this.createAnnotation = function createAnnotation(x, y, width, height, context, comment, successCallback) {
         var newAnnotation = {};
         // First create a row in rbk:roi...
@@ -126,7 +120,7 @@ openSeadragonApp.service('ERMrestService', ['ERMrestClientFactory', '$http', fun
 }]);
 
 // MainController: An Angular controller to update the view ===========================================================================================================================
-openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', 'ERMrestClientFactory', function($scope, ERMrestService, ERMrestClientFactory) {
+openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', function($scope, ERMrestService) {
     $scope.annotations = ERMrestService.getAnnotations();
     $scope.viewerReady = false;
     $scope.viewerSource = null;

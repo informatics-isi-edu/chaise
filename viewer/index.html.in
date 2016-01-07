@@ -2,30 +2,12 @@
 <head>
     <title>Data Viewer | (Re)Building A Kidney</title>
     <link rel='stylesheet' type='text/css' href='../styles/vendor/bootstrap.min.css'>
-    <link rel='stylesheet' type='text/css' href='../styles/material-design/css/material-design-iconic-font.min.css'>
     <link rel='stylesheet' type='text/css' href='../styles/appheader.css'>
-    <link rel='stylesheet' type='text/css' href='../viewer/assets/lib/slippry/slippry.css'>
-    <link rel='stylesheet' type='text/css' href='../viewer/assets/lib/fancybox/jquery.fancybox.css'>
-    <link rel='stylesheet' type='text/css' href='../viewer/assets/stylesheets/app.css?v=c09d6b5cc734947558e3e29a574c702d'></script>
     <script src='../scripts/vendor/jquery-latest.min.js'></script>
-    <script src='../scripts/vendor/jquery.cookie.js'></script>
     <script src='../scripts/vendor/angular.js'></script>
-    <script src='../scripts/vendor/angular-sanitize.js'></script>
-    <script src='../../ermrestjs/ermrest.js'></script>
-    <script src='../viewer/assets/lib/angular-route.min.js'></script>
-    <script src='../viewer/assets/lib/angular-resource.min.js'></script>
-    <script src='../viewer/assets/lib/angular-animate.min.js'></script>
-    <script src='../viewer/assets/lib/angular-cookies.min.js'></script>
-    <script src='../viewer/assets/lib/ui-bootstrap-tpls-0.12.1.min.js'></script>
-    <script src='../viewer/assets/lib/filesize.min.js'></script>
-    <script src='../viewer/assets/lib/slippry/slippry.min.js'></script>
-    <script src='../viewer/assets/lib/fancybox/jquery.fancybox.pack.js'></script>
-    <script src='../viewer/assets/lib/jquery.floatThead.min.js'></script>
-    <script src='../scripts/respond.js?v=14642d14550b82e5e933e2e02331d0a8'></script>
-    <script src='../scripts/variables.js?v=f9a242d35edafafcb990fd7e8881b8dc'></script>
-    <script src='../scripts/utils.js?v=1163578705a99a5a99b54652a4e21b4a'></script>
-    <script src='../scripts/ermrest.js?v=5e2cbb0ec7dbe6a1bf228ebe16727519'></script>
-    <script src='../viewer/assets/javascripts/app.js?v=ace7bc3834e8b251efa3b17533854304'></script>
+    <script src='../../../ermrestjs/js/ermrest.js'></script>
+    <script src='../../../ermrestjs/js/ngermrest.js'></script>
+    <script src='../viewer/app.js?v=ace7bc3834e8b251efa3b17533854304'></script>
     <script src='../chaise-config.js?v=bceb1440a28b0d8b4fd43d8388977e75'></script>
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     <style>
@@ -60,7 +42,7 @@
             <div class="col-md-3">
                 <p><input ng-model="query" class="form-control" type="search" placeholder="Type to filter annotation text..."></p>
                 <h2>Annotations</h2>
-                <div ng-repeat="annotation in annotations | orderBy:'timestamp' | filter:query" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation}" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);">
+                <div ng-repeat="annotation in annotations | orderBy:'-timestamp' | filter:query" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation}" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);">
                     <span class="comment">{{annotation.comments}}</span><br>
                     <small>{{annotation.timestamp | date: 'MMM d, y h:mm a'}}</small>
                 </div>
