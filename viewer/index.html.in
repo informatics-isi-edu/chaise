@@ -52,7 +52,7 @@
             <div id="annotations-control" class="col-md-3">
                 <p><input ng-model="query" class="form-control" type="search" placeholder="Type to filter annotation text..."></p>
                 <h2>Annotations</h2>
-
+                <button ng-click="drawNewAnnotation();" class="btn btn-sm btn-primary" type="button" role="button">Create Annotation</button>
                 <div ng-repeat="annotation in annotations | orderBy:'-timestamp' | filter:query" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation}" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);">
                     <span class="comment">{{annotation.comments}}</span><br>
                     <small>{{annotation.timestamp | date: 'MMM d, y h:mm a'}}</small>
