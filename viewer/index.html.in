@@ -60,7 +60,7 @@
                 <p ng-if="annotations.length == 0">No annotations exist yet.</p>
             </div>
             <div ng-if="viewerSource" id="viewer" class="col-md-9">
-                <iframe id="viewer" width="100%" height="90%" ng-src="{{viewerSource | trusted}}" frameBorder="0" style="border: 1px solid #ccc;">
+                <iframe id="viewer" width="74%" height="90%" ng-src="{{viewerSource | trusted}}" frameBorder="0" style="border: 1px solid #ccc;">
                     &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
                 </iframe>
             </div>
