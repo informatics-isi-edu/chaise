@@ -122,6 +122,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
 // MainController: An Angular controller to update the view ===========================================================================================================================
 openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', function($scope, ERMrestService) {
     $scope.annotations = ERMrestService.getAnnotations();
+    $scope.viewer = null;
     $scope.viewerReady = false;
     $scope.viewerSource = null;
     $scope.highlightedAnnotation = null;
@@ -142,7 +143,8 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
                 case 'myAnnoReady':
                     $scope.viewerReady = data.content;
                     if ($scope.viewerReady) {
-                        window.frames[0].postMessage({messageType: 'annotationsList', content: $scope.annotations}, window.location.origin);
+                        $scope.viewer = window.frames[0];
+                        $scope.viewer.postMessage({messageType: 'annotationsList', content: $scope.annotations}, window.location.origin);
                     }
                     break;
                 case 'onAnnotationCreated':
@@ -164,10 +166,10 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
     };
 
     $scope.highlightAnnotation = function highlightAnnotation(annotation) {
-        window.frames[0].postMessage({messageType: 'highlightAnnotation', content: annotation}, window.location.origin);
+        $scope.viewer.postMessage({messageType: 'highlightAnnotation', content: annotation}, window.location.origin);
     };
 
-    $scope.setHighlightedAnnotation = function (annotationIndex) {
+    $scope.setHighlightedAnnotation = function setHighlightedAnnotation(annotationIndex) {
         $scope.highlightedAnnotation = annotationIndex;
     };
 }]);
