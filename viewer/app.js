@@ -208,6 +208,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
         var timestamp = new Date().toISOString();
         annotation.comments.timestamp = timestamp;
         annotation.comments.comment = annotation.comments.comment;
+        $scope.viewer.postMessage({messageType: 'saveAnnotation', content: annotation}, window.location.origin);
         ERMrestService.editAnnotation(annotation);
     }
 
