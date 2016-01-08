@@ -96,6 +96,19 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
         });
     };
 
+    // TODO: Rewrite this with ermrestjs
+    this.editAnnotation = function editAnnotation(annotation) {
+        var editedComment = [{
+            "id": annotation.comments.id,
+            "roi_id": annotation.id,
+            "author": null,
+            "timestamp": annotation.comments.timestamp,
+            "comment": annotation.comments.comment
+        }];
+        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment';
+        return $http.put(entityPath, editedComment);
+    }
+
     this.getAnnotations = function getAnnotations() {
         var annotations = [];
         this.getSchema().then(function(schema) {
@@ -128,6 +141,9 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
     $scope.viewerSource = null;
     $scope.highlightedAnnotation = null;
     $scope.creatingANewAnnotation = false;
+    $scope.editMode = false; // True if user is currently editing an annotation
+    $scope.editedAnnotation = null; // Track which one is being edited right now
+    $scope.editedAnnotationText = ''; // The new annotation text to be used when updating an annotation
 
     // Fetch uri from image table to load OpenSeadragon
     ERMrestService.getEntity().then(function(uri) {
@@ -180,12 +196,25 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
         $scope.viewer.postMessage({messageType: 'drawNewAnnotation'}, window.location.origin);
     };
 
-    // TODO: Finish this.
-    $scope.writtenNewAnnotation = function writtenNewAnnotation() {
-        // 1. Create the new annotation in ERMrest and Annotorious
-
-        $scope.creatingANewAnnotation = false;
+    $scope.editAnnotation = function editAnnotation(annotation) {
+        $scope.editedAnnotation = annotation.id;
+        $scope.editMode = true;
     };
+
+    $scope.saveAnnotation = function saveAnnotation(annotation) {
+        $scope.editedAnnotation = null;
+        $scope.editMode = false;
+        var timestamp = new Date().toISOString();
+        annotation.comments.timestamp = timestamp;
+        annotation.comments.comment = annotation.comments.comment;
+        ERMrestService.editAnnotation(annotation);
+    }
+
+    // $scope.writtenNewAnnotation = function writtenNewAnnotation() {
+    //     // 1. Create the new annotation in ERMrest and Annotorious
+    //
+    //     $scope.creatingANewAnnotation = false;
+    // };
 }]);
 
 // Trusted: A filter that tells Angular when a url is trusted =========================================================================================================================
