@@ -85,7 +85,8 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
             var roiId = data.id;
             self.insertRoiComment(roiId, comment).then(function(response) {
                 if (response.data) {
-                    newAnnotation.comments = response.data[0].comment;
+                    var commentData = response.data[0];
+                    newAnnotation.comments = {id: commentData.id, roiId: commentData.roi_id, author: commentData.author, comment: commentData.comment, timestamp: commentData.timestamp};
                     return response.data[0];
                 } else {
                     return 'Error: Comment could not be created. ' + response.status + ' ' + response.statusText;
@@ -105,7 +106,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
                     return Promise.all(roiRows.map(function(roi) {
                         return roi.getRelatedTable(self.schemaName, 'roi_comment').getRows().then(function(commentRows) {
                             return Promise.all(commentRows.map(function(comment) {
-                                roi.data.comments = comment.data.comment;
+                                roi.data.comments = {id: comment.data.id, roiId: comment.data.roi_id, author: comment.data.author, comment: comment.data.comment, timestamp: comment.data.timestamp};
                                 annotations.push(roi.data);
                             }));
                         });
