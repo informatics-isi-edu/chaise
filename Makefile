@@ -16,9 +16,9 @@ BIN=$(MODULES)/.bin
 UNIT=$(BIN)/mocha
 
 # Protractor scripts
-E2E=test/e2e/search/protractor.conf.js \
-	test/e2e/record/protractor.conf.js \
-	test/e2e/login/protractor.conf.js
+E2Esearch=test/e2e/search/protractor.conf.js
+E2Erecord=test/e2e/record/protractor.conf.js
+E2Elogin=test/e2e/login/protractor.conf.js
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)
@@ -218,10 +218,8 @@ distclean: clean
 
 # Rule to run tests
 .PHONY: test
-test: deps
-	for file in $(E2E); do \
-		$(BIN)/protractor $$file; \
-	done
+test:
+	$(BIN)/protractor $(E2Esearch) && $(BIN)/protractor $(E2Erecord) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run testem
 .PHONY: testem
