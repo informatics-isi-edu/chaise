@@ -251,6 +251,10 @@ record/index.html: record/index.html.in .make-record-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
 
+$(JS_CONFIG): chaise-config-sample.js
+	cp -n chaise-config-sample.js $(JS_CONFIG) | true
+	touch $(JS_CONFIG)
+
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
 	> .make-asset-block
 	for file in $(CSS_DEPS); do \
