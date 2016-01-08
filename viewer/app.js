@@ -139,7 +139,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
     $scope.viewer = null;
     $scope.viewerReady = false;
     $scope.viewerSource = null;
-    $scope.highlightedAnnotation = null;
+    $scope.highlightedAnnotation = null; // Track which one is highlighted/centered right now
     $scope.creatingANewAnnotation = false;
     $scope.editMode = false; // True if user is currently editing an annotation
     $scope.editedAnnotation = null; // Track which one is being edited right now
@@ -191,6 +191,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
         $scope.highlightedAnnotation = annotationIndex;
     };
 
+    // Activates the drawing selector tool in Annotorious
     $scope.drawNewAnnotation = function drawNewAnnotation() {
         $scope.creatingANewAnnotation = true;
         $scope.viewer.postMessage({messageType: 'drawNewAnnotation'}, window.location.origin);
