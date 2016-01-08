@@ -6,6 +6,7 @@ describe('In the Chaise search app,', function () {
         beforeAll(function () {
             browser.get('');
         });
+
         it('should show the spinner', function (done) {
             //not so sure why adding ignoreSync works
             //probably not waiting for AngularJS to sync,
@@ -32,7 +33,10 @@ describe('In the Chaise search app,', function () {
             });
         });
 
-        it('should have > 1 visible facets to choose from', function (done) {
+    });
+
+    describe('the initial attributes selection sidebar,', function () {
+        it('should have > 1 visible attributes to choose from', function (done) {
             var facets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope'));
             facets.then(function () {
                 expect(facets.count()).toBeGreaterThan(0);
@@ -43,13 +47,43 @@ describe('In the Chaise search app,', function () {
                 done();
             });
         });
+
+        describe('sidebar header title,', function() {
+            var initSidebarHeaderText = 'CHOOSE ATTRIBUTES:';
+            var navContainer = element(by.css('#navcontainer'));
+            var sidebarHeader = navContainer.element(by.css('h4'));
+            it('should show correctly when initialized', function(done) {
+                expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
+                done();
+            });
+
+            var expectedAttr = 'Data Type';
+            var dataTypeAttr = navContainer.element(by.cssContainingText('.field-toggle.ng-binding', expectedAttr));
+            var editFilter = element(by.css('#editfilter'));
+            var sidebarAttrTitle = editFilter.element(by.css('.sidebar-title'));
+            it('should change correctly when one attribute is chosen', function(done) {
+                dataTypeAttr.click().then(function() {
+                    expect(sidebarAttrTitle.getText()).toBe(expectedAttr.toUpperCase());
+                    done();
+                });
+            });
+
+            it('should change back to \'CHOOSE ATTRIBUTES\' when clicking GoBack icon', function(done) {
+                var sidebarBack = editFilter.$('.sidebar-back');
+                sidebarBack.click().then(function() {
+                    expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
+                    done();
+                });
+            });
+        });
     });
 
-    describe('the initial facet selection sidebar', function () {
+    describe('The sidebar filter input ', function () {
         var expectedFacetsNum = 0;
         //choose the first element found, because it's the one we are looking for
         //use first() instead of [0], so the Promise can be resolved
         var searchBox = element.all(by.model('FacetsData.searchFilter')).first();
+
         it('should display 0 attributes when searching for something nonexistent', function (done) {
             browser.wait(EC.visibilityOf(searchBox), 500).then(function () {
                 // Set values (usually inputs) via sendKeys();
@@ -74,9 +108,6 @@ describe('In the Chaise search app,', function () {
                 });
             });
         });
-    });
-
-    describe('The sidebar filter input ', function () {
 
         it('should find 8 attributes when searching for \'RNA\' in the search box', function (done) {
             var expectedAttrNum = 8;
