@@ -107,7 +107,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
         }];
         var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment';
         return $http.put(entityPath, editedComment);
-    }
+    };
 
     this.getAnnotations = function getAnnotations() {
         var annotations = [];
@@ -130,6 +130,16 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
             });
         });
         return annotations;
+    };
+
+    this.deleteAnnotation = function deleteAnnotation(annotation) {
+        // Delete the comment from roi_comment
+        var commentEntityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment/id=' + annotation.comments.id;
+        return $http.delete(commentEntityPath).then(function() {
+            // Delete the roi itself
+            var roiEntityPath = ERMREST_ENDPOINT + self.catalogId + '/entity/' + self.schemaName + ':roi/id=' + annotation.id;
+            return $http.delete(roiEntityPath);
+        });
     };
 }]);
 
@@ -211,6 +221,13 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
         $scope.viewer.postMessage({messageType: 'saveAnnotation', content: annotation}, window.location.origin);
         ERMrestService.editAnnotation(annotation);
     }
+
+    $scope.deleteAnnotation = function deleteAnnotation(annotation) {
+        var index = $scope.annotations.indexOf(annotation);
+        $scope.annotations.splice(index, 1);
+        $scope.viewer.postMessage({messageType: 'deleteAnnotation', content: annotation}, window.location.origin);
+        ERMrestService.deleteAnnotation(annotation);
+    };
 
     // $scope.writtenNewAnnotation = function writtenNewAnnotation() {
     //     // 1. Create the new annotation in ERMrest and Annotorious
