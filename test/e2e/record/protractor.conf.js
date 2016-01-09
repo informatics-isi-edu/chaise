@@ -12,6 +12,6 @@ exports.config = {
     showColors: true,
     defaultTimeoutInterval: 30000
   },
-  // PTOR_BASE_URL should be http://dev.facebase.org for now.
+  // CHAISE_BASE_URL should be https://dev.misd.isi.edu/chaise for now.
   baseUrl: process.env.CHAISE_BASE_URL + '/data/record'
 };
