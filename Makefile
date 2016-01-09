@@ -252,7 +252,7 @@ record/index.html: record/index.html.in .make-record-asset-block
 		record/index.html.in > record/index.html
 
 $(JS_CONFIG): chaise-config-sample.js
-	cp -n chaise-config-sample.js $(JS_CONFIG) | true
+	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
 
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
