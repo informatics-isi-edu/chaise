@@ -117,12 +117,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
             return filteredRoiTable.getRows().then(function(roiRows) {
                 if (roiRows.length > 0) {
                     return Promise.all(roiRows.map(function(roi) {
-                        return roi.getRelatedTable(self.schemaName, 'roi_comment').getRows().then(function(commentRows) {
-                            return Promise.all(commentRows.map(function(comment) {
-                                roi.data.comments = {id: comment.data.id, roiId: comment.data.roi_id, author: comment.data.author, comment: comment.data.comment, timestamp: comment.data.timestamp};
-                                annotations.push(roi.data);
-                            }));
-                        });
+                        annotations.push(roi.data);
                     }));
                 } else {
                     console.log('No annotations found for this image.')
