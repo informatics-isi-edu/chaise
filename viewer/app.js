@@ -128,12 +128,12 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
     };
 
     this.deleteAnnotation = function deleteAnnotation(annotation) {
-        // Delete the comment from roi_comment
-        var commentEntityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment/id=' + annotation.comments.id;
-        return $http.delete(commentEntityPath).then(function() {
-            // Delete the roi itself
-            var roiEntityPath = ERMREST_ENDPOINT + self.catalogId + '/entity/' + self.schemaName + ':roi/id=' + annotation.id;
-            return $http.delete(roiEntityPath);
+        this.getSchema().then(function(schema) {
+            var table = schema.getTable('roi');
+            var filteredTable = table.getFilteredTable(["id=" + annotation.id]);
+            return filteredTable.getRows().then(function(rows) {
+                rows[0].delete();
+            });
         });
     };
 }]);
