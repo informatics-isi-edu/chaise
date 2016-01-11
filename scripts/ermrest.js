@@ -56,7 +56,7 @@ var viewer3dFileTypes = ['image/x.nifti'];
 
 var sliderPresentation = [ 'numeric', 'float4', 'int8', 'int4', 'int2', 'float8', 'serial4', 'serial8' ];
 
-var searchBoxPresentation = [ 'text' ];
+var searchBoxPresentation = [ 'text', 'jsonb' ];
 var checkBoxPresentation = [ 'boolean' ];
 
 var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
