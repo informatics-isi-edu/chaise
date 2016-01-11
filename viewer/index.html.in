@@ -1,0 +1,59 @@
+<html ng-app="openSeadragonApp">
+<head>
+    <title>Data Viewer | (Re)Building A Kidney</title>
+    <link rel='stylesheet' type='text/css' href='../styles/vendor/bootstrap.min.css'>
+    <link rel='stylesheet' type='text/css' href='../styles/appheader.css'>
+    <script src='../scripts/vendor/jquery-latest.min.js'></script>
+    <script src='../scripts/vendor/angular.js'></script>
+    <script src='../../../ermrestjs/js/ermrest.js'></script>
+    <script src='../../../ermrestjs/js/ngermrest.js'></script>
+    <script src='../viewer/app.js?v=ace7bc3834e8b251efa3b17533854304'></script>
+    <script src='../chaise-config.js?v=bceb1440a28b0d8b4fd43d8388977e75'></script>
+    <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
+    <style>
+        .annotation {
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 3px;
+            border: 1px solid #eee;
+        }
+
+        .annotation:hover {
+            cursor: pointer;
+        }
+
+        .annotation.highlighted {
+            border-left: 5px solid #428bca;
+        }
+
+        .annotation:hover .comment, .annotation.highlighted .comment {
+            color: #428bca;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-header"><a id="brand" href="/" class="navbar-brand">(Re)Building A Kidney</a></div>
+        <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse"></div>
+    </div>
+
+    <div class="container-fluid" style="margin-top: 65px;">
+        <div ng-controller="MainController" class="row">
+            <div class="col-md-3">
+                <p><input ng-model="query" class="form-control" type="search" placeholder="Type to filter annotation text..."></p>
+                <h2>Annotations</h2>
+                <div ng-repeat="annotation in annotations | orderBy:'-timestamp' | filter:query" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation}" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);">
+                    <span class="comment">{{annotation.comments}}</span><br>
+                    <small>{{annotation.timestamp | date: 'MMM d, y h:mm a'}}</small>
+                </div>
+                <p ng-if="annotations.length == 0">No annotations exist yet.</p>
+            </div>
+            <div ng-if="viewerSource" class="col-md-9">
+                <iframe id="viewer" width="100%" height="90%" ng-src="{{viewerSource | trusted}}" frameBorder="0" style="border: 1px solid #ccc;">
+                    &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
+                </iframe>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
