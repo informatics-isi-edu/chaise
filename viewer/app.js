@@ -97,16 +97,17 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
     };
 
     // TODO: Rewrite this with ermrestjs
-    this.editAnnotation = function editAnnotation(annotation) {
-        var editedComment = [{
-            "id": annotation.comments.id,
-            "roi_id": annotation.id,
+    this.updateAnnotation = function updateAnnotation(annotation) {
+        var editedAnnotation = [{
+            "id": annotation.id,
+            "image_id": this.entityId,
             "author": null,
-            "timestamp": annotation.comments.timestamp,
-            "comment": annotation.comments.comment
+            "context_uri": annotation.context_uri,
+            "coords": annotation.coords,
+            "description": annotation.description
         }];
-        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment';
-        return $http.put(entityPath, editedComment);
+        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi';
+        return $http.put(entityPath, editedAnnotation);
     };
 
     this.getAnnotations = function getAnnotations() {
@@ -196,25 +197,31 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
         $scope.highlightedAnnotation = annotationIndex;
     };
 
+    $scope.createAnnotation = function createAnnotation(annotation_data) {
+
+    }
     // Activates the drawing selector tool in Annotorious
     $scope.drawNewAnnotation = function drawNewAnnotation() {
         $scope.creatingANewAnnotation = true;
         $scope.viewer.postMessage({messageType: 'drawNewAnnotation'}, window.location.origin);
     };
 
+    // Sets the selected annotation to edit mode
     $scope.editAnnotation = function editAnnotation(annotation) {
         $scope.editedAnnotation = annotation.id;
         $scope.editMode = true;
     };
 
+    // Updates the annotation in Annotorious and ERMrest
     $scope.saveAnnotation = function saveAnnotation(annotation) {
         $scope.editedAnnotation = null;
         $scope.editMode = false;
         var timestamp = new Date().toISOString();
-        annotation.comments.timestamp = timestamp;
-        annotation.comments.comment = annotation.comments.comment;
-        $scope.viewer.postMessage({messageType: 'saveAnnotation', content: annotation}, window.location.origin);
-        ERMrestService.editAnnotation(annotation);
+        annotation.timestamp = timestamp;
+        // TODO: Jessie: Is the following line redundant? Since the input on the view is hooked up to annotation.description already..
+        annotation.description = annotation.description;
+        $scope.viewer.postMessage({messageType: 'updateAnnotation', content: annotation}, window.location.origin);
+        ERMrestService.updateAnnotation(annotation);
     }
 
     $scope.deleteAnnotation = function deleteAnnotation(annotation) {
