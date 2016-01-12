@@ -153,8 +153,8 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
     $scope.createMode = false; // True if user is currently creating a new annotation
     $scope.newAnnotation = null; // Holds the data for a new annotation as it's being created
 
-    $scope.editMode = false; // True if user is currently editing an annotation
     $scope.editedAnnotation = null; // Track which one is being edited right now; used to show/hide the right UI elements depending on which one is being edited.
+    $scope.originalAnnotationText = ''; // Holds the old value of an annotation's text in the event that a user cancels an edit
 
     // Fetch uri from image table to load OpenSeadragon
     ERMrestService.getEntity().then(function(uri) {
@@ -209,6 +209,12 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
         $scope.viewer.postMessage({messageType: 'drawAnnotation'}, window.location.origin);
     };
 
+    // Stop creating an annotation: Hides the forms used to create an annotation in Chaise and Annotorious
+    $scope.cancelAnnotationCreation = function cancelAnnotationCreation() {
+        $scope.createMode = false;
+        $scope.viewer.postMessage({messageType: 'cancelAnnotationCreation'}, window.location.origin);
+    };
+
     // Given the new annotation data, it creates the annotation in Annotorious and ERMrest
     $scope.createAnnotation = function createAnnotation(newAnnotation) {
         $scope.createMode = false;
@@ -231,17 +237,20 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
     // Sets the selected annotation to edit mode
     $scope.editAnnotation = function editAnnotation(annotation) {
         $scope.editedAnnotation = annotation.id;
-        $scope.editMode = true;
+        $scope.originalAnnotationText = annotation.description;
+    };
+
+    // Stop editing an annotation
+    $scope.cancelAnnotationEdit = function cancelAnnotationEdit(annotation) {
+        $scope.editedAnnotation = null;
+        annotation.description = $scope.originalAnnotationText;
     };
 
     // Given the updated annotation data, it updates the annotation in Annotorious and ERMrest
     $scope.saveAnnotation = function saveAnnotation(annotation) {
         $scope.editedAnnotation = null;
-        $scope.editMode = false;
         var timestamp = new Date().toISOString();
         annotation.timestamp = timestamp;
-        // TODO: Jessie: Is the following line redundant? Since the input on the view is hooked up to annotation.description already..
-        annotation.description = annotation.description;
         $scope.viewer.postMessage({messageType: 'updateAnnotation', content: annotation}, window.location.origin);
         ERMrestService.updateAnnotation(annotation);
     }
