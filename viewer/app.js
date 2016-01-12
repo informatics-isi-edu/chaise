@@ -141,7 +141,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
 }]);
 
 // MainController: An Angular controller to update the view ===========================================================================================================================
-openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', function($scope, ERMrestService) {
+openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestService', function($scope, $window, ERMrestService) {
     $scope.annotations = ERMrestService.getAnnotations();
 
     $scope.viewerSource = null; // The source URL of the iframe/viewer
@@ -158,13 +158,16 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
 
     // Fetch uri from image table to load OpenSeadragon
     ERMrestService.getEntity().then(function(uri) {
+        // TODO: Remove me after pushing to vm-wide version of OpenSeadragon ///////////////
+        // Splicing in my ~jessie directory in here so it redirects to my own version of OpenSeadragon and not the VM-wide version..
+        uri = uri.substring(0, 34) + '~jessie/' + uri.substring(34);
+        ///////////////////////////////////////////////////////////////////////////////////
         // Initialize OpenSeadragon with the uri
         $scope.viewerSource = uri;
     });
 
     // Listen for events from OpenSeadragon/iframe
-    // TODO: Maybe figure out an Angular way to listen to the postMessage event
-    window.addEventListener('message', function(event) {
+    $window.addEventListener('message', function(event) {
         if (event.origin === window.location.origin) {
             var data = event.data;
             var messageType = data.messageType;
