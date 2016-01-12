@@ -17,6 +17,9 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
     this.tableName = this.params[1].split(':')[1];
     this.entityId = this.params[2].split('=')[1];
 
+    // The name of the table where the annotations are stored — currently 'roi'
+    this.annotationTableName = 'roi';
+
     var ERMREST_ENDPOINT = window.location.origin + '/ermrest/catalog/';
     if (chaiseConfig['ermrestLocation'] != null) {
         ERMREST_ENDPOINT = chaiseConfig['ermrestLocation'] + '/ermrest/catalog';
@@ -52,7 +55,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
             "context_uri": context,
             "anatomy": null
         }];
-        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi?defaults=id,author';
+        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':' + this.annotationTableName + '?defaults=id,author';
         return $http.post(entityPath, roi);
     };
 
@@ -99,11 +102,12 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
             "id": annotation.id,
             "image_id": this.entityId,
             "author": null,
+            "timestamp": annotation.timestamp,
             "context_uri": annotation.context_uri,
             "coords": annotation.coords,
             "description": annotation.description
         }];
-        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi';
+        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':' + this.annotationTableName;
         return $http.put(entityPath, editedAnnotation);
     };
 
