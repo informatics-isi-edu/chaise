@@ -3,9 +3,6 @@ var openSeadragonApp = angular.module('openSeadragonApp', ['ERMrest']);
 
 // ERMrestService: A service for operations that deal with the ERMrest db =============================================================================================================
 openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', function(ermrestClientFactory, $http) {
-    var client = ermrestClientFactory.getClient(window.location.origin + '/ermrest', null);
-    var catalog = client.getCatalog(1);
-
     // Get a reference to the ERMrestService service
     var self = this;
 
@@ -24,6 +21,9 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
     if (chaiseConfig['ermrestLocation'] != null) {
         ERMREST_ENDPOINT = chaiseConfig['ermrestLocation'] + '/ermrest/catalog';
     }
+
+    var client = ermrestClientFactory.getClient(window.location.origin + '/ermrest', null);
+    var catalog = client.getCatalog(1);
 
     // Returns a Schema object from ERMrest
     this.getSchema = function getSchema() {
@@ -154,8 +154,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
     $scope.newAnnotation = null; // Holds the data for a new annotation as it's being created
 
     $scope.editMode = false; // True if user is currently editing an annotation
-    $scope.editedAnnotation = null; // Track which one is being edited right now
-    $scope.editedAnnotationText = ''; // The new annotation text to be used when updating an annotation
+    $scope.editedAnnotation = null; // Track which one is being edited right now; used to show/hide the right UI elements depending on which one is being edited.
 
     // Fetch uri from image table to load OpenSeadragon
     ERMrestService.getEntity().then(function(uri) {
@@ -244,7 +243,7 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
         $scope.editMode = true;
     };
 
-    // Updates the annotation in Annotorious and ERMrest
+    // Given the updated annotation data, it updates the annotation in Annotorious and ERMrest
     $scope.saveAnnotation = function saveAnnotation(annotation) {
         $scope.editedAnnotation = null;
         $scope.editMode = false;
