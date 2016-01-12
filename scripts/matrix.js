@@ -3,11 +3,10 @@
 var isModalOpen = false; //indicates whether modal is open or not. used for arrow key handler.
 
 $(function () {
-
     var modal = $("#dataset-modal");
 
     // changing background of column on hover:
-    var allCells = $(".experiment-table .mousematrix td");
+    var allCells = $(".experiment-table .matrix-view td");
     allCells
         .on("mouseover", function () {
             var el = $(this),
@@ -21,6 +20,7 @@ $(function () {
         });
 
     modal.on('show.bs.modal', function () {
+        $(this).focus();
         $(this).show();
         setModalMaxHeight(this);
         isModalOpen = true;
@@ -33,6 +33,7 @@ $(function () {
 
     // used for changing height of modal:
     var modal_in = $('.modal.in');
+
     $(window).resize(function () {
         if (modal_in.length != 0) {
             setModalMaxHeight(modal_in);

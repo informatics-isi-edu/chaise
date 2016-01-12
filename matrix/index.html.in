@@ -15,9 +15,11 @@
 	</div>
 	<div class="container">
 		<!-- Row 1: Logo and Main navigation -->
-		<div id="main-content" class="col-md-12" ng-app="ermrestApp">
-			%TEMPLATES%
-		</div>
+    <div class="row">
+  		<div id="main-content" class="col-md-12" ng-app="ermrestApp">
+  			%TEMPLATES%
+  		</div>
+    </div>
 	</div>
 	<!-- Row 3: Footer -->
 	<div id="ermrestFooter"></div>
