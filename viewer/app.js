@@ -69,30 +69,27 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
         var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment?defaults=id,author';
         return $http.post(entityPath, roiComment);
     };
-    // TODO: Rewrite this with ermrestjs
-    this.createAnnotation = function createAnnotation(x, y, width, height, context, comment, successCallback) {
-        var newAnnotation = {};
-        // First create a row in rbk:roi...
-        this.insertRoi(x, y, width, height, context).then(function(response) {
-            if (response.data) {
-                newAnnotation = response.data[0];
-                return response.data[0];
-            } else {
-                return 'Error: Region of interest could not be created. ' + response.status + ' ' + response.statusText;
-            }
-        // Then create a row in roi_comment, filling in the roi_id column with the result of insertRoi()
-        }).then(function(data) {
-            var roiId = data.id;
-            self.insertRoiComment(roiId, comment).then(function(response) {
-                if (response.data) {
-                    var commentData = response.data[0];
-                    newAnnotation.comments = {id: commentData.id, roiId: commentData.roi_id, author: commentData.author, comment: commentData.comment, timestamp: commentData.timestamp};
-                    return response.data[0];
-                } else {
-                    return 'Error: Comment could not be created. ' + response.status + ' ' + response.statusText;
-                }
+
+    this.createAnnotation = function createAnnotation(annotation) {
+        var timestamp = new Date().toISOString();
+        annotation = [{
+            "image_id": self.entityId,
+            "timestamp": timestamp,
+            "anatomy": null,
+            "context_uri": annotation.context_uri,
+            "coords": [
+                annotation.shape.geometry.x,
+                annotation.shape.geometry.y,
+                annotation.shape.geometry.width,
+                annotation.shape.geometry.height
+            ],
+            "description": annotation.description
+        }];
+        return this.getSchema().then(function(schema) {
+            var table = schema.getTable('roi');
+            return table.createEntity(annotation, ['id', 'author']).then(function(response) {
+                return response;
             });
-            successCallback(newAnnotation);
         });
     };
 
@@ -142,11 +139,16 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
 // MainController: An Angular controller to update the view ===========================================================================================================================
 openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', function($scope, ERMrestService) {
     $scope.annotations = ERMrestService.getAnnotations();
-    $scope.viewer = null;
-    $scope.viewerReady = false;
-    $scope.viewerSource = null;
-    $scope.highlightedAnnotation = null; // Track which one is highlighted/centered right now
-    $scope.creatingANewAnnotation = false;
+
+    $scope.viewerSource = null; // The source URL of the iframe/viewer
+    $scope.viewerReady = false; // True if viewer (OpenSeadragon/Annotorious) has finished setup
+    $scope.viewer = null; // A reference to the iframe window
+
+    $scope.highlightedAnnotation = null; // Track which annotation is highlighted/centered right now
+
+    $scope.createMode = false; // True if user is currently creating a new annotation
+    $scope.newAnnotation = null; // Holds the data for a new annotation as it's being created
+
     $scope.editMode = false; // True if user is currently editing an annotation
     $scope.editedAnnotation = null; // Track which one is being edited right now
     $scope.editedAnnotationText = ''; // The new annotation text to be used when updating an annotation
@@ -170,6 +172,15 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
                         $scope.viewer = window.frames[0];
                         $scope.viewer.postMessage({messageType: 'annotationsList', content: $scope.annotations}, window.location.origin);
                     }
+                    break;
+                case 'annotationDrawn':
+                    $scope.newAnnotation = {
+                        description: null,
+                        shape: data.content.shape
+                    };
+                    $scope.$apply(function() {
+                        $scope.createMode = true;
+                    });
                     break;
                 case 'onAnnotationCreated':
                     var annotation = JSON.parse(event.data.content);
@@ -197,14 +208,31 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
         $scope.highlightedAnnotation = annotationIndex;
     };
 
-    $scope.createAnnotation = function createAnnotation(annotation_data) {
-
-    }
     // Activates the drawing selector tool in Annotorious
-    $scope.drawNewAnnotation = function drawNewAnnotation() {
-        $scope.creatingANewAnnotation = true;
-        $scope.viewer.postMessage({messageType: 'drawNewAnnotation'}, window.location.origin);
+    $scope.drawAnnotation = function drawAnnotation() {
+        $scope.viewer.postMessage({messageType: 'drawAnnotation'}, window.location.origin);
     };
+
+    // Given the new annotation data, it creates the annotation in Annotorious and ERMrest
+    $scope.createAnnotation = function createAnnotation(newAnnotation) {
+        $scope.createMode = false;
+        newAnnotation.context_uri = $scope.viewerSource;
+        // Create new annotation in ERMrest
+        return ERMrestService.createAnnotation(newAnnotation).then(function(response) {
+            if (response.length > 0) {
+                newAnnotation = response[0];
+                // Send new annotation to Annotorious
+                $scope.viewer.postMessage({messageType: 'createAnnotation', content: newAnnotation}, window.location.origin);
+                // Add new annotation to controller scope
+                $scope.annotations.push(newAnnotation);
+                return newAnnotation;
+            } else {
+                return response;
+            }
+        });
+
+        // Use constructed annotation to send a message to Annotorious
+    }
 
     // Sets the selected annotation to edit mode
     $scope.editAnnotation = function editAnnotation(annotation) {
@@ -231,11 +259,6 @@ openSeadragonApp.controller('MainController', ['$scope', 'ERMrestService', funct
         ERMrestService.deleteAnnotation(annotation);
     };
 
-    // $scope.writtenNewAnnotation = function writtenNewAnnotation() {
-    //     // 1. Create the new annotation in ERMrest and Annotorious
-    //
-    //     $scope.creatingANewAnnotation = false;
-    // };
 }]);
 
 // Trusted: A filter that tells Angular when a url is trusted =========================================================================================================================
