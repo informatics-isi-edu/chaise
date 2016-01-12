@@ -172,11 +172,11 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
             var data = event.data;
             var messageType = data.messageType;
             switch (messageType) {
-                case 'myAnnoReady':
+                case 'annotoriousReady':
                     $scope.viewerReady = data.content;
                     if ($scope.viewerReady) {
                         $scope.viewer = window.frames[0];
-                        $scope.viewer.postMessage({messageType: 'annotationsList', content: $scope.annotations}, window.location.origin);
+                        $scope.viewer.postMessage({messageType: 'loadAnnotations', content: $scope.annotations}, window.location.origin);
                     }
                     break;
                 case 'annotationDrawn':
@@ -188,11 +188,6 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
                         $scope.createMode = true;
                     });
                     break;
-                case 'onAnnotationCreated':
-                    var annotation = JSON.parse(event.data.content);
-                    var coordinates = annotation.data.shapes[0].geometry;
-                    ERMrestService.createAnnotation(coordinates.x, coordinates.y, coordinates.width, coordinates.height, annotation.data.context, annotation.data.text, $scope.pushAnnotationToScope);
-                    break;
                 default:
                     console.log('Invalid message type. No action performed.');
             }
@@ -201,17 +196,12 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
         }
     });
 
-    // A success callback fn to push new annotations into this controller's scope
-    $scope.pushAnnotationToScope = function pushAnnotationToScope(newAnnotation) {
-        $scope.annotations.push(newAnnotation);
+    $scope.setHighlightedAnnotation = function setHighlightedAnnotation(annotationId) {
+        $scope.highlightedAnnotation = annotationId;
     };
 
     $scope.highlightAnnotation = function highlightAnnotation(annotation) {
         $scope.viewer.postMessage({messageType: 'highlightAnnotation', content: annotation}, window.location.origin);
-    };
-
-    $scope.setHighlightedAnnotation = function setHighlightedAnnotation(annotationIndex) {
-        $scope.highlightedAnnotation = annotationIndex;
     };
 
     // Activates the drawing selector tool in Annotorious
@@ -236,8 +226,6 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
                 return response;
             }
         });
-
-        // Use constructed annotation to send a message to Annotorious
     }
 
     // Sets the selected annotation to edit mode
