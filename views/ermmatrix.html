@@ -1,11 +1,21 @@
 <div ng-controller="ermMatrixController as mCtrl" class="matrix-page">
-    <div ng-keyup="mCtrl.keyUp($event)" ng-if="!(error.has && error.imp)">
+    <div ng-if="!(error.has && error.imp) && schemaReady">
         <p class="matrix-intro">
-            Use the three input boxes to select attributes that you want to use for generating the matrix.
-            <span ng-if="showMatrix && !error.has">(Click a cell to see a list of links to the related datasets.)</span>
+            <span ng-if="!attributesReady">Select the table you want to create the matrix for.</span>
+            <span ng-if="attributesReady && !showMatrix">Select the attributes you want to use for generating the matrix.</span>
+            <span ng-if="showMatrix && !error.has">Click a cell to see a list of links to the related datasets.</span>
         </p>
         <form class="form-inline attribute-form" role="form">
-            <div class="form-group">
+          <div class="form-group">
+              <label for="attr-row">Dataset:</label>
+              <div>
+                  <select class="form-control" id="attr-row" ng-model="mCtrl.selectedTable"
+                          ng-disabled="FacetsData.progress"
+                          ng-change="mCtrl.getAttributeList()"
+                          ng-options="dt.name for dt in mCtrl.tableList track by dt.value"></select>
+              </div>
+          </div>
+            <div class="form-group" ng-if="attributesReady">
                 <label for="attr-row">Row:</label>
                 <div>
                     <select class="form-control" id="attr-row" ng-model="mCtrl.selectedAttributes[0]"
@@ -14,7 +24,7 @@
                             ng-options="dt.name for dt in mCtrl.attributeList track by dt.value"></select>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-if="attributesReady">
                 <label for="attr-col">Column:</label>
                 <div>
                     <select class="form-control" id="attr-col" ng-model="mCtrl.selectedAttributes[1]"
@@ -23,7 +33,7 @@
                             ng-options="dt.name for dt in mCtrl.attributeList track by dt.value"></select>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-if="attributesReady">
                 <label for="attr-datat">Category:</label>
                 <div>
                     <select class="form-control" id="attr-datat" ng-model="mCtrl.selectedAttributes[2]"
@@ -32,44 +42,36 @@
                             ng-options="dt.name for dt in mCtrl.attributeList track by dt.value"></select>
                 </div>
             </div>
-            <!--<div class="form-group">-->
-            <!--<div class="submit-btn-div">-->
-            <!--<div class="btn btn-primary" ng-click="mCtrl.createMatrix()"-->
-            <!--ng-disabled="FacetsData.progress">-->
-            <!--Create-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--</div>-->
         </form>
         <div ng-if="showMatrix && !error.has" class="matrix-result">
             <table class="matrix-view table table-bordered">
                 <thead>
                 <tr class="col-label labels">
-                    <td class="labels-td" colspan="{{ mCtrl.attributes[1].length + 2 }}"
+                    <td class="labels-td" colspan="{{ mCtrl.matrixAttributes[1].length + 2 }}"
                         ng-bind="mCtrl.selectedAttributes[1].name"></td>
                 </tr>
                 <tr class="features">
                     <th class="no-border" ng-style="{'height': mCtrl.headerHeight}">&nbsp;</th>
                     <th class="no-border">&nbsp;</th>
-                    <th class="text-center rotate" ng-repeat="col in mCtrl.attributes[1]">
+                    <th class="text-center rotate" ng-repeat="col in mCtrl.matrixAttributes[1]">
                         <div ng-bind="col"></div>
                     </th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr class="row-label labels">
-                    <td class="labels-td" rowspan="{{ mCtrl.attributes[0].length + 1 }}">
+                    <td class="labels-td" rowspan="{{ mCtrl.matrixAttributes[0].length + 1 }}">
                         <div ng-style="{'width': mCtrl.selectedAttributes[0].name.length * 9, 'left': mCtrl.selectedAttributes[0].name.length * -4.2}"
                              ng-bind="mCtrl.selectedAttributes[0].name"></div>
                         <div></div>
                     </td>
                 </tr>
                 <tr ng-repeat="row in mCtrl.dataSetTypes" ng-init="rowIndex = $index">
-                    <th class="row-header" ng-bind="mCtrl.attributes[0][$index]"></th>
+                    <th class="row-header" ng-bind="mCtrl.matrixAttributes[0][$index]"></th>
                     <td ng-repeat="cell in row track by $index">
                         <div ng-if="cell.length == 0">&nbsp;</div>
                         <div ng-if="cell.length > 0" class="exp-div"
-                             title="{{mCtrl.attributes[1][$index]}} + {{mCtrl.attributes[0][rowIndex]}}"
+                             title="{{mCtrl.matrixAttributes[1][$index]}} + {{mCtrl.matrixAttributes[0][rowIndex]}}"
                              ng-click="mCtrl.openModal(rowIndex, $index)"
                              data-toggle="modal" data-target="#dataset-modal">
                             <div class="color-part" ng-repeat="dt in cell"
@@ -89,7 +91,7 @@
                         </th>
                     </tr>
                     <tr class="colors">
-                        <td ng-repeat="dt in mCtrl.attributes[2]" ng-style="{'height': mCtrl.legendHeight}">
+                        <td ng-repeat="dt in mCtrl.matrixAttributes[2]" ng-style="{'height': mCtrl.legendHeight}">
                             <div ng-bind="dt"></div>
                         </td>
                     </tr>
@@ -105,37 +107,43 @@
                         <h5 class="modal-title" ng-bind="mCtrl.modalContent.header"></h5>
                     </div>
                     <div class="modal-body">
-                        <div ng-if="mCtrl.modalContent.nextCol >= 0"
-                             ng-click="mCtrl.openModal(mCtrl.modalContent.row, mCtrl.modalContent.nextCol)"
-                             class="modal-nav-btn" title="Next {{ mCtrl.colLabel }}" id="next-col">
-                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        <div ng-show="modalProgress" class="modal-spinner">
+                          <img src="../record/assets/images/spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
+                          <div style="margin-top: 15px;">Loading...</div>
                         </div>
-                        <div ng-if="mCtrl.modalContent.prevCol >= 0"
-                             ng-click="mCtrl.openModal(mCtrl.modalContent.row, mCtrl.modalContent.prevCol)"
-                             class="modal-nav-btn" title="Previous {{ mCtrl.colLabel }}" id="prev-col">
-                            <span class="glyphicon glyphicon-chevron-left"></span>
-                        </div>
-                        <div ng-if="mCtrl.modalContent.prevRow >= 0"
-                             ng-click="mCtrl.openModal(mCtrl.modalContent.prevRow, mCtrl.modalContent.col)"
-                             class="modal-nav-btn" title="Previous {{ mCtrl.rowLabel }}" id="prev-row">
-                            <span class="glyphicon glyphicon-chevron-left up"></span>
-                        </div>
-                        <div ng-if="mCtrl.modalContent.nextRow >= 0"
-                             ng-click="mCtrl.openModal(mCtrl.modalContent.nextRow, mCtrl.modalContent.col)"
-                             class="modal-nav-btn" title="Next {{ mCtrl.rowLabel }}" id="next-row">
-                            <span class="glyphicon glyphicon-chevron-right down"></span>
-                        </div>
-                        <div class="content-here">
-                            <div ng-repeat="dataSet in mCtrl.modalContent.dataset">
-                                <h5>
-                                    <a ng-href="{{ dataSet.uri }}" ng-bind="dataSet.title"></a>
-                                </h5>
-                                <ol>
-                                    <li ng-repeat="data in dataSet.data">
-                                        <a ng-href="{{ data.uri }}" ng-bind="data.title"></a>
-                                    </li>
-                                </ol>
-                            </div>
+                        <div ng-show="!modalProgress">
+                          <div ng-if="mCtrl.modalContent.nextCol >= 0"
+                               ng-click="mCtrl.openModal(mCtrl.modalContent.row, mCtrl.modalContent.nextCol)"
+                               class="modal-nav-btn" title="Next {{ mCtrl.colLabel }}" id="next-col">
+                              <span class="glyphicon glyphicon-chevron-right"></span>
+                          </div>
+                          <div ng-if="mCtrl.modalContent.prevCol >= 0"
+                               ng-click="mCtrl.openModal(mCtrl.modalContent.row, mCtrl.modalContent.prevCol)"
+                               class="modal-nav-btn" title="Previous {{ mCtrl.colLabel }}" id="prev-col">
+                              <span class="glyphicon glyphicon-chevron-left"></span>
+                          </div>
+                          <div ng-if="mCtrl.modalContent.prevRow >= 0"
+                               ng-click="mCtrl.openModal(mCtrl.modalContent.prevRow, mCtrl.modalContent.col)"
+                               class="modal-nav-btn" title="Previous {{ mCtrl.rowLabel }}" id="prev-row">
+                              <span class="glyphicon glyphicon-chevron-left up"></span>
+                          </div>
+                          <div ng-if="mCtrl.modalContent.nextRow >= 0"
+                               ng-click="mCtrl.openModal(mCtrl.modalContent.nextRow, mCtrl.modalContent.col)"
+                               class="modal-nav-btn" title="Next {{ mCtrl.rowLabel }}" id="next-row">
+                              <span class="glyphicon glyphicon-chevron-right down"></span>
+                          </div>
+                          <div class="content-here">
+                              <div ng-repeat="dataSet in mCtrl.modalContent.dataset">
+                                  <h5>
+                                      <a ng-href="{{ dataSet.uri }}" ng-bind="dataSet.title"></a>
+                                  </h5>
+                                  <ol>
+                                      <li ng-repeat="data in dataSet.data">
+                                          <a ng-href="{{ data.uri }}" ng-bind="data.title"></a>
+                                      </li>
+                                  </ol>
+                              </div>
+                          </div>
                         </div>
                     </div>
                     <div class="modal-footer">

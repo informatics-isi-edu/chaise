@@ -20,9 +20,9 @@ $(function () {
         });
 
     modal.on('show.bs.modal', function () {
-        $(this).focus();
-        $(this).show();
-        setModalMaxHeight(this);
+        var el = $(this);
+        el.focus().show();
+        setModalMaxHeight(el);
         isModalOpen = true;
     });
 
@@ -41,7 +41,7 @@ $(function () {
     });
 
     /**
-     * handler for arrow keys. used for navigation in modal view.
+     * @desc handler for arrow keys. used for navigation in modal view.
      */
     $(document).keyup(function (e) {
         if (isModalOpen) {
@@ -54,23 +54,22 @@ $(function () {
                 temp = $("#next-col");
             } else if (e.which == 40) { //down arrow
                 temp = $("#next-row");
-            } else if(e.which == 27){
+            } else if(e.which == 27){ // escape key
                 modal.modal('hide');
                 return false;
             }
             if(temp.length) temp.click();
             return false;
         }
-    })
+    });
 
 });
 
 /**
- * Changes the height of modal and making it scrollable if needed.
+ * @desc Changes the height of modal and making it scrollable if needed.
  * @param element : modal element
  */
-function setModalMaxHeight(element) {
-    var el = $(element);
+function setModalMaxHeight(el) {
     var dialogMargin = $(window).width() > 767 ? 62 : 22;
     var contentHeight = $(window).height() - dialogMargin;
     var headerHeight = el.find('.modal-header').outerHeight() || 2;
