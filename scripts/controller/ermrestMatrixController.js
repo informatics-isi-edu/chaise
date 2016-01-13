@@ -347,7 +347,6 @@ ermMatrixController.controller('ermMatrixController', ['$scope', 'FacetsData', '
     function showProgress(start, is_modal) {
       if(is_modal){
           $scope.modalProgress = start;
-          console.log($scope.modalProgress);
       }else{
           $scope.FacetsData.progress = start;
       }
