@@ -35,7 +35,8 @@ BOWER=bower_components
 # HTML
 HTML=search/index.html \
 	 login/index.html \
-	 record/index.html
+	 record/index.html \
+	 matrix/index.html
 
 # CSS source
 CSS=styles
@@ -50,7 +51,8 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/ermrest.css \
 	$(CSS)/app.css \
-	$(CSS)/appheader.css
+	$(CSS)/appheader.css \
+	$(CSS)/matrix.css
 
 # JavaScript source and test specs
 JS=scripts
@@ -79,7 +81,9 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestLoginController.js \
 	$(JS)/controller/ermrestLogoutController.js \
 	$(JS)/controller/ermrestResultsController.js \
-	$(JS)/controller/ermrestSideBarController.js
+	$(JS)/controller/ermrestSideBarController.js \
+	$(JS)/controller/ermrestMatrixController.js \
+	$(JS)/matrix.js
 
 # HTML templates
 TEMPLATES=views
@@ -88,6 +92,10 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermsidebar.html \
 	$(TEMPLATES)/ermretrievefilters.html \
 	$(TEMPLATES)/ermretrieveresults.html
+
+MATRIX_TEMPLATES_DEPS =$(TEMPLATES)/erminit.html \
+    $(TEMPLATES)/ermmatrix.html
+
 
 # JavaScript and CSS source for Record app
 RECORD_ASSETS=record/assets
@@ -249,6 +257,11 @@ record/index.html: record/index.html.in .make-record-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
 
+matrix/index.html: matrix/index.html.in .make-asset-block .make-matrix-template-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-matrix-template-block' -e 'd' -e '}' \
+		matrix/index.html.in > matrix/index.html
+
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
@@ -291,6 +304,12 @@ $(JS_CONFIG): chaise-config-sample.js
 	> .make-template-block
 	for file in $(TEMPLATES_DEPS); do \
 		$(CAT) $$file >> .make-template-block ; \
+	done
+
+.make-matrix-template-block: $(MATRIX_TEMPLATES_DEPS)
+	> .make-matrix-template-block
+	for file in $(MATRIX_TEMPLATES_DEPS); do \
+		$(CAT) $$file >> .make-matrix-template-block ; \
 	done
 
 # Rules for help/usage
