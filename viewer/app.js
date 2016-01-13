@@ -15,7 +15,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
     this.entityId = this.params[2].split('=')[1];
 
     // The name of the table where the annotations are stored — currently 'roi'
-    this.annotationTableName = 'roi';
+    this.annotationTableName = 'annotation';
 
     var ERMREST_ENDPOINT = window.location.origin + '/ermrest/catalog/';
     if (chaiseConfig['ermrestLocation'] != null) {
@@ -37,47 +37,15 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
         return this.getSchema().then(function(schema) {
             var table = schema.getTable(self.tableName);
             var filteredTable = table.getFilteredTable(["id=" + self.entityId]);
-            return filteredTable.getRows().then(function(rows) {
+            return filteredTable.getEntities().then(function(rows) {
                 return rows[0].data.uri;
             });
         });
     };
 
-    this.insertRoi = function insertRoi(x, y, width, height, context) {
-        var timestamp = new Date().toISOString();
-        var coordinates = [x, y, width, height];
-        var roi = [{
-            "id": null,
-            "image_id": parseInt(this.entityId),
-            "author": null,
-            "timestamp": timestamp,
-            "coords": coordinates,
-            "context_uri": context,
-            "anatomy": null
-        }];
-        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':' + this.annotationTableName + '?defaults=id,author';
-        return $http.post(entityPath, roi);
-    };
-
-    this.insertRoiComment = function insertRoiComment(roiId, comment) {
-        var timestamp = new Date().toISOString();
-        var roiComment = [{
-            "id": null,
-            "roi_id": roiId,
-            "author": null,
-            "timestamp": timestamp,
-            "comment": comment
-        }];
-
-        var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':roi_comment?defaults=id,author';
-        return $http.post(entityPath, roiComment);
-    };
-
     this.createAnnotation = function createAnnotation(annotation) {
-        var timestamp = new Date().toISOString();
         annotation = [{
             "image_id": self.entityId,
-            "timestamp": timestamp,
             "anatomy": null,
             "context_uri": annotation.context_uri,
             "coords": [
@@ -89,20 +57,19 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
             "description": annotation.description
         }];
         return this.getSchema().then(function(schema) {
-            var table = schema.getTable('roi');
-            return table.createEntity(annotation, ['id', 'author']).then(function(response) {
+            var table = schema.getTable(self.annotationTableName);
+            return table.createEntity(annotation, ['id', 'author', 'created']).then(function(response) {
                 return response;
             });
         });
     };
 
-    // TODO: Rewrite this with ermrestjs
     this.updateAnnotation = function updateAnnotation(annotation) {
         var editedAnnotation = [{
             "id": annotation.id,
             "image_id": this.entityId,
             "author": null,
-            "timestamp": annotation.timestamp,
+            "created": annotation.created,
             "context_uri": annotation.context_uri,
             "coords": annotation.coords,
             "description": annotation.description
@@ -114,12 +81,12 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
     this.getAnnotations = function getAnnotations() {
         var annotations = [];
         this.getSchema().then(function(schema) {
-            var roiTable = schema.getTable('roi');
-            var filteredRoiTable = roiTable.getFilteredTable(["image_id=" + self.entityId]);
-            return filteredRoiTable.getRows().then(function(roiRows) {
-                if (roiRows.length > 0) {
-                    return Promise.all(roiRows.map(function(roi) {
-                        annotations.push(roi.data);
+            var table = schema.getTable(self.annotationTableName);
+            var filteredTable = table.getFilteredTable(["image_id=" + self.entityId]);
+            return filteredTable.getEntities().then(function(rows) {
+                if (rows.length > 0) {
+                    return Promise.all(rows.map(function(row) {
+                        annotations.push(row.data);
                     }));
                 } else {
                     console.log('No annotations found for this image.')
@@ -131,9 +98,9 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
 
     this.deleteAnnotation = function deleteAnnotation(annotation) {
         this.getSchema().then(function(schema) {
-            var table = schema.getTable('roi');
+            var table = schema.getTable(self.annotationTableName);
             var filteredTable = table.getFilteredTable(["id=" + annotation.id]);
-            return filteredTable.getRows().then(function(rows) {
+            return filteredTable.getEntities().then(function(rows) {
                 rows[0].delete();
             });
         });
@@ -249,8 +216,6 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
     // Given the updated annotation data, it updates the annotation in Annotorious and ERMrest
     $scope.saveAnnotation = function saveAnnotation(annotation) {
         $scope.editedAnnotation = null;
-        var timestamp = new Date().toISOString();
-        annotation.timestamp = timestamp;
         $scope.viewer.postMessage({messageType: 'updateAnnotation', content: annotation}, window.location.origin);
         ERMrestService.updateAnnotation(annotation);
     }
