@@ -16,6 +16,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
 
     // The name of the table where the annotations are stored — currently 'roi'
     this.annotationTableName = 'annotation';
+    this.anatomyTableName = 'anatomy';
 
     var ERMREST_ENDPOINT = window.location.origin + '/ermrest/catalog/';
     if (chaiseConfig['ermrestLocation'] != null) {
@@ -44,9 +45,13 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
     };
 
     this.createAnnotation = function createAnnotation(annotation) {
+        if (annotation.anatomy === "") {
+            annotation.anatomy = null;
+        }
+
         annotation = [{
             "image_id": self.entityId,
-            "anatomy": null,
+            "anatomy": annotation.anatomy,
             "context_uri": annotation.context_uri,
             "coords": [
                 annotation.shape.geometry.x,
@@ -65,14 +70,19 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
     };
 
     this.updateAnnotation = function updateAnnotation(annotation) {
+        if (annotation.anatomy === "") {
+            annotation.anatomy = null;
+        }
+        
         var editedAnnotation = [{
             "id": annotation.id,
-            "image_id": this.entityId,
+            "image_id": self.entityId,
             "author": null,
             "created": annotation.created,
             "context_uri": annotation.context_uri,
             "coords": annotation.coords,
-            "description": annotation.description
+            "description": annotation.description,
+            "anatomy": annotation.anatomy
         }];
         var entityPath = ERMREST_ENDPOINT + this.catalogId + '/entity/' + this.schemaName + ':' + this.annotationTableName;
         return $http.put(entityPath, editedAnnotation);
@@ -105,12 +115,29 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
             });
         });
     };
+
+    this.getAnatomies = function getAnatomies() {
+        var anatomies = [];
+        this.getSchema().then(function(schema) {
+            var table = schema.getTable(self.anatomyTableName);
+            table.getEntities().then(function(rows) {
+                if (rows.length > 0) {
+                    return Promise.all(rows.map(function(row) {
+                        anatomies.push(row.data.term);
+                    }));
+                } else {
+                    return rows;
+                }
+            });
+        });
+        return anatomies;
+    };
 }]);
 
 // MainController: An Angular controller to update the view ===========================================================================================================================
 openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestService', function($scope, $window, ERMrestService) {
     $scope.annotations = ERMrestService.getAnnotations();
-
+    $scope.anatomies = ERMrestService.getAnatomies(); // An array of elements, where each element is a string of an anatomy term
     $scope.viewerSource = null; // The source URL of the iframe/viewer
     $scope.viewerReady = false; // True if viewer (OpenSeadragon/Annotorious) has finished setup
     $scope.viewer = null; // A reference to the iframe window
@@ -121,7 +148,7 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
     $scope.newAnnotation = null; // Holds the data for a new annotation as it's being created
 
     $scope.editedAnnotation = null; // Track which one is being edited right now; used to show/hide the right UI elements depending on which one is being edited.
-    $scope.originalAnnotationText = ''; // Holds the old value of an annotation's text in the event that a user cancels an edit
+    $scope.originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
 
     // Fetch uri from image table to load OpenSeadragon
     ERMrestService.getEntity().then(function(uri) {
@@ -204,13 +231,13 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
     // Sets the selected annotation to edit mode
     $scope.editAnnotation = function editAnnotation(annotation) {
         $scope.editedAnnotation = annotation.id;
-        $scope.originalAnnotationText = annotation.description;
+        $scope.originalAnnotation = annotation;
     };
 
     // Stop editing an annotation
     $scope.cancelAnnotationEdit = function cancelAnnotationEdit(annotation) {
         $scope.editedAnnotation = null;
-        annotation.description = $scope.originalAnnotationText;
+        annotation = $scope.originalAnnotation;
     };
 
     // Given the updated annotation data, it updates the annotation in Annotorious and ERMrest
@@ -226,7 +253,6 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
         $scope.viewer.postMessage({messageType: 'deleteAnnotation', content: annotation}, window.location.origin);
         ERMrestService.deleteAnnotation(annotation);
     };
-
 }]);
 
 // Trusted: A filter that tells Angular when a url is trusted =========================================================================================================================
