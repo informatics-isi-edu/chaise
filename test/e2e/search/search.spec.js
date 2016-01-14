@@ -4,26 +4,12 @@
 describe('In the Chaise search app,', function () {
     var EC = protractor.ExpectedConditions;
 
-    by.addLocator('findSidebarAttributes', function(attributeName, opt_parentElement) {
+    by.addLocator('findSidebarAttribute', function(attributeName, opt_parentElement) {
         var using = opt_parentElement || document;
-        var navcontainer = using.querySelector('#navcontainer');
-        var attributeAnchors = navcontainer.querySelectorAll('a');
-        return attributeAnchors[0];
-        //return Array.prototype.filter.call(attributeAnchors, function(ele) {
-        //    return ele.textContent === attributeName;
-        //});
-    });
-
-    by.addLocator('what', function(tag) {
-        var using = document;
-        var arr = using.querySelectorAll(tag);
-        return arr;
-    });
-
-    it('should allow custom locator', function(done) {
-        expect(by.findSidebarAttributes).toBeDefined();
-        expect(by.what).toBeDefined();
-        done();
+        var attributeAnchors = using.querySelectorAll('#navcontainer > ul > li > a');
+        return Array.prototype.filter.call(attributeAnchors, function(ele) {
+            return ele.textContent.trim() === attributeName;
+        });
     });
 
     describe('on load,', function () {
@@ -82,7 +68,7 @@ describe('In the Chaise search app,', function () {
             });
 
             var expectedAttr = 'Data Type';
-            var dataTypeAttr = navContainer.element(by.cssContainingText('.field-toggle.ng-binding', expectedAttr));
+            var dataTypeAttr = element(by.findSidebarAttribute(expectedAttr));
             var editFilter = element(by.css('#editfilter'));
             var sidebarAttrTitle = editFilter.element(by.css('.sidebar-title'));
             it('should change correctly when one attribute is chosen', function (done) {
@@ -105,9 +91,8 @@ describe('In the Chaise search app,', function () {
             var somiteCount = 'Somite Count';
             var investigator = 'Investigator';
             var navContainer = element(by.css('#navcontainer'));
-            //var somiteCountAttr = element(by.findSidebarAttributes(somiteCount));
-            var somiteCountAttr = navContainer.element(by.cssContainingText('.field-toggle.ng-binding', somiteCount));
-            var investigatorAttr = navContainer.element(by.cssContainingText('.field-toggle.ng-binding', investigator));
+            var somiteCountAttr = element(by.findSidebarAttribute(somiteCount));
+            var investigatorAttr = element(by.findSidebarAttribute(investigator));
 
             it('Somite Count attribute should be displayed', function (done) {
                 expect(somiteCountAttr.isDisplayed()).toBe(true);
@@ -198,7 +183,8 @@ describe('In the Chaise search app,', function () {
             var searchBoxInput = searchBox.getAttribute('value');
             expect(searchBoxInput).toBe('RNA');
 
-            var experimentFacet = element(by.cssContainingText('.field-toggle.ng-binding', 'Experiment Type'));
+            //var experimentFacet = element(by.cssContainingText('.field-toggle.ng-binding', 'Experiment Type'));
+            var experimentFacet = element(by.findSidebarAttribute('Experiment Type'));
             browser.wait(EC.visibilityOf(experimentFacet), 500).then(function () {
                 experimentFacet.click();
             });
@@ -249,6 +235,29 @@ describe('In the Chaise search app,', function () {
             });
         });
 
+        by.addLocator('findFilterAttrWrapper', function(filterAttribute, opt_parentElement) {
+            var using = opt_parentElement || document;
+            var attrs = using.querySelectorAll('#filter .filter-item:not(.ng-hide)');
+            return Array.prototype.filter.call(attrs, function(ele) {
+                var span = ele.querySelector('span');
+                return span.textContent.trim() === filterAttribute;
+            });
+        });
+
+        var filterAttrCheckedValues = 'filterAttrCheckedValues';
+        by.addLocator(filterAttrCheckedValues, function(filterAttr, opt_parentElement) {
+            var using = opt_parentElement || document;
+            var attrs = using.querySelectorAll('#filter .filter-item:not(.ng-hide)');
+            for (var i = 0; i < attrs.length; i++) {
+                ele = attrs[i];
+                var span = ele.querySelector('span');
+                if (span.textContent.trim() === filterAttr) {
+                    return ele.querySelector('span[ng-attr-title="{{facetResults.displayTitle(facet)}}"]');
+                }
+            }
+        });
+
+        //input is now "RNA"
         it('should show \'Clear All Filters\' button and \'RNA expression\' filter', function(done) {
             var clearAllFilterText = 'Clear All Filters';
             var experimentType = 'Experiment Type';
@@ -259,9 +268,11 @@ describe('In the Chaise search app,', function () {
 
             //how to select element excluding attributes
             var hasNoHide = filterDiv.all(by.css('.filter-item.ng-scope:not(.ng-hide)'));
+            //now only "Clear All Filters" and "Experiment Type" are shown (so 2 elements are expected)
             expect(hasNoHide.count()).toBe(2);
-            var experimentTypeWrapper = filterDiv.element(by.cssContainingText('.filter-item.ng-scope', experimentType));
-            var experimentTypeValueSpan = experimentTypeWrapper.element(by.css('span.filter-item-value.ng-scope'));
+            //var experimentTypeWrapper = element(by.findFilterAttrWrapper(experimentType));
+            //var experimentTypeValueSpan = experimentTypeWrapper.element(by.css('span.filter-item-value.ng-scope'));
+            var experimentTypeValueSpan = element(by.filterAttrCheckedValues(experimentType));
             var experimentTypeValues = experimentTypeValueSpan.all(by.css('span'));
             //since now only one 'RNA expression (microarray)' is selected
             expect(experimentTypeValues.count()).toBe(1);
