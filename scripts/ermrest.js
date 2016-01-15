@@ -517,6 +517,10 @@ function getTableColumns(options, successCallback) {
 			PRIMARY_KEY.push(encodeSafeURIComponent(col['name']));
 		});
 	}
+	
+	if (display_columns['title'] == null && display_columns['thumbnail'].length == 0) {
+		display_columns['title'] = decodeURIComponent(PRIMARY_KEY[0]);
+	}
 
 	var table = options['table'];
 	options['box'][table] = {};
