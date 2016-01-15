@@ -73,7 +73,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
         if (annotation.anatomy === "") {
             annotation.anatomy = null;
         }
-        
+
         var editedAnnotation = [{
             "id": annotation.id,
             "image_id": self.entityId,
@@ -221,6 +221,7 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
                 $scope.viewer.postMessage({messageType: 'createAnnotation', content: newAnnotation}, window.location.origin);
                 // Add new annotation to controller scope
                 $scope.annotations.push(newAnnotation);
+                $scope.newAnnotation = null;
                 return newAnnotation;
             } else {
                 return response;
