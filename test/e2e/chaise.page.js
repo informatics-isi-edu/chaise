@@ -10,6 +10,7 @@ var editFilterId= '#editfilter';
 function chaisePage() {
     this.sidebar = {
         htmlElement: element(sidebarId),
+        searchInput: element(by.css(sidebarId + ' div.search-box > input')),
         sidebarAttrsDisplayed: element.all(by.css(sidebarId + ' ul.sidebar-nav li.ng-scope:not(.ng-hide)')),
         sidebarHeader: element(by.css(sidebarId + ' #navcontainer h4')),
         viewMoreBtn: element(by.cssContainingText(sidebarId + ' li a', 'View all attributes')),
@@ -28,6 +29,10 @@ function chaisePage() {
     this.editFilter = {
         htmlElement: element(by.css(editFilterId)),
         sidebarHeader: element(by.css(editFilterId + ' div.sidebar-title h4')),
+        displayedEditAttrs: element.all(by.css(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide)')),
+        findEditfilterAttrByName: function (attrName) {
+            return element(by.cssContainingText(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
+        },
     };
 };
 
