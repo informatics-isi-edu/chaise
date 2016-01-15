@@ -77,7 +77,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
         var editedAnnotation = [{
             "id": annotation.id,
             "image_id": self.entityId,
-            "author": null,
+            "author": annotation.author,
             "created": annotation.created,
             "context_uri": annotation.context_uri,
             "coords": annotation.coords,
@@ -134,6 +134,7 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
     };
 }]);
 
+
 // MainController: An Angular controller to update the view ===========================================================================================================================
 openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestService', function($scope, $window, ERMrestService) {
     $scope.annotations = ERMrestService.getAnnotations();
@@ -158,6 +159,7 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
         ///////////////////////////////////////////////////////////////////////////////////
         // Initialize OpenSeadragon with the uri
         $scope.viewerSource = uri;
+        console.log($scope.annotations);
     });
 
     // Listen for events from OpenSeadragon/iframe
@@ -256,14 +258,16 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
     };
 }]);
 
-// Trusted: A filter that tells Angular when a url is trusted =========================================================================================================================
+
+// Filters ============================================================================================================================================================================
+// Trusted: A filter that tells Angular when a url is trusted
 openSeadragonApp.filter('trusted', ['$sce', function($sce) {
     return function(url) {
         return $sce.trustAsResourceUrl(url);
     };
 }]);
 
-// Capitalize: A filter that capitalizes the first character for each word in a string ================================================================================================
+// Capitalize: A filter that capitalizes the first character for each word in a string
 openSeadragonApp.filter('capitalize', function() {
     return function(input, all) {
         var regex = (all) ? /([^\W_]+[^\s-]*) */g : /([^\W_]+[^\s-]*)/;
