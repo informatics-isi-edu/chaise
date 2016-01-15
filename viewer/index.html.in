@@ -1,14 +1,7 @@
 <html ng-app="openSeadragonApp">
 <head>
     <title>Data Viewer | (Re)Building A Kidney</title>
-    <link rel='stylesheet' type='text/css' href='../styles/vendor/bootstrap.min.css'>
-    <link rel='stylesheet' type='text/css' href='../styles/appheader.css'>
-    <script src='../scripts/vendor/jquery-latest.min.js'></script>
-    <script src='../scripts/vendor/angular.js'></script>
-    <script src='../../../ermrestjs/js/ermrest.js'></script>
-    <script src='../../../ermrestjs/js/ngermrest.js'></script>
-    <script src='../viewer/app.js?v=ace7bc3834e8b251efa3b17533854304'></script>
-    <script src='../chaise-config.js?v=bceb1440a28b0d8b4fd43d8388977e75'></script>
+    %ASSETS%
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     <style>
         #annotations-control {
@@ -97,19 +90,25 @@
                         </div>
                     </form>
                 <!-- Annotations -->
-                <div ng-repeat="annotation in annotations | orderBy:'-created' | filter:query as results track by annotation.id" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation}">
+                <div ng-repeat="annotation in annotations | orderBy:'-created' | filter:query as results track by annotation.id" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation || annotation.id === editedAnnotation}">
                     <!-- Annotation Display Card -->
                     <div ng-show="annotation.id !== editedAnnotation">
                         <div class="row">
-                            <div class="col-md-8 annotation-anatomy-text">
+                            <div class="col-md-7 annotation-anatomy-text">
                                 <small><strong>
-                                    <span ng-if="annotation.anatomy">{{annotation.anatomy | uppercase}}</span>
+                                    <span ng-if="annotation.anatomy">{{annotation.anatomy | uppercase}}</span></button>
                                     <span ng-if="!annotation.anatomy">{{'No Anatomy' | uppercase}}</span>
                                 </strong></small>
                             </div>
-                            <!-- Annotation Date -->
-                            <div class="col-md-4">
-                                <small class="pull-right">{{annotation.created | date: 'MMM d, y'}}</small>
+                            <!-- Annotation Control Buttons -->
+                            <div class="col-md-5" ng-show="annotation.id !== editedAnnotation">
+                                <small class="pull-right">
+                                    <a ng-click="editAnnotation(annotation);" title="Edit Annotation" style="cursor:pointer;">Edit</a> |
+                                    <a ng-click="deleteAnnotation(annotation);" title="Delete Annotation" style="cursor:pointer;color:red;">Delete</a>
+                                </small>
+                                <!-- <button ng-show="annotation.id !== editedAnnotation" ng-click="deleteAnnotation(annotation);" title="Delete Annotation" class="btn btn-sm btn-danger pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-trash"></span></button>
+                                <button ng-show="annotation.id !== editedAnnotation" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" title="Highlight Annotation" class="btn btn-sm btn-warning pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-search"></span></button>
+                                <button ng-show="annotation.id !== editedAnnotation" ng-click="editAnnotation(annotation);" title="Edit Annotation" class="btn btn-sm btn-primary pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-pencil"></span></button> -->
                             </div>
                         </div>
                         <br>
@@ -120,12 +119,10 @@
                             </div>
                         </div>
                         <br>
-                        <!-- Annotation Control Buttons -->
+                        <!-- Annotation Date -->
                         <div class="row">
                             <div class="col-md-12">
-                                <button ng-show="annotation.id !== editedAnnotation" ng-click="deleteAnnotation(annotation);" title="Delete Annotation" class="btn btn-sm btn-danger pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-trash"></span></button>
-                                <button ng-show="annotation.id !== editedAnnotation" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" title="Highlight Annotation" class="btn btn-sm btn-warning pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                                <button ng-show="annotation.id !== editedAnnotation" ng-click="editAnnotation(annotation);" title="Edit Annotation" class="btn btn-sm btn-primary pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-pencil"></span></button>
+                                <small>{{annotation.author | capitalize}} &mdash; {{annotation.created | date: 'MMM d, y'}}</small>
                             </div>
                         </div>
                     </div>
@@ -139,9 +136,8 @@
                                     <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
                                 </select>
                             </div>
-                            <!-- Edit Form: Annotation Date -->
-                            <div class="col-md-4">
-                                <small class="pull-right">{{annotation.created | date: 'MMM d, y'}}</small>
+                            <div class="col-md-2 col-md-offset-2">
+                                <button ng-click="cancelAnnotationEdit(annotation);" type="button" class="close pull-right" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             </div>
                         </div>
                         <br>
@@ -152,12 +148,16 @@
                             </div>
                         </div>
                         <br>
+                        <!-- Edit Form: Annotation Date -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <small>{{annotation.author | capitalize}} &mdash; {{annotation.created | date: 'MMM d, y'}}</small>
+                            </div>
+                        </div>
+                        <br>
                         <!-- Edit Form: Save and Cancel buttons -->
                         <div class="row">
-                            <div class="col-md-6">
-                                <button ng-click="cancelAnnotationEdit(annotation);" role="button" class="btn btn-xs btn-danger form-control" type="button">Cancel</button>
-                            </div>
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <button ng-click="saveAnnotation(annotation);" role="button" class="btn btn-xs btn-primary form-control" type="button">Save</button>
                             </div>
                         </div>
