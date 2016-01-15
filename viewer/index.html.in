@@ -14,7 +14,7 @@
         #annotations-control {
             height: 98vh;
             overflow: auto;
-            border-right: 1px solid #ccc;
+            border-right: 1px solid #eee;
         }
 
         #viewer {
@@ -24,9 +24,9 @@
 
         .annotation {
             padding: 10px;
-            margin: 20px 0;
+            margin: 15px 0;
             border-radius: 3px;
-            border: 1px solid #eee;
+            border: 1px solid #ccc;
         }
 
         .annotation.highlighted {
@@ -41,7 +41,10 @@
             cursor: pointer;
         }
 
-        /* TODO: Give the Edit and Delete buttons their own class */
+        .annotation-anatomy-text {
+            color: #444;
+        }
+
         .annotation-control-button {
             margin: 2px;
             margin-right: 0;
@@ -66,118 +69,99 @@
                     </div>
                 </div>
                 <!-- Annotation Creation Form -->
-                <div class="row">
-                    <div class="col-md-12">
-                        <div ng-if="createMode" class="annotation">
-                            <form>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <h4>New Annotation</h4>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <label>Description</label><br>
-                                        <textarea ng-model="newAnnotation.description" class="form-control" rows="3">Annotation text goes here</textarea><br>
-                                        <label>Anatomy</label><br>
-                                        <select ng-model="newAnnotation.anatomy" class="form-control">
-                                            <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <button ng-click="cancelAnnotationCreation();" role="button" class="btn btn-xs btn-danger form-control" type="button">Cancel</button>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <button ng-click="createAnnotation(newAnnotation);" role="button" class="btn btn-xs btn-primary form-control" type="submit">Create</button>
-                                    </div>
-                                </div>
-                            </form>
+                <form ng-show="createMode" class="annotation" style="border-left: 5px solid #5cb85c;">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <span class="h4">New Annotation</span>
+                            </div>
+                            <div class="col-md-2">
+                                <button ng-click="cancelAnnotationCreation();" type="button" class="close pull-right" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <textarea ng-model="newAnnotation.description" class="form-control input-sm" rows="3" placeholder="Write annotation text here"></textarea><br>
+                                <select ng-model="newAnnotation.anatomy" class="form-control input-sm">
+                                    <option ng-disabled="true" value="">Select an anatomy term</option>
+                                    <option value="">No Anatomy</option>
+                                    <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button ng-click="createAnnotation(newAnnotation);" role="button" class="btn btn-xs btn-success form-control" type="submit"><strong>Create Annotation</strong></button>
+                            </div>
+                        </div>
+                    </form>
                 <!-- Annotations -->
                 <div ng-repeat="annotation in annotations | orderBy:'-created' | filter:query as results track by annotation.id" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation}">
-                    <div class="row">
-                        <div class="col-md-10">
+                    <!-- Annotation Display Card -->
+                    <div ng-show="annotation.id !== editedAnnotation">
+                        <div class="row">
+                            <div class="col-md-8 annotation-anatomy-text">
+                                <small><strong>
+                                    <span ng-if="annotation.anatomy">{{annotation.anatomy | uppercase}}</span>
+                                    <span ng-if="!annotation.anatomy">{{'No Anatomy' | uppercase}}</span>
+                                </strong></small>
+                            </div>
                             <!-- Annotation Date -->
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <small>{{annotation.created | date: 'MMM d, y'}}</small>
-                                </div>
-                            </div>
-                            <!-- Annotation Text -->
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <br>
-                                    <p ng-if="annotation.description" ng-show="annotation.id !== editedAnnotation">
-                                        <strong>Description</strong><br>
-                                        <span ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" class="comment">{{annotation.description}}</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- Annotation Anatomy -->
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <p ng-if="annotation.anatomy" ng-show="annotation.id !== editedAnnotation;">
-                                        <strong>Anatomy</strong><br>
-                                        <span ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" class="comment">{{annotation.anatomy}}</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- Annotation Edit Form -->
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <form ng-show="annotation.id === editedAnnotation">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <label>Description</label>
-                                                <textarea ng-model="annotation.description" class="form-control" rows="3"></textarea>
-                                            </div>
-                                        </div>
-                                        <br>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <label>Anatomy</label>
-                                                <select ng-model="annotation.anatomy" class="form-control">
-                                                    <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <br>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <button ng-click="cancelAnnotationEdit(annotation);" role="button" class="btn btn-xs btn-danger form-control" type="button">Cancel</button>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <button ng-click="saveAnnotation(annotation);" role="button" class="btn btn-xs btn-primary form-control" type="button">Save</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
+                            <div class="col-md-4">
+                                <small class="pull-right">{{annotation.created | date: 'MMM d, y'}}</small>
                             </div>
                         </div>
-                        <!-- Edit and Delete buttons -->
-                        <div class="col-md-2">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <button ng-show="annotation.id !== editedAnnotation" ng-click="editAnnotation(annotation);" title="Edit Annotation" class="btn btn-sm btn-primary pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-pencil"></span></button>
-                                </div>
+                        <br>
+                        <!-- Annotation Text -->
+                        <div ng-if="annotation.description" class="row">
+                            <div class="col-md-12">
+                                <span ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" class="comment" class="h4">{{annotation.description}}</span>
                             </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <button ng-show="annotation.id !== editedAnnotation" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" title="Highlight Annotation" class="btn btn-sm btn-warning pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <button ng-show="annotation.id !== editedAnnotation" ng-click="deleteAnnotation(annotation);" title="Delete Annotation" class="btn btn-sm btn-danger pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-trash"></span></button>
-                                </div>
+                        </div>
+                        <br>
+                        <!-- Annotation Control Buttons -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button ng-show="annotation.id !== editedAnnotation" ng-click="deleteAnnotation(annotation);" title="Delete Annotation" class="btn btn-sm btn-danger pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-trash"></span></button>
+                                <button ng-show="annotation.id !== editedAnnotation" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" title="Highlight Annotation" class="btn btn-sm btn-warning pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-search"></span></button>
+                                <button ng-show="annotation.id !== editedAnnotation" ng-click="editAnnotation(annotation);" title="Edit Annotation" class="btn btn-sm btn-primary pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-pencil"></span></button>
                             </div>
                         </div>
                     </div>
+                    <!-- Annotation Edit Form -->
+                    <form ng-if="annotation.id === editedAnnotation">
+                        <div class="row">
+                            <!-- Edit Form: Annotation Anatomy -->
+                            <div class="col-md-8 annotation-anatomy-text">
+                                <select ng-model="annotation.anatomy" class="form-control input-sm">
+                                    <option ng-show="annotation.anatomy" value="">No Anatomy</option>
+                                    <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
+                                </select>
+                            </div>
+                            <!-- Edit Form: Annotation Date -->
+                            <div class="col-md-4">
+                                <small class="pull-right">{{annotation.created | date: 'MMM d, y'}}</small>
+                            </div>
+                        </div>
+                        <br>
+                        <!-- Edit Form: Annotation Text -->
+                        <div ng-if="annotation.description" class="row">
+                            <div class="col-md-12">
+                                <textarea ng-model="annotation.description" class="form-control input-sm" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <br>
+                        <!-- Edit Form: Save and Cancel buttons -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button ng-click="cancelAnnotationEdit(annotation);" role="button" class="btn btn-xs btn-danger form-control" type="button">Cancel</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button ng-click="saveAnnotation(annotation);" role="button" class="btn btn-xs btn-primary form-control" type="button">Save</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <br>
                 <p ng-if="annotations.length == 0 || results.length == 0">No annotations found.</p>
