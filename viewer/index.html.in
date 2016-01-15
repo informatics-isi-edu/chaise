@@ -72,12 +72,14 @@
                             <form>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <p><strong>Create an Annotation:</strong></p>
+                                        <h4>New Annotation</h4>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">
+                                        <label>Description</label><br>
                                         <textarea ng-model="newAnnotation.description" class="form-control" rows="3">Annotation text goes here</textarea><br>
+                                        <label>Anatomy</label><br>
                                         <select ng-model="newAnnotation.anatomy" class="form-control">
                                             <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
                                         </select>
@@ -110,7 +112,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <br>
-                                    <p ng-if="annotation.id !== editedAnnotation">
+                                    <p ng-if="annotation.description" ng-show="annotation.id !== editedAnnotation">
                                         <strong>Description</strong><br>
                                         <span ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" class="comment">{{annotation.description}}</span>
                                     </p>
@@ -119,7 +121,7 @@
                             <!-- Annotation Anatomy -->
                             <div class="row">
                                 <div class="col-md-12">
-                                    <p ng-if="annotation.id !== editedAnnotation;annotation.anatomy">
+                                    <p ng-if="annotation.anatomy" ng-show="annotation.id !== editedAnnotation;">
                                         <strong>Anatomy</strong><br>
                                         <span ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" class="comment">{{annotation.anatomy}}</span>
                                     </p>
@@ -128,7 +130,7 @@
                             <!-- Annotation Edit Form -->
                             <div class="row">
                                 <div class="col-md-12">
-                                    <form ng-if="annotation.id === editedAnnotation">
+                                    <form ng-show="annotation.id === editedAnnotation">
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <label>Description</label>
@@ -161,17 +163,17 @@
                         <div class="col-md-2">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <button ng-if="annotation.id !== editedAnnotation" ng-click="editAnnotation(annotation);" title="Edit Annotation" class="btn btn-sm btn-primary pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-pencil"></span></button>
+                                    <button ng-show="annotation.id !== editedAnnotation" ng-click="editAnnotation(annotation);" title="Edit Annotation" class="btn btn-sm btn-primary pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-pencil"></span></button>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <button ng-if="annotation.id !== editedAnnotation" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" title="Highlight Annotation" class="btn btn-sm btn-warning pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-search"></span></button>
+                                    <button ng-show="annotation.id !== editedAnnotation" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" title="Highlight Annotation" class="btn btn-sm btn-warning pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-search"></span></button>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <button ng-if="annotation.id !== editedAnnotation" ng-click="deleteAnnotation(annotation);" title="Delete Annotation" class="btn btn-sm btn-danger pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-trash"></span></button>
+                                    <button ng-show="annotation.id !== editedAnnotation" ng-click="deleteAnnotation(annotation);" title="Delete Annotation" class="btn btn-sm btn-danger pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-trash"></span></button>
                                 </div>
                             </div>
                         </div>
