@@ -1,3 +1,5 @@
+var chaisePage = require('../chaise.page.js');
+
 // Each suite should begin with a `describe`
 describe('In the Chaise search app,', function () {
     var EC = protractor.ExpectedConditions;
@@ -41,11 +43,6 @@ describe('In the Chaise search app,', function () {
             var spinner = element(by.id('spinner'));
             expect(spinner.isDisplayed()).toBe(true);
             done();
-            // Browser waits (up to 500ms) for spinner to become visible before continuing
-            //browser.wait(EC.visibilityOf(spinner), 10000).then(function () {
-            //    expect(spinner.isDisplayed()).toBe(true);
-            //    done();
-            //});
         });
 
         it('should open the initial sidebar', function (done) {
@@ -63,15 +60,17 @@ describe('In the Chaise search app,', function () {
 
     describe('the initial attributes selection sidebar,', function () {
         it('should have > 1 visible attributes to choose from', function (done) {
-            var facets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope'));
-            facets.then(function () {
-                expect(facets.count()).toBeGreaterThan(0);
-            });
-            var hiddenFacets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope.ng-hide'));
-            hiddenFacets.then(function () {
-                expect(hiddenFacets.count()).toBeLessThan(facets.count());
-                done();
-            });
+            //var facets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope'));
+            //facets.then(function () {
+            //    expect(facets.count()).toBeGreaterThan(0);
+            //});
+            //var hiddenFacets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope.ng-hide'));
+            //hiddenFacets.then(function () {
+            //    expect(hiddenFacets.count()).toBeLessThan(facets.count());
+            //    done();
+            //});
+            expect(chaisePage.sidebar.sidebarAttrsDisplayed.count()).toBeGreaterThan(0);
+            done();
         });
 
         describe('sidebar header title,', function () {
