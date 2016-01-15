@@ -263,6 +263,16 @@ openSeadragonApp.filter('trusted', ['$sce', function($sce) {
     };
 }]);
 
+// Capitalize: A filter that capitalizes the first character for each word in a string ================================================================================================
+openSeadragonApp.filter('capitalize', function() {
+    return function(input, all) {
+        var regex = (all) ? /([^\W_]+[^\s-]*) */g : /([^\W_]+[^\s-]*)/;
+        return (!!input) ? input.replace(regex, function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        }) : '';
+    }
+});
+
 // Refreshes page when the window's hash changes
 window.onhashchange = function() {
     if (window.location.hash != '#undefined') {
