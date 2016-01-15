@@ -60,32 +60,22 @@ describe('In the Chaise search app,', function () {
 
     describe('the initial attributes selection sidebar,', function () {
         it('should have > 1 visible attributes to choose from', function (done) {
-            //var facets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope'));
-            //facets.then(function () {
-            //    expect(facets.count()).toBeGreaterThan(0);
-            //});
-            //var hiddenFacets = element.all(by.css('#sidebar ul.sidebar-nav li.ng-scope.ng-hide'));
-            //hiddenFacets.then(function () {
-            //    expect(hiddenFacets.count()).toBeLessThan(facets.count());
-            //    done();
-            //});
             expect(chaisePage.sidebar.sidebarAttrsDisplayed.count()).toBeGreaterThan(0);
             done();
         });
 
         describe('sidebar header title,', function () {
             var initSidebarHeaderText = 'CHOOSE ATTRIBUTES:';
-            var navContainer = element(by.css('#navcontainer'));
-            var sidebarHeader = navContainer.element(by.css('h4'));
+            var sidebarHeader = chaisePage.sidebar.sidebarHeader;
             it('should show correctly when initialized', function (done) {
                 expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
                 done();
             });
 
             var expectedAttr = 'Data Type';
-            var dataTypeAttr = element(by.findSidebarAttr(expectedAttr));
-            var editFilter = element(by.css('#editfilter'));
-            var sidebarAttrTitle = editFilter.element(by.css('.sidebar-title'));
+            var dataTypeAttr = chaisePage.sidebar.findSidebarAttrByName(expectedAttr);
+            var sidebarAttrTitle = chaisePage.editFilter.sidebarHeader;
+
             it('should change correctly when one attribute is chosen', function (done) {
                 dataTypeAttr.click().then(function () {
                     expect(sidebarAttrTitle.getText()).toBe(expectedAttr.toUpperCase());
@@ -94,7 +84,7 @@ describe('In the Chaise search app,', function () {
             });
 
             it('should change back to \'CHOOSE ATTRIBUTES\' when clicking GoBack icon', function (done) {
-                var sidebarBack = editFilter.$('.sidebar-back');
+                var sidebarBack = chaisePage.editFilter.sidebarHeader;
                 sidebarBack.click().then(function () {
                     expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
                     done();
@@ -105,9 +95,8 @@ describe('In the Chaise search app,', function () {
         describe('sidebar attribute,', function () {
             var somiteCount = 'Somite Count';
             var investigator = 'Investigator';
-            var navContainer = element(by.css('#navcontainer'));
-            var somiteCountAttr = element(by.findSidebarAttr(somiteCount));
-            var investigatorAttr = element(by.findSidebarAttr(investigator));
+            var somiteCountAttr = chaisePage.sidebar.findSidebarAttrByName(somiteCount);
+            var investigatorAttr = chaisePage.sidebar.findSidebarAttrByName(investigator);
 
             it('Somite Count attribute should be displayed', function (done) {
                 expect(somiteCountAttr.isDisplayed()).toBe(true);
@@ -120,15 +109,11 @@ describe('In the Chaise search app,', function () {
             });
 
             it('should show Investigator and hide Somite Count after checking and unchecking', function (done) {
-                var viewAllAttributes = "View all attributes";
-                var viewAll = navContainer.element(by.cssContainingText('.field-toggle.view-attr', viewAllAttributes));
-                var moreFilters = element(by.css('#morefilters'));
-                var investigatorCheckbox = moreFilters.element(by.cssContainingText('.field-enable.ng-scope', investigator)).$('input');
-                var somiteCountCheckbox = moreFilters.element(by.cssContainingText('.field-enable.ng-scope', somiteCount)).$('input');
-                //var investigatorCheckbox = element(by.findMoreFilterAttr(investigator));
-                //var somiteCountCheckbox = element(by.findMoreFilterAttr(somiteCountAttr));
+                var viewAll = chaisePage.sidebar.viewMoreBtn;
+                var investigatorCheckbox = chaisePage.moreFilter.findMorefilterAttrByName(investigator);
+                var somiteCountCheckbox = chaisePage.moreFilter.findMorefilterAttrByName(somiteCount);
 
-                var sidebarHeader = moreFilters.element(by.css('.sidebar-header'));
+                var sidebarHeader = chaisePage.moreFilter.sidebarHeader;
                 //click to show all attributes' checkboxs
                 viewAll.click();
                 investigatorCheckbox.click();
