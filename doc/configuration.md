@@ -1,9 +1,9 @@
 # Configuration
 
-**Chaise** is using a set of default configuration parameters. You can overwrite them through the _chaise-config.js_ file and/or the search parameters in the URL.
-The URL search parameters take precedence over the _chaise-config.js_ parameters, which at their turn take precedence over the default ones.
+**Chaise** is using a set of default configuration parameters. You can set your own parameters through the _chaise-config-sample.js_ file and/or the search parameters in the URL. After you've written your own parameters, rename the file to _chaise-config.js_. The URL search parameters take precedence over the _chaise-config.js_ parameters, which at their turn take precedence over the default ones.
 
-The below table explains the usage of them:
+
+The below table explains the usage of the default parameters:
 
 | Parameter | Values | Default Value | chaise-config.js | URL | Remarks |
 |-----------|--------|---------------|------------------|-----|---------|

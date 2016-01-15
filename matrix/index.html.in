@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chaise :: Dataset Matrix</title>
+  %ASSETS%
+</head>
+<body>
+	<!-- Overlay for fixed sidebar -->
+	<div class="sidebar-overlay"></div>
+	<div class="container-fluid">
+		<!-- Row 1: Logo and Main navigation -->
+		<div id="ermrestHeader"></div>
+	</div>
+	<div class="container">
+		<!-- Row 1: Logo and Main navigation -->
+    <div class="row">
+  		<div id="main-content" class="col-md-12" ng-app="ermrestApp">
+  			%TEMPLATES%
+  		</div>
+    </div>
+	</div>
+	<!-- Row 3: Footer -->
+	<div id="ermrestFooter"></div>
+</body>
+</html>

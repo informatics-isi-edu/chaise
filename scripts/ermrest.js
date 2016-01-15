@@ -56,7 +56,7 @@ var viewer3dFileTypes = ['image/x.nifti'];
 
 var sliderPresentation = [ 'numeric', 'float4', 'int8', 'int4', 'int2', 'float8', 'serial4', 'serial8' ];
 
-var searchBoxPresentation = [ 'text' ];
+var searchBoxPresentation = [ 'text', 'jsonb' ];
 var checkBoxPresentation = [ 'boolean' ];
 
 var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
@@ -771,12 +771,13 @@ function initModels(options, successCallback) {
 function updateCount(options, successCallback) {
 	var tables = [options['table']].concat(association_tables_names);
 	var alertObject = {'display': true};
+	var sentRequest = false;
 	$.each(tables, function(i, table) {
 		if (!hasTableFacetsHidden(table)) {
 			var box = options['box'][table];
 			var urlPrefix = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/';
 			$.each(box, function(col, value) {
-				if (!hasColumnFacetHidden(table, col) && !isColumnFacetOnDemand(options, table, col)) {
+				if (!hasColumnFacetHidden(table, col) && !isColumnFacetOnDemand(options, table, col) && !hasAnnotation(table, col, 'hidden')) {
 					box[col]['ready'] = false;
 				}
 			});
@@ -804,6 +805,7 @@ function updateCount(options, successCallback) {
 					param['col'] = col;
 					param['alert'] = alertObject;
 					param['successCallback'] = successCallback;
+					sentRequest = true;
 					ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateCount, errorErmrest, param);
 				} else if (isColumnFacetOnDemand(options, table, col)) {
 					box[col]['count'] = col + ' (1)';
@@ -812,6 +814,9 @@ function updateCount(options, successCallback) {
 			});
 		}
 	});
+	if (!sentRequest) {
+		successCallback();
+	}
 }
 
 function successUpdateCount(data, textStatus, jqXHR, param) {
@@ -831,7 +836,7 @@ function successUpdateCount(data, textStatus, jqXHR, param) {
 		if (!hasTableFacetsHidden(table)) {
 			var box = param['options']['box'][table];
 			$.each(box, function(col, value) {
-				if (!hasColumnFacetHidden(table, col) && !isColumnFacetOnDemand(options, table, col)) {
+				if (!hasColumnFacetHidden(table, col) && !isColumnFacetOnDemand(options, table, col) && !hasAnnotation(table, col, 'hidden')) {
 					if (!value['ready']) {
 						ready = false;
 						return false;
@@ -2047,8 +2052,10 @@ function setAssociationTables(table_name) {
 						if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_MAP_URI] != null && column_definition['annotations'][COLUMNS_MAP_URI]['display'] != null) {
 							display = column_definition['annotations'][COLUMNS_MAP_URI]['display'];
 						}
-						columns.push({'name': column_definition['name'],
-							'display': display});
+						if (column_definition['annotations'] == null || column_definition['annotations'][COLUMNS_LIST_URI] == null || !column_definition['annotations'][COLUMNS_LIST_URI].contains('hidden')) {
+							columns.push({'name': column_definition['name'],
+								'display': display});
+						}
 					}
 				});
 				if (columns.length > 0) {
