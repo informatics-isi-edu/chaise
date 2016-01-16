@@ -304,7 +304,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
   this.removeFilter = function removeFilter(event, facet) {
   	//event.stopPropagation();
   	event.preventDefault();
-  	if ($scope.if_type(facet, 'slider')) {
+  	if ($scope.if_type(facet, 'slider') || $scope.if_type(facet, 'date')) {
   		$scope.FacetsData.box[facet['table']][facet['name']]['min'] = $scope.FacetsData.box[facet['table']][facet['name']]['floor'];
   		$scope.FacetsData.box[facet['table']][facet['name']]['max'] = $scope.FacetsData.box[facet['table']][facet['name']]['ceil'];
   		$scope.delay_slider(facet);
