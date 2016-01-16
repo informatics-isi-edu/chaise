@@ -48,7 +48,6 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
         if (annotation.anatomy === "") {
             annotation.anatomy = null;
         }
-
         annotation = [{
             "image_id": self.entityId,
             "anatomy": annotation.anatomy,
@@ -159,7 +158,6 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
         ///////////////////////////////////////////////////////////////////////////////////
         // Initialize OpenSeadragon with the uri
         $scope.viewerSource = uri;
-        console.log($scope.annotations);
     });
 
     // Listen for events from OpenSeadragon/iframe
@@ -256,6 +254,34 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
         $scope.viewer.postMessage({messageType: 'deleteAnnotation', content: annotation}, window.location.origin);
         ERMrestService.deleteAnnotation(annotation);
     };
+
+    // Returns true if an item (i.e. annotation) contains a value that contains the query
+    $scope.filterAnnotations = function filterAnnotations(query) {
+        return function(annotation) {
+            if (!query) {
+                // If nothing in the query, then the annotation is considered a match
+                return true;
+            } else {
+                query = query.toLowerCase();
+
+                // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
+                if (!annotation.anatomy) {
+                    annotation.anatomy = 'No Anatomy';
+                }
+                // An array of keys in annotation that we want to filter through
+                var keys = ['author', 'anatomy', 'created', 'description'];
+                for (var i = 0, len = keys.length; i < len; i++) {
+                    if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
+                        return true;
+                    }
+                }
+                // At the end, set the "anatomy" key back to null
+                if (annotation.anatomy === 'No Anatomy') {
+                    annotation.anatomy = null;
+                }
+            }
+        }
+    }
 }]);
 
 
