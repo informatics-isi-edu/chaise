@@ -19,7 +19,7 @@
             padding: 10px;
             margin: 15px 0;
             border-radius: 3px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
         }
 
         .annotation.highlighted {
@@ -62,7 +62,7 @@
                     </div>
                 </div>
                 <!-- Annotation Creation Form -->
-                <form ng-show="createMode" class="annotation" style="border-left: 5px solid #5cb85c;">
+                <form ng-show="createMode" id="create-annotation-form" class="annotation" style="border-left: 5px solid #5cb85c;">
                         <div class="row">
                             <div class="col-md-10">
                                 <span class="h4">New Annotation</span>
@@ -74,11 +74,11 @@
                         <br>
                         <div class="row">
                             <div class="col-md-12">
-                                <textarea ng-model="newAnnotation.description" class="form-control input-sm" rows="3" placeholder="Write annotation text here"></textarea><br>
+                                <textarea ng-model="newAnnotation.description" class="form-control input-sm description-field" rows="3" placeholder="Write annotation text here"></textarea><br>
                                 <select ng-model="newAnnotation.anatomy" class="form-control input-sm">
                                     <option ng-disabled="true" value="">Select an anatomy term</option>
                                     <option value="">No Anatomy</option>
-                                    <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
+                                    <option ng-repeat="anatomy in anatomies track by $index">{{anatomy | capitalize}}</option>
                                 </select>
                             </div>
                         </div>
@@ -90,7 +90,7 @@
                         </div>
                     </form>
                 <!-- Annotations -->
-                <div ng-repeat="annotation in annotations | orderBy:'-created' | filter:query as results track by annotation.id" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation || annotation.id === editedAnnotation}">
+                <div ng-repeat="annotation in annotations | orderBy:'-created' | filter:filterAnnotations(query, ['description', 'anatomy', 'author', 'created']) as results track by annotation.id" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation || annotation.id === editedAnnotation}">
                     <!-- Annotation Display Card -->
                     <div ng-show="annotation.id !== editedAnnotation">
                         <div class="row">
@@ -122,18 +122,18 @@
                         <!-- Annotation Date -->
                         <div class="row">
                             <div class="col-md-12">
-                                <small>{{annotation.author | capitalize}} &mdash; {{annotation.created | date: 'MMM d, y'}}</small>
+                                <small>{{annotation.author | capitalize}} &mdash; {{annotation.created}}</small>
                             </div>
                         </div>
                     </div>
                     <!-- Annotation Edit Form -->
-                    <form ng-if="annotation.id === editedAnnotation">
+                    <form ng-if="annotation.id === editedAnnotation" id="edit-annotation-form">
                         <div class="row">
                             <!-- Edit Form: Annotation Anatomy -->
                             <div class="col-md-8 annotation-anatomy-text">
                                 <select ng-model="annotation.anatomy" class="form-control input-sm">
                                     <option ng-show="annotation.anatomy" value="">No Anatomy</option>
-                                    <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
+                                    <option ng-repeat="anatomy in anatomies track by $index">{{anatomy | capitalize}}</option>
                                 </select>
                             </div>
                             <div class="col-md-2 col-md-offset-2">

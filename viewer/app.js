@@ -261,25 +261,26 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
         ERMrestService.deleteAnnotation(annotation);
     };
 
-    // Returns true if an item (i.e. annotation) contains a value that contains the query
-    $scope.filterAnnotations = function filterAnnotations(query) {
+    // Returns true if at least one of a specified subset of an object's keys contains a value that contains the query
+    // Arguments: query = the string to find matches; keys = an array of object keys to filter through on the object
+    $scope.filterAnnotations = function filterAnnotations(query, keys) {
         return function(annotation) {
             if (!query) {
                 // If query is "" or undefined, then the annotation is considered a match
                 return true;
             } else {
                 query = query.toLowerCase();
-
                 // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
                 if (!annotation.anatomy) {
                     annotation.anatomy = 'No Anatomy';
                 }
-                // An array of keys in annotation that we want to filter through
-                // (We don't want to filter through all keys because not all keys are visible in the UI)
-                var keys = ['author', 'anatomy', 'created', 'description'];
-                for (var i = 0, len = keys.length; i < len; i++) {
-                    if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
-                        return true;
+                // Loop through the array to find matches
+                var numKeys = keys.length;
+                if (numKeys > 0) {
+                    for (var i = 0; i < numKeys; i++) {
+                        if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
+                            return true;
+                        }
                     }
                 }
                 // Set the "anatomy" key back to null if it was changed to "No Anatomy" earlier
