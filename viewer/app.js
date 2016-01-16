@@ -181,6 +181,7 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
                     $scope.$apply(function() {
                         $scope.createMode = true;
                     });
+                    $scope.focusForm();
                     break;
                 default:
                     console.log('Invalid message type. No action performed.');
@@ -201,6 +202,10 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
     // Activates the drawing selector tool in Annotorious
     $scope.drawAnnotation = function drawAnnotation() {
         $scope.viewer.postMessage({messageType: 'drawAnnotation'}, window.location.origin);
+    };
+
+    $scope.focusForm = function focusForm() {
+        document.getElementById('create-annotation-form').getElementsByClassName('description-field')[0].focus();
     };
 
     // Stop creating an annotation: Hides the forms used to create an annotation in Chaise and Annotorious
