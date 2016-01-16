@@ -136,8 +136,8 @@ openSeadragonApp.service('ERMrestService', ['ermrestClientFactory', '$http', fun
 
 // MainController: An Angular controller to update the view ===========================================================================================================================
 openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestService', function($scope, $window, ERMrestService) {
-    $scope.annotations = ERMrestService.getAnnotations();
-    $scope.anatomies = ERMrestService.getAnatomies(); // An array of elements, where each element is a string of an anatomy term
+    $scope.annotations = ERMrestService.getAnnotations(); // An array of annotation objects
+    $scope.anatomies = ERMrestService.getAnatomies(); // An array of anatomy terms
     $scope.viewerSource = null; // The source URL of the iframe/viewer
     $scope.viewerReady = false; // True if viewer (OpenSeadragon/Annotorious) has finished setup
     $scope.viewer = null; // A reference to the iframe window
@@ -147,7 +147,7 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
     $scope.createMode = false; // True if user is currently creating a new annotation
     $scope.newAnnotation = null; // Holds the data for a new annotation as it's being created
 
-    $scope.editedAnnotation = null; // Track which one is being edited right now; used to show/hide the right UI elements depending on which one is being edited.
+    $scope.editedAnnotation = null; // Track which annotation is being edited right now; used to show/hide the right UI elements depending on which one is being edited.
     $scope.originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
 
     // Fetch uri from image table to load OpenSeadragon
@@ -204,6 +204,7 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
         $scope.viewer.postMessage({messageType: 'drawAnnotation'}, window.location.origin);
     };
 
+    // Focuses the description field when the annotation creation form is activated
     $scope.focusForm = function focusForm() {
         document.getElementById('create-annotation-form').getElementsByClassName('description-field')[0].focus();
     };
@@ -264,7 +265,7 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
     $scope.filterAnnotations = function filterAnnotations(query) {
         return function(annotation) {
             if (!query) {
-                // If nothing in the query, then the annotation is considered a match
+                // If query is "" or undefined, then the annotation is considered a match
                 return true;
             } else {
                 query = query.toLowerCase();
@@ -274,13 +275,14 @@ openSeadragonApp.controller('MainController', ['$scope', '$window', 'ERMrestServ
                     annotation.anatomy = 'No Anatomy';
                 }
                 // An array of keys in annotation that we want to filter through
+                // (We don't want to filter through all keys because not all keys are visible in the UI)
                 var keys = ['author', 'anatomy', 'created', 'description'];
                 for (var i = 0, len = keys.length; i < len; i++) {
                     if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
                         return true;
                     }
                 }
-                // At the end, set the "anatomy" key back to null
+                // Set the "anatomy" key back to null if it was changed to "No Anatomy" earlier
                 if (annotation.anatomy === 'No Anatomy') {
                     annotation.anatomy = null;
                 }
