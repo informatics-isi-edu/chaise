@@ -128,8 +128,37 @@ describe('In the Chaise 01-search app,', function () {
             });
         });
 
-        it('should click on \'Experiment Type\' Cancel icon', function(done) {
+
+        var externalReferenceText = 'External Reference';
+        it('should go back and check \'Genome Browser reference\' in \'External Reference\'', function(done) {
+            var goback = chaisePage.editFilter.sidebarHeader;
+            goback.click();
+            var externalArr = chaisePage.sidebar.findSidebarAttrsByName(externalReferenceText);
+            var external = externalArr.filter(function(ele) {
+                return ele.getText().then(function(t) {
+                    return t === externalReferenceText;
+                });
+            }).first();
+            expect(external.isDisplayed()).toBe(true);
+            var genomeAttr = chaisePage.editFilter.findEditfilterAttrByName('Genome Browser reference');
+            external.click();
+            expect(genomeAttr.isDisplayed()).toBe(true);
+            genomeAttr.click();
+            //goback
+            goback.click();
+            done();
+        });
+
+        it('should show \'External Reference\' filter', function(done) {
+            var externalFilter = chaisePage.resultContent.filter.findFilterWrapperByName(externalReferenceText);
+            expect(externalFilter.isDisplayed()).toBe(true);
+            done();
+        });
+
+        it('should uncheck \'RNA expression(microArray)\' click on \'Experiment Type\' Cancel icon', function(done) {
             var cancelBtn = experimentTypeWrapper.element(by.css('.filter-link-cancel'));
+            var experimentTypeAttr = chaisePage.sidebar.findSidebarAttrByName(experimentType);
+            experimentTypeAttr.click();
             var microArrayLi = chaisePage.editFilter.findEditfilterLiByName(microArrayText);
             var checkbox = microArrayLi.element(by.css('div[ng-click="sideBar.checkUncheck($event,value)"'));
             expect(checkbox.getAttribute('class')).toMatch('toggle');

@@ -14,6 +14,9 @@ function chaisePage() {
         sidebarAttrsDisplayed: element.all(by.css(sidebarId + ' ul.sidebar-nav li.ng-scope:not(.ng-hide)')),
         sidebarHeader: element(by.css(sidebarId + ' #navcontainer h4')),
         viewMoreBtn: element(by.cssContainingText(sidebarId + ' li a', 'View all attributes')),
+        findSidebarAttrsByName: function (attrName) {
+            return element.all(by.cssContainingText(sidebarId + ' ul li a', attrName));
+        },
         findSidebarAttrByName: function (attrName) {
             return element(by.cssContainingText(sidebarId + ' ul li a', attrName));
         },
@@ -48,6 +51,8 @@ function chaisePage() {
                 return element(by.cssContainingText('#filter div.filter-item.ng-scope:not(.ng-hide)', attrName));
             },
         },
+    };
+    this.recordPage = {
 
     };
 };
