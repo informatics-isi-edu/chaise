@@ -4,32 +4,6 @@ var chaisePage = require('../chaise.page.js');
 describe('In the Chaise search app,', function () {
     var EC = protractor.ExpectedConditions;
 
-    //default sidebar view
-    var findSidebarAttr = 'findSidebarAttr';
-    by.addLocator(findSidebarAttr, function (attributeName, opt_parentElement) {
-        var using = opt_parentElement || document;
-        var attributeAnchors = using.querySelectorAll('#sidebar #navcontainer > ul > li > a');
-        for (var i = 0; i < attributeAnchors.length; i++) {
-            var ele = attributeAnchors[i];
-            if (ele.textContent.trim() === attributeName) {
-                return ele;
-            }
-        }
-    });
-
-    //click 'View All Attributes' to show #morefilters
-    var findMoreFilterAttr = 'findMoreFilterAttr';
-    by.addLocator(findMoreFilterAttr, function (attributeName, opt_parentElement) {
-        var using = opt_parentElement || document;
-        var filterLabels = using.querySelectorAll('#morefilters div[ng-repeat="facet in FacetsData.facets"] label');
-        for (var i = 0; i < filterLabels.length; i++) {
-            var ele = filterLabels[i];
-            if (ele.textContent.trim() === attributeName) {
-                return ele;
-            }
-        }
-    });
-
     describe('on load,', function () {
         beforeAll(function () {
             browser.get('');
@@ -180,73 +154,56 @@ describe('In the Chaise search app,', function () {
     var detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
     describe('Result content area ', function () {
         it('should show > 0 results', function (done) {
-            var allResults = element.all(by.repeater('row in FacetsData.ermrestData'));
+            var allResultRows = chaisePage.resultContent.resultAllRows;
             //choose the second #results_tally
-            var resultTally = element.all(by.css('#results_tally')).get(1);
-            var totalResults = resultTally.element(by.binding("FacetsData.totalServerItems"));
-            allResults.count().then(function (allResultsNum) {
-                totalResults.getText().then(function (totalResultsText) {
-                    expect(totalResultsText).toBeGreaterThan(0);
-                    expect(allResultsNum).toBeGreaterThan(0);
-                    done();
+            var totalResultTallyShows = chaisePage.resultContent.resultTallySum;
+            expect(allResultRows.count()).toBeGreaterThan(0);
+            totalResultTallyShows.getText().then(function(txt) {
+                expect(parseInt(txt)).toBeGreaterThan(0);
+                done();
+            });
+        });
+
+        //input is now "RNA"
+        var experimentType = 'Experiment Type';
+        var microArrayText = 'RNA expression (microarray)';
+        var experimentTypeWrapper = chaisePage.resultContent.filter.findFilterWrapperByName(experimentType);
+        var experimentTypeSpans = experimentTypeWrapper.all(by.css('span.filter-item-value span'));
+        it('should show \'Clear All Filters\' button and \'Experiment Type\' filter', function (done) {
+            var clearAllFilterBtn = chaisePage.resultContent.filter.clearAllBtn;
+            expect(clearAllFilterBtn.isDisplayed()).toBe(true);
+            var displayedFilters = chaisePage.resultContent.filter.displayedFilters;
+            //now only "Clear All Filters" and "Experiment Type" are shown (so 2 elements are expected)
+            expect(experimentTypeWrapper.isDisplayed()).toBe(true);
+            expect(displayedFilters.count()).toBe(2);
+            expect(experimentTypeSpans.count()).toBe(1);
+            done();
+        });
+
+        var miRNAText = 'miRNA expression (RNA-Seq)';
+        it('should show click \'miRNA expression\' in \'Experiment Type\'', function(done) {
+            var filterLabel = chaisePage.editFilter.findEditfilterAttrByName(miRNAText);
+            browser.wait(EC.visibilityOf(filterLabel), 500).then(function () {
+                filterLabel.click().then(function () {
+                    setTimeout(function () {
+                        done();
+                    }, 5000);
                 });
             });
         });
 
-        by.addLocator('findFilterAttrWrapper', function (filterAttribute, opt_parentElement) {
-            var using = opt_parentElement || document;
-            var attrs = using.querySelectorAll('#filter .filter-item:not(.ng-hide)');
-            return Array.prototype.filter.call(attrs, function (ele) {
-                var span = ele.querySelector('span');
-                return span.textContent.trim() === filterAttribute;
+        it('should show \'miRNA expression\' in \'Experiment Type\' filter span after checking \'miRNA\'', function(done) {
+            //the span now contains 'miRNA expression (RNA-Seq)' and 'RNA expression (microarray)'
+            var miRNASpan = experimentTypeWrapper.element(by.cssContainingText('span.ng-binding.ng-scope', miRNAText));
+            miRNASpan.getText().then(function(txt) {
+                expect(txt.indexOf(miRNAText) !== -1).toBe(true);
+                done();
             });
         });
 
-        var filterAttrCheckedValues = 'filterAttrCheckedValues';
-        by.addLocator(filterAttrCheckedValues, function (filterAttr, opt_parentElement) {
-            var using = opt_parentElement || document;
-            var attrs = using.querySelectorAll('#filter .filter-item:not(.ng-hide)');
-            for (var i = 0; i < attrs.length; i++) {
-                ele = attrs[i];
-                var span = ele.querySelector('span');
-                if (span.textContent.trim() === filterAttr) {
-                    return ele.querySelector('span[ng-attr-title="{{facetResults.displayTitle(facet)}}"]');
-                }
-            }
-        });
 
-        //input is now "RNA"
-        it('should show \'Clear All Filters\' button and \'RNA expression\' filter', function (done) {
-            var clearAllFilterText = 'Clear All Filters';
-            var experimentType = 'Experiment Type';
-            var microArrayText = 'RNA expression (microarray)';
-            var filterDiv = element(by.css('#filter'));
-            var clearAllFilterBtn = filterDiv.element(by.cssContainingText('a', clearAllFilterText));
-            expect(clearAllFilterBtn.isDisplayed()).toBe(true);
-
-            //how to select element excluding attributes
-            var hasNoHide = filterDiv.all(by.css('.filter-item.ng-scope:not(.ng-hide)'));
-            //now only "Clear All Filters" and "Experiment Type" are shown (so 2 elements are expected)
-            expect(hasNoHide.count()).toBe(2);
-            //var experimentTypeWrapper = element(by.findFilterAttrWrapper(experimentType));
-            //var experimentTypeValueSpan = experimentTypeWrapper.element(by.css('span.filter-item-value.ng-scope'));
-            var experimentTypeValueSpan = element(by.filterAttrCheckedValues(experimentType));
-            var experimentTypeValues = experimentTypeValueSpan.all(by.css('span'));
-            //since now only one 'RNA expression (microarray)' is selected
-            expect(experimentTypeValues.count()).toBe(1);
-            expect(experimentTypeValues.first().getText()).toBe(microArrayText);
-
-            it('should show more filterValues in \'RNA expression\' filter when more filterValues are checked', function (done) {
-
-
-
-            });
-            done();
-        });
-
-
+        var titleSpan = chaisePage.resultContent.resultAllRows.first().$('span.panel-title');
         it('should get the entity title and it\'s not empty', function (done) {
-            var titleSpan = element.all(by.css('span.panel-title.ng-binding')).first();
             titleSpan.getText().then(function (text) {
                 //get the entity title in results list
                 expectedEntityTitle = text;
@@ -257,8 +214,6 @@ describe('In the Chaise search app,', function () {
 
         detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
         it('should go to the correct URL when clicked', function (done) {
-            //var titleSpan = element(by.cssContainingText('span.panel-title', titleTxt));
-            var titleSpan = element.all(by.css('span.panel-title.ng-binding')).first();
             titleSpan.click();
             browser.rootEl = "#recordApp";
             // 'browser.ignoreSynchronization = true' tells Protractor not to sync(wait for Angular's finishing async operations).

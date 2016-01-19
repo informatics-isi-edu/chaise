@@ -34,6 +34,19 @@ function chaisePage() {
             return element(by.cssContainingText(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
         },
     };
+    this.resultContent = {
+        resultAllRows: element.all(by.repeater('row in FacetsData.ermrestData')),
+        resultTallySum: element.all(by.css('#results_tally')).get(1).element(by.binding("FacetsData.totalServerItems")),
+        filter: {
+            clearAllBtn: element(by.cssContainingText('#filter div.filter-item.ng-scope > a', 'Clear All Filters')),
+            //including the clearAllFilterBtn
+            displayedFilters: element.all(by.css('#filter div.filter-item.ng-scope:not(.ng-hide)')),
+            findFilterWrapperByName: function(attrName) {
+                return element(by.cssContainingText('#filter div.filter-item.ng-scope:not(.ng-hide)', attrName));
+            },
+        },
+
+    };
 };
 
 module.exports = new chaisePage();
