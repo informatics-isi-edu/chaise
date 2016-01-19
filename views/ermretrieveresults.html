@@ -71,9 +71,11 @@
 					</div>
 					<div class="row" id="filterarea">
 						<div id="filter" class="col-md-12">
+						<div ng-show="false">
 							<div class="jumbotron text-center" ng-show="!facetResults.hasSelectedFacets()">
 								<h1>{{FacetsData.selectedEntity.display}}</h1>
 								<p class="lead">Use the sidebar to the right to select search attributes.</p>
+						  </div>
 						  </div>
 							<div class="filter-container">
 								<div class="filter-item" ng-if="facetResults.hasSelectedFacets()">

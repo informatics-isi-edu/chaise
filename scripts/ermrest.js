@@ -517,6 +517,10 @@ function getTableColumns(options, successCallback) {
 			PRIMARY_KEY.push(encodeSafeURIComponent(col['name']));
 		});
 	}
+	
+	if (display_columns['title'] == null && display_columns['thumbnail'].length == 0) {
+		display_columns['title'] = decodeURIComponent(PRIMARY_KEY[0]);
+	}
 
 	var table = options['table'];
 	options['box'][table] = {};
@@ -650,6 +654,7 @@ function successTotalCount(data, textStatus, jqXHR, param) {
 }
 
 function initModels(options, successCallback) {
+	var allAttributes = (chaiseConfig['showAllAttributes'] ? true : false);
 	var table = options['table'];
 	var box = options['box'][table];
 	var colsDescr = options['colsDescr'][options['table']];
@@ -671,8 +676,9 @@ function initModels(options, successCallback) {
 	var extraFacets = [];
 	$.each(options['score'], function(i,col) {
 		if ((topN[options['table']] == null || !topN[options['table']].contains(col['name'])) && !hasAnnotation(options['table'], col['name'], 'hidden') && !hasAnnotation(options['table'], col['name'], 'thumbnail')) {
-			if (j++ < 10) {
+			if (allAttributes || j < 10) {
 				extraFacets.push(col['name']);
+				j++;
 			} else {
 				return false;
 			}
@@ -753,7 +759,7 @@ function initModels(options, successCallback) {
 	});
 	var index = 10 - facetOrder - topCount;
 	var table = options['table'];
-	if (index > 0) {
+	if (!allAttributes && index > 0) {
 		$.each(extraFacets, function(i, col) {
 			options['chooseColumns'][table][extraFacets[i]] = false;
 			options['searchFilterValue'][table][extraFacets[i]] = '';
