@@ -201,6 +201,26 @@ describe('In the Chaise search app,', function () {
             });
         });
 
+        it('should click on \'Experiment Type\' Cancel icon', function(done) {
+            var cancelBtn = experimentTypeWrapper.element(by.css('.filter-link-cancel'));
+            var microArrayLi = chaisePage.editFilter.findEditfilterLiByName(microArrayText);
+            var checkbox = microArrayLi.element(by.css('div[ng-click="sideBar.checkUncheck($event,value)"'));
+            expect(checkbox.getAttribute('class')).toMatch('toggle');
+            expect(checkbox.getAttribute('class')).not.toMatch('disabled');
+            cancelBtn.click().then(function() {
+                expect(checkbox.getAttribute('class')).toMatch('toggle disabled');
+                done();
+            });
+        });
+
+        it('should click on \'RNA expression (microarray)\'', function(done) {
+            var microArrayLabel = chaisePage.editFilter.findEditfilterAttrByName(microArrayText);
+            microArrayLabel.click().then(function() {
+                setTimeout(function() {
+                    done();
+                }, 4000);
+            });
+        });
 
         var titleSpan = chaisePage.resultContent.resultAllRows.first().$('span.panel-title');
         it('should get the entity title and it\'s not empty', function (done) {

@@ -33,6 +33,9 @@ function chaisePage() {
         findEditfilterAttrByName: function (attrName) {
             return element(by.cssContainingText(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
         },
+        findEditfilterLiByName: function (attrName) {
+            return element(by.cssContainingText(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
+        },
     };
     this.resultContent = {
         resultAllRows: element.all(by.repeater('row in FacetsData.ermrestData')),
