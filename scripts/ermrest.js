@@ -62,7 +62,7 @@ var checkBoxPresentation = [ 'boolean' ];
 var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
 
 var unsortableColumns = [];
-var suppressError = true;
+var suppressError = false;
 var suppressBookmark = false;
 var facetPolicy = null;
 var assignBookmark = false;
