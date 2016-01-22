@@ -34,10 +34,11 @@
     }])
 
 
-    .run(['$q', '$window', 'context', 'image', 'annotations', 'anatomies', 'ermrestClientFactory', function run($q, $window, context, image, annotations, anatomies, ermrestClientFactory) {
+    .run(['$window', 'context', 'image', 'annotations', 'anatomies', 'ermrestClientFactory', function run($window, context, image, annotations, anatomies, ermrestClientFactory) {
+        var origin = window.location.origin;
+        var annotoriousReady = false;
         var client = ermrestClientFactory.getClient(context.serviceURL);
         var catalog = client.getCatalog(context.catalogID);
-        var deferredAnnotations = $q.defer();
         catalog.introspect().then(function success(schemas) {
             var schema = schemas[context.schemaName];
             if (schema) {
@@ -45,12 +46,20 @@
                 var filteredTable = table.getFilteredTable(['id=' + context.imageID]);
                 if (filteredTable) {
                     filteredTable.getEntities().then(function success(_entities) {
+                        // Splicing in my ~jessie directory in here so it
+                        // redirects to my own version of OpenSeadragon and not
+                        // the shared version..
+                        _entities[0].data.uri = _entities[0].data.uri.substring(0, 34) + '~jessie/' + _entities[0].data.uri.substring(34);
+                        ////////////////////////////////////////////////////////
                         image[0] = _entities[0];
                         console.log('Image: ', image);
                         var annotationTable = image[0].getRelatedTable(context.schemaName, 'annotation');
                         annotationTable.getEntities().then(function success(_annotations) {
                             for (var i = 0; i < _annotations.length; i++) {
                                 annotations.push(_annotations[i]);
+                            }
+                            if (annotoriousReady) {
+                                $window.frames[0].postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                             }
                             console.log('Annotations: ', annotations);
                         }, function error(response) {
@@ -73,11 +82,10 @@
         });
 
         $window.addEventListener('message', function(event) {
-            var origin = window.location.origin;
             if (event.origin === origin) {
                 if (event.data.messageType === 'annotoriousReady') {
-                    if (annotations) {
-                        deferredAnnotations.resolve(annotations);
+                    annotoriousReady = event.data.content;
+                    if (annotoriousReady) {
                         $window.frames[0].postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                     }
                 }
