@@ -48,8 +48,8 @@
                         console.log('Image: ', image);
                         var annotationTable = image[0].getRelatedTable(context.schemaName, 'annotation');
                         annotationTable.getEntities().then(function success(_annotations) {
-                            for (var j = 0; j < _annotations.length; j++) {
-                                annotations.push(_annotations[j]);
+                            for (var i = 0; i < _annotations.length; i++) {
+                                annotations.push(_annotations[i]);
                             }
                             console.log('Annotations: ', annotations);
                         }, function error(response) {
@@ -61,7 +61,9 @@
                 }
                 var anatomyTable = schema.getTable('anatomy');
                 anatomyTable.getEntities().then(function success(_anatomies) {
-                    anatomies = _anatomies;
+                    for (var j = 0; j < _anatomies.length; j++) {
+                        anatomies.push(_anatomies[j]);
+                    }
                     console.log('Anatomies: ', anatomies);
                 }, function error(response) {
                     throw response;

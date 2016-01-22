@@ -6,6 +6,5 @@
     .controller('OSDController', ['image', function OSDController(image) {
         var vm = this;
         vm.image = image;
-        vm.template = 'osd/osd.html';
     }]);
 })();
