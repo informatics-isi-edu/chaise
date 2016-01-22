@@ -105,7 +105,7 @@
                         <li ng-repeat="preview in entity.previews" class="preview col-sm-6 col-xs-12">
                             <div class="preview-content">
                                 <a href="https://www.facebase.org/_viewer/xtk/view.html?url={{ preview.preview }}" target="_blank" class="enlarge">Enlarge</a>
-                                <iframe title="3dView" width="100%" height="400" ng-src="https://www.facebase.org/_viewer/xtk/view_on_load.html?url=https://www.facebase.org/hatrac/facebase/previews/fb1/FB00000177/CP084CCMB_transformed.nii.gz" src="https://www.facebase.org/_viewer/xtk/view_on_load.html?url=https://www.facebase.org/hatrac/facebase/previews/fb1/FB00000177/CP084CCMB_transformed.nii.gz">&lt;p&gt;Your browser does not support iframes.&lt;/p&gt;</iframe>
+                                <iframe title="3dView" width="100%" height="400" ng-src="{{ preview.embedUrl }}">&lt;p&gt;Your browser does not support iframes.&lt;/p&gt;</iframe>
                             </div>
                             <a class="preview-filename" href="{{ preview.uri }}">{{ preview.filename }}</a>
                             <div class="file-size">{{ preview.bytes | filesize }}</div>
