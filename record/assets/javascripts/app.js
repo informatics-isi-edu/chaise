@@ -940,6 +940,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', 'spinn
                     for (var i = 0, len = data['previews'].length; i < len; i++) {
                         preview = data['previews'][i];
                         preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?url=' + preview.preview;
+                        preview.enlargeUrl = origin + '/_viewer/xtk/view.html?url=' + preview.preview;
                         $sce.trustAsResourceUrl(preview.embedUrl);
                     }
                 }
