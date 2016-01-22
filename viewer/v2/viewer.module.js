@@ -34,9 +34,10 @@
     }])
 
 
-    .run(['context', 'image', 'annotations', 'anatomies', 'ermrestClientFactory', function run(context, image, annotations, anatomies, ermrestClientFactory) {
+    .run(['$q', '$window', 'context', 'image', 'annotations', 'anatomies', 'ermrestClientFactory', function run($q, $window, context, image, annotations, anatomies, ermrestClientFactory) {
         var client = ermrestClientFactory.getClient(context.serviceURL);
         var catalog = client.getCatalog(context.catalogID);
+        var deferredAnnotations = $q.defer();
         catalog.introspect().then(function success(schemas) {
             var schema = schemas[context.schemaName];
             if (schema) {
@@ -70,5 +71,20 @@
                 });
             }
         });
+
+        $window.addEventListener('message', function(event) {
+            var origin = window.location.origin;
+            if (event.origin === origin) {
+                if (event.data.messageType === 'annotoriousReady') {
+                    if (annotations) {
+                        deferredAnnotations.resolve(annotations);
+                        $window.frames[0].postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                    }
+                }
+            } else {
+                console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
+            }
+        });
+
     }]);
 })();

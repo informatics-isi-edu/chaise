@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['image', function OSDController(image) {
+    .controller('OSDController', ['image', '$window', function OSDController(image, $window) {
         var vm = this;
         vm.image = image;
     }]);
