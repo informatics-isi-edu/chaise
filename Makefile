@@ -45,7 +45,8 @@ CSS=styles
 CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/ng-grid.css \
 	$(CSS)/vendor/rzslider.css \
-	$(CSS)/vendor/angular-datepicker.css
+	$(CSS)/vendor/angular-datepicker.css \
+	$(CSS)/vendor/ui-grid.css
 
 CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/jquery.nouislider.min.css \
@@ -67,7 +68,8 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
-	$(JS)/vendor/ng-grid.js
+	$(JS)/vendor/ng-grid.js \
+	$(JS)/vendor/ui-grid.js
 
 JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
@@ -114,7 +116,8 @@ RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
 	$(RECORD_ASSETS)/lib/filesize.min.js \
 	$(RECORD_ASSETS)/lib/slippry/slippry.min.js \
 	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.pack.js \
-	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js
+	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js \
+    $(RECORD_ASSETS)/lib/ui-grid.js
 
 RECORD_JS_SOURCE= $(JS)/respond.js \
 	$(JS)/variables.js \
@@ -127,7 +130,8 @@ RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/appheader.css
 
 RECORD_CSS_DEPS=$(RECORD_ASSETS)/lib/slippry/slippry.css \
-	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css
+	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css \
+	$(RECORD_ASSETS)/stylesheets/ui-grid.css
 
 RECORD_CSS_SOURCE=$(RECORD_ASSETS)/stylesheets/app.css
 

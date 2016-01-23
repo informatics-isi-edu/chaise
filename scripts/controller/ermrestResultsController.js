@@ -2,15 +2,120 @@
 
 /* Controllers */
 
-var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService']);
+var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService', 'ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.grid.selection', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.grouping', 'ui.grid.infiniteScroll']);
 
 //angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
 
-ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
-                                                      function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
+ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeout', '$sce', '$http', '$q', 'uiGridConstants', 'FacetsData', 'FacetsService',
+                                                      function($scope, $window, $timeout, $sce, $http, $q, uiGridConstants, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
-  $scope.chaiseConfig = chaiseConfig;
+  	$scope.chaiseConfig = chaiseConfig;
+
+	$scope.data = [];
+    $scope.columns = [];
+    $scope.gridOptions = {};
+    $scope.gridOptions.data = 'data';
+    $scope.gridOptions.columnDefs = $scope.columns;
+    $scope.gridOptions.minRowsToShow = 10;
+	$scope.gridOptions.rowHeight = 100;
+    $scope.gridOptions.flatEntityAccess = true;
+    $scope.gridOptions.enableColumnResizing = true;
+    $scope.gridOptions.enableFiltering = true;
+    $scope.gridOptions.enableGridMenu = true;
+    $scope.gridOptions.showGridFooter = true;
+    $scope.gridOptions.showColumnFooter = true;
+
+    $scope.gridOptions.onRegisterApi = function ( gridApi ) {
+        $scope.gridApi = gridApi;
+        $timeout(function() {
+            $scope.gridApi.core.handleWindowResize();
+        });
+    };
+
+	$scope.initUIGrid = function() {
+		$scope.firstPage = 1;
+		$scope.lastPage = 1;
+
+		// Thumbnail column
+		$scope.columns.push({field: 'thumbnail',
+							 displayName: 'Thumbnail',
+							 visible: false,
+							 groupable:false,
+							 sortable:false,
+							 resizeable:false,
+							 headerTooltip:true,
+							 cellTooltip: true,
+							 width:100});
+
+		// Title column
+		var title = getTitleName();
+		var titleDisp = FacetsService.display(FacetsData.table,title);
+		if (titleDisp !== "") {
+			$scope.columns.push({field: title,
+								 displayName: titleDisp,
+								 headerTooltip: true,
+								 cellTooltip:true,
+								 width:100})
+		}
+		// add an invisible href column for detail link
+		$scope.columns.push({field: 'href', visible: false});
+
+		// rest of columns
+		$.each(getTableColumnsNames(FacetsData.table,6), function(i, column) {
+			var displayName = FacetsService.display(FacetsData.table,column);
+			var colRef = '{{row.entity.' + column + '}}';
+			$scope.columns.push({field: column,
+								 displayName: displayName,
+								 headerTooltip:true,
+								 cellTooltip: true,
+								 width:100})
+		});
+
+		$scope.data = $scope.formatGridResultData();
+	};
+
+	$scope.formatGridResultData = function()
+	{
+		var data = [];
+		var thumbCol = $scope.columns[0];
+		var titleCol = $scope.columns[1];
+		var fr = $scope.facetResults;
+		$.each(FacetsData.ermrestData, function(r,row) {
+			var rowData = {};
+			rowData['href'] = fr.rowPath(row);
+			var thumbnail = fr.itemThumbnail(row);
+			// just a hack to test TODO: remove
+			thumbnail = "https://www.facebase.org/hatrac/facebase/thumbnail/fb1/generic_genetic.png:ODWKSXFY3TOU5DJJXIB2C6ACSQ"
+			if (thumbnail != null) {
+				thumbCol.visible = true;
+				rowData[thumbCol.field] = thumbnail;
+				thumbCol['cellTemplate'] =
+					'<div class="ui-grid-cell-contents"><a ng-href="{{row.entity.href}}">' +
+					'<img title="Thumbnail" alt="Undefined" width="90" height="90" ng-src="{{COL_FIELD}}"></a></div>';
+			}
+			var titleText = fr.itemTitle(row);
+			if (titleText != "") {
+				rowData[titleCol.field] = titleText;
+				titleCol['cellTemplate'] =
+					'<div class="ui-grid-cell-contents"><a ng-href="{{row.entity.href}}">{{COL_FIELD}}</a></div>';
+			}
+			$.each(getTableColumnsNames(FacetsData.table, 6), function(c, col) {
+				if (fr.isUrl(FacetsData.table, col)) {
+					var urlValues = fr.urlLink(FacetsData.table, col, row[col]);
+					for (var url in urlValues) {
+						var urlHref = url[urlValues][1];
+						var urlHtml = url[urlValues][0];
+						// TODO: make this work
+					}
+				} else {
+					rowData[col] = fr.html(FacetsData.table, col, row[col])
+				}
+			});
+			data.push(rowData);
+		});
+		return data;
+	};
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
@@ -20,6 +125,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 
 	$scope.successSearchFacets = function successSearchFacets(data, totalItems, page, pageSize) {
 		FacetsService.successSearchFacets(data, totalItems, page, pageSize);
+		//$scope.data = $scope.formatGridResultData();
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}

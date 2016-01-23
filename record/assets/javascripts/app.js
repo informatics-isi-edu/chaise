@@ -1,6 +1,6 @@
 // Chaise Record App
 
-var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'ngCookies', 'ngSanitize']);
+var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ui.bootstrap','ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.grid.selection', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.grouping', 'ui.grid.infiniteScroll', 'ngCookies', 'ngSanitize']);
 
 // Refreshes page when fragment identifier changes
 setTimeout(function(){
@@ -903,6 +903,8 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerServic
     // T: Table name
     // K: Key
 
+    $scope.chaiseConfig = chaiseConfig;
+
     // Set up the parameters base on url
     var params      = locationService.getHashParams();
     // var params      = $location.search();  query parameters
@@ -963,6 +965,221 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerServic
         ermrestService.loadReferencesForEntity($scope.entity, index);
     };
 
+}]);
+
+chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeout', 'uiGridConstants','ermrestService', 'schemaService', function ($scope, $http, $q, $timeout, uiGridConstants, ermrestService, schemaService)
+{
+    $scope.view = [];
+    $scope.data = [];
+    $scope.columns = [];
+    $scope.transposedData = [];
+    $scope.transposedColumns = [];
+    $scope.columnMetadata = {};
+    $scope.gridOptions = {};
+    $scope.gridOptions.data = 'view';
+	$scope.gridOptions.rowHeight = 65;
+    $scope.gridOptions.minRowsToShow = 10;
+    $scope.gridOptions.flatEntityAccess = true;
+    $scope.gridOptions.enableColumnResizing = true;
+    $scope.gridOptions.enableFiltering = true;
+    $scope.gridOptions.enableGridMenu = true;
+    $scope.gridOptions.showGridFooter = true;
+    $scope.gridOptions.showColumnFooter = true;
+    //$scope.gridOptions.infiniteScrollUp = true;
+    //$scope.gridOptions.infiniteScrollDown = true;
+    //$scope.gridOptions.infiniteScrollRowsFromEnd= 40;
+
+    $scope.gridOptions.onRegisterApi = function ( gridApi ) {
+        $scope.gridApi = gridApi;
+        $timeout(function() {
+            $scope.gridApi.core.handleWindowResize();
+        });
+        //gridApi.infiniteScroll.on.needLoadMoreData($scope, $scope.getDataDown);
+        //gridApi.infiniteScroll.on.needLoadMoreDataTop($scope, $scope.getDataUp);
+    };
+
+    $scope.initUIGrid = function()
+    {
+        $scope.firstPage = 1;
+        $scope.lastPage = 1;
+        var entity = $scope.ft;
+        var displayColumns = schemaService.getDisplayColumns(entity.schemaName, entity.tableName);
+        for (var column in displayColumns) {
+            if (displayColumns.hasOwnProperty(column)) {
+                var displayName = displayColumns[column];
+                $scope.columnMetadata[column] = {displayName:displayName}
+                $scope.columns.push({name: column, displayName: displayName, headerTooltip:true, cellTooltip:true, width:120})
+            }
+        }
+        $scope.gridOptions.columnDefs = $scope.columns;
+
+        var canceler = $q.defer();
+        $http.get(entity.path, {timeout: canceler.promise})
+            .success(function (data) {
+                $scope.data = data;
+                $scope.view = $scope.data;
+            });
+
+        $scope.$on('$destroy', function(){
+            canceler.resolve();  // Aborts the $http request if it isn't finished.
+        });
+    };
+
+    $scope.transposeToggle = function(entity, transpose)
+    {
+        entity.transpose = transpose;
+        if (transpose && $scope.transposedData.length == 0) {
+            var values = [];
+            var transposedRecords = {};
+            $scope.transposedColumns.push({
+                name: '0',
+                displayName: '',
+                headerTooltip:true,
+                cellTooltip:true,
+                width: 120,
+                type: 'string'
+            });
+            angular.forEach($scope.data, function (value, key) {
+                $scope.transposedColumns.push({
+                    name: (key + 1).toString(),
+                    displayName: '',
+                    headerTooltip:true,
+                    cellTooltip:true,
+                    width: 120,
+                    type: 'string'
+                });
+
+                var i = 0;
+                angular.forEach(value, function (inner, index) {
+                    if ($scope.columnMetadata[index] !== undefined) {
+                        transposedRecords[i] = transposedRecords[i] || {0:$scope.columnMetadata[index].displayName};
+                        values[index] = values[index] || [];
+                        values[index].push(inner);
+                        transposedRecords[i][key + 1] = values[index][key];
+                        i++;
+                    }
+                });
+            });
+            $scope.transposedData = Object.keys(transposedRecords).map(function(k) { return transposedRecords[k] });
+        }
+
+        if (transpose) {
+            $scope.gridOptions.columnDefs = $scope.transposedColumns;
+            $scope.view  = $scope.transposedData;
+        } else {
+            $scope.gridOptions.columnDefs = $scope.columns;
+            $scope.view = $scope.data;
+        }
+        $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.ALL);
+    };
+
+/*
+    $scope.getFirstData = function() {
+        var promise = $q.defer();
+        $http.get(entity.path)
+            .success(function(data) {
+                var newData = $scope.getPage(data, $scope.lastPage);
+                $scope.data = $scope.data.concat(newData);
+                promise.resolve();
+        });
+        return promise.promise;
+    };
+
+    $scope.getDataUp = function() {
+        var promise = $q.defer();
+        $http.get(entity.path)
+        .success(function(data) {
+          $scope.firstPage--;
+          var newData = $scope.getPage(data, $scope.firstPage);
+          $scope.gridApi.infiniteScroll.saveScrollPercentage();
+          $scope.data = newData.concat($scope.data);
+          $scope.gridApi.infiniteScroll.dataLoaded($scope.firstPage > 0, $scope.lastPage < 4).then(function() {$scope.checkDataLength('down');}).then(function() {
+            promise.resolve();
+          });
+        })
+        .error(function(error) {
+            $scope.gridApi.infiniteScroll.dataLoaded();
+            promise.reject();
+        });
+        return promise.promise;
+    };
+
+    $scope.getDataDown = function() {
+        var promise = $q.defer();
+        $http.get(entity.path)
+            .success(function(data) {
+                $scope.lastPage++;
+                var newData = $scope.getPage(data, $scope.lastPage);
+                $scope.gridApi.infiniteScroll.saveScrollPercentage();
+                $scope.data = $scope.data.concat(newData);
+                $scope.gridApi.infiniteScroll.dataLoaded($scope.firstPage > 0, $scope.lastPage < 4).then(function() {$scope.checkDataLength('up');}).then(function() {
+                    promise.resolve();
+                });
+            })
+            .error(function(error) {
+                $scope.gridApi.infiniteScroll.dataLoaded();
+                promise.reject();
+            });
+        return promise.promise;
+    };
+
+    $scope.checkDataLength = function( discardDirection) {
+        // work out whether we need to discard a page, if so discard from the direction passed in
+        if( $scope.lastPage - $scope.firstPage > 3 ){
+          // we want to remove a page
+          $scope.gridApi.infiniteScroll.saveScrollPercentage();
+
+          if( discardDirection === 'up' ){
+            $scope.data = $scope.data.slice(100);
+            $scope.firstPage++;
+            $timeout(function() {
+              // wait for grid to ingest data changes
+              $scope.gridApi.infiniteScroll.dataRemovedTop($scope.firstPage > 0, $scope.lastPage < 4);
+            });
+          } else {
+            $scope.data = $scope.data.slice(0, 400);
+            $scope.lastPage--;
+            $timeout(function() {
+              // wait for grid to ingest data changes
+              $scope.gridApi.infiniteScroll.dataRemovedBottom($scope.firstPage > 0, $scope.lastPage < 4);
+            });
+          }
+        }
+    };
+
+    $scope.getPage = function(data, page) {
+        var res = [];
+        for (var i = (page * 100); i < (page + 1) * 100 && i < data.length; ++i) {
+            res.push(data[i]);
+        }
+        return res;
+    };
+
+    $scope.reset = function() {
+        $scope.firstPage = 2;
+        $scope.lastPage = 2;
+
+        // turn off the infinite scroll handling up and down
+        $scope.gridApi.infiniteScroll.setScrollDirections( false, false );
+        $scope.data = [];
+
+        $scope.getFirstData().then(function(){
+            $timeout(function() {
+                // timeout needed to allow digest cycle to complete,and grid to finish ingesting the data
+                $scope.gridApi.infiniteScroll.resetScroll( $scope.firstPage > 0, $scope.lastPage < 4 );
+            });
+        });
+    };
+
+    $scope.getFirstData().then(function(){
+        $timeout(function() {
+            // timeout needed to allow digest cycle to complete,and grid to finish ingesting the data
+            // you need to call resetData once you've loaded your data if you want to enable scroll up,
+            // it adjusts the scroll position down one pixel so that we can generate scroll up events
+            $scope.gridApi.infiniteScroll.resetScroll( $scope.firstPage > 0, $scope.lastPage < 4 );
+        });
+    });
+*/
 }]);
 
 // Images controller
@@ -1030,7 +1247,6 @@ chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
 
     });
 }]);
-
 
 /*
  _____ _ _ _
