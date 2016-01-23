@@ -839,17 +839,3 @@ th.table-more-bt {
 	display: none;
 }
 
-/* for angular UI-Grid */
-.ui-grid-viewport .ui-grid-cell-contents {
-  word-wrap: break-word;
-  white-space: normal !important;
-}
-
-.ui-grid-row, .ui-grid-cell {
-  height: auto !important;
-}
-
-.ui-grid-row div[role=row] {
-  display: flex ;
-  align-content: stretch;
-}

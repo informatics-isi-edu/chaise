@@ -977,7 +977,7 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
     $scope.columnMetadata = {};
     $scope.gridOptions = {};
     $scope.gridOptions.data = 'view';
-	$scope.gridOptions.rowHeight = 65;
+    $scope.gridOptions.rowHeight = 65;
     $scope.gridOptions.minRowsToShow = 10;
     $scope.gridOptions.flatEntityAccess = true;
     $scope.gridOptions.enableColumnResizing = true;
