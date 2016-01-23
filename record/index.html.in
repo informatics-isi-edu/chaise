@@ -136,7 +136,7 @@
                         <div class="table-wrapper wrapper">
                             <table class="table table-striped table-reference">
                                 <tbody>
-                                    <tr ng-repeat="key in ft.keys" on-finish-render>
+                                    <tr ng-repeat="key in ft.keys | notHyperLink" on-finish-render>
                                         <th class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
                                         <td ng-repeat="reference in ft.list" class="entity-value col-xs-10">
                                             <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()">
@@ -164,12 +164,12 @@
                             <table class="table table-striped nested table-reference">
                                 <thead>
                                     <tr>
-                                        <th ng-repeat="key in ft.keys" class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
+                                        <th ng-repeat="key in ft.keys | notHyperLink" class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr ng-repeat="reference in ft.list" on-finish-render>
-                                        <td ng-repeat="key in ft.keys"  class="entity-value col-xs-10" >
+                                        <td ng-repeat="key in ft.keys | notHyperLink"  class="entity-value col-xs-10" >
                                             <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()">
                                                 {{reference[key] | sanitizeValue }}
                                             </a>
