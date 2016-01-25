@@ -1125,7 +1125,6 @@ chaiseRecordApp.filter('removeUnderScores', function(){
 chaiseRecordApp.filter('sanitizeValue', function($sce){
     return function(value){
 
-        //var urls    = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
         var emails  = /([a-zA-Z0-9_\.]+@[a-zA-Z_\.]+\.(edu|com|net|gov|io))/gim;
 
         if (Array.isArray(value)){
@@ -1144,6 +1143,14 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
         } else{
             return value;
         }
+
+    };
+});
+
+chaiseRecordApp.filter('uri', function($sce){
+    return function(value){
+
+        return $sce.trustAsHtml(value);
 
     };
 });

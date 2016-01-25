@@ -139,7 +139,8 @@
                                     <tr ng-repeat="key in ft.keys | notHyperLink" on-finish-render>
                                         <th class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
                                         <td ng-repeat="reference in ft.list" class="entity-value col-xs-10">
-                                            <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()">
+                                            <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
+                                                ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
                                                 {{reference[key] | sanitizeValue }}
                                             </a>
                                             <span ng-if="!reference[key + '_link']" ng-bind-html="reference[key] | sanitizeValue"></span>
@@ -170,7 +171,8 @@
                                 <tbody>
                                     <tr ng-repeat="reference in ft.list" on-finish-render>
                                         <td ng-repeat="key in ft.keys | notHyperLink"  class="entity-value col-xs-10" >
-                                            <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()">
+                                            <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
+                                                ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
                                                 {{reference[key] | sanitizeValue }}
                                             </a>
                                             <span ng-if="!reference[key + '_link']" ng-bind-html="reference[key] | sanitizeValue"></span>
