@@ -411,8 +411,14 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         for (col in urlPatterns) {
             for (var row = 0; row < references.length; row++) {
                 var pattern = urlPatterns[col];
-                var link = pattern.replace("{value}", references[row][col]); // replace {value} with data value
-                references[row][col + '_link'] = link;
+                if (pattern === "auto_link") { // link url is same as the column value
+                    references[row][col + '_link'] = references[row][col];
+                }
+                else {
+                    var link = pattern.replace("{value}", references[row][col]);
+                    // replace {value} with data value
+                    references[row][col + '_link'] = link;
+                }
             }
         }
     };
@@ -817,12 +823,19 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
 
             // If column has interpretation
             if (cd.annotations['tag:misd.isi.edu,2015:url'] !== undefined){
-                if (cd.annotations['tag:misd.isi.edu,2015:url']['base-url'] !== undefined) {
-                    pattern = cd.annotations['tag:misd.isi.edu,2015:url']['base-url'];
+                if (cd.annotations['tag:misd.isi.edu,2015:url'] === null ||
+                    Object.getOwnPropertyNames(cd.annotations['tag:misd.isi.edu,2015:url']).length === 0) {
+                    pattern = "auto_link";
                 }
-                if (cd.annotations['tag:misd.isi.edu,2015:url']['pattern'] !== undefined) {
-                    pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
+                else {
+                    if (cd.annotations['tag:misd.isi.edu,2015:url']['base-url'] !== undefined) {
+                        pattern = cd.annotations['tag:misd.isi.edu,2015:url']['base-url'];
+                    }
+                    if (cd.annotations['tag:misd.isi.edu,2015:url']['pattern'] !== undefined) {
+                        pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
+                    }
                 }
+
                 interp[cd.name] = pattern;
             }
         }
