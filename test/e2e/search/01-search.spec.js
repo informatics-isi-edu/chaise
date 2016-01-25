@@ -1,6 +1,6 @@
 var chaisePage = require('../chaise.page.js');
 
-describe('In the Chaise 01-search app,', function () {
+xdescribe('In the Chaise 01-search app,', function () {
     var EC = protractor.ExpectedConditions;
 
     describe('on load,', function () {

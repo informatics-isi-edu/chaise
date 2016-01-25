@@ -53,6 +53,13 @@ function chaisePage() {
         },
     };
     this.recordPage = {
+        entityTitle: element(by.css('#entity-title')),
+        findEntityKeyByName: function(entityName) {
+            return element(by.cssContainingText('.entity-key.ng-binding', entityName));
+        },
+        findToggleByName: function(keyName) {
+            return element(by.cssContainingText('.panel-heading', keyName))
+        },
 
     };
 };

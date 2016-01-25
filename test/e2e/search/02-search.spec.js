@@ -102,42 +102,34 @@ describe('In the Chaise 02-search app,', function () {
         });
 
         it('should have the correct title', function (done) {
-            var entityTitleEle = element(by.css('#entity-title'));
-            entityTitleEle.getText().then(function (entityTitle) {
-                expect(entityTitleEle.isDisplayed()).toBe(true);
-                expect(entityTitle).toBe(expectedEntityTitle);
-                done();
-            });
+            var entityTitleEle = chaisePage.recordPage.entityTitle;
+            expect(entityTitleEle.isDisplayed()).toBe(true);
+            expect(entityTitleEle.getText()).toBe(expectedEntityTitle);
+            done();
         });
 
         it('should have non-empty Description', function (done) {
-            var descriptionEle = element(by.cssContainingText('.entity-key.ng-binding', 'description'));
-            descriptionEle.getText().then(function (text) {
-                expect(descriptionEle.isDisplayed()).toBe(true);
-                expect(text).not.toBe('');
-                var descriptionValueEle = descriptionEle.element(by.xpath('following-sibling::td'));
-                descriptionValueEle.getText().then(function (desText) {
-                    expect(desText).not.toBe('');
-                    done();
-                });
-            });
+            var descriptionEle = chaisePage.recordPage.findEntityKeyByName('description');
+            expect(descriptionEle.isDisplayed()).toBe(true);
+            expect(descriptionEle.getText()).not.toBe('');
+            var descriptionValueEle = descriptionEle.element(by.xpath('following-sibling::td'));
+            expect(descriptionValueEle.getText()).not.toBe('');
+            done();
         });
 
         it('should have \'Data Type\' and its label is clickable', function (done) {
-            var dataTypeEle = element(by.cssContainingText('.entity-key.ng-binding', 'data type'));
-            dataTypeEle.getText().then(function (text) {
-                expect(dataTypeEle.isDisplayed()).toBe(true);
-                expect(text).not.toBe('');
-                var dataTypeValueLabelEle = dataTypeEle.element(by.xpath('following-sibling::td')).element(by.css('a'));
-                dataTypeValueLabelEle.getText().then(function (labelText) {
-                    expect(labelText).not.toBe('');
-                    done();
-                })
-            });
+            var dataTypeEle = chaisePage.recordPage.findEntityKeyByName('data type');
+            expect(dataTypeEle.isDisplayed()).toBe(true);
+            expect(dataTypeEle.getText()).not.toBe('');
+            var dataTypeValueLabelEle = dataTypeEle.element(by.xpath('following-sibling::td')).element(by.css('a'));
+            expect(dataTypeValueLabelEle.isDisplayed()).toBe(true);
+            expect(dataTypeValueLabelEle.c).toBe(true);
+            expect(dataTypeValueLabelEle.getText()).not.toBe('');
+            done();
         });
 
         it('should open a table when \'DATA SOMITE COUNT\' is clicked', function (done) {
-            var dataEle = element(by.cssContainingText('.panel-heading', 'dataset somite count'));
+            var dataEle = chaisePage.recordPage.findToggleByName('dataset somite count');
             //click on the DATA SOMITE COUNT
             dataEle.click().then(function () {
                 var datasetSomiteTableEle = dataEle.element(by.xpath('following-sibling::div'));
@@ -159,19 +151,24 @@ describe('In the Chaise 02-search app,', function () {
         });
 
         it('should show one file when \'FILES\' is clicked', function (done) {
-            var expectedFileName = 'FB00000008.zip';
-            var fileEle = element(by.cssContainingText('.panel-heading', 'Files'));
-            var fileCollapedEle = fileEle.element(by.xpath('following-sibling::div'));
-            expect(fileCollapedEle.isDisplayed()).toBe(false);
+            var accessionEle = chaisePage.recordPage.findEntityKeyByName('accession');
+            var accessionValueEle = accessionEle.element(by.xpath('following-sibling::td'));
+            accessionValueEle.getText().then(function(expectedFileName) {
+                var fileEle = chaisePage.recordPage.findToggleByName('Files');
+                var fileCollapedEle = fileEle.element(by.xpath('following-sibling::div'));
+                expect(fileCollapedEle.isDisplayed()).toBe(false);
 
-            fileEle.click().then(function () {
-                expect(fileCollapedEle.isDisplayed()).toBe(true);
-                var fileList = fileCollapedEle.all(by.repeater('file in entity.files'));
-                var imgEle = fileList.first().element(by.css('img'));
-                var fileNameEle = imgEle.all(by.xpath('following-sibling::div')).first();
-                expect(fileNameEle.getText()).toBe(expectedFileName);
-                expect(fileList.count()).toBe(1);
-                done();
+                fileEle.click().then(function () {
+                    expect(fileCollapedEle.isDisplayed()).toBe(true);
+                    var fileList = fileCollapedEle.all(by.repeater('file in entity.files'));
+                    var imgEle = fileList.first().element(by.css('img'));
+                    var fileNameEle = imgEle.all(by.xpath('following-sibling::div')).first();
+                    fileNameEle.getText().then(function(fileName) {
+                        expect(fileName).toContain(expectedFileName);
+                        expect(fileList.count()).not.toBe(0);
+                        done();
+                    });
+                });
             });
         });
     });
