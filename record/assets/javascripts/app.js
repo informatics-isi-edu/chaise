@@ -36,6 +36,10 @@ chaiseRecordApp.service('configService', function() {
     if (chaiseConfig['ermrestLocation'] != null) {
         this.CR_BASE_URL = chaiseConfig['ermrestLocation'] + '/ermrest/catalog/';
     }
+    this.TABLE_THRESHOLD = 5;
+    if (chaiseConfig['tableThreshold'] != null) {
+        this.TABLE_THRESHOLD = chaiseConfig['tableThreshold'];
+    }
 });
 
 // REST API for Ermrest
@@ -167,7 +171,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                                 'schemaName':           ft['schemaName'],
                                                                 'list':                 [], // list of nested entities
                                                                 'referencedTableName':  ft['referencedTableName'],
-                                                                'transpose':            false,
+                                                                'transpose':            elements[0]['row_count'] <= configService.TABLE_THRESHOLD,
                                                                 'open':                 false,
                                                                 'path':                 ft['path'], // ermrest path to load elements
                                                                 'count':                elements[0]['row_count']
