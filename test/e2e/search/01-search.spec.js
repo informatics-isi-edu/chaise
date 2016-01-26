@@ -1,6 +1,14 @@
+/**
+ * Created by shuai on 1/25/16.
+ *
+ * Test the sidebar filter in #editfilter and #morefilters,
+ * the filter tags in content area
+ *
+ */
+
 var chaisePage = require('../chaise.page.js');
 
-xdescribe('In the Chaise 01-search app,', function () {
+describe('In Chaise, search_01 contentArea and sidebar', function () {
     var EC = protractor.ExpectedConditions;
 
     describe('on load,', function () {
@@ -79,7 +87,7 @@ xdescribe('In the Chaise 01-search app,', function () {
         });
     });
 
-    describe('Result content area ', function () {
+    describe('Result content area,', function () {
         it('should show > 0 results', function (done) {
             var allResultRows = chaisePage.resultContent.resultAllRows;
             //choose the second #results_tally

@@ -1,5 +1,13 @@
+/**
+ *
+ * Created by shuai.
+ *
+ * Test the initial sidebar.
+ *
+ */
+
 var chaisePage = require('../chaise.page.js');
-xdescribe('In the Chaise 00-search app', function() {
+describe('In Chaise, search_00 sidebar', function() {
     var EC = protractor.ExpectedConditions;
     describe('on load,', function () {
         beforeAll(function () {

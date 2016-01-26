@@ -1,6 +1,12 @@
-var chaisePage = require('../chaise.page.js');
+/**
+ * Created by shuai on 1/25/16.
+ *
+ * Test the sidebar filter (Summary and Description)
+ *
+ */
 
-describe('In the Chaise 02-search app,', function () {
+var chaisePage = require('../chaise.page.js');
+describe('In Chaise, search_02 sidebarFilter summary and description,', function () {
     var EC = protractor.ExpectedConditions;
 
     describe('on load,', function () {
@@ -14,7 +20,6 @@ describe('In the Chaise 02-search app,', function () {
             //so icon can be tested before everything settles down(settling down means img is no longer there)
             browser.ignoreSynchronization = true;
             var spinner = element(by.id('spinner'));
-            expect(spinner.isDisplayed()).toBe(true);
             done();
         });
 
@@ -23,15 +28,13 @@ describe('In the Chaise 02-search app,', function () {
             var spinner = element(by.id('spinner'));
             var sidebar = element(by.id('sidebar'));
             browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
-                expect(sidebar.isDisplayed()).toBe(true);
-                expect(spinner.isDisplayed()).toBe(false);
                 done();
             });
         });
 
     });
 
-    describe('The sidebar filter input', function () {
+    describe('The sidebar filter input,', function () {
         var searchBox = chaisePage.sidebar.searchInput;
 
         it('should search \'RNA\' in the search input', function (done) {
@@ -59,119 +62,91 @@ describe('In the Chaise 02-search app,', function () {
             });
         });
 
-    });
-
-    var expectedEntityTitle = '';
-    var detailUrl = "https://dev.misd.isi.edu/chaise/record/#1/legacy:dataset/id=263";
-    describe('Result content area ', function () {
-        //input is now "RNA"
-        var experimentType = 'Experiment Type';
-        var microArrayText = 'RNA expression (microarray)';
-
-        var titleSpan = chaisePage.resultContent.resultAllRows.first().$('span.panel-title');
-        it('should get the entity title and it\'s not empty', function (done) {
-            titleSpan.getText().then(function (text) {
-                //get the entity title in results list
-                expectedEntityTitle = text;
-                expect(text).not.toBe('');
-                done();
-            });
-        });
-
-        it('should go to the correct URL when clicked', function (done) {
-            titleSpan.click();
-            browser.rootEl = "#recordApp";
-            // 'browser.ignoreSynchronization = true' tells Protractor not to sync(wait for Angular's finishing async operations).
-            //It is not supposed to be used here, but somehow using it resolves the 'Hashtag' problem.
-            //Before, the problem was, Angualr(or Browser) adds automatically a slash after '#', making '/#1/' become '/#/1/'.
-            browser.ignoreSynchronization = true;
-            setTimeout(function () {
-                expect(browser.getCurrentUrl()).toBe(detailUrl);
-                done();
-            }, 5000);
+        it('should go back to initial sidebar', function(done) {
+            var editGobackBtn = chaisePage.editFilter.sidebarHeader;
+            editGobackBtn.click();
+            done();
         });
     });
 
-    describe('the record detail page', function () {
-        //turn on sync again
-        browser.ignoreSynchronization = false;
-        it('should still have the correct URL when sync is turned on', function (done) {
-            //make sure after turning on Sync, the URL is not changed.
-            expect(browser.getCurrentUrl()).toBe(detailUrl);
-            done();
-        });
-
-        it('should have the correct title', function (done) {
-            var entityTitleEle = chaisePage.recordPage.entityTitle;
-            expect(entityTitleEle.isDisplayed()).toBe(true);
-            expect(entityTitleEle.getText()).toBe(expectedEntityTitle);
-            done();
-        });
-
-        it('should have non-empty Description', function (done) {
-            var descriptionEle = chaisePage.recordPage.findEntityKeyByName('description');
-            expect(descriptionEle.isDisplayed()).toBe(true);
-            expect(descriptionEle.getText()).not.toBe('');
-            var descriptionValueEle = descriptionEle.element(by.xpath('following-sibling::td'));
-            expect(descriptionValueEle.getText()).not.toBe('');
-            done();
-        });
-
-        it('should have \'Data Type\' and its label is clickable', function (done) {
-            var dataTypeEle = chaisePage.recordPage.findEntityKeyByName('data type');
-            expect(dataTypeEle.isDisplayed()).toBe(true);
-            expect(dataTypeEle.getText()).not.toBe('');
-            var dataTypeValueLabelEle = dataTypeEle.element(by.xpath('following-sibling::td')).element(by.css('a'));
-            expect(dataTypeValueLabelEle.isDisplayed()).toBe(true);
-            expect(dataTypeValueLabelEle.c).toBe(true);
-            expect(dataTypeValueLabelEle.getText()).not.toBe('');
-            done();
-        });
-
-        it('should open a table when \'DATA SOMITE COUNT\' is clicked', function (done) {
-            var dataEle = chaisePage.recordPage.findToggleByName('dataset somite count');
-            //click on the DATA SOMITE COUNT
-            dataEle.click().then(function () {
-                var datasetSomiteTableEle = dataEle.element(by.xpath('following-sibling::div'));
-                expect(datasetSomiteTableEle.isDisplayed()).toBe(true);
-
-                var wrapperEle = datasetSomiteTableEle.element(by.css('.table-wrapper.wrapper'));
-                var wrapperEleTbody = wrapperEle.element(by.css('tbody'));
-                var ftListArray = wrapperEleTbody.all(by.repeater('reference in ft.list'));
-                var firstRow = ftListArray.first();
-                //var firstRowKeyArray = firstRow.all(by.repeater('key in ft.keys'));
-                var firstRowKeyArray = firstRow.all(by.css('.entity-value.col-xs-10.ng-scope'));
-                var UrlEle = firstRowKeyArray.last();
-                UrlEle.element(by.css('a')).getAttribute('href').then(function (linkText) {
-                    expect(firstRow.isDisplayed()).toBe(true);
-                    expect(linkText).toContain('http');
+    describe('The sidebar \'Summary\' filtered records,', function() {
+        var randomIdx = 0;
+        var recordSumBefore = 0;
+        it('records\' number should be >0 and a random record is picked', function(done) {
+            var tallyRange = chaisePage.resultContent.resultTallyRange;
+            var tallySum = chaisePage.resultContent.resultTallySum;
+            expect(tallyRange.getText()).toContain('-');
+            tallyRange.getText().then(function(range) {
+                var sum = chaisePage.tools.getDisplayedRecordNum(range);
+                expect(sum).not.toBe(0);
+                randomIdx = chaisePage.tools.getRandomInt(1, sum);
+                tallySum.getText().then(function(txt) {
+                    recordSumBefore = parseInt(txt);
                     done();
                 });
             });
         });
 
-        it('should show one file when \'FILES\' is clicked', function (done) {
-            var accessionEle = chaisePage.recordPage.findEntityKeyByName('accession');
-            var accessionValueEle = accessionEle.element(by.xpath('following-sibling::td'));
-            accessionValueEle.getText().then(function(expectedFileName) {
-                var fileEle = chaisePage.recordPage.findToggleByName('Files');
-                var fileCollapedEle = fileEle.element(by.xpath('following-sibling::div'));
-                expect(fileCollapedEle.isDisplayed()).toBe(false);
+        //randomly choose a record
+        //var summaryText = '';
+        //var titleText = '';
+        //it('the picked record\' summary should be displayed', function (done) {
+        //    var titleSpan = chaisePage.resultContent.resultAllRows.get(randomIdx).$('span.panel-title');
+        //    var summaryEle = chaisePage.resultContent.resultAllRows
+        //        .get(randomIdx).$('.panel-body div[ng-show="values\[\'summary\'\]!=null"] dd');
+        //    titleSpan.getText().then(function (titleTxt) {
+        //        //get the entity title in results list
+        //        summaryEle.getText().then(function(summaryTxt) {
+        //            titleText = titleTxt;
+        //            summaryText = summaryTxt;
+        //            done();
+        //        });
+        //    });
+        //});
 
-                fileEle.click().then(function () {
-                    expect(fileCollapedEle.isDisplayed()).toBe(true);
-                    var fileList = fileCollapedEle.all(by.repeater('file in entity.files'));
-                    var imgEle = fileList.first().element(by.css('img'));
-                    var fileNameEle = imgEle.all(by.xpath('following-sibling::div')).first();
-                    fileNameEle.getText().then(function(fileName) {
-                        expect(fileName).toContain(expectedFileName);
-                        expect(fileList.count()).not.toBe(0);
-                        done();
-                    });
-                });
+        var summaryFilter = chaisePage.sidebar.findSidebarAttrByName('Summary');
+        var editFilterEle = chaisePage.editFilter.htmlElement;
+        var summaryInput = editFilterEle.$('input');
+        it('should input some meaningless text in summary input', function(done) {
+            summaryFilter.click().then(function() {
+                summaryInput.sendKeys('hellomyfriend');
+                summaryInput.sendKeys(protractor.Key.ENTER);
+                setTimeout(function () {
+                    done();
+                }, 4000);
             });
         });
-    });
 
+        it('should show 0 record when searching meaningless summary filter input', function(done) {
+            var num = chaisePage.resultContent.resultAllRows;
+            expect(num.count()).toBe(0);
+            summaryInput.clear();
+            //use keystroke to activate AJAX to refresh page
+            summaryInput.sendKeys(protractor.Key.ENTER);
+            setTimeout(function() {
+                done();
+            }, 5000);
+        });
+
+        it('should show >0 records when clearing the summary filter input', function(done) {
+            var num = chaisePage.resultContent.resultAllRows;
+            expect(num.count()).toBeGreaterThan(0);
+            var editHeader = chaisePage.editFilter.sidebarHeader;
+            editHeader.click();
+            done();
+        });
+
+        var descriptionFilter = chaisePage.sidebar.findSidebarAttrByName('Description');
+        var descriptionInput = editFilterEle.$('input');
+        it('should show 0 record when inputing meaningless text in description', function(done) {
+            descriptionFilter.click();
+            descriptionInput.sendKeys('helloagain');
+            descriptionInput.sendKeys(protractor.Key.ENTER);
+            var num = chaisePage.resultContent.resultAllRows;
+            expect(num.count()).toBe(0);
+            done();
+        });
+
+    });
 
 });
