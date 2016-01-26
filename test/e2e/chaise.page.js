@@ -1,6 +1,9 @@
 /**
  *
  * Created by shuai on 1/14/16.
+ *
+ * To store reusable elements and functions.
+ *
  */
 
 var sidebarId= '#sidebar';
@@ -14,6 +17,9 @@ function chaisePage() {
         sidebarAttrsDisplayed: element.all(by.css(sidebarId + ' ul.sidebar-nav li.ng-scope:not(.ng-hide)')),
         sidebarHeader: element(by.css(sidebarId + ' #navcontainer h4')),
         viewMoreBtn: element(by.cssContainingText(sidebarId + ' li a', 'View all attributes')),
+        findSidebarAttrsByName: function (attrName) {
+            return element.all(by.cssContainingText(sidebarId + ' ul li a', attrName));
+        },
         findSidebarAttrByName: function (attrName) {
             return element(by.cssContainingText(sidebarId + ' ul li a', attrName));
         },
@@ -39,6 +45,7 @@ function chaisePage() {
     };
     this.resultContent = {
         resultAllRows: element.all(by.repeater('row in FacetsData.ermrestData')),
+        resultTallyRange: element.all(by.css('#results_tally')).get(1).element(by.binding("facetResults.displayRange()")),
         resultTallySum: element.all(by.css('#results_tally')).get(1).element(by.binding("FacetsData.totalServerItems")),
         filter: {
             clearAllBtn: element(by.cssContainingText('#filter div.filter-item.ng-scope > a', 'Clear All Filters')),
@@ -48,8 +55,29 @@ function chaisePage() {
                 return element(by.cssContainingText('#filter div.filter-item.ng-scope:not(.ng-hide)', attrName));
             },
         },
-
     };
+    this.recordPage = {
+        entityTitle: element(by.css('#entity-title')),
+        findEntityKeyByName: function(entityName) {
+            return element(by.cssContainingText('.entity-key.ng-binding', entityName));
+        },
+        findToggleByName: function(keyName) {
+            return element(by.cssContainingText('.panel-heading', keyName))
+        },
+    };
+    this.tools = {
+        getDisplayedRecordNum: function(str) {
+            return str.split('-')[1];
+        },
+        getRandomInt: function(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        },
+        getAnyPartOfStr: function(str) {
+            var len = str.length;
+            //var idx = Math.floor(Math.random() * (len - 0 + 1) + 0);
+            return str.substr(len / 2);
+        },
+    }
 };
 
 module.exports = new chaisePage();
