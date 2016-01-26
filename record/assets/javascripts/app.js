@@ -828,13 +828,8 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
                     Object.getOwnPropertyNames(cd.annotations['tag:misd.isi.edu,2015:url']).length === 0) {
                     pattern = "auto_link";
                 }
-                else {
-                    if (cd.annotations['tag:misd.isi.edu,2015:url']['base-url'] !== undefined) {
-                        pattern = cd.annotations['tag:misd.isi.edu,2015:url']['base-url'];
-                    }
-                    if (cd.annotations['tag:misd.isi.edu,2015:url']['pattern'] !== undefined) {
-                        pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
-                    }
+                else if (cd.annotations['tag:misd.isi.edu,2015:url']['pattern'] !== undefined) {
+                    pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
                 }
 
                 interp[cd.name] = pattern;
