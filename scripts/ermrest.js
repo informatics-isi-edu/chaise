@@ -914,6 +914,7 @@ function successUpdateCount(data, textStatus, jqXHR, param) {
 function updateGroups(options, successCallback) {
 	var tables = [options['table']].concat(association_tables_names);
 	var alertObject = {'display': true};
+	var sentRequest = false;
 	$.each(tables, function(i, table) {
 		if (!hasTableFacetsHidden(table)) {
 			$.each(options['colsGroup'][table], function(col, values) {
@@ -947,10 +948,14 @@ function updateGroups(options, successCallback) {
 					}
 					url += tableRef +  '/' + col_name + ';cnt:=cnt(' + col_name + ')';
 					ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successUpdateGroups, errorErmrest, param);
+					sentRequest = true;
 				}
 			});
 		}
 	});
+	if (!sentRequest) {
+		successCallback();
+	}
 }
 
 function successUpdateGroups(data, textStatus, jqXHR, param) {
