@@ -241,7 +241,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // If reference table is a complex table, swap vocab
             var references = data;
             self.processForeignKeyRefencesForTable(ft.tableName, ft.schemaName, ft, references);
-            self.patternInterpretationForTable(ft, references);
+            self.patternInterpretationForTable(ft, references); // this will overwrite reference _link with annotation _link
 
             // get display columns
             // this is a list of key values of column names and display column names
@@ -593,6 +593,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         // Build an array of predicates for the Ermrest Filter lanaguage
         var predicates = [];
 
+        // TODO this doesn't work when value is an uri
         for (var key in params){
             var predicate   = fixedEncodeURIComponent(key) + '=';
             // Do not encoude already encoded string
@@ -1075,6 +1076,10 @@ chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
         });
 
     });
+
+    $scope.isExternalUrl = function(url) {
+        return (url.indexOf(window.location.origin) === -1);
+    }
 }]);
 
 
