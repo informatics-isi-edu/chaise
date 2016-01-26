@@ -241,6 +241,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // If reference table is a complex table, swap vocab
             var references = data;
             self.processForeignKeyRefencesForTable(ft.tableName, ft.schemaName, ft, references);
+            self.patternInterpretationForTable(ft, references); // this will overwrite reference _link with annotation _link
 
             // get display columns
             // this is a list of key values of column names and display column names
@@ -402,6 +403,24 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             }
         }
 
+    };
+
+    // if table has columns with url pattern, add to data as col_link
+    this.patternInterpretationForTable = function(ft, references) {
+        var urlPatterns = schemaService.getColumnInterpretations(ft.schemaName, ft.tableName);
+        for (col in urlPatterns) {
+            for (var row = 0; row < references.length; row++) {
+                var pattern = urlPatterns[col];
+                if (pattern === "auto_link") { // link url is same as the column value
+                    references[row][col + '_link'] = references[row][col];
+                }
+                else {
+                    var link = pattern.replace("{value}", references[row][col]);
+                    // replace {value} with data value
+                    references[row][col + '_link'] = link;
+                }
+            }
+        }
     };
 
     // Get the entity display title
@@ -574,6 +593,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         // Build an array of predicates for the Ermrest Filter lanaguage
         var predicates = [];
 
+        // TODO this doesn't work when value is an uri
         for (var key in params){
             var predicate   = fixedEncodeURIComponent(key) + '=';
             // Do not encoude already encoded string
@@ -791,6 +811,33 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         return columns;
     }
 
+    // returns a set of col_name : interpretation for the table
+    this.getColumnInterpretations = function(schemaName, tableName) {
+        var interp = {};
+
+        var columnDefinitions = this.schemas[schemaName].tables[tableName].column_definitions;
+
+        for (var i = 0; i < columnDefinitions.length; i++) {
+            var cd = columnDefinitions[i];
+
+            var pattern = "";
+
+            // If column has interpretation
+            if (cd.annotations['tag:misd.isi.edu,2015:url'] !== undefined){
+                if (cd.annotations['tag:misd.isi.edu,2015:url'] === null ||
+                    Object.getOwnPropertyNames(cd.annotations['tag:misd.isi.edu,2015:url']).length === 0) {
+                    pattern = "auto_link";
+                }
+                else if (cd.annotations['tag:misd.isi.edu,2015:url']['pattern'] !== undefined) {
+                    pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
+                }
+
+                interp[cd.name] = pattern;
+            }
+        }
+
+        return interp;
+    }
 }]);
 
 
@@ -1024,6 +1071,10 @@ chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
         });
 
     });
+
+    $scope.isExternalUrl = function(url) {
+        return (url.indexOf(window.location.origin) === -1);
+    }
 }]);
 
 
@@ -1070,12 +1121,10 @@ chaiseRecordApp.filter('removeUnderScores', function(){
 });
 
 
-// If value is url -> wraps it in an <a>
 // If value is array -> stringify arrays
 chaiseRecordApp.filter('sanitizeValue', function($sce){
     return function(value){
 
-        var urls    = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
         var emails  = /([a-zA-Z0-9_\.]+@[a-zA-Z_\.]+\.(edu|com|net|gov|io))/gim;
 
         if (Array.isArray(value)){
@@ -1086,11 +1135,6 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
 
             return 'N/A';
 
-        } else if (typeof value == "string" && value.match(urls)) {
-
-            value = value.replace(urls, '<a href="$1" target="_blank">$1</a>');
-            return $sce.trustAsHtml(value);
-
         } else if (typeof value == "string" && value.match(emails)) {
 
             value = value.replace(emails, '<a href=\"mailto:$1\">$1</a>');
@@ -1099,6 +1143,14 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
         } else{
             return value;
         }
+
+    };
+});
+
+chaiseRecordApp.filter('uri', function($sce){
+    return function(value){
+
+        return $sce.trustAsHtml(value);
 
     };
 });
@@ -1164,6 +1216,22 @@ chaiseRecordApp.filter('filesize', function(){
     return function(input){
         return filesize(parseInt(input, 10));
     };
+});
+
+// remove columns with _link ending
+chaiseRecordApp.filter('notHyperLink', function () {
+    return function (cols) {
+        var result = [];
+        if (cols !== undefined) {
+            for (var i = 0; i < cols.length; i++) {
+                if (!cols[i].match(".*_link")) {
+                    result.push(cols[i]);
+                }
+            }
+        }
+        return result;
+
+    }
 });
 
 /*
