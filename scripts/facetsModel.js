@@ -77,6 +77,7 @@ facetsModel.factory('FacetsData', function() {
 			'tag': null,
 			'tagPages': 5,
 			'textEntryRow': [],
+			'thumbnails': {},
 			'tiles': [],
 			'totalServerItems': 0,
 			'tree': [],
