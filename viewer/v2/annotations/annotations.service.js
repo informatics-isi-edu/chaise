@@ -43,8 +43,8 @@
         }
 
         function updateAnnotation(annotation) {
-            if (!newAnnotation.anatomy) {
-                newAnnotation.anatomy = null;
+            if (!annotation.anatomy) {
+                annotation.anatomy = null;
             }
 
             // Update in ERMrest
