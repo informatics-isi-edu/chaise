@@ -85,8 +85,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // Data use by helper methods
             entity.internal         = { schemaName: schemaName, tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
 
-            // console.log('entity', entity);
-
             // SET ENTITY DISPLAY TITLE
             entity.internal.displayTitle = self.getEntityTitle(entity);
 
@@ -107,8 +105,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                 // If initialLoad is true, then we load the entities, else we load the aggregate (count)
                 var ermrestPath = (ft.initialLoad) ? ft.path : ft.aggregatePath;
-
-                console.log('ermrest path is ', ermrestPath);
 
                 // Need to preserve ft variable in a closure
                 (function(ft){
@@ -157,14 +153,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                                 'referencedTableName':  ft['referencedTableName']
                                                             };
 
-                                                            // console.log(formattedAssoication);
-
                                 entity.associations.push(formattedAssoication);
 
                             // Else, append the 'formattedForeignTable' to the entity's elements
                             } else{
-
-                                console.log('elements is', elements);
 
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
                                 var formattedForeignTable     = {
@@ -197,8 +189,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                             // Hide spinner
                             spinnerService.hide();
-
-                            console.log('entity', entity);
                         }
 
                     }).
@@ -217,8 +207,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                 // Hide spinner
                 spinnerService.hide();
-
-                console.log('entity', entity);
             }
 
         }).error(function(data, status, headers, config) {
@@ -898,7 +886,7 @@ chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($root
 }]);
 
 // Detail controller
-chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, spinnerService, ermrestService, schemaService, locationService, notFoundService){
+chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, $sce, spinnerService, ermrestService, schemaService, locationService, notFoundService){
     // C: Catalogue id
     // T: Table name
     // K: Key
@@ -947,7 +935,15 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerServic
         schemaService.initSchemas(cid, function(data) {
             // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
             ermrestService.getEntity(schemaName, tableName, keys, function(data){
-                // console.log('data is ', data);
+                if (data['previews']) {
+                    var origin = window.location.protocol + "//" + window.location.hostname; // TBD: portno?
+                    for (var i = 0, len = data['previews'].length; i < len; i++) {
+                        preview = data['previews'][i];
+                        preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?url=' + preview.preview;
+                        preview.enlargeUrl = origin + '/_viewer/xtk/view.html?url=' + preview.preview;
+                        $sce.trustAsResourceUrl(preview.embedUrl);
+                    }
+                }
                 $scope.entity = data;
             });
         });
@@ -982,7 +978,6 @@ chaiseRecordApp.controller('ImagesCtrl', ['$scope', function($scope){
 
         jQuery(document).on('click', '.thumbs a', function (e){
             e.preventDefault();
-            // console.log('data slide', jQuery(this).data('att-slide'));
             thumbs.goToSlide(jQuery(this).data('att-slide'));
             return false;
         });
@@ -1070,7 +1065,6 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
 // Removes underscores from input
 chaiseRecordApp.filter('removeUnderScores', function(){
     return function(input){
-        //console.log('input ' + input);
         return input.replace(/_/g, ' ');
     };
 });

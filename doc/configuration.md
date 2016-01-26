@@ -14,8 +14,8 @@ The below table explains the usage of the default parameters:
 | authnProvider | session <br> goauth <br> globusonline | goauth | "authnProvider":\<value\> | N/A | The _ermrest_config.json_ file must be configured adequately for the used authnProvider. |
 | layout | list <br> table <br> card | list | "layout":\<value\> | layout=\<value\> | The view the summary page will be rendered. |
 | facetPolicy | on_demand | N/A | "facetPolicy":\<value\> | N/A | If present with the _on_demand_ value, requests (for facets count and for facets distinct values) will be issued only for the selected facets. <br> At start up, the facets with the "top" annotation will be selected.<br>  On demand, you can check also other facets. |
-| feedbackURL | An URL for a form to provide feedback. | The FaceBase feedback form page. | "feedbackURL":\<URL\> | N/A | |
-| helpURL | An URL for getting help using Chaise. | The URL for getting help in using the Data Browser of FaceBase. | "helpURL":\<URL\> | N/A | |
+| feedbackURL | An URL for a form to provide feedback. | None | "feedbackURL":\<URL\> | N/A | |
+| helpURL | An URL for getting help using Chaise. | None | "helpURL":\<URL\> | N/A | |
 | ermrestLocation | The base URL for the ERMrest service | window.location.protocol + // + window.location.host | "ermrestLocation": \<URL\> | N/A | The location of the ERMrest service. |
 | recordResource | The sub path for the record resource | /record | "recordResource":\<value\> | N/A | |
 | showBadgeCounts | true <br> false | false | "showBadgeCounts":\<value\> | N/A | If true, facet counts will be displayed in the sidebar. |
