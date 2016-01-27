@@ -36,6 +36,10 @@ chaiseRecordApp.service('configService', function() {
     if (chaiseConfig['ermrestLocation'] != null) {
         this.CR_BASE_URL = chaiseConfig['ermrestLocation'] + '/ermrest/catalog/';
     }
+    this.TABLE_THRESHOLD = 5;
+    if (chaiseConfig['tableThreshold'] != null) {
+        this.TABLE_THRESHOLD = chaiseConfig['tableThreshold'];
+    }
 });
 
 // REST API for Ermrest
@@ -85,8 +89,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // Data use by helper methods
             entity.internal         = { schemaName: schemaName, tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
 
-            // console.log('entity', entity);
-
             // SET ENTITY DISPLAY TITLE
             entity.internal.displayTitle = self.getEntityTitle(entity);
 
@@ -107,8 +109,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                 // If initialLoad is true, then we load the entities, else we load the aggregate (count)
                 var ermrestPath = (ft.initialLoad) ? ft.path : ft.aggregatePath;
-
-                console.log('ermrest path is ', ermrestPath);
 
                 // Need to preserve ft variable in a closure
                 (function(ft){
@@ -157,14 +157,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                                 'referencedTableName':  ft['referencedTableName']
                                                             };
 
-                                                            // console.log(formattedAssoication);
-
                                 entity.associations.push(formattedAssoication);
 
                             // Else, append the 'formattedForeignTable' to the entity's elements
                             } else{
-
-                                console.log('elements is', elements);
 
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
                                 var formattedForeignTable     = {
@@ -175,7 +171,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                                 'schemaName':           ft['schemaName'],
                                                                 'list':                 [], // list of nested entities
                                                                 'referencedTableName':  ft['referencedTableName'],
-                                                                'transpose':            false,
+                                                                'transpose':            elements[0]['row_count'] <= configService.TABLE_THRESHOLD,
                                                                 'open':                 false,
                                                                 'path':                 ft['path'], // ermrest path to load elements
                                                                 'count':                elements[0]['row_count']
@@ -197,8 +193,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                             // Hide spinner
                             spinnerService.hide();
-
-                            console.log('entity', entity);
                         }
 
                     }).
@@ -217,8 +211,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                 // Hide spinner
                 spinnerService.hide();
-
-                console.log('entity', entity);
             }
 
         }).error(function(data, status, headers, config) {
@@ -253,6 +245,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // If reference table is a complex table, swap vocab
             var references = data;
             self.processForeignKeyRefencesForTable(ft.tableName, ft.schemaName, ft, references);
+            self.patternInterpretationForTable(ft, references); // this will overwrite reference _link with annotation _link
 
             // get display columns
             // this is a list of key values of column names and display column names
@@ -414,6 +407,24 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             }
         }
 
+    };
+
+    // if table has columns with url pattern, add to data as col_link
+    this.patternInterpretationForTable = function(ft, references) {
+        var urlPatterns = schemaService.getColumnInterpretations(ft.schemaName, ft.tableName);
+        for (col in urlPatterns) {
+            for (var row = 0; row < references.length; row++) {
+                var pattern = urlPatterns[col];
+                if (pattern === "auto_link") { // link url is same as the column value
+                    references[row][col + '_link'] = references[row][col];
+                }
+                else {
+                    var link = pattern.replace("{value}", references[row][col]);
+                    // replace {value} with data value
+                    references[row][col + '_link'] = link;
+                }
+            }
+        }
     };
 
     // Get the entity display title
@@ -586,6 +597,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         // Build an array of predicates for the Ermrest Filter lanaguage
         var predicates = [];
 
+        // TODO this doesn't work when value is an uri
         for (var key in params){
             var predicate   = fixedEncodeURIComponent(key) + '=';
             // Do not encoude already encoded string
@@ -803,6 +815,33 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         return columns;
     }
 
+    // returns a set of col_name : interpretation for the table
+    this.getColumnInterpretations = function(schemaName, tableName) {
+        var interp = {};
+
+        var columnDefinitions = this.schemas[schemaName].tables[tableName].column_definitions;
+
+        for (var i = 0; i < columnDefinitions.length; i++) {
+            var cd = columnDefinitions[i];
+
+            var pattern = "";
+
+            // If column has interpretation
+            if (cd.annotations['tag:misd.isi.edu,2015:url'] !== undefined){
+                if (cd.annotations['tag:misd.isi.edu,2015:url'] === null ||
+                    Object.getOwnPropertyNames(cd.annotations['tag:misd.isi.edu,2015:url']).length === 0) {
+                    pattern = "auto_link";
+                }
+                else if (cd.annotations['tag:misd.isi.edu,2015:url']['pattern'] !== undefined) {
+                    pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
+                }
+
+                interp[cd.name] = pattern;
+            }
+        }
+
+        return interp;
+    }
 }]);
 
 
@@ -898,7 +937,7 @@ chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($root
 }]);
 
 // Detail controller
-chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, spinnerService, ermrestService, schemaService, locationService, notFoundService){
+chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, $sce, spinnerService, ermrestService, schemaService, locationService, notFoundService){
     // C: Catalogue id
     // T: Table name
     // K: Key
@@ -949,7 +988,15 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerServic
         schemaService.initSchemas(cid, function(data) {
             // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
             ermrestService.getEntity(schemaName, tableName, keys, function(data){
-                // console.log('data is ', data);
+                if (data['previews']) {
+                    var origin = window.location.protocol + "//" + window.location.hostname; // TBD: portno?
+                    for (var i = 0, len = data['previews'].length; i < len; i++) {
+                        preview = data['previews'][i];
+                        preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?url=' + preview.preview;
+                        preview.enlargeUrl = origin + '/_viewer/xtk/view.html?url=' + preview.preview;
+                        $sce.trustAsResourceUrl(preview.embedUrl);
+                    }
+                }
                 $scope.entity = data;
             });
         });
@@ -1199,7 +1246,6 @@ chaiseRecordApp.controller('ImagesCtrl', ['$scope', function($scope){
 
         jQuery(document).on('click', '.thumbs a', function (e){
             e.preventDefault();
-            // console.log('data slide', jQuery(this).data('att-slide'));
             thumbs.goToSlide(jQuery(this).data('att-slide'));
             return false;
         });
@@ -1246,6 +1292,10 @@ chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
         });
 
     });
+
+    $scope.isExternalUrl = function(url) {
+        return (url.indexOf(window.location.origin) === -1);
+    }
 }]);
 
 /*
@@ -1286,18 +1336,15 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
 // Removes underscores from input
 chaiseRecordApp.filter('removeUnderScores', function(){
     return function(input){
-        //console.log('input ' + input);
         return input.replace(/_/g, ' ');
     };
 });
 
 
-// If value is url -> wraps it in an <a>
 // If value is array -> stringify arrays
 chaiseRecordApp.filter('sanitizeValue', function($sce){
     return function(value){
 
-        var urls    = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
         var emails  = /([a-zA-Z0-9_\.]+@[a-zA-Z_\.]+\.(edu|com|net|gov|io))/gim;
 
         if (Array.isArray(value)){
@@ -1308,11 +1355,6 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
 
             return 'N/A';
 
-        } else if (typeof value == "string" && value.match(urls)) {
-
-            value = value.replace(urls, '<a href="$1" target="_blank">$1</a>');
-            return $sce.trustAsHtml(value);
-
         } else if (typeof value == "string" && value.match(emails)) {
 
             value = value.replace(emails, '<a href=\"mailto:$1\">$1</a>');
@@ -1321,6 +1363,14 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
         } else{
             return value;
         }
+
+    };
+});
+
+chaiseRecordApp.filter('uri', function($sce){
+    return function(value){
+
+        return $sce.trustAsHtml(value);
 
     };
 });
@@ -1386,6 +1436,22 @@ chaiseRecordApp.filter('filesize', function(){
     return function(input){
         return filesize(parseInt(input, 10));
     };
+});
+
+// remove columns with _link ending
+chaiseRecordApp.filter('notHyperLink', function () {
+    return function (cols) {
+        var result = [];
+        if (cols !== undefined) {
+            for (var i = 0; i < cols.length; i++) {
+                if (!cols[i].match(".*_link")) {
+                    result.push(cols[i]);
+                }
+            }
+        }
+        return result;
+
+    }
 });
 
 /*
