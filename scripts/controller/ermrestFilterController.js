@@ -10,6 +10,13 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'FacetsD
 	
 	$scope.FacetsData = FacetsData;
 	
+	$scope.$watch('FacetsData.sortFacet', function (newVal, oldVal) {
+		if ($scope.FacetsData.ready && newVal !== oldVal) {
+			$scope.FacetsData.pagingOptions.currentPage = 1;
+			$scope.getPagedDataAsync($scope.FacetsData.pagingOptions.pageSize, $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.filterOptions.filterText, $scope.FacetsData.sortInfo);
+		}
+	}, true);
+	
 	$scope.$watch('FacetsData.filterOptions', function (newVal, oldVal) {
 		if ($scope.FacetsData.ready && newVal !== oldVal) {
 			$scope.FacetsData.pagingOptions.currentPage = 1;
