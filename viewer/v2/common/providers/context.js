@@ -6,11 +6,10 @@
     angular.module('chaise.viewer')
 
     .constant('context', {
-        // Configure serviceURL from chaise-config
         serviceURL: 'https://localhost/ermrest',
         catalogID: '1',
         schemaName: 'rbk',
         tableName: 'image',
-        imageID: '1'
+        imageID: '1',
     });
 })();

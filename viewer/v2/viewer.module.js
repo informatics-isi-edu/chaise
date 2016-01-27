@@ -3,7 +3,6 @@
 
     angular.module('chaise.viewer', ['ERMrest'])
 
-
     .config(['context', function configureContext(context) {
         context.serviceURL = window.location.origin + '/ermrest';
 
@@ -33,7 +32,7 @@
         }
     }])
 
-    // Run block to hydrate values providers
+    // Hydrate values providers
     .run(['$window', 'context', 'image', 'annotations', 'anatomies', 'ermrestClientFactory', function run($window, context, image, annotations, anatomies, ermrestClientFactory) {
         var origin = window.location.origin;
         var annotoriousReady = false;
@@ -95,7 +94,7 @@
         });
 
     }]);
-    
+
     // Refresh the page when the window's hash changes. Needed because Angular
     // normally doesn't refresh page when hash changes.
     window.onhashchange = function() {
