@@ -1,3 +1,4 @@
+<!doctype html>
 <html id="recordApp" ng-app="chaiseRecordApp">
     <head>
         %ASSETS%
@@ -113,79 +114,104 @@
                     </ul>
                 </accordion-group>
 
-                <!-- REFERENCES -->
-                <accordion-group ng-repeat="ft in entity.foreignTables | orderBy:'title'" is-open="ft.open">
+                <div ng-if="!chaiseConfig.detailUiGridEnabled">
+                    <!-- REFERENCES -->
+                    <accordion-group ng-repeat="ft in entity.foreignTables | orderBy:'title'" is-open="ft.open">
+                        <accordion-heading>
+                            <div ng-class="{'active': ft.open }" ng-click="foreignTableToggle($index)">
+                                {{ ft.title | removeUnderScores }}
+                                <span ng-if="ft.count > 0">({{ ft.count }})</span>
+                            </div>
 
-                    <accordion-heading>
-                        <div ng-class="{'active': ft.open }" ng-click="foreignTableToggle($index)">
-                            {{ ft.title | removeUnderScores }}
-                            <span ng-if="ft.count > 0">({{ ft.count }})</span>
-                        </div>
-                        
-                    </accordion-heading>
+                        </accordion-heading>
 
-                    <div id="ft-transpose" ng-controller="NestedTablesCtrl" ng-if="ft.transpose">
-                        <ul class="reference-views clearfix" ng-if="ft.count > 0">
-                            <li><div class="reference-view-title">View</div></li>
-                            <li><a ng-click="ft.transpose = false" ng-class="{ 'active': !ft.transpose }" class="transpose-toggle">Default</a></li>
-                            <li><a ng-click="ft.transpose = true" ng-class="{ 'active': ft.transpose }" class="transpose-toggle">Transpose</a></li>
-                        </ul>
+                        <div id="ft-transpose" ng-controller="NestedTablesCtrl" ng-if="ft.transpose">
+                            <ul class="reference-views clearfix" ng-if="ft.count > 0">
+                                <li><div class="reference-view-title">View</div></li>
+                                <li><a ng-click="ft.transpose = false" ng-class="{ 'active': !ft.transpose }" class="transpose-toggle">Default</a></li>
+                                <li><a ng-click="ft.transpose = true" ng-class="{ 'active': ft.transpose }" class="transpose-toggle">Transpose</a></li>
+                            </ul>
 
-                        <p ng-if="ft.count == 0">No rows found</p>
+                            <p ng-if="ft.count == 0">No rows found</p>
 
-                        <div class="table-wrapper wrapper">
-                            <table class="table table-striped table-reference">
-                                <tbody>
-                                    <tr ng-repeat="key in ft.keys | notHyperLink" on-finish-render>
-                                        <th class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
-                                        <td ng-repeat="reference in ft.list" class="entity-value col-xs-10">
-                                            <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
-                                                ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
-                                                {{reference[key] | sanitizeValue }}
-                                            </a>
-                                            <span ng-if="!reference[key + '_link']" ng-bind-html="reference[key] | sanitizeValue"></span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div ng-controller="NestedTablesCtrl" ng-if="!ft.transpose">
-
-                        <ul class="reference-views clearfix" ng-if="ft.count > 0">
-                            <li><div class="reference-view-title">View</div></li>
-                            <li><a ng-click="ft.transpose = false" ng-class="{ 'active': !ft.transpose }" class="transpose-toggle">Default</a></li>
-                            <li><a ng-click="ft.transpose = true" ng-class="{ 'active': ft.transpose }" class="transpose-toggle">Transpose</a></li>
-                        </ul>
-
-                        <p ng-if="ft.count == 0">No rows found</p>
-
-                        <div class="table-wrapper wrapper">
-                            <table class="table table-striped nested table-reference">
-                                <thead>
-                                    <tr>
-                                        <th ng-repeat="key in ft.keys | notHyperLink" class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="reference in ft.list" on-finish-render>
-                                        <td ng-repeat="key in ft.keys | notHyperLink"  class="entity-value col-xs-10" >
-                                            <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
-                                                ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
-                                                {{reference[key] | sanitizeValue }}
-                                            </a>
-                                            <span ng-if="!reference[key + '_link']" ng-bind-html="reference[key] | sanitizeValue"></span>
-
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="table-wrapper wrapper">
+                                <table class="table table-striped table-reference">
+                                    <tbody>
+                                        <tr ng-repeat="key in ft.keys | notHyperLink" on-finish-render>
+                                            <th class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
+                                            <td ng-repeat="reference in ft.list" class="entity-value col-xs-10">
+                                                <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
+                                                    ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
+                                                    {{reference[key] | sanitizeValue }}
+                                                </a>
+                                                <span ng-if="!reference[key + '_link']" ng-bind-html="reference[key] | sanitizeValue"></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
-                    </div>
+                        <div ng-controller="NestedTablesCtrl" ng-if="!ft.transpose">
 
-                </accordion-group>
+                            <ul class="reference-views clearfix" ng-if="ft.count > 0">
+                                <li><div class="reference-view-title">View</div></li>
+                                <li><a ng-click="ft.transpose = false" ng-class="{ 'active': !ft.transpose }" class="transpose-toggle">Default</a></li>
+                                <li><a ng-click="ft.transpose = true" ng-class="{ 'active': ft.transpose }" class="transpose-toggle">Transpose</a></li>
+                            </ul>
+
+                            <p ng-if="ft.count == 0">No rows found</p>
+
+                            <div class="table-wrapper wrapper">
+                                <table class="table table-striped nested table-reference">
+                                    <thead>
+                                        <tr>
+                                            <th ng-repeat="key in ft.keys | notHyperLink" class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="reference in ft.list" on-finish-render>
+                                            <td ng-repeat="key in ft.keys | notHyperLink"  class="entity-value col-xs-10" >
+                                                <a ng-if="reference[key + '_link']" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
+                                                    ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
+                                                    {{reference[key] | sanitizeValue }}
+                                                </a>
+                                                <span ng-if="!reference[key + '_link']" ng-bind-html="reference[key] | sanitizeValue"></span>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </accordion-group>
+                </div>
+
+                <div ng-if="chaiseConfig.detailUiGridEnabled">
+                    <!-- REFERENCES -->
+                    <accordion-group ng-repeat="ft in entity.foreignTables | orderBy:'title'" is-open="ft.open">
+                        <accordion-heading>
+                            <div ng-class="{'active': ft.open }" >
+                                {{ ft.title | removeUnderScores }}
+                                <span ng-if="ft.count > 0">({{ ft.count }})</span>
+                            </div>
+
+                        </accordion-heading>
+
+                        <div ng-controller="DetailTablesCtrl" ng-if="ft.open">
+                           <div>
+                                <ul class="reference-views clearfix" ng-if="ft.count > 0">
+                                    <li><div class="reference-view-title">View</div></li>
+                                    <li><a ng-click="transposeToggle(ft, false)" ng-class="{ 'active': !ft.transpose }" class="transpose-toggle">Default</a></li>
+                                    <li><a ng-click="transposeToggle(ft, true)" ng-class="{ 'active': ft.transpose }" class="transpose-toggle">Transpose</a></li>
+                                </ul>
+                                <p ng-if="ft.count == 0">No rows found</p>
+                            </div>
+
+                            <div id = "nestedDetailGrid" class="detailGrid" ng-if="ft.count > 0" ng-init="initUIGrid()" ui-grid="gridOptions" ui-grid-cellNav ui-grid-edit ui-grid-resize-columns ui-grid-pinning ui-grid-selection ui-grid-move-columns ui-grid-grouping ui-grid-infinite-scroll ></div>
+                        </div>
+                    </accordion-group>
+                </div>
 
             </accordion>
         <!-- NG-IF ENTITY -->

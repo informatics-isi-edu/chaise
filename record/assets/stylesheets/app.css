@@ -439,8 +439,6 @@ tbody{
 
 .detailGrid {
     min-width: 600px;
-    min-height: 200px;
-    height: 400px;
 }
 
 .ui-grid-viewport .ui-grid-cell-contents {

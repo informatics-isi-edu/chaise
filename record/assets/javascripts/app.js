@@ -1025,7 +1025,7 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
     $scope.gridOptions = {};
     $scope.gridOptions.data = 'view';
     $scope.gridOptions.rowHeight = 65;
-    $scope.gridOptions.minRowsToShow = 10;
+    $scope.gridOptions.minRowsToShow = $scope.ft.count > 10 ? 10 : $scope.ft.count;
     $scope.gridOptions.flatEntityAccess = true;
     $scope.gridOptions.enableColumnResizing = true;
     $scope.gridOptions.enableFiltering = true;
@@ -1054,7 +1054,7 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
         for (var column in displayColumns) {
             if (displayColumns.hasOwnProperty(column)) {
                 var displayName = displayColumns[column];
-                $scope.columnMetadata[column] = {displayName:displayName}
+                $scope.columnMetadata[column] = {displayName:displayName};
                 $scope.columns.push({name: column, displayName: displayName, headerTooltip:true, cellTooltip:true, width:120})
             }
         }
