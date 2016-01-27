@@ -36,7 +36,7 @@ chaiseRecordApp.service('configService', function() {
     if (chaiseConfig['ermrestLocation'] != null) {
         this.CR_BASE_URL = chaiseConfig['ermrestLocation'] + '/ermrest/catalog/';
     }
-    this.TABLE_THRESHOLD = 5;
+    this.TABLE_THRESHOLD = 0;
     if (chaiseConfig['tableThreshold'] != null) {
         this.TABLE_THRESHOLD = chaiseConfig['tableThreshold'];
     }
