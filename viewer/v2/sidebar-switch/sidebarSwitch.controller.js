@@ -6,7 +6,7 @@
     .controller('SidebarSwitchController', [function() {
         var vm = this;
         vm.sidebars = ['annotations', 'metadata'];
-        vm.sidebar = vm.sidebars[0];
+        vm.sidebar = vm.sidebars[1];
         vm.setSidebar = setSidebar;
 
         function setSidebar(sidebar) {

@@ -15,11 +15,12 @@
             if (!newAnnotation.anatomy) {
                 newAnnotation.anatomy = null;
             }
-
+            // WHEN REMOVING this ~jessie, set newAnnotation.context_uri to iframe.location.href 3 lines down
+            newAnnotation.context_uri = iframe.location.href.replace(/\/~jessie/g, '');
             newAnnotation = [{
                 "image_id": context.imageID,
                 "anatomy": newAnnotation.anatomy,
-                "context_uri": iframe.location.href,
+                "context_uri": newAnnotation.context_uri,
                 "coords": [
                     newAnnotation.shape.geometry.x,
                     newAnnotation.shape.geometry.y,
@@ -48,6 +49,7 @@
             }
 
             // Update in ERMrest
+            annotation.data.context_uri = annotation.data.context_uri.replace(/\/~jessie/g, '');
             annotation.update();
             // Update in Annotorious
             iframe.postMessage({messageType: 'updateAnnotation', content: annotation.data}, origin);
