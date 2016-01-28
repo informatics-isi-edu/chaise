@@ -1147,9 +1147,13 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
         }
 
         if (transpose) {
+            $scope.gridOptions.enableFiltering = false;
+            $scope.gridOptions.enableColumnMenus = false;
             $scope.gridOptions.columnDefs = $scope.transposedColumns;
             $scope.view  = $scope.transposedData;
         } else {
+            $scope.gridOptions.enableFiltering = true;
+            $scope.gridOptions.enableColumnMenus = true;
             $scope.gridOptions.columnDefs = $scope.columns;
             $scope.view = $scope.data;
         }
