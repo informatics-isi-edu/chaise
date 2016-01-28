@@ -408,7 +408,7 @@ tbody{
     color: #999;
     font-weight: normal;
     font-size: 1em;
-    letter-spacing: 
+    /*letter-spacing:*/
 }
 
 .entity-value {
@@ -437,4 +437,16 @@ tbody{
     color: #428bca;
 }
 
+.detailGrid {
+    min-width: 600px;
+}
 
+.ui-grid-viewport .ui-grid-cell-contents {
+  word-wrap: break-word;
+  white-space: normal !important;
+}
+
+.ui-grid-row div[role=row] {
+  display: flex ;
+  align-content: stretch;
+}

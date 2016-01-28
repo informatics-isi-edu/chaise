@@ -10,7 +10,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
                                                       function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
-  $scope.chaiseConfig = chaiseConfig;
+  	$scope.chaiseConfig = chaiseConfig;
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();

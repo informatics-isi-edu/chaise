@@ -114,7 +114,11 @@ RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
 	$(RECORD_ASSETS)/lib/filesize.min.js \
 	$(RECORD_ASSETS)/lib/slippry/slippry.min.js \
 	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.pack.js \
-	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js
+	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js \
+    $(RECORD_ASSETS)/lib/ui-grid.js \
+    $(RECORD_ASSETS)/lib/csv.js \
+    $(RECORD_ASSETS)/lib/pdfmake.min.js \
+    $(RECORD_ASSETS)/lib/vfs_fonts.js
 
 RECORD_JS_SOURCE= $(JS)/respond.js \
 	$(JS)/variables.js \
@@ -127,7 +131,8 @@ RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/appheader.css
 
 RECORD_CSS_DEPS=$(RECORD_ASSETS)/lib/slippry/slippry.css \
-	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css
+	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css \
+	$(RECORD_ASSETS)/stylesheets/ui-grid.css
 
 RECORD_CSS_SOURCE=$(RECORD_ASSETS)/stylesheets/app.css
 
