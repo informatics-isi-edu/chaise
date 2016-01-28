@@ -1033,7 +1033,7 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
     $scope.gridOptions.enableFiltering = true;
     $scope.gridOptions.enableGridMenu = true;
     $scope.gridOptions.showGridFooter = true;
-    $scope.gridOptions.showColumnFooter = true;
+    $scope.gridOptions.showColumnFooter = false;
     $scope.gridOptions.minRowsToShow = $scope.ft.count > 10 ? 10 : $scope.ft.count;
     $scope.gridOptions.enableGridMenu = true;
     $scope.gridOptions.enableSelectAll = true;
@@ -1091,7 +1091,7 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
                                  type:columnType,
                                  headerTooltip:true,
                                  cellTooltip:true,
-                                 groupingShowAggregationMenu: (columnType == 'number'),
+                                 groupingShowAggregationMenu: false, //(columnType == 'number'),
                                  width:120})
         });
         $scope.gridOptions.columnDefs = $scope.columns;
