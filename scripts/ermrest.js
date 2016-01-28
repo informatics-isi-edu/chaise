@@ -1330,10 +1330,34 @@ function getSortQuery(sortOption, isAttribute) {
 	return ret;
 }
 
+function getSortClause(sortOption, isAttribute) {
+	var field = encodeSafeURIComponent(sortOption);
+	var columns = [];
+	var sortColumns = [];
+	sortColumns.push(field);
+	if (PRIMARY_KEY != null) {
+		$.each(PRIMARY_KEY, function(i, key) {
+			if (encodeSafeURIComponent(key) != field) {
+				sortColumns.push(encodeSafeURIComponent(key));
+			}
+		});
+		if (isAttribute) {
+			columns.push(field);
+			$.each(PRIMARY_KEY, function(i, key) {
+				if (encodeSafeURIComponent(key) != field) {
+					columns.push(encodeSafeURIComponent(key));
+				}
+			});
+		}
+	}
+	var ret = columns.join(',') + '@sort(' + sortColumns.join(',') + ')';
+	return ret;
+}
+
 function getPage(options, totalItems, successCallback) {
 	var page = options['pagingOptions']['currentPage'];
 	var pageSize = options['pagingOptions']['pageSize'];
-	var sortOption = options['sortOption'];
+	var sortOption = options['sortFacet'];
 	if (!$.isNumeric(page) || Math.floor(page) != page || page <= 0) {
 		successCallback([], totalItems, page, pageSize);
 	} else {
@@ -1343,8 +1367,8 @@ function getPage(options, totalItems, successCallback) {
 			url += '/' + predicate.join('/');
 		}
 		url += '/$A'
-		if (sortOption != null) {
-			url += '/' + getSortQuery(sortOption, true);
+		if (sortOption != null && sortOption != '') {
+			url += '/' + getSortClause(sortOption, true);
 		} else if (PRIMARY_KEY.length > 0) {
 			url += '/' + PRIMARY_KEY.join(',') + '@sort(' + PRIMARY_KEY.join(',') + ')';
 		}
@@ -1361,29 +1385,14 @@ function getPage(options, totalItems, successCallback) {
 function successGetPagePredicate(data, textStatus, jqXHR, param) {
 	var page = param['options']['pagingOptions']['currentPage'];
 	var pageSize = param['options']['pagingOptions']['pageSize'];
-	var sortOption = param['options']['sortOption'];
+	var sortOption = param['options']['sortFacet'];
 	if (data.length < (page-1)*pageSize + 1) {
 		param['successCallback']([], param['totalItems']);
 	} else {
 		param['queryPath'] = param['predicate'].slice();
 		var predicate = param['predicate'];
-		if (sortOption != null) {
-			var col = sortOption['fields'][0];
-			var direction = sortOption['directions'][0];
-			var sortPredicate = [];
-			sortPredicate.push(encodeSafeURIComponent(col) + '::null::');
-			if (data[(page-1)*pageSize][col] != null) {
-				sortPredicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
-			}
-			predicate.push('$A/' + sortPredicate.join(';'));
-			sortPredicate = [];
-			$.each(PRIMARY_KEY, function(i, primaryCol) {
-				sortPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
-			});
-			if (data[(page-1)*pageSize][col] != null) {
-				sortPredicate.push(encodeSafeURIComponent(col) + '::null::');
-				sortPredicate.push(encodeSafeURIComponent(col) + (direction=='asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
-			}
+		if (sortOption != null && sortOption != '') {
+			var sortPredicate = getSortPredicate(data, sortOption, page, pageSize);
 			predicate.push('$A/' + sortPredicate.join(';'));
 		} else {
 			var primaryKeyPredicate = [];
@@ -1405,12 +1414,13 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 			url += '/' + predicate.join('/');
 		}
 		url += '/$A';
-		if (sortOption != null) {
-			url += getSortQuery(sortOption, false);
+		if (sortOption != null && sortOption != '') {
+			url += getSortClause(sortOption, false);
 		} else {
 			url += '@sort(' + PRIMARY_KEY.join(',') + ')';
 		}
 		url += '?limit=' + pageSize;
+		param['getPageUrl'] = url;
 		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetPage, null, param);
 	}
 }
@@ -1422,10 +1432,19 @@ function successGetPage(data, textStatus, jqXHR, param) {
 		param['ermrestData'] = data;
 		param['fileTable'] = fileTable;
 		param['thumbnailColumn'] = thumbnailColumn;
-		var url = ERMREST_DATA_HOME + '/attribute/' + param['queryPredicate'] + (param['queryPath'].length > 0 ? '/' + param['queryPath'].join('/') : '');
-		url +='/$A/' + param['primaryKey'] + '::geq::' + data[0][param['primaryKey']]+'&'+param['primaryKey'] + '::leq::'+ data[data.length-1][param['primaryKey']];
-		var alias = 'B';
-		url += '/' + alias + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(fileTable) + '/$A/A:' + encodeSafeURIComponent(param['primaryKey']) + ',' + alias + ':' + encodeSafeURIComponent(thumbnailColumn);
+		var url = param['getPageUrl'];
+		var index = url.indexOf('/entity/');
+		url = url.substring(0, index) + '/attribute/' + url.substring(index + '/entity/'.length);
+		index = url.indexOf('@sort');
+		var columnList = [];
+		if (param['options']['sortFacet'] != null && param['options']['sortFacet'] != '') {
+			columnList.push(encodeSafeURIComponent(param['options']['sortFacet']));
+		}
+		$.each(PRIMARY_KEY, function(i, col) {
+			columnList.push(encodeSafeURIComponent(col));
+		});
+		columnList.push('B:' + encodeSafeURIComponent(thumbnailColumn));
+		url = url.substring(0, index) + '/B:=' + encodeSafeURIComponent(fileTable) + '/$A/' + columnList.join(',') + url.substring(index);
 		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetThumbnailUri, null, param);
 	} else {
 		param['successCallback'](data, param['totalItems'], param['options']['pagingOptions']['currentPage'], param['options']['pagingOptions']['pageSize']);
@@ -3788,3 +3807,24 @@ function getPredicateAttributes(options) {
 	return ret;
 }
 
+function getSortPredicate(data, sortColumn, page, pageSize) {
+	var sortPredicate = [];
+	if (data[(page-1)*pageSize][sortColumn] == null) {
+		var offsetPredicate = [];
+		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
+		$.each(PRIMARY_KEY, function(i, primaryCol) {
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+		});
+		sortPredicate.push(offsetPredicate.join('&'));
+		sortPredicate.push('!' + encodeSafeURIComponent(sortColumn) + '::null::');
+	} else {
+		var offsetPredicate = [];
+		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
+		$.each(PRIMARY_KEY, function(i, primaryCol) {
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+		});
+		sortPredicate.push(offsetPredicate.join('&'));
+		sortPredicate.push(encodeSafeURIComponent(sortColumn) + '::gt::' + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
+	}
+	return sortPredicate;
+}
