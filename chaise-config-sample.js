@@ -5,5 +5,7 @@ var chaiseConfig = {
     feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
     helpURL: '/help/using-the-data-browser/',
     showBadgeCounts: false,
-    detailUiGridEnabled: false
+    recordUiGridEnabled: true,
+    recordUiGridExportCSVEnabled: true,
+    recordUiGridExportPDFEnabled: true
 }

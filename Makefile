@@ -115,7 +115,10 @@ RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
 	$(RECORD_ASSETS)/lib/slippry/slippry.min.js \
 	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.pack.js \
 	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js \
-    $(RECORD_ASSETS)/lib/ui-grid.js
+    $(RECORD_ASSETS)/lib/ui-grid.js \
+    $(RECORD_ASSETS)/lib/csv.js \
+    $(RECORD_ASSETS)/lib/pdfmake.js \
+    $(RECORD_ASSETS)/lib/vfs_fonts.js
 
 RECORD_JS_SOURCE= $(JS)/respond.js \
 	$(JS)/variables.js \

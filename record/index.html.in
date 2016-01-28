@@ -114,7 +114,7 @@
                     </ul>
                 </accordion-group>
 
-                <div ng-if="!chaiseConfig.detailUiGridEnabled">
+                <div ng-if="!chaiseConfig.recordUiGridEnabled">
                     <!-- REFERENCES -->
                     <accordion-group ng-repeat="ft in entity.foreignTables | orderBy:'title'" is-open="ft.open">
                         <accordion-heading>
@@ -187,7 +187,7 @@
                     </accordion-group>
                 </div>
 
-                <div ng-if="chaiseConfig.detailUiGridEnabled">
+                <div ng-if="chaiseConfig.recordUiGridEnabled">
                     <!-- REFERENCES -->
                     <accordion-group ng-repeat="ft in entity.foreignTables | orderBy:'title'" is-open="ft.open">
                         <accordion-heading>
@@ -208,7 +208,7 @@
                                 <p ng-if="ft.count == 0">No rows found</p>
                             </div>
 
-                            <div id = "nestedDetailGrid" class="detailGrid" ng-if="ft.count > 0" ng-init="initUIGrid()" ui-grid="gridOptions" ui-grid-cellNav ui-grid-edit ui-grid-resize-columns ui-grid-pinning ui-grid-selection ui-grid-move-columns ui-grid-grouping ui-grid-infinite-scroll ></div>
+                            <div id = "nestedDetailGrid" class="detailGrid" ng-if="ft.count > 0" ng-init="initUIGrid()" ui-grid="gridOptions" ui-grid-cellNav ui-grid-edit ui-grid-exporter ui-grid-resize-columns ui-grid-pinning ui-grid-selection ui-grid-move-columns ui-grid-grouping ui-grid-infinite-scroll ></div>
                         </div>
                     </accordion-group>
                 </div>

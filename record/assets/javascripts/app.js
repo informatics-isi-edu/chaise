@@ -1022,19 +1022,50 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
     $scope.transposedData = [];
     $scope.transposedColumns = [];
     $scope.columnMetadata = {};
+    $scope.firstPage = 1;
+    $scope.lastPage = 1;
+
+    // base gridOptions
     $scope.gridOptions = {};
     $scope.gridOptions.data = 'view';
     $scope.gridOptions.rowHeight = 65;
-    $scope.gridOptions.minRowsToShow = $scope.ft.count > 10 ? 10 : $scope.ft.count;
-    $scope.gridOptions.flatEntityAccess = true;
     $scope.gridOptions.enableColumnResizing = true;
     $scope.gridOptions.enableFiltering = true;
     $scope.gridOptions.enableGridMenu = true;
     $scope.gridOptions.showGridFooter = true;
     $scope.gridOptions.showColumnFooter = true;
+    $scope.gridOptions.minRowsToShow = $scope.ft.count > 10 ? 10 : $scope.ft.count;
+    $scope.gridOptions.enableGridMenu = true;
+    $scope.gridOptions.enableSelectAll = true;
+    $scope.gridOptions.flatEntityAccess = true;
     //$scope.gridOptions.infiniteScrollUp = true;
     //$scope.gridOptions.infiniteScrollDown = true;
     //$scope.gridOptions.infiniteScrollRowsFromEnd= 40;
+
+    // csv export options
+    $scope.gridOptions.exporterMenuCsv = (chaiseConfig['recordUiGridExportCsvEnabled'] == true);
+    if ($scope.gridOptions.exporterMenuCsv) {
+        $scope.gridOptions.exporterCsvFilename = $scope.ft.title + '.csv';
+        $scope.gridOptions.exporterCsvLinkElement = angular.element(document.querySelectorAll(".custom-csv-link-location"));
+    }
+    // pdf export options
+    $scope.gridOptions.exporterMenuPdf = (chaiseConfig['recordUiGridExportPdfEnabled'] == true);
+    if ($scope.gridOptions.exporterMenuPdf) {
+        $scope.gridOptions.exporterPdfDefaultStyle = {fontSize: 9};
+        //$scope.gridOptions.exporterPdfTableStyle = {margin: [10, 10, 10, 10]};
+        $scope.gridOptions.exporterPdfTableHeaderStyle = {fontSize: 10, bold: true, italics: true, color: 'red'};
+        $scope.gridOptions.exporterPdfHeader = {text: $scope.ft.title, style: 'headerStyle'};
+        $scope.gridOptions.exporterPdfFooter = function (currentPage, pageCount) {
+            return {text: currentPage.toString() + ' of ' + pageCount.toString(), style: 'footerStyle'};
+        };
+        $scope.gridOptions.exporterPdfCustomFormatter = function (docDefinition) {
+            docDefinition.styles.headerStyle = {fontSize: 22, bold: true};
+            docDefinition.styles.footerStyle = {fontSize: 10, bold: true};
+            return docDefinition;
+        };
+        $scope.gridOptions.exporterPdfOrientation = 'landscape';
+        $scope.gridOptions.exporterPdfPageSize = 'A4';
+    }
 
     $scope.gridOptions.onRegisterApi = function ( gridApi ) {
         $scope.gridApi = gridApi;
@@ -1047,17 +1078,21 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
 
     $scope.initUIGrid = function()
     {
-        $scope.firstPage = 1;
-        $scope.lastPage = 1;
         var entity = $scope.ft;
-        var displayColumns = schemaService.getDisplayColumns(entity.schemaName, entity.tableName);
-        for (var column in displayColumns) {
-            if (displayColumns.hasOwnProperty(column)) {
-                var displayName = displayColumns[column];
-                $scope.columnMetadata[column] = {displayName:displayName};
-                $scope.columns.push({name: column, displayName: displayName, headerTooltip:true, cellTooltip:true, width:120})
-            }
-        }
+        var displayName;
+        var columnType;
+        var columnDefinitions = schemaService.schemas[entity.schemaName].tables[entity.tableName].column_definitions;
+        angular.forEach(columnDefinitions, function (column, i) {
+            displayName = schemaService.getColumnDisplayName(entity.schemaName,entity.tableName,column.name);
+            columnType = $scope.mapColumnDisplayType(column.type.typename);
+            $scope.columnMetadata[column.name] = {displayName:displayName};
+            $scope.columns.push({name: column.name,
+                                 displayName: displayName,
+                                 type:columnType,
+                                 headerTooltip:true,
+                                 cellTooltip:true,
+                                 width:120})
+        });
         $scope.gridOptions.columnDefs = $scope.columns;
 
         var canceler = $q.defer();
@@ -1080,19 +1115,19 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
             var transposedRecords = {};
             $scope.transposedColumns.push({
                 name: '0',
-                displayName: '',
+                displayName: 'Field Name',
                 headerTooltip:true,
                 cellTooltip:true,
-                width: 120,
+                width: 150,
                 type: 'string'
             });
             angular.forEach($scope.data, function (value, key) {
                 $scope.transposedColumns.push({
                     name: (key + 1).toString(),
-                    displayName: '',
+                    displayName: 'Record ' + (key + 1).toString(), // should be pkey but what about composites?
                     headerTooltip:true,
                     cellTooltip:true,
-                    width: 120,
+                    width: 150,
                     type: 'string'
                 });
 
@@ -1120,6 +1155,38 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
         $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.ALL);
     };
 
+    $scope.mapColumnDisplayType = function(type)
+    {
+        /*
+        from angular ui-grid docs:
+
+        columnDefs.type : the type of the column, used in sorting. If not provided then the grid will guess the type.
+
+        Add this only if the grid guessing is not to your satisfaction. One of:
+
+        'string'
+        'boolean'
+        'number'
+        'date'
+        'object'
+        'numberStr' Note that if you choose date, your dates should be in a javascript date type
+         */
+
+        // this mapping code is likely imperfect, but its a decent start
+        var mappedType;
+        if (type == 'boolean') {
+            mappedType = 'boolean';
+        } else if ((type.indexOf('time')!=-1) || (type.indexOf('date')!=-1)) {
+            mappedType = 'date';
+        } else if ((type.indexOf('int')!=-1) || (type.indexOf('serial')!=-1) || (type.indexOf('numeric')!=-1) ||
+                   (type.indexOf('real')!=-1) || (type.indexOf('double')!=-1) || (type.indexOf('float')!=-1) ) {
+            mappedType = 'number';
+        } else {
+            mappedType = 'string';
+        }
+        //console.log("Mapped an ermrest type [%s] to an angular ui-grid type [%s]", type, mappedType);
+        return mappedType;
+    };
 /*
     $scope.getFirstData = function() {
         var promise = $q.defer();
