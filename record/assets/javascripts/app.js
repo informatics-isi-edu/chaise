@@ -84,6 +84,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // Extract the first entity
             var entity          = data[0];
 
+            self.patternInterpretationForTable(schemaName, tableName, data);
+
             entity.foreignTables    = [];
             entity.associations     = [];
             // Data use by helper methods
@@ -245,7 +247,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // If reference table is a complex table, swap vocab
             var references = data;
             self.processForeignKeyRefencesForTable(ft.tableName, ft.schemaName, ft, references);
-            self.patternInterpretationForTable(ft, references); // this will overwrite reference _link with annotation _link
+            self.patternInterpretationForTable(ft.schemaName, ft.tableName, references); // this will overwrite reference _link with annotation _link
 
             // get display columns
             // this is a list of key values of column names and display column names
@@ -410,8 +412,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
     };
 
     // if table has columns with url pattern, add to data as col_link
-    this.patternInterpretationForTable = function(ft, references) {
-        var urlPatterns = schemaService.getColumnInterpretations(ft.schemaName, ft.tableName);
+    this.patternInterpretationForTable = function(schemaName, tableName, references) {
+        var urlPatterns = schemaService.getColumnInterpretations(schemaName, tableName);
         for (col in urlPatterns) {
             for (var row = 0; row < references.length; row++) {
                 var pattern = urlPatterns[col];
@@ -1012,6 +1014,10 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', 'spinn
         ermrestService.loadReferencesForEntity($scope.entity, index);
     };
 
+    $scope.isExternalUrl = function(url) {
+        return (url.indexOf(window.location.origin) === -1);
+    }
+
 }]);
 
 chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeout', 'uiGridConstants','ermrestService', 'schemaService', function ($scope, $http, $q, $timeout, uiGridConstants, ermrestService, schemaService)
@@ -1387,7 +1393,8 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
         for (var key in entity){
             var value = entity[key];
             // Only insert values into filteredEntity if value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object AND if the key is not 'interal'
-            if ((!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) && key != 'internal'){
+            // and key is does not end with "_link" (for pattern linking of another column)
+            if ((!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) && key != 'internal' && !key.match(".*_link")){
 
                 // use display column name as key
                 // TODO inefficient to do this for each column?
