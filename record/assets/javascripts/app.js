@@ -1091,6 +1091,7 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
                                  type:columnType,
                                  headerTooltip:true,
                                  cellTooltip:true,
+                                 groupingShowAggregationMenu: (columnType == 'number'),
                                  width:120})
         });
         $scope.gridOptions.columnDefs = $scope.columns;
