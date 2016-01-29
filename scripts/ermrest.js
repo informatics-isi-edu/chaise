@@ -1253,7 +1253,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 				attributegroupParam['cols'] = [col];
 				attributegroupParam['options'] = options;
 				attributegroupParam['alert'] = alertObject;
-				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, param);
+				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, attributegroupParam);
 			} else {
 				entity[col]['ready'] = true;
 			}
