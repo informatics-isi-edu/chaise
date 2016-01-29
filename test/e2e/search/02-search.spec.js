@@ -6,7 +6,7 @@
  */
 
 var chaisePage = require('../chaise.page.js');
-describe('In Chaise, search_02 sidebarFilter summary and description,', function () {
+xdescribe('In Chaise, search_02 sidebarFilter summary and description,', function () {
     var EC = protractor.ExpectedConditions;
 
     describe('on load,', function () {
@@ -69,7 +69,7 @@ describe('In Chaise, search_02 sidebarFilter summary and description,', function
         });
     });
 
-    describe('The sidebar \'Summary\' filtered records,', function() {
+    describe('The sidebar \'Description\' filtered records,', function() {
         var randomIdx = 0;
         var recordSumBefore = 0;
         it('records\' number should be >0 and a random record is picked', function(done) {
@@ -87,55 +87,7 @@ describe('In Chaise, search_02 sidebarFilter summary and description,', function
             });
         });
 
-        //randomly choose a record
-        //var summaryText = '';
-        //var titleText = '';
-        //it('the picked record\' summary should be displayed', function (done) {
-        //    var titleSpan = chaisePage.resultContent.resultAllRows.get(randomIdx).$('span.panel-title');
-        //    var summaryEle = chaisePage.resultContent.resultAllRows
-        //        .get(randomIdx).$('.panel-body div[ng-show="values\[\'summary\'\]!=null"] dd');
-        //    titleSpan.getText().then(function (titleTxt) {
-        //        //get the entity title in results list
-        //        summaryEle.getText().then(function(summaryTxt) {
-        //            titleText = titleTxt;
-        //            summaryText = summaryTxt;
-        //            done();
-        //        });
-        //    });
-        //});
-
-        var summaryFilter = chaisePage.sidebar.findSidebarAttrByName('Summary');
         var editFilterEle = chaisePage.editFilter.htmlElement;
-        var summaryInput = editFilterEle.$('input');
-        it('should input some meaningless text in summary input', function(done) {
-            summaryFilter.click().then(function() {
-                summaryInput.sendKeys('hellomyfriend');
-                summaryInput.sendKeys(protractor.Key.ENTER);
-                setTimeout(function () {
-                    done();
-                }, 4000);
-            });
-        });
-
-        it('should show 0 record when searching meaningless summary filter input', function(done) {
-            var num = chaisePage.resultContent.resultAllRows;
-            expect(num.count()).toBe(0);
-            summaryInput.clear();
-            //use keystroke to activate AJAX to refresh page
-            summaryInput.sendKeys(protractor.Key.ENTER);
-            setTimeout(function() {
-                done();
-            }, 5000);
-        });
-
-        it('should show >0 records when clearing the summary filter input', function(done) {
-            var num = chaisePage.resultContent.resultAllRows;
-            expect(num.count()).toBeGreaterThan(0);
-            var editHeader = chaisePage.editFilter.sidebarHeader;
-            editHeader.click();
-            done();
-        });
-
         var descriptionFilter = chaisePage.sidebar.findSidebarAttrByName('Description');
         var descriptionInput = editFilterEle.$('input');
         it('should show 0 record when inputing meaningless text in description', function(done) {

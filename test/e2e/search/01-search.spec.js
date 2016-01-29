@@ -131,7 +131,8 @@ describe('In Chaise, search_01 contentArea and sidebar', function () {
             //the span now contains 'miRNA expression (RNA-Seq)' and 'RNA expression (microarray)'
             var miRNASpan = experimentTypeWrapper.element(by.cssContainingText('span.ng-binding.ng-scope', miRNAText));
             miRNASpan.getText().then(function(txt) {
-                expect(txt.indexOf(miRNAText) !== -1).toBe(true);
+                //expect(txt.indexOf(miRNAText) !== -1).toBe(true);
+                expect(txt).toContain(miRNAText);
                 done();
             });
         });

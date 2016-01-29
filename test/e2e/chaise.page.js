@@ -10,39 +10,46 @@ var sidebarId= '#sidebar';
 var moreFilterId= '#morefilters';
 var editFilterId= '#editfilter';
 
+function sidebar() {
+    this.htmlElement = $(sidebarId);
+    this.searchInput = this.htmlElement.$('div.search-box > input');
+    this.sidebarAttrsDisplayed = this.htmlElement.all(by.css('ul.sidebar-nav li.ng-scope:not(.ng-hide)'));
+    this.sidebarHeader =  this.htmlElement.$('#navcontainer h4');
+    this.viewMoreBtn = this.htmlElement.element(by.cssContainingText('li a', 'View all attributes'));
+    this.findSidebarAttrsByName = function (attrName) {
+        return this.htmlElement.all(by.cssContainingText('ul li a', attrName))
+    };
+    this.findSidebarAttrByName = function (attrName) {
+        return this.htmlElement.element(by.cssContainingText('ul li a', attrName));
+    };
+};
+
+function moreFilter() {
+    this.htmlElement = $(moreFilterId);
+    this.sidebarHeader = this.htmlElement.$('div.sidebar-title h4');
+    this.findMorefilterAttrByName = function(attrName) {
+        return this.htmlElement.element(by.cssContainingText('div.editvalue-container' +
+            ' div[ng-repeat="facet in FacetsData.facets"] label', attrName));
+    };
+};
+
+function editFilter() {
+    this.htmlElement = $(editFilterId);
+    this.sidebarHeader = this.htmlElement.$('div.sidebar-title h4');
+    this.displayedEditAttrs = this.htmlElement.all(by.css('ul.nav.filteritems li.ng-scope:not(.ng-hide)'));
+    this.findEditfilterAttrByName = function(attrName) {
+        return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
+    };
+    this.findEditfilterLiByName = function (attrName) {
+        return element(by.cssContainingText(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
+        return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
+    };
+};
+
 function chaisePage() {
-    this.sidebar = {
-        htmlElement: element(sidebarId),
-        searchInput: element(by.css(sidebarId + ' div.search-box > input')),
-        sidebarAttrsDisplayed: element.all(by.css(sidebarId + ' ul.sidebar-nav li.ng-scope:not(.ng-hide)')),
-        sidebarHeader: element(by.css(sidebarId + ' #navcontainer h4')),
-        viewMoreBtn: element(by.cssContainingText(sidebarId + ' li a', 'View all attributes')),
-        findSidebarAttrsByName: function (attrName) {
-            return element.all(by.cssContainingText(sidebarId + ' ul li a', attrName));
-        },
-        findSidebarAttrByName: function (attrName) {
-            return element(by.cssContainingText(sidebarId + ' ul li a', attrName));
-        },
-    };
-    this.moreFilter = {
-        htmlElement: element(by.css(moreFilterId)),
-        sidebarHeader: element(by.css(moreFilterId + ' div.sidebar-title h4')),
-        findMorefilterAttrByName: function (attrName) {
-            return element(by.cssContainingText(moreFilterId + ' div.editvalue-container' +
-                ' div[ng-repeat="facet in FacetsData.facets"] label', attrName));
-        },
-    };
-    this.editFilter = {
-        htmlElement: element(by.css(editFilterId)),
-        sidebarHeader: element(by.css(editFilterId + ' div.sidebar-title h4')),
-        displayedEditAttrs: element.all(by.css(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide)')),
-        findEditfilterAttrByName: function (attrName) {
-            return element(by.cssContainingText(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
-        },
-        findEditfilterLiByName: function (attrName) {
-            return element(by.cssContainingText(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
-        },
-    };
+    this.sidebar = new sidebar();
+    this.moreFilter = new moreFilter();
+    this.editFilter = new editFilter();
     this.resultContent = {
         resultAllRows: element.all(by.repeater('row in FacetsData.ermrestData')),
         resultTallyRange: element.all(by.css('#results_tally')).get(1).element(by.binding("facetResults.displayRange()")),

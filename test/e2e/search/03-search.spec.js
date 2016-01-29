@@ -138,27 +138,6 @@ describe('In Chaise, search_03 record,', function () {
             done();
         });
 
-        it('should open a table when \'DATA SOMITE COUNT\' is clicked', function (done) {
-            var dataEle = chaisePage.recordPage.findToggleByName('dataset somite count');
-            //click on the DATA SOMITE COUNT
-            dataEle.click().then(function () {
-                var datasetSomiteTableEle = dataEle.element(by.xpath('following-sibling::div'));
-                expect(datasetSomiteTableEle.isDisplayed()).toBe(true);
-                var wrapperEle = datasetSomiteTableEle.element(by.css('.table-wrapper.wrapper'));
-                var wrapperEleTbody = wrapperEle.element(by.css('tbody'));
-                var ftListArray = wrapperEleTbody.all(by.repeater('reference in ft.list'));
-                var firstRow = ftListArray.first();
-                //var firstRowKeyArray = firstRow.all(by.repeater('key in ft.keys'));
-                var firstRowKeyArray = firstRow.all(by.css('.entity-value.col-xs-10.ng-scope'));
-                var UrlEle = firstRowKeyArray.last();
-                UrlEle.element(by.css('a')).getAttribute('href').then(function (linkText) {
-                    expect(firstRow.isDisplayed()).toBe(true);
-                    expect(linkText).toContain('http');
-                    done();
-                });
-            });
-        });
-
         it('should show correct file when \'FILES\' is clicked', function (done) {
             var accessionEle = chaisePage.recordPage.findEntityKeyByName('accession');
             var accessionValueEle = accessionEle.element(by.xpath('following-sibling::td'));
