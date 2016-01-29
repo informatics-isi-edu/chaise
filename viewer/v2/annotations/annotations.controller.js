@@ -53,10 +53,10 @@
                     console.log(query);
                     annotation = annotation.data;
                     query = query.toLowerCase();
-                    // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
-                    if (!annotation.anatomy) {
-                        annotation.anatomy = 'No Anatomy';
-                    }
+                    // // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
+                    // if (!annotation.anatomy) {
+                    //     annotation.anatomy = 'No Anatomy';
+                    // }
                     // Loop through the array to find matches
                     var numKeys = keys.length;
                     if (numKeys > 0) {
@@ -66,10 +66,10 @@
                             }
                         }
                     }
-                    // Set the "anatomy" key back to null if it was changed to "No Anatomy" earlier
-                    if (annotation.anatomy === 'No Anatomy') {
-                        annotation.anatomy = null;
-                    }
+                    // // Set the "anatomy" key back to null if it was changed to "No Anatomy" earlier
+                    // if (annotation.anatomy === 'No Anatomy') {
+                    //     annotation.anatomy = null;
+                    // }
                 }
             }
         }

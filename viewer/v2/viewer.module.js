@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.viewer', ['ERMrest'])
+    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'ui.select'])
 
     .config(['context', function configureContext(context) {
         context.serviceURL = window.location.origin + '/ermrest';
@@ -33,7 +33,7 @@
     }])
 
     // Hydrate values providers
-    .run(['$window', 'context', 'image', 'annotations', 'anatomies', 'ermrestClientFactory', function run($window, context, image, annotations, anatomies, ermrestClientFactory) {
+    .run(['$window', 'context', 'image', 'annotations', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function run($window, context, image, annotations, anatomies, statuses, vocabs, ermrestClientFactory) {
         var origin = window.location.origin;
         var annotoriousReady = false;
         var client = ermrestClientFactory.getClient(context.serviceURL);
@@ -52,9 +52,9 @@
                             _entities[0].data.uri = _entities[0].data.uri.substring(0, 34) + '~jessie/' + _entities[0].data.uri.substring(34);
                         }
                         ////////////////////////////////////////////////////////
-                        image[0] = _entities[0];
+                        image.entity = _entities[0];
                         console.log('Image: ', image);
-                        var annotationTable = image[0].getRelatedTable(context.schemaName, 'annotation');
+                        var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
                         annotationTable.getEntities().then(function success(_annotations) {
                             for (var i = 0; i < _annotations.length; i++) {
                                 annotations.push(_annotations[i]);
@@ -70,12 +70,95 @@
                         throw response;
                     });
                 }
+
+                // Get all rows from "anatomy" table
                 var anatomyTable = schema.getTable('anatomy');
                 anatomyTable.getEntities().then(function success(_anatomies) {
+                    anatomies.push('No Anatomy');
                     for (var j = 0; j < _anatomies.length; j++) {
-                        anatomies.push(_anatomies[j]);
+                        anatomies.push(_anatomies[j].data.term);
                     }
                     console.log('Anatomies: ', anatomies);
+                }, function error(response) {
+                    throw response;
+                });
+
+                // Get all rows from "image_grade_code" table.
+                var statusTable = schema.getTable('image_grade_code');
+                statusTable.getEntities().then(function success(_statuses) {
+                    for (var j = 0; j < _statuses.length; j++) {
+                        statuses.push(_statuses[j].data.code);
+                    }
+                    console.log('Statuses: ', statuses);
+                }, function error(response) {
+                    throw response;
+                });
+
+                // Push all rows from each vocab table into the "vocab" value
+                // provider.
+                // Get all rows from "tissues" table
+                var tissueTable = schema.getTable('tissue');
+                tissueTable.getEntities().then(function success(_tissues) {
+                    vocabs['tissue'] = [];
+                    for (var j = 0; j < _tissues.length; j++) {
+                        vocabs['tissue'].push(_tissues[j].data.term);
+                    }
+                }, function error(response) {
+                    throw response;
+                });
+
+                // Get all rows from "age stage" table
+                var ageStageTable = schema.getTable('age_stage');
+                ageStageTable.getEntities().then(function success(_stages) {
+                    vocabs['age_stage'] = [];
+                    for (var j = 0; j < _stages.length; j++) {
+                        vocabs['age_stage'].push(_stages[j].data.term);
+                    }
+                }, function error(response) {
+                    throw response;
+                });
+
+                // Get all rows from "gender" table
+                var genderTable = schema.getTable('gender');
+                genderTable.getEntities().then(function success(_genders) {
+                    vocabs['gender'] = [];
+                    for (var j = 0; j < _genders.length; j++) {
+                        vocabs['gender'].push(_genders[j].data.term);
+                    }
+                }, function error(response) {
+                    throw response;
+                });
+
+                // Get all rows from "specimen_fixation" table
+                var specimenFixationTable = schema.getTable('specimen_fixation');
+                specimenFixationTable.getEntities().then(function success(_fixations) {
+                    vocabs['specimen_fixation'] = [];
+                    for (var j = 0; j < _fixations.length; j++) {
+                        vocabs['specimen_fixation'].push(_fixations[j].data.term);
+                    }
+                }, function error(response) {
+                    throw response;
+                });
+
+                // Get all rows from "embedding_medium" table
+                var embeddingMediumTable = schema.getTable('embedding_medium');
+                embeddingMediumTable.getEntities().then(function success(_media) {
+                    vocabs['embedding_medium'] = [];
+                    for (var j = 0; j < _media.length; j++) {
+                        vocabs['embedding_medium'].push(_media[j].data.term);
+                    }
+                    console.log('Vocabs: ', vocabs);
+                }, function error(response) {
+                    throw response;
+                });
+
+                // Get all rows from "staining_protocol" table
+                var stainingProtocolTable = schema.getTable('staining_protocol');
+                stainingProtocolTable.getEntities().then(function success(_protocols) {
+                    vocabs['staining_protocol'] = [];
+                    for (var j = 0; j < _protocols.length; j++) {
+                        vocabs['staining_protocol'].push(_protocols[j].data.term);
+                    }
                 }, function error(response) {
                     throw response;
                 });

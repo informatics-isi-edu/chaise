@@ -12,7 +12,7 @@
         }
 
         function createAnnotation(newAnnotation) {
-            if (!newAnnotation.anatomy) {
+            if (newAnnotation.anatomy == 'No Anatomy') {
                 newAnnotation.anatomy = null;
             }
             // WHEN REMOVING this ~jessie, set newAnnotation.context_uri to iframe.location.href 3 lines down
@@ -44,8 +44,8 @@
         }
 
         function updateAnnotation(annotation) {
-            if (!annotation.anatomy) {
-                annotation.anatomy = null;
+            if (annotation.data.anatomy == 'No Anatomy') {
+                annotation.data.anatomy = null;
             }
 
             // Update in ERMrest
