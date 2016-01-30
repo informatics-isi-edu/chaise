@@ -4,5 +4,8 @@ var chaiseConfig = {
     authnProvider: 'goauth',
     feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
     helpURL: '/help/using-the-data-browser/',
-    showBadgeCounts: false
-}
+    showBadgeCounts: false,
+    recordUiGridEnabled: false,
+    recordUiGridExportCSVEnabled: true,
+    recordUiGridExportPDFEnabled: true
+};

@@ -72,7 +72,7 @@
 					<div class="row" id="filterarea">
 						<div id="filter" class="col-md-12">
 							<div class="jumbotron text-center" ng-show="!facetResults.hasSelectedFacets()">
-								<h1>{{FacetsData.selectedEntity.display}}</h1>
+								<h1 ng-show="false">{{FacetsData.selectedEntity.display}}</h1>
 								<p class="lead">Use the sidebar to the right to select search attributes.</p>
 						  </div>
 							<div class="filter-container">
@@ -170,7 +170,9 @@
 					</div>
 					<div id="results_tally" class="row" ng-show="facetResults.hasSelectedFacets()">
 						<div class="col-md-8">
-							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
+							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results, sort by: <select name="sortColumn" ng-change="facetResults.sortData($event)" ng-model="FacetsData.sortFacet">
+								<option ng-repeat="option in FacetsData.sortColumns" value="{{option}}">{{facetResults.display(FacetsData.table, option)}}</option>
+							</select></p>
 						</div>
 						<div class="col-md-4">
 							<div id="views" class="btn-group view-toggle pull-right" role="group">

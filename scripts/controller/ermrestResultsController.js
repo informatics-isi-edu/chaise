@@ -10,7 +10,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
                                                       function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
-  $scope.chaiseConfig = chaiseConfig;
+  	$scope.chaiseConfig = chaiseConfig;
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
@@ -142,7 +142,8 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		var ret = getEntryThumbnail(row);
 		if (ret == null) {
 			//ret = getAssociationThumbnail($scope.FacetsData.table, row);
-			ret = getReferenceThumbnail($scope.FacetsData.table, row);
+			//ret = getReferenceThumbnail($scope.FacetsData.table, row);
+			ret = $scope.FacetsData.thumbnails[row[PRIMARY_KEY[0]]];
 		}
 		return ret;
 	};
@@ -189,6 +190,12 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 
 	this.pageToFirst = function pageToFirst(event) {
 		event.preventDefault();
+		$scope.FacetsData.pagingOptions.currentPage = 2;
+		$scope.FacetsData.pagingOptions.currentPage = updatePageTag('backward', $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap, $scope.FacetsData.tagPages, $scope.FacetsData.maxPages);
+		setActivePage($scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap);
+	};
+
+	this.sortData = function sortData(event) {
 		$scope.FacetsData.pagingOptions.currentPage = 2;
 		$scope.FacetsData.pagingOptions.currentPage = updatePageTag('backward', $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap, $scope.FacetsData.tagPages, $scope.FacetsData.maxPages);
 		setActivePage($scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap);
@@ -304,7 +311,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
   this.removeFilter = function removeFilter(event, facet) {
   	//event.stopPropagation();
   	event.preventDefault();
-  	if ($scope.if_type(facet, 'slider')) {
+  	if ($scope.if_type(facet, 'slider') || $scope.if_type(facet, 'date')) {
   		$scope.FacetsData.box[facet['table']][facet['name']]['min'] = $scope.FacetsData.box[facet['table']][facet['name']]['floor'];
   		$scope.FacetsData.box[facet['table']][facet['name']]['max'] = $scope.FacetsData.box[facet['table']][facet['name']]['ceil'];
   		$scope.delay_slider(facet);

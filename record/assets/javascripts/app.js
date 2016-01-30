@@ -1,6 +1,6 @@
 // Chaise Record App
 
-var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'ngCookies', 'ngSanitize']);
+var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ui.bootstrap','ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.grid.selection', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.grouping', 'ui.grid.infiniteScroll', 'ngCookies', 'ngSanitize']);
 
 // Refreshes page when fragment identifier changes
 setTimeout(function(){
@@ -35,6 +35,10 @@ chaiseRecordApp.service('configService', function() {
     this.CR_BASE_URL = window.location.origin + '/ermrest/catalog/';
     if (chaiseConfig['ermrestLocation'] != null) {
         this.CR_BASE_URL = chaiseConfig['ermrestLocation'] + '/ermrest/catalog/';
+    }
+    this.TABLE_THRESHOLD = 0;
+    if (chaiseConfig['tableThreshold'] != null) {
+        this.TABLE_THRESHOLD = chaiseConfig['tableThreshold'];
     }
 });
 
@@ -80,12 +84,12 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // Extract the first entity
             var entity          = data[0];
 
+            self.patternInterpretationForTable(schemaName, tableName, data);
+
             entity.foreignTables    = [];
             entity.associations     = [];
             // Data use by helper methods
             entity.internal         = { schemaName: schemaName, tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
-
-            // console.log('entity', entity);
 
             // SET ENTITY DISPLAY TITLE
             entity.internal.displayTitle = self.getEntityTitle(entity);
@@ -107,8 +111,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                 // If initialLoad is true, then we load the entities, else we load the aggregate (count)
                 var ermrestPath = (ft.initialLoad) ? ft.path : ft.aggregatePath;
-
-                console.log('ermrest path is ', ermrestPath);
 
                 // Need to preserve ft variable in a closure
                 (function(ft){
@@ -157,14 +159,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                                 'referencedTableName':  ft['referencedTableName']
                                                             };
 
-                                                            // console.log(formattedAssoication);
-
                                 entity.associations.push(formattedAssoication);
 
                             // Else, append the 'formattedForeignTable' to the entity's elements
                             } else{
-
-                                console.log('elements is', elements);
 
                                 // SWAP FORGEIN KEY ID WITH VOCABULARY
                                 var formattedForeignTable     = {
@@ -175,7 +173,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                                                                 'schemaName':           ft['schemaName'],
                                                                 'list':                 [], // list of nested entities
                                                                 'referencedTableName':  ft['referencedTableName'],
-                                                                'transpose':            false,
+                                                                'transpose':            elements[0]['row_count'] <= configService.TABLE_THRESHOLD,
                                                                 'open':                 false,
                                                                 'path':                 ft['path'], // ermrest path to load elements
                                                                 'count':                elements[0]['row_count']
@@ -197,8 +195,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                             // Hide spinner
                             spinnerService.hide();
-
-                            console.log('entity', entity);
                         }
 
                     }).
@@ -217,8 +213,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                 // Hide spinner
                 spinnerService.hide();
-
-                console.log('entity', entity);
             }
 
         }).error(function(data, status, headers, config) {
@@ -253,6 +247,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             // If reference table is a complex table, swap vocab
             var references = data;
             self.processForeignKeyRefencesForTable(ft.tableName, ft.schemaName, ft, references);
+            self.patternInterpretationForTable(ft.schemaName, ft.tableName, references); // this will overwrite reference _link with annotation _link
 
             // get display columns
             // this is a list of key values of column names and display column names
@@ -414,6 +409,24 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             }
         }
 
+    };
+
+    // if table has columns with url pattern, add to data as col_link
+    this.patternInterpretationForTable = function(schemaName, tableName, references) {
+        var urlPatterns = schemaService.getColumnInterpretations(schemaName, tableName);
+        for (col in urlPatterns) {
+            for (var row = 0; row < references.length; row++) {
+                var pattern = urlPatterns[col];
+                if (pattern === "auto_link") { // link url is same as the column value
+                    references[row][col + '_link'] = references[row][col];
+                }
+                else {
+                    var link = pattern.replace("{value}", references[row][col]);
+                    // replace {value} with data value
+                    references[row][col + '_link'] = link;
+                }
+            }
+        }
     };
 
     // Get the entity display title
@@ -586,6 +599,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
         // Build an array of predicates for the Ermrest Filter lanaguage
         var predicates = [];
 
+        // TODO this doesn't work when value is an uri
         for (var key in params){
             var predicate   = fixedEncodeURIComponent(key) + '=';
             // Do not encoude already encoded string
@@ -803,6 +817,33 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         return columns;
     }
 
+    // returns a set of col_name : interpretation for the table
+    this.getColumnInterpretations = function(schemaName, tableName) {
+        var interp = {};
+
+        var columnDefinitions = this.schemas[schemaName].tables[tableName].column_definitions;
+
+        for (var i = 0; i < columnDefinitions.length; i++) {
+            var cd = columnDefinitions[i];
+
+            var pattern = "";
+
+            // If column has interpretation
+            if (cd.annotations['tag:misd.isi.edu,2015:url'] !== undefined){
+                if (cd.annotations['tag:misd.isi.edu,2015:url'] === null ||
+                    Object.getOwnPropertyNames(cd.annotations['tag:misd.isi.edu,2015:url']).length === 0) {
+                    pattern = "auto_link";
+                }
+                else if (cd.annotations['tag:misd.isi.edu,2015:url']['pattern'] !== undefined) {
+                    pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
+                }
+
+                interp[cd.name] = pattern;
+            }
+        }
+
+        return interp;
+    }
 }]);
 
 
@@ -898,10 +939,12 @@ chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($root
 }]);
 
 // Detail controller
-chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, spinnerService, ermrestService, schemaService, locationService, notFoundService){
+chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, $sce, spinnerService, ermrestService, schemaService, locationService, notFoundService){
     // C: Catalogue id
     // T: Table name
     // K: Key
+
+    $scope.chaiseConfig = chaiseConfig;
 
     // Set up the parameters base on url
     var params      = locationService.getHashParams();
@@ -947,7 +990,15 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerServic
         schemaService.initSchemas(cid, function(data) {
             // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
             ermrestService.getEntity(schemaName, tableName, keys, function(data){
-                // console.log('data is ', data);
+                if (data['previews']) {
+                    var origin = window.location.protocol + "//" + window.location.hostname; // TBD: portno?
+                    for (var i = 0, len = data['previews'].length; i < len; i++) {
+                        preview = data['previews'][i];
+                        preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?url=' + preview.preview;
+                        preview.enlargeUrl = origin + '/_viewer/xtk/view.html?url=' + preview.preview;
+                        $sce.trustAsResourceUrl(preview.embedUrl);
+                    }
+                }
                 $scope.entity = data;
             });
         });
@@ -963,6 +1014,297 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', 'spinnerServic
         ermrestService.loadReferencesForEntity($scope.entity, index);
     };
 
+    $scope.isExternalUrl = function(url) {
+        return (url.indexOf(window.location.origin) === -1);
+    }
+
+}]);
+
+chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeout', 'uiGridConstants','ermrestService', 'schemaService', function ($scope, $http, $q, $timeout, uiGridConstants, ermrestService, schemaService)
+{
+    $scope.view = [];
+    $scope.data = [];
+    $scope.columns = [];
+    $scope.transposedData = [];
+    $scope.transposedColumns = [];
+    $scope.columnMetadata = {};
+    $scope.firstPage = 1;
+    $scope.lastPage = 1;
+
+    // base gridOptions
+    $scope.gridOptions = {};
+    $scope.gridOptions.data = 'view';
+    $scope.gridOptions.rowHeight = 65;
+    $scope.gridOptions.enableColumnResizing = true;
+    $scope.gridOptions.enableFiltering = true;
+    $scope.gridOptions.enableGridMenu = true;
+    $scope.gridOptions.showGridFooter = true;
+    $scope.gridOptions.showColumnFooter = false;
+    $scope.gridOptions.minRowsToShow = $scope.ft.count > 10 ? 10 : $scope.ft.count;
+    $scope.gridOptions.enableGridMenu = true;
+    $scope.gridOptions.enableSelectAll = true;
+    $scope.gridOptions.flatEntityAccess = true;
+    //$scope.gridOptions.infiniteScrollUp = true;
+    //$scope.gridOptions.infiniteScrollDown = true;
+    //$scope.gridOptions.infiniteScrollRowsFromEnd= 40;
+
+    // csv export options
+    $scope.gridOptions.exporterMenuCsv = (chaiseConfig['recordUiGridExportCsvEnabled'] == true);
+    if ($scope.gridOptions.exporterMenuCsv) {
+        $scope.gridOptions.exporterCsvFilename = $scope.ft.title + '.csv';
+        $scope.gridOptions.exporterCsvLinkElement = angular.element(document.querySelectorAll(".custom-csv-link-location"));
+    }
+    // pdf export options
+    $scope.gridOptions.exporterMenuPdf = (chaiseConfig['recordUiGridExportPdfEnabled'] == true);
+    if ($scope.gridOptions.exporterMenuPdf) {
+        $scope.gridOptions.exporterPdfDefaultStyle = {fontSize: 9};
+        //$scope.gridOptions.exporterPdfTableStyle = {margin: [10, 10, 10, 10]};
+        $scope.gridOptions.exporterPdfTableHeaderStyle = {fontSize: 10, bold: true, italics: true, color: 'red'};
+        $scope.gridOptions.exporterPdfHeader = {text: $scope.ft.title, style: 'headerStyle'};
+        $scope.gridOptions.exporterPdfFooter = function (currentPage, pageCount) {
+            return {text: currentPage.toString() + ' of ' + pageCount.toString(), style: 'footerStyle'};
+        };
+        $scope.gridOptions.exporterPdfCustomFormatter = function (docDefinition) {
+            docDefinition.styles.headerStyle = {fontSize: 22, bold: true};
+            docDefinition.styles.footerStyle = {fontSize: 10, bold: true};
+            return docDefinition;
+        };
+        $scope.gridOptions.exporterPdfOrientation = 'landscape';
+        $scope.gridOptions.exporterPdfPageSize = 'A4';
+    }
+
+    $scope.gridOptions.onRegisterApi = function ( gridApi ) {
+        $scope.gridApi = gridApi;
+        $timeout(function() {
+            $scope.gridApi.core.handleWindowResize();
+        });
+        //gridApi.infiniteScroll.on.needLoadMoreData($scope, $scope.getDataDown);
+        //gridApi.infiniteScroll.on.needLoadMoreDataTop($scope, $scope.getDataUp);
+    };
+
+    $scope.initUIGrid = function()
+    {
+        var entity = $scope.ft;
+        var displayName;
+        var columnType;
+        var columnDefinitions = schemaService.schemas[entity.schemaName].tables[entity.tableName].column_definitions;
+        angular.forEach(columnDefinitions, function (column, i) {
+            displayName = schemaService.getColumnDisplayName(entity.schemaName,entity.tableName,column.name);
+            columnType = $scope.mapColumnDisplayType(column.type.typename);
+            $scope.columnMetadata[column.name] = {displayName:displayName};
+            $scope.columns.push({name: column.name,
+                                 displayName: displayName,
+                                 type:columnType,
+                                 headerTooltip:true,
+                                 cellTooltip:true,
+                                 groupingShowAggregationMenu: false, //(columnType == 'number'),
+                                 width:120})
+        });
+        $scope.gridOptions.columnDefs = $scope.columns;
+
+        var canceler = $q.defer();
+        $http.get(entity.path, {timeout: canceler.promise})
+            .success(function (data) {
+                $scope.data = data;
+                $scope.view = $scope.data;
+            });
+
+        $scope.$on('$destroy', function(){
+            canceler.resolve();  // Aborts the $http request if it isn't finished.
+        });
+    };
+
+    $scope.transposeToggle = function(entity, transpose)
+    {
+        entity.transpose = transpose;
+        if (transpose && $scope.transposedData.length == 0) {
+            var values = [];
+            var transposedRecords = {};
+            $scope.transposedColumns.push({
+                name: '0',
+                displayName: 'Field Name',
+                headerTooltip:true,
+                cellTooltip:true,
+                width: 150,
+                type: 'string'
+            });
+            angular.forEach($scope.data, function (value, key) {
+                $scope.transposedColumns.push({
+                    name: (key + 1).toString(),
+                    displayName: 'Record ' + (key + 1).toString(), // should be pkey but what about composites?
+                    headerTooltip:true,
+                    cellTooltip:true,
+                    width: 150,
+                    type: 'string'
+                });
+
+                var i = 0;
+                angular.forEach(value, function (inner, index) {
+                    if ($scope.columnMetadata[index] !== undefined) {
+                        transposedRecords[i] = transposedRecords[i] || {0:$scope.columnMetadata[index].displayName};
+                        values[index] = values[index] || [];
+                        values[index].push(inner);
+                        transposedRecords[i][key + 1] = values[index][key];
+                        i++;
+                    }
+                });
+            });
+            $scope.transposedData = Object.keys(transposedRecords).map(function(k) { return transposedRecords[k] });
+        }
+
+        if (transpose) {
+            $scope.gridOptions.enableFiltering = false;
+            $scope.gridOptions.enableColumnMenus = false;
+            $scope.gridOptions.columnDefs = $scope.transposedColumns;
+            $scope.view  = $scope.transposedData;
+        } else {
+            $scope.gridOptions.enableFiltering = true;
+            $scope.gridOptions.enableColumnMenus = true;
+            $scope.gridOptions.columnDefs = $scope.columns;
+            $scope.view = $scope.data;
+        }
+        $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.ALL);
+    };
+
+    $scope.mapColumnDisplayType = function(type)
+    {
+        /*
+        from angular ui-grid docs:
+
+        columnDefs.type : the type of the column, used in sorting. If not provided then the grid will guess the type.
+
+        Add this only if the grid guessing is not to your satisfaction. One of:
+
+        'string'
+        'boolean'
+        'number'
+        'date'
+        'object'
+        'numberStr' Note that if you choose date, your dates should be in a javascript date type
+         */
+
+        // this mapping code is likely imperfect, but its a decent start
+        var mappedType;
+        if (type == 'boolean') {
+            mappedType = 'boolean';
+        } else if ((type.indexOf('time')!=-1) || (type.indexOf('date')!=-1)) {
+            mappedType = 'date';
+        } else if ((type.indexOf('int')!=-1) || (type.indexOf('serial')!=-1) || (type.indexOf('numeric')!=-1) ||
+                   (type.indexOf('real')!=-1) || (type.indexOf('double')!=-1) || (type.indexOf('float')!=-1) ) {
+            mappedType = 'number';
+        } else {
+            mappedType = 'string';
+        }
+        //console.log("Mapped an ermrest type [%s] to an angular ui-grid type [%s]", type, mappedType);
+        return mappedType;
+    };
+/*
+    $scope.getFirstData = function() {
+        var promise = $q.defer();
+        $http.get(entity.path)
+            .success(function(data) {
+                var newData = $scope.getPage(data, $scope.lastPage);
+                $scope.data = $scope.data.concat(newData);
+                promise.resolve();
+        });
+        return promise.promise;
+    };
+
+    $scope.getDataUp = function() {
+        var promise = $q.defer();
+        $http.get(entity.path)
+        .success(function(data) {
+          $scope.firstPage--;
+          var newData = $scope.getPage(data, $scope.firstPage);
+          $scope.gridApi.infiniteScroll.saveScrollPercentage();
+          $scope.data = newData.concat($scope.data);
+          $scope.gridApi.infiniteScroll.dataLoaded($scope.firstPage > 0, $scope.lastPage < 4).then(function() {$scope.checkDataLength('down');}).then(function() {
+            promise.resolve();
+          });
+        })
+        .error(function(error) {
+            $scope.gridApi.infiniteScroll.dataLoaded();
+            promise.reject();
+        });
+        return promise.promise;
+    };
+
+    $scope.getDataDown = function() {
+        var promise = $q.defer();
+        $http.get(entity.path)
+            .success(function(data) {
+                $scope.lastPage++;
+                var newData = $scope.getPage(data, $scope.lastPage);
+                $scope.gridApi.infiniteScroll.saveScrollPercentage();
+                $scope.data = $scope.data.concat(newData);
+                $scope.gridApi.infiniteScroll.dataLoaded($scope.firstPage > 0, $scope.lastPage < 4).then(function() {$scope.checkDataLength('up');}).then(function() {
+                    promise.resolve();
+                });
+            })
+            .error(function(error) {
+                $scope.gridApi.infiniteScroll.dataLoaded();
+                promise.reject();
+            });
+        return promise.promise;
+    };
+
+    $scope.checkDataLength = function( discardDirection) {
+        // work out whether we need to discard a page, if so discard from the direction passed in
+        if( $scope.lastPage - $scope.firstPage > 3 ){
+          // we want to remove a page
+          $scope.gridApi.infiniteScroll.saveScrollPercentage();
+
+          if( discardDirection === 'up' ){
+            $scope.data = $scope.data.slice(100);
+            $scope.firstPage++;
+            $timeout(function() {
+              // wait for grid to ingest data changes
+              $scope.gridApi.infiniteScroll.dataRemovedTop($scope.firstPage > 0, $scope.lastPage < 4);
+            });
+          } else {
+            $scope.data = $scope.data.slice(0, 400);
+            $scope.lastPage--;
+            $timeout(function() {
+              // wait for grid to ingest data changes
+              $scope.gridApi.infiniteScroll.dataRemovedBottom($scope.firstPage > 0, $scope.lastPage < 4);
+            });
+          }
+        }
+    };
+
+    $scope.getPage = function(data, page) {
+        var res = [];
+        for (var i = (page * 100); i < (page + 1) * 100 && i < data.length; ++i) {
+            res.push(data[i]);
+        }
+        return res;
+    };
+
+    $scope.reset = function() {
+        $scope.firstPage = 2;
+        $scope.lastPage = 2;
+
+        // turn off the infinite scroll handling up and down
+        $scope.gridApi.infiniteScroll.setScrollDirections( false, false );
+        $scope.data = [];
+
+        $scope.getFirstData().then(function(){
+            $timeout(function() {
+                // timeout needed to allow digest cycle to complete,and grid to finish ingesting the data
+                $scope.gridApi.infiniteScroll.resetScroll( $scope.firstPage > 0, $scope.lastPage < 4 );
+            });
+        });
+    };
+
+    $scope.getFirstData().then(function(){
+        $timeout(function() {
+            // timeout needed to allow digest cycle to complete,and grid to finish ingesting the data
+            // you need to call resetData once you've loaded your data if you want to enable scroll up,
+            // it adjusts the scroll position down one pixel so that we can generate scroll up events
+            $scope.gridApi.infiniteScroll.resetScroll( $scope.firstPage > 0, $scope.lastPage < 4 );
+        });
+    });
+*/
 }]);
 
 // Images controller
@@ -982,7 +1324,6 @@ chaiseRecordApp.controller('ImagesCtrl', ['$scope', function($scope){
 
         jQuery(document).on('click', '.thumbs a', function (e){
             e.preventDefault();
-            // console.log('data slide', jQuery(this).data('att-slide'));
             thumbs.goToSlide(jQuery(this).data('att-slide'));
             return false;
         });
@@ -1029,8 +1370,11 @@ chaiseRecordApp.controller('NestedTablesCtrl', ['$scope', function($scope){
         });
 
     });
-}]);
 
+    $scope.isExternalUrl = function(url) {
+        return (url.indexOf(window.location.origin) === -1);
+    }
+}]);
 
 /*
  _____ _ _ _
@@ -1049,7 +1393,8 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
         for (var key in entity){
             var value = entity[key];
             // Only insert values into filteredEntity if value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object AND if the key is not 'interal'
-            if ((!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) && key != 'internal'){
+            // and key is does not end with "_link" (for pattern linking of another column)
+            if ((!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) && key != 'internal' && !key.match(".*_link")){
 
                 // use display column name as key
                 // TODO inefficient to do this for each column?
@@ -1070,18 +1415,15 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
 // Removes underscores from input
 chaiseRecordApp.filter('removeUnderScores', function(){
     return function(input){
-        //console.log('input ' + input);
         return input.replace(/_/g, ' ');
     };
 });
 
 
-// If value is url -> wraps it in an <a>
 // If value is array -> stringify arrays
 chaiseRecordApp.filter('sanitizeValue', function($sce){
     return function(value){
 
-        var urls    = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
         var emails  = /([a-zA-Z0-9_\.]+@[a-zA-Z_\.]+\.(edu|com|net|gov|io))/gim;
 
         if (Array.isArray(value)){
@@ -1092,11 +1434,6 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
 
             return 'N/A';
 
-        } else if (typeof value == "string" && value.match(urls)) {
-
-            value = value.replace(urls, '<a href="$1" target="_blank">$1</a>');
-            return $sce.trustAsHtml(value);
-
         } else if (typeof value == "string" && value.match(emails)) {
 
             value = value.replace(emails, '<a href=\"mailto:$1\">$1</a>');
@@ -1105,6 +1442,14 @@ chaiseRecordApp.filter('sanitizeValue', function($sce){
         } else{
             return value;
         }
+
+    };
+});
+
+chaiseRecordApp.filter('uri', function($sce){
+    return function(value){
+
+        return $sce.trustAsHtml(value);
 
     };
 });
@@ -1170,6 +1515,22 @@ chaiseRecordApp.filter('filesize', function(){
     return function(input){
         return filesize(parseInt(input, 10));
     };
+});
+
+// remove columns with _link ending
+chaiseRecordApp.filter('notHyperLink', function () {
+    return function (cols) {
+        var result = [];
+        if (cols !== undefined) {
+            for (var i = 0; i < cols.length; i++) {
+                if (!cols[i].match(".*_link")) {
+                    result.push(cols[i]);
+                }
+            }
+        }
+        return result;
+
+    }
 });
 
 /*

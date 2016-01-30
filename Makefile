@@ -36,7 +36,8 @@ BOWER=bower_components
 HTML=search/index.html \
 	 login/index.html \
 	 record/index.html \
-	 matrix/index.html
+	 matrix/index.html \
+	 viewer/index.html
 
 # CSS source
 CSS=styles
@@ -113,7 +114,11 @@ RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
 	$(RECORD_ASSETS)/lib/filesize.min.js \
 	$(RECORD_ASSETS)/lib/slippry/slippry.min.js \
 	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.pack.js \
-	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js
+	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js \
+    $(RECORD_ASSETS)/lib/ui-grid.js \
+    $(RECORD_ASSETS)/lib/csv.js \
+    $(RECORD_ASSETS)/lib/pdfmake.min.js \
+    $(RECORD_ASSETS)/lib/vfs_fonts.js
 
 RECORD_JS_SOURCE= $(JS)/respond.js \
 	$(JS)/variables.js \
@@ -126,9 +131,23 @@ RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/appheader.css
 
 RECORD_CSS_DEPS=$(RECORD_ASSETS)/lib/slippry/slippry.css \
-	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css
+	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css \
+	$(RECORD_ASSETS)/stylesheets/ui-grid.css
 
 RECORD_CSS_SOURCE=$(RECORD_ASSETS)/stylesheets/app.css
+
+
+# JavaScript and CSS source for Viewer app
+VIEWER_ASSETS=viewer
+
+VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/angular.js
+
+VIEWER_JS_SOURCE= $(VIEWER_ASSETS)/app.js
+
+VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/appheader.css
+
 
 # Config file
 JS_CONFIG=chaise-config.js
@@ -243,7 +262,7 @@ karma:
 .PHONY: html
 html: $(HTML)
 
-# Rules to attach checksums to JavaScript and CSS source in the header
+# Rules to attach JavaScript and CSS assets to the head
 search/index.html: search/index.html.in .make-asset-block .make-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
@@ -261,6 +280,10 @@ matrix/index.html: matrix/index.html.in .make-asset-block .make-matrix-template-
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-matrix-template-block' -e 'd' -e '}' \
 		matrix/index.html.in > matrix/index.html
+
+viewer/index.html: viewer/index.html.in .make-viewer-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
+		viewer/index.html.in > viewer/index.html
 
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
@@ -310,6 +333,21 @@ $(JS_CONFIG): chaise-config-sample.js
 	> .make-matrix-template-block
 	for file in $(MATRIX_TEMPLATES_DEPS); do \
 		$(CAT) $$file >> .make-matrix-template-block ; \
+	done
+
+.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_SHARED_JS_DEPS) $(ERMRESTJS_SOURCE) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
+	> .make-viewer-asset-block
+	for file in $(VIEWER_SHARED_CSS_DEPS); do \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-viewer-asset-block ; \
+	done
+	for file in $(VIEWER_SHARED_JS_DEPS); do \
+		echo "<script src='../$$file'></script>" >> .make-viewer-asset-block ; \
+	done
+	echo "<script src='../../../ermrestjs/js/ermrest.js'></script>" >> .make-viewer-asset-block
+	echo "<script src='../../../ermrestjs/js/ngermrest.js'></script>" >> .make-viewer-asset-block
+	for file in $(VIEWER_JS_SOURCE) $(JS_CONFIG); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 
 # Rules for help/usage
