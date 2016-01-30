@@ -65,22 +65,23 @@
                     annotation = annotation.data;
                     query = query.toLowerCase();
                     // // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
-                    // if (!annotation.anatomy) {
-                    //     annotation.anatomy = 'No Anatomy';
-                    // }
+                    if (!annotation.anatomy) {
+                        annotation.anatomy = 'No Anatomy';
+                    }
                     // Loop through the array to find matches
                     var numKeys = keys.length;
                     if (numKeys > 0) {
                         for (var i = 0; i < numKeys; i++) {
+                            console.log('Checking | Key: ', keys[i], ' Value: ', annotation[keys[i]]);
                             if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
                                 return true;
                             }
                         }
                     }
                     // // Set the "anatomy" key back to null if it was changed to "No Anatomy" earlier
-                    // if (annotation.anatomy === 'No Anatomy') {
-                    //     annotation.anatomy = null;
-                    // }
+                    if (annotation.anatomy === 'No Anatomy') {
+                        annotation.anatomy = null;
+                    }
                 }
             }
         }
@@ -132,7 +133,7 @@
             return AnnotationsService.highlightAnnotation(annotation);
         }
 
-        // Return an annotation given an object of Annotorious coordinates
+        // Return an annotation that matches an object of coordinates
         function findAnnotation(coordinates) {
             for (var i = 0; i < vm.annotations.length; i++) {
                 var annotationCoords = vm.annotations[i].data.coords;
