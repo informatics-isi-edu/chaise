@@ -65,12 +65,17 @@
             iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
         }
 
+        function highlightAnnotation(annotation) {
+            iframe.postMessage({messageType: 'highlightAnnotation', content: annotation.data}, origin);
+        };
+
         return {
             drawAnnotation: drawAnnotation,
             createAnnotation: createAnnotation,
             cancelNewAnnotation: cancelNewAnnotation,
             updateAnnotation: updateAnnotation,
-            deleteAnnotation: deleteAnnotation
+            deleteAnnotation: deleteAnnotation,
+            highlightAnnotation: highlightAnnotation
         };
 
     }]);

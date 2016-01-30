@@ -24,11 +24,14 @@
 
         vm.deleteAnnotation = deleteAnnotation;
 
+        vm.highlightedAnnotation = null;
+        vm.setHighlightedAnnotation = setHighlightedAnnotation;
+
+
         $window.addEventListener('message', function annotationControllerListener(event) {
             if (event.origin === window.location.origin) {
                 var data = event.data;
                 if (data.messageType === 'annotationDrawn') {
-                    console.log(data);
                     vm.newAnnotation = {
                         description: '',
                         shape: data.content.shape
@@ -36,8 +39,16 @@
                     $scope.$apply(function() {
                         vm.createMode = true;
                     });
-                    // TODO: Implement this
-                    // vm.focusForm();
+                } else if (data.messageType === 'onHighlighted') {
+                    var content = JSON.parse(data.content);
+                    var annotation = findAnnotation(content.data.shapes[0].geometry);
+                    $scope.$apply(function() {
+                        vm.highlightedAnnotation = annotation.data.id;
+                    });
+                } else if (data.messageType ==='onUnHighlighted') {
+                    $scope.$apply(function() {
+                        vm.highlightedAnnotation = null;
+                    });
                 }
             }
         });
@@ -107,6 +118,28 @@
             return AnnotationsService.deleteAnnotation(annotation);
         };
 
+        function setHighlightedAnnotation(annotation) {
+            if (vm.highlightedAnnotation == annotation.data.id) {
+                vm.highlightedAnnotation = null;
+                return;
+            }
 
+            vm.highlightedAnnotation = annotation.data.id;
+            highlightAnnotation(annotation);
+        }
+
+        function highlightAnnotation(annotation) {
+            return AnnotationsService.highlightAnnotation(annotation);
+        }
+
+        // Return an annotation given an object of Annotorious coordinates
+        function findAnnotation(coordinates) {
+            for (var i = 0; i < vm.annotations.length; i++) {
+                var annotationCoords = vm.annotations[i].data.coords;
+                if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
+                    return vm.annotations[i];
+                }
+            }
+        }
     }]);
 })();
