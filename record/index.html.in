@@ -120,6 +120,19 @@
                     </ul>
                 </accordion-group>
 
+                <!-- EMBEDED TABLES -->
+                <accordion-group ng-repeat="t in entity.embedTables | orderBy: 'title'" is-open="embed.open">
+                    <accordion-heading><div ng-class="{'active': embed.open }">{{t.title | removeUnderScores}}</div></accordion-heading>
+                        <ul id="embed">
+                            <li ng-repeat="element in t.elements">
+                                <div>
+                                    <a href="{{ element.uri }}" target="_blank" class="enlarge">Open</a>
+                                    <iframe title="{{ element.caption }}" width="100%" height="400" ng-src="{{ element.uri }}">&lt;p&gt;Your browser does not support iframes.&lt;/p&gt;</iframe>
+                                </div>
+                            </li>
+                        </ul>
+                </accordion-group>
+
                 <div ng-if="!chaiseConfig.recordUiGridEnabled">
                     <!-- REFERENCES -->
                     <accordion-group ng-repeat="ft in entity.foreignTables | orderBy:'title'" is-open="ft.open">

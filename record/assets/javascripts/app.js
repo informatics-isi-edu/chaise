@@ -43,7 +43,7 @@ chaiseRecordApp.service('configService', function() {
 });
 
 // REST API for Ermrest
-chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService', 'spinnerService', 'notFoundService', 'configService', function($http, $rootScope, schemaService, spinnerService, notFoundService, configService){
+chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schemaService', 'spinnerService', 'notFoundService', 'configService', function($http, $rootScope, $sce, schemaService, spinnerService, notFoundService, configService){
 
     // Get the entity in JSON format
     // Note: By this point,the schema should be loaded already
@@ -87,6 +87,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             self.patternInterpretationForTable(schemaName, tableName, data);
 
             entity.foreignTables    = [];
+            entity.embedTables = [];
             entity.associations     = [];
             // Data use by helper methods
             entity.internal         = { schemaName: schemaName, tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
@@ -123,13 +124,45 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         // If the elements doesn't return an empty array, continue
                         if (elements.length > 0){
 
-
+                            // Base on the annotation, treat the reference differently
                             // Get the elements annotations from the schema
                             var annotations =  schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations;
+                            var embedAnnotation = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations['tag:misd.isi.edu,2015:url'];
 
-                            // Base on the annotation, treat the reference differently
-                            // If annotations is 'download', store it in the entity's 'files' atributes
-                            if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
+                            // TODO embedded iFrame - annotation could be in table or column
+                            if (embedAnnotation !== undefined &&
+                                embedAnnotation.presentation !== undefined && embedAnnotation.presentation === 'embed') {
+
+                                var embedTable = {title: ft.displayTableName, elements: []};
+                                var cdef = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].column_definitions;
+
+                                for (var e = 0; e < elements.length; e++) {
+                                    var element = elements[e];
+
+                                    var urlPattern = embedAnnotation.pattern;
+                                    for (var c = 0; c < cdef.length; c++) {
+                                        cname = cdef[c].name;
+                                        urlPattern = urlPattern.replace("{" + cname + "}", element[cname]);
+                                    }
+
+
+                                    var caption = "";
+                                    if (embedAnnotation.caption !== undefined) {
+                                        caption = embedAnnotation.caption;
+                                        for (var c = 0; c < cdef.length; c++) {
+                                            cname = cdef[c].name;
+                                            caption = caption.replace("{" + cname + "}", element[cname]);
+                                        }
+                                    }
+
+                                    var embedElement = {uri: $sce.trustAsResourceUrl(urlPattern), caption: caption};
+                                    embedTable.elements.push(embedElement);
+                                }
+
+                                entity.embedTables.push(embedTable);
+
+                                // If annotations is 'download', store it in the entity's 'files' atributes
+                            } else if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
                                 entity['files']         = elements;
 
                             // If annotations is 'previews', store it in the entity's 'previews' atributes
@@ -551,6 +584,12 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                         // If table is download, preview, or images, initially load them
                         if (annotations !== undefined && (annotations.indexOf('download') > -1 || annotations.indexOf('preview') > -1 || annotations.indexOf('image') > -1)){
+                            foreignTable.initialLoad = true;
+                        }
+
+                        // if table is embed, initially load them
+                        urlAnnotation = tableSchema.annotations['tag:misd.isi.edu,2015:url'];
+                        if (urlAnnotation !== undefined && urlAnnotation.presentation !== undefined && urlAnnotation.presentation === 'embed') {
                             foreignTable.initialLoad = true;
                         }
 
