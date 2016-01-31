@@ -17,7 +17,7 @@
         vm.cancelNewAnnotation = cancelNewAnnotation;
 
         vm.editedAnnotation = null; // Track which annotation is being edited right now; used to show/hide the right UI elements depending on which one is being edited.
-        // vm.originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
+        var originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
         vm.editAnnotation = editAnnotation;
         vm.cancelEdit = cancelEdit;
         vm.updateAnnotation = updateAnnotation;
@@ -112,12 +112,17 @@
 
         function editAnnotation(annotation) {
             vm.editedAnnotation = annotation.data.id;
-            // vm.originalAnnotation = annotation;
+            originalAnnotation = {
+                description: annotation.data.description,
+                anatomy: annotation.data.anatomy
+            };
         };
 
         function cancelEdit(annotation) {
             vm.editedAnnotation = null;
-            // annotation = vm.originalAnnotation;
+            var data = annotation.data;
+            data.description = originalAnnotation.description;
+            data.anatomy = originalAnnotation.anatomy;
         };
 
         function updateAnnotation(annotation) {
