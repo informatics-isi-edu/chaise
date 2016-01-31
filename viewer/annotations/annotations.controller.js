@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['annotations', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(annotations, anatomies, AnnotationsService, $window, $scope) {
+    .controller('AnnotationsController', ['annotations', 'anatomies', 'AnnotationsService', '$window', '$document', '$scope', function AnnotationsController(annotations, anatomies, AnnotationsService, $window, $document, $scope) {
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;
@@ -44,7 +44,13 @@
                     var annotation = findAnnotation(content.data.shapes[0].geometry);
                     $scope.$apply(function() {
                         vm.highlightedAnnotation = annotation.data.id;
+                        // Scroll the annotation into visible part of browser
+                        document.getElementById('annotation-' + vm.highlightedAnnotation).scrollIntoView({
+                            block: 'start',
+                            behavior: 'smooth'
+                        });
                     });
+                    var element = document.get
                 } else if (data.messageType ==='onUnHighlighted') {
                     $scope.$apply(function() {
                         vm.highlightedAnnotation = null;
@@ -72,7 +78,6 @@
                     var numKeys = keys.length;
                     if (numKeys > 0) {
                         for (var i = 0; i < numKeys; i++) {
-                            console.log('Checking | Key: ', keys[i], ' Value: ', annotation[keys[i]]);
                             if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
                                 return true;
                             }
