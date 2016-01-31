@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['annotations', 'anatomies', 'AnnotationsService', '$window', '$document', '$scope', function AnnotationsController(annotations, anatomies, AnnotationsService, $window, $document, $scope) {
+    .controller('AnnotationsController', ['annotations', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(annotations, anatomies, AnnotationsService, $window, $scope) {
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;
@@ -27,35 +27,40 @@
         vm.highlightedAnnotation = null;
         vm.setHighlightedAnnotation = setHighlightedAnnotation;
 
-
+        // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
             if (event.origin === window.location.origin) {
                 var data = event.data;
-                if (data.messageType === 'annotationDrawn') {
-                    vm.newAnnotation = {
-                        description: '',
-                        shape: data.content.shape
-                    };
-                    $scope.$apply(function() {
-                        vm.createMode = true;
-                    });
-                } else if (data.messageType === 'onHighlighted') {
-                    var content = JSON.parse(data.content);
-                    var annotation = findAnnotation(content.data.shapes[0].geometry);
-                    $scope.$apply(function() {
-                        vm.highlightedAnnotation = annotation.data.id;
-                        // Scroll the annotation into visible part of browser
-                        document.getElementById('annotation-' + vm.highlightedAnnotation).scrollIntoView({
-                            block: 'start',
-                            behavior: 'smooth'
+                var messageType = data.messageType;
+                switch (messageType) {
+                    case 'annotationDrawn':
+                        vm.newAnnotation = {
+                            description: '',
+                            shape: data.content.shape
+                        };
+                        $scope.$apply(function() {
+                            vm.createMode = true;
                         });
-                    });
-                    var element = document.get
-                } else if (data.messageType ==='onUnHighlighted') {
-                    $scope.$apply(function() {
-                        vm.highlightedAnnotation = null;
-                    });
+                        break;
+                    case 'onHighlighted':
+                        var content = JSON.parse(data.content);
+                        var annotation = findAnnotation(content.data.shapes[0].geometry);
+                        $scope.$apply(function() {
+                            // Highlight the annotation in the sidebar
+                            vm.highlightedAnnotation = annotation.data.id;
+                        });
+                        scrollIntoView('annotation-' + vm.highlightedAnnotation);
+                        break;
+                    case 'onUnHighlighted':
+                        $scope.$apply(function() {
+                            vm.highlightedAnnotation = null;
+                        });
+                        break;
+                    default:
+                        console.log('Invalid event message type "', messageType, '"');
                 }
+            } else {
+                console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
             }
         });
 
@@ -134,6 +139,7 @@
             highlightAnnotation(annotation);
         }
 
+        // Highlights the annotation inside Annotorious
         function highlightAnnotation(annotation) {
             return AnnotationsService.highlightAnnotation(annotation);
         }
@@ -146,6 +152,15 @@
                     return vm.annotations[i];
                 }
             }
+        }
+
+        // Scroll an element into visible part of the browser
+        function scrollIntoView(elementId) {
+            // Scroll the annotation into visible part of browser
+            document.getElementById(elementId).scrollIntoView({
+                block: 'start',
+                behavior: 'smooth'
+            });
         }
     }]);
 })();
