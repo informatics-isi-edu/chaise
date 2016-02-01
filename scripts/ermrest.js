@@ -3611,9 +3611,10 @@ function successUpdateFacetGroups(data, textStatus, jqXHR, param) {
 		}
 	});
 	var hideValues = [];
-	$.each(colsGroup[col], function(key, value) {
-		if (!values.contains(key)) {
-			hideValues.push(key);
+	var allValues = options['colsDescr'][table][col]['values'];
+	$.each(allValues, function(i, value) {
+		if (!values.contains(value)) {
+			hideValues.push(value);
 		}
 	});
 	$.each(hideValues, function(i, key) {
