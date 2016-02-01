@@ -1,36 +1,52 @@
-<html ng-app="openSeadragonApp">
+<html ng-app="chaise.viewer">
 <head>
     <title>Data Viewer | (Re)Building A Kidney</title>
     %ASSETS%
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     <style>
-        #annotations-control {
-            height: 98vh;
+        #sidebar, #viewer {
+            margin-top: 5px;
+        }
+
+        #sidebar {
+            height: 99%;
+            background-color: #fff;
             overflow: auto;
-            border-right: 1px solid #eee;
+            resize: horizontal;
+            /* To allow sidebar to resize over the iframe, sidebar's z-index should be iframe's z-index + 1.*/
+            z-index: 1;
         }
 
         #viewer {
             position: fixed;
             left: 25%;
+            border-left: 1px solid #eee;
+        }
+
+        #annotations-panel .ui-select-container {
+            width: 100%;
+        }
+
+        #metadata-panel .entity-key, #metadata-panel .entity-value {
+            font-size: 14px;
         }
 
         .annotation {
             padding: 10px;
             margin: 15px 0;
             border-radius: 3px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
         }
 
-        .annotation.highlighted {
+        .annotation:hover, .annotation.highlighted {
             border-left: 5px solid #428bca;
         }
 
-        .annotation.highlighted .comment, .comment:hover {
+        .annotation.highlighted .annotation-description, .annotation-description:hover {
             color: #428bca;
         }
 
-        .comment:hover {
+        .annotation-description:hover {
             cursor: pointer;
         }
 
@@ -43,125 +59,436 @@
             margin-right: 0;
         }
     </style>
+    <!--
+        IE8 support, see AngularJS Internet Explorer Compatibility http://docs.angularjs.org/guide/ie
+        For Firefox 3.6, you will also need to include jQuery and ECMAScript 5 shim
+    -->
+    <!--[if lt IE 9]>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/es5-shim/2.2.0/es5-shim.js"></script>
+        <script>
+            document.createElement('ui-select');
+            document.createElement('ui-select-match');
+            document.createElement('ui-select-choices');
+        </script>
+    <![endif]-->
 </head>
+<!-- TODO: Later, concatenate views into this file via Makefile -->
 <body>
-    <div class="container-fluid" style="margin-top: 10px;">
-        <div ng-controller="MainController" class="row">
-            <div id="annotations-control" class="col-md-3">
-                <!-- TODO: Perform form validation (e.g. no empty annotation descriptions) -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- CONTROLLER: SidebarSwitchController -->
+            <div ng-controller="SidebarSwitchController as sidebarSwitch" id="sidebar" class="col-md-3">
                 <div class="row">
-                    <div class="col-md-12">
-                        <span class="h2">Annotations</span><button ng-click="drawAnnotation();" class="btn btn-sm btn-success pull-right" type="button" role="button"><span class="glyphicon glyphicon-plus"></span>   New</button>
-                    </div>
+                    <ul class="nav nav-tabs">
+                        <li ng-repeat="sidebar in sidebarSwitch.sidebars" ng-class="{active: sidebarSwitch.sidebar == sidebar}" role="presentation">
+                            <a ng-click="sidebarSwitch.setSidebar(sidebar);">{{sidebar | toTitleCase}}</a>
+                        </li>
+                    </ul>
                 </div>
                 <br>
-                <!-- Search Bar -->
-                <div class="row">
+                <!-- CONTROLLER: ImageMetadataController-->
+                <div ng-show="sidebarSwitch.sidebar == 'metadata'" ng-controller="ImageMetadataController as metadata" id="metadata-panel" class="row">
                     <div class="col-md-12">
-                        <input ng-model="query" class="form-control" type="search" placeholder="Search annotations">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <span class="entity-title">Image Metadata</span>
+                            </div>
+                        </div>
+                        <br>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td class="entity-key col-md-2">Slide ID</td>
+                                    <td class="entity-value col-md-10">
+                                        <span ng-if="metadata.image.entity.data.slide_id">{{metadata.image.entity.data.slide_id}}</span>
+                                        <span ng-if="!metadata.image.entity.data.slide_id" class="text-muted">No data</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Status</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingStatus">
+                                            <span ng-if="metadata.image.entity.data.status">{{metadata.image.entity.data.status}}</span>
+                                            <span ng-if="!metadata.image.entity.data.status" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingStatus');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingStatus" class="form-inline">
+                                            <ui-select ng-model="metadata.image.entity.data.status" theme="select2" ng-disabled="disabled" style="width: 175px;">
+                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.status}}</ui-select-match>
+                                                <ui-select-choices repeat="status in (metadata.statuses | filter: $select.search) track by status">
+                                                    <div ng-bind-html="status | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <a ng-click="metadata.save('editingStatus');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Description</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingDescription">
+                                            <span ng-if="metadata.image.entity.data.description">{{metadata.image.entity.data.description}}</span>
+                                            <span ng-if="!metadata.image.entity.data.description" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingDescription');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingDescription" class="form-inline">
+                                            <textarea ng-model="metadata.image.entity.data.description" class="form-control" rows="5"></textarea>
+                                            <a ng-click="metadata.save('editingDescription');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Submitter</td>
+                                    <td class="entity-value col-md-10">
+                                        <span ng-if="metadata.image.entity.data.submitter">{{metadata.image.entity.data.submitter}}</span>
+                                        <span ng-if="!metadata.image.entity.data.submitter" class="text-muted">No data</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Submitted</td>
+                                    <td class="entity-value col-md-10">
+                                        <span ng-if="metadata.image.entity.data.submitted">{{metadata.image.entity.data.submitted}}</span>
+                                        <span ng-if="!metadata.image.entity.data.submitted" class="text-muted">No data</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br>
+                        <h4>Tags</h4>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td class="entity-key col-md-2">Tissue</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingTissue">
+                                            <span ng-if="metadata.image.entity.data.tissue">{{metadata.image.entity.data.tissue}}</span>
+                                            <span ng-if="!metadata.image.entity.data.tissue" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingTissue');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingTissue" class="form-inline">
+                                            <ui-select ng-model="metadata.image.entity.data.tissue" theme="select2" ng-disabled="disabled" style="width: 175px;">
+                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.tissue}}</ui-select-match>
+                                                <ui-select-choices repeat="tissue in (metadata.vocabs.tissue | filter: $select.search) track by tissue">
+                                                    <div ng-bind-html="tissue | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <a ng-click="metadata.save('editingTissue');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Gender</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingGender">
+                                            <span ng-if="metadata.image.entity.data.gender">{{metadata.image.entity.data.gender}}</span>
+                                            <span ng-if="!metadata.image.entity.data.gender" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingGender');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingGender" class="form-inline">
+                                            <ui-select ng-model="metadata.image.entity.data.gender" theme="select2" ng-disabled="disabled" style="width: 175px;">
+                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.gender}}</ui-select-match>
+                                                <ui-select-choices repeat="gender in (metadata.vocabs.gender | filter: $select.search) track by gender">
+                                                    <div ng-bind-html="gender | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <a ng-click="metadata.save('editingGender');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Age Stage</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingAgeStage">
+                                            <span ng-if="metadata.image.entity.data.age_stage">{{metadata.image.entity.data.age_stage}}</span>
+                                            <span ng-if="!metadata.image.entity.data.age_stage" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingAgeStage');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingAgeStage" class="form-inline">
+                                            <ui-select ng-model="metadata.image.entity.data.age_stage" theme="select2" ng-disabled="disabled" style="width: 175px;">
+                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.age_stage}}</ui-select-match>
+                                                <ui-select-choices repeat="age_stage in (metadata.vocabs.age_stage | filter: $select.search) track by age_stage">
+                                                    <div ng-bind-html="age_stage | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <a ng-click="metadata.save('editingAgeStage');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Embedding Medium</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingEmebeddingMedium">
+                                            <span ng-if="metadata.image.entity.data.embedding_medium">{{metadata.image.entity.data.embedding_medium}}</span>
+                                            <span ng-if="!metadata.image.entity.data.embedding_medium" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingEmebeddingMedium');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingEmebeddingMedium" class="form-inline">
+                                            <ui-select ng-model="metadata.image.entity.data.embedding_medium" theme="select2" ng-disabled="disabled" style="width: 175px;">
+                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.embedding_medium}}</ui-select-match>
+                                                <ui-select-choices repeat="embedding_medium in (metadata.vocabs.embedding_medium | filter: $select.search) track by embedding_medium">
+                                                    <div ng-bind-html="embedding_medium | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <a ng-click="metadata.save('editingEmebeddingMedium');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Specimen Fixation</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingSpecimenFixation">
+                                            <span ng-if="metadata.image.entity.data.specimen_fixation">{{metadata.image.entity.data.specimen_fixation}}</span>
+                                            <span ng-if="!metadata.image.entity.data.specimen_fixation" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingSpecimenFixation');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingSpecimenFixation" class="form-inline">
+                                            <ui-select ng-model="metadata.image.entity.data.specimen_fixation" theme="select2" ng-disabled="disabled" style="width: 175px;">
+                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.specimen_fixation}}</ui-select-match>
+                                                <ui-select-choices repeat="specimen_fixation in (metadata.vocabs.specimen_fixation | filter: $select.search) track by specimen_fixation">
+                                                    <div ng-bind-html="specimen_fixation | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <a ng-click="metadata.save('editingSpecimenFixation');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Staining Protocol</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingStainingProtocol">
+                                            <span ng-if="metadata.image.entity.data.staining_protocol">{{metadata.image.entity.data.staining_protocol}}</span>
+                                            <span ng-if="!metadata.image.entity.data.staining_protocol" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingStainingProtocol');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingStainingProtocol" class="form-inline">
+                                            <ui-select ng-model="metadata.image.entity.data.staining_protocol" theme="select2" ng-disabled="disabled" style="width: 175px;">
+                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.staining_protocol}}</ui-select-match>
+                                                <ui-select-choices repeat="staining_protocol in (metadata.vocabs.staining_protocol | filter: $select.search) track by staining_protocol">
+                                                    <div ng-bind-html="staining_protocol | highlight: $select.search"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <a ng-click="metadata.save('editingStainingProtocol');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br>
+                        <h4>File Details</h4>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td class="entity-key col-md-2">Filename</td>
+                                    <td class="entity-value col-md-10">
+                                        <span ng-if="metadata.image.entity.data.filename">{{metadata.image.entity.data.filename}}</span>
+                                        <span ng-if="!metadata.image.entity.data.filename" class="text-muted">No data</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Resolution</td>
+                                    <td class="entity-value col-md-10">
+                                        <span ng-if="metadata.image.entity.data.resolution">{{metadata.image.entity.data.resolution}}</span>
+                                        <span ng-if="!metadata.image.entity.data.resolution" class="text-muted">No data</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">Bytes</td>
+                                    <td class="entity-value col-md-10">
+                                        <span ng-if="metadata.image.entity.data.bytes">{{metadata.image.entity.data.bytes}}</span>
+                                        <span ng-if="!metadata.image.entity.data.bytes" class="text-muted">No data</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br>
+                        <h4>Identifiers</h4>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td class="entity-key col-md-2">Accession Number</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingAccessionNum">
+                                            <span ng-if="metadata.image.entity.data.accession_number">{{metadata.image.entity.data.description}}</span>
+                                            <span ng-if="!metadata.image.entity.data.accession_number" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingAccessionNum');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingAccessionNum" class="form-inline">
+                                            <input ng-model="metadata.image.entity.data.accession_number" type="text" class="form-control">
+                                            <a ng-click="metadata.save('editingAccessionNum');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">DOI</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.metadata.editingDOI">
+                                            <span ng-if="metadata.image.entity.data.doi">{{metadata.image.entity.data.doi}}</span>
+                                            <span ng-if="!metadata.image.entity.data.doi" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingDOI');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingDOI" class="form-inline">
+                                            <input ng-model="metadata.image.entity.data.doi" type="text" class="form-control">
+                                            <a ng-click="metadata.save('editingDOI');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="entity-key col-md-2">ARK</td>
+                                    <td class="entity-value col-md-10">
+                                        <div ng-show="!metadata.editingARK">
+                                            <span ng-if="metadata.image.entity.data.ark">{{metadata.image.entity.data.ark}}</span>
+                                            <span ng-if="!metadata.image.entity.data.ark" class="text-muted">No data</span>
+                                            <a ng-click="metadata.edit('editingARK');" class="pull-right">Edit</a>
+                                        </div>
+                                        <div ng-show="metadata.editingARK" class="form-inline">
+                                            <input ng-model="metadata.image.entity.data.ark" type="text" class="form-control">
+                                            <a ng-click="metadata.save('editingARK');" class="pull-right">Save</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <!-- Annotation Creation Form -->
-                <form ng-show="createMode" class="annotation" style="border-left: 5px solid #5cb85c;">
+                <!-- CONTROLLER: AnnotationsController-->
+                <div ng-show="sidebarSwitch.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
+                    <div class="col-md-12">
                         <div class="row">
-                            <div class="col-md-10">
-                                <span class="h4">New Annotation</span>
-                            </div>
-                            <div class="col-md-2">
-                                <button ng-click="cancelAnnotationCreation();" type="button" class="close pull-right" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <div class="col-md-12">
+                                <span class="entity-title">Annotations</span>
+                                <button ng-click="annotations.drawAnnotation();" class="btn btn-sm btn-success pull-right" type="button" role="button">
+                                    <span class="glyphicon glyphicon-plus"></span>   New
+                                </button>
                             </div>
                         </div>
                         <br>
                         <div class="row">
                             <div class="col-md-12">
-                                <textarea ng-model="newAnnotation.description" class="form-control input-sm" rows="3" placeholder="Write annotation text here"></textarea><br>
-                                <select ng-model="newAnnotation.anatomy" class="form-control input-sm">
-                                    <option ng-disabled="true" value="">Select an anatomy term</option>
-                                    <option value="">No Anatomy</option>
-                                    <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
-                                </select>
+                                <input ng-model="annotations.query" class="form-control" type="search" placeholder="Search annotations">
                             </div>
                         </div>
-                        <br>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <button ng-click="createAnnotation(newAnnotation);" role="button" class="btn btn-xs btn-success form-control" type="submit"><strong>Create Annotation</strong></button>
+                        <!-- Annotation Creation Form -->
+                        <form ng-show="annotations.createMode" id="create-annotation-form" class="annotation" style="border-left: 5px solid #5cb85c;">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <span class="h4">New Annotation</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <button ng-click="annotations.cancelNewAnnotation();" type="button" class="close pull-right" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </form>
-                <!-- Annotations -->
-                <div ng-repeat="annotation in annotations | orderBy:'-created' | filter:query as results track by annotation.id" class="annotation" ng-class="{highlighted: annotation.id === highlightedAnnotation}">
-                    <!-- Annotation Display Card -->
-                    <div ng-show="annotation.id !== editedAnnotation">
-                        <div class="row">
-                            <div class="col-md-8 annotation-anatomy-text">
-                                <small><strong>
-                                    <span ng-if="annotation.anatomy">{{annotation.anatomy | uppercase}}</span>
-                                    <span ng-if="!annotation.anatomy">{{'No Anatomy' | uppercase}}</span>
-                                </strong></small>
+                            <br>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <textarea ng-model="annotations.newAnnotation.description" class="form-control description-field" rows="3" placeholder="Write annotation text here"></textarea>
+                                    <br>
+                                    <ui-select ng-model="annotations.newAnnotation.anatomy" theme="select2" ng-disabled="disabled">
+                                        <ui-select-match placeholder="Select an anatomy term">{{annotations.newAnnotation.anatomy}}</ui-select-match>
+                                        <ui-select-choices repeat="anatomy in (annotations.anatomies | filter: $select.search) track by anatomy">
+                                            <div ng-bind-html="anatomy | highlight: $select.search"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
                             </div>
-                            <!-- Annotation Date -->
-                            <div class="col-md-4">
-                                <small class="pull-right">{{annotation.created | date: 'MMM d, y'}}</small>
+                            <br>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button ng-click="annotations.createAnnotation();" role="button" class="btn btn-xs btn-success form-control" type="submit">
+                                        <strong>Create Annotation</strong>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <br>
-                        <!-- Annotation Text -->
-                        <div ng-if="annotation.description" class="row">
-                            <div class="col-md-12">
-                                <span ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" class="comment" class="h4">{{annotation.description}}</span>
-                            </div>
-                        </div>
-                        <br>
-                        <!-- Annotation Control Buttons -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <button ng-show="annotation.id !== editedAnnotation" ng-click="deleteAnnotation(annotation);" title="Delete Annotation" class="btn btn-sm btn-danger pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-trash"></span></button>
-                                <button ng-show="annotation.id !== editedAnnotation" ng-click="setHighlightedAnnotation(annotation.id);highlightAnnotation(annotation);" title="Highlight Annotation" class="btn btn-sm btn-warning pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                                <button ng-show="annotation.id !== editedAnnotation" ng-click="editAnnotation(annotation);" title="Edit Annotation" class="btn btn-sm btn-primary pull-right annotation-control-button" role="button" type="button"><span class="glyphicon glyphicon-pencil"></span></button>
-                            </div>
-                        </div>
+                        </form>
+                        <!-- Annotations List -->
+                        <div ng-repeat="annotation in annotations.annotations | orderBy:'-data.created' | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == annotation.data.id}" class="annotation" ng-click="annotations.setHighlightedAnnotation(annotation);" style="cursor: pointer;">
+                            <!-- Annotation Display Card -->
+                            <div ng-show="annotation.data.id !== annotations.editedAnnotation">
+                                <div class="row">
+                                    <!-- Annotation Anatomy Text -->
+                                    <div class="col-md-7 annotation-anatomy-text">
+                                        <small><strong>
+                                            <span ng-if="annotation.data.anatomy">{{annotation.data.anatomy | uppercase}}</span>
+                                            <span ng-if="!annotation.data.anatomy">{{'No Anatomy' | uppercase}}</span>
+                                        </strong></small>
+                                    </div>
+                                    <!-- Annotation Edit/Delete Buttons -->
+                                    <div class="col-md-5">
+                                        <small class="pull-right">
+                                            <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" style="cursor:pointer;">Edit</a> |
+                                            <a ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" style="cursor:pointer;">Delete</a>
+                                        </small>
+                                    </div>
+                                </div>
+                                <br>
+                                <!-- Annotation Description -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <span class="h5 annotation-description" style="cursor:pointer;">
+                                            {{annotation.data.description}}
+                                        </span>
+                                    </div>
+                                </div>
+                                <br>
+                                <!-- Annotation Author & Date -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <small>{{annotation.data.author | toTitleCase}} &mdash; {{annotation.data.created}}</small>
+                                    </div>
+                                </div>
+                            </div><!-- /Annotation Display Card -->
+                            <form ng-show="annotation.data.id === annotations.editedAnnotation" id="edit-annotation-form">
+                                <div class="row">
+                                    <!-- Edit Form: Annotation Anatomy -->
+                                    <div class="col-md-10 annotation-anatomy-text">
+                                        <ui-select ng-model="annotation.data.anatomy" theme="select2" ng-disabled="disabled">
+                                            <ui-select-match placeholder="Select an anatomy term">{{annotation.data.anatomy}}</ui-select-match>
+                                            <ui-select-choices repeat="anatomy in (annotations.anatomies | filter: $select.search) track by anatomy">
+                                                <div ng-bind-html="anatomy | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button ng-click="annotations.cancelEdit(annotation);" type="button" class="close pull-right" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <br>
+                                <div ng-show="annotation.data.description" class="row">
+                                    <div class="col-md-12">
+                                        <textarea ng-model="annotation.data.description" rows="3" class="form-control"></textarea>
+                                    </div>
+                                </div>
+                                <br>
+                                <!-- Edit Form: Annotation Author and Date -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <small>
+                                            {{annotation.data.author | toTitleCase}} &mdash;
+                                            {{annotation.data.created | date: 'MMM d, y'}}
+                                        </small>
+                                    </div>
+                                </div>
+                                <br>
+                                <!-- Edit Form: Save and Cancel buttons -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button ng-click="annotations.updateAnnotation(annotation);" role="button" class="btn btn-xs btn-primary form-control" type="button">
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div><!-- /Annotations List-->
                     </div>
-                    <!-- Annotation Edit Form -->
-                    <form ng-if="annotation.id === editedAnnotation">
-                        <div class="row">
-                            <!-- Edit Form: Annotation Anatomy -->
-                            <div class="col-md-8 annotation-anatomy-text">
-                                <select ng-model="annotation.anatomy" class="form-control input-sm">
-                                    <option ng-show="annotation.anatomy" value="">No Anatomy</option>
-                                    <option ng-repeat="anatomy in anatomies track by $index">{{anatomy}}</option>
-                                </select>
-                            </div>
-                            <!-- Edit Form: Annotation Date -->
-                            <div class="col-md-4">
-                                <small class="pull-right">{{annotation.created | date: 'MMM d, y'}}</small>
-                            </div>
-                        </div>
-                        <br>
-                        <!-- Edit Form: Annotation Text -->
-                        <div ng-if="annotation.description" class="row">
-                            <div class="col-md-12">
-                                <textarea ng-model="annotation.description" class="form-control input-sm" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <br>
-                        <!-- Edit Form: Save and Cancel buttons -->
-                        <div class="row">
-                            <div class="col-md-6">
-                                <button ng-click="cancelAnnotationEdit(annotation);" role="button" class="btn btn-xs btn-danger form-control" type="button">Cancel</button>
-                            </div>
-                            <div class="col-md-6">
-                                <button ng-click="saveAnnotation(annotation);" role="button" class="btn btn-xs btn-primary form-control" type="button">Save</button>
-                            </div>
-                        </div>
-                    </form>
                 </div>
-                <br>
-                <p ng-if="annotations.length == 0 || results.length == 0">No annotations found.</p>
-            </div>
-            <!-- iframe viewer -->
-            <div ng-if="viewerSource" id="viewer" class="col-md-9">
-                <iframe id="viewer" width="74%" height="100%" ng-src="{{viewerSource | trusted}}" frameBorder="0">
+            </div><!--/ end SidebarSwitchController -->
+            <!-- CONTROLLER: OSDController -->
+            <div ng-controller="OSDController as osd" id="viewer" class="col-md-9">
+                <iframe id="viewer" width="74%" height="100%" ng-src="{{::osd.image.entity.data.uri}}" frameBorder="0">
                     &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
                 </iframe>
             </div>

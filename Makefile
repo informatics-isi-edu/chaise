@@ -141,12 +141,31 @@ RECORD_CSS_SOURCE=$(RECORD_ASSETS)/stylesheets/app.css
 VIEWER_ASSETS=viewer
 
 VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
-	$(JS)/vendor/angular.js
+	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/select.js
 
-VIEWER_JS_SOURCE= $(VIEWER_ASSETS)/app.js
+VIEWER_JS_SOURCE= $(VIEWER_ASSETS)/viewer.module.js \
+	$(VIEWER_ASSETS)/common/providers/context.js \
+	$(VIEWER_ASSETS)/common/providers/image.js \
+	$(VIEWER_ASSETS)/common/filters/toTitleCase.js \
+	$(VIEWER_ASSETS)/common/filters/underscoreToSpace.js \
+	$(VIEWER_ASSETS)/sidebar-switch/sidebarSwitch.controller.js \
+	$(VIEWER_ASSETS)/annotations/annotations.js \
+	$(VIEWER_ASSETS)/annotations/anatomies.js \
+	$(VIEWER_ASSETS)/annotations/annotations.service.js \
+	$(VIEWER_ASSETS)/annotations/annotations.controller.js \
+	$(VIEWER_ASSETS)/osd/osd.controller.js \
+	$(VIEWER_ASSETS)/image-metadata/vocabs.js \
+	$(VIEWER_ASSETS)/image-metadata/statuses.js \
+	$(VIEWER_ASSETS)/image-metadata/metadata.controller.js
 
 VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/appheader.css
+	$(CSS)/material-design/css/material-design-iconic-font.min.css \
+	$(CSS)/vendor/select.css \
+	$(CSS)/vendor/select2.css \
+	$(CSS)/appheader.css \
+	$(RECORD_ASSETS)/stylesheets/app.css
 
 
 # Config file
