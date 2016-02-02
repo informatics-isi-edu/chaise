@@ -45,13 +45,6 @@
                 var filteredTable = table.getFilteredTable(['id=' + context.imageID]);
                 if (filteredTable) {
                     filteredTable.getEntities().then(function success(_entities) {
-                        // Splicing in my ~jessie directory in here so it
-                        // redirects to my own version of OpenSeadragon and not
-                        // the shared version..
-                        if (_entities[0].data.uri.indexOf('~jessie') == -1) {
-                            _entities[0].data.uri = _entities[0].data.uri.substring(0, 34) + '~jessie/' + _entities[0].data.uri.substring(34);
-                        }
-                        ////////////////////////////////////////////////////////
                         image.entity = _entities[0];
                         console.log('Image: ', image);
                         var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
