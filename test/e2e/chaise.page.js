@@ -22,6 +22,9 @@ function sidebar() {
     this.findSidebarAttrByName = function (attrName) {
         return this.htmlElement.element(by.cssContainingText('ul li a', attrName));
     };
+    this.clickSidebarAttr = function (attrName) {
+        this.findSidebarAttrByName(attrName).click();
+    };
 };
 
 function moreFilter() {
@@ -40,9 +43,39 @@ function editFilter() {
     this.findEditfilterAttrByName = function(attrName) {
         return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
     };
-    this.findEditfilterLiByName = function (attrName) {
-        return element(by.cssContainingText(editFilterId + ' ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
-        return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
+    this.goBackToSidebar = function() {
+        this.sidebarHeader.click();
+    };
+    //this.findEditfilterLiByName = function (attrName) {
+    //    return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
+    //};
+};
+
+function contentFilter() {
+    var filterEle = '#filter';
+    this.htmlElement = $(filterEle);
+    this.clearAllBtn = this.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope > a', 'Clear All Filters'));
+    this.displayedFilters = this.htmlElement.all(by.css('div.filter-item.ng-scope:not(.ng-hide)'));
+    this.findFilterWrapperByName = function(attrName) {
+        return this.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
+    };
+};
+
+function resultContent() {
+    this.resultAllRows = element.all(by.repeater('row in FacetsData.ermrestData'));
+    this.resultTally = element.all(by.css('#results_tally')).get(1);
+    this.resultTallyRange = this.resultTally.element(by.binding("facetResults.displayRange()"));
+    this.resultTallySum = this.resultTally.element(by.binding("FacetsData.totalServerItems"));
+    this.filter = new contentFilter();
+};
+
+function recordPage() {
+    this.entityTitle = $('#entity-title');
+    this.findEntityKeyByName = function(entityName) {
+        return element(by.cssContainingText('.entity-key.ng-binding', entityName));
+    };
+    this.findToggleByName = function(keyName) {
+        return element(by.cssContainingText('.panel-heading', keyName))
     };
 };
 
@@ -50,28 +83,8 @@ function chaisePage() {
     this.sidebar = new sidebar();
     this.moreFilter = new moreFilter();
     this.editFilter = new editFilter();
-    this.resultContent = {
-        resultAllRows: element.all(by.repeater('row in FacetsData.ermrestData')),
-        resultTallyRange: element.all(by.css('#results_tally')).get(1).element(by.binding("facetResults.displayRange()")),
-        resultTallySum: element.all(by.css('#results_tally')).get(1).element(by.binding("FacetsData.totalServerItems")),
-        filter: {
-            clearAllBtn: element(by.cssContainingText('#filter div.filter-item.ng-scope > a', 'Clear All Filters')),
-            //including the clearAllFilterBtn
-            displayedFilters: element.all(by.css('#filter div.filter-item.ng-scope:not(.ng-hide)')),
-            findFilterWrapperByName: function(attrName) {
-                return element(by.cssContainingText('#filter div.filter-item.ng-scope:not(.ng-hide)', attrName));
-            },
-        },
-    };
-    this.recordPage = {
-        entityTitle: element(by.css('#entity-title')),
-        findEntityKeyByName: function(entityName) {
-            return element(by.cssContainingText('.entity-key.ng-binding', entityName));
-        },
-        findToggleByName: function(keyName) {
-            return element(by.cssContainingText('.panel-heading', keyName))
-        },
-    };
+    this.resultContent = new resultContent();
+    this.recordPage = new recordPage();
     this.tools = {
         getDisplayedRecordNum: function(str) {
             return str.split('-')[1];

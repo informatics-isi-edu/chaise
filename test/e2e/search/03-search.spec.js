@@ -10,36 +10,16 @@
  */
 
 var chaisePage = require('../chaise.page.js');
+var pageAction = require('../page.action.js');
 
-describe('In Chaise, search_03 record,', function () {
+xdescribe('In Chaise, search_03 record,', function () {
     var EC = protractor.ExpectedConditions;
 
     describe('on load,', function () {
-        beforeAll(function () {
-            browser.get('');
-        });
-
-        it('should show the spinner', function (done) {
-            //not so sure why adding ignoreSync works
-            //probably not waiting for AngularJS to sync,
-            //so icon can be tested before everything settles down(settling down means img is no longer there)
-            browser.ignoreSynchronization = true;
-            var spinner = element(by.id('spinner'));
-            expect(spinner.isDisplayed()).toBe(true);
+        it('should load the page', function (done) {
+            pageAction.loadChaise();
             done();
         });
-
-        it('should open the initial sidebar', function (done) {
-            browser.ignoreSynchronization = false;
-            var spinner = element(by.id('spinner'));
-            var sidebar = element(by.id('sidebar'));
-            browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
-                expect(sidebar.isDisplayed()).toBe(true);
-                expect(spinner.isDisplayed()).toBe(false);
-                done();
-            });
-        });
-
     });
 
     describe('The sidebar filter input', function () {
@@ -143,12 +123,12 @@ describe('In Chaise, search_03 record,', function () {
             var accessionValueEle = accessionEle.element(by.xpath('following-sibling::td'));
             accessionValueEle.getText().then(function(expectedFileName) {
                 var fileEle = chaisePage.recordPage.findToggleByName('Files');
-                var fileCollapedEle = fileEle.element(by.xpath('following-sibling::div'));
-                expect(fileCollapedEle.isDisplayed()).toBe(false);
+                var fileCollapsedEle = fileEle.element(by.xpath('following-sibling::div'));
+                expect(fileCollapsedEle.isDisplayed()).toBe(false);
 
                 fileEle.click().then(function () {
-                    expect(fileCollapedEle.isDisplayed()).toBe(true);
-                    var fileList = fileCollapedEle.all(by.repeater('file in entity.files'));
+                    expect(fileCollapsedEle.isDisplayed()).toBe(true);
+                    var fileList = fileCollapsedEle.all(by.repeater('file in entity.files'));
                     var imgEle = fileList.first().element(by.css('img'));
                     var fileNameEle = imgEle.all(by.xpath('following-sibling::div')).first();
                     fileNameEle.getText().then(function(fileName) {

@@ -6,32 +6,16 @@
  */
 
 var chaisePage = require('../chaise.page.js');
-xdescribe('In Chaise, search_02 sidebarFilter summary and description,', function () {
+var pageAction = require('../page.action.js');
+
+xdescribe('In Chaise, search_02 sidebarFilter description,', function () {
     var EC = protractor.ExpectedConditions;
 
     describe('on load,', function () {
-        beforeAll(function () {
-            browser.get('');
-        });
-
-        it('should show the spinner', function (done) {
-            //not so sure why adding ignoreSync works
-            //probably not waiting for AngularJS to sync,
-            //so icon can be tested before everything settles down(settling down means img is no longer there)
-            browser.ignoreSynchronization = true;
-            var spinner = element(by.id('spinner'));
+        it('should load the page', function (done) {
+            pageAction.loadChaise();
             done();
         });
-
-        it('should open the initial sidebar', function (done) {
-            browser.ignoreSynchronization = false;
-            var spinner = element(by.id('spinner'));
-            var sidebar = element(by.id('sidebar'));
-            browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
-                done();
-            });
-        });
-
     });
 
     describe('The sidebar filter input,', function () {

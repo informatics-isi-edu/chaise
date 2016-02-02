@@ -7,36 +7,16 @@
  */
 
 var chaisePage = require('../chaise.page.js');
+var pageAction = require('../page.action.js');
 
-describe('In Chaise, search_01 contentArea and sidebar', function () {
+xdescribe('In Chaise, search_01 contentArea and sidebar', function () {
     var EC = protractor.ExpectedConditions;
 
     describe('on load,', function () {
-        beforeAll(function () {
-            browser.get('');
-        });
-
-        it('should show the spinner', function (done) {
-            //not so sure why adding ignoreSync works
-            //probably not waiting for AngularJS to sync,
-            //so icon can be tested before everything settles down(settling down means img is no longer there)
-            browser.ignoreSynchronization = true;
-            var spinner = element(by.id('spinner'));
-            expect(spinner.isDisplayed()).toBe(true);
+        it('should load the page', function (done) {
+            pageAction.loadChaise();
             done();
         });
-
-        it('should open the initial sidebar', function (done) {
-            browser.ignoreSynchronization = false;
-            var spinner = element(by.id('spinner'));
-            var sidebar = element(by.id('sidebar'));
-            browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
-                expect(sidebar.isDisplayed()).toBe(true);
-                expect(spinner.isDisplayed()).toBe(false);
-                done();
-            });
-        });
-
     });
 
     describe('The sidebar filter input', function () {
@@ -60,15 +40,13 @@ describe('In Chaise, search_01 contentArea and sidebar', function () {
             done();
         });
 
-        it('should show >= 0 attributes after clicking \"Experiment Type\"', function (done) {
+        it('should show >= 0 editfilter attributes after clicking \"Experiment Type\"', function (done) {
             var searchBoxInput = searchBox.getAttribute('value');
             expect(searchBoxInput).toBe('RNA');
 
             var experimentType = 'Experiment Type';
             var experimentFacet = chaisePage.sidebar.findSidebarAttrByName(experimentType);
-            browser.wait(EC.visibilityOf(experimentFacet), 500).then(function () {
-                experimentFacet.click();
-            });
+            experimentFacet.click();
             var displayedEditAttrs = chaisePage.editFilter.displayedEditAttrs;
             expect(displayedEditAttrs.count()).toBeGreaterThan(0);
             done();
@@ -90,7 +68,6 @@ describe('In Chaise, search_01 contentArea and sidebar', function () {
     describe('Result content area,', function () {
         it('should show > 0 results', function (done) {
             var allResultRows = chaisePage.resultContent.resultAllRows;
-            //choose the second #results_tally
             var totalResultTallyShows = chaisePage.resultContent.resultTallySum;
             expect(allResultRows.count()).toBeGreaterThan(0);
             totalResultTallyShows.getText().then(function(txt) {
@@ -131,7 +108,6 @@ describe('In Chaise, search_01 contentArea and sidebar', function () {
             //the span now contains 'miRNA expression (RNA-Seq)' and 'RNA expression (microarray)'
             var miRNASpan = experimentTypeWrapper.element(by.cssContainingText('span.ng-binding.ng-scope', miRNAText));
             miRNASpan.getText().then(function(txt) {
-                //expect(txt.indexOf(miRNAText) !== -1).toBe(true);
                 expect(txt).toContain(miRNAText);
                 done();
             });

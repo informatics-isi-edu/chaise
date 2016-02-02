@@ -72,17 +72,15 @@ xdescribe('In Chaise, search_00 sidebar', function() {
         });
 
         describe('sidebar attribute,', function () {
+            //previously displayed attribute
             var somiteCount = 'Somite Count';
+            //previously non-displayed attribute
             var investigator = 'Investigator';
             var somiteCountAttr = chaisePage.sidebar.findSidebarAttrByName(somiteCount);
             var investigatorAttr = chaisePage.sidebar.findSidebarAttrByName(investigator);
 
             it('Somite Count attribute should be displayed', function (done) {
                 expect(somiteCountAttr.isDisplayed()).toBe(true);
-                done();
-            });
-
-            it('Investigator attribute should not be displayed', function (done) {
                 expect(investigatorAttr.isDisplayed()).toBe(false);
                 done();
             });
