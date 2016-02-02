@@ -446,17 +446,39 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
     // if table has columns with url pattern, add to data as col_link
     this.patternInterpretationForTable = function(schemaName, tableName, references) {
-        var urlPatterns = schemaService.getColumnInterpretations(schemaName, tableName);
-        for (col in urlPatterns) {
-            for (var row = 0; row < references.length; row++) {
-                var pattern = urlPatterns[col];
-                if (pattern === "auto_link") { // link url is same as the column value
+        var urlInterp = schemaService.getColumnInterpretations(schemaName, tableName);
+        var columns = Object.keys(references[0]);
+        for (col in urlInterp) {
+            var uriPattern = urlInterp[col].uriPattern;
+            var caption = urlInterp[col].captionPattern;
+
+            if (uriPattern === "auto_link") { // link url is same as column value
+                for (var row = 0; row < references.length; row++) {
                     references[row][col + '_link'] = references[row][col];
                 }
-                else {
-                    var link = pattern.replace("{value}", references[row][col]);
-                    // replace {value} with data value
-                    references[row][col + '_link'] = link;
+            } else {
+                var link = uriPattern;
+                for (var c = 0; c < columns.length; c++) { // if col name is found in the pattern
+                    var col2 = columns[c];
+                    for (var row = 0; row < references.length; row++) {
+                        if (link.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
+                            link = link.replace("{" + col2 + "}", references[row][col2]);
+                            references[row][col + '_link'] = link;
+                        }
+                    }
+                }
+            }
+
+            if (caption !== null) {
+                var cap = caption;
+                for (var c = 0; c < columns.length; c++) { // if col name is found in the pattern
+                    col2 = columns[c];
+                    for (var row = 0; row < references.length; row++) {
+                        if (cap.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
+                            cap = cap.replace("{" + col2 + "}", references[row][col2]);
+                            references[row][col] = cap; // overwrite existing col value with caption
+                        }
+                    }
                 }
             }
         }
@@ -856,7 +878,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         return columns;
     }
 
-    // returns a set of col_name : interpretation for the table
+    // returns a set of <col_name, {uri_pattern, caption_pattern}>
     this.getColumnInterpretations = function(schemaName, tableName) {
         var interp = {};
 
@@ -877,7 +899,12 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
                     pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
                 }
 
-                interp[cd.name] = pattern;
+                var caption = null;
+                if (cd.annotations['tag:misd.isi.edu,2015:url'] !== null &&
+                    cd.annotations['tag:misd.isi.edu,2015:url'].caption !== undefined) {
+                    caption = cd.annotations['tag:misd.isi.edu,2015:url'].caption;
+                }
+                interp[cd.name] = {uriPattern: pattern, captionPattern: caption};
             }
         }
 
