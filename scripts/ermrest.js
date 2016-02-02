@@ -1173,7 +1173,7 @@ function getColumnDescriptions(options, successCallback) {
 				var col_type = col['type']['typename'];
 				var obj = {};
 				obj['type'] = col_type;
-				obj['ready'] = (facetPolicy != 'on_demand' || isSelectedColumnFacetOnDemand(options, options['table'], col['name'])) ? false : true;
+				obj['ready'] = (facetPolicy != 'on_demand' || isSelectedColumnFacetOnDemand(options, options['table'], col['name']) || facetIsInBookmark(options['table'], col['name'], options.filter)) ? false : true;
 				ret[col_name] = obj;
 			}
 		});
@@ -1533,7 +1533,7 @@ function getTableColumnsUniques(options, successCallback) {
 			var cnt = [];
 			$.each(column_definitions, function(i, col) {
 				if (!hasColumnFacetHidden(table, col['name'])) {
-					if (facetPolicy != 'on_demand' || hasAnnotation(table, col['name'], 'top')) {
+					if (facetPolicy != 'on_demand' || hasAnnotation(table, col['name'], 'top') || facetIsInBookmark(table, col['name'], options.filter)) {
 						cnt.push('cnt_'+encodeSafeURIComponent(col['name'])+':=cnt('+encodeSafeURIComponent(col['name'])+')');
 					}
 				}
@@ -1568,7 +1568,7 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 			cols[col['name']] = {};
 			if (hasColumnFacetHidden(table_name, col['name'])) {
 				cols[col['name']]['cnt'] = 0;
-			} else if (facetPolicy == 'on_demand') {
+			} else if (facetPolicy == 'on_demand' && !facetIsInBookmark(table_name, col['name'], options.filter)) {
 				cols[col['name']]['cnt'] = 1;
 			} else {
 				cols[col['name']]['cnt'] = data[0]['cnt_'+col['name']];
@@ -1600,7 +1600,7 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 						return true;
 					}
 					if (col['type']['typename'] != 'json' && !hasColumnFacetHidden(table, col['name'])) {
-						if (facetPolicy != 'on_demand' && !hasAnnotation(table, col['name'], 'hidden') || hasAnnotation(table, col['name'], 'top')) {
+						if (facetPolicy != 'on_demand' && !hasAnnotation(table, col['name'], 'hidden') || hasAnnotation(table, col['name'], 'top') || facetIsInBookmark(table, col['name'], options.filter)) {
 							var params = {};
 							params['alert'] = alertObject;
 							params['options'] = param['options'];
@@ -1643,7 +1643,7 @@ function successGetTableColumnsDistinct(data, textStatus, jqXHR, param) {
 					return true;
 				}
 				if (!hasColumnFacetHidden(table, key) || !hasAnnotation(table, key, 'hidden')) {
-					if (facetPolicy != 'on_demand' || hasAnnotation(table, key, 'top')) {
+					if (facetPolicy != 'on_demand' || hasAnnotation(table, key, 'top') || facetIsInBookmark(table, key, options.filter)) {
 						if (value['distinct'] == -1) {
 							ready = false;
 							return false;
@@ -1661,7 +1661,7 @@ function successGetTableColumnsDistinct(data, textStatus, jqXHR, param) {
 		var score = param['options']['score'];
 		$.each(cols, function(key, value) {
 			if (!hasColumnFacetHidden(options['table'], key)) {
-				if (facetPolicy != 'on_demand' || hasAnnotation(options['table'], key, 'top')) {
+				if (facetPolicy != 'on_demand' || hasAnnotation(options['table'], key, 'top') || facetIsInBookmark(options['table'], key, options.filter)) {
 					value['name'] = key;
 					score.push(value);
 				}
@@ -2299,7 +2299,7 @@ function getAssociationTableColumns(options, successCallback, columns) {
 		});
 		facets.sort(compareFacets);
 		$.each(facets, function(i, facet) {
-			if (getFacetOrder(facet) != null) {
+			if (getFacetOrder(facet) != null || facetIsInBookmark(facet['table'], facet['name'], options.filter)) {
 				options['chooseColumns'][facet['table']][facet['name']] = true;
 			}
 		});
@@ -2307,7 +2307,7 @@ function getAssociationTableColumns(options, successCallback, columns) {
 	} else {
 		facets.sort(compareFacets);
 		$.each(facets, function(i, facet) {
-			if (getFacetOrder(facet) != null || hasAnnotation(facet['table'], facet['name'], 'top')) {
+			if (getFacetOrder(facet) != null || hasAnnotation(facet['table'], facet['name'], 'top') || facetIsInBookmark(facet['table'], facet['name'], options.filter)) {
 				options['chooseColumns'][facet['table']][facet['name']] = true;
 			}
 		});
@@ -2343,7 +2343,7 @@ function getAssociationColumnsDescriptions(options, successCallback) {
 						var col_type = col['type']['typename'];
 						var obj = {};
 						obj['type'] = col_type;
-						obj['ready'] = (facetPolicy != 'on_demand' || isSelectedColumnFacetOnDemand(options, table_name, col['name'])) ? false : true;
+						obj['ready'] = (facetPolicy != 'on_demand' || isSelectedColumnFacetOnDemand(options, table_name, col['name']) || facetIsInBookmark(table_name, col['name'], options.filter)) ? false : true;
 						ret[table_name][col_name] = obj;
 					}
 				});
@@ -3829,3 +3829,22 @@ function getSortPredicate(data, sortColumn, page, pageSize) {
 	}
 	return sortPredicate;
 }
+
+function facetIsInBookmark(table_name, column_name, filter) {
+	var ret = false;
+	if (filter != null) {
+		$.each(filter, function(table, columns) {
+			if (table == table_name) {
+				$.each(columns, function(column, values) {
+					if (column == column_name) {
+						ret = true;
+						return false;
+					}
+				});
+				return false;
+			}
+		});
+	}
+	return ret;
+}
+
