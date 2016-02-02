@@ -72,7 +72,6 @@
                     // If query is "" or undefined, then the annotation is considered a match
                     return true;
                 } else {
-                    console.log(query);
                     annotation = annotation.data;
                     query = query.toLowerCase();
                     // // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
@@ -161,7 +160,8 @@
 
         // Scroll an element into visible part of the browser
         function scrollIntoView(elementId) {
-            // Scroll the annotation into visible part of browser
+            // Not using angular.element to get element because neither jQuery
+            // nor Angular's jqLite support .scrollIntoView()
             document.getElementById(elementId).scrollIntoView({
                 block: 'start',
                 behavior: 'smooth'
