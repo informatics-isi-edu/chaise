@@ -43,6 +43,9 @@ function editFilter() {
     this.findEditfilterAttrByName = function(attrName) {
         return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
     };
+    this.clickEditFilter = function (attrName) {
+        this.findEditfilterAttrByName(attrName).click();
+    };
     this.goBackToSidebar = function() {
         this.sidebarHeader.click();
     };
@@ -59,6 +62,12 @@ function contentFilter() {
     this.findFilterWrapperByName = function(attrName) {
         return this.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
     };
+    this.clickFilterWrapperCancelByName = function (attrName) {
+        this.findFilterWrapperByName(attrName).$('a.filter-link-cancel').click();
+    };
+    this.findCheckedSubfiltersByName = function (attrName) {
+        return this.findFilterWrapperByName(attrName).all(by.css('> span > span'));
+    }
 };
 
 function resultContent() {
