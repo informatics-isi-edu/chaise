@@ -403,7 +403,7 @@
                             </div>
                         </form>
                         <!-- Annotations List -->
-                        <div ng-repeat="annotation in annotations.annotations | orderBy:'-data.created' | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == annotation.data.id}" class="annotation" ng-click="annotations.setHighlightedAnnotation(annotation);" style="cursor: pointer;">
+                        <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == annotation.data.id}" class="annotation" ng-click="annotations.setHighlightedAnnotation(annotation);" style="cursor: pointer;">
                             <!-- Annotation Display Card -->
                             <div ng-show="annotation.data.id !== annotations.editedAnnotation">
                                 <div class="row">
