@@ -78,7 +78,7 @@ function addSteps(){
 
   var tourSteps = [{
     element: "#navcontainer .sidebar-nav",
-    title: "Choose Attriutes",
+    title: "Choose Attributes",
     content: "Using this list you can select attributes to filter the results.",
     placement: "left",
   }, {
@@ -118,7 +118,7 @@ function addSteps(){
     }
   }, {
     element: "#navcontainer a:visible:not(.view-attr):contains(" + chosenAttr.text().trim() + "):eq(0)",
-    title: "Choose Attriutes",
+    title: "Choose Attributes",
     content: "Let's choose " + createLabel(chosenAttr.text().trim()) + " to see its values.",
     placement: "left",
     onNext: function(tour) {
