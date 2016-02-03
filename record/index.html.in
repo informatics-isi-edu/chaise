@@ -46,7 +46,7 @@
                 <tr ng-repeat="(key, value) in entity | filteredEntity">
                     <td class="entity-key col-xs-2">{{ key | removeUnderScores }}</td>
                     <td class="entity-value col-xs-10">
-                        <a ng-if="entity[key + '_link'] && value !== null" ng-href="{{entity[key + '_link']}}" ng-click="reloadPage()"
+                        <a ng-if="entity[key + '_link'] && value !== null" ng-href="{{entity[key + '_link']}}" ng-click="isExternalUrl(reference[key + '_link']) || reloadPage()"
                             ng-attr-target="{{isExternalUrl(entity[key + '_link']) && '_blank' || '_self'}}">
                                 {{value | sanitizeValue }}
                         </a>
@@ -159,7 +159,7 @@
                                         <tr ng-repeat="key in ft.keys | notHyperLink" on-finish-render>
                                             <th class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
                                             <td ng-repeat="reference in ft.list" class="entity-value col-xs-10">
-                                                <a ng-if="reference[key + '_link'] && reference[key] !== null" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
+                                                <a ng-if="reference[key + '_link'] && reference[key] !== null" ng-href="{{reference[key + '_link']}}" ng-click="isExternalUrl(reference[key + '_link']) || reloadPage()"
                                                     ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
                                                         {{reference[key] | sanitizeValue }}
                                                 </a>
@@ -191,7 +191,7 @@
                                     <tbody>
                                         <tr ng-repeat="reference in ft.list" on-finish-render>
                                             <td ng-repeat="key in ft.keys | notHyperLink"  class="entity-value col-xs-10" >
-                                                <a ng-if="reference[key + '_link'] && reference[key] !== null" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
+                                                <a ng-if="reference[key + '_link'] && reference[key] !== null" ng-href="{{reference[key + '_link']}}" ng-click="isExternalUrl(reference[key + '_link']) || reloadPage()"
                                                     ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
                                                         {{reference[key] | sanitizeValue }}
                                                 </a>
