@@ -155,7 +155,25 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                                         }
                                     }
 
-                                    var embedElement = {uri: $sce.trustAsResourceUrl(urlPattern), caption: caption};
+                                    var width = "100%";
+                                    if (embedAnnotation.width !== undefined) {
+                                        if (typeof embedAnnotation.width === "string") { // column name
+                                            width = element[embedAnnotation.width]; // value in a column
+                                        } else if (typeof embedAnnotation.width === "number") {
+                                            width = embedAnnotation.width;
+                                        }
+                                    }
+
+                                    var height = "400";
+                                    if (embedAnnotation.height !== undefined) {
+                                        if (typeof embedAnnotation.height === "string") { // column name
+                                            height = element[embedAnnotation.height]; // value in a column
+                                        } else if (typeof embedAnnotation.height === "number") {
+                                            width = embedAnnotation.height;
+                                        }
+                                    }
+
+                                    var embedElement = {uri: $sce.trustAsResourceUrl(urlPattern), caption: caption, width: width, height: height};
                                     embedTable.elements.push(embedElement);
                                 }
 
