@@ -5,7 +5,7 @@
 var chaisePage = require('../chaise.page.js');
 var pageAction = require('../page.action.js');
 
-xdescribe('Sidebar top search input,', function () {
+describe('Sidebar top search input,', function () {
     var EC = protractor.ExpectedConditions;
 
     it('should load the page correctly', function (done) {
@@ -26,8 +26,15 @@ xdescribe('Sidebar top search input,', function () {
     });
 
     var meaninglessTxt = 'hellogoodbye';
-    it('should show 0 attribute when searching for meaningless input', function (done) {
+    it('should input meaningless text and wait for seconds', function (done) {
         searchBox.sendKeys(meaninglessTxt);
+        searchBox.sendKeys(protractor.Key.BACK_SPACE);
+        setTimeout(function () {
+            done();
+        }, 4000);
+    });
+
+    it('should show 0 attribute when searching for meaningless input', function (done) {
         expect(displayedAttrs.count()).toBe(0);
         done();
     });

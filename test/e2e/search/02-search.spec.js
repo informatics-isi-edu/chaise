@@ -8,7 +8,7 @@
 var chaisePage = require('../chaise.page.js');
 var pageAction = require('../page.action.js');
 
-xdescribe('In Chaise, search_02 sidebarFilter description,', function () {
+describe('In Chaise, search_02 sidebarFilter description,', function () {
     var EC = protractor.ExpectedConditions;
 
     describe('on load,', function () {
@@ -21,7 +21,7 @@ xdescribe('In Chaise, search_02 sidebarFilter description,', function () {
     describe('The sidebar filter input,', function () {
         var searchBox = chaisePage.sidebar.searchInput;
 
-        it('should search \'RNA\' in the search input', function (done) {
+        it('should enter \'RNA\' in the search input', function (done) {
             browser.wait(EC.visibilityOf(searchBox), 500).then(function () {
                 searchBox.clear();
                 searchBox.sendKeys('RNA');
@@ -40,7 +40,7 @@ xdescribe('In Chaise, search_02 sidebarFilter description,', function () {
                     filterLabel.click().then(function () {
                         setTimeout(function () {
                             done();
-                        }, 4000);
+                        }, 5000);
                     });
                 });
             });

@@ -140,6 +140,11 @@ xdescribe('In Chaise, search_03 record,', function () {
             });
         });
 
+        it('should change the rootElement back', function (done) {
+            browser.rootEl = "#main-content";
+            done();
+        });
+
     });
 
 

@@ -49,9 +49,12 @@ function editFilter() {
     this.goBackToSidebar = function() {
         this.sidebarHeader.click();
     };
-    //this.findEditfilterLiByName = function (attrName) {
-    //    return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
-    //};
+    this.findEditfilterLiByName = function (attrName) {
+        return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
+    };
+    this.findCheckStatusDivByName = function (attr) {
+        return this.findEditfilterLiByName(attr).$('div[ng-click="sideBar.checkUncheck($event,value)"]');
+    }
 };
 
 function contentFilter() {
@@ -59,6 +62,9 @@ function contentFilter() {
     this.htmlElement = $(filterEle);
     this.clearAllBtn = this.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope > a', 'Clear All Filters'));
     this.displayedFilters = this.htmlElement.all(by.css('div.filter-item.ng-scope:not(.ng-hide)'));
+    this.clickClearAllBtn = function () {
+        this.clearAllBtn.click();
+    };
     this.findFilterWrapperByName = function(attrName) {
         return this.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
     };
@@ -66,7 +72,7 @@ function contentFilter() {
         this.findFilterWrapperByName(attrName).$('a.filter-link-cancel').click();
     };
     this.findCheckedSubfiltersByName = function (attrName) {
-        return this.findFilterWrapperByName(attrName).all(by.css('> span > span'));
+        return this.findFilterWrapperByName(attrName).all(by.css('span.filter-item-value.ng-scope > span'));
     }
 };
 
@@ -106,7 +112,12 @@ function chaisePage() {
             //var idx = Math.floor(Math.random() * (len - 0 + 1) + 0);
             return str.substr(len / 2);
         },
-    }
+    };
+    this.customExpect = {
+        elementContainClass: function (ele, className) {
+            expect(ele.getAttribute('class')).toContain(className);
+        },
+    };
 };
 
 module.exports = new chaisePage();

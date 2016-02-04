@@ -16,16 +16,6 @@ function pageActions() {
             expect(sidebar.isDisplayed()).toBe(true);
         });
     };
-
-    this.clickSidebar = function(attrName) {
-        var sidebarAttr = page.sidebar.findSidebarAttrByName(attrName);
-        sidebarAttr.click();
-    };
-
-    this.clickEditFilter = function(attr) {
-        var attrLabel = page.editFilter.findEditfilterAttrByName(attr);
-        attrLabel.click();
-    };
 };
 
 module.exports = new pageActions();
