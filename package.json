@@ -25,6 +25,7 @@
     "bower": "x",
     "chai": "x",
     "closurecompiler": "x",
+    "jasmine-core": "^2.4.1",
     "jsdoc": "x",
     "jsdoc-to-markdown": "x",
     "jshint": "x",
@@ -33,14 +34,12 @@
     "karma-chrome-launcher": "^0.2.0",
     "karma-firefox-launcher": "^0.1.6",
     "karma-ie-launcher": "^0.2.0",
-    "karma-mocha": "^0.2.0",
+    "karma-jasmine": "^0.3.7",
+    "karma-osx-reporter": "^0.2.1",
     "karma-phantomjs-launcher": "^0.2.1",
     "karma-safari-launcher": "^0.1.1",
-    "karma-sinon-chai": "^1.1.0",
-    "mocha": "x",
     "phantomjs": "^1.9.18",
-    "sinon": "x",
-    "testem": "x",
-    "protractor": "x"
+    "protractor": "x",
+    "testem": "x"
   }
 }
