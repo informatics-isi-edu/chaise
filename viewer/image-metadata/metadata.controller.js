@@ -32,7 +32,6 @@
 
         function save(key) {
             vm[key] = false;
-            vm.image.entity.data.uri = vm.image.entity.data.uri.replace(/\/~jessie/g, '');
             vm.image.entity.update();
             console.log('Updated image: ', vm.image.entity.data);
         }

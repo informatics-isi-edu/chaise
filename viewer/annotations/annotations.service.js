@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'annotations', '$window', function(context, annotations, $window) {
+    .factory('AnnotationsService', ['context', 'image', 'annotations', '$window', function(context, image, annotations, $window) {
         var origin = window.location.origin;
         var iframe = $window.frames[0];
 
@@ -15,12 +15,11 @@
             if (newAnnotation.anatomy == 'No Anatomy') {
                 newAnnotation.anatomy = null;
             }
-            // WHEN REMOVING this ~jessie, set newAnnotation.context_uri to iframe.location.href 3 lines down
-            newAnnotation.context_uri = iframe.location.href.replace(/\/~jessie/g, '');
+
             newAnnotation = [{
                 "image_id": context.imageID,
                 "anatomy": newAnnotation.anatomy,
-                "context_uri": newAnnotation.context_uri,
+                "context_uri": iframe.location.href,
                 "coords": [
                     newAnnotation.shape.geometry.x,
                     newAnnotation.shape.geometry.y,
@@ -31,7 +30,8 @@
             }];
 
             // Add to ERMrest
-            return annotations[0].table.createEntity(newAnnotation, ['id', 'author', 'created']).then(function success(annotation) {
+            var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
+            return annotationTable.createEntity(newAnnotation, ['id', 'author', 'created']).then(function success(annotation) {
                 // Then add to Annotorious
                 iframe.postMessage({messageType: 'createAnnotation', content: annotation.data}, window.location.origin);
                 // Push new annotation to value provider
@@ -49,7 +49,6 @@
             }
 
             // Update in ERMrest
-            annotation.data.context_uri = annotation.data.context_uri.replace(/\/~jessie/g, '');
             annotation.update();
             // Update in Annotorious
             iframe.postMessage({messageType: 'updateAnnotation', content: annotation.data}, origin);
