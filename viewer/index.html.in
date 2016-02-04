@@ -2,63 +2,8 @@
 <head>
     <title>Data Viewer | (Re)Building A Kidney</title>
     %ASSETS%
+    <link rel='stylesheet' type='text/css' href='../styles/viewer.css'>
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
-    <style>
-        #sidebar, #viewer {
-            margin-top: 5px;
-        }
-
-        #sidebar {
-            height: 99%;
-            background-color: #fff;
-            overflow: auto;
-            resize: horizontal;
-            /* To allow sidebar to resize over the iframe, sidebar's z-index should be iframe's z-index + 1.*/
-            z-index: 1;
-        }
-
-        #viewer {
-            position: fixed;
-            left: 25%;
-            border-left: 1px solid #eee;
-        }
-
-        #annotations-panel .ui-select-container {
-            width: 100%;
-        }
-
-        #metadata-panel .entity-key, #metadata-panel .entity-value {
-            font-size: 14px;
-        }
-
-        .annotation {
-            padding: 10px;
-            margin: 15px 0;
-            border-radius: 3px;
-            border: 1px solid #ddd;
-        }
-
-        .annotation:hover, .annotation.highlighted {
-            border-left: 5px solid #428bca;
-        }
-
-        .annotation.highlighted .annotation-description, .annotation-description:hover {
-            color: #428bca;
-        }
-
-        .annotation-description:hover {
-            cursor: pointer;
-        }
-
-        .annotation-anatomy-text {
-            color: #444;
-        }
-
-        .annotation-control-button {
-            margin: 2px;
-            margin-right: 0;
-        }
-    </style>
     <!--
         IE8 support, see AngularJS Internet Explorer Compatibility http://docs.angularjs.org/guide/ie
         For Firefox 3.6, you will also need to include jQuery and ECMAScript 5 shim
@@ -417,8 +362,8 @@
                                     <!-- Annotation Edit/Delete Buttons -->
                                     <div class="col-md-5">
                                         <small class="pull-right">
-                                            <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" style="cursor:pointer;">Edit</a> |
-                                            <a ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" style="cursor:pointer;">Delete</a>
+                                            <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" class="cardlink">Edit</a> |
+                                            <a ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" class="cardlink delete">Delete</a>
                                         </small>
                                     </div>
                                 </div>

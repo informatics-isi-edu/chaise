@@ -1,0 +1,72 @@
+#sidebar {
+  background-color: #F9F9F9;
+}
+
+#annotations-control {
+    height: 98vh;
+    overflow: auto;
+    border-right: 1px solid #eee;
+}
+
+#viewer {
+    position: fixed;
+    padding-left: 20px;
+}
+
+.annotation {
+    padding: 10px;
+    margin: 15px 0;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+}
+
+.annotation.highlighted {
+    border-left: 5px solid #428bca;
+}
+
+.annotation.highlighted .comment, .comment:hover {
+    color: #428bca;
+}
+
+.annotation, input[type=search] {
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+}
+
+.comment:hover {
+    cursor: pointer;
+}
+
+.annotation-anatomy-text {
+    color: #444;
+}
+
+.annotation-control-button {
+    margin: 2px;
+    margin-right: 0;
+}
+
+.nav-tabs>li {
+  font-style: italic;
+}
+
+.btn-success {
+  background-color: #407CCA;
+  border-color: #1E4E9A;
+}
+
+.btn-success:hover {
+  background-color: #002D73;
+}
+
+#entity-title, .entity-title {
+  color: #002D73;
+}
+
+a.cardlink {
+  cursor: pointer;
+}
+
+a.cardlink.delete {
+  color: #EB0029;
+}
