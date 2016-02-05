@@ -169,7 +169,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                                         if (typeof embedAnnotation.height === "string") { // column name
                                             height = element[embedAnnotation.height]; // value in a column
                                         } else if (typeof embedAnnotation.height === "number") {
-                                            width = embedAnnotation.height;
+                                            height = embedAnnotation.height;
                                         }
                                     }
 
