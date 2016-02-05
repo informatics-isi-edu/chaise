@@ -8,11 +8,6 @@
     border-right: 1px solid #eee;
 }
 
-#viewer {
-    position: fixed;
-    padding-left: 20px;
-}
-
 .annotation {
     padding: 10px;
     margin: 15px 0;
