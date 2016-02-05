@@ -1,7 +1,7 @@
 var chaisePage = require('../chaise.page.js');
 var pageAction = require('../page.action.js');
 
-describe('Search result columns', function () {
+xdescribe('Search result columns,', function () {
     var EC = protractor.ExpectedConditions;
 
     it('should load the page correctly', function (done) {
@@ -13,15 +13,10 @@ describe('Search result columns', function () {
     it('should click one sidebar attribute randomly', function (done) {
         var allAttrs = chaisePage.sidebar.sidebarAttrsDisplayed;
         allAttrs.count().then(function (num) {
-            var ranInt = chaisePage.tools.getRandomInt(0, num);
+            var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
             var ranAttr = allAttrs.get(ranInt);
             ranAttr.click();
             done();
-            //ranAttr.getText().then(function (attrName) {
-            //    //randomSidebarAttrName = attrName;
-            //    ranAttr.click();
-            //    done();
-            //});
         });
     });
 
@@ -29,7 +24,7 @@ describe('Search result columns', function () {
     it('should check one edit filter randomly', function (done) {
         var allFilters = chaisePage.editFilter.editFilterAttrsDisplayed;
         allFilters.count().then(function (num) {
-            var ranInt = chaisePage.tools.getRandomInt(0, num);
+            var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
             var ranAttr = allFilters.get(ranInt);
             var randAttrLabel = ranAttr.$('label');
             randAttrLabel.click();
@@ -55,7 +50,7 @@ describe('Search result columns', function () {
         it('should be chosen randomly', function (done) {
             var allResults = chaisePage.resultContent.resultAllRows;
             allResults.count().then(function (num) {
-                var rand = chaisePage.tools.getRandomInt(0, num);
+                var rand = chaisePage.tools.getRandomInt(0, num - 1);
                 randResult = allResults.get(rand);
                 expect(randResult.isDisplayed()).toBe(true);
                 done();

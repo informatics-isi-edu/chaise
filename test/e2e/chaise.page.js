@@ -15,7 +15,8 @@ function tools() {
         return str.split('-')[1];
     };
     this.getRandomInt = function (min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min - 1;
+        //include min and max
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     };
     this.getAnyPartOfStr = function (str) {
         var len = str.length;
@@ -131,6 +132,10 @@ function recordPage() {
     this.findEntityKeyByName = function (entityName) {
         return element(by.cssContainingText('.entity-key.ng-binding', entityName));
     };
+    this.findEntityValueByName = function (entityName) {
+        var entityKey = this.findEntityKeyByName(entityName);
+        return toolkit.getSiblingByCss(entityKey, 'td');
+    }
     this.findToggleByName = function (keyName) {
         return element(by.cssContainingText('.panel-heading', keyName))
     };
