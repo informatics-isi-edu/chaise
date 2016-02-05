@@ -379,7 +379,7 @@
                                 <!-- Annotation Author & Date -->
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <small>{{annotation.data.author | toTitleCase}} &mdash; {{annotation.data.created}}</small>
+                                        <small>{{annotation.data.author}} &mdash; {{annotation.data.created}}</small>
                                     </div>
                                 </div>
                             </div><!-- /Annotation Display Card -->
@@ -411,7 +411,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <small>
-                                            {{annotation.data.author | toTitleCase}} &mdash;
+                                            {{annotation.data.author}} &mdash;
                                             {{annotation.data.created | date: 'MMM d, y'}}
                                         </small>
                                     </div>
