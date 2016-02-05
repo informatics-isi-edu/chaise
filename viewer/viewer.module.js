@@ -37,6 +37,12 @@
         var origin = window.location.origin;
         var annotoriousReady = false;
         var client = ermrestClientFactory.getClient(context.serviceURL);
+
+        client.getSession().then(function success(response) {
+            console.log('Session: ', response);
+            context.session = response;
+        });
+
         var catalog = client.getCatalog(context.catalogID);
         catalog.introspect().then(function success(schemas) {
             var schema = schemas[context.schemaName];
