@@ -6,15 +6,34 @@
  *
  */
 
-var sidebarId= '#sidebar';
-var moreFilterId= '#morefilters';
-var editFilterId= '#editfilter';
+var sidebarId = '#sidebar';
+var moreFilterId = '#morefilters';
+var editFilterId = '#editfilter';
+
+function tools() {
+    this.getDisplayedRecordNum = function (str) {
+        return str.split('-')[1];
+    };
+    this.getRandomInt = function (min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min - 1;
+    };
+    this.getAnyPartOfStr = function (str) {
+        var len = str.length;
+        //var idx = Math.floor(Math.random() * (len - 0 + 1) + 0);
+        return str.substr(len / 2);
+    };
+    this.getSiblingByCss = function (ele, cssStr) {
+        return ele.element(by.xpath('following-sibling::' + cssStr));
+    }
+};
+
+var toolkit = new tools();
 
 function sidebar() {
     this.htmlElement = $(sidebarId);
     this.searchInput = this.htmlElement.$('div.search-box > input');
     this.sidebarAttrsDisplayed = this.htmlElement.all(by.css('ul.sidebar-nav li.ng-scope:not(.ng-hide)'));
-    this.sidebarHeader =  this.htmlElement.$('#navcontainer h4');
+    this.sidebarHeader = this.htmlElement.$('#navcontainer h4');
     this.viewMoreBtn = this.htmlElement.element(by.cssContainingText('li a', 'View all attributes'));
     this.findSidebarAttrsByName = function (attrName) {
         return this.htmlElement.all(by.cssContainingText('ul li a', attrName))
@@ -28,9 +47,8 @@ function sidebar() {
 };
 
 function moreFilter() {
-    this.htmlElement = $(moreFilterId);
-    this.sidebarHeader = this.htmlElement.$('div.sidebar-title h4');
-    this.findMorefilterAttrByName = function(attrName) {
+    this.htmlElement = $(moreFilterId); this.sidebarHeader = this.htmlElement.$('div.sidebar-title h4');
+    this.findMorefilterAttrByName = function (attrName) {
         return this.htmlElement.element(by.cssContainingText('div.editvalue-container' +
             ' div[ng-repeat="facet in FacetsData.facets"] label', attrName));
     };
@@ -42,14 +60,14 @@ function moreFilter() {
 function editFilter() {
     this.htmlElement = $(editFilterId);
     this.sidebarHeader = this.htmlElement.$('div.sidebar-title h4');
-    this.displayedEditAttrs = this.htmlElement.all(by.css('ul.nav.filteritems li.ng-scope:not(.ng-hide)'));
-    this.findEditfilterAttrByName = function(attrName) {
+    this.editFilterAttrsDisplayed = this.htmlElement.all(by.css('ul.nav.filteritems li.ng-scope:not(.ng-hide)'));
+    this.findEditfilterAttrByName = function (attrName) {
         return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
     };
     this.clickEditFilter = function (attrName) {
         this.findEditfilterAttrByName(attrName).click();
     };
-    this.goBackToSidebar = function() {
+    this.goBackToSidebar = function () {
         this.sidebarHeader.click();
     };
     this.findEditfilterLiByName = function (attrName) {
@@ -68,7 +86,7 @@ function contentFilter() {
     this.clickClearAllBtn = function () {
         this.clearAllBtn.click();
     };
-    this.findFilterWrapperByName = function(attrName) {
+    this.findFilterWrapperByName = function (attrName) {
         return this.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
     };
     this.clickFilterWrapperCancelByName = function (attrName) {
@@ -85,14 +103,35 @@ function resultContent() {
     this.resultTallyRange = this.resultTally.element(by.binding("facetResults.displayRange()"));
     this.resultTallySum = this.resultTally.element(by.binding("FacetsData.totalServerItems"));
     this.filter = new contentFilter();
+    //ele is element found using resultAllRows.get(idx);
+    this.getResultTitleElement = function (ele) {
+        return ele.$('span.panel-title.ng-binding');
+    };
+    this.getResultImgElement = function (ele) {
+        return ele.$('img');
+    };
+    this.getResultInvestigatorElement = function (ele) {
+        return ele.element(by.cssContainingText('dt.ng-binding', 'Investigator'));
+    };
+    this.getResultInvestigatorContent = function (ele) {
+        var investEle = this.getResultInvestigatorElement(ele);
+        return toolkit.getSiblingByCss(investEle, 'dd');
+    };
+    this.getResultSummaryElement = function (ele) {
+        return ele.element(by.cssContainingText('dt.ng-binding', 'Summary'));
+    };
+    this.getResultSummaryContent = function (ele) {
+        var summaryEle = this.getResultSummaryElement(ele);
+        return toolkit.getSiblingByCss(summaryEle, 'dd');
+    }
 };
 
 function recordPage() {
     this.entityTitle = $('#entity-title');
-    this.findEntityKeyByName = function(entityName) {
+    this.findEntityKeyByName = function (entityName) {
         return element(by.cssContainingText('.entity-key.ng-binding', entityName));
     };
-    this.findToggleByName = function(keyName) {
+    this.findToggleByName = function (keyName) {
         return element(by.cssContainingText('.panel-heading', keyName))
     };
 };
@@ -103,19 +142,7 @@ function chaisePage() {
     this.editFilter = new editFilter();
     this.resultContent = new resultContent();
     this.recordPage = new recordPage();
-    this.tools = {
-        getDisplayedRecordNum: function(str) {
-            return str.split('-')[1];
-        },
-        getRandomInt: function(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        },
-        getAnyPartOfStr: function(str) {
-            var len = str.length;
-            //var idx = Math.floor(Math.random() * (len - 0 + 1) + 0);
-            return str.substr(len / 2);
-        },
-    };
+    this.tools = new tools();
     this.customExpect = {
         elementContainClass: function (ele, className) {
             expect(ele.getAttribute('class')).toContain(className);

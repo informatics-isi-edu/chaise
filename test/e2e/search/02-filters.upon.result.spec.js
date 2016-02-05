@@ -38,6 +38,11 @@ describe('Filters on top of the records,', function () {
             expect(expeSubfilters.count()).toBe(1);
             done();
         });
+
+        xit('should show \'RNA expression microarray\' in \'Experiment Type\' wrapper', function (done) {
+
+            done();
+        });
     });
 
     var microArrStatus = chaisePage.editFilter.findCheckStatusDivByName(microarrayText);
