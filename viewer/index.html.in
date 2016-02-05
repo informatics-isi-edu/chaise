@@ -2,7 +2,6 @@
 <head>
     <title>Data Viewer | (Re)Building A Kidney</title>
     %ASSETS%
-    <link rel='stylesheet' type='text/css' href='../styles/viewer.css'>
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     <!--
         IE8 support, see AngularJS Internet Explorer Compatibility http://docs.angularjs.org/guide/ie
@@ -348,7 +347,7 @@
                             </div>
                         </form>
                         <!-- Annotations List -->
-                        <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == annotation.data.id}" class="annotation" ng-click="annotations.setHighlightedAnnotation(annotation);" style="cursor: pointer;">
+                        <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == annotation.data.id}" id="{{'annotation-' + annotation.data.id}}" class="annotation" ng-click="annotations.setHighlightedAnnotation(annotation);" style="cursor: pointer;">
                             <!-- Annotation Display Card -->
                             <div ng-show="annotation.data.id !== annotations.editedAnnotation">
                                 <div class="row">

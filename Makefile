@@ -145,7 +145,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/select.js
 
-VIEWER_JS_SOURCE= $(VIEWER_ASSETS)/viewer.module.js \
+VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.module.js \
 	$(VIEWER_ASSETS)/common/providers/context.js \
 	$(VIEWER_ASSETS)/common/providers/image.js \
 	$(VIEWER_ASSETS)/common/filters/toTitleCase.js \
@@ -167,6 +167,7 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/appheader.css \
 	$(RECORD_ASSETS)/stylesheets/app.css
 
+VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
 # Config file
 JS_CONFIG=chaise-config.js
@@ -354,10 +355,14 @@ $(JS_CONFIG): chaise-config-sample.js
 		$(CAT) $$file >> .make-matrix-template-block ; \
 	done
 
-.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_SHARED_JS_DEPS) $(ERMRESTJS_SOURCE) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
+.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(ERMRESTJS_SOURCE) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
 	> .make-viewer-asset-block
 	for file in $(VIEWER_SHARED_CSS_DEPS); do \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-viewer-asset-block ; \
+	done
+	for file in $(VIEWER_CSS_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
 	done
 	for file in $(VIEWER_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-viewer-asset-block ; \

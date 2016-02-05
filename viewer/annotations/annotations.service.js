@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'annotations', '$window', function(context, annotations, $window) {
+    .factory('AnnotationsService', ['context', 'image', 'annotations', '$window', function(context, image, annotations, $window) {
         var origin = window.location.origin;
         var iframe = $window.frames[0];
 
@@ -30,7 +30,8 @@
             }];
 
             // Add to ERMrest
-            return annotations[0].table.createEntity(newAnnotation, ['id', 'author', 'created']).then(function success(annotation) {
+            var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
+            return annotationTable.createEntity(newAnnotation, ['id', 'author', 'created']).then(function success(annotation) {
                 // Then add to Annotorious
                 iframe.postMessage({messageType: 'createAnnotation', content: annotation.data}, window.location.origin);
                 // Push new annotation to value provider

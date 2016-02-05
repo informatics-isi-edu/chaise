@@ -17,7 +17,7 @@
         vm.cancelNewAnnotation = cancelNewAnnotation;
 
         vm.editedAnnotation = null; // Track which annotation is being edited right now; used to show/hide the right UI elements depending on which one is being edited.
-        // vm.originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
+        var originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
         vm.editAnnotation = editAnnotation;
         vm.cancelEdit = cancelEdit;
         vm.updateAnnotation = updateAnnotation;
@@ -27,29 +27,40 @@
         vm.highlightedAnnotation = null;
         vm.setHighlightedAnnotation = setHighlightedAnnotation;
 
-
+        // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
             if (event.origin === window.location.origin) {
                 var data = event.data;
-                if (data.messageType === 'annotationDrawn') {
-                    vm.newAnnotation = {
-                        description: '',
-                        shape: data.content.shape
-                    };
-                    $scope.$apply(function() {
-                        vm.createMode = true;
-                    });
-                } else if (data.messageType === 'onHighlighted') {
-                    var content = JSON.parse(data.content);
-                    var annotation = findAnnotation(content.data.shapes[0].geometry);
-                    $scope.$apply(function() {
-                        vm.highlightedAnnotation = annotation.data.id;
-                    });
-                } else if (data.messageType ==='onUnHighlighted') {
-                    $scope.$apply(function() {
-                        vm.highlightedAnnotation = null;
-                    });
+                var messageType = data.messageType;
+                switch (messageType) {
+                    case 'annotationDrawn':
+                        vm.newAnnotation = {
+                            description: '',
+                            shape: data.content.shape
+                        };
+                        $scope.$apply(function() {
+                            vm.createMode = true;
+                        });
+                        break;
+                    case 'onHighlighted':
+                        var content = JSON.parse(data.content);
+                        var annotation = findAnnotation(content.data.shapes[0].geometry);
+                        $scope.$apply(function() {
+                            // Highlight the annotation in the sidebar
+                            vm.highlightedAnnotation = annotation.data.id;
+                        });
+                        scrollIntoView('annotation-' + vm.highlightedAnnotation);
+                        break;
+                    case 'onUnHighlighted':
+                        $scope.$apply(function() {
+                            vm.highlightedAnnotation = null;
+                        });
+                        break;
+                    default:
+                        console.log('Invalid event message type "', messageType, '"');
                 }
+            } else {
+                console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
             }
         });
 
@@ -61,7 +72,6 @@
                     // If query is "" or undefined, then the annotation is considered a match
                     return true;
                 } else {
-                    console.log(query);
                     annotation = annotation.data;
                     query = query.toLowerCase();
                     // // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
@@ -72,7 +82,6 @@
                     var numKeys = keys.length;
                     if (numKeys > 0) {
                         for (var i = 0; i < numKeys; i++) {
-                            console.log('Checking | Key: ', keys[i], ' Value: ', annotation[keys[i]]);
                             if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
                                 return true;
                             }
@@ -102,12 +111,17 @@
 
         function editAnnotation(annotation) {
             vm.editedAnnotation = annotation.data.id;
-            // vm.originalAnnotation = annotation;
+            originalAnnotation = {
+                description: annotation.data.description,
+                anatomy: annotation.data.anatomy
+            };
         };
 
         function cancelEdit(annotation) {
             vm.editedAnnotation = null;
-            // annotation = vm.originalAnnotation;
+            var data = annotation.data;
+            data.description = originalAnnotation.description;
+            data.anatomy = originalAnnotation.anatomy;
         };
 
         function updateAnnotation(annotation) {
@@ -129,6 +143,7 @@
             highlightAnnotation(annotation);
         }
 
+        // Highlights the annotation inside Annotorious
         function highlightAnnotation(annotation) {
             return AnnotationsService.highlightAnnotation(annotation);
         }
@@ -141,6 +156,16 @@
                     return vm.annotations[i];
                 }
             }
+        }
+
+        // Scroll an element into visible part of the browser
+        function scrollIntoView(elementId) {
+            // Not using angular.element to get element because neither jQuery
+            // nor Angular's jqLite support .scrollIntoView()
+            document.getElementById(elementId).scrollIntoView({
+                block: 'start',
+                behavior: 'smooth'
+            });
         }
     }]);
 })();
