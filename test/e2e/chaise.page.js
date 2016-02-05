@@ -34,6 +34,9 @@ function moreFilter() {
         return this.htmlElement.element(by.cssContainingText('div.editvalue-container' +
             ' div[ng-repeat="facet in FacetsData.facets"] label', attrName));
     };
+    this.goBackToSidebar = function () {
+        this.sidebarHeader.click();
+    };
 };
 
 function editFilter() {
