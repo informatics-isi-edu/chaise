@@ -65,3 +65,8 @@ a.cardlink {
 a.cardlink.delete {
   color: #EB0029;
 }
+
+#viewer.col-md-9 {
+	position: fixed;
+	right: 0;
+}
