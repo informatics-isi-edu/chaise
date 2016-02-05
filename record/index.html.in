@@ -126,7 +126,6 @@
                         <ul id="embed">
                             <li ng-repeat="element in t.elements">
                                 <div>
-                                    <a href="{{ element.uri }}" target="_blank" class="enlarge">Open</a>
                                     <iframe title="{{ element.caption }}" width="{{ element.width }}" height="{{ element.height }}" ng-src="{{ element.uri }}">&lt;p&gt;Your browser does not support iframes.&lt;/p&gt;</iframe>
                                 </div>
                             </li>
