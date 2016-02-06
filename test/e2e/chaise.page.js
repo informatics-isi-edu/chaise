@@ -136,8 +136,11 @@ function recordPage() {
         var entityKey = this.findEntityKeyByName(entityName);
         return toolkit.getSiblingByCss(entityKey, 'td');
     }
-    this.findToggleByName = function (keyName) {
-        return element(by.cssContainingText('.panel-heading', keyName))
+    this.findToggleWrapperByName = function (keyName) {
+        return element(by.cssContainingText('.panel-group div.panel.panel-default', keyName))
+    };
+    this.clickToggleWrapperByName = function (keyName) {
+        this.findToggleWrapperByName(keyName).click();
     };
 };
 

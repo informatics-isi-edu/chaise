@@ -1,7 +1,7 @@
 var chaisePage = require('../chaise.page.js');
-var pageAction = require('../page.action.js');
 
 describe('Search result detail page,', function () {
+    var waitTimeAfterClickingEditFilter = 3000;
     var EC = protractor.ExpectedConditions;
     beforeEach(function (done) {
         browser.get('');
@@ -40,7 +40,7 @@ describe('Search result detail page,', function () {
                         randAttrLabel.click();
                         setTimeout(function () {
                             done();
-                        }, 4000);
+                        }, waitTimeAfterClickingEditFilter);
                     });
                 });
             });
@@ -71,13 +71,13 @@ describe('Search result detail page,', function () {
                         done();
                     });
 
-                    xit('should have the same title as previous record column', function (done) {
+                    it('should have the same title as previous record column', function (done) {
                         var entityTitle = chaisePage.recordPage.entityTitle;
                         expect(entityTitle.getText()).toBe(randomRecordTitle);
                         done();
                     });
 
-                    xit('should display the \'Accession\' key and non-empty content', function (done) {
+                    it('should display the \'Accession\' key and non-empty content', function (done) {
                         var accessionText = 'accession';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(accessionText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(accessionText);
@@ -87,7 +87,7 @@ describe('Search result detail page,', function () {
                         expect(accKey.getText()).toBe('Accession');
                         done();
                     });
-                    xit('should display the \'Description\' key and non-empty content', function (done) {
+                    it('should display the \'Description\' key and non-empty content', function (done) {
                         var desText = 'description';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(desText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(desText);
@@ -97,7 +97,7 @@ describe('Search result detail page,', function () {
                         expect(accKey.getText()).toBe('Description');
                         done();
                     });
-                    xit('should display the \'Funding\' key and non-empty content', function (done) {
+                    it('should display the \'Funding\' key and non-empty content', function (done) {
                         var fundingText = 'funding';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(fundingText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(fundingText);
@@ -107,7 +107,7 @@ describe('Search result detail page,', function () {
                         expect(accKey.getText()).toBe('Funding');
                         done();
                     });
-                    xit('should display the \'Pubmed Id\' key and display \'N/A\' or digits', function (done) {
+                    it('should display the \'Pubmed Id\' key and display \'N/A\' or digits', function (done) {
                         var pubmedText = 'pubmed id';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(pubmedText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(pubmedText);
@@ -118,14 +118,14 @@ describe('Search result detail page,', function () {
                         done();
                     });
 
-                    xit('should contain the randomly chosen attribute field', function (done) {
+                    it('should contain the randomly chosen attribute field', function (done) {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
                         var sidebarAttrKey = chaisePage.recordPage.findEntityKeyByName(sidebarAttr);
                         expect(sidebarAttrKey.isDisplayed()).toBe(true);
                         done();
                     });
 
-                    xit('should contain the randomly chosen edit filter in attribute value', function (done) {
+                    it('should contain the randomly chosen edit filter in attribute value', function (done) {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
                         var sidebarAttrValue = chaisePage.recordPage.findEntityValueByName(sidebarAttr);
                         expect(sidebarAttrValue.isDisplayed()).toBe(true);
@@ -134,6 +134,38 @@ describe('Search result detail page,', function () {
                             done();
                         });
                     });
+
+                    it('should display \'Files\', toggle it ' +
+                        'to display file icon or \'No rows found\'', function (done) {
+                        var fileWrapper = chaisePage.recordPage.findToggleWrapperByName('Files');
+                        expect(fileWrapper.isDisplayed()).toBe(true);
+                        expect(fileWrapper.getText()).toBe('FILES');
+                        chaisePage.recordPage.clickToggleWrapperByName('Files');
+                        //var activeEle = fileWrapper.$('div[ng-class="{\'active\': files.open }"]');
+                        //chaisePage.customExpect.elementContainClass(activeEle, 'active');
+                        var collapseArea = fileWrapper.$('div.panel-collapse');
+                        expect(collapseArea.isDisplayed()).toBe(true);
+                        collapseArea.getText().then(function (text) {
+                            //after testing, test.toLowerCase() will be exactly 'no rows found'
+                            if (text.toLowerCase() !== 'no rows found') {
+                                var fileImg = collapseArea.$('img');
+                                expect(fileImg.isDisplayed()).toBe(true);
+                                done();
+                            } else {
+                                done();
+                            }
+                        });
+                    });
+
+                    it('should display \'Dataset Geo\', toggle it to display something', function (done) {
+                        var dataset = 'dataset geo';
+                        var dataSetWrapper = chaisePage.recordPage.findToggleWrapperByName(dataset);
+                        chaisePage.recordPage.clickToggleWrapperByName(dataset);
+                        var collapseArea = dataSetWrapper.$('div.panel-collapse');
+                        expect(collapseArea.isDisplayed()).toBe(true);
+                        done();
+                    });
+
                 });
 
                 afterEach(function (done) {
