@@ -361,8 +361,8 @@
                                     <!-- Annotation Edit/Delete Buttons -->
                                     <div class="col-md-5">
                                         <small class="pull-right">
-                                            <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" style="cursor:pointer;">Edit</a> |
-                                            <a ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" style="cursor:pointer;">Delete</a>
+                                            <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" class="cardlink">Edit</a> |
+                                            <a ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" class="cardlink delete">Delete</a>
                                         </small>
                                     </div>
                                 </div>
@@ -432,7 +432,7 @@
             </div><!--/ end SidebarSwitchController -->
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer" class="col-md-9">
-                <iframe id="viewer" width="74%" height="100%" ng-src="{{::osd.image.entity.data.uri}}" frameBorder="0">
+                <iframe id="viewer" width="100%" height="100%" src="#" frameBorder="0">
                     &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
                 </iframe>
             </div>

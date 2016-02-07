@@ -32,7 +32,7 @@
         }
     }])
 
-    // Hydrate values providers
+    // Hydrate values providers and set up the iframe
     .run(['$window', 'context', 'image', 'annotations', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function run($window, context, image, annotations, anatomies, statuses, vocabs, ermrestClientFactory) {
         var origin = window.location.origin;
         var annotoriousReady = false;
@@ -52,6 +52,8 @@
                 if (filteredTable) {
                     filteredTable.getEntities().then(function success(_entities) {
                         image.entity = _entities[0];
+                        var iframe = $window.frames[0];
+                        iframe.location.replace(image.entity.data.uri);
                         console.log('Image: ', image);
                         var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
                         annotationTable.getEntities().then(function success(_annotations) {
@@ -59,7 +61,7 @@
                                 annotations.push(_annotations[i]);
                             }
                             if (annotoriousReady) {
-                                $window.frames[0].postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                                iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                             }
                             console.log('Annotations: ', annotations);
                         }, function error(response) {

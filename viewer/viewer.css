@@ -1,17 +1,16 @@
+html, body {
+  background-color: #f9f9f9;
+}
+
 #sidebar {
-  background-color: #F9F9F9;
+    min-height: 100%;
+    height: 100%;
 }
 
 #annotations-control {
     height: 98vh;
     overflow: auto;
     border-right: 1px solid #eee;
-}
-
-#viewer {
-    position: fixed;
-    /*padding-left: 20px;*/
-    left: 25%;
 }
 
 .annotation {
@@ -70,4 +69,11 @@ a.cardlink {
 
 a.cardlink.delete {
   color: #EB0029;
+}
+
+#viewer.col-md-9 {
+	position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
