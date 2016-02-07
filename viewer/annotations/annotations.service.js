@@ -5,7 +5,7 @@
 
     .factory('AnnotationsService', ['context', 'image', 'annotations', '$window', function(context, image, annotations, $window) {
         var origin = window.location.origin;
-        var iframe = $window.frames[0];
+        var iframe = document.getElementById('osd').contentWindow;
 
         function drawAnnotation() {
             iframe.postMessage({messageType: 'drawAnnotation'}, origin);
