@@ -128,6 +128,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				FacetsData.sortColumns.push(col.field);
 			}
 		});
+		FacetsData.sortColumns.sort();
 	};
 
 	this.predicate = function (facet, keyCode, successSearchFacets, successUpdateModels) {

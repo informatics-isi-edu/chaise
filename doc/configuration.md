@@ -19,3 +19,4 @@ The below table explains the usage of the default parameters:
 | ermrestLocation | The base URL for the ERMrest service | window.location.protocol + // + window.location.host | "ermrestLocation": \<URL\> | N/A | The location of the ERMrest service. |
 | recordResource | The sub path for the record resource | /record | "recordResource":\<value\> | N/A | |
 | showBadgeCounts | true <br> false | false | "showBadgeCounts":\<value\> | N/A | If true, facet counts will be displayed in the sidebar. |
+| tableThreshold | Number of rows. | 0 | "tableThreshold":\<value\> | N/A | Max number of rows default to transpose view. |

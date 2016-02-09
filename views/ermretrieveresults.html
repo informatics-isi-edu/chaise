@@ -170,7 +170,9 @@
 					</div>
 					<div id="results_tally" class="row" ng-show="facetResults.hasSelectedFacets()">
 						<div class="col-md-8">
-							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results.</p>
+							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results, sort by: <select name="sortColumn" ng-change="facetResults.sortData($event)" ng-model="FacetsData.sortFacet">
+								<option ng-repeat="option in FacetsData.sortColumns" value="{{option}}">{{facetResults.display(FacetsData.table, option)}}</option>
+							</select></p>
 						</div>
 						<div class="col-md-4">
 							<div id="views" class="btn-group view-toggle pull-right" role="group">

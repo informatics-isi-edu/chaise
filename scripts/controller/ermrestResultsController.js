@@ -10,7 +10,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
                                                       function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
-  $scope.chaiseConfig = chaiseConfig;
+  	$scope.chaiseConfig = chaiseConfig;
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
@@ -190,6 +190,12 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 
 	this.pageToFirst = function pageToFirst(event) {
 		event.preventDefault();
+		$scope.FacetsData.pagingOptions.currentPage = 2;
+		$scope.FacetsData.pagingOptions.currentPage = updatePageTag('backward', $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap, $scope.FacetsData.tagPages, $scope.FacetsData.maxPages);
+		setActivePage($scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap);
+	};
+
+	this.sortData = function sortData(event) {
 		$scope.FacetsData.pagingOptions.currentPage = 2;
 		$scope.FacetsData.pagingOptions.currentPage = updatePageTag('backward', $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap, $scope.FacetsData.tagPages, $scope.FacetsData.maxPages);
 		setActivePage($scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap);
