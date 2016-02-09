@@ -11,24 +11,33 @@ describe('Search result detail page,', function () {
         });
     });
 
-    describe('should click one random sidebar attribute,', function () {
+    describe('should click one random sidebar attribute', function () {
         var randomSidebarAttr = '';
         var randomEditAttr = '';
         var randomRecordTitle = '';
         beforeEach(function (done) {
             var allAttrs = chaisePage.sidebar.sidebarAttrsDisplayed;
             allAttrs.count().then(function (num) {
-                var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
-                var ranAttr = allAttrs.get(ranInt);
-                ranAttr.getText().then(function (attrName) {
-                    randomSidebarAttr = attrName;
-                    ranAttr.click();
-                    done();
-                });
+                    var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
+                    var ranAttr = allAttrs.get(ranInt);
+                    ranAttr.getText().then(function (attrName) {
+                        randomSidebarAttr = attrName;
+                        //avoid 'Somite Count' because it will not show in record page
+                        //might need other ways to check it
+                        if (attrName === 'Somite Count') {
+                            var nextAttr = allAttrs.get(ranInt + 1);
+                            nextAttr.click();
+                            done();
+                        } else {
+                            ranAttr.click();
+                            done();
+                        }
+                    });
             });
         });
 
-        describe('should check one random edit filter,', function () {
+        describe('('+ randomSidebarAttr + '), ' +
+            'should check one random edit filter (' + randomEditAttr + ')', function () {
             beforeEach(function (done) {
                 var allFilters = chaisePage.editFilter.editFilterAttrsDisplayed;
                 allFilters.count().then(function (num) {
@@ -118,14 +127,15 @@ describe('Search result detail page,', function () {
                         done();
                     });
 
-                    it('should contain the randomly chosen attribute field', function (done) {
+                    it('should contain the randomly chosen attribute field (' + randomSidebarAttr + ')', function (done) {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
                         var sidebarAttrKey = chaisePage.recordPage.findEntityKeyByName(sidebarAttr);
                         expect(sidebarAttrKey.isDisplayed()).toBe(true);
                         done();
                     });
 
-                    it('should contain the randomly chosen edit filter in attribute value', function (done) {
+                    it('should contain the randomly chosen edit filter (' + randomEditAttr + ')' +
+                        ' in attribute value', function (done) {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
                         var sidebarAttrValue = chaisePage.recordPage.findEntityValueByName(sidebarAttr);
                         expect(sidebarAttrValue.isDisplayed()).toBe(true);
