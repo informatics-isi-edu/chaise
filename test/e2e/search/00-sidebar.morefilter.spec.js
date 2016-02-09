@@ -3,13 +3,17 @@
  * Created by shuai.
  *
  * Test the initial sidebar.
+ * Checking attributes in View all attributes will show them in initial sidebar list.
  *
  */
 
 var chaisePage = require('../chaise.page.js');
-describe('In Chaise, search_00 sidebar', function() {
+describe('Chaise initial sidebar,', function () {
+
     var EC = protractor.ExpectedConditions;
-    describe('on load,', function () {
+
+    var spinner = element(by.id('spinner'));
+    describe('when initializing,', function () {
         beforeAll(function () {
             browser.get('');
         });
@@ -19,25 +23,24 @@ describe('In Chaise, search_00 sidebar', function() {
             //probably not waiting for AngularJS to sync,
             //so icon can be tested before everything settles down(settling down means img is no longer there)
             browser.ignoreSynchronization = true;
-            var spinner = element(by.id('spinner'));
             expect(spinner.isDisplayed()).toBe(true);
             done();
         });
+    });
 
-        it('should open the initial sidebar', function (done) {
+    describe('after initialization completes,', function () {
+        it('should show the initial sidebar', function (done) {
             browser.ignoreSynchronization = false;
-            var spinner = element(by.id('spinner'));
             var sidebar = element(by.id('sidebar'));
             browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
                 expect(sidebar.isDisplayed()).toBe(true);
-                expect(spinner.isDisplayed()).toBe(false);
                 done();
             });
         });
-
-    });
-
-    describe('the initial attributes selection sidebar,', function () {
+        it('should not show the spinner', function (done) {
+            expect(spinner.isDisplayed()).toBe(false);
+            done();
+        });
         it('should have > 1 visible attributes to choose from', function (done) {
             expect(chaisePage.sidebar.sidebarAttrsDisplayed.count()).toBeGreaterThan(0);
             done();
@@ -71,38 +74,59 @@ describe('In Chaise, search_00 sidebar', function() {
             });
         });
 
-        describe('sidebar attribute,', function () {
-            var somiteCount = 'Somite Count';
-            var investigator = 'Investigator';
-            var somiteCountAttr = chaisePage.sidebar.findSidebarAttrByName(somiteCount);
-            var investigatorAttr = chaisePage.sidebar.findSidebarAttrByName(investigator);
+        //previously displayed attribute
+        var somiteCount = 'Somite Count';
+        //previously non-displayed attribute
+        var investigator = 'Investigator';
 
-            it('Somite Count attribute should be displayed', function (done) {
-                expect(somiteCountAttr.isDisplayed()).toBe(true);
+        var somiteCountAttr = chaisePage.sidebar.findSidebarAttrByName(somiteCount);
+        var investigatorAttr = chaisePage.sidebar.findSidebarAttrByName(investigator);
+        it('should show \'Somite Count\' attribute', function (done) {
+            expect(somiteCountAttr.isDisplayed()).toBe(true);
+            done();
+        });
+
+        it('should not show \'Investigator\' attribute', function (done) {
+            expect(investigatorAttr.isDisplayed()).toBe(false);
+            done();
+        });
+
+        var viewAll = chaisePage.sidebar.viewMoreBtn;
+        var sidebarHeader = chaisePage.sidebar.sidebarHeader;
+        describe('when entering \'View All Attributes\'', function () {
+            it('sidebar header should change to \'view all attributes\'', function (done) {
+                viewAll.click();
+                expect(chaisePage.moreFilter.sidebarHeader.getText()).toContain('ALL ATTRIBUTES');
                 done();
             });
 
-            it('Investigator attribute should not be displayed', function (done) {
-                expect(investigatorAttr.isDisplayed()).toBe(false);
-                done();
-            });
-
-            it('should show Investigator and hide Somite Count after checking and unchecking', function (done) {
-                var viewAll = chaisePage.sidebar.viewMoreBtn;
+            it('should check \'Investigator\' and uncheck \'Somite Count\'', function (done) {
                 var investigatorCheckbox = chaisePage.moreFilter.findMorefilterAttrByName(investigator);
                 var somiteCountCheckbox = chaisePage.moreFilter.findMorefilterAttrByName(somiteCount);
-
-                var sidebarHeader = chaisePage.moreFilter.sidebarHeader;
-                //click to show all attributes' checkboxs
-                viewAll.click();
                 investigatorCheckbox.click();
                 somiteCountCheckbox.click();
-                //click GoBack to see attribute list
-                sidebarHeader.click();
-                expect(somiteCountAttr.isDisplayed()).toBe(false);
+                done();
+            });
+
+        });
+
+        describe('when back to initial sidebar', function () {
+            it('sidebar header should show \'CHOOSE ATTRIBUTES:\'', function (done) {
+                chaisePage.moreFilter.goBackToSidebar();
+                expect(sidebarHeader.getText()).toBe('CHOOSE ATTRIBUTES:');
+                done();
+            });
+
+            it('should show \'Investigator\' attribute', function (done) {
                 expect(investigatorAttr.isDisplayed()).toBe(true);
                 done();
             });
+
+            it('should not show \'Somite Count\' attribute', function (done) {
+                expect(somiteCountAttr.isDisplayed()).toBe(false);
+                done();
+            });
+
         });
     });
 
