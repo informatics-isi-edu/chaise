@@ -1,7 +1,7 @@
 var chaisePage = require('../chaise.page.js');
 var pageAction = require('../page.action.js');
 
-xdescribe('Search result columns,', function () {
+describe('Search result columns,', function () {
     var EC = protractor.ExpectedConditions;
 
     it('should load the page correctly', function (done) {
