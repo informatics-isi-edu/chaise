@@ -19,7 +19,7 @@ describe('Filters on top of the records,', function () {
     var proteinExpText = 'Protein expression data';
     var expeSubfilters = filterObj.findCheckedSubfiltersByName(experimentTypeText);
 
-    describe('after 1 edit filter (\'RNA expression microarray\' in \'Experiment Type\') is checked,', function () {
+    describe('after checking 1 edit filter (\'RNA expression microarray\' in \'Experiment Type\'),', function () {
         it('should show the \'Clear All Filters\' button', function (done) {
             chaisePage.sidebar.clickSidebarAttr(experimentTypeText);
             chaisePage.editFilter.clickEditFilter(microarrayText);
@@ -39,8 +39,9 @@ describe('Filters on top of the records,', function () {
             done();
         });
 
-        xit('should show \'RNA expression microarray\' in \'Experiment Type\' wrapper', function (done) {
-
+        it('should show \'RNA expression microarray\' in \'Experiment Type\' wrapper', function (done) {
+            var title = filterObj.findFitlerWrapperTitleByWrapperName(experimentTypeText);
+            expect(title).toContain(microarrayText);
             done();
         });
     });

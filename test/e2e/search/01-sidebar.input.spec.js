@@ -49,11 +49,11 @@ describe('Sidebar top search input,', function () {
     });
 
     var RNA = 'RNA';
+    var displayedEditAttrs = chaisePage.editFilter.editFilterAttrsDisplayed;
     it('should show \'Experiment Type\' filters containing \'RNA\' when searching for \'RNA\'', function (done) {
         searchBox.sendKeys(RNA);
         var experimentTypeText = 'Experiment Type';
         chaisePage.sidebar.clickSidebarAttr(experimentTypeText);
-        var displayedEditAttrs = chaisePage.editFilter.displayedEditAttrs;
         displayedEditAttrs.count().then(function (num) {
             for (var i = 0; i < num; i++) {
                 displayedEditAttrs.get(i).getText().then(function (txt) {
@@ -68,7 +68,6 @@ describe('Sidebar top search input,', function () {
         var dataType = 'Data Type';
         chaisePage.editFilter.goBackToSidebar();
         chaisePage.sidebar.clickSidebarAttr(dataType);
-        var displayedEditAttrs = chaisePage.editFilter.displayedEditAttrs;
         displayedEditAttrs.count().then(function (num) {
             for (var i = 0; i < num; i++) {
                 displayedEditAttrs.get(i).getText().then(function (txt) {

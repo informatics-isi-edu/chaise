@@ -90,6 +90,11 @@ function contentFilter() {
     this.findFilterWrapperByName = function (attrName) {
         return this.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
     };
+    this.findFitlerWrapperTitleByWrapperName = function (wrapperAttrName) {
+        var titleSpan = this.findFilterWrapperByName(wrapperAttrName)
+            .$('span[ng-attr-title="{{facetResults.displayTitle(facet)}}"]');
+        return titleSpan.getAttribute('title');
+    };
     this.clickFilterWrapperCancelByName = function (attrName) {
         this.findFilterWrapperByName(attrName).$('a.filter-link-cancel').click();
     };
