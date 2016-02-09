@@ -37,6 +37,14 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <span class="entity-title">Image Metadata</span>
+                                <button ng-show="!metadata.editMode" ng-click="metadata.edit();" class="btn btn-sm btn-success pull-right" type="button" role="button">
+                                    <span class="glyphicon glyphicon-pencil"></span>   Edit
+                                </button>
+                                <button ng-show="metadata.editMode" ng-click="metadata.save();" class="btn btn-sm btn-success pull-right" type="button" role="button">
+                                    <span class="glyphicon glyphicon-ok"></span>   Save
+                                </button>
+
+
                             </div>
                         </div>
                         <br>
@@ -52,33 +60,33 @@
                                 <tr>
                                     <td class="entity-key col-md-2">Status</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingStatus">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.status">{{metadata.image.entity.data.status}}</span>
                                             <span ng-if="!metadata.image.entity.data.status" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingStatus');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingStatus" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.status" theme="select2" ng-disabled="disabled" style="width: 175px;">
                                                 <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.status}}</ui-select-match>
                                                 <ui-select-choices repeat="status in (metadata.statuses | filter: $select.search) track by status">
                                                     <div ng-bind-html="status | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-                                            <a ng-click="metadata.save('editingStatus');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="entity-key col-md-2">Description</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingDescription">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.description">{{metadata.image.entity.data.description}}</span>
                                             <span ng-if="!metadata.image.entity.data.description" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingDescription');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingDescription" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <textarea ng-model="metadata.image.entity.data.description" class="form-control" rows="5"></textarea>
-                                            <a ng-click="metadata.save('editingDescription');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -105,114 +113,114 @@
                                 <tr>
                                     <td class="entity-key col-md-2">Tissue</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingTissue">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.tissue">{{metadata.image.entity.data.tissue}}</span>
                                             <span ng-if="!metadata.image.entity.data.tissue" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingTissue');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingTissue" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.tissue" theme="select2" ng-disabled="disabled" style="width: 175px;">
                                                 <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.tissue}}</ui-select-match>
                                                 <ui-select-choices repeat="tissue in (metadata.vocabs.tissue | filter: $select.search) track by tissue">
                                                     <div ng-bind-html="tissue | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-                                            <a ng-click="metadata.save('editingTissue');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="entity-key col-md-2">Gender</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingGender">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.gender">{{metadata.image.entity.data.gender}}</span>
                                             <span ng-if="!metadata.image.entity.data.gender" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingGender');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingGender" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.gender" theme="select2" ng-disabled="disabled" style="width: 175px;">
                                                 <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.gender}}</ui-select-match>
                                                 <ui-select-choices repeat="gender in (metadata.vocabs.gender | filter: $select.search) track by gender">
                                                     <div ng-bind-html="gender | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-                                            <a ng-click="metadata.save('editingGender');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="entity-key col-md-2">Age Stage</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingAgeStage">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.age_stage">{{metadata.image.entity.data.age_stage}}</span>
                                             <span ng-if="!metadata.image.entity.data.age_stage" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingAgeStage');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingAgeStage" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.age_stage" theme="select2" ng-disabled="disabled" style="width: 175px;">
                                                 <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.age_stage}}</ui-select-match>
                                                 <ui-select-choices repeat="age_stage in (metadata.vocabs.age_stage | filter: $select.search) track by age_stage">
                                                     <div ng-bind-html="age_stage | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-                                            <a ng-click="metadata.save('editingAgeStage');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="entity-key col-md-2">Embedding Medium</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingEmebeddingMedium">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.embedding_medium">{{metadata.image.entity.data.embedding_medium}}</span>
                                             <span ng-if="!metadata.image.entity.data.embedding_medium" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingEmebeddingMedium');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingEmebeddingMedium" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.embedding_medium" theme="select2" ng-disabled="disabled" style="width: 175px;">
                                                 <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.embedding_medium}}</ui-select-match>
                                                 <ui-select-choices repeat="embedding_medium in (metadata.vocabs.embedding_medium | filter: $select.search) track by embedding_medium">
                                                     <div ng-bind-html="embedding_medium | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-                                            <a ng-click="metadata.save('editingEmebeddingMedium');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="entity-key col-md-2">Specimen Fixation</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingSpecimenFixation">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.specimen_fixation">{{metadata.image.entity.data.specimen_fixation}}</span>
                                             <span ng-if="!metadata.image.entity.data.specimen_fixation" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingSpecimenFixation');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingSpecimenFixation" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.specimen_fixation" theme="select2" ng-disabled="disabled" style="width: 175px;">
                                                 <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.specimen_fixation}}</ui-select-match>
                                                 <ui-select-choices repeat="specimen_fixation in (metadata.vocabs.specimen_fixation | filter: $select.search) track by specimen_fixation">
                                                     <div ng-bind-html="specimen_fixation | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-                                            <a ng-click="metadata.save('editingSpecimenFixation');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="entity-key col-md-2">Staining Protocol</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingStainingProtocol">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.staining_protocol">{{metadata.image.entity.data.staining_protocol}}</span>
                                             <span ng-if="!metadata.image.entity.data.staining_protocol" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingStainingProtocol');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingStainingProtocol" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.staining_protocol" theme="select2" ng-disabled="disabled" style="width: 175px;">
                                                 <ui-select-match placeholder="Select a term">{{metadata.image.entity.data.staining_protocol}}</ui-select-match>
                                                 <ui-select-choices repeat="staining_protocol in (metadata.vocabs.staining_protocol | filter: $select.search) track by staining_protocol">
                                                     <div ng-bind-html="staining_protocol | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-                                            <a ng-click="metadata.save('editingStainingProtocol');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -252,42 +260,42 @@
                                 <tr>
                                     <td class="entity-key col-md-2">Accession Number</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingAccessionNum">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.accession_number">{{metadata.image.entity.data.description}}</span>
                                             <span ng-if="!metadata.image.entity.data.accession_number" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingAccessionNum');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingAccessionNum" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <input ng-model="metadata.image.entity.data.accession_number" type="text" class="form-control">
-                                            <a ng-click="metadata.save('editingAccessionNum');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="entity-key col-md-2">DOI</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.metadata.editingDOI">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.doi">{{metadata.image.entity.data.doi}}</span>
                                             <span ng-if="!metadata.image.entity.data.doi" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingDOI');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingDOI" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <input ng-model="metadata.image.entity.data.doi" type="text" class="form-control">
-                                            <a ng-click="metadata.save('editingDOI');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="entity-key col-md-2">ARK</td>
                                     <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editingARK">
+                                        <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.ark">{{metadata.image.entity.data.ark}}</span>
                                             <span ng-if="!metadata.image.entity.data.ark" class="text-muted">No data</span>
-                                            <a ng-click="metadata.edit('editingARK');" class="pull-right">Edit</a>
+
                                         </div>
-                                        <div ng-show="metadata.editingARK" class="form-inline">
+                                        <div ng-show="metadata.editMode" class="form-inline">
                                             <input ng-model="metadata.image.entity.data.ark" type="text" class="form-control">
-                                            <a ng-click="metadata.save('editingARK');" class="pull-right">Save</a>
+
                                         </div>
                                     </td>
                                 </tr>

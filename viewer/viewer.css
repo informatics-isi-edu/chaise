@@ -77,3 +77,7 @@ a.cardlink.delete {
     right: 0;
     bottom: 0;
 }
+
+#metadata-panel .ui-select-container {
+    width: 100%;
+}
