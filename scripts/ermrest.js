@@ -142,9 +142,9 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			// redirect to login in case of an Unauthorized error
 			document.body.style.cursor = 'default';
 			if (authnProvider == 'goauth') {
-				getGoauth(window.location);
+				getGoauth(encodeSafeURIComponent(window.location.href));
 			} else {
-				var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
+				var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location.href);
 				window.location = login_url;
 			}
 			break;
