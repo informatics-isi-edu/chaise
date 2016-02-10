@@ -43,7 +43,7 @@ chaiseRecordApp.service('configService', function() {
 });
 
 // REST API for Ermrest
-chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService', 'spinnerService', 'notFoundService', 'configService', function($http, $rootScope, schemaService, spinnerService, notFoundService, configService){
+chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schemaService', 'spinnerService', 'notFoundService', 'configService', function($http, $rootScope, $sce, schemaService, spinnerService, notFoundService, configService){
 
     // Get the entity in JSON format
     // Note: By this point,the schema should be loaded already
@@ -87,6 +87,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
             self.patternInterpretationForTable(schemaName, tableName, data);
 
             entity.foreignTables    = [];
+            entity.embedTables = [];
             entity.associations     = [];
             // Data use by helper methods
             entity.internal         = { schemaName: schemaName, tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
@@ -123,13 +124,63 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
                         // If the elements doesn't return an empty array, continue
                         if (elements.length > 0){
 
-
+                            // Base on the annotation, treat the reference differently
                             // Get the elements annotations from the schema
                             var annotations =  schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations;
+                            var embedAnnotation = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations['tag:misd.isi.edu,2015:url'];
 
-                            // Base on the annotation, treat the reference differently
-                            // If annotations is 'download', store it in the entity's 'files' atributes
-                            if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
+                            // TODO embedded iFrame - annotation could be in table or column
+                            if (embedAnnotation !== undefined &&
+                                embedAnnotation.presentation !== undefined && embedAnnotation.presentation === 'embed') {
+
+                                var embedTable = {title: ft.displayTableName, elements: []};
+                                var cdef = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].column_definitions;
+
+                                for (var e = 0; e < elements.length; e++) {
+                                    var element = elements[e];
+
+                                    var urlPattern = embedAnnotation.pattern;
+                                    for (var c = 0; c < cdef.length; c++) {
+                                        cname = cdef[c].name;
+                                        urlPattern = urlPattern.replace("{" + cname + "}", element[cname]);
+                                    }
+
+
+                                    var caption = "";
+                                    if (embedAnnotation.caption !== undefined) {
+                                        caption = embedAnnotation.caption;
+                                        for (var c = 0; c < cdef.length; c++) {
+                                            cname = cdef[c].name;
+                                            caption = caption.replace("{" + cname + "}", element[cname]);
+                                        }
+                                    }
+
+                                    var width = "100%";
+                                    if (embedAnnotation.width !== undefined) {
+                                        if (typeof embedAnnotation.width === "string") { // column name
+                                            width = element[embedAnnotation.width]; // value in a column
+                                        } else if (typeof embedAnnotation.width === "number") {
+                                            width = embedAnnotation.width;
+                                        }
+                                    }
+
+                                    var height = "400";
+                                    if (embedAnnotation.height !== undefined) {
+                                        if (typeof embedAnnotation.height === "string") { // column name
+                                            height = element[embedAnnotation.height]; // value in a column
+                                        } else if (typeof embedAnnotation.height === "number") {
+                                            height = embedAnnotation.height;
+                                        }
+                                    }
+
+                                    var embedElement = {uri: $sce.trustAsResourceUrl(urlPattern), caption: caption, width: width, height: height};
+                                    embedTable.elements.push(embedElement);
+                                }
+
+                                entity.embedTables.push(embedTable);
+
+                                // If annotations is 'download', store it in the entity's 'files' atributes
+                            } else if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
                                 entity['files']         = elements;
 
                             // If annotations is 'previews', store it in the entity's 'previews' atributes
@@ -413,17 +464,39 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
     // if table has columns with url pattern, add to data as col_link
     this.patternInterpretationForTable = function(schemaName, tableName, references) {
-        var urlPatterns = schemaService.getColumnInterpretations(schemaName, tableName);
-        for (col in urlPatterns) {
-            for (var row = 0; row < references.length; row++) {
-                var pattern = urlPatterns[col];
-                if (pattern === "auto_link") { // link url is same as the column value
+        var urlInterp = schemaService.getColumnInterpretations(schemaName, tableName);
+        var columns = Object.keys(references[0]);
+        for (col in urlInterp) {
+            var uriPattern = urlInterp[col].uriPattern;
+            var caption = urlInterp[col].captionPattern;
+
+            if (uriPattern === "auto_link") { // link url is same as column value
+                for (var row = 0; row < references.length; row++) {
                     references[row][col + '_link'] = references[row][col];
                 }
-                else {
-                    var link = pattern.replace("{value}", references[row][col]);
-                    // replace {value} with data value
-                    references[row][col + '_link'] = link;
+            } else {
+                var link = uriPattern;
+                for (var c = 0; c < columns.length; c++) { // if col name is found in the pattern
+                    var col2 = columns[c];
+                    for (var row = 0; row < references.length; row++) {
+                        if (link.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
+                            link = link.replace("{" + col2 + "}", references[row][col2]);
+                            references[row][col + '_link'] = link;
+                        }
+                    }
+                }
+            }
+
+            if (caption !== null) {
+                var cap = caption;
+                for (var c = 0; c < columns.length; c++) { // if col name is found in the pattern
+                    col2 = columns[c];
+                    for (var row = 0; row < references.length; row++) {
+                        if (cap.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
+                            cap = cap.replace("{" + col2 + "}", references[row][col2]);
+                            references[row][col] = cap; // overwrite existing col value with caption
+                        }
+                    }
                 }
             }
         }
@@ -551,6 +624,12 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', 'schemaService
 
                         // If table is download, preview, or images, initially load them
                         if (annotations !== undefined && (annotations.indexOf('download') > -1 || annotations.indexOf('preview') > -1 || annotations.indexOf('image') > -1)){
+                            foreignTable.initialLoad = true;
+                        }
+
+                        // if table is embed, initially load them
+                        urlAnnotation = tableSchema.annotations['tag:misd.isi.edu,2015:url'];
+                        if (urlAnnotation !== undefined && urlAnnotation.presentation !== undefined && urlAnnotation.presentation === 'embed') {
                             foreignTable.initialLoad = true;
                         }
 
@@ -817,7 +896,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         return columns;
     }
 
-    // returns a set of col_name : interpretation for the table
+    // returns a set of <col_name, {uri_pattern, caption_pattern}>
     this.getColumnInterpretations = function(schemaName, tableName) {
         var interp = {};
 
@@ -838,7 +917,12 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
                     pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
                 }
 
-                interp[cd.name] = pattern;
+                var caption = null;
+                if (cd.annotations['tag:misd.isi.edu,2015:url'] !== null &&
+                    cd.annotations['tag:misd.isi.edu,2015:url'].caption !== undefined) {
+                    caption = cd.annotations['tag:misd.isi.edu,2015:url'].caption;
+                }
+                interp[cd.name] = {uriPattern: pattern, captionPattern: caption};
             }
         }
 
