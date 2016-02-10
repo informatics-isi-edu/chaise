@@ -21,7 +21,7 @@ html, body {
     background-color: #fff;
 }
 
-.annotation.highlighted {
+.annotation.highlighted, #create-annotation-form {
     border-left: 5px solid #428bca;
 }
 

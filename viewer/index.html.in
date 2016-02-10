@@ -321,7 +321,7 @@
                             </div>
                         </div>
                         <!-- Annotation Creation Form -->
-                        <form ng-show="annotations.createMode" id="create-annotation-form" class="annotation" style="border-left: 5px solid #5cb85c;">
+                        <form ng-show="annotations.createMode" id="create-annotation-form" class="annotation">
                             <div class="row">
                                 <div class="col-md-10">
                                     <span class="h4">New Annotation</span>
