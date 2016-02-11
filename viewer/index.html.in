@@ -17,22 +17,32 @@
         </script>
     <![endif]-->
 </head>
-<!-- TODO: Later, concatenate views into this file via Makefile -->
 <body>
     <div class="container-fluid">
         <div class="row">
             <!-- CONTROLLER: SidebarSwitchController -->
-            <div ng-controller="SidebarSwitchController as sidebarSwitch" id="sidebar" class="col-md-3">
+            <div ng-controller="SidebarController as sidebar" id="sidebar" class="col-md-3">
+                <br>
+                <div class="col-md-12">
+                    <div class="row">
+                        <button ng-click="sidebar.downloadView();" class="btn btn-sm btn-success form-control" type="button" role="button">
+                            Download Current Image View
+                        </button>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <br>
                 <div class="row">
                     <ul class="nav nav-tabs">
-                        <li ng-repeat="sidebar in sidebarSwitch.sidebars" ng-class="{active: sidebarSwitch.sidebar == sidebar}" role="presentation">
-                            <a ng-click="sidebarSwitch.setSidebar(sidebar);">{{sidebar | toTitleCase}}</a>
+                        <li ng-repeat="panel in sidebar.sidebars" ng-class="{active: sidebar.sidebar == panel}" role="presentation">
+                            <a ng-click="sidebar.setSidebar(panel);">{{panel | toTitleCase}}</a>
                         </li>
                     </ul>
                 </div>
                 <br>
                 <!-- CONTROLLER: ImageMetadataController-->
-                <div ng-show="sidebarSwitch.sidebar == 'metadata'" ng-controller="ImageMetadataController as metadata" id="metadata-panel" class="row">
+                <div ng-show="sidebar.sidebar == 'metadata'" ng-controller="ImageMetadataController as metadata" id="metadata-panel" class="row">
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-12">
@@ -43,8 +53,6 @@
                                 <button ng-show="metadata.editMode" ng-click="metadata.save();" class="btn btn-sm btn-success pull-right" type="button" role="button">
                                     <span class="glyphicon glyphicon-ok"></span>   Save
                                 </button>
-
-
                             </div>
                         </div>
                         <br>
@@ -63,7 +71,6 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.status">{{metadata.image.entity.data.status}}</span>
                                             <span ng-if="!metadata.image.entity.data.status" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.status" theme="select2" ng-disabled="disabled" style="width: 175px;">
@@ -72,7 +79,6 @@
                                                     <div ng-bind-html="status | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -82,11 +88,9 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.description">{{metadata.image.entity.data.description}}</span>
                                             <span ng-if="!metadata.image.entity.data.description" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <textarea ng-model="metadata.image.entity.data.description" class="form-control" rows="5"></textarea>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -116,7 +120,6 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.tissue">{{metadata.image.entity.data.tissue}}</span>
                                             <span ng-if="!metadata.image.entity.data.tissue" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.tissue" theme="select2" ng-disabled="disabled" style="width: 175px;">
@@ -125,7 +128,6 @@
                                                     <div ng-bind-html="tissue | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -135,7 +137,6 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.gender">{{metadata.image.entity.data.gender}}</span>
                                             <span ng-if="!metadata.image.entity.data.gender" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.gender" theme="select2" ng-disabled="disabled" style="width: 175px;">
@@ -144,7 +145,6 @@
                                                     <div ng-bind-html="gender | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -154,7 +154,6 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.age_stage">{{metadata.image.entity.data.age_stage}}</span>
                                             <span ng-if="!metadata.image.entity.data.age_stage" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.age_stage" theme="select2" ng-disabled="disabled" style="width: 175px;">
@@ -163,7 +162,6 @@
                                                     <div ng-bind-html="age_stage | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -173,7 +171,6 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.embedding_medium">{{metadata.image.entity.data.embedding_medium}}</span>
                                             <span ng-if="!metadata.image.entity.data.embedding_medium" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.embedding_medium" theme="select2" ng-disabled="disabled" style="width: 175px;">
@@ -182,7 +179,6 @@
                                                     <div ng-bind-html="embedding_medium | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -192,7 +188,6 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.specimen_fixation">{{metadata.image.entity.data.specimen_fixation}}</span>
                                             <span ng-if="!metadata.image.entity.data.specimen_fixation" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.specimen_fixation" theme="select2" ng-disabled="disabled" style="width: 175px;">
@@ -201,7 +196,6 @@
                                                     <div ng-bind-html="specimen_fixation | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -211,7 +205,6 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.staining_protocol">{{metadata.image.entity.data.staining_protocol}}</span>
                                             <span ng-if="!metadata.image.entity.data.staining_protocol" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <ui-select ng-model="metadata.image.entity.data.staining_protocol" theme="select2" ng-disabled="disabled" style="width: 175px;">
@@ -220,7 +213,6 @@
                                                     <div ng-bind-html="staining_protocol | highlight: $select.search"></div>
                                                 </ui-select-choices>
                                             </ui-select>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -263,11 +255,9 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.accession_number">{{metadata.image.entity.data.description}}</span>
                                             <span ng-if="!metadata.image.entity.data.accession_number" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <input ng-model="metadata.image.entity.data.accession_number" type="text" class="form-control">
-
                                         </div>
                                     </td>
                                 </tr>
@@ -277,11 +267,9 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.doi">{{metadata.image.entity.data.doi}}</span>
                                             <span ng-if="!metadata.image.entity.data.doi" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <input ng-model="metadata.image.entity.data.doi" type="text" class="form-control">
-
                                         </div>
                                     </td>
                                 </tr>
@@ -291,11 +279,9 @@
                                         <div ng-show="!metadata.editMode">
                                             <span ng-if="metadata.image.entity.data.ark">{{metadata.image.entity.data.ark}}</span>
                                             <span ng-if="!metadata.image.entity.data.ark" class="text-muted">No data</span>
-
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
                                             <input ng-model="metadata.image.entity.data.ark" type="text" class="form-control">
-
                                         </div>
                                     </td>
                                 </tr>
@@ -304,14 +290,20 @@
                     </div>
                 </div>
                 <!-- CONTROLLER: AnnotationsController-->
-                <div ng-show="sidebarSwitch.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
+                <div ng-show="sidebar.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-12">
                                 <span class="entity-title">Annotations</span>
-                                <button ng-click="annotations.drawAnnotation();" class="btn btn-sm btn-success pull-right" type="button" role="button">
-                                    <span class="glyphicon glyphicon-plus"></span>   New
-                                </button>
+                                <div class="btn-group pull-right">
+                                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        New <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a ng-click="annotations.drawAnnotation();">Annotation</a></li>
+                                        <li><a href="#">Section of Interest</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                         <br>

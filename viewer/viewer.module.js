@@ -36,7 +36,6 @@
     .run(['$window', 'context', 'image', 'annotations', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function run($window, context, image, annotations, anatomies, statuses, vocabs, ermrestClientFactory) {
         var origin = window.location.origin;
         var iframe = document.getElementById('osd').contentWindow;
-        console.log(iframe);
         var annotoriousReady = false;
         var client = ermrestClientFactory.getClient(context.serviceURL);
 

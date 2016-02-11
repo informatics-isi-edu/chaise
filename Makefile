@@ -143,6 +143,7 @@ VIEWER_ASSETS=viewer
 VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/select.js
 
 VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.module.js \
@@ -150,7 +151,7 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.module.js \
 	$(VIEWER_ASSETS)/common/providers/image.js \
 	$(VIEWER_ASSETS)/common/filters/toTitleCase.js \
 	$(VIEWER_ASSETS)/common/filters/underscoreToSpace.js \
-	$(VIEWER_ASSETS)/sidebar-switch/sidebarSwitch.controller.js \
+	$(VIEWER_ASSETS)/sidebar/sidebar.controller.js \
 	$(VIEWER_ASSETS)/annotations/annotations.js \
 	$(VIEWER_ASSETS)/annotations/anatomies.js \
 	$(VIEWER_ASSETS)/annotations/annotations.service.js \

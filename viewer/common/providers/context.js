@@ -1,5 +1,4 @@
-// Holds the default context information. Basically the Angular version of the
-// chaise-config.js file.
+// Holds the default context information.
 (function() {
     'use strict';
 
