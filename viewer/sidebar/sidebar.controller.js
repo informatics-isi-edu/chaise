@@ -20,7 +20,7 @@
             iframe.postMessage({
                 messageType: 'downloadView',
                 content: {
-                    outfile: vm.image.entity.data.slide_id + '.jpg'
+                    outfile: vm.image.entity.data.slide_id
                 }
             }, window.location.origin);
         }
