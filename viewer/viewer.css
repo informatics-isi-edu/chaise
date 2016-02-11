@@ -55,8 +55,9 @@ html, body {
   border-color: #1E4E9A;
 }
 
-.btn-success:hover {
+.open > .dropdown-toggle.btn-success, .btn-success:hover, .btn-success:focus, .btn-success:active {
   background-color: #002D73;
+  border-color: #1E4E9A;
 }
 
 #entity-title, .entity-title {

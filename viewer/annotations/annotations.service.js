@@ -69,13 +69,18 @@
             iframe.postMessage({messageType: 'highlightAnnotation', content: annotation.data}, origin);
         };
 
+        function centerAnnotation(annotation) {
+            iframe.postMessage({messageType: 'centerAnnotation', content: annotation.data}, origin);
+        };
+
         return {
             drawAnnotation: drawAnnotation,
             createAnnotation: createAnnotation,
             cancelNewAnnotation: cancelNewAnnotation,
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
-            highlightAnnotation: highlightAnnotation
+            highlightAnnotation: highlightAnnotation,
+            centerAnnotation: centerAnnotation
         };
 
     }]);

@@ -25,7 +25,8 @@
         vm.deleteAnnotation = deleteAnnotation;
 
         vm.highlightedAnnotation = null;
-        vm.setHighlightedAnnotation = setHighlightedAnnotation;
+        vm.highlightAnnotation = highlightAnnotation;
+        vm.centerAnnotation = centerAnnotation;
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
@@ -48,7 +49,7 @@
                         $scope.$apply(function() {
                             // Highlight the annotation in the sidebar
                             vm.highlightedAnnotation = annotation.data.id;
-                        });
+                        });                        
                         scrollIntoView('annotation-' + vm.highlightedAnnotation);
                         break;
                     case 'onUnHighlighted':
@@ -95,7 +96,7 @@
             }
         }
 
-        function drawAnnotation(annotation) {
+        function drawAnnotation() {
             return AnnotationsService.drawAnnotation();
         }
 
@@ -140,12 +141,18 @@
             }
 
             vm.highlightedAnnotation = annotation.data.id;
-            highlightAnnotation(annotation);
         }
 
         // Highlights the annotation inside Annotorious
         function highlightAnnotation(annotation) {
+            setHighlightedAnnotation(annotation);
             return AnnotationsService.highlightAnnotation(annotation);
+        }
+
+        // Centers and zooms to the annotation inside Annotorious
+        function centerAnnotation(annotation) {
+            setHighlightedAnnotation(annotation);
+            return AnnotationsService.centerAnnotation(annotation);
         }
 
         // Return an annotation that matches an object of coordinates

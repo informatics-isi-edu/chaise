@@ -297,7 +297,7 @@
                                 <span class="entity-title">Annotations</span>
                                 <div class="btn-group pull-right">
                                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        New <span class="caret"></span>
+                                        New&nbsp;&nbsp;<span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a ng-click="annotations.drawAnnotation();">Annotation</a></li>
@@ -347,7 +347,7 @@
                             </div>
                         </form>
                         <!-- Annotations List -->
-                        <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == annotation.data.id}" id="{{'annotation-' + annotation.data.id}}" class="annotation" ng-click="annotations.setHighlightedAnnotation(annotation);" style="cursor: pointer;">
+                        <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == annotation.data.id}" id="{{'annotation-' + annotation.data.id}}" class="annotation" ng-click="annotations.highlightAnnotation(annotation);" style="cursor: pointer;">
                             <!-- Annotation Display Card -->
                             <div ng-show="annotation.data.id !== annotations.editedAnnotation">
                                 <div class="row">
@@ -361,6 +361,7 @@
                                     <!-- Annotation Edit/Delete Buttons -->
                                     <div class="col-md-5">
                                         <small class="pull-right">
+                                            <a ng-click="annotations.centerAnnotation(annotation)" title="Center Annotation" class="cardlink">Focus</a> |
                                             <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" class="cardlink">Edit</a> |
                                             <a ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" class="cardlink delete">Delete</a>
                                         </small>
