@@ -5,12 +5,12 @@ html, body {
 #sidebar {
     min-height: 100%;
     height: 100%;
+    border-right: 1px solid #ddd;
 }
 
 #annotations-control {
     height: 98vh;
     overflow: auto;
-    border-right: 1px solid #eee;
 }
 
 .annotation {
@@ -77,6 +77,11 @@ a.cardlink.delete {
     top: 0;
     right: 0;
     bottom: 0;
+}
+
+#viewer-header {
+    padding-top: 5px;
+    padding-bottom: 1px;
 }
 
 #metadata-panel .ui-select-container {

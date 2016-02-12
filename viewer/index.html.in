@@ -22,17 +22,6 @@
         <div class="row">
             <!-- CONTROLLER: SidebarSwitchController -->
             <div ng-controller="SidebarController as sidebar" id="sidebar" class="col-md-3">
-                <br>
-                <div class="col-md-12">
-                    <div class="row">
-                        <button ng-click="sidebar.downloadView();" class="btn btn-sm btn-success form-control" type="button" role="button">
-                            Download Current Image View
-                        </button>
-                    </div>
-                </div>
-                <br>
-                <br>
-                <br>
                 <div class="row">
                     <ul class="nav nav-tabs">
                         <li ng-repeat="panel in sidebar.sidebars" ng-class="{active: sidebar.sidebar == panel}" role="presentation">
@@ -433,9 +422,25 @@
             </div><!--/ end SidebarSwitchController -->
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer" class="col-md-9">
-                <iframe id="osd" width="100%" height="100%" src="about:blank" frameBorder="0">
-                    &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
-                </iframe>
+                <div id="viewer-header" class="row">
+                    <div class="col-md-8">
+                        <span class="entity-title">
+                            {{osd.image.entity.data.slide_id || 'No Slide ID'}}
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <button ng-click="osd.downloadView();" class="btn btn-sm btn-success pull-right" type="button" role="button">
+                            <span class="glyphicon glyphicon-camera"></span>&nbsp;&nbsp;Download Current View
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <iframe id="osd" width="100%" height="100%" src="about:blank" frameBorder="0">
+                            &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
+                        </iframe>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
