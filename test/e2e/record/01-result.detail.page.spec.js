@@ -21,23 +21,38 @@ describe('Search result detail page,', function () {
                     var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
                     var ranAttr = allAttrs.get(ranInt);
                     ranAttr.getText().then(function (attrName) {
-                        randomSidebarAttr = attrName;
                         //avoid 'Somite Count' because it will not show in record page
                         //might need other ways to check it
                         if (attrName === 'Somite Count') {
                             var nextAttr = allAttrs.get(ranInt + 1);
-                            nextAttr.click();
-                            done();
+                            nextAttr.getText().then(function (txt) {
+                                randomSidebarAttr = txt;
+                                console.log(' ');
+                                console.log('' + txt);
+                                nextAttr.click();
+                                done();
+                            });
+                        } else if (attrName === 'Mouse Chromosome') {
+                            var nextAttr = allAttrs.get(ranInt - 1);
+                            nextAttr.getText().then(function (txt) {
+                                randomSidebarAttr = txt;
+                                console.log('' + txt);
+                                nextAttr.click();
+                                done();
+                            });
                         } else {
-                            ranAttr.click();
-                            done();
+                            randomSidebarAttr = attrName;
+                            ranAttr.getText().then(function (txt) {
+                                console.log('' + txt);
+                                ranAttr.click();
+                                done();
+                            });
                         }
                     });
             });
         });
 
-        describe('('+ randomSidebarAttr + '), ' +
-            'should check one random edit filter (' + randomEditAttr + ')', function () {
+        describe('should check one random edit filter,', function () {
             beforeEach(function (done) {
                 var allFilters = chaisePage.editFilter.editFilterAttrsDisplayed;
                 allFilters.count().then(function (num) {
@@ -46,6 +61,7 @@ describe('Search result detail page,', function () {
                     var randAttrLabel = ranAttr.$('label');
                     ranAttr.getText().then(function (attrName) {
                         randomEditAttr = attrName;
+                        console.log('->' + attrName)
                         randAttrLabel.click();
                         setTimeout(function () {
                             done();
@@ -63,6 +79,7 @@ describe('Search result detail page,', function () {
                         var randResultTitle = chaisePage.resultContent.getResultTitleElement(randResult);
                         randResultTitle.getText().then(function (title) {
                             randomRecordTitle = title;
+                            console.log('->' + title);
                             randResultTitle.click();
                             browser.rootEl = "#recordApp";
                             browser.ignoreSynchronization = true;
@@ -145,7 +162,7 @@ describe('Search result detail page,', function () {
                         });
                     });
 
-                    it('should display \'Files\', toggle it ' +
+                    xit('should display \'Files\', toggle it ' +
                         'to display file icon or \'No rows found\'', function (done) {
                         var fileWrapper = chaisePage.recordPage.findToggleWrapperByName('Files');
                         expect(fileWrapper.isDisplayed()).toBe(true);
@@ -165,7 +182,7 @@ describe('Search result detail page,', function () {
                                 done();
                             }
                         });
-                    });
+                    }).pend('Some record page does not contain "Files", ex. Organism -> Human');
 
                     it('should display \'Dataset Geo\', toggle it to display something', function (done) {
                         var dataset = 'dataset geo';
