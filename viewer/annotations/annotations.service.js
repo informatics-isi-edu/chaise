@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'image', 'annotations', '$window', function(context, image, annotations, $window) {
+    .factory('AnnotationsService', ['context', 'image', 'annotations', 'sections', '$window', function(context, image, annotations, sections, $window) {
         var origin = window.location.origin;
         var iframe = document.getElementById('osd').contentWindow;
 
@@ -11,7 +11,7 @@
             iframe.postMessage({messageType: 'drawAnnotation'}, origin);
         }
 
-        function createAnnotation(newAnnotation) {
+        function createAnnotation(newAnnotation, type) {
             if (newAnnotation.anatomy == 'No Anatomy') {
                 newAnnotation.anatomy = null;
             }
@@ -30,14 +30,25 @@
                 "description": newAnnotation.description
             }];
 
-            // Add to ERMrest
-            var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
-            return annotationTable.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
-                // Then add to Annotorious
-                iframe.postMessage({messageType: 'createAnnotation', content: annotation.data}, window.location.origin);
-                // Push new annotation to value provider
-                annotations.push(annotation);
-            });
+            if (type == 'annotation') {
+                // Add to 'annotation' table in ERMrest
+                var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
+                return annotationTable.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
+                    // Then add to Annotorious
+                    iframe.postMessage({messageType: 'createAnnotation', content: annotation.data}, origin);
+                    // Push new annotation to value provider
+                    annotations.push(annotation);
+                });
+            } else if (type == 'section') {
+                // Add to 'section_annotation' table in ERMrest
+                var sectionTable = image.entity.getRelatedTable(context.schemaName, 'section_annotation');
+                return sectionTable.createEntity(newAnnotation, ['id', 'created']).then(function success(section) {
+                    // Then add to Annotorious
+                    iframe.postMessage({messageType: 'createAnnotation', content: section.data}, origin);
+                    // Push new section to value provider
+                    sections.push(section);
+                });
+            }
         }
 
         function cancelNewAnnotation() {

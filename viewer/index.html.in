@@ -289,8 +289,8 @@
                                         New&nbsp;&nbsp;<span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a ng-click="annotations.drawAnnotation();">Annotation</a></li>
-                                        <li><a href="#">Section of Interest</a></li>
+                                        <li><a ng-click="annotations.drawAnnotation('annotation');">Annotation</a></li>
+                                        <li><a ng-click="annotations.drawAnnotation('section');">Section of Interest</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -305,7 +305,10 @@
                         <form ng-show="annotations.createMode" id="create-annotation-form" class="annotation">
                             <div class="row">
                                 <div class="col-md-10">
-                                    <span class="h4">New Annotation</span>
+                                    <span class="h4">New
+                                        <span ng-if="annotations.newAnnotationType == 'annotation'">Annotation</span>
+                                        <span ng-if="annotations.newAnnotationType == 'section'">Section of Interest</span>
+                                    </span>
                                 </div>
                                 <div class="col-md-2">
                                     <button ng-click="annotations.cancelNewAnnotation();" type="button" class="close pull-right" aria-label="Close">
@@ -330,11 +333,22 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <button ng-click="annotations.createAnnotation();" role="button" class="btn btn-xs btn-success form-control" type="submit">
-                                        <strong>Create Annotation</strong>
+                                        <strong>Submit</strong>
                                     </button>
                                 </div>
                             </div>
                         </form>
+                        <!-- Sections of Interest List -->
+                        <div ng-show="annotations.sections.length > 0">
+                            <div ng-repeat="section in annotations.sections | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy'])" class="annotation">
+                                <small><strong>
+                                    <span ng-if="section.data.anatomy">{{section.data.anatomy | uppercase}}</span>
+                                    <span ng-if="!section.data.anatomy">{{'No Anatomy' | uppercase}}</span>
+                                </strong></small>
+                                <br>
+                                {{section.data.description}}
+                            </div>
+                        </div>
                         <!-- Annotations List -->
                         <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == annotation.data.id}" id="{{'annotation-' + annotation.data.id}}" class="annotation" ng-click="annotations.highlightAnnotation(annotation);" style="cursor: pointer;">
                             <!-- Annotation Display Card -->

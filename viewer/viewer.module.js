@@ -33,7 +33,7 @@
     }])
 
     // Hydrate values providers and set up the iframe
-    .run(['$window', 'context', 'image', 'annotations', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function run($window, context, image, annotations, anatomies, statuses, vocabs, ermrestClientFactory) {
+    .run(['$window', 'context', 'image', 'annotations', 'sections', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function run($window, context, image, annotations, sections, anatomies, statuses, vocabs, ermrestClientFactory) {
         var origin = window.location.origin;
         var iframe = document.getElementById('osd').contentWindow;
         var annotoriousReady = false;
@@ -55,6 +55,20 @@
                         image.entity = _entities[0];
                         iframe.location.replace(image.entity.data.uri);
                         console.log('Image: ', image);
+
+                        var sectionTable = image.entity.getRelatedTable(context.schemaName, 'section_annotation');
+                        sectionTable.getEntities().then(function success(_sections) {
+                            for (var i = 0; i < _sections.length; i++) {
+                                sections.push(_sections[i]);
+                            }
+                            if (annotoriousReady) {
+                                iframe.postMessage({messageType: 'loadAnnotations', content: sections}, origin);
+                            }
+                            console.log('Sections: ', sections);
+                        }, function error(response) {
+                            throw response;
+                        });
+
                         var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
                         annotationTable.getEntities().then(function success(_annotations) {
                             for (var i = 0; i < _annotations.length; i++) {
@@ -95,8 +109,7 @@
                     throw response;
                 });
 
-                // Push all rows from each vocab table into the "vocab" value
-                // provider.
+
                 // Get all rows from "tissues" table
                 var tissueTable = schema.getTable('tissue');
                 tissueTable.getEntities().then(function success(_tissues) {
@@ -171,6 +184,7 @@
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;
                     if (annotoriousReady) {
+                        iframe.postMessage({messageType: 'loadAnnotations', content: sections}, origin);
                         iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                     }
                 }

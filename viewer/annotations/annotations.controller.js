@@ -3,15 +3,17 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['annotations', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(annotations, anatomies, AnnotationsService, $window, $scope) {
+    .controller('AnnotationsController', ['annotations', 'sections', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(annotations, sections, anatomies, AnnotationsService, $window, $scope) {
         var vm = this;
         vm.annotations = annotations;
+        vm.sections = sections;
         vm.anatomies = anatomies;
 
         vm.filterAnnotations = filterAnnotations;
 
         vm.createMode = false;
         vm.newAnnotation = null;
+        vm.newAnnotationType = null; // Track whether a new annotation is 'annotation' or 'section' type
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
@@ -49,7 +51,7 @@
                         $scope.$apply(function() {
                             // Highlight the annotation in the sidebar
                             vm.highlightedAnnotation = annotation.data.id;
-                        });                        
+                        });
                         scrollIntoView('annotation-' + vm.highlightedAnnotation);
                         break;
                     case 'onUnHighlighted':
@@ -96,13 +98,15 @@
             }
         }
 
-        function drawAnnotation() {
+        function drawAnnotation(type) {
+            vm.newAnnotationType = type;
             return AnnotationsService.drawAnnotation();
         }
 
         function createAnnotation() {
             vm.createMode = false;
-            return AnnotationsService.createAnnotation(vm.newAnnotation);
+            AnnotationsService.createAnnotation(vm.newAnnotation, vm.newAnnotationType);
+            vm.newAnnotationType = null;
         }
 
         function cancelNewAnnotation() {
