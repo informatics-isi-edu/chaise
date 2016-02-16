@@ -46,7 +46,7 @@
                 <tr ng-repeat="(key, value) in entity | filteredEntity">
                     <td class="entity-key col-xs-2">{{ key | removeUnderScores }}</td>
                     <td class="entity-value col-xs-10">
-                        <a ng-if="entity[key + '_link'] && value !== null" ng-href="{{entity[key + '_link']}}" ng-click="reloadPage()"
+                        <a ng-if="entity[key + '_link'] && value !== null" ng-href="{{entity[key + '_link']}}" ng-click="isExternalUrl(reference[key + '_link']) || reloadPage()"
                             ng-attr-target="{{isExternalUrl(entity[key + '_link']) && '_blank' || '_self'}}">
                                 {{value | sanitizeValue }}
                         </a>
@@ -120,6 +120,18 @@
                     </ul>
                 </accordion-group>
 
+                <!-- EMBEDED TABLES -->
+                <accordion-group ng-repeat="t in entity.embedTables | orderBy: 'title'" is-open="embed.open">
+                    <accordion-heading><div ng-class="{'active': embed.open }">{{t.title | removeUnderScores}}</div></accordion-heading>
+                        <ul id="embed">
+                            <li ng-repeat="element in t.elements">
+                                <div>
+                                    <iframe title="{{ element.caption }}" width="{{ element.width }}" height="{{ element.height }}" frameBorder="0" ng-src="{{ element.uri }}">&lt;p&gt;Your browser does not support iframes.&lt;/p&gt;</iframe>
+                                </div>
+                            </li>
+                        </ul>
+                </accordion-group>
+
                 <div ng-if="!chaiseConfig.recordUiGridEnabled">
                     <!-- REFERENCES -->
                     <accordion-group ng-repeat="ft in entity.foreignTables | orderBy:'title'" is-open="ft.open">
@@ -146,7 +158,7 @@
                                         <tr ng-repeat="key in ft.keys | notHyperLink" on-finish-render>
                                             <th class="entity-key col-xs-2">{{ key | removeUnderScores }}</th>
                                             <td ng-repeat="reference in ft.list" class="entity-value col-xs-10">
-                                                <a ng-if="reference[key + '_link'] && reference[key] !== null" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
+                                                <a ng-if="reference[key + '_link'] && reference[key] !== null" ng-href="{{reference[key + '_link']}}" ng-click="isExternalUrl(reference[key + '_link']) || reloadPage()"
                                                     ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
                                                         {{reference[key] | sanitizeValue }}
                                                 </a>
@@ -178,7 +190,7 @@
                                     <tbody>
                                         <tr ng-repeat="reference in ft.list" on-finish-render>
                                             <td ng-repeat="key in ft.keys | notHyperLink"  class="entity-value col-xs-10" >
-                                                <a ng-if="reference[key + '_link'] && reference[key] !== null" ng-href="{{reference[key + '_link']}}" ng-click="reloadPage()"
+                                                <a ng-if="reference[key + '_link'] && reference[key] !== null" ng-href="{{reference[key + '_link']}}" ng-click="isExternalUrl(reference[key + '_link']) || reloadPage()"
                                                     ng-attr-target="{{isExternalUrl(reference[key + '_link']) && '_blank' || '_self'}}">
                                                         {{reference[key] | sanitizeValue }}
                                                 </a>

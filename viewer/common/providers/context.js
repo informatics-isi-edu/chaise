@@ -11,5 +11,6 @@
         schemaName: 'rbk',
         tableName: 'image',
         imageID: '1',
+        session: {}
     });
 })();

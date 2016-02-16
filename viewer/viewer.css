@@ -73,7 +73,11 @@ a.cardlink.delete {
 
 #viewer.col-md-9 {
 	position: fixed;
-  top: 0;
-	right: 0;
-  bottom: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#metadata-panel .ui-select-container {
+    width: 100%;
 }

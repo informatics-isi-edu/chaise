@@ -35,8 +35,16 @@
     // Hydrate values providers and set up the iframe
     .run(['$window', 'context', 'image', 'annotations', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function run($window, context, image, annotations, anatomies, statuses, vocabs, ermrestClientFactory) {
         var origin = window.location.origin;
+        var iframe = document.getElementById('osd').contentWindow;
+        console.log(iframe);
         var annotoriousReady = false;
         var client = ermrestClientFactory.getClient(context.serviceURL);
+
+        client.getSession().then(function success(response) {
+            console.log('Session: ', response);
+            context.session = response;
+        });
+
         var catalog = client.getCatalog(context.catalogID);
         catalog.introspect().then(function success(schemas) {
             var schema = schemas[context.schemaName];
@@ -46,7 +54,6 @@
                 if (filteredTable) {
                     filteredTable.getEntities().then(function success(_entities) {
                         image.entity = _entities[0];
-                        var iframe = $window.frames[0];
                         iframe.location.replace(image.entity.data.uri);
                         console.log('Image: ', image);
                         var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
@@ -162,10 +169,10 @@
 
         $window.addEventListener('message', function(event) {
             if (event.origin === origin) {
-                if (event.data.messageType === 'annotoriousReady') {
+                if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;
                     if (annotoriousReady) {
-                        $window.frames[0].postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                        iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                     }
                 }
             } else {

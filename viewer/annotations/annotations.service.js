@@ -5,7 +5,7 @@
 
     .factory('AnnotationsService', ['context', 'image', 'annotations', '$window', function(context, image, annotations, $window) {
         var origin = window.location.origin;
-        var iframe = $window.frames[0];
+        var iframe = document.getElementById('osd').contentWindow;
 
         function drawAnnotation() {
             iframe.postMessage({messageType: 'drawAnnotation'}, origin);
@@ -19,6 +19,7 @@
             newAnnotation = [{
                 "image_id": context.imageID,
                 "anatomy": newAnnotation.anatomy,
+                "author": context.session.client,
                 "context_uri": iframe.location.href,
                 "coords": [
                     newAnnotation.shape.geometry.x,
@@ -31,7 +32,7 @@
 
             // Add to ERMrest
             var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
-            return annotationTable.createEntity(newAnnotation, ['id', 'author', 'created']).then(function success(annotation) {
+            return annotationTable.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
                 // Then add to Annotorious
                 iframe.postMessage({messageType: 'createAnnotation', content: annotation.data}, window.location.origin);
                 // Push new annotation to value provider
