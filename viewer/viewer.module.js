@@ -32,8 +32,8 @@
         }
     }])
 
-    // Hydrate values providers and set up the iframe
-    .run(['$window', 'context', 'image', 'annotations', 'sections', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function run($window, context, image, annotations, sections, anatomies, statuses, vocabs, ermrestClientFactory) {
+    // Get session info, hydrate values providers, and set up iframe
+    .run(['$http', '$window', 'context', 'image', 'annotations', 'sections', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function runApp($http, $window, context, image, annotations, sections, anatomies, statuses, vocabs, ermrestClientFactory) {
         var origin = window.location.origin;
         var iframe = document.getElementById('osd').contentWindow;
         var annotoriousReady = false;
@@ -42,10 +42,13 @@
         client.getSession().then(function success(response) {
             console.log('Session: ', response);
             context.session = response;
+        }, function error(response) {
+            console.log(response);
         });
 
         var catalog = client.getCatalog(context.catalogID);
         catalog.introspect().then(function success(schemas) {
+            console.log('Schemas: ', schemas);
             var schema = schemas[context.schemaName];
             if (schema) {
                 var table = schema.getTable(context.tableName);
@@ -177,6 +180,13 @@
                     throw response;
                 });
             }
+        }, function error(response) {
+            if (response.status == 401) {
+                if (chaiseConfig.authnProvider == 'goauth') {
+                    getGoauth(encodeSafeURIComponent(window.location.href));
+                }
+                console.log(response);
+            }
         });
 
         $window.addEventListener('message', function(event) {
@@ -193,6 +203,21 @@
             }
         });
 
+        function encodeSafeURIComponent (str) {
+            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+            });
+        }
+
+        function getGoauth(referrer) {
+            var url = '/ermrest/authn/preauth?referrer=' + referrer;
+            $http.get(url).then(function success(response) {
+                console.log('Success: ', response);
+                window.open(response.data.redirect_url, '_self');
+            }, function error(response) {
+                console.log('Error: ', error);
+            });
+        }
     }]);
 
     // Refresh the page when the window's hash changes. Needed because Angular
