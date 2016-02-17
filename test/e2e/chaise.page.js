@@ -135,7 +135,8 @@ function resultContent() {
 function recordPage() {
     this.entityTitle = $('#entity-title');
     this.findEntityKeyByName = function (entityName) {
-        return element(by.cssContainingText('.entity-key.ng-binding', entityName));
+        //return element(by.css('.entity-key.ng-binding:contains("' + entityName + '")'));
+        return element(by.xpath('//td[.="' + entityName + '"]'));
     };
     this.findEntityValueByName = function (entityName) {
         var entityKey = this.findEntityKeyByName(entityName);

@@ -86,24 +86,10 @@ describe('Search result columns,', function () {
             done();
         });
 
-        it('should display non-empty \'summary\' content', function (done) {
-            var summaryContent = chaisePage.resultContent.getResultSummaryContent(randResult);
-            expect(summaryContent.isDisplayed()).toBe(true);
-            expect(summaryContent.getText()).not.toBe('');
-            done();
-        });
-
         it('should display the \'investigator\' title', function (done) {
             var investEle = chaisePage.resultContent.getResultInvestigatorElement(randResult);
             expect(investEle.getText()).toBe('Investigator');
             expect(investEle.isDisplayed()).toBe(true);
-            done();
-        });
-
-        it('should display non-empty \'investigator\' content', function (done) {
-            var investContent = chaisePage.resultContent.getResultInvestigatorContent(randResult);
-            expect(investContent.isDisplayed()).toBe(true);
-            expect(investContent.getText()).not.toBe('');
             done();
         });
     });
