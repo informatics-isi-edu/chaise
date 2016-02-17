@@ -3395,6 +3395,9 @@ function initLogin() {
 	window.location = url;
 }
 
+function showUser() {
+}
+
 function hasTableFacetsHidden(table_name) {
 	var ret = false;
 	$.each(SCHEMA_METADATA, function(i, table) {
