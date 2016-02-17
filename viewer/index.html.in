@@ -35,7 +35,6 @@
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-12">
-                                <span class="entity-title">Image Metadata</span>
                                 <button ng-show="!metadata.editMode" ng-click="metadata.edit();" class="btn btn-sm btn-success pull-right" type="button" role="button">
                                     <span class="glyphicon glyphicon-pencil"></span>   Edit
                                 </button>
@@ -283,8 +282,7 @@
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-12">
-                                <span class="entity-title">Annotations</span>
-                                <div class="btn-group pull-right">
+                                <div class="btn-group">
                                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         New&nbsp;&nbsp;<span class="caret"></span>
                                     </button>
@@ -443,9 +441,23 @@
                         </span>
                     </div>
                     <div class="col-md-4">
-                        <button ng-click="osd.downloadView();" class="btn btn-sm btn-success pull-right" type="button" role="button">
-                            <span class="glyphicon glyphicon-camera"></span>&nbsp;&nbsp;Download Current View
-                        </button>
+                        <div class="btn-group pull-right" role="group">
+                            <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button">
+                                <span class="glyphicon glyphicon-zoom-in"></span>
+                            </button>
+                            <button ng-click="osd.zoomOutView();" class="btn btn-success" type="button" role="button">
+                                <span class="glyphicon glyphicon-zoom-out"></span>
+                            </button>
+                            <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button">
+                                <span class="glyphicon glyphicon-home"></span>
+                            </button>
+                            <button ng-click="osd.fullPageView();" class="btn btn-success" type="button" role="button">
+                                <span class="glyphicon glyphicon-resize-small"></span>
+                            </button>
+                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button">
+                                <span class="glyphicon glyphicon-camera"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
