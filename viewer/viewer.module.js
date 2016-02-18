@@ -194,7 +194,7 @@
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;
                     if (annotoriousReady) {
-                        iframe.postMessage({messageType: 'loadAnnotations', content: sections}, origin);
+                        iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
                         iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                     }
                 }
@@ -203,12 +203,6 @@
             }
         });
 
-        function encodeSafeURIComponent (str) {
-            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            });
-        }
-
         function getGoauth(referrer) {
             var url = '/ermrest/authn/preauth?referrer=' + referrer;
             $http.get(url).then(function success(response) {
@@ -216,6 +210,12 @@
                 window.open(response.data.redirect_url, '_self');
             }, function error(response) {
                 console.log('Error: ', error);
+            });
+        }
+
+        function encodeSafeURIComponent (str) {
+            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
             });
         }
     }]);

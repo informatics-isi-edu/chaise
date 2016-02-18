@@ -40,11 +40,14 @@
                     annotations.push(annotation);
                 });
             } else if (type == 'section') {
-                // Add to 'section_annotation' table in ERMrest
+                // Section annotations don't have anatomies
+                delete newAnnotation[0].anatomy;
+
+                // Add new section to 'section_annotation' table in ERMrest
                 var sectionTable = image.entity.getRelatedTable(context.schemaName, 'section_annotation');
                 return sectionTable.createEntity(newAnnotation, ['id', 'created']).then(function success(section) {
                     // Then add to Annotorious
-                    iframe.postMessage({messageType: 'createAnnotation', content: section.data}, origin);
+                    iframe.postMessage({messageType: 'createSpecialAnnotation', content: section.data}, origin);
                     // Push new section to value provider
                     sections.push(section);
                 });
