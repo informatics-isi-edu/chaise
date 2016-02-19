@@ -30,28 +30,25 @@
                 "description": newAnnotation.description
             }];
 
-            if (type == 'annotation') {
-                // Add to 'annotation' table in ERMrest
-                var annotationTable = image.entity.getRelatedTable(context.schemaName, type);
-                return annotationTable.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
-                    // Then add to Annotorious
-                    iframe.postMessage({messageType: 'createAnnotation', content: annotation.data}, origin);
-                    // Push new annotation to value provider
-                    annotations.push(annotation);
-                });
-            } else if (type == 'section_annotation') {
+            if (type == 'section_annotation') {
                 // Section annotations don't have anatomies
                 delete newAnnotation[0].anatomy;
-
-                // Add new section to 'section_annotation' table in ERMrest
-                var sectionTable = image.entity.getRelatedTable(context.schemaName, type);
-                return sectionTable.createEntity(newAnnotation, ['id', 'created']).then(function success(section) {
-                    // Then add to Annotorious
-                    iframe.postMessage({messageType: 'createSpecialAnnotation', content: section.data}, origin);
-                    // Push new section to value provider
-                    sections.push(section);
-                });
             }
+
+            var table = image.entity.getRelatedTable(context.schemaName, type);
+            return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
+                switch (type) {
+                    case 'annotation':
+                        annotations.push(annotation);
+                        break;
+                    case 'section_annotation':
+                        sections.push(annotation);
+                        break;
+                }
+                iframe.postMessage({messageType: messageType, content: annotation.data}, origin);
+            }, function error(response) {
+                console.log(response);
+            });
         }
 
         function cancelNewAnnotation() {

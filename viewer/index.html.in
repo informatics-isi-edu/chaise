@@ -316,13 +316,15 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <textarea ng-model="annotations.newAnnotation.description" class="form-control description-field" rows="3" placeholder="Write annotation text here"></textarea>
-                                    <br>
-                                    <ui-select ng-model="annotations.newAnnotation.anatomy" theme="select2" ng-disabled="disabled">
-                                        <ui-select-match placeholder="Select an anatomy term">{{annotations.newAnnotation.anatomy}}</ui-select-match>
-                                        <ui-select-choices repeat="anatomy in (annotations.anatomies | filter: $select.search) track by anatomy">
-                                            <div ng-bind-html="anatomy | highlight: $select.search"></div>
-                                        </ui-select-choices>
-                                    </ui-select>
+                                    <div ng-if="annotations.newAnnotationType == 'annotation'">
+                                        <br>
+                                        <ui-select ng-model="annotations.newAnnotation.anatomy" theme="select2" ng-disabled="disabled">
+                                            <ui-select-match placeholder="Select an anatomy term">{{annotations.newAnnotation.anatomy}}</ui-select-match>
+                                            <ui-select-choices repeat="anatomy in (annotations.anatomies | filter: $select.search) track by anatomy">
+                                                <div ng-bind-html="anatomy | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
                                 </div>
                             </div>
                             <br>
