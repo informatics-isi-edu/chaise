@@ -335,7 +335,7 @@
                             </div>
                         </form>
                         <!-- Sections List -->
-                        <div ng-repeat="section in annotations.sections | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" class="annotation section" id="{{section.table.name + '-' + section.data.id}}">
+                        <div ng-repeat="section in annotations.sections | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == (section.table.name + '-' + section.data.id)}" class="annotation section" id="{{section.table.name + '-' + section.data.id}}" ng-click="annotations.highlightAnnotation(section);">
                             <div ng-show="annotations.editedAnnotation != (section.table.name + '-' + section.data.id)">
                                 <div class="row">
                                     <div class="col-md-12">
@@ -349,7 +349,7 @@
                                 <br>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <span class="h5 annotation-description" style="cursor:pointer;">
+                                        <span class="h5 annotation-description">
                                             {{section.data.description}}
                                         </span>
                                     </div>
@@ -396,7 +396,7 @@
                             </form>
                         </div>
                         <!-- Annotations List -->
-                        <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == annotation.data.id}" id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation" ng-click="annotations.highlightAnnotation(annotation);" style="cursor: pointer;">
+                        <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table.name + '-' + annotation.data.id)}" id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation" ng-click="annotations.highlightAnnotation(annotation);">
                             <!-- Annotation Display Card -->
                             <div ng-show="annotations.editedAnnotation != (annotation.table.name + '-' + annotation.data.id)">
                                 <div class="row">
@@ -420,7 +420,7 @@
                                 <!-- Annotation Description -->
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <span class="h5 annotation-description" style="cursor:pointer;">
+                                        <span class="h5 annotation-description">
                                             {{annotation.data.description}}
                                         </span>
                                     </div>

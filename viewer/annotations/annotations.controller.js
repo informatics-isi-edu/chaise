@@ -50,9 +50,9 @@
                         var annotation = findAnnotation(content.data.shapes[0].geometry);
                         $scope.$apply(function() {
                             // Highlight the annotation in the sidebar
-                            vm.highlightedAnnotation = annotation.data.id;
+                            vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
                         });
-                        scrollIntoView('annotation-' + vm.highlightedAnnotation);
+                        scrollIntoView(vm.highlightedAnnotation);
                         break;
                     case 'onUnHighlighted':
                         $scope.$apply(function() {
@@ -139,17 +139,13 @@
         };
 
         function setHighlightedAnnotation(annotation) {
-            if (vm.highlightedAnnotation == annotation.data.id) {
-                vm.highlightedAnnotation = null;
-                return;
-            }
-
-            vm.highlightedAnnotation = annotation.data.id;
+            vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
         }
 
         // Highlights the annotation inside Annotorious
         function highlightAnnotation(annotation) {
             setHighlightedAnnotation(annotation);
+            console.log(vm.highlightedAnnotation);
             return AnnotationsService.highlightAnnotation(annotation);
         }
 
@@ -159,12 +155,21 @@
             return AnnotationsService.centerAnnotation(annotation);
         }
 
-        // Return an annotation that matches an object of coordinates
+        // Return an annotation/section that matches an object of coordinates
         function findAnnotation(coordinates) {
+            // Search in annotations collection
             for (var i = 0; i < vm.annotations.length; i++) {
                 var annotationCoords = vm.annotations[i].data.coords;
                 if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
                     return vm.annotations[i];
+                }
+            }
+
+            // Search in sections collection
+            for (var i = 0; i < vm.sections.length; i++) {
+                var annotationCoords = vm.sections[i].data.coords;
+                if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
+                    return vm.sections[i];
                 }
             }
         }
