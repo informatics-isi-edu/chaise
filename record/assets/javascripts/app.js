@@ -1478,7 +1478,9 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
             var value = entity[key];
             // Only insert values into filteredEntity if value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object AND if the key is not 'interal'
             // and key is does not end with "_link" (for pattern linking of another column)
-            if ((!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) && key != 'internal' && !key.match(".*_link")){
+            if (value !== null &&
+                (!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) &&
+                key != 'internal' && !key.match(".*_link")){
 
                 // use display column name as key
                 // TODO inefficient to do this for each column?
