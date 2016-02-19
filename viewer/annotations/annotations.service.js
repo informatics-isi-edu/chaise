@@ -32,19 +32,19 @@
 
             if (type == 'annotation') {
                 // Add to 'annotation' table in ERMrest
-                var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
+                var annotationTable = image.entity.getRelatedTable(context.schemaName, type);
                 return annotationTable.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
                     // Then add to Annotorious
                     iframe.postMessage({messageType: 'createAnnotation', content: annotation.data}, origin);
                     // Push new annotation to value provider
                     annotations.push(annotation);
                 });
-            } else if (type == 'section') {
+            } else if (type == 'section_annotation') {
                 // Section annotations don't have anatomies
                 delete newAnnotation[0].anatomy;
 
                 // Add new section to 'section_annotation' table in ERMrest
-                var sectionTable = image.entity.getRelatedTable(context.schemaName, 'section_annotation');
+                var sectionTable = image.entity.getRelatedTable(context.schemaName, type);
                 return sectionTable.createEntity(newAnnotation, ['id', 'created']).then(function success(section) {
                     // Then add to Annotorious
                     iframe.postMessage({messageType: 'createSpecialAnnotation', content: section.data}, origin);
@@ -70,11 +70,21 @@
         }
 
         function deleteAnnotation(annotation) {
+            var index;
+            var type = annotation.table.name;
+
             // Delete from ERMrest
             annotation.delete();
-            // Delete from 'annotations' provider
-            var index = annotations.indexOf(annotation);
-            annotations.splice(index, 1);
+
+            // Delete from the 'annotations' or 'sections' provider
+            if (type == 'annotation') {
+                index = annotations.indexOf(annotation);
+                annotations.splice(index, 1);
+            } else if (type == 'section_annotation') {
+                index = sections.indexOf(annotation);
+                sections.splice(index, 1);
+            }
+
             // Delete in Annotorious
             iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
         }

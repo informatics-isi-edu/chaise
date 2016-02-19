@@ -21,6 +21,10 @@ html, body {
     background-color: #fff;
 }
 
+.annotation.section {
+    border-color: green;
+}
+
 .annotation.highlighted, #create-annotation-form {
     border-left: 5px solid #428bca;
 }
@@ -84,6 +88,6 @@ a.cardlink.delete {
     padding-bottom: 1px;
 }
 
-#metadata-panel .ui-select-container {
+#edit-annotation-form .ui-select-container, #metadata-panel .ui-select-container {
     width: 100%;
 }

@@ -115,7 +115,7 @@
         }
 
         function editAnnotation(annotation) {
-            vm.editedAnnotation = annotation.data.id;
+            vm.editedAnnotation = annotation.table.name + '-' + annotation.data.id;
             originalAnnotation = {
                 description: annotation.data.description,
                 anatomy: annotation.data.anatomy
