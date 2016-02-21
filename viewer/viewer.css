@@ -21,16 +21,20 @@ html, body {
     background-color: #fff;
 }
 
-.annotation.section {
-    border-color: green;
-}
-
 .annotation.highlighted, #create-annotation-form {
     border-left: 5px solid #428bca;
 }
 
-.annotation.highlighted .comment, .comment:hover {
-    color: #428bca;
+.annotation.section {
+    border-color: green;
+}
+
+.annotation.section.highlighted {
+    border-left: 5px solid green;
+}
+
+.section-label {
+    color: green;
 }
 
 .annotation, input[type=search] {
@@ -74,6 +78,26 @@ a.cardlink {
 
 a.cardlink.delete {
   color: #EB0029;
+}
+
+.comment {
+    padding-top: 5px;
+    padding-bottom: 4px;
+    border-top: 1px solid #eee;
+}
+
+.comment:first-child {
+    margin-top: 10px;
+}
+
+.comment:last-child {
+    margin-bottom: -5px;
+}
+
+.comment-input {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
 }
 
 #viewer.col-md-9 {

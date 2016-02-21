@@ -145,7 +145,6 @@
         // Highlights the annotation inside Annotorious
         function highlightAnnotation(annotation) {
             setHighlightedAnnotation(annotation);
-            console.log(vm.highlightedAnnotation);
             return AnnotationsService.highlightAnnotation(annotation);
         }
 

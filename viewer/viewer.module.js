@@ -33,7 +33,7 @@
     }])
 
     // Get session info, hydrate values providers, and set up iframe
-    .run(['$http', '$window', 'context', 'image', 'annotations', 'sections', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function runApp($http, $window, context, image, annotations, sections, anatomies, statuses, vocabs, ermrestClientFactory) {
+    .run(['$http', '$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function runApp($http, $window, context, image, annotations, comments, sections, anatomies, statuses, vocabs, ermrestClientFactory) {
         var origin = window.location.origin;
         var iframe = document.getElementById('osd').contentWindow;
         var annotoriousReady = false;
@@ -77,10 +77,28 @@
                             for (var i = 0; i < _annotations.length; i++) {
                                 annotations.push(_annotations[i]);
                             }
+
                             if (annotoriousReady) {
                                 iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                             }
                             console.log('Annotations: ', annotations);
+                        }, function error(response) {
+                            throw response;
+                        });
+
+                        // Get all the comments for this image
+                        var commentsURL = context.serviceURL + '/catalog/' + context.catalogID + '/entity/' + context.schemaName + ':' + context.tableName + '/id=' + context.imageID + '/annotation/annotation_comment';
+                        $http.get(commentsURL).then(function success(response) {
+                            var _comments = response.data;
+                            var length = _comments.length;
+                            for (var i = 0; i < length; i++) {
+                                var annotationId = _comments[i].annotation_id;
+                                if (!comments[annotationId]) {
+                                    comments[annotationId] = [];
+                                }
+                                comments[annotationId].push(_comments[i]);
+                            }
+                            console.log('Comments: ', comments);
                         }, function error(response) {
                             throw response;
                         });
@@ -96,7 +114,6 @@
                     for (var j = 0; j < _anatomies.length; j++) {
                         anatomies.push(_anatomies[j].data.term);
                     }
-                    console.log('Anatomies: ', anatomies);
                 }, function error(response) {
                     throw response;
                 });
@@ -107,7 +124,6 @@
                     for (var j = 0; j < _statuses.length; j++) {
                         statuses.push(_statuses[j].data.code);
                     }
-                    console.log('Statuses: ', statuses);
                 }, function error(response) {
                     throw response;
                 });
@@ -164,7 +180,6 @@
                     for (var j = 0; j < _media.length; j++) {
                         vocabs['embedding_medium'].push(_media[j].data.term);
                     }
-                    console.log('Vocabs: ', vocabs);
                 }, function error(response) {
                     throw response;
                 });

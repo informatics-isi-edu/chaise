@@ -37,11 +37,14 @@
 
             var table = image.entity.getRelatedTable(context.schemaName, type);
             return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
+                var messageType = '';
                 switch (type) {
                     case 'annotation':
+                        messageType = 'createAnnotation';
                         annotations.push(annotation);
                         break;
                     case 'section_annotation':
+                        messageType = 'createSpecialAnnotation';
                         sections.push(annotation);
                         break;
                 }
