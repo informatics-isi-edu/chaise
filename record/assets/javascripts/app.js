@@ -298,7 +298,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             // If reference table is a complex table, swap vocab
             var references = data;
             self.processForeignKeyRefencesForTable(ft.tableName, ft.schemaName, ft, references);
-            self.patternInterpretationForTable(ft.schemaName, ft.tableName, references); // this will overwrite reference _link with annotation _link
+            if (references.length > 0)
+                self.patternInterpretationForTable(ft.schemaName, ft.tableName, references); // this will overwrite reference _link with annotation _link
 
             // get display columns
             // this is a list of key values of column names and display column names
