@@ -151,6 +151,14 @@ function addSteps(){
       chosenValue.click();
     }
   }, {
+    element: '#permalink',
+    title: "permalink",
+    placement: "bottom",
+    content: "You can right click on permalink to save your search result.",
+    onPrev: function(tour) {
+      chosenAttr.click();
+    }
+  }, {
     element: '#results_tally.row',
     title: "Results Tally",
     placement: "bottom",
