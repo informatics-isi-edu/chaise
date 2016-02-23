@@ -1174,16 +1174,19 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
         var columnType;
         var columnDefinitions = schemaService.schemas[entity.schemaName].tables[entity.tableName].column_definitions;
         angular.forEach(columnDefinitions, function (column, i) {
-            displayName = schemaService.getColumnDisplayName(entity.schemaName,entity.tableName,column.name);
-            columnType = $scope.mapColumnDisplayType(column.type.typename);
-            $scope.columnMetadata[column.name] = {displayName:displayName};
-            $scope.columns.push({name: column.name,
-                                 displayName: displayName,
-                                 type:columnType,
-                                 headerTooltip:true,
-                                 cellTooltip:true,
-                                 groupingShowAggregationMenu: false, //(columnType == 'number'),
-                                 width:120})
+            // Only include column if it is not hidden
+            if (!schemaService.isHiddenColumn(entity.schemaName,entity.tableName,column.name)){
+                displayName = schemaService.getColumnDisplayName(entity.schemaName,entity.tableName,column.name);
+                columnType = $scope.mapColumnDisplayType(column.type.typename);
+                $scope.columnMetadata[column.name] = {displayName:displayName};
+                $scope.columns.push({name: column.name,
+                                     displayName: displayName,
+                                     type:columnType,
+                                     headerTooltip:true,
+                                     cellTooltip:true,
+                                     groupingShowAggregationMenu: false, //(columnType == 'number'),
+                                     width:120})
+            }
         });
         $scope.gridOptions.columnDefs = $scope.columns;
 
