@@ -298,7 +298,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             // If reference table is a complex table, swap vocab
             var references = data;
             self.processForeignKeyRefencesForTable(ft.tableName, ft.schemaName, ft, references);
-            self.patternInterpretationForTable(ft.schemaName, ft.tableName, references); // this will overwrite reference _link with annotation _link
+            if (references.length > 0)
+                self.patternInterpretationForTable(ft.schemaName, ft.tableName, references); // this will overwrite reference _link with annotation _link
 
             // get display columns
             // this is a list of key values of column names and display column names
@@ -1173,16 +1174,19 @@ chaiseRecordApp.controller('DetailTablesCtrl', ['$scope', '$http', '$q','$timeou
         var columnType;
         var columnDefinitions = schemaService.schemas[entity.schemaName].tables[entity.tableName].column_definitions;
         angular.forEach(columnDefinitions, function (column, i) {
-            displayName = schemaService.getColumnDisplayName(entity.schemaName,entity.tableName,column.name);
-            columnType = $scope.mapColumnDisplayType(column.type.typename);
-            $scope.columnMetadata[column.name] = {displayName:displayName};
-            $scope.columns.push({name: column.name,
-                                 displayName: displayName,
-                                 type:columnType,
-                                 headerTooltip:true,
-                                 cellTooltip:true,
-                                 groupingShowAggregationMenu: false, //(columnType == 'number'),
-                                 width:120})
+            // Only include column if it is not hidden
+            if (!schemaService.isHiddenColumn(entity.schemaName,entity.tableName,column.name)){
+                displayName = schemaService.getColumnDisplayName(entity.schemaName,entity.tableName,column.name);
+                columnType = $scope.mapColumnDisplayType(column.type.typename);
+                $scope.columnMetadata[column.name] = {displayName:displayName};
+                $scope.columns.push({name: column.name,
+                                     displayName: displayName,
+                                     type:columnType,
+                                     headerTooltip:true,
+                                     cellTooltip:true,
+                                     groupingShowAggregationMenu: false, //(columnType == 'number'),
+                                     width:120})
+            }
         });
         $scope.gridOptions.columnDefs = $scope.columns;
 
