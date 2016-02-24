@@ -22,7 +22,8 @@
                     // Not using the comment returned from ermrestClientFactory
                     // because it's incompatible with the comment objects loaded
                     // in viewer.module.js
-                    var annotationId = newComment[0].annotation_id
+                    var annotationId = newComment[0].annotation_id;
+                    newComment[0].created = comment.data.created;
                     if (!comments[annotationId]) {
                         comments[annotationId] = [];
                     }

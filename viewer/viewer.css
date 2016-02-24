@@ -1,5 +1,5 @@
 html, body {
-  background-color: #f9f9f9;
+    background-color: #f9f9f9;
 }
 
 #sidebar {
@@ -38,7 +38,7 @@ html, body {
 }
 
 .annotation, input[type=search] {
-  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
 }
 
 .annotation:hover {
@@ -55,49 +55,47 @@ html, body {
 }
 
 .nav-tabs>li {
-  font-style: italic;
+    font-style: italic;
 }
 
 .btn-success {
-  background-color: #407CCA;
-  border-color: #1E4E9A;
+    background-color: #407CCA;
+    border-color: #1E4E9A;
 }
 
 .open > .dropdown-toggle.btn-success, .btn-success:hover, .btn-success:focus, .btn-success:active {
-  background-color: #002D73;
-  border-color: #1E4E9A;
+    background-color: #002D73;
+    border-color: #1E4E9A;
 }
 
 #entity-title, .entity-title {
-  color: #002D73;
+    color: #002D73;
 }
 
 a.cardlink {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 a.cardlink.delete {
-  color: #EB0029;
+    color: #EB0029;
+}
+
+.comments {
+    margin: -10px;
+    padding: 10px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    background-color: #f9f9f9;
 }
 
 .comment {
-    padding-top: 5px;
-    padding-bottom: 4px;
-    border-top: 1px solid #eee;
+    padding-bottom: 10px;
 }
 
-.comment:first-child {
-    margin-top: 10px;
-}
-
-.comment:last-child {
-    margin-bottom: -5px;
-}
-
-.comment-input {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
+.separator {
+    width: 97%;
+    border-top: 1px solid #ddd;
+    margin: 10px auto 10px auto;
 }
 
 #viewer.col-md-9 {

@@ -364,7 +364,7 @@
                                 <br>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <small>{{section.data.author}} &mdash; {{section.data.created}}</small>
+                                        <small>{{section.data.author}} &mdash; {{section.data.created | date:'MMM d, y'}}</small>
                                     </div>
                                 </div>
                             </div>
@@ -432,16 +432,17 @@
                                 <!-- Annotation Author, Date & Comment Icon -->
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <small>{{annotation.data.author}} &mdash; {{annotation.data.created}}</small>
+                                        <small>{{annotation.data.author}} &mdash; {{annotation.data.created | date:'MMM d, y'}}</small>
                                     </div>
                                 </div>
-                                <div ng-controller="CommentsController as comments">
-                                    <div ng-repeat="comment in comments.comments[annotation.data.id] | orderBy: ['created', 'id'] track by $index" class="row">
+                                <div class="row">
+                                    <hr class="separator">
+                                </div>
+                                <div ng-controller="CommentsController as comments" class="comments">
+                                    <div ng-repeat="comment in comments.comments[annotation.data.id] | orderBy: ['created', 'id'] track by $index" class="row comment">
                                         <div class="col-md-12">
-                                            <div class="comment">
-                                                <small><strong>{{comment.author}}</strong></small>:
-                                                <br>{{comment.comment}}
-                                            </div>
+                                            <small><strong>{{comment.author}}</strong> <span class="text-muted pull-right">{{comment.created | date:'MMM d, y'}}</span></small>
+                                            <br>{{comment.comment}}
                                         </div>
                                     </div>
                                     <div class="row">
@@ -450,7 +451,9 @@
                                                 <div class="input-group input-group-sm">
                                                     <input ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
                                                     <span class="input-group-btn">
-                                                        <button ng-click="comments.createComment();" class="btn btn-default" type="button">Go</button>
+                                                        <button ng-click="comments.createComment();" class="btn btn-success" type="submit" role="button">
+                                                            Post
+                                                        </button>
                                                     </span>
                                                 </div>
                                             </div>
