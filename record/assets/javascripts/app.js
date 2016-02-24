@@ -104,6 +104,31 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             // Extract the first entity
             var entity          = data[0];
 
+            // apply sequence formatting
+            var columnDefinitions = schema.tables[tableName].column_definitions;
+            for (var i = 0; i < columnDefinitions.length; i++) {
+                var cdAnnotation = columnDefinitions[i].annotations;
+                if (cdAnnotation['tag:isrd.isi.edu,2016:sequence'] !== undefined) {
+                    var len = cdAnnotation['tag:isrd.isi.edu,2016:sequence']['subseq-length'];
+                    var spacer = cdAnnotation['tag:isrd.isi.edu,2016:sequence']['separator'];
+                    spacer = spacer.replace(/\s/g, "&nbsp;"); // replace single space with &nbsp; so that multiple spaces will show in html
+
+                    // format column value
+                    var text = entity[columnDefinitions[i].name];
+                    var chunks = text.match(new RegExp(".{1," + len + "}", "g"));
+                    text = "";
+                    for (var j = 0; j < chunks.length; j++) {
+                        if (text === "") {
+                            text = chunks[j];
+                        }
+                        else {
+                            text = text + spacer + chunks[j];
+                        }
+                    }
+                    entity[columnDefinitions[i].name] = text;
+                }
+            }
+
             self.patternInterpretationForTable(schemaName, tableName, data);
 
             entity.foreignTables    = [];
