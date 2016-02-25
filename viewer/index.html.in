@@ -36,10 +36,10 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <button ng-show="!metadata.editMode" ng-click="metadata.edit();" class="btn btn-sm btn-success form-control" type="button" role="button">
-                                    Edit Metadata&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-pencil"></span>
+                                    <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;&nbsp;Edit Metadata
                                 </button>
                                 <button ng-show="metadata.editMode" ng-click="metadata.save();" class="btn btn-sm btn-success form-control" type="button" role="button">
-                                    Save Metadata&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-ok"></span>
+                                    <span class="glyphicon glyphicon-ok"></span>&nbsp;&nbsp;&nbsp;Save Metadata
                                 </button>
                             </div>
                         </div>
@@ -511,27 +511,27 @@
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer" class="col-md-9">
                 <div id="viewer-header" class="row">
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <span class="entity-title">
                             {{osd.image.entity.data.slide_id || 'No Slide ID'}}
                         </span>
                     </div>
-                    <div class="col-md-4">
-                        <div class="btn-group pull-right" role="group">
+                    <div class="col-md-6">
+                        <div class="btn-group btn-group-sm pull-right" role="group">
                             <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-zoom-in"></span>
+                                <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
                             </button>
                             <button ng-click="osd.zoomOutView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-zoom-out"></span>
+                                <span class="glyphicon glyphicon-zoom-out"></span> Zoom Out
                             </button>
                             <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-home"></span>
+                                <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <button ng-click="osd.fullPageView();" class="btn btn-success" type="button" role="button">
+                            <!-- <button ng-click="osd.fullPageView();" class="btn btn-success" type="button" role="button">
                                 <span class="glyphicon glyphicon-resize-small"></span>
-                            </button>
+                            </button> -->
                             <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-camera"></span>
+                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot
                             </button>
                         </div>
                     </div>
