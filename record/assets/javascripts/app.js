@@ -50,6 +50,16 @@ chaiseRecordApp.service('configService', function() {
     	document.getElementsByTagName("head")[0].appendChild(fileref);
     }
     	
+	// set the navbar-header link
+	if (chaiseConfig['navbarBrand'] !== undefined) {
+		jQuery(jQuery('.navbar-brand', jQuery('#header'))[0]).attr('href', chaiseConfig['navbarBrand']);
+	}
+	
+	if (chaiseConfig['headTitle'] !== undefined) {
+		var title = document.createElement("title");
+		title.innerHTML = chaiseConfig['headTitle'];
+		document.getElementsByTagName("head")[0].appendChild(title);
+	}
 });
 
 // REST API for Ermrest
