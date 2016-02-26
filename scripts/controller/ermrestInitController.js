@@ -15,6 +15,9 @@ ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$window',
 		fileref.setAttribute("href", chaiseConfig['customCSS']);
 		document.getElementsByTagName("head")[0].appendChild(fileref);
 	}
+	if (chaiseConfig['headTitle'] !== undefined) {
+		document.getElementsByTagName("head")[0].getElementsByTagName("title")[0].innerHTML = chaiseConfig['headTitle'];
+	}
 	
 	$('footer').hide();
 
