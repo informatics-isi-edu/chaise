@@ -31,8 +31,9 @@
                 // Not using the comment returned from ermrestClientFactory
                 // because it's incompatible with the comment objects loaded
                 // in viewer.module.js
-                var annotationId = newComment[0].annotation_id;
+                newComment[0].id = comment.data.id;
                 newComment[0].created = comment.data.created;
+                var annotationId = newComment[0].annotation_id;
                 if (!comments[annotationId]) {
                     comments[annotationId] = [];
                 }
@@ -49,6 +50,7 @@
                 var index = annotationComments.indexOf(comment);
                 annotationComments.splice(index, 1);
             }, function error(response) {
+                console.log(comment);
                 console.log(response);
             });
         }
