@@ -1,14 +1,5 @@
 // Chaise Record App
 
-// dynamic load of a custom CSS file defined in chaise-config.js
-if (chaiseConfig['customCSS'] !== undefined) {
-	var fileref = document.createElement("link");
-	fileref.setAttribute("rel", "stylesheet");
-	fileref.setAttribute("type", "text/css");
-	fileref.setAttribute("href", chaiseConfig['customCSS']);
-	document.getElementsByTagName("head")[0].appendChild(fileref);
-}
-	
 var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ui.bootstrap','ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.grid.selection', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.grouping', 'ui.grid.infiniteScroll', 'ngCookies', 'ngSanitize']);
 
 // Refreshes page when fragment identifier changes
@@ -49,6 +40,16 @@ chaiseRecordApp.service('configService', function() {
     if (chaiseConfig['tableThreshold'] != null) {
         this.TABLE_THRESHOLD = chaiseConfig['tableThreshold'];
     }
+    
+    // dynamic load the custom CSS file defined in chaise-config.js
+    if (chaiseConfig['customCSS'] !== undefined) {
+    	var fileref = document.createElement("link");
+    	fileref.setAttribute("rel", "stylesheet");
+    	fileref.setAttribute("type", "text/css");
+    	fileref.setAttribute("href", chaiseConfig['customCSS']);
+    	document.getElementsByTagName("head")[0].appendChild(fileref);
+    }
+    	
 });
 
 // REST API for Ermrest
