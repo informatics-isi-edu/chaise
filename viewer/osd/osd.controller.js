@@ -12,7 +12,6 @@
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
-        vm.fullPageView = fullPageView;
 
         function downloadView() {
             var filename = vm.image.entity.data.slide_id.toString();
@@ -35,10 +34,6 @@
 
         function homeView() {
             iframe.postMessage({messageType: 'homeView'}, origin);
-        }
-
-        function fullPageView() {
-            iframe.postMessage({messageType: 'fullPageView'}, origin);
         }
     }]);
 })();

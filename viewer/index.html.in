@@ -340,10 +340,8 @@
                         <div ng-repeat="section in annotations.sections | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])" ng-class="{highlighted: annotations.highlightedAnnotation == (section.table.name + '-' + section.data.id)}" class="annotation section" id="{{section.table.name + '-' + section.data.id}}" ng-click="annotations.highlightAnnotation(section);">
                             <div ng-show="annotations.editedAnnotation != (section.table.name + '-' + section.data.id)">
                                 <div class="row">
-                                    <div class="col-md-3 section-label">
-                                        <small><strong>
-                                            {{'Section' | uppercase}}
-                                        </strong></small>
+                                    <div class="col-md-3">
+                                        <span class="label label-success">{{'Section' | uppercase}}</span>
                                     </div>
                                     <div class="col-md-9">
                                         <small class="pull-right">
@@ -431,8 +429,14 @@
                                 <br>
                                 <!-- Annotation Author, Date & Comment Icon -->
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-8">
                                         <small>{{annotation.data.author}} &mdash; {{annotation.data.created | date:'MMM d, y'}}</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="pull-right">
+                                            <span class="glyphicon glyphicon-comment"></span>
+                                            {{annotations.getNumComments(annotation);}}
+                                        </small>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -441,8 +445,10 @@
                                 <div ng-controller="CommentsController as comments" class="comments">
                                     <div ng-repeat="comment in comments.comments[annotation.data.id] | orderBy: ['created', 'id'] track by $index" class="row comment">
                                         <div class="col-md-12">
-                                            <small><strong>{{comment.author}}</strong> <span class="text-muted pull-right">{{comment.created | date:'MMM d, y'}}</span></small>
+                                            <strong>{{comment.author}}</strong>
+                                            <small><span class="text-muted pull-right">{{comment.created | date:'MMM d, y'}}</span></small>
                                             <br>{{comment.comment}}
+                                            <br><small><a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a></small>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -507,7 +513,7 @@
                         </div><!-- /Annotations List-->
                     </div>
                 </div>
-            </div><!--/ end SidebarSwitchController -->
+            </div><!--/ end SidebarController -->
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer" class="col-md-9">
                 <div id="viewer-header" class="row">
@@ -527,9 +533,6 @@
                             <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <!-- <button ng-click="osd.fullPageView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-resize-small"></span>
-                            </button> -->
                             <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button">
                                 <span class="glyphicon glyphicon-camera"></span> Take a Screenshot
                             </button>

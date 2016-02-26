@@ -24,15 +24,11 @@ html, body {
 }
 
 .annotation.section {
-    border-color: green;
+    border-color: #5cb85c;
 }
 
 .annotation.section.highlighted {
-    border-left: 5px solid green;
-}
-
-.section-label {
-    color: green;
+    border-left: 5px solid #5cb85c;
 }
 
 .annotation, input[type=search] {
@@ -108,6 +104,8 @@ a.cardlink.delete {
     padding-bottom: 1px;
 }
 
-#edit-annotation-form .ui-select-container, #metadata-panel .ui-select-container {
+#create-annotation-form .ui-select-container,
+#edit-annotation-form .ui-select-container,
+#metadata-panel .ui-select-container {
     width: 100%;
 }

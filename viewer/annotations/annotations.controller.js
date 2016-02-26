@@ -30,6 +30,8 @@
         vm.highlightAnnotation = highlightAnnotation;
         vm.centerAnnotation = centerAnnotation;
 
+        vm.getNumComments = getNumComments;
+
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
             if (event.origin === window.location.origin) {
@@ -48,11 +50,13 @@
                     case 'onHighlighted':
                         var content = JSON.parse(data.content);
                         var annotation = findAnnotation(content.data.shapes[0].geometry);
-                        $scope.$apply(function() {
-                            // Highlight the annotation in the sidebar
-                            vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
-                        });
-                        scrollIntoView(vm.highlightedAnnotation);
+                        if (annotation) {
+                            $scope.$apply(function() {
+                                // Highlight the annotation in the sidebar
+                                vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
+                            });
+                            scrollIntoView(vm.highlightedAnnotation);
+                        }
                         break;
                     case 'onUnHighlighted':
                         $scope.$apply(function() {
@@ -152,6 +156,10 @@
         function centerAnnotation(annotation) {
             setHighlightedAnnotation(annotation);
             return AnnotationsService.centerAnnotation(annotation);
+        }
+
+        function getNumComments(annotation) {
+            return AnnotationsService.getNumComments(annotation.data.id);
         }
 
         // Return an annotation/section that matches an object of coordinates

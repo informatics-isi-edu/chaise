@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'image', 'annotations', 'sections', '$window', function(context, image, annotations, sections, $window) {
+    .factory('AnnotationsService', ['context', 'image', 'annotations', 'sections', 'CommentsService', '$window', '$q', function(context, image, annotations, sections, CommentsService, $window, $q) {
         var origin = window.location.origin;
         var iframe = document.getElementById('osd').contentWindow;
 
@@ -69,24 +69,34 @@
             iframe.postMessage({messageType: 'updateAnnotation', content: annotation.data}, origin);
         }
 
+        function getNumComments(annotationId) {
+            return CommentsService.getNumComments(annotationId);
+        }
+
         function deleteAnnotation(annotation) {
-            var index;
-            var type = annotation.table.name;
+            if (getNumComments(annotation.data.id) == 0) {
+                // Delete from ERMrest
+                annotation.delete().then(function success(response) {
+                    console.log('Successfully deleted annotation.');
 
-            // Delete from ERMrest
-            annotation.delete();
+                    // Delete from the 'annotations' or 'sections' provider
+                    var type = annotation.table.name;
+                    if (type == 'annotation') {
+                        var index = annotations.indexOf(annotation);
+                        annotations.splice(index, 1);
+                    } else if (type == 'section_annotation') {
+                        var index = sections.indexOf(annotation);
+                        sections.splice(index, 1);
+                    }
 
-            // Delete from the 'annotations' or 'sections' provider
-            if (type == 'annotation') {
-                index = annotations.indexOf(annotation);
-                annotations.splice(index, 1);
-            } else if (type == 'section_annotation') {
-                index = sections.indexOf(annotation);
-                sections.splice(index, 1);
-            }
-
-            // Delete in Annotorious
-            iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
+                    // Delete in Annotorious
+                    iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
+                }, function error(response) {
+                    console.log(response);
+                });
+            } else {
+                alert('This annotation cannot be deleted because there are comments on it.');
+            };
         }
 
         function highlightAnnotation(annotation) {
@@ -104,7 +114,8 @@
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
             highlightAnnotation: highlightAnnotation,
-            centerAnnotation: centerAnnotation
+            centerAnnotation: centerAnnotation,
+            getNumComments: getNumComments
         };
 
     }]);
