@@ -8,6 +8,17 @@ var ermInitController = angular.module('ermInitController', ['facetsModel', 'fac
 ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$window', 'FacetsData', 'FacetsService', 'ermrest',
                                                       function($rootScope, $scope, $window, FacetsData, FacetsService, ermrest) {
 
+	if (chaiseConfig['customCSS'] !== undefined) {
+		var fileref = document.createElement("link");
+		fileref.setAttribute("rel", "stylesheet");
+		fileref.setAttribute("type", "text/css");
+		fileref.setAttribute("href", chaiseConfig['customCSS']);
+		document.getElementsByTagName("head")[0].appendChild(fileref);
+	}
+	if (chaiseConfig['headTitle'] !== undefined) {
+		document.getElementsByTagName("head")[0].getElementsByTagName("title")[0].innerHTML = chaiseConfig['headTitle'];
+	}
+	
 	$('footer').hide();
 
 	$('.panel-collapse').on('hide.bs.collapse', function () {

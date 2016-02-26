@@ -87,6 +87,10 @@ function initApplication() {
 	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
 	getSchemas();
 	getSession();
+	// set the navbar-header link
+	if (chaiseConfig['navbarBrand'] !== undefined) {
+		$($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
+	}
 	//alert(JSON.stringify(DATASET_COLUMNS, null, 4));
 }
 
@@ -530,9 +534,17 @@ function getTableColumns(options, successCallback) {
 	options['searchFilterValue'][table] = {};
 	options['narrow'][table] = {};
 
+	var facets = ret;
+	facets.sort(compareFacets);
+	$.each(facets, function(i, facet) {
+		if (getFacetOrder(facet) != null || hasAnnotation(facet['table'], facet['name'], 'top') || facetIsInBookmark(facet['table'], facet['name'], options.filter)) {
+			options['chooseColumns'][facet['table']][facet['name']] = true;
+		}
+	});
+	
 	var columns = {'facets': ret,
-		'sortInfo': sortInfo,
-		'colsDefs': columns_definitions};
+			'sortInfo': sortInfo,
+			'colsDefs': columns_definitions};
 
 	getAssociationTableColumns(options, successCallback, columns);
 }
