@@ -530,9 +530,17 @@ function getTableColumns(options, successCallback) {
 	options['searchFilterValue'][table] = {};
 	options['narrow'][table] = {};
 
+	var facets = ret;
+	facets.sort(compareFacets);
+	$.each(facets, function(i, facet) {
+		if (getFacetOrder(facet) != null || hasAnnotation(facet['table'], facet['name'], 'top') || facetIsInBookmark(facet['table'], facet['name'], options.filter)) {
+			options['chooseColumns'][facet['table']][facet['name']] = true;
+		}
+	});
+	
 	var columns = {'facets': ret,
-		'sortInfo': sortInfo,
-		'colsDefs': columns_definitions};
+			'sortInfo': sortInfo,
+			'colsDefs': columns_definitions};
 
 	getAssociationTableColumns(options, successCallback, columns);
 }
