@@ -163,7 +163,9 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.module.js \
 	$(VIEWER_ASSETS)/osd/osd.controller.js \
 	$(VIEWER_ASSETS)/image-metadata/vocabs.js \
 	$(VIEWER_ASSETS)/image-metadata/statuses.js \
-	$(VIEWER_ASSETS)/image-metadata/metadata.controller.js
+	$(VIEWER_ASSETS)/image-metadata/metadata.controller.js \
+	$(VIEWER_ASSETS)/alerts/alerts.service.js \
+	$(VIEWER_ASSETS)/alerts/alerts.controller.js
 
 VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \

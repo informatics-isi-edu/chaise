@@ -2,9 +2,11 @@ html, body {
     background-color: #f9f9f9;
 }
 
-#sidebar {
-    height: 100vh;
-    border-right: 1px solid #ddd;
+#alert {
+    position: fixed;
+    top: 15;
+    /* Why set z-index to 3? Because Bootstrap sets input fields to 2.*/
+    z-index: 3;
 }
 
 #annotations-control {

@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'image', 'annotations', 'sections', 'CommentsService', '$window', '$q', function(context, image, annotations, sections, CommentsService, $window, $q) {
+    .factory('AnnotationsService', ['context', 'image', 'annotations', 'sections', 'CommentsService', 'AlertsService', '$window', '$q', function(context, image, annotations, sections, CommentsService, AlertsService, $window, $q) {
         var origin = window.location.origin;
         var iframe = document.getElementById('osd').contentWindow;
 
@@ -73,12 +73,19 @@
             return CommentsService.getNumComments(annotationId);
         }
 
+        // Returns a boolean
+        function allowDelete(annotation) {
+            // If there are comments on annotation, return false.
+            if (getNumComments(annotation.data.id) > 0) {
+                return false;
+            }
+            return true;
+        }
+
         function deleteAnnotation(annotation) {
-            if (getNumComments(annotation.data.id) == 0) {
+            if (allowDelete(annotation)) {
                 // Delete from ERMrest
                 annotation.delete().then(function success(response) {
-                    console.log('Successfully deleted annotation.');
-
                     // Delete from the 'annotations' or 'sections' provider
                     var type = annotation.table.name;
                     if (type == 'annotation') {
@@ -95,7 +102,10 @@
                     console.log(response);
                 });
             } else {
-                alert('This annotation cannot be deleted because there are comments on it.');
+                AlertsService.setAlert({
+                    type: 'error',
+                    message: 'Sorry, this annotation cannot be deleted because there are comments on it.'
+                });
             };
         }
 

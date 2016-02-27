@@ -55,7 +55,7 @@
                                 // Highlight the annotation in the sidebar
                                 vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
                             });
-                            scrollIntoView(vm.highlightedAnnotation);
+                            // scrollIntoView(vm.highlightedAnnotation);
                         }
                         break;
                     case 'onUnHighlighted':
