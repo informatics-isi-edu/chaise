@@ -93,7 +93,11 @@
 
                 <!-- FILES -->
                 <accordion-group ng-if="entity.files" is-open="files.open">
-                    <accordion-heading><div ng-class="{'active': files.open }">Files</div></accordion-heading>
+                    <accordion-heading>
+                        <div ng-class="{'active': files.open }">
+                            Files <span ng-if="entity.files.length > 0">({{ entity.files.length }})</span>
+                        </div>
+                    </accordion-heading>
                     <ul>
                         <li ng-repeat="file in entity.files" class="file" >
                             <a href="{{ file.uri }}" target="_blank">
@@ -107,7 +111,11 @@
 
                 <!-- PREVIEWS -->
                 <accordion-group ng-if="entity.previews" is-open="previews.open">
-                    <accordion-heading><div ng-class="{'active': previews.open }">Previews</div></accordion-heading>
+                    <accordion-heading>
+                        <div ng-class="{'active': previews.open }">
+                            Previews <span ng-if="entity.previews.length > 0">({{ entity.previews.length }})</span>
+                        </div>
+                    </accordion-heading>
                     <ul id="previews">
                         <li ng-repeat="preview in entity.previews" class="preview col-sm-6 col-xs-12">
                             <div class="preview-content">

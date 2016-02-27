@@ -1583,6 +1583,8 @@ chaiseRecordApp.filter('iconPreviewUri', function(){
                 case 'image/tiff':
                 case 'image/x-tiff':
                 case 'image/gif':
+                case 'application/dicom':
+                case 'image/x.nifti':
                     preview += 'image.png';
                     break;
                 // Video
@@ -1614,6 +1616,7 @@ chaiseRecordApp.filter('iconPreviewUri', function(){
                     preview += 'text.png';
                     break;
                 default:
+                    preview += 'default.png';
                     break;
         }
         return preview;
