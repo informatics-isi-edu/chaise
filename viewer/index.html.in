@@ -325,9 +325,11 @@
                             <br>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <textarea ng-model="annotations.newAnnotation.description" class="form-control description-field" rows="3" placeholder="Write annotation text here"></textarea>
+                                    <label>Description</label>
+                                    <textarea ng-model="annotations.newAnnotation.description" class="form-control description-field" rows="3" placeholder="Write annotation text here."></textarea>
                                     <div ng-if="annotations.newAnnotationType == 'annotation'">
                                         <br>
+                                        <label>Anatomy</label>
                                         <ui-select ng-model="annotations.newAnnotation.anatomy" theme="select2" ng-disabled="disabled">
                                             <ui-select-match placeholder="Select an anatomy term">{{annotations.newAnnotation.anatomy}}</ui-select-match>
                                             <ui-select-choices repeat="anatomy in (annotations.anatomies | filter: $select.search) track by anatomy">
@@ -382,6 +384,7 @@
                             <form ng-show="annotations.editedAnnotation == (section.table.name + '-' + section.data.id)" id="edit-annotation-form">
                                 <div class="row">
                                     <div class="col-md-10">
+                                        <label>Description</label>
                                         <textarea ng-model="section.data.description" rows="3" class="form-control"></textarea>
                                     </div>
                                     <div class="col-md-2">
@@ -488,6 +491,7 @@
                                 <div class="row">
                                     <!-- Edit Form: Annotation Anatomy -->
                                     <div class="col-md-10 annotation-anatomy-text">
+                                        <label>Anatomy</label>
                                         <ui-select ng-model="annotation.data.anatomy" theme="select2" ng-disabled="disabled">
                                             <ui-select-match placeholder="Select an anatomy term">{{annotation.data.anatomy}}</ui-select-match>
                                             <ui-select-choices repeat="anatomy in (annotations.anatomies | filter: $select.search) track by anatomy">
@@ -504,16 +508,23 @@
                                 <br>
                                 <div ng-show="annotation.data.description" class="row">
                                     <div class="col-md-12">
+                                        <label>Description</label>
                                         <textarea ng-model="annotation.data.description" rows="3" class="form-control"></textarea>
                                     </div>
                                 </div>
                                 <br>
                                 <!-- Edit Form: Annotation Author and Date -->
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-8">
                                         <small>
                                             {{annotation.data.author}} &mdash;
                                             {{annotation.data.created | date: 'MMM d, y'}}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="pull-right">
+                                            <span class="glyphicon glyphicon-comment"></span>
+                                            {{annotations.getNumComments(annotation);}}
                                         </small>
                                     </div>
                                 </div>
