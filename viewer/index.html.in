@@ -21,7 +21,7 @@
     <div class="container-fluid">
         <div ng-controller="AlertsController as alerts" id="alert" class="row">
             <div class="col-md-12">
-                <div ng-repeat="alert in alerts.alerts" class="alert alert-danger alert-dismissable" role="alert">
+                <div ng-repeat="alert in alerts.alerts" class="alert alert-dismissable" ng-class="{'alert-danger': alert.type == 'error'}" role="alert">
                     <button ng-click="alerts.closeAlert(alert);" type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
