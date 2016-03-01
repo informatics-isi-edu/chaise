@@ -71,7 +71,12 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
         if (chaiseConfig['recordResource'] != null) {
             recordResource = chaiseConfig['recordResource'];
         }
-        var detailPath = prefix + recordResource + '#' + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
+        // in case we have a view, we want the "original" table in the detail
+        var table_name = getTableAnnotation($scope.FacetsData.table, TABLES_MAP_URI, 'originalTable');
+        if (table_name == null) {
+        	table_name = $scope.FacetsData.table;
+        }
+        var detailPath = prefix + recordResource + '#' + CATALOG + '/' + SCHEMA + ':' +  encodeSafeURIComponent(table_name) + '/' + this.buildPredicate(PRIMARY_KEY, row);
         return detailPath;
     };
 
