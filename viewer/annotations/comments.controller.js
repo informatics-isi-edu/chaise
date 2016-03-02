@@ -5,19 +5,21 @@
 
     .controller('CommentsController', ['CommentsService', '$scope', 'comments', function AnnotationsController(CommentsService, $scope, comments) {
         var vm = this;
-        vm.comments = comments;
-        vm.newComment = null;
-        // Each CommentsController inherits the scope of the current annotation
         vm.annotationId = $scope.annotation.data.id;
+        vm.comments = comments;
+        vm.newComment = {
+            annotationId: vm.annotationId,
+            comment: null,
+            author: null
+        };
 
         vm.createComment = createComment;
         vm.getNumComments = getNumComments;
         vm.deleteComment = deleteComment;
 
         function createComment() {
-            vm.newComment.annotationId = vm.annotationId;
             CommentsService.createComment(vm.newComment);
-            vm.newComment = null;
+            resetNewComment();
         }
 
         // Get the # of comments an annotation has
@@ -27,6 +29,15 @@
 
         function deleteComment(comment) {
             CommentsService.deleteComment(comment);
+        }
+
+        // Set newComment back to its default vaules
+        function resetNewComment() {
+            vm.newComment = {
+                annotationId: vm.annotationId,
+                comment: null,
+                author: null
+            };
         }
     }]);
 })();

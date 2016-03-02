@@ -61,7 +61,8 @@
 
                         var sectionTable = image.entity.getRelatedTable(context.schemaName, 'section_annotation');
                         sectionTable.getEntities().then(function success(_sections) {
-                            for (var i = 0; i < _sections.length; i++) {
+                            var length = _sections.length;
+                            for (var i = 0; i < length; i++) {
                                 sections.push(_sections[i]);
                             }
                             if (annotoriousReady) {
@@ -74,7 +75,8 @@
 
                         var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
                         annotationTable.getEntities().then(function success(_annotations) {
-                            for (var i = 0; i < _annotations.length; i++) {
+                            var length = _annotations.length;
+                            for (var i = 0; i < length; i++) {
                                 annotations.push(_annotations[i]);
                             }
 
@@ -87,12 +89,11 @@
                         });
 
                         // Get all the comments for this image
-                        var commentsURL = context.serviceURL + '/catalog/' + context.catalogID + '/entity/' + context.schemaName + ':' + context.tableName + '/id=' + context.imageID + '/annotation/annotation_comment';
-                        $http.get(commentsURL).then(function success(response) {
-                            var _comments = response.data;
+                        var commentTable = annotationTable.getRelatedTable(context.schemaName, 'annotation_comment');
+                        commentTable.getEntities().then(function success(_comments) {
                             var length = _comments.length;
                             for (var i = 0; i < length; i++) {
-                                var annotationId = _comments[i].annotation_id;
+                                var annotationId = _comments[i].data.annotation_id;
                                 if (!comments[annotationId]) {
                                     comments[annotationId] = [];
                                 }
@@ -100,7 +101,7 @@
                             }
                             console.log('Comments: ', comments);
                         }, function error(response) {
-                            throw response;
+                            console.log(response);
                         });
                     }, function error(response) {
                         throw response;
@@ -111,7 +112,8 @@
                 var anatomyTable = schema.getTable('anatomy');
                 anatomyTable.getEntities().then(function success(_anatomies) {
                     anatomies.push('No Anatomy');
-                    for (var j = 0; j < _anatomies.length; j++) {
+                    var length = _anatomies.length;
+                    for (var j = 0; j < length; j++) {
                         anatomies.push(_anatomies[j].data.term);
                     }
                 }, function error(response) {
@@ -121,7 +123,8 @@
                 // Get all rows from "image_grade_code" table.
                 var statusTable = schema.getTable('image_grade_code');
                 statusTable.getEntities().then(function success(_statuses) {
-                    for (var j = 0; j < _statuses.length; j++) {
+                    var length = _statuses.length;
+                    for (var j = 0; j < length; j++) {
                         statuses.push(_statuses[j].data.code);
                     }
                 }, function error(response) {
@@ -132,8 +135,9 @@
                 // Get all rows from "tissues" table
                 var tissueTable = schema.getTable('tissue');
                 tissueTable.getEntities().then(function success(_tissues) {
+                    var length = _tissues.length;
                     vocabs['tissue'] = [];
-                    for (var j = 0; j < _tissues.length; j++) {
+                    for (var j = 0; j < length; j++) {
                         vocabs['tissue'].push(_tissues[j].data.term);
                     }
                 }, function error(response) {
@@ -143,8 +147,9 @@
                 // Get all rows from "age stage" table
                 var ageStageTable = schema.getTable('age_stage');
                 ageStageTable.getEntities().then(function success(_stages) {
+                    var length = _stages.length;
                     vocabs['age_stage'] = [];
-                    for (var j = 0; j < _stages.length; j++) {
+                    for (var j = 0; j < length; j++) {
                         vocabs['age_stage'].push(_stages[j].data.term);
                     }
                 }, function error(response) {
@@ -154,8 +159,9 @@
                 // Get all rows from "gender" table
                 var genderTable = schema.getTable('gender');
                 genderTable.getEntities().then(function success(_genders) {
+                    var length = _genders.length;
                     vocabs['gender'] = [];
-                    for (var j = 0; j < _genders.length; j++) {
+                    for (var j = 0; j < length; j++) {
                         vocabs['gender'].push(_genders[j].data.term);
                     }
                 }, function error(response) {
@@ -165,8 +171,9 @@
                 // Get all rows from "specimen_fixation" table
                 var specimenFixationTable = schema.getTable('specimen_fixation');
                 specimenFixationTable.getEntities().then(function success(_fixations) {
+                    var length = _fixations.length;
                     vocabs['specimen_fixation'] = [];
-                    for (var j = 0; j < _fixations.length; j++) {
+                    for (var j = 0; j < length; j++) {
                         vocabs['specimen_fixation'].push(_fixations[j].data.term);
                     }
                 }, function error(response) {
@@ -176,6 +183,7 @@
                 // Get all rows from "embedding_medium" table
                 var embeddingMediumTable = schema.getTable('embedding_medium');
                 embeddingMediumTable.getEntities().then(function success(_media) {
+                    var length = _media.length;
                     vocabs['embedding_medium'] = [];
                     for (var j = 0; j < _media.length; j++) {
                         vocabs['embedding_medium'].push(_media[j].data.term);
@@ -187,8 +195,9 @@
                 // Get all rows from "staining_protocol" table
                 var stainingProtocolTable = schema.getTable('staining_protocol');
                 stainingProtocolTable.getEntities().then(function success(_protocols) {
+                    var length = _protocols.length;
                     vocabs['staining_protocol'] = [];
-                    for (var j = 0; j < _protocols.length; j++) {
+                    for (var j = 0; j < length; j++) {
                         vocabs['staining_protocol'].push(_protocols[j].data.term);
                     }
                 }, function error(response) {

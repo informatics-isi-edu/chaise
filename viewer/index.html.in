@@ -463,11 +463,11 @@
                                     <hr class="separator">
                                 </div>
                                 <div ng-controller="CommentsController as comments" class="comments">
-                                    <div ng-repeat="comment in comments.comments[annotation.data.id] | orderBy: ['created', 'id'] track by $index" class="row comment">
+                                    <div ng-repeat="comment in comments.comments[comments.annotationId] | orderBy: ['data.created', 'data.id'] track by $index" class="row comment">
                                         <div class="col-md-12">
-                                            <strong>{{comment.author}}</strong>
-                                            <small><span class="text-muted pull-right">{{comment.created | date:'MMM d, y'}}</span></small>
-                                            <br>{{comment.comment}}
+                                            <strong>{{comment.data.author}}</strong>
+                                            <small><span class="text-muted pull-right">{{comment.data.created | date:'MMM d, y'}}</span></small>
+                                            <br>{{comment.data.comment}}
                                             <br><small><a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a></small>
                                         </div>
                                     </div>
