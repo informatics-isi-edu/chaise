@@ -33,17 +33,20 @@
     }])
 
     // Get session info, hydrate values providers, and set up iframe
-    .run(['$http', '$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', function runApp($http, $window, context, image, annotations, comments, sections, anatomies, statuses, vocabs, ermrestClientFactory) {
+    .run(['$http', '$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', 'user', 'UserService', function runApp($http, $window, context, image, annotations, comments, sections, anatomies, statuses, vocabs, ermrestClientFactory, user, UserService) {
         var origin = window.location.origin;
         var iframe = document.getElementById('osd').contentWindow;
         var annotoriousReady = false;
         var client = ermrestClientFactory.getClient(context.serviceURL);
 
         client.getSession().then(function success(response) {
-            console.log('Session: ', response);
             context.session = response;
+            console.log('Session: ', context.session);
+            UserService.setUser();
+            console.log('User: ', user);
         }, function error(response) {
             console.log(response);
+            throw response;
         });
 
         var catalog = client.getCatalog(context.catalogID);
@@ -201,6 +204,7 @@
                     getGoauth(encodeSafeURIComponent(window.location.href));
                 }
                 console.log(response);
+                throw response;
             }
         });
 

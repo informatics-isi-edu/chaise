@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .service('CommentsService', ['ermrestClientFactory', 'comments', 'context', function(ermrestClientFactory, comments, context) {
+    .service('CommentsService', ['ermrestClientFactory', 'comments', 'context', 'user', function(ermrestClientFactory, comments, context, user) {
         var commentsTable;
         var client = ermrestClientFactory.getClient(context.serviceURL);
         var catalog = client.getCatalog(context.catalogID);
@@ -23,7 +23,7 @@
         function createComment(newComment) {
             newComment = [{
                 "annotation_id": newComment.annotationId,
-                "author": context.session.client,
+                "author": user.name,
                 "comment": newComment.comment
             }];
 
