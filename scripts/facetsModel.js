@@ -71,6 +71,7 @@ facetsModel.factory('FacetsData', function() {
 			'sortDirectionOptions': ['asc', 'desc'],
 			'sortFacet': '',
 			'sortInfo': {'fields': [], 'directions': []},
+			'sortOrder': null,
 			'table': '',
 			'tables': [],
 			'tablesStack': [],

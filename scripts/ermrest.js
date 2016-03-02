@@ -1342,11 +1342,15 @@ function getSortQuery(sortOption, isAttribute) {
 	return ret;
 }
 
-function getSortClause(sortOption, isAttribute) {
+function getSortClause(sortOption, sortOrder, isAttribute) {
 	var field = encodeSafeURIComponent(sortOption);
+	var sortField = field;
+	if (sortOrder == 'desc') {
+		sortField += '::desc::';
+	}
 	var columns = [];
 	var sortColumns = [];
-	sortColumns.push(field);
+	sortColumns.push(sortField);
 	if (PRIMARY_KEY != null) {
 		$.each(PRIMARY_KEY, function(i, key) {
 			if (encodeSafeURIComponent(key) != field) {
@@ -1370,6 +1374,7 @@ function getPage(options, totalItems, successCallback) {
 	var page = options['pagingOptions']['currentPage'];
 	var pageSize = options['pagingOptions']['pageSize'];
 	var sortOption = options['sortFacet'];
+	var sortOrder = options['sortOrder'];
 	if (!$.isNumeric(page) || Math.floor(page) != page || page <= 0) {
 		successCallback([], totalItems, page, pageSize);
 	} else {
@@ -1380,7 +1385,7 @@ function getPage(options, totalItems, successCallback) {
 		}
 		url += '/$A'
 		if (sortOption != null && sortOption != '') {
-			url += '/' + getSortClause(sortOption, true);
+			url += '/' + getSortClause(sortOption, sortOrder, true);
 		} else if (PRIMARY_KEY.length > 0) {
 			url += '/' + PRIMARY_KEY.join(',') + '@sort(' + PRIMARY_KEY.join(',') + ')';
 		}
@@ -1398,13 +1403,14 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 	var page = param['options']['pagingOptions']['currentPage'];
 	var pageSize = param['options']['pagingOptions']['pageSize'];
 	var sortOption = param['options']['sortFacet'];
+	var sortOrder = param['options']['sortOrder'];
 	if (data.length < (page-1)*pageSize + 1) {
 		param['successCallback']([], param['totalItems']);
 	} else {
 		param['queryPath'] = param['predicate'].slice();
 		var predicate = param['predicate'];
 		if (sortOption != null && sortOption != '') {
-			var sortPredicate = getSortPredicate(data, sortOption, page, pageSize);
+			var sortPredicate = getSortPredicate(data, sortOption, sortOrder, page, pageSize);
 			predicate.push('$A/' + sortPredicate.join(';'));
 		} else {
 			var primaryKeyPredicate = [];
@@ -1427,7 +1433,7 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 		}
 		url += '/$A';
 		if (sortOption != null && sortOption != '') {
-			url += getSortClause(sortOption, false);
+			url += getSortClause(sortOption, sortOrder, false);
 		} else {
 			url += '@sort(' + PRIMARY_KEY.join(',') + ')';
 		}
@@ -3824,7 +3830,7 @@ function getPredicateAttributes(options) {
 	return ret;
 }
 
-function getSortPredicate(data, sortColumn, page, pageSize) {
+function getSortPredicate(data, sortColumn, sortOrder, page, pageSize) {
 	var sortPredicate = [];
 	if (data[(page-1)*pageSize][sortColumn] == null) {
 		var offsetPredicate = [];
@@ -3833,15 +3839,14 @@ function getSortPredicate(data, sortColumn, page, pageSize) {
 			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
 		});
 		sortPredicate.push(offsetPredicate.join('&'));
-		sortPredicate.push('!' + encodeSafeURIComponent(sortColumn) + '::null::');
 	} else {
 		var offsetPredicate = [];
-		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
+		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
 		$.each(PRIMARY_KEY, function(i, primaryCol) {
 			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
 		});
 		sortPredicate.push(offsetPredicate.join('&'));
-		sortPredicate.push(encodeSafeURIComponent(sortColumn) + '::gt::' + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
+		sortPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
 	}
 	return sortPredicate;
 }

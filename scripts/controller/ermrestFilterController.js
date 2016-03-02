@@ -9,11 +9,25 @@ ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'FacetsD
                                                       function($scope, $timeout, FacetsData, FacetsService) {
 	
 	$scope.FacetsData = FacetsData;
+	$scope.preventSortOrder = false;
 	
 	$scope.$watch('FacetsData.sortFacet', function (newVal, oldVal) {
 		if ($scope.FacetsData.ready && newVal !== oldVal) {
 			$scope.FacetsData.pagingOptions.currentPage = 1;
+			$scope.preventSortOrder = true;
 			$scope.getPagedDataAsync($scope.FacetsData.pagingOptions.pageSize, $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.filterOptions.filterText, $scope.FacetsData.sortInfo);
+		}
+	}, true);
+	
+	$scope.$watch('FacetsData.sortOrder', function (newVal, oldVal) {
+		if ($scope.FacetsData.ready && newVal !== oldVal) {
+			if ($scope.preventSortOrder) {
+				// the data was already got from sortFacet
+				$scope.preventSortOrder = false;
+			} else {
+				$scope.FacetsData.pagingOptions.currentPage = 1;
+				$scope.getPagedDataAsync($scope.FacetsData.pagingOptions.pageSize, $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.filterOptions.filterText, $scope.FacetsData.sortInfo);
+			}
 		}
 	}, true);
 	
