@@ -7,6 +7,7 @@ var ermrestApp = angular.module('ermrestApp', [
   'ngGrid',
   'rzModule',
   '720kb.datepicker',
+  'ui.select',
   'ermLoginController',
   'ermLogoutController',
   'facetsModel',

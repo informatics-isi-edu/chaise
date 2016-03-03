@@ -45,6 +45,8 @@ CSS=styles
 CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/ng-grid.css \
 	$(CSS)/vendor/rzslider.css \
+	$(CSS)/vendor/select.css \
+	$(CSS)/vendor/select2.css \
 	$(CSS)/vendor/angular-datepicker.css
 
 CSS_SOURCE=$(CSS)/swoop-sidebar.css \
@@ -67,7 +69,8 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
-	$(JS)/vendor/ng-grid.js
+	$(JS)/vendor/ng-grid.js \
+	$(JS)/vendor/select.js
 
 JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
