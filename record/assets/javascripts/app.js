@@ -377,6 +377,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
             // Hide spinner
             spinnerService.hide();
+        }).error (function(data, status, headers, config) {
+            // Hide spinner
+            spinnerService.hide();
         });
 
     };
