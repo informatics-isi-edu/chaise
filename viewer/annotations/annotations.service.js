@@ -31,10 +31,9 @@
             }];
 
             if (type == 'section_annotation') {
-                // Section annotations don't have anatomies
+                // Section annotations don't need anatomies
                 delete newAnnotation[0].anatomy;
             }
-
             var table = image.entity.getRelatedTable(context.schemaName, type);
             return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
                 var messageType = '';

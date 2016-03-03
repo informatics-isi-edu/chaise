@@ -71,7 +71,12 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
         if (chaiseConfig['recordResource'] != null) {
             recordResource = chaiseConfig['recordResource'];
         }
-        var detailPath = prefix + recordResource + '#' + CATALOG + '/' + SCHEMA + ':' +  $scope.FacetsData.table + '/' + this.buildPredicate(PRIMARY_KEY, row);
+        // in case we have a view, we want the "original" table in the detail
+        var table_name = getTableAnnotation($scope.FacetsData.table, TABLES_MAP_URI, 'originalTable');
+        if (table_name == null) {
+        	table_name = $scope.FacetsData.table;
+        }
+        var detailPath = prefix + recordResource + '#' + CATALOG + '/' + SCHEMA + ':' +  encodeSafeURIComponent(table_name) + '/' + this.buildPredicate(PRIMARY_KEY, row);
         return detailPath;
     };
 
@@ -196,6 +201,18 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	};
 
 	this.sortData = function sortData(event) {
+		if ($scope.FacetsData.sortFacet == null || $scope.FacetsData.sortFacet == '') {
+			$scope.FacetsData.sortOrder = null;
+		} else {
+			$scope.FacetsData.sortOrder = 'asc';
+		}
+		$scope.FacetsData.pagingOptions.currentPage = 2;
+		$scope.FacetsData.pagingOptions.currentPage = updatePageTag('backward', $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap, $scope.FacetsData.tagPages, $scope.FacetsData.maxPages);
+		setActivePage($scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap);
+	};
+
+	this.changeSortOrder = function changeSortOrder(event) {
+		$scope.FacetsData.sortOrder = ($scope.FacetsData.sortOrder == 'asc') ? 'desc' : 'asc';
 		$scope.FacetsData.pagingOptions.currentPage = 2;
 		$scope.FacetsData.pagingOptions.currentPage = updatePageTag('backward', $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap, $scope.FacetsData.tagPages, $scope.FacetsData.maxPages);
 		setActivePage($scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap);

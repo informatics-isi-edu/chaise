@@ -53,6 +53,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		FacetsData.pageMap = {};
 		FacetsData.maxPages = 0;
 		FacetsData.sortFacet = '';
+		FacetsData.sortOrder = null;
 		FacetsData.sortDirection = 'asc';
 		FacetsData.details = false;
 		FacetsData.entryRow = [];

@@ -172,7 +172,7 @@
 						<div class="col-md-8">
 							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results, sort by: <select name="sortColumn" ng-change="facetResults.sortData($event)" ng-model="FacetsData.sortFacet">
 								<option ng-repeat="option in FacetsData.sortColumns" value="{{option}}">{{facetResults.display(FacetsData.table, option)}}</option>
-							</select></p>
+							</select><span ng-show="FacetsData.sortOrder=='asc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes toggler"></span><span ng-show="FacetsData.sortOrder=='desc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes-alt toggler"></span></p>
 						</div>
 						<div class="col-md-4">
 							<div id="views" class="btn-group view-toggle pull-right" role="group">
