@@ -9,7 +9,7 @@
         vm.vocabs = vocabs;
         vm.statuses = statuses;
 
-        vm.allowEdit = AuthService.editMetadata();
+        vm.allowEdit = AuthService.editMetadata;
 
         vm.editMode = false;
 
@@ -23,7 +23,6 @@
         function save() {
             vm.editMode = false;
             vm.image.entity.update();
-            console.log('Updated image: ', vm.image.entity.data);
         }
     }]);
 })();

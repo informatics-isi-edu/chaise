@@ -1,8 +1,11 @@
 (function() {
     'use strict';
 
+    var client;
+
     angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'ui.select'])
 
+    // Configure the context info from the URI
     .config(['context', function configureContext(context) {
         context.serviceURL = window.location.origin + '/ermrest';
 
@@ -32,22 +35,48 @@
         }
     }])
 
-    // Get session info, hydrate values providers, and set up iframe
-    .run(['$http', '$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'ermrestClientFactory', 'user', 'UserService', function runApp($http, $window, context, image, annotations, comments, sections, anatomies, statuses, vocabs, ermrestClientFactory, user, UserService) {
-        var origin = window.location.origin;
-        var iframe = document.getElementById('osd').contentWindow;
-        var annotoriousReady = false;
-        var client = ermrestClientFactory.getClient(context.serviceURL);
+    // Get a client connection to ERMrest
+    // Note: Can only use Providers and Constants in .config blocks. So if you
+    // want to use a custom factory/service/value provider in a config block,
+    // you add append 'Provider' to the dependency name and run .$get on it.
+    .config(['ermrestClientFactoryProvider', 'context', function configureClient(ermrestClientFactoryProvider, context) {
+        client = ermrestClientFactoryProvider.$get().getClient(context.serviceURL);
+    }])
 
-        client.getSession().then(function success(response) {
-            context.session = response;
-            console.log('Session: ', context.session);
-            UserService.setUser();
+    // Set user info
+    .config(['userProvider', 'context', function configureUser(userProvider, context) {
+        client.getSession().then(function success(session) {
+            var groups = context.groups;
+            var attributes = session.attributes;
+            var user = userProvider.$get();
+
+            user.name = session.client;
+
+            if (attributes.indexOf(groups.curators) > -1) {
+                return user.role = 'curator';
+            } else if (attributes.indexOf(groups.annotators) > -1) {
+                return user.role = 'annotator';
+            } else if (attributes.indexOf(groups.users) > -1) {
+                return user.role = 'user';
+            } else {
+                user.role = null;
+                AlertsService.setAlert({
+                    type: 'error',
+                    message: 'Sorry, you are not allowed to view this page.'
+                });
+            }
             console.log('User: ', user);
         }, function error(response) {
             console.log(response);
             throw response;
         });
+    }])
+
+    // Get session info, hydrate values providers, and set up iframe
+    .run(['$http', '$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($http, $window, context, image, annotations, comments, sections, anatomies, statuses, vocabs) {
+        var origin = window.location.origin;
+        var iframe = document.getElementById('osd').contentWindow;
+        var annotoriousReady = false;
 
         var catalog = client.getCatalog(context.catalogID);
         catalog.introspect().then(function success(schemas) {

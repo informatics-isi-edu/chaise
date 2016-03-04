@@ -86,7 +86,7 @@
 
         function deleteAnnotation(annotation) {
             if (!hasComments(annotation)) {
-                if (AuthService.deleteAnnotation(annotation)) {
+                // if (AuthService.deleteAnnotation(annotation)) {
                     // Delete from ERMrest
                     annotation.delete().then(function success(response) {
                         // Delete from the 'annotations' or 'sections' provider
@@ -104,7 +104,7 @@
                     }, function error(response) {
                         console.log(response);
                     });
-                }
+                // }
             } else {
                 AlertsService.addAlert({
                     type: 'error',

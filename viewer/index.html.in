@@ -43,7 +43,7 @@
                 <!-- CONTROLLER: ImageMetadataController-->
                 <div ng-show="sidebar.sidebar == 'metadata'" ng-controller="ImageMetadataController as metadata" id="metadata-panel" class="row">
                     <div class="col-md-12">
-                        <div class="row">
+                        <div ng-if="metadata.allowEdit();" class="row">
                             <div class="col-md-12">
                                 <button ng-show="!metadata.editMode" ng-click="metadata.edit();" class="btn btn-sm btn-success form-control" type="button" role="button">
                                     <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;&nbsp;Edit Metadata
@@ -468,10 +468,14 @@
                                             <strong>{{comment.data.author}}</strong>
                                             <small><span class="text-muted pull-right">{{comment.data.created | date:'MMM d, y'}}</span></small>
                                             <br>{{comment.data.comment}}
-                                            <br><small><a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a></small>
+                                            <div ng-if="comments.allowDelete(comment);">
+                                                <small>
+                                                    <a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a>
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div ng-if="comments.allowCreate();" class="row">
                                         <div class="col-md-12">
                                             <div class="comment-input">
                                                 <div class="input-group input-group-sm">

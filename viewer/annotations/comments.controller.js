@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('CommentsController', ['CommentsService', '$scope', 'comments', function AnnotationsController(CommentsService, $scope, comments) {
+    .controller('CommentsController', ['AuthService', 'CommentsService', '$scope', 'comments', function AnnotationsController(AuthService, CommentsService, $scope, comments) {
         var vm = this;
         vm.annotationId = $scope.annotation.data.id;
         vm.comments = comments;
@@ -12,6 +12,9 @@
             comment: null,
             author: null
         };
+
+        vm.allowCreate = AuthService.createComment;
+        vm.allowDelete = AuthService.deleteComment;
 
         vm.createComment = createComment;
         vm.getNumComments = getNumComments;
