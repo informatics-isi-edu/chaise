@@ -110,11 +110,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             var columnDefinitions = schema.tables[tableName].column_definitions;
             for (var i = 0; i < columnDefinitions.length; i++) {
                 var cdAnnotation = columnDefinitions[i].annotations;
-                if (cdAnnotation['tag:isrd.isi.edu,2016:sequence'] !== undefined) {
+                if (cdAnnotation['tag:isrd.isi.edu,2016:sequence'] !== undefined && entity[columnDefinitions[i].name] !== null) {
                     entity.sequences.push(columnDefinitions[i].name);
                     var len = cdAnnotation['tag:isrd.isi.edu,2016:sequence']['subseq-length'];
                     var spacer = cdAnnotation['tag:isrd.isi.edu,2016:sequence']['separator'];
-                    //spacer = spacer.replace(/\s/g, "&nbsp;"); // replace single space with &nbsp; so that multiple spaces will show in html
 
                     // format column value
                     var text = entity[columnDefinitions[i].name];
