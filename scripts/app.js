@@ -17,14 +17,15 @@ var ermrestApp = angular.module('ermrestApp', [
   'ermFilterController',
   'ermResultsController',
   'ermSideBarController',
-  'ermMatrixController'
+  'ermMatrixController',
+  'ermrestTourController'
 ]);
 
 ermrestApp.provider('ermrest', function () {
 	var catalog;
 	var authnProvider;
 	var layout;
-	
+
 	return {
 		setCatalog: function (value) {
 			catalog = value;
@@ -51,4 +52,3 @@ ermrestApp.config(['ermrestProvider',
 	ermrestProvider.setAuthnProvider('session');
 	ermrestProvider.setLayout('list');
 }]);
-

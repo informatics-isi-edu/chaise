@@ -7,5 +7,14 @@ var chaiseConfig = {
     showBadgeCounts: false,
     recordUiGridEnabled: false,
     recordUiGridExportCSVEnabled: true,
-    recordUiGridExportPDFEnabled: true
+    recordUiGridExportPDFEnabled: true,
+    tour: {
+      pickRandom: false,
+      searchInputAttribute: "Data",
+      searchChosenAttribute: "Data Type",
+      searchInputValue: "micro",
+      extraAttribute: "Mouse Anatomic Source",
+      chosenAttribute: "Data Type",
+      chosenValue: "Expression microarray - gene"
+    }
 };
