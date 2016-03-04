@@ -84,7 +84,7 @@ function addSteps(){
   }, {
     element: "a.view-attr",
     title: "View All Attributes",
-    content: "There are many more available attributes to refine your search. \
+    content: "There are many more available attributes to refine your search - \
   You can click here to see the list of all available attributes.",
     placement: "left",
     onNext: function(tour) {
@@ -94,10 +94,10 @@ function addSteps(){
   }, {
     element: ".editvalue-container:eq(0)",
     title: "Add New Attribute",
-    content: "After clicking on 'View all attributes', this list came up. \
-  This list displays all available attributes. We'll choose to add  \
-  " + createLabel(extraAttr.text().trim()) + "as an attribute. To get back to the default list of \
-  attributes, we'll use the 'All Attributes' button on top.",
+    content: "As we clicked on 'View all attributes' this list came up. \
+  Here you can see list of all attributes. We'll choose to add  \
+  " + createLabel(extraAttr.text().trim()) + "as an attribute and get back to list of \
+  attributes using the 'All Attributes' button on top.",
     placement: "left",
     onNext: function(tour) {
       extraAttr.click();
@@ -128,9 +128,9 @@ function addSteps(){
   }, {
     element: ".nav.filteritems",
     title: "Choose Values",
-    content: 'Now you can see all the different values for \
-  ' + createLabel(chosenAttr.text().trim()) + ' in the database. \
-  You can choose as many as you want. We are going to choose just one.',
+    content: 'Now you can see all different values for \
+  ' + createLabel(chosenAttr.text().trim()) + ' in the databse. \
+  You can choose as many as you want. We are going to choose one of them.',
     placement: "left",
     onShow: function(tour) {},
     onPrev: function(tour) {
@@ -154,7 +154,7 @@ function addSteps(){
     element: '#permalink',
     title: "permalink",
     placement: "bottom",
-    content: "You can right click on Permalink to save your search results.",
+    content: "You can right click on permalink to save your search result.",
     onPrev: function(tour) {
       chosenAttr.click();
     }
@@ -162,20 +162,20 @@ function addSteps(){
     element: '#results_tally.row',
     title: "Results Tally",
     placement: "bottom",
-    content: "Here is the results tally. You can also switch between different types of views or change the sort.",
+    content: "You can see results tally. You can also switch between different types of view or change sort.",
     onPrev: function(tour) {
       chosenAttr.click();
     }
   }, {
     element: "#filter",
     title: "Filters",
-    content: "This area displays all of the filters that are applied. By \
-  clicking on the <i class='md-cancel md-lg'></i> button, you can clear the filter.",
+    content: "In here you can see all the filters that are applied. By \
+  clicking on <i class='md-cancel md-lg'></i> button you can clear the filter.",
     placement: "right",
   }, {
     element: "#filter .filter-item:visible a:not(:contains(Clear),.filter-link-cancel)",
     title: " Chosen Attributes",
-    content: "To choose different values for this attribute, click here.",
+    content: "To choose different values for this attribute, you can click here.",
     placement: "bottom",
     onNext: function(tour) {
       $("#filter .filter-item:visible a:not(:contains(Clear),.filter-link-cancel)").click();
@@ -183,7 +183,7 @@ function addSteps(){
   }, {
     element: ".nav.filteritems",
     title: "Add Value",
-    content: "After clicking on the attribute name, this list came up. \
+    content: "As we clicked on the attribute name in filter lists, this list came up. \
   You can change your filters in here.",
     placement: "left",
     onPrev: function(tour) {
@@ -196,7 +196,7 @@ function addSteps(){
     element: ".search-box input:eq(0)",
     title: "Search Attributes",
     content: 'You can also search within attributes using this box. \
-  Just type something and the list of attributes will be filtered.',
+  Just type something and list of attributes will be filtered.',
     placement: "left",
     onNext: function(tour) {
       searchInputAttr = searchInputAttr ? searchInputAttr : getSearchTerm(true, $("#navcontainer a:visible:not(.view-attr)"));
@@ -221,7 +221,7 @@ function addSteps(){
   }, {
     element: ".search-box input:eq(2)",
     title: "Search Values",
-    content: "You can also search within the values of an attribute.",
+    content: "You can also search in values of attributes.",
     placement: "left",
     onPrev: function(tour) {
       $(".field-enable.sidebar-toggle:eq(1)").click();
@@ -234,7 +234,7 @@ function addSteps(){
   }, {
     element: ".nav.filteritems",
     title: "Filtered Values",
-    content: "As you can see, the values are filtered based on the search term.",
+    content: "As you can see the values are filtered based on search box.",
     placement: "left",
     onPrev: function(tour) {
       $(".search-box input:eq(2)").val("").trigger('input').keyup();
@@ -246,7 +246,7 @@ function addSteps(){
   }, {
     element: '#resultstable .panel:eq(0)',
     title: "Dataset Details",
-    content: "By clicking on the title of each dataset, you can see its details.",
+    content: "By clicking on title of each dataset, you can see its details.",
     placement: "right",
     onPrev: function(tour) {
       searchChosenAttr.click();
@@ -254,7 +254,7 @@ function addSteps(){
     }
   }, {
     title: "Find out more",
-    content: "You can find more information <a target='_blank' href='" + chaiseConfig.helpURL + "'>here</a>.",
+    content: "You can find more tutorial in <a target='_blank' href='" + chaiseConfig.helpURL + "'>here</a>.",
     placement: "bottom",
   }];
 
