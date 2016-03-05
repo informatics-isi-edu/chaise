@@ -45,7 +45,10 @@ CSS=styles
 CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/ng-grid.css \
 	$(CSS)/vendor/rzslider.css \
-	$(CSS)/vendor/angular-datepicker.css
+	$(CSS)/vendor/select.css \
+	$(CSS)/vendor/select2.css \
+	$(CSS)/vendor/angular-datepicker.css \
+	$(CSS)/vendor/bootstrap-tour.min.css
 
 CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/jquery.nouislider.min.css \
@@ -53,7 +56,8 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/ermrest.css \
 	$(CSS)/app.css \
 	$(CSS)/appheader.css \
-	$(CSS)/matrix.css
+	$(CSS)/matrix.css \
+	$(CSS)/tour.css
 
 # JavaScript source and test specs
 JS=scripts
@@ -67,7 +71,9 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
-	$(JS)/vendor/ng-grid.js
+	$(JS)/vendor/ng-grid.js \
+	$(JS)/vendor/select.js \
+	$(JS)/vendor/bootstrap-tour.min.js
 
 JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
@@ -83,7 +89,9 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestLogoutController.js \
 	$(JS)/controller/ermrestResultsController.js \
 	$(JS)/controller/ermrestSideBarController.js \
+	$(JS)/controller/ermrestTourController.js \
 	$(JS)/controller/ermrestMatrixController.js \
+	$(JS)/tour.js \
 	$(JS)/matrix.js
 
 # HTML templates

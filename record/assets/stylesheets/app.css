@@ -408,11 +408,6 @@ tbody{
     color: #999;
     font-weight: normal;
     font-size: 1em;
-<<<<<<< HEAD
-    letter-spacing:
-=======
-    /*letter-spacing:*/
->>>>>>> master
 }
 
 .entity-value {
@@ -453,4 +448,8 @@ tbody{
 .ui-grid-row div[role=row] {
   display: flex ;
   align-content: stretch;
+}
+
+.fixed-font {
+    font-family: "Lucida Console", Courier, monospace;
 }

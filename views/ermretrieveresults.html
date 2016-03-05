@@ -59,8 +59,13 @@
 							</p>
 						</div>
 						<div class="col-md-7">
-							<p class="pull-right">
-								<a title="This link stores your current search criteria as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}"><span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
+							<p class="pull-right" ng-controller="ermrestTourController as tourCtrl">
+								<button class="btn btn-primary tour-start-btn" title="Chaise Data Browser Tour" ng-disabled="tourCtrl.progress" ng-click="tourCtrl.startTour($event)">
+									<span ng-show="!tourCtrl.progress" class="glyphicon glyphicon-question-sign"></span>
+									<span ng-show="tourCtrl.progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+									<span>Tutorial</span>
+								</button>
+								<a id="permalink" title="This link stores your current search criteria as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}"><span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
 							</p>
 						</div>
 					</div>
@@ -170,9 +175,13 @@
 					</div>
 					<div id="results_tally" class="row" ng-show="facetResults.hasSelectedFacets()">
 						<div class="col-md-8">
-							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results, sort by: <select name="sortColumn" ng-change="facetResults.sortData($event)" ng-model="FacetsData.sortFacet">
-								<option ng-repeat="option in FacetsData.sortColumns" value="{{option}}">{{facetResults.display(FacetsData.table, option)}}</option>
-							</select><span ng-show="FacetsData.sortOrder=='asc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes toggler"></span><span ng-show="FacetsData.sortOrder=='desc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes-alt toggler"></span></p>
+							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results, sort by: 
+							<ui-select ng-model="FacetsData.sortFacet" theme="select2" ng-disabled="disabled" on-select="facetResults.sortData($event)">
+								<ui-select-match placeholder="Select a filter">{{facetResults.display(FacetsData.table, FacetsData.sortFacet)}}</ui-select-match>
+								<ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}
+								</ui-select-choices>
+							</ui-select>
+							<span ng-show="FacetsData.sortOrder=='asc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes toggler"></span><span ng-show="FacetsData.sortOrder=='desc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes-alt toggler"></span></p>
 						</div>
 						<div class="col-md-4">
 							<div id="views" class="btn-group view-toggle pull-right" role="group">

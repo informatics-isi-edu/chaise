@@ -2,7 +2,7 @@
 
 /* Controllers */
 
-var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService']);
+var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService', 'ui.select']);
 
 //angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
 

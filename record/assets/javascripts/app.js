@@ -104,6 +104,33 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             // Extract the first entity
             var entity          = data[0];
 
+            entity.sequences = []; // array of sequence columns
+
+            // apply sequence formatting
+            var columnDefinitions = schema.tables[tableName].column_definitions;
+            for (var i = 0; i < columnDefinitions.length; i++) {
+                var cdAnnotation = columnDefinitions[i].annotations;
+                if (cdAnnotation['tag:isrd.isi.edu,2016:sequence'] !== undefined && entity[columnDefinitions[i].name] !== null) {
+                    entity.sequences.push(columnDefinitions[i].name);
+                    var len = cdAnnotation['tag:isrd.isi.edu,2016:sequence']['subseq-length'];
+                    var spacer = cdAnnotation['tag:isrd.isi.edu,2016:sequence']['separator'];
+
+                    // format column value
+                    var text = entity[columnDefinitions[i].name];
+                    var chunks = text.match(new RegExp(".{1," + len + "}", "g"));
+                    text = "";
+                    for (var j = 0; j < chunks.length; j++) {
+                        if (text === "") {
+                            text = chunks[j];
+                        }
+                        else {
+                            text = text + spacer + chunks[j];
+                        }
+                    }
+                    entity[columnDefinitions[i].name] = text;
+                }
+            }
+
             self.patternInterpretationForTable(schemaName, tableName, data);
 
             entity.foreignTables    = [];
@@ -375,6 +402,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                 entity.foreignTables[index].keys =  Object.keys(references[0]);
             }
 
+            // Hide spinner
+            spinnerService.hide();
+        }).error (function(data, status, headers, config) {
             // Hide spinner
             spinnerService.hide();
         });

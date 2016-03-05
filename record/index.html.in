@@ -50,7 +50,9 @@
                             ng-attr-target="{{isExternalUrl(entity[key + '_link']) && '_blank' || '_self'}}">
                                 {{value | sanitizeValue }}
                         </a>
-                        <span ng-if="!entity[key + '_link'] || value === null" ng-bind-html="value | sanitizeValue"></span>
+                        <div ng-class="{'fixed-font' : entity.sequences.indexOf(key) > -1, '' : entity.sequences.indexOf(key) == -1}">
+                            <span ng-if="!entity[key + '_link'] || value === null" ng-bind-html="value | sanitizeValue"></span>
+                        </div>
                     </td>
                 </tr>
                 <tr ng-repeat="association in entity.associations">
