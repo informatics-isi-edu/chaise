@@ -300,7 +300,9 @@
                                         New&nbsp;&nbsp;<span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a ng-click="annotations.drawAnnotation('annotation');">Annotation</a></li>
+                                        <li ng-if="annotations.allowCreate();">
+                                            <a ng-click="annotations.drawAnnotation('annotation');">Annotation</a>
+                                        </li>
                                         <li><a ng-click="annotations.drawAnnotation('section_annotation');">Section of Interest</a></li>
                                     </ul>
                                 </div>
@@ -431,9 +433,13 @@
                                     <!-- Annotation Edit/Delete Buttons -->
                                     <div class="col-md-5">
                                         <small class="pull-right">
-                                            <a ng-click="annotations.centerAnnotation(annotation)" title="Center Annotation" class="cardlink">Focus</a> |
-                                            <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" class="cardlink">Edit</a> |
-                                            <a ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" class="cardlink delete">Delete</a>
+                                            <a ng-click="annotations.centerAnnotation(annotation)" title="Center Annotation" class="cardlink">Focus</a>
+                                            <span ng-if="annotations.allowEdit(annotation);">
+                                                | <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" class="cardlink">Edit</a>
+                                            </span>
+                                            <span ng-if="annotations.allowDelete(annotation);">
+                                                | <a ng-if="annotations.allowDelete(annotation);" ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" class="cardlink delete">Delete</a>
+                                            </span>
                                         </small>
                                     </div>
                                 </div>

@@ -150,7 +150,6 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.module.js \
 	$(VIEWER_ASSETS)/common/providers/context.js \
 	$(VIEWER_ASSETS)/common/providers/image.js \
 	$(VIEWER_ASSETS)/common/providers/user.js \
-	$(VIEWER_ASSETS)/common/providers/user.service.js \
 	$(VIEWER_ASSETS)/common/providers/auth.service.js \
 	$(VIEWER_ASSETS)/common/filters/toTitleCase.js \
 	$(VIEWER_ASSETS)/common/filters/underscoreToSpace.js \
