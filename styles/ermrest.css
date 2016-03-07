@@ -343,7 +343,7 @@ th.multiple_values, td.multiple_values {
 
 #login_user {
 	color: yellow;
-  padding-right: 10px;
+  /*padding-right: 10px;*/
 }
 
 .collection_badge {
