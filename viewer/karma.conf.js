@@ -22,7 +22,7 @@ module.exports = function(config) {
         '../scripts/vendor/select.js',
         'https://dev.rebuildingakidney.org/ermrestjs/js/ermrest.js',
         'https://dev.rebuildingakidney.org/ermrestjs/js/ngermrest.js',
-        'viewer.module.js',
+        'viewer.app.js',
         '**/*.js',
         '../chaise-config.js',
         '*.spec.js'
