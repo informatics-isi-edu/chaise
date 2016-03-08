@@ -29,18 +29,42 @@
         }
     }])
 
-    .run(['context', 'ermrestClientFactory', 'data', function configureRun(context, ermrestClientFactory, data) {
+    .run(['context', 'ermrestClientFactory', 'data', '$http', function configureRun(context, ermrestClientFactory, data, $http) {
         var client = ermrestClientFactory.getClient(context.serviceURL);
         client.getCatalog(context.catalogID).introspect().then(function success(schemas) {
             var schema = schemas[context.schemaName];
             if (schema) {
-                var _table = schema.getTable(context.tableName);
-                if (_table) {
-                    data.table = _table;
+                var table = schema.getTable(context.tableName);
+                if (table) {
+                    data.table = table;
                 }
                 console.log(data);
             }
+        }, function error(response) {
+            if (response.status == 401) {
+                if (chaiseConfig.authnProvider == 'goauth') {
+                    getGoauth(encodeSafeURIComponent(window.location.href));
+                }
+                console.log(response);
+                throw response;
+            }
         });
+
+        function getGoauth(referrer) {
+            var url = '/ermrest/authn/preauth?referrer=' + referrer;
+            $http.get(url).then(function success(response) {
+                window.open(response.data.redirect_url, '_self');
+            }, function error(response) {
+                console.log('Error: ', error);
+            });
+        }
+
+        function encodeSafeURIComponent (str) {
+            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+            });
+        }
+
     }]);
 
     // Refresh the page when the window's hash changes. Needed because Angular

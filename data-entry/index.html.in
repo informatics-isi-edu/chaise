@@ -1,6 +1,7 @@
+<!DOCTYPE html>
 <html ng-app="chaise.dataEntry">
 <head>
-    <title>Data Entry</title>
+    <title>Data Entry App</title>
     %ASSETS%
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     <!--
@@ -18,11 +19,33 @@
     <![endif]-->
 </head>
 <body>
-    <div class="container-fluid">
-        <div ng-controller="FormController as form" class="row">
-            <div class="col-md-12">
-                <div ng-repeat="column in form.data.table.columns">
-                    {{column.displayName}}
+    <div class="container">
+        <div class="container">
+            <div ng-controller="FormController as form" class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <form ng-show="form.showForm">
+                        <h2>Add New {{form.data.table.displayName}}</h2>
+                        <br>
+                        <div ng-repeat="column in form.data.table.columns" class="form-group">
+                            <label for="{{column.name}}">{{column.displayName | underscoreToSpace | toTitleCase}}</label>
+                            <input ng-model="form.newData[column.name]" type="text" class="form-control" id="{{column.name}}">
+                        </div>
+                        <button ng-click="form.confirmSubmission();" type="button" role="button" class="btn btn-primary">Submit</button>
+                    </form>
+                    <div ng-show="!form.showForm" class="row">
+                            <h2>Confirm New {{form.data.table.displayName}}</h2>
+                            <p class="lead">You're about to add the following information to the database. Is this correct?</p>
+                            <table class="table table-striped">
+                                <tr ng-repeat="column in form.data.table.columns">
+                                    <td class="col-md-3">
+                                        <strong>{{column.displayName | underscoreToSpace | toTitleCase}}</strong>
+                                    </td>
+                                    <td class="col-md-9">{{form.newData[column.name]}}</td>
+                                </tr>
+                            </table>
+                            <button ng-click="form.submit();" type="submit" class="btn btn-primary">Add to Database</button>
+                            <button ng-click="form.cancel();" type="button" class="btn btn-default">Make Changes</button>
+                    </div>
                 </div>
             </div>
         </div>
