@@ -116,8 +116,6 @@ div.popover.top>.arrow{
   margin-right: 10px;
 }
 
-.tour-start-btn span{margin-right: 5px;}
-
 .glyphicon-refresh-animate {
     animation: spin .7s infinite linear;
     -ms-animation: spin .7s infinite linear;
