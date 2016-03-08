@@ -303,7 +303,9 @@
                                         <li ng-if="annotations.allowCreate();">
                                             <a ng-click="annotations.drawAnnotation('annotation');">Annotation</a>
                                         </li>
-                                        <li><a ng-click="annotations.drawAnnotation('section_annotation');">Section of Interest</a></li>
+                                        <li ng-if="annotations.allowCreate();">
+                                            <a ng-click="annotations.drawAnnotation('section_annotation');">Section of Interest</a>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
@@ -362,9 +364,13 @@
                                     </div>
                                     <div class="col-md-9">
                                         <small class="pull-right">
-                                            <a ng-click="annotations.centerAnnotation(section)" title="Center Annotation" class="cardlink">Focus</a> |
-                                            <a ng-click="annotations.editAnnotation(section);" title="Edit Annotation" class="cardlink">Edit</a> |
-                                            <a ng-click="annotations.deleteAnnotation(section);" title="Delete Annotation" class="cardlink delete">Delete</a>
+                                            <a ng-click="annotations.centerAnnotation(section)" title="Center Section" class="cardlink">Focus</a>
+                                            <span ng-if="annotations.allowEdit(section);">
+                                                | <a ng-click="annotations.editAnnotation(section);" title="Edit Annotation" class="cardlink">Edit</a>
+                                            </span>
+                                            <span ng-if="annotations.allowDelete(section);">
+                                                | <a ng-if="annotations.allowDelete(section);" ng-click="annotations.deleteAnnotation(section);" title="Delete Annotation" class="cardlink delete">Delete</a>
+                                            </span>
                                         </small>
                                     </div>
                                 </div>
