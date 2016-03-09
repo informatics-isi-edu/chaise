@@ -526,10 +526,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                     references[row][col + '_link'] = references[row][col];
                 }
             } else {
-                var link = uriPattern;
                 for (var c = 0; c < columns.length; c++) { // if col name is found in the pattern
                     var col2 = columns[c];
                     for (var row = 0; row < references.length; row++) {
+                        var link = uriPattern;
                         if (link.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
                             link = link.replace("{" + col2 + "}", references[row][col2]);
                             references[row][col + '_link'] = link;
@@ -539,10 +539,10 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             }
 
             if (caption !== null) {
-                var cap = caption;
                 for (var c = 0; c < columns.length; c++) { // if col name is found in the pattern
                     col2 = columns[c];
                     for (var row = 0; row < references.length; row++) {
+                        var cap = caption;
                         if (cap.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
                             cap = cap.replace("{" + col2 + "}", references[row][col2]);
                             references[row][col] = cap; // overwrite existing col value with caption
