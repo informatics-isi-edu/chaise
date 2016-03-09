@@ -62,7 +62,7 @@ describe('chaise.viewer filters', function() {
     });
 });
 
-describe('SidebarSwitchController', function() {
+describe('SidebarController', function() {
     var $controller;
 
     beforeEach(function() {
@@ -73,7 +73,7 @@ describe('SidebarSwitchController', function() {
     });
 
     it('setSidebar() should set the sidebar', function() {
-        var controller = $controller('SidebarSwitchController');
+        var controller = $controller('SidebarController');
         expect(controller.sidebar).toEqual(controller.sidebars[0]);
         controller.setSidebar('exampleSidebar');
         expect(controller.sidebar).toEqual('exampleSidebar');

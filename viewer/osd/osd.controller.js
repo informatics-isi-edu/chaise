@@ -3,10 +3,10 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['image', function OSDController(image) {
+    .controller('OSDController', ['image', '$window', function OSDController(image, $window) {
         var vm = this;
-        var iframe = document.getElementById('osd').contentWindow;
-        var origin = window.location.origin;
+        var iframe = $window.frames[0];
+        var origin = $window.location.origin;
         vm.image = image;
         vm.downloadView = downloadView;
         vm.zoomInView = zoomInView;

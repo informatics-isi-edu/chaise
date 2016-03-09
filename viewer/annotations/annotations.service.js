@@ -4,8 +4,8 @@
     angular.module('chaise.viewer')
 
     .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'sections', 'CommentsService', 'AuthService', 'AlertsService', '$window', '$q', function(context, user, image, annotations, sections, CommentsService, AuthService, AlertsService, $window, $q) {
-        var origin = window.location.origin;
-        var iframe = document.getElementById('osd').contentWindow;
+        var origin = $window.location.origin;
+        var iframe = $window.frames[0];
 
         function drawAnnotation() {
             iframe.postMessage({messageType: 'drawAnnotation'}, origin);

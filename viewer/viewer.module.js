@@ -74,8 +74,8 @@
 
     // Get session info, hydrate values providers, and set up iframe
     .run(['$http', '$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($http, $window, context, image, annotations, comments, sections, anatomies, statuses, vocabs) {
-        var origin = window.location.origin;
-        var iframe = document.getElementById('osd').contentWindow;
+        var origin = $window.location.origin;
+        var iframe = $window.frames[0];
         var annotoriousReady = false;
 
         var catalog = client.getCatalog(context.catalogID);
