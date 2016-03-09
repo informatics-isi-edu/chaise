@@ -5,6 +5,7 @@ describe('AnnotationsService', function() {
     var mockAnnotationsService = null;
 
     beforeEach(function() {
+        // Load the module that contains the service
         angular.mock.module('chaise.viewer');
         inject(function(AnnotationsService) {
             mockAnnotationsService = AnnotationsService;
@@ -26,9 +27,30 @@ describe('AnnotationsService', function() {
         expect(mockAnnotationsService.highlightAnnotation).toEqual(jasmine.any(Function));
     });
 
-    // TODO: Test the rest of the methods in the service
+    it('should define a createAnnotation() method', function() {
+        expect(mockAnnotationsService.createAnnotation).toBeDefined();
+        expect(mockAnnotationsService.createAnnotation).toEqual(jasmine.any(Function));
+    });
 
-    // TODO: Figure out how to mock the postMessages...
+    it('should define a updateAnnotation() method', function() {
+        expect(mockAnnotationsService.updateAnnotation).toBeDefined();
+        expect(mockAnnotationsService.updateAnnotation).toEqual(jasmine.any(Function));
+    });
+
+    it('should define a deleteAnnotation() method', function() {
+        expect(mockAnnotationsService.deleteAnnotation).toBeDefined();
+        expect(mockAnnotationsService.deleteAnnotation).toEqual(jasmine.any(Function));
+    });
+
+    it('should define a centerAnnotation() method', function() {
+        expect(mockAnnotationsService.centerAnnotation).toBeDefined();
+        expect(mockAnnotationsService.centerAnnotation).toEqual(jasmine.any(Function));
+    });
+
+    it('should define a getNumComments() method', function() {
+        expect(mockAnnotationsService.getNumComments).toBeDefined();
+        expect(mockAnnotationsService.getNumComments).toEqual(jasmine.any(Function));
+    });
 });
 
 // FILTERS =====================================================================
@@ -78,6 +100,11 @@ describe('SidebarController', function() {
         controller.setSidebar('exampleSidebar');
         expect(controller.sidebar).toEqual('exampleSidebar');
     });
+
+    it('should have at least one sidebar', function() {
+        var controller = $controller('SidebarController');
+        expect(controller.sidebars.length).toBeGreaterThan(0);
+    });
 });
 
 describe('OSDController', function() {
@@ -88,5 +115,29 @@ describe('OSDController', function() {
         inject(function(_$controller_) {
             $controller = _$controller_;
         });
+    });
+
+    it('should define a downloadView() method', function() {
+        var controller = $controller('OSDController');
+        expect(controller.downloadView).toBeDefined();
+        expect(controller.downloadView).toEqual(jasmine.any(Function));
+    });
+
+    it('should define a zoomInView() method', function() {
+        var controller = $controller('OSDController');
+        expect(controller.zoomInView).toBeDefined();
+        expect(controller.zoomInView).toEqual(jasmine.any(Function));
+    });
+
+    it('should define a zoomOutView() method', function() {
+        var controller = $controller('OSDController');
+        expect(controller.zoomOutView).toBeDefined();
+        expect(controller.zoomOutView).toEqual(jasmine.any(Function));
+    });
+
+    it('should define a homeView() method', function() {
+        var controller = $controller('OSDController');
+        expect(controller.homeView).toBeDefined();
+        expect(controller.homeView).toEqual(jasmine.any(Function));
     });
 });
