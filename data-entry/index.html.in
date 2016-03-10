@@ -20,34 +20,34 @@
 </head>
 <body>
     <div class="container">
-        <div class="container">
-            <div ng-controller="FormController as form" class="row">
-                <div class="col-md-6 col-md-offset-3">
-                    <form ng-show="form.showForm">
-                        <!-- TODO: filters error out when first transforming table name -->
-                        <h2>Add New {{form.data.table.name | underscoreToSpace | toTitleCase}}</h2>
-                        <br>
-                        <div ng-repeat="(column, props) in form.data.table.columns._columns" class="form-group">
-                            <label for="{{props.name}}">{{props.name | underscoreToSpace | toTitleCase}}</label>
-                            <input ng-model="form.newData[props.name]" type="text" class="form-control" id="{{props.name}}">
-                        </div>
-                        <button ng-click="form.confirmSubmission();" type="button" role="button" class="btn btn-primary">Submit</button>
-                    </form>
-                    <div ng-show="!form.showForm" class="row">
-                        <!-- TODO: filters error out when first transforming table name -->
-                            <h2>Confirm New {{form.data.table.name | underscoreToSpace | toTitleCase}}</h2>
-                            <p class="lead">You're about to add the following information to the database. Is this correct?</p>
-                            <table class="table table-striped">
-                                <tr ng-repeat="(column, props) in form.data.table.columns._columns">
-                                    <td class="col-md-3">
-                                        <strong>{{props.name | underscoreToSpace | toTitleCase}}</strong>
-                                    </td>
-                                    <td class="col-md-9">{{form.newData[props.name]}}</td>
-                                </tr>
-                            </table>
-                            <button ng-click="form.submit();" type="submit" class="btn btn-primary">Add to Database</button>
-                            <button ng-click="form.cancel();" type="button" class="btn btn-default">Make Changes</button>
+        <div ng-controller="FormController as form" class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <form ng-show="form.showForm">
+                    <h2>Add New {{form.data.table.name | underscoreToSpace | toTitleCase}}</h2>
+                    <br>
+                    <div ng-repeat="(column, props) in form.data.table.columns._columns" ng-if="form.showColumn(props.name);" class="form-group">
+                        <label for="{{props.name}}">{{props.name | underscoreToSpace | toTitleCase}}</label> &bull; {{props.type.name}}
+                        <input ng-if="form.isTextType(props.type.name);" ng-model="form.newData[props.name]" type="text" class="form-control" id="{{props.name}}">
+                        <input ng-if="form.isNumberType(props.type.name);" ng-model="form.newData[props.name]" type="number" class="form-control" id="{{props.name}}">
+                        <input ng-if="form.isDateType(props.type.name);" ng-model="form.newData[props.name]" type="date" class="form-control" id="{{props.name}}">
                     </div>
+                    <br>
+                    <button ng-click="form.confirmSubmission();" type="button" role="button" class="btn btn-primary">Submit</button>
+                </form>
+                <div ng-show="!form.showForm" class="row">
+                        <h2>Confirm New {{form.data.table.name | underscoreToSpace | toTitleCase}}</h2>
+                        <p class="lead">You're about to add the following information to the database. Is this correct?</p>
+                        <table class="table table-striped">
+                            <tr ng-repeat="(column, props) in form.data.table.columns._columns" ng-if="form.showColumn(props.name);">
+                                <td class="col-md-3">
+                                    <strong>{{props.name | underscoreToSpace | toTitleCase}}</strong>
+                                </td>
+                                <td class="col-md-9">{{form.newData[props.name]}}</td>
+                            </tr>
+                        </table>
+                        <br>
+                        <button ng-click="form.submit();" type="submit" class="btn btn-primary">Add to Database</button>
+                        <button ng-click="form.cancel();" type="button" class="btn btn-default">Make Changes</button>
                 </div>
             </div>
         </div>

@@ -17,7 +17,9 @@
 
         vm.isTextType = isTextType;
         vm.isDateType = isDateType;
-        vm.isNumberType = isNumberType;
+        // vm.isNumberType = isNumberType;
+        // vm.isDropdownType = isDropdownType;
+        vm.isSliderType = isSliderType;
         vm.matchType = matchType;
 
         function cancel() {
@@ -32,9 +34,7 @@
             // Put the new data in an array so that it's compatible with ERMrest
             vm.newData = [vm.newData];
 
-            vm.data.table.entity.post(vm.newData, vm.defaultColumns).then(function success(entity) {
-                console.log(entity);
-            }, function error(response) {
+            vm.data.table.entity.post(vm.newData, vm.defaultColumns()).then(null, function error(response) {
                 console.log(response);
             });
 
@@ -69,8 +69,9 @@
             return false;
         }
 
+        // TODO: How to differentiate between using a textarea and input? Maybe a column annotation..
         function isTextType(columnType) {
-            var types = ['text'];
+            var types = ['text', 'jsonb'];
             return matchType(columnType, types);
         }
 
@@ -84,16 +85,23 @@
             return matchType(columnType, types);
         }
 
+        // TODO: If column is a FK, use a dropdown?
+        // function isDropdownType(columnType) {
+        //     var types = [];
+        //     return matchType(columnType, types);
+        // }
+
+        // function isSliderType(columnType) {
+        //     var types = [];
+        //     return matchType(columnType, types);
+        // }
+
+        // Returns true if a column type is found in the given array of types
         function matchType(columnType, types) {
             if (types.indexOf(columnType) !== -1) {
                 return true;
             }
             return false;
         }
-
-
-
-
-
     }]);
 })();

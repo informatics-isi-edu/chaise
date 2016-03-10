@@ -194,7 +194,10 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/select.js
+	$(JS)/vendor/select.js \
+	$(JS)/vendor/angular-datepicker.js \
+	$(JS)/vendor/rzslider.js
+
 
 DE_JS_SOURCE=$(DE_ASSETS)/dataEntry.app.js \
 	$(DE_ASSETS)/context.js \
@@ -207,6 +210,8 @@ DE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
+	$(CSS)/vendor/angular-datepicker.css \
+	$(CSS)/vendor/rzslider.css \
 	$(CSS)/appheader.css \
 	$(RECORD_ASSETS)/stylesheets/app.css
 

@@ -6,5 +6,5 @@
 
     // Initialized with the table and name so that Angular won't complain when it
     // renders the initial view before the table data has arrived yet
-    .value('data', {table:{name: ''}});
+    .value('data', {table:{name: '...'}});
 })();

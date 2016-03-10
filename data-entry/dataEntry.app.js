@@ -3,7 +3,13 @@
 
     var client;
 
-    angular.module('chaise.dataEntry', ['ERMrest', 'ngSanitize', 'ui.select'])
+    angular.module('chaise.dataEntry', [
+        'ERMrest',
+        'ngSanitize',
+        'ui.select',
+        'rzModule',
+        '720kb.datepicker'
+    ])
 
     // Configure the context info from the URI
     .config(['context', function configureContext(context) {
