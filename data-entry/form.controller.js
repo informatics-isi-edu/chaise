@@ -25,7 +25,7 @@
             vm.newData = [vm.newData];
 
             // How to programmatically tell which columns are defaults?
-            vm.data.table.createEntity(vm.newData, ['id', 'created']).then(function success(entity) {
+            vm.data.table.entity.post(vm.newData, ['id', 'created']).then(function success(entity) {
                 console.log(entity);
             }, function error(response) {
                 console.log(response);

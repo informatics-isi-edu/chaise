@@ -24,23 +24,25 @@
             <div ng-controller="FormController as form" class="row">
                 <div class="col-md-6 col-md-offset-3">
                     <form ng-show="form.showForm">
-                        <h2>Add New {{form.data.table.displayName}}</h2>
+                        <!-- TODO: filters error out when first transforming table name -->
+                        <h2>Add New {{form.data.table.name | underscoreToSpace | toTitleCase}}</h2>
                         <br>
-                        <div ng-repeat="column in form.data.table.columns" class="form-group">
-                            <label for="{{column.name}}">{{column.displayName | underscoreToSpace | toTitleCase}}</label>
-                            <input ng-model="form.newData[column.name]" type="text" class="form-control" id="{{column.name}}">
+                        <div ng-repeat="(column, props) in form.data.table.columns._columns" class="form-group">
+                            <label for="{{props.name}}">{{props.name | underscoreToSpace | toTitleCase}}</label>
+                            <input ng-model="form.newData[props.name]" type="text" class="form-control" id="{{props.name}}">
                         </div>
                         <button ng-click="form.confirmSubmission();" type="button" role="button" class="btn btn-primary">Submit</button>
                     </form>
                     <div ng-show="!form.showForm" class="row">
-                            <h2>Confirm New {{form.data.table.displayName}}</h2>
+                        <!-- TODO: filters error out when first transforming table name -->
+                            <h2>Confirm New {{form.data.table.name | underscoreToSpace | toTitleCase}}</h2>
                             <p class="lead">You're about to add the following information to the database. Is this correct?</p>
                             <table class="table table-striped">
-                                <tr ng-repeat="column in form.data.table.columns">
+                                <tr ng-repeat="(column, props) in form.data.table.columns._columns">
                                     <td class="col-md-3">
-                                        <strong>{{column.displayName | underscoreToSpace | toTitleCase}}</strong>
+                                        <strong>{{props.name | underscoreToSpace | toTitleCase}}</strong>
                                     </td>
-                                    <td class="col-md-9">{{form.newData[column.name]}}</td>
+                                    <td class="col-md-9">{{form.newData[props.name]}}</td>
                                 </tr>
                             </table>
                             <button ng-click="form.submit();" type="submit" class="btn btn-primary">Add to Database</button>

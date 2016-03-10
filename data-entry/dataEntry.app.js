@@ -8,6 +8,9 @@
     // Configure the context info from the URI
     .config(['context', function configureContext(context) {
         context.serviceURL = window.location.origin + '/ermrest';
+        if (chaiseConfig.ermrestLocation) {
+            context.serviceURL = chaiseConfig.ermrestLocation + '/ermrest';
+        }
 
         var hash = window.location.hash;
 
@@ -29,16 +32,20 @@
         }
     }])
 
-    .run(['context', 'ermrestClientFactory', 'data', '$http', function configureRun(context, ermrestClientFactory, data, $http) {
-        var client = ermrestClientFactory.getClient(context.serviceURL);
-        client.getCatalog(context.catalogID).introspect().then(function success(schemas) {
-            var schema = schemas[context.schemaName];
+    .run(['context', 'ermrestServerFactory', 'data', '$http', function runApp(context, ermrestServerFactory, data, $http) {
+        var server = ermrestServerFactory.getServer(context.serviceURL);
+        server.catalogs.get(context.catalogID).then(function success(catalog) {
+            var schema = catalog.schemas.get(context.schemaName);
             if (schema) {
-                var table = schema.getTable(context.tableName);
+                var table = schema.tables.get(context.tableName);
                 if (table) {
                     data.table = table;
+                    console.log(data);
+                } else {
+                    console.log('Table not found.');
                 }
-                console.log(data);
+            } else {
+                console.log('Schema not found.');
             }
         }, function error(response) {
             if (response.status == 401) {
