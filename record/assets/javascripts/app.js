@@ -180,7 +180,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                             if (embedAnnotation !== undefined &&
                                 embedAnnotation.presentation !== undefined && embedAnnotation.presentation === 'embed') {
 
-                                var embedTable = {title: ft.displayTableName, elements: []};
+                                var embedTable = {title: ft.title, elements: []};
                                 var cdef = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].column_definitions;
 
                                 for (var e = 0; e < elements.length; e++) {
