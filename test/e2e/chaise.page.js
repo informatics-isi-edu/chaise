@@ -31,79 +31,85 @@ function tools() {
 var toolkit = new tools();
 
 function sidebar() {
+    var that = this;
     this.htmlElement = $(sidebarId);
     this.searchInput = this.htmlElement.$('div.search-box > input');
     this.sidebarAttrsDisplayed = this.htmlElement.all(by.css('ul.sidebar-nav li.ng-scope:not(.ng-hide)'));
     this.sidebarHeader = this.htmlElement.$('#navcontainer h4');
     this.viewMoreBtn = this.htmlElement.element(by.cssContainingText('li a', 'View all attributes'));
     this.findSidebarAttrsByName = function (attrName) {
-        return this.htmlElement.all(by.cssContainingText('ul li a', attrName))
+        return that.htmlElement.all(by.cssContainingText('ul li a', attrName))
     };
     this.findSidebarAttrByName = function (attrName) {
-        return this.htmlElement.element(by.cssContainingText('ul li a', attrName));
+        return that.htmlElement.element(by.cssContainingText('ul li a', attrName));
     };
     this.clickSidebarAttr = function (attrName) {
-        this.findSidebarAttrByName(attrName).click();
+        that.findSidebarAttrByName(attrName).click();
     };
 };
 
 function moreFilter() {
-    this.htmlElement = $(moreFilterId); this.sidebarHeader = this.htmlElement.$('div.sidebar-title h4');
+    var that = this;
+    this.htmlElement = $(moreFilterId);
+    this.sidebarHeader = this.htmlElement.$('div.sidebar-title h4');
     this.findMorefilterAttrByName = function (attrName) {
-        return this.htmlElement.element(by.cssContainingText('div.editvalue-container' +
+        return that.htmlElement.element(by.cssContainingText('div.editvalue-container' +
             ' div[ng-repeat="facet in FacetsData.facets"] label', attrName));
     };
     this.goBackToSidebar = function () {
-        this.sidebarHeader.click();
+        that.sidebarHeader.click();
     };
 };
 
 function editFilter() {
+    var that = this;
     this.htmlElement = $(editFilterId);
     this.sidebarHeader = this.htmlElement.$('div.sidebar-title h4');
     this.editFilterAttrsDisplayed = this.htmlElement.all(by.css('ul.nav.filteritems li.ng-scope:not(.ng-hide)'));
     this.findEditfilterAttrByName = function (attrName) {
-        return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
+        return that.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide) label', attrName));
     };
     this.clickEditFilter = function (attrName) {
-        this.findEditfilterAttrByName(attrName).click();
+        that.findEditfilterAttrByName(attrName).click();
     };
     this.goBackToSidebar = function () {
-        this.sidebarHeader.click();
+        that.sidebarHeader.click();
     };
     this.findEditfilterLiByName = function (attrName) {
-        return this.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
+        return that.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
     };
     this.findCheckStatusDivByName = function (attr) {
-        return this.findEditfilterLiByName(attr).$('div[ng-click="sideBar.checkUncheck($event,value)"]');
+        return that.findEditfilterLiByName(attr).$('div[ng-click="sideBar.checkUncheck($event,value)"]');
     }
 };
 
 function contentFilter() {
+    var that = this;
     var filterEle = '#filter';
     this.htmlElement = $(filterEle);
     this.clearAllBtn = this.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope > a', 'Clear All Filters'));
     this.displayedFilters = this.htmlElement.all(by.css('div.filter-item.ng-scope:not(.ng-hide)'));
     this.clickClearAllBtn = function () {
-        this.clearAllBtn.click();
+        that.clearAllBtn.click();
     };
     this.findFilterWrapperByName = function (attrName) {
-        return this.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
+        return that.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
     };
     this.findFitlerWrapperTitleByWrapperName = function (wrapperAttrName) {
-        var titleSpan = this.findFilterWrapperByName(wrapperAttrName)
+        var titleSpan = that.findFilterWrapperByName(wrapperAttrName)
             .$('span[ng-attr-title="{{facetResults.displayTitle(facet)}}"]');
         return titleSpan.getAttribute('title');
     };
     this.clickFilterWrapperCancelByName = function (attrName) {
-        this.findFilterWrapperByName(attrName).$('a.filter-link-cancel').click();
+        that.findFilterWrapperByName(attrName).$('a.filter-link-cancel').click();
     };
     this.findCheckedSubfiltersByName = function (attrName) {
-        return this.findFilterWrapperByName(attrName).all(by.css('span.filter-item-value.ng-scope > span'));
+        return that.findFilterWrapperByName(attrName).all(by.css('span.filter-item-value.ng-scope > span'));
     }
 };
 
 function resultContent() {
+    var that = this;
     this.resultAllRows = element.all(by.repeater('row in FacetsData.ermrestData'));
     this.resultTally = element.all(by.css('#results_tally')).get(1);
     this.resultTallyRange = this.resultTally.element(by.binding("facetResults.displayRange()"));
@@ -120,33 +126,34 @@ function resultContent() {
         return ele.element(by.cssContainingText('dt.ng-binding', 'Investigator'));
     };
     this.getResultInvestigatorContent = function (ele) {
-        var investEle = this.getResultInvestigatorElement(ele);
+        var investEle = that.getResultInvestigatorElement(ele);
         return toolkit.getSiblingByCss(investEle, 'dd');
     };
     this.getResultSummaryElement = function (ele) {
         return ele.element(by.cssContainingText('dt.ng-binding', 'Summary'));
     };
     this.getResultSummaryContent = function (ele) {
-        var summaryEle = this.getResultSummaryElement(ele);
+        var summaryEle = that.getResultSummaryElement(ele);
         return toolkit.getSiblingByCss(summaryEle, 'dd');
     }
 };
 
 function recordPage() {
+    var that = this;
     this.entityTitle = $('#entity-title');
     this.findEntityKeyByName = function (entityName) {
         //return element(by.css('.entity-key.ng-binding:contains("' + entityName + '")'));
-        return element(by.xpath('//td[.="' + entityName + '"]'));
+        return element(by.xpath('//td[.=\'' + entityName + '\']'));
     };
     this.findEntityValueByName = function (entityName) {
-        var entityKey = this.findEntityKeyByName(entityName);
+        var entityKey = that.findEntityKeyByName(entityName);
         return toolkit.getSiblingByCss(entityKey, 'td');
     }
     this.findToggleWrapperByName = function (keyName) {
         return element(by.cssContainingText('.panel-group div.panel.panel-default', keyName))
     };
     this.clickToggleWrapperByName = function (keyName) {
-        this.findToggleWrapperByName(keyName).click();
+        that.findToggleWrapperByName(keyName).click();
     };
 };
 
