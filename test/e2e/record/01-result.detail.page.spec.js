@@ -1,7 +1,7 @@
 var chaisePage = require('../chaise.page.js');
 
 describe('Search result detail page,', function () {
-    var waitTimeAfterClickingEditFilter = 3000;
+    var waitTimeAfterClickingEditFilter = 10000;
     var EC = protractor.ExpectedConditions;
     beforeEach(function (done) {
         browser.get('');
@@ -33,6 +33,22 @@ describe('Search result detail page,', function () {
                                 done();
                             });
                         } else if (attrName === 'Mouse Chromosome') {
+                            var nextAttr = allAttrs.get(ranInt - 1);
+                            nextAttr.getText().then(function (txt) {
+                                randomSidebarAttr = txt;
+                                console.log('' + txt);
+                                nextAttr.click();
+                                done();
+                            });
+                        } else if (attrName === 'Investigator') {
+                            var nextAttr = allAttrs.get(ranInt + 1);
+                            nextAttr.getText().then(function (txt) {
+                                randomSidebarAttr = txt;
+                                console.log('' + txt);
+                                nextAttr.click();
+                                done();
+                            });
+                        } else if (attrName === 'Accession') {
                             var nextAttr = allAttrs.get(ranInt - 1);
                             nextAttr.getText().then(function (txt) {
                                 randomSidebarAttr = txt;
@@ -123,7 +139,7 @@ describe('Search result detail page,', function () {
                         expect(accKey.getText()).toBe('Description');
                         done();
                     });
-                    it('should display the \'Funding\' key and non-empty content', function (done) {
+                    xit('should display the \'Funding\' key and non-empty content', function (done) {
                         var fundingText = 'funding';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(fundingText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(fundingText);
@@ -132,8 +148,8 @@ describe('Search result detail page,', function () {
                         expect(accValue.getText()).not.toBe('');
                         expect(accKey.getText()).toBe('Funding');
                         done();
-                    });
-                    it('should display the \'Pubmed Id\' key and display \'N/A\' or digits', function (done) {
+                    }).pend('Some record page may not contain "Funding", ex. Data Type -> Morphometic analysis');
+                    xit('should display the \'Pubmed Id\' key and display \'N/A\' or digits', function (done) {
                         var pubmedText = 'pubmed id';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(pubmedText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(pubmedText);
@@ -142,7 +158,7 @@ describe('Search result detail page,', function () {
                         expect(accValue.getText()).toMatch('(^[0-9]*$|^N/A$)');
                         expect(accKey.getText()).toBe('Pubmed Id');
                         done();
-                    });
+                    }).pend('Some record page may not contain "Pumbed Id", ex. Mouse Phenotype -> Normative');
 
                     it('should contain the randomly chosen attribute field (' + randomSidebarAttr + ')', function (done) {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
@@ -182,7 +198,7 @@ describe('Search result detail page,', function () {
                                 done();
                             }
                         });
-                    }).pend('Some record page does not contain "Files", ex. Organism -> Human');
+                    }).pend('Some record page may not contain "Files", ex. Organism -> Human');
 
                     it('should display \'Dataset Geo\', toggle it to display something', function (done) {
                         var dataset = 'dataset geo';

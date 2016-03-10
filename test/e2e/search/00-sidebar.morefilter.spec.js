@@ -18,113 +18,98 @@ describe('Chaise initial sidebar,', function () {
             browser.get('');
         });
 
-        it('should show the spinner', function (done) {
+        it('should show the spinner', function () {
             //not so sure why adding ignoreSync works
             //probably not waiting for AngularJS to sync,
             //so icon can be tested before everything settles down(settling down means img is no longer there)
             browser.ignoreSynchronization = true;
             expect(spinner.isDisplayed()).toBe(true);
-            done();
         });
     });
 
     describe('after initialization completes,', function () {
-        it('should show the initial sidebar', function (done) {
+        it('should show the initial sidebar', function () {
             browser.ignoreSynchronization = false;
             var sidebar = element(by.id('sidebar'));
             browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
                 expect(sidebar.isDisplayed()).toBe(true);
-                done();
             });
         });
-        it('should not show the spinner', function (done) {
+        it('should not show the spinner', function () {
             expect(spinner.isDisplayed()).toBe(false);
-            done();
         });
-        it('should have > 1 visible attributes to choose from', function (done) {
+        it('should have > 1 visible attributes to choose from', function () {
             expect(chaisePage.sidebar.sidebarAttrsDisplayed.count()).toBeGreaterThan(0);
-            done();
         });
 
         describe('sidebar header title,', function () {
             var initSidebarHeaderText = 'CHOOSE ATTRIBUTES:';
             var sidebarHeader = chaisePage.sidebar.sidebarHeader;
-            it('should show correctly when initialized', function (done) {
+            it('should show correctly when initialized', function () {
                 expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
-                done();
             });
 
             var expectedAttr = 'Data Type';
             var dataTypeAttr = chaisePage.sidebar.findSidebarAttrByName(expectedAttr);
             var sidebarAttrTitle = chaisePage.editFilter.sidebarHeader;
 
-            it('should change correctly when one attribute is chosen', function (done) {
-                dataTypeAttr.click().then(function () {
-                    expect(sidebarAttrTitle.getText()).toBe(expectedAttr.toUpperCase());
-                    done();
-                });
+            it('should change correctly when one attribute is chosen', function () {
+                dataTypeAttr.click();
+                expect(sidebarAttrTitle.getText()).toBe(expectedAttr.toUpperCase());
             });
 
-            it('should change back to \'CHOOSE ATTRIBUTES\' when clicking GoBack icon', function (done) {
+            it('should change back to \'CHOOSE ATTRIBUTES\' when clicking GoBack icon', function () {
                 var sidebarBack = chaisePage.editFilter.sidebarHeader;
-                sidebarBack.click().then(function () {
-                    expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
-                    done();
-                });
+                sidebarBack.click();
+                expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
             });
         });
 
         //previously displayed attribute
         var somiteCount = 'Somite Count';
         //previously non-displayed attribute
-        var investigator = 'Investigator';
+        var nonDisplayedAttrName = 'Title';
+
 
         var somiteCountAttr = chaisePage.sidebar.findSidebarAttrByName(somiteCount);
-        var investigatorAttr = chaisePage.sidebar.findSidebarAttrByName(investigator);
-        it('should show \'Somite Count\' attribute', function (done) {
+        var nonDisplayedAttr = chaisePage.sidebar.findSidebarAttrByName(nonDisplayedAttrName);
+        it('should show \'Somite Count\' attribute', function () {
             expect(somiteCountAttr.isDisplayed()).toBe(true);
-            done();
         });
 
-        it('should not show \'Investigator\' attribute', function (done) {
-            expect(investigatorAttr.isDisplayed()).toBe(false);
-            done();
+        it('should not show \'' + nonDisplayedAttrName + '\' attribute', function () {
+            expect(nonDisplayedAttr.isDisplayed()).toBe(false);
         });
 
         var viewAll = chaisePage.sidebar.viewMoreBtn;
         var sidebarHeader = chaisePage.sidebar.sidebarHeader;
         describe('when entering \'View All Attributes\'', function () {
-            it('sidebar header should change to \'view all attributes\'', function (done) {
+            it('sidebar header should change to \'view all attributes\'', function () {
                 viewAll.click();
                 expect(chaisePage.moreFilter.sidebarHeader.getText()).toContain('ALL ATTRIBUTES');
-                done();
             });
 
-            it('should check \'Investigator\' and uncheck \'Somite Count\'', function (done) {
-                var investigatorCheckbox = chaisePage.moreFilter.findMorefilterAttrByName(investigator);
+            it('should check \'' + nonDisplayedAttrName + '\' and uncheck \'Somite Count\'', function () {
+                var nonDisplayedAttrCheckbox = chaisePage.moreFilter.findMorefilterAttrByName(nonDisplayedAttrName);
                 var somiteCountCheckbox = chaisePage.moreFilter.findMorefilterAttrByName(somiteCount);
-                investigatorCheckbox.click();
+                nonDisplayedAttrCheckbox.click();
                 somiteCountCheckbox.click();
-                done();
             });
 
         });
 
         describe('when back to initial sidebar', function () {
-            it('sidebar header should show \'CHOOSE ATTRIBUTES:\'', function (done) {
+            it('sidebar header should show \'CHOOSE ATTRIBUTES:\'', function () {
                 chaisePage.moreFilter.goBackToSidebar();
                 expect(sidebarHeader.getText()).toBe('CHOOSE ATTRIBUTES:');
-                done();
             });
 
-            it('should show \'Investigator\' attribute', function (done) {
-                expect(investigatorAttr.isDisplayed()).toBe(true);
-                done();
+            it('should show \'Investigator\' attribute', function () {
+                expect(nonDisplayedAttr.isDisplayed()).toBe(true);
             });
 
-            it('should not show \'Somite Count\' attribute', function (done) {
+            it('should not show \'Somite Count\' attribute', function () {
                 expect(somiteCountAttr.isDisplayed()).toBe(false);
-                done();
             });
 
         });
