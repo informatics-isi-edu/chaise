@@ -4,7 +4,7 @@
 var chaisePage = require('../chaise.page.js');
 var filterObj = chaisePage.resultContent.filter;
 
-xdescribe('Filters on top of the records,', function () {
+describe('Filters on top of the records,', function () {
     var EC = protractor.ExpectedConditions;
 
     it('should load the page correctly', function (done) {

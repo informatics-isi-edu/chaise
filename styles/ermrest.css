@@ -345,6 +345,10 @@ th.multiple_values, td.multiple_values {
 	color: yellow;
 }
 
+#logout_link {
+	padding-left: 10px;
+}
+
 .collection_badge {
 	background-color: #FFF;
 	color: #333;
@@ -361,9 +365,10 @@ th.multiple_values, td.multiple_values {
     border-radius: 7px;
     color: #828282;
     top: 50vh;
-    position: absolute;
-    left: 75%;
+		position: fixed;
+		left: 0;
+		right: 0;
     margin-top: -75px;
-    margin-left: -75px;
+		margin-left: auto;
     z-index: 10;
 }

@@ -4,7 +4,7 @@
 
 var chaisePage = require('../chaise.page.js');
 
-xdescribe('Sidebar top search input,', function () {
+describe('Sidebar top search input,', function () {
     var EC = protractor.ExpectedConditions;
 
     it('should load the page correctly', function (done) {

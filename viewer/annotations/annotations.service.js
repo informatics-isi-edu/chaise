@@ -3,9 +3,9 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'image', 'annotations', 'sections', 'CommentsService', 'AlertsService', '$window', '$q', function(context, image, annotations, sections, CommentsService, AlertsService, $window, $q) {
-        var origin = window.location.origin;
-        var iframe = document.getElementById('osd').contentWindow;
+    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'sections', 'CommentsService', 'AuthService', 'AlertsService', '$window', '$q', function(context, user, image, annotations, sections, CommentsService, AuthService, AlertsService, $window, $q) {
+        var origin = $window.location.origin;
+        var iframe = $window.frames[0];
 
         function drawAnnotation() {
             iframe.postMessage({messageType: 'drawAnnotation'}, origin);
@@ -19,7 +19,7 @@
             newAnnotation = [{
                 "image_id": context.imageID,
                 "anatomy": newAnnotation.anatomy,
-                "author": context.session.client,
+                "author": user.name,
                 "context_uri": iframe.location.href,
                 "coords": [
                     newAnnotation.shape.geometry.x,
@@ -31,10 +31,9 @@
             }];
 
             if (type == 'section_annotation') {
-                // Section annotations don't have anatomies
+                // Section annotations don't need anatomies
                 delete newAnnotation[0].anatomy;
             }
-
             var table = image.entity.getRelatedTable(context.schemaName, type);
             return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
                 var messageType = '';
@@ -64,9 +63,12 @@
             }
 
             // Update in ERMrest
-            annotation.update();
-            // Update in Annotorious
-            iframe.postMessage({messageType: 'updateAnnotation', content: annotation.data}, origin);
+            annotation.update().then(function success(response) {
+                // Update in Annotorious
+                iframe.postMessage({messageType: 'updateAnnotation', content: annotation.data}, origin);
+            }, function error(response) {
+                console.log(response);
+            });
         }
 
         function getNumComments(annotationId) {
@@ -74,39 +76,41 @@
         }
 
         // Returns a boolean
-        function allowDelete(annotation) {
+        function hasComments(annotation) {
             // If there are comments on annotation, return false.
             if (getNumComments(annotation.data.id) > 0) {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
 
         function deleteAnnotation(annotation) {
-            if (allowDelete(annotation)) {
-                // Delete from ERMrest
-                annotation.delete().then(function success(response) {
-                    // Delete from the 'annotations' or 'sections' provider
-                    var type = annotation.table.name;
-                    if (type == 'annotation') {
-                        var index = annotations.indexOf(annotation);
-                        annotations.splice(index, 1);
-                    } else if (type == 'section_annotation') {
-                        var index = sections.indexOf(annotation);
-                        sections.splice(index, 1);
-                    }
+            if (!hasComments(annotation)) {
+                // if (AuthService.deleteAnnotation(annotation)) {
+                    // Delete from ERMrest
+                    annotation.delete().then(function success(response) {
+                        // Delete from the 'annotations' or 'sections' provider
+                        var type = annotation.table.name;
+                        if (type == 'annotation') {
+                            var index = annotations.indexOf(annotation);
+                            annotations.splice(index, 1);
+                        } else if (type == 'section_annotation') {
+                            var index = sections.indexOf(annotation);
+                            sections.splice(index, 1);
+                        }
 
-                    // Delete in Annotorious
-                    iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
-                }, function error(response) {
-                    console.log(response);
-                });
+                        // Delete in Annotorious
+                        iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
+                    }, function error(response) {
+                        console.log(response);
+                    });
+                // }
             } else {
-                AlertsService.setAlert({
+                AlertsService.addAlert({
                     type: 'error',
                     message: 'Sorry, this annotation cannot be deleted because there are comments on it.'
                 });
-            };
+            }
         }
 
         function highlightAnnotation(annotation) {

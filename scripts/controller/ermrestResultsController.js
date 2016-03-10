@@ -2,7 +2,7 @@
 
 /* Controllers */
 
-var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService']);
+var ermResultsController = angular.module('ermResultsController', ['facetsModel', 'facetsService', 'ui.select']);
 
 //angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
 
@@ -201,6 +201,18 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	};
 
 	this.sortData = function sortData(event) {
+		if ($scope.FacetsData.sortFacet == null || $scope.FacetsData.sortFacet == '') {
+			$scope.FacetsData.sortOrder = null;
+		} else {
+			$scope.FacetsData.sortOrder = 'asc';
+		}
+		$scope.FacetsData.pagingOptions.currentPage = 2;
+		$scope.FacetsData.pagingOptions.currentPage = updatePageTag('backward', $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap, $scope.FacetsData.tagPages, $scope.FacetsData.maxPages);
+		setActivePage($scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap);
+	};
+
+	this.changeSortOrder = function changeSortOrder(event) {
+		$scope.FacetsData.sortOrder = ($scope.FacetsData.sortOrder == 'asc') ? 'desc' : 'asc';
 		$scope.FacetsData.pagingOptions.currentPage = 2;
 		$scope.FacetsData.pagingOptions.currentPage = updatePageTag('backward', $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap, $scope.FacetsData.tagPages, $scope.FacetsData.maxPages);
 		setActivePage($scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap);

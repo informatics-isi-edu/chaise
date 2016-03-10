@@ -3,11 +3,13 @@
 
     angular.module('chaise.viewer')
 
-    .controller('ImageMetadataController', ['vocabs', 'image', 'statuses', function(vocabs, image, statuses) {
+    .controller('ImageMetadataController', ['AuthService', 'vocabs', 'image', 'statuses', function(AuthService, vocabs, image, statuses) {
         var vm = this;
         vm.image = image;
         vm.vocabs = vocabs;
         vm.statuses = statuses;
+
+        vm.allowEdit = AuthService.editMetadata;
 
         vm.editMode = false;
 
@@ -21,7 +23,6 @@
         function save() {
             vm.editMode = false;
             vm.image.entity.update();
-            console.log('Updated image: ', vm.image.entity.data);
         }
     }]);
 })();

@@ -8,7 +8,7 @@
  */
 
 var chaisePage = require('../chaise.page.js');
-xdescribe('Chaise initial sidebar,', function () {
+describe('Chaise initial sidebar,', function () {
 
     var EC = protractor.ExpectedConditions;
 

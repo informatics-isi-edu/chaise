@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['annotations', 'sections', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(annotations, sections, anatomies, AnnotationsService, $window, $scope) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'sections', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(AuthService, annotations, sections, anatomies, AnnotationsService, $window, $scope) {
         var vm = this;
         vm.annotations = annotations;
         vm.sections = sections;
@@ -31,6 +31,10 @@
         vm.centerAnnotation = centerAnnotation;
 
         vm.getNumComments = getNumComments;
+
+        vm.allowCreate = AuthService.createAnnotation;
+        vm.allowEdit = AuthService.editAnnotation;
+        vm.allowDelete = AuthService.deleteAnnotation;
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {

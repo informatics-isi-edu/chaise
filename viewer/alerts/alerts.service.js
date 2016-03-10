@@ -6,21 +6,21 @@
     .factory('AlertsService', [function AlertsService() {
         var alerts = [];
 
-        function setAlert(alert) {
+        function addAlert(alert) {
             if (alert.hasOwnProperty('type') && alert.hasOwnProperty('message')) {
                 return alerts.push(alert);
             }
-            console.log('Improper alert properties: ', alert);
+            console.log('Invalid alert properties: ', alert);
         }
 
         function deleteAlert(alert) {
             var index = alerts.indexOf(alert);
             alerts.splice(index, 1);
         }
-        
+
         return {
             alerts: alerts,
-            setAlert: setAlert,
+            addAlert: addAlert,
             deleteAlert: deleteAlert
         };
     }]);
