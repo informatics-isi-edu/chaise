@@ -402,11 +402,13 @@ function submitLogout() {
 		token = null;
 		USER = null;
 	}
-	$('#login_user').html('');
-	$('#login_link').show();
+	$('#login_user').hide();
+	$('#login_link').hide();
 	$('#logout_link').hide();
-	var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
-	window.location = login_url;
+	//var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
+	//window.location = login_url;
+	var logout_url = '../logout?referrer=' + encodeSafeURIComponent(window.location);
+	window.location = logout_url;
 }
 
 function encodeSafeURIComponent(value) {
@@ -1806,7 +1808,8 @@ function deleteSession(param) {
 }
 
 function successDeleteSession(data, textStatus, jqXHR, param) {
-	getSession(param);
+	//getSession(param);
+	submitLogout();
 }
 
 function getSession(param) {
@@ -3869,3 +3872,6 @@ function facetIsInBookmark(table_name, column_name, filter) {
 	return ret;
 }
 
+function chaiseApp() {
+	window.location = window.location.origin;
+}
