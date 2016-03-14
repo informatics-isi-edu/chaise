@@ -34,6 +34,7 @@ BOWER=bower_components
 
 # HTML
 HTML=search/index.html \
+	 logout/index.html \
 	 login/index.html \
 	 record/index.html \
 	 matrix/index.html \
@@ -308,6 +309,10 @@ search/index.html: search/index.html.in .make-asset-block .make-template-block
 login/index.html: login/index.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		login/index.html.in > login/index.html
+
+logout/index.html: logout/index.html.in .make-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
+		logout/index.html.in > logout/index.html
 
 record/index.html: record/index.html.in .make-record-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
