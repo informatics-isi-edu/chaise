@@ -776,7 +776,12 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         }).
         error(function(data, status, headers, config) {
             console.log("Error querying schemas", data);
-            notFoundService.show("We're sorry, the catalogue id " + cid + " does not exist. Please try again!");
+            if (status == 401) {
+				var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location.href);
+				window.location = login_url;
+            } else {
+                notFoundService.show("We're sorry, the catalogue id " + cid + " does not exist. Please try again!");
+            }
         });
     }
 
