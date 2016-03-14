@@ -113,10 +113,6 @@
             }
         }
 
-        function highlightAnnotation(annotation) {
-            iframe.postMessage({messageType: 'highlightAnnotation', content: annotation.data}, origin);
-        };
-
         function centerAnnotation(annotation) {
             iframe.postMessage({messageType: 'centerAnnotation', content: annotation.data}, origin);
         };
@@ -127,7 +123,6 @@
             cancelNewAnnotation: cancelNewAnnotation,
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
-            highlightAnnotation: highlightAnnotation,
             centerAnnotation: centerAnnotation,
             getNumComments: getNumComments
         };

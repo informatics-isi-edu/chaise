@@ -355,8 +355,7 @@
                         <!-- Sections List -->
                         <div ng-repeat="section in annotations.sections | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])"
                          ng-class="{highlighted: annotations.highlightedAnnotation == (section.table.name + '-' + section.data.id)}"
-                          class="annotation section" id="{{section.table.name + '-' + section.data.id}}"
-                           ng-click="annotations.centerAnnotation(section);" ng-mouseover="annotations.highlightAnnotation(section);">
+                          class="annotation section" id="{{section.table.name + '-' + section.data.id}}">
                             <div ng-show="annotations.editedAnnotation != (section.table.name + '-' + section.data.id)">
                                 <div class="row">
                                     <div class="col-md-3">
@@ -423,9 +422,7 @@
                         <!-- Annotations List -->
                         <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created']) track by $index"
                         ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table.name + '-' + annotation.data.id)}"
-                        id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation"
-                        ng-click="annotations.centerAnnotation(annotation);"
-                        ng-mouseover="annotations.highlightAnnotation(annotation);">
+                        id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation">
                             <!-- Annotation Display Card -->
                             <div ng-show="annotations.editedAnnotation != (annotation.table.name + '-' + annotation.data.id)">
                                 <div class="row">
@@ -491,7 +488,7 @@
                                         <div class="col-md-12">
                                             <div class="comment-input">
                                                 <div class="input-group input-group-sm">
-                                                    <input ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
+                                                    <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
                                                     <span class="input-group-btn">
                                                         <button ng-click="comments.createComment();" class="btn btn-success" type="submit" role="button">
                                                             Post

@@ -27,7 +27,6 @@
         vm.deleteAnnotation = deleteAnnotation;
 
         vm.highlightedAnnotation = null;
-        vm.highlightAnnotation = highlightAnnotation;
         vm.centerAnnotation = centerAnnotation;
 
         vm.getNumComments = getNumComments;
@@ -148,12 +147,6 @@
 
         function setHighlightedAnnotation(annotation) {
             vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
-        }
-
-        // Highlights the annotation inside Annotorious
-        function highlightAnnotation(annotation) {
-            setHighlightedAnnotation(annotation);
-            return AnnotationsService.highlightAnnotation(annotation);
         }
 
         // Centers and zooms to the annotation inside Annotorious
