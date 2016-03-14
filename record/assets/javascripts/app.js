@@ -105,8 +105,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             var entity          = data[0];
 
             entity.sequences = []; // array of sequence columns
+            entity.colTooltips = {}; // column tool tips
 
-            // apply sequence formatting
+            // apply sequence formatting & get column tooltips
             var columnDefinitions = schema.tables[tableName].column_definitions;
             for (var i = 0; i < columnDefinitions.length; i++) {
                 var cdAnnotation = columnDefinitions[i].annotations;
@@ -128,6 +129,11 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                         }
                     }
                     entity[columnDefinitions[i].name] = text;
+                }
+
+                // tooltips
+                if (columnDefinitions[i].comment != null) {
+                    entity.colTooltips[columnDefinitions[i].name] = columnDefinitions[i].comment;
                 }
             }
 
@@ -1546,11 +1552,15 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
 
         for (var key in entity){
             var value = entity[key];
-            // Only insert values into filteredEntity if value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object AND if the key is not 'interal'
-            // and key is does not end with "_link" (for pattern linking of another column)
+            // Only insert values into filteredEntity if
+            // * value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object
+            // * key is not 'interal'
+            // * key does not end with "_link" (for pattern linking of another column)
+            // * key is not colTooltips
             if (value !== null &&
                 (!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) &&
-                key != 'internal' && !key.match(".*_link")){
+                key != 'internal' && !key.match(".*_link") &&
+                key != 'colTooltips'){
 
                 // use display column name as key
                 // TODO inefficient to do this for each column?

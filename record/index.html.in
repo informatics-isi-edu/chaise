@@ -44,7 +44,12 @@
             <div id="entity-subtitle">{{ entity.internal.displayTableName }}</div>
             <table class="table">
                 <tr ng-repeat="(key, value) in entity | filteredEntity">
-                    <td class="entity-key col-xs-2">{{ key | removeUnderScores }}</td>
+                    <td class="entity-key col-xs-2">
+                        <div ng-if="entity.colTooltips[key]" class="coltooltip">{{ key | removeUnderScores }}
+                            <span class="coltooltiptext">{{ entity.colTooltips[key] }}</span>
+                        </div>
+                        <span ng-if="!entity.colTooltips[key]">{{ key | removeUnderScores }}</span>
+                    </td>
                     <td class="entity-value col-xs-10">
                         <a ng-if="entity[key + '_link'] && value !== null" ng-href="{{entity[key + '_link']}}" ng-click="isExternalUrl(reference[key + '_link']) || reloadPage()"
                             ng-attr-target="{{isExternalUrl(entity[key + '_link']) && '_blank' || '_self'}}">
