@@ -522,7 +522,7 @@
                                     </div>
                                 </div>
                                 <br>
-                                <div ng-show="annotation.data.description" class="row">
+                                <div class="row">
                                     <div class="col-md-12">
                                         <label>Description</label>
                                         <textarea ng-model="annotation.data.description" rows="3" class="form-control"></textarea>
