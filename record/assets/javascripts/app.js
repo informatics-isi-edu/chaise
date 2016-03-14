@@ -180,7 +180,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                             if (embedAnnotation !== undefined &&
                                 embedAnnotation.presentation !== undefined && embedAnnotation.presentation === 'embed') {
 
-                                var embedTable = {title: ft.displayTableName, elements: []};
+                                var embedTable = {title: ft.title, elements: []};
                                 var cdef = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].column_definitions;
 
                                 for (var e = 0; e < elements.length; e++) {
@@ -526,28 +526,34 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                     references[row][col + '_link'] = references[row][col];
                 }
             } else {
-                var link = uriPattern;
-                for (var c = 0; c < columns.length; c++) { // if col name is found in the pattern
-                    var col2 = columns[c];
-                    for (var row = 0; row < references.length; row++) {
+
+                for (var row = 0; row < references.length; row++) {
+
+                    // replace each col used in the pattern
+                    var link = uriPattern;
+                    for (var c = 0; c < columns.length; c++) {
+                        var col2 = columns[c];
                         if (link.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
                             link = link.replace("{" + col2 + "}", references[row][col2]);
-                            references[row][col + '_link'] = link;
                         }
                     }
+                    references[row][col + '_link'] = link;
                 }
             }
 
+
             if (caption !== null) {
-                var cap = caption;
-                for (var c = 0; c < columns.length; c++) { // if col name is found in the pattern
-                    col2 = columns[c];
-                    for (var row = 0; row < references.length; row++) {
+                for (var row = 0; row < references.length; row++) {
+
+                    // replace each col used in the pattern
+                    var cap = caption;
+                    for (var c = 0; c < columns.length; c++) {
+                        var col2 = columns[c];
                         if (cap.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
                             cap = cap.replace("{" + col2 + "}", references[row][col2]);
-                            references[row][col] = cap; // overwrite existing col value with caption
                         }
                     }
+                    references[row][col] = cap; // overwrite existing col value with caption
                 }
             }
         }
