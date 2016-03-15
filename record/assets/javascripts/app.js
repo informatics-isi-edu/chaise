@@ -578,14 +578,14 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                 }
             } else {
 
-                for (var row = 0; row < references.length; row++) {
+                for (row = 0; row < references.length; row++) {
 
                     // replace each col used in the pattern
                     var link = uriPattern;
-                    for (var c = 0; c < columns.length; c++) {
-                        var col2 = columns[c];
+                    for (c = 0; c < columns.length; c++) {
+                        col2 = columns[c];
                         // replace {col} with col value
-                        var search = "{" + col2 + "}";
+                        search = "{" + col2 + "}";
                         link = link.replace(new RegExp(search, 'g'), references[row][col2]);
                     }
                     references[row][col + '_link'] = link;
@@ -595,24 +595,26 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
             if (caption !== null) {
                 for (var row = 0; row < references.length; row++) {
+                    if (references[row][col] !== null) { // leave null values alone
+                        // save original
+                        originals[col] = [];
+                        originals[col][row] = references[row][col]; // NOTE 'originals' structure is { col : [rows...] }
 
-                    // save original
-                    originals[col] = [];
-                    originals[col][row] = references[row][col]; // NOTE 'originals' structure is { col : [rows...] }
+                        // replace each col used in the pattern
+                        var cap = caption;
+                        for (var c = 0; c < columns.length; c++) {
+                            var col2 = columns[c];
 
-                    // replace each col used in the pattern
-                    var cap = caption;
-                    for (var c = 0; c < columns.length; c++) {
-                        var col2 = columns[c];
+                            // replace {col} with col value
+                            var search = "{" + col2 + "}";
+                            if (originals[col2] !== undefined && originals[col2][row] !== undefined) // col values modified
+                                cap = cap.replace(new RegExp(search, 'g'), originals[col2][row]);
+                            else
+                                cap = cap.replace(new RegExp(search, 'g'), references[row][col2]);
+                        }
 
-                        // replace {col} with col value
-                        var search = "{" + col2 + "}";
-                        if (originals[col2] !== undefined && originals[col2][row] !== undefined) // col values modified
-                            cap = cap.replace(new RegExp(search, 'g'), originals[col2][row]);
-                        else
-                            cap = cap.replace(new RegExp(search, 'g'), references[row][col2]);
+                        references[row][col] = cap; // overwrite existing col value with caption
                     }
-                    references[row][col] = cap; // overwrite existing col value with caption
                 }
             }
         }
