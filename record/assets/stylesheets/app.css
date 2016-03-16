@@ -334,6 +334,7 @@ tbody{
 }
 .entity-term{
     margin-right: 10px;
+    margin-top: 10px;
     display: inline-block;
     background-color: #406C90;
     color: #fff;
