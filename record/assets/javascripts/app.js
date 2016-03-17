@@ -188,17 +188,19 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
                                     var urlPattern = embedAnnotation.pattern;
                                     for (var c = 0; c < cdef.length; c++) {
-                                        cname = cdef[c].name;
-                                        urlPattern = urlPattern.replace("{" + cname + "}", element[cname]);
+                                        var cname = cdef[c].name;
+                                        var search = "{" + cname + "}";
+                                        urlPattern = urlPattern.replace(new RegExp(search, 'g'), element[cname]);
                                     }
 
 
                                     var caption = "";
                                     if (embedAnnotation.caption !== undefined) {
                                         caption = embedAnnotation.caption;
-                                        for (var c = 0; c < cdef.length; c++) {
+                                        for (c = 0; c < cdef.length; c++) {
                                             cname = cdef[c].name;
-                                            caption = caption.replace("{" + cname + "}", element[cname]);
+                                            search = "{" + cname + "}";
+                                            caption = caption.replace(new RegExp(search, 'g'), element[cname]);
                                         }
                                     }
 
@@ -225,6 +227,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                                 }
 
                                 entity.embedTables.push(embedTable);
+
+                                // if has download files
+
 
                                 // If annotations is 'download', store it in the entity's 'files' atributes
                             } else if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
