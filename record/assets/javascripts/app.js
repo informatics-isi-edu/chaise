@@ -188,17 +188,19 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
                                     var urlPattern = embedAnnotation.pattern;
                                     for (var c = 0; c < cdef.length; c++) {
-                                        cname = cdef[c].name;
-                                        urlPattern = urlPattern.replace("{" + cname + "}", element[cname]);
+                                        var cname = cdef[c].name;
+                                        var search = "{" + cname + "}";
+                                        urlPattern = urlPattern.replace(new RegExp(search, 'g'), element[cname]);
                                     }
 
 
                                     var caption = "";
                                     if (embedAnnotation.caption !== undefined) {
                                         caption = embedAnnotation.caption;
-                                        for (var c = 0; c < cdef.length; c++) {
+                                        for (c = 0; c < cdef.length; c++) {
                                             cname = cdef[c].name;
-                                            caption = caption.replace("{" + cname + "}", element[cname]);
+                                            search = "{" + cname + "}";
+                                            caption = caption.replace(new RegExp(search, 'g'), element[cname]);
                                         }
                                     }
 
@@ -225,6 +227,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                                 }
 
                                 entity.embedTables.push(embedTable);
+
+                                // if has download files
+
 
                                 // If annotations is 'download', store it in the entity's 'files' atributes
                             } else if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
@@ -533,9 +538,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                     var link = uriPattern;
                     for (var c = 0; c < columns.length; c++) {
                         var col2 = columns[c];
-                        if (link.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
-                            link = link.replace("{" + col2 + "}", references[row][col2]);
-                        }
+                        // replace {col} with col value
+                        var search = "{" + col2 + "}";
+                        link = link.replace(new RegExp(search, 'g'), references[row][col2]);
                     }
                     references[row][col + '_link'] = link;
                 }
@@ -549,9 +554,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                     var cap = caption;
                     for (var c = 0; c < columns.length; c++) {
                         var col2 = columns[c];
-                        if (cap.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
-                            cap = cap.replace("{" + col2 + "}", references[row][col2]);
-                        }
+                        // replace {col} with col value
+                        var search = "{" + col2 + "}";
+                        cap = cap.replace(new RegExp(search, 'g'), references[row][col2]);
                     }
                     references[row][col] = cap; // overwrite existing col value with caption
                 }
