@@ -889,8 +889,8 @@ function successUpdateCount(data, textStatus, jqXHR, param) {
 	var cols = param['cols'];
 	$.each(cols, function(i, col) {
 		box[col]['ready'] = true;
-		box[col]['count'] = col + ' (' + data[0]['cnt_' + encodeSafeURIComponent(col)] + ')';
-		box[col]['facetcount'] = data[0]['cnt_' + encodeSafeURIComponent(col)];
+		box[col]['count'] = col + ' (' + data[0]['cnt_' + col] + ')';
+		box[col]['facetcount'] = data[0]['cnt_' + col];
 	});
 	var ready = true;
 	var tables = [options['table']].concat(association_tables_names);
@@ -1248,7 +1248,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var successCallback = param['successCallback'];
 	$.each(cols, function(i, col) {
 		if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
-			if (data[0]['cnt_d_' + encodeSafeURIComponent(col)] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
+			if (data[0]['cnt_d_' + col] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
@@ -1258,7 +1258,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 				attributegroupParam['options'] = options;
 				attributegroupParam['alert'] = alertObject;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, attributegroupParam);
-			} else if (data[0]['cnt_d_' + encodeSafeURIComponent(col)] >= MULTI_SELECT_LIMIT) {
+			} else if (data[0]['cnt_d_' + col] >= MULTI_SELECT_LIMIT) {
 				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
