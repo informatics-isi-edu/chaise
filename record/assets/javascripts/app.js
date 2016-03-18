@@ -180,64 +180,67 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                             // Base on the annotation, treat the reference differently
                             // Get the elements annotations from the schema
                             var annotations =  schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations;
-                            var embedAnnotation = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations['tag:misd.isi.edu,2015:url'];
+                            var urlAnnotation = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations['tag:misd.isi.edu,2015:url'];
 
                             // TODO embedded iFrame - annotation could be in table or column
-                            if (embedAnnotation !== undefined &&
-                                embedAnnotation.presentation !== undefined && embedAnnotation.presentation === 'embed') {
+                            // process url annotation :
+                            // embed iFrame and related download files
+                            if (urlAnnotation !== undefined) {
+                                for (var i = 0; i < urlAnnotation.length; i++) {
+                                    var anno = urlAnnotation[i];
+                                    if (anno !== undefined && anno.presentation === 'embed') {
 
-                                var embedTable = {title: ft.title, elements: []};
-                                var cdef = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].column_definitions;
+                                        var embedTable = {title: ft.title, elements: []};
+                                        var cdef = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].column_definitions;
 
-                                for (var e = 0; e < elements.length; e++) {
-                                    var element = elements[e];
+                                        for (var e = 0; e < elements.length; e++) {
+                                            var element = elements[e];
 
-                                    var urlPattern = embedAnnotation.pattern;
-                                    for (var c = 0; c < cdef.length; c++) {
-                                        var cname = cdef[c].name;
-                                        var search = "{" + cname + "}";
-                                        urlPattern = urlPattern.replace(new RegExp(search, 'g'), element[cname]);
-                                    }
+                                            var urlPattern = anno.url;
+                                            for (var c = 0; c < cdef.length; c++) {
+                                                var cname = cdef[c].name;
+                                                var search = "{" + cname + "}";
+                                                urlPattern = urlPattern.replace(new RegExp(search, 'g'), element[cname]);
+                                            }
 
+                                            var caption = "";
+                                            if (anno.caption !== undefined) {
+                                                caption = anno.caption;
+                                                for (c = 0; c < cdef.length; c++) {
+                                                    cname = cdef[c].name;
+                                                    search = "{" + cname + "}";
+                                                    caption = caption.replace(new RegExp(search, 'g'), element[cname]);
+                                                }
+                                            }
 
-                                    var caption = "";
-                                    if (embedAnnotation.caption !== undefined) {
-                                        caption = embedAnnotation.caption;
-                                        for (c = 0; c < cdef.length; c++) {
-                                            cname = cdef[c].name;
-                                            search = "{" + cname + "}";
-                                            caption = caption.replace(new RegExp(search, 'g'), element[cname]);
+                                            var width = "100%";
+                                            if (anno.width !== undefined) {
+                                                if (typeof anno.width === "string") { // column name
+                                                    width = element[anno.width]; // value in a column
+                                                } else if (typeof anno.width === "number") {
+                                                    width = anno.width;
+                                                }
+                                            }
+
+                                            var height = "400";
+                                            if (anno.height !== undefined) {
+                                                if (typeof anno.height === "string") { // column name
+                                                    height = element[anno.height]; // value in a column
+                                                } else if (typeof anno.height === "number") {
+                                                    height = anno.height;
+                                                }
+                                            }
+
+                                            var embedElement = {uri: $sce.trustAsResourceUrl(urlPattern), caption: caption, width: width, height: height};
+                                            embedTable.elements.push(embedElement);
                                         }
-                                    }
 
-                                    var width = "100%";
-                                    if (embedAnnotation.width !== undefined) {
-                                        if (typeof embedAnnotation.width === "string") { // column name
-                                            width = element[embedAnnotation.width]; // value in a column
-                                        } else if (typeof embedAnnotation.width === "number") {
-                                            width = embedAnnotation.width;
-                                        }
+                                        entity.embedTables.push(embedTable);
+                                    } else if (anno !== undefined && anno.presentation === 'download') {
+                                        // TODO jchen
                                     }
-
-                                    var height = "400";
-                                    if (embedAnnotation.height !== undefined) {
-                                        if (typeof embedAnnotation.height === "string") { // column name
-                                            height = element[embedAnnotation.height]; // value in a column
-                                        } else if (typeof embedAnnotation.height === "number") {
-                                            height = embedAnnotation.height;
-                                        }
-                                    }
-
-                                    var embedElement = {uri: $sce.trustAsResourceUrl(urlPattern), caption: caption, width: width, height: height};
-                                    embedTable.elements.push(embedElement);
                                 }
-
-                                entity.embedTables.push(embedTable);
-
-                                // if has download files
-
-
-                                // If annotations is 'download', store it in the entity's 'files' atributes
+                            // If annotations is 'download', store it in the entity's 'files' atributes
                             } else if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
                                 entity['files']         = elements;
 
@@ -696,9 +699,16 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                         }
 
                         // if table is embed, initially load them
-                        urlAnnotation = tableSchema.annotations['tag:misd.isi.edu,2015:url'];
-                        if (urlAnnotation !== undefined && urlAnnotation.presentation !== undefined && urlAnnotation.presentation === 'embed') {
-                            foreignTable.initialLoad = true;
+                        var urlAnnotations = tableSchema.annotations['tag:misd.isi.edu,2015:url'];
+
+                        if (urlAnnotations !== undefined) {
+                            for (var i = 0; i < urlAnnotations.length; i++) {
+                                var urlAnnotation = urlAnnotations[i];
+                                if (urlAnnotation.presentation !== undefined && urlAnnotation.presentation === 'embed') {
+                                    foreignTable.initialLoad = true;
+                                    break;
+                                }
+                            }
                         }
 
                         // If this is a binary table, switch the path to bring out the referenced table instead
@@ -794,7 +804,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
                 notFoundService.show("We're sorry, the catalogue id " + cid + " does not exist. Please try again!");
             }
         });
-    }
+    };
 
     // For a given nested entity, get the parent column name
     this.getParentColumnName = function(schemaName, parentTableName, tableName){
@@ -838,7 +848,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
             for (var j = 0; j < referencedColumns.length; j++){
                 var rc = referencedColumns[j];
                 if (rc.table_name != parentTableName){
-                    var res = {schema:rc.schema_name, table:rc.table_name}
+                    var res = {schema:rc.schema_name, table:rc.table_name};
                     return res;
                 }
             }
@@ -942,7 +952,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
                 }
             }
         }
-    }
+    };
 
     // returns a list of key values of column names and display column names
     // where hidden columns are omitted
@@ -967,7 +977,7 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         }
 
         return columns;
-    }
+    };
 
     // returns a set of <col_name, {uri_pattern, caption_pattern}>
     this.getColumnInterpretations = function(schemaName, tableName) {
@@ -978,23 +988,26 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         for (var i = 0; i < columnDefinitions.length; i++) {
             var cd = columnDefinitions[i];
 
-            var pattern = "";
+            var pattern = null;
+            var caption = null;
 
             // If column has interpretation
             if (cd.annotations['tag:misd.isi.edu,2015:url'] !== undefined){
-                if (cd.annotations['tag:misd.isi.edu,2015:url'] === null ||
-                    Object.getOwnPropertyNames(cd.annotations['tag:misd.isi.edu,2015:url']).length === 0) {
-                    pattern = "auto_link";
-                }
-                else if (cd.annotations['tag:misd.isi.edu,2015:url']['pattern'] !== undefined) {
-                    pattern = pattern + cd.annotations['tag:misd.isi.edu,2015:url']['pattern'];
+                for (var j = 0; j < cd.annotations['tag:misd.isi.edu,2015:url'].length; j++) {
+
+                    var anno = cd.annotations['tag:misd.isi.edu,2015:url'][j];
+
+                    if (anno === null || Object.getOwnPropertyNames(anno).length === 0) {
+                        pattern = "auto_link"; // we shouldn't be using auto link anymore, always define pattern
+                    } else if (anno.url !== undefined) {
+                        pattern = anno.url;
+                    }
+
+                    if (anno !== null && anno.caption !== undefined) {
+                        caption = anno.caption;
+                    }
                 }
 
-                var caption = null;
-                if (cd.annotations['tag:misd.isi.edu,2015:url'] !== null &&
-                    cd.annotations['tag:misd.isi.edu,2015:url'].caption !== undefined) {
-                    caption = cd.annotations['tag:misd.isi.edu,2015:url'].caption;
-                }
                 interp[cd.name] = {uriPattern: pattern, captionPattern: caption};
             }
         }
