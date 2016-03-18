@@ -201,7 +201,7 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 
 DE_JS_SOURCE=$(DE_ASSETS)/dataEntry.app.js \
 	$(DE_ASSETS)/context.js \
-	$(DE_ASSETS)/data.js \
+	$(DE_ASSETS)/table.js \
 	$(DE_ASSETS)/form.controller.js \
 	$(DE_ASSETS)/common/filters/toTitleCase.js \
 	$(DE_ASSETS)/common/filters/underscoreToSpace.js

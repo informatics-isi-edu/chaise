@@ -38,15 +38,51 @@
         }
     }])
 
-    .run(['context', 'ermrestServerFactory', 'data', '$http', function runApp(context, ermrestServerFactory, data, $http) {
+    .run(['context', 'ermrestServerFactory', 'table', '$http', function runApp(context, ermrestServerFactory, table, $http) {
         var server = ermrestServerFactory.getServer(context.serviceURL);
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
             if (schema) {
-                var table = schema.tables.get(context.tableName);
-                if (table) {
-                    data.table = table;
-                    console.log(data);
+                var data = schema.tables.get(context.tableName);
+                if (data) {
+                    console.log('Data: ', data);
+                    table.name = data.name;
+                    table.columns = data.columns.all();
+                    table.keys = data.keys.colsets();
+
+                    // Construct each foreignKey object and push to "table" value provider
+                    var foreignRefs = data.foreignKeys.all();
+                    var length = foreignRefs.length;
+                    for (var i = 0; i < length; i++) {
+                        var ref = foreignRefs[i];
+                        var foreignKey = {};
+                        foreignKey.colSet = ref.colset;
+
+                        // Construct a display name for each foreign key's colset
+                        var keysLength = foreignKey.colSet.columns.length;
+                        for (var c = 0; c < keysLength; c++) {
+                            if (!foreignKey.displayName) {
+                                foreignKey.displayName = foreignKey.colSet.columns[c].name;
+                            } else {
+                                foreignKey.displayName = foreignKey.displayName + ' ' + foreignKey.colSet.columns[c].name;
+                            }
+                        }
+                        table.foreignKeys.push(foreignKey);
+
+                        // Capture the i from the for loop in a closure so that
+                        // getDomainValues() has the correct i on success
+                        (function(i) {
+                            ref.getDomainValues().then(function success(values) {
+                                table.foreignKeys[i].domainValues = values;
+                                if (i == length - 1) {
+                                    console.log('Table: ', table);
+                                }
+                            }, function error(response) {
+                                console.log(response);
+                            });
+                        })(i);
+
+                    }
                 } else {
                     console.log('Table not found.');
                 }
