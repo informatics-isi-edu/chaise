@@ -1699,8 +1699,8 @@ function successGetTableColumnsDistinct(data, textStatus, jqXHR, param) {
 
 function compareUniques(item1, item2) {
 	var ret = 0;
-	var val1 = uniquenessColumns.contains(item1['name']) ? 0 : item1['distinct'] / item1['cnt'];
-	var val2 = uniquenessColumns.contains(item2['name']) ? 0 : item2['distinct'] / item2['cnt'];
+	var val1 = uniquenessColumns.contains(item1['name']) ? -1 : (item1['cnt'] == 0 ? 1 : item1['distinct'] / item1['cnt']) ;
+	var val2 = uniquenessColumns.contains(item2['name']) ? -1 : (item2['cnt'] == 0 ? 1 : item2['distinct'] / item2['cnt']);
 	if (val1 < val2) {
 		ret = -1;
 	} else if (val1 > val2) {
