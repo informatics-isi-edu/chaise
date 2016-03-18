@@ -6,22 +6,10 @@
  *
  */
 
-var sidebarId = '#sidebar';
-var moreFilterId = '#morefilters';
-var editFilterId = '#editfilter';
-
 function tools() {
-    this.getDisplayedRecordNum = function (str) {
-        return str.split('-')[1];
-    };
     this.getRandomInt = function (min, max) {
         //include min and max
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
-    this.getAnyPartOfStr = function (str) {
-        var len = str.length;
-        //var idx = Math.floor(Math.random() * (len - 0 + 1) + 0);
-        return str.substr(len / 2);
     };
     this.getSiblingByCss = function (ele, cssStr) {
         return ele.element(by.xpath('following-sibling::' + cssStr));
@@ -30,6 +18,10 @@ function tools() {
 
 var toolkit = new tools();
 
+/*
+    Utility object for finding elements under '#sidebar' element.
+ */
+var sidebarId = '#sidebar';
 function sidebar() {
     var that = this;
     this.htmlElement = $(sidebarId);
@@ -37,9 +29,6 @@ function sidebar() {
     this.sidebarAttrsDisplayed = this.htmlElement.all(by.css('ul.sidebar-nav li.ng-scope:not(.ng-hide)'));
     this.sidebarHeader = this.htmlElement.$('#navcontainer h4');
     this.viewMoreBtn = this.htmlElement.element(by.cssContainingText('li a', 'View all attributes'));
-    this.findSidebarAttrsByName = function (attrName) {
-        return that.htmlElement.all(by.cssContainingText('ul li a', attrName))
-    };
     this.findSidebarAttrByName = function (attrName) {
         return that.htmlElement.element(by.cssContainingText('ul li a', attrName));
     };
@@ -48,6 +37,10 @@ function sidebar() {
     };
 };
 
+/*
+ Utility object for finding elements under '#morefilters' element.
+ */
+var moreFilterId = '#morefilters';
 function moreFilter() {
     var that = this;
     this.htmlElement = $(moreFilterId);
@@ -61,6 +54,10 @@ function moreFilter() {
     };
 };
 
+/*
+ Utility object for finding elements under '#editfilter' element.
+ */
+var editFilterId = '#editfilter';
 function editFilter() {
     var that = this;
     this.htmlElement = $(editFilterId);
@@ -112,8 +109,6 @@ function resultContent() {
     var that = this;
     this.resultAllRows = element.all(by.repeater('row in FacetsData.ermrestData'));
     this.resultTally = element.all(by.css('#results_tally')).get(1);
-    this.resultTallyRange = this.resultTally.element(by.binding("facetResults.displayRange()"));
-    this.resultTallySum = this.resultTally.element(by.binding("FacetsData.totalServerItems"));
     this.filter = new contentFilter();
     //ele is element found using resultAllRows.get(idx);
     this.getResultTitleElement = function (ele) {
@@ -143,12 +138,20 @@ function recordPage() {
     this.entityTitle = $('#entity-title');
     this.findEntityKeyByName = function (entityName) {
         //return element(by.css('.entity-key.ng-binding:contains("' + entityName + '")'));
-        return element(by.xpath('//td[.=\'' + entityName + '\']'));
+        //return element(by.xpath('//span[.=\'' + entityName + '\']'));
+        return element(by.cssContainingText('td.entity-key:not(.ng-binding)', entityName));
     };
     this.findEntityValueByName = function (entityName) {
         var entityKey = that.findEntityKeyByName(entityName);
         return toolkit.getSiblingByCss(entityKey, 'td');
-    }
+    };
+    this.findAssociationKeyByName = function (associateName) {
+        return element(by.xpath('//td[.=\'' + associateName + '\']'));
+    };
+    this.findAssociationValueByName = function (associateName) {
+        var associationKeyElement = that.findAssociationKeyByName(associateName);
+        return toolkit.getSiblingByCss(associationKeyElement, 'td');
+    };
     this.findToggleWrapperByName = function (keyName) {
         return element(by.cssContainingText('.panel-group div.panel.panel-default', keyName))
     };

@@ -20,8 +20,9 @@ describe('Search result detail page,', function () {
             allAttrs.count().then(function (num) {
                     var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
                     var ranAttr = allAttrs.get(ranInt);
+                    //var ranAttr = allAttrs.get(4);
                     ranAttr.getText().then(function (attrName) {
-                        //avoid 'Somite Count' because it will not show in record page
+                        //avoid 'Somite Count' and other attributes because it will not show in record page
                         //might need other ways to check it
                         if (attrName === 'Somite Count') {
                             var nextAttr = allAttrs.get(ranInt + 1);
@@ -113,13 +114,12 @@ describe('Search result detail page,', function () {
                         done();
                     });
 
-                    it('should have the same title as previous record column', function (done) {
+                    it('should have the same title as previous record column', function () {
                         var entityTitle = chaisePage.recordPage.entityTitle;
                         expect(entityTitle.getText()).toBe(randomRecordTitle);
-                        done();
                     });
 
-                    it('should display the \'Accession\' key and non-empty content', function (done) {
+                    it('should display the \'Accession\' key and non-empty content', function () {
                         var accessionText = 'accession';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(accessionText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(accessionText);
@@ -127,9 +127,8 @@ describe('Search result detail page,', function () {
                         expect(accValue.isDisplayed()).toBe(true);
                         expect(accValue.getText()).not.toBe('');
                         expect(accKey.getText()).toBe('Accession');
-                        done();
                     });
-                    it('should display the \'Description\' key and non-empty content', function (done) {
+                    it('should display the \'Description\' key and non-empty content', function () {
                         var desText = 'description';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(desText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(desText);
@@ -137,9 +136,8 @@ describe('Search result detail page,', function () {
                         expect(accValue.isDisplayed()).toBe(true);
                         expect(accValue.getText()).not.toBe('');
                         expect(accKey.getText()).toBe('Description');
-                        done();
                     });
-                    xit('should display the \'Funding\' key and non-empty content', function (done) {
+                    xit('should display the \'Funding\' key and non-empty content', function () {
                         var fundingText = 'funding';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(fundingText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(fundingText);
@@ -147,9 +145,8 @@ describe('Search result detail page,', function () {
                         expect(accValue.isDisplayed()).toBe(true);
                         expect(accValue.getText()).not.toBe('');
                         expect(accKey.getText()).toBe('Funding');
-                        done();
                     }).pend('Some record page may not contain "Funding", ex. Data Type -> Morphometic analysis');
-                    xit('should display the \'Pubmed Id\' key and display \'N/A\' or digits', function (done) {
+                    xit('should display the \'Pubmed Id\' key and display \'N/A\' or digits', function () {
                         var pubmedText = 'pubmed id';
                         var accKey = chaisePage.recordPage.findEntityKeyByName(pubmedText);
                         var accValue = chaisePage.recordPage.findEntityValueByName(pubmedText);
@@ -157,20 +154,16 @@ describe('Search result detail page,', function () {
                         expect(accValue.isDisplayed()).toBe(true);
                         expect(accValue.getText()).toMatch('(^[0-9]*$|^N/A$)');
                         expect(accKey.getText()).toBe('Pubmed Id');
-                        done();
                     }).pend('Some record page may not contain "Pumbed Id", ex. Mouse Phenotype -> Normative');
 
-                    it('should contain the randomly chosen attribute field (' + randomSidebarAttr + ')', function (done) {
+                    it('should contain the randomly chosen attribute field', function () {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
-                        var sidebarAttrKey = chaisePage.recordPage.findEntityKeyByName(sidebarAttr);
+                        var sidebarAttrKey = chaisePage.recordPage.findAssociationKeyByName(sidebarAttr);
                         expect(sidebarAttrKey.isDisplayed()).toBe(true);
-                        done();
                     });
-
-                    it('should contain the randomly chosen edit filter (' + randomEditAttr + ')' +
-                        ' in attribute value', function (done) {
+                    it('should contain the randomly chosen edit filter in association key', function (done) {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
-                        var sidebarAttrValue = chaisePage.recordPage.findEntityValueByName(sidebarAttr);
+                        var sidebarAttrValue = chaisePage.recordPage.findAssociationValueByName(sidebarAttr);
                         expect(sidebarAttrValue.isDisplayed()).toBe(true);
                         sidebarAttrValue.getText().then(function (valueText) {
                             expect(valueText.toLowerCase()).toContain(randomEditAttr.toLowerCase());
@@ -200,13 +193,12 @@ describe('Search result detail page,', function () {
                         });
                     }).pend('Some record page may not contain "Files", ex. Organism -> Human');
 
-                    it('should display \'Dataset Geo\', toggle it to display something', function (done) {
+                    it('should display \'Dataset Geo\', toggle it to display something', function () {
                         var dataset = 'dataset geo';
                         var dataSetWrapper = chaisePage.recordPage.findToggleWrapperByName(dataset);
                         chaisePage.recordPage.clickToggleWrapperByName(dataset);
                         var collapseArea = dataSetWrapper.$('div.panel-collapse');
                         expect(collapseArea.isDisplayed()).toBe(true);
-                        done();
                     });
 
                 });
