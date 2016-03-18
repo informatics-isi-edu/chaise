@@ -7,14 +7,13 @@ var filterObj = chaisePage.resultContent.filter;
 describe('Filters on top of the records,', function () {
     var EC = protractor.ExpectedConditions;
 
-    it('should load the page correctly', function (done) {
+    beforeAll(function (done) {
         browser.get('');
         var sidebar = element(by.id('sidebar'));
         browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
             done();
         });
     });
-
     var experimentTypeText = 'Experiment Type';
     var microarrayText = 'RNA expression (microarray)';
     var enhancerRepText = 'Enhancer reporter gene assay';
