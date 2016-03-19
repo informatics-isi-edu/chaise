@@ -1,3 +1,7 @@
 datepicker {
-    margin: inherit;
+    margin-bottom: 20px;
+}
+
+.ui-select-container {
+    width: 100%;
 }

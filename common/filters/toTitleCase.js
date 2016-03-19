@@ -6,11 +6,14 @@
 
     .filter('toTitleCase', function() {
         return function toTitleCase(input) {
-            return input.replace(/[^-'\s]+/g, function(word) {
-                return word.replace(/^./, function(first) {
-                    return first.toUpperCase();
+            if (typeof input === "string") {
+                return input.replace(/[^-'\s]+/g, function(word) {
+                    return word.replace(/^./, function(first) {
+                        return first.toUpperCase();
+                    });
                 });
-            });
+            }
+            return input;
         }
     });
 })();

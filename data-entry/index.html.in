@@ -23,34 +23,39 @@
         <div ng-controller="FormController as form" class="row">
             <div class="col-md-6 col-md-offset-3">
                 <form ng-show="form.showForm">
-                    <h2>Add New {{form.data.table.name | underscoreToSpace | toTitleCase}}</h2>
+                    <h2>Add New {{form.table.name | underscoreToSpace | toTitleCase}}</h2>
                     <br>
-                    <div ng-repeat="(column, props) in form.data.table.columns._columns" ng-if="form.showColumn(props.name);" class="form-group">
-                        <label for="{{props.name}}">{{props.name | underscoreToSpace | toTitleCase}}</label> &bull; {{props.type.name}}
-                        <input ng-if="form.isTextType(props.type.name);" ng-model="form.newData[props.name]" type="text" class="form-control" id="{{props.name}}">
-                        <!-- <input ng-if="form.isNumberType(props.type.name);" ng-model="form.newData[props.name]" type="number" class="form-control" id="{{props.name}}"> -->
-                        <input ng-if="form.isDateType(props.type.name);" ng-model="form.newData[props.name]" type="date" class="form-control" id="{{props.name}}">
-
-                        <ui-select ng-if="form.isDropdownType(props.name)" ng-model="form.newData[props.name]" theme="select2" ng-disabled="disabled" id="{{props.name}}">
-                            <ui-select-match placeholder="Select a value">{{form.newData[props.name]}}</ui-select-match>
-                            <ui-select-choices repeat="item in (form.foreignValues[props.name] | filter: $select.search) track by item">
-                                <div ng-bind-html="item | highlight: $select.search"></div>
+                    <div ng-repeat="field in form.table.nativeColumns">
+                        <label for="{{field.name}}">{{field.name | underscoreToSpace | toTitleCase}}</label> &bull; {{field.type.name}}
+                        <input ng-if="form.isTextType(field.type.name);" ng-model="form.newData[field.name]" type="text" class="form-control" id="{{field.name}}">
+                        <input ng-if="form.isNumberType(field.type.name);" ng-model="form.newData[field.name]" type="number" class="form-control" id="{{field.name}}">
+                        <datepicker ng-if="form.isDateType(field.type.name);" date-format="yyyy-MM-dd">
+                            <input ng-model="form.newData[field.name]" type="text" class="form-control" id="{{field.name}}">
+                        </datepicker>
+                        <br>
+                    </div>
+                    <div ng-repeat="field in form.table.foreignKeys">
+                        <label for="{{field.name}}">{{field.name | underscoreToSpace | toTitleCase}}</label><br>
+                        <ui-select ng-model="form.newData[field.name]" theme="select2" ng-disabled="disabled" id="{{field.name}}">
+                            <ui-select-match placeholder="Select a value">{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="value in field.domainValues | filter: $select.search">
+                                <div ng-bind-html="value | underscoreToSpace | toTitleCase | highlight: $select.search"></div>
                             </ui-select-choices>
                         </ui-select>
+                        <br><br>
                     </div>
                     <br>
-                    <!-- <button ng-click="form.confirmSubmission();" type="button" role="button" class="btn btn-primary">Submit</button> -->
-                    <button ng-click="form.getForeignValues('annotation_id');" type="button" role="button" class="btn btn-primary">Submit</button>
+                    <button ng-click="form.confirmSubmission();" type="button" role="button" class="btn btn-primary">Submit</button>
                 </form>
                 <div ng-show="!form.showForm" class="row">
-                        <h2>Confirm New {{form.data.table.name | underscoreToSpace | toTitleCase}}</h2>
+                        <h2>Confirm New {{form.table.name | underscoreToSpace | toTitleCase}}</h2>
                         <p class="lead">You're about to add the following information to the database. Is this correct?</p>
                         <table class="table table-striped">
-                            <tr ng-repeat="(column, props) in form.data.table.columns._columns" ng-if="form.showColumn(props.name);">
+                            <tr ng-repeat="(key, value) in form.newData">
                                 <td class="col-md-3">
-                                    <strong>{{props.name | underscoreToSpace | toTitleCase}}</strong>
+                                    <strong>{{key | underscoreToSpace | toTitleCase}}</strong>
                                 </td>
-                                <td class="col-md-9">{{form.newData[props.name]}}</td>
+                                <td class="col-md-9">{{value}}</td>
                             </tr>
                         </table>
                         <br>

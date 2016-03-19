@@ -8,6 +8,7 @@
         name: '...',
         foreignKeys: [],
         keys: [],
-        columns: []
+        nativeColumns: [],
+        entity: {}
     });
 })();
