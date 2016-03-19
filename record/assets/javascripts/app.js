@@ -140,7 +140,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             self.patternInterpretationForTable(schemaName, tableName, data);
 
             entity.foreignTables    = [];
-            entity.embedTables = [];
+            entity.embedTables      = {};
             entity.associations     = [];
             // Data use by helper methods
             entity.internal         = { schemaName: schemaName, tableName: tableName, path: path, aggregatePath: aggregatePath, displayTitle: '', displayTableName: tableName};
@@ -186,12 +186,16 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                             // process url annotation :
                             // embed iFrame and related download files
                             if (urlAnnotation !== undefined) {
+
+                                var cdef = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].column_definitions;
+
+                                // for each item under url annotation ["download" | "embed" | "link" | "thumbnail"]
                                 for (var i = 0; i < urlAnnotation.length; i++) {
                                     var anno = urlAnnotation[i];
+
                                     if (anno !== undefined && anno.presentation === 'embed') {
 
-                                        var embedTable = {title: ft.title, elements: []};
-                                        var cdef = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].column_definitions;
+                                        var rows = [];
 
                                         for (var e = 0; e < elements.length; e++) {
                                             var element = elements[e];
@@ -231,13 +235,45 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                                                 }
                                             }
 
-                                            var embedElement = {uri: $sce.trustAsResourceUrl(urlPattern), caption: caption, width: width, height: height};
-                                            embedTable.elements.push(embedElement);
+                                            rows.push({uri: $sce.trustAsResourceUrl(urlPattern), caption: caption, width: width, height: height});
                                         }
 
-                                        entity.embedTables.push(embedTable);
+                                        entity.embedTables[ft.title] = rows;
+
                                     } else if (anno !== undefined && anno.presentation === 'download') {
-                                        // TODO jchen
+
+                                        var files = [];
+
+                                        // TODO we are handling downloads for iFrame items only right now
+                                        // TODO therefore download should come after 'embed'
+                                        // downloadable files for each embed element
+                                        var downloadPatterns = (anno.url.constructor === Array ? anno.url : [anno.url]);
+                                        var captionPatterns = (anno.caption.constructor === Array ? anno.caption : [anno.caption]);
+
+                                        // for each table row
+                                        for (e = 0; e < elements.length; e++) {
+                                            element = elements[e];
+
+                                            // for each download pattern
+                                            for (var p = 0; p < downloadPatterns.length; p++) {
+
+                                                var downloadPattern = downloadPatterns[p];
+                                                var captionPattern = captionPatterns[p];
+
+                                                for (var c = 0; c < cdef.length; c++) {
+                                                    var cname = cdef[c].name;
+                                                    var search = "{" + cname + "}";
+                                                    downloadPattern = downloadPattern.replace(new RegExp(search, 'g'), element[cname]);
+                                                    captionPattern = captionPattern.replace(new RegExp(search, 'g'), element[cname]);
+                                                }
+
+                                                files.push({"url": $sce.trustAsResourceUrl(downloadPattern), "caption": captionPattern});
+                                            }
+
+                                            // each row (iFrame)'s files
+                                            entity.embedTables[ft.title][e].files = files;
+
+                                        }
                                     }
                                 }
                             // If annotations is 'download', store it in the entity's 'files' atributes
@@ -1567,12 +1603,12 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
             var value = entity[key];
             // Only insert values into filteredEntity if
             // * value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object
-            // * key is not 'interal'
+            // * key is not 'interal' or 'embedTables'
             // * key does not end with "_link" (for pattern linking of another column)
             // * key is not colTooltips
             if (value !== null &&
                 (!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) &&
-                key != 'internal' && !key.match(".*_link") &&
+                key != 'internal' && key != 'embedTables' && !key.match(".*_link") &&
                 key != 'colTooltips'){
 
                 // use display column name as key
