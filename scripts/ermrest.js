@@ -10,6 +10,7 @@ var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 var USER = null;
+var GLOBUS_LOGOUT = false;
 
 var PRIMARY_KEY = [];
 var uniquenessColumns = [];
@@ -407,7 +408,11 @@ function submitLogout() {
 	$('#logout_link').hide();
 	//var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	//window.location = login_url;
+	
 	var logout_url = '../logout?referrer=' + encodeSafeURIComponent(window.location);
+	if (GLOBUS_LOGOUT) {
+		logout_url = 'https://www.globus.org/app/logout?redirect_uri=' + encodeSafeURIComponent(window.location);
+	}
 	window.location = logout_url;
 }
 
@@ -1820,7 +1825,12 @@ function getSession(param) {
 function successGetSession(data, textStatus, jqXHR, param) {
 	//alert(JSON.stringify(data, null, 4));
 	if (data['client'] != null) {
-		$('#login_user').html(data['client']);
+		if (data['client']['display_name'] !== undefined) {
+			$('#login_user').html(data['client']['display_name']);
+			GLOBUS_LOGOUT = true;
+		} else {
+			$('#login_user').html(data['client']);
+		}
 		$('#login_link').hide();
 		$('#logout_link').show();
 	} else {
