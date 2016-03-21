@@ -20,7 +20,7 @@
             }
             iframe.postMessage({
                 messageType: 'downloadView',
-                content: filename
+                content: filename + '.jpg'
             }, origin);
         }
 
