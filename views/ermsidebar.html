@@ -146,7 +146,7 @@
 											type="checkbox" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['values'][value]"
 											class="check"/><b class="b switch"></b>
 									</div>
-									<label ng-class="sideBar.getFieldValueClass(FacetsData.tag, value)" ng-click="sideBar.checkUncheck($event,value)">{{value}}</label>
+									<label ng-class="sideBar.getFieldValueClass(FacetsData.tag, value)" ng-click="sideBar.checkUncheck($event,value)" title="{{value}}">{{value}}</label>
 									<div class="field-count pull-right">
 										<!-- <span class="badge">{{FacetsData.colsGroup[FacetsData.tag['table']][FacetsData.tag['name']][value]}}</span> -->
 									</div>
