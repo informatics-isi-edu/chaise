@@ -75,6 +75,32 @@ a:hover, a:focus{
     color: rgb(111, 111, 111); */
 }
 
+/****************** Entity Table ******************/
+
+.coltooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.coltooltip .coltooltiptext {
+    visibility: hidden;
+    width: 100px;
+    background-color: #454545;
+    color: #f0f0f0;
+    text-align: center;
+    padding: 5px 5px;
+    border-radius: 6px;
+    font-size: 11px;
+    position: absolute;
+    z-index: 1;
+}
+
+.coltooltip:hover .coltooltiptext {
+    visibility: visible;
+}
+
+
 /****************** ACCORDION ******************/
 
 .panel{

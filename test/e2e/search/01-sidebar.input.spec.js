@@ -7,14 +7,13 @@ var chaisePage = require('../chaise.page.js');
 describe('Sidebar top search input,', function () {
     var EC = protractor.ExpectedConditions;
 
-    it('should load the page correctly', function (done) {
+    beforeAll(function (done) {
         browser.get('');
         var sidebar = element(by.id('sidebar'));
         browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
             done();
         });
     });
-
     var searchBox = chaisePage.sidebar.searchInput;
     var displayedAttrs = chaisePage.sidebar.sidebarAttrsDisplayed;
 

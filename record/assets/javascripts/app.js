@@ -105,8 +105,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             var entity          = data[0];
 
             entity.sequences = []; // array of sequence columns
+            entity.colTooltips = {}; // column tool tips
 
-            // apply sequence formatting
+            // apply sequence formatting & get column tooltips
             var columnDefinitions = schema.tables[tableName].column_definitions;
             for (var i = 0; i < columnDefinitions.length; i++) {
                 var cdAnnotation = columnDefinitions[i].annotations;
@@ -128,6 +129,11 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                         }
                     }
                     entity[columnDefinitions[i].name] = text;
+                }
+
+                // tooltips
+                if (columnDefinitions[i].comment != null) {
+                    entity.colTooltips[columnDefinitions[i].name] = columnDefinitions[i].comment;
                 }
             }
 
@@ -188,17 +194,19 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
                                     var urlPattern = embedAnnotation.pattern;
                                     for (var c = 0; c < cdef.length; c++) {
-                                        cname = cdef[c].name;
-                                        urlPattern = urlPattern.replace("{" + cname + "}", element[cname]);
+                                        var cname = cdef[c].name;
+                                        var search = "{" + cname + "}";
+                                        urlPattern = urlPattern.replace(new RegExp(search, 'g'), element[cname]);
                                     }
 
 
                                     var caption = "";
                                     if (embedAnnotation.caption !== undefined) {
                                         caption = embedAnnotation.caption;
-                                        for (var c = 0; c < cdef.length; c++) {
+                                        for (c = 0; c < cdef.length; c++) {
                                             cname = cdef[c].name;
-                                            caption = caption.replace("{" + cname + "}", element[cname]);
+                                            search = "{" + cname + "}";
+                                            caption = caption.replace(new RegExp(search, 'g'), element[cname]);
                                         }
                                     }
 
@@ -225,6 +233,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                                 }
 
                                 entity.embedTables.push(embedTable);
+
+                                // if has download files
+
 
                                 // If annotations is 'download', store it in the entity's 'files' atributes
                             } else if (annotations.comment !== undefined && annotations.comment.indexOf('download') > -1){
@@ -533,9 +544,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                     var link = uriPattern;
                     for (var c = 0; c < columns.length; c++) {
                         var col2 = columns[c];
-                        if (link.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
-                            link = link.replace("{" + col2 + "}", references[row][col2]);
-                        }
+                        // replace {col} with col value
+                        var search = "{" + col2 + "}";
+                        link = link.replace(new RegExp(search, 'g'), references[row][col2]);
                     }
                     references[row][col + '_link'] = link;
                 }
@@ -549,9 +560,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                     var cap = caption;
                     for (var c = 0; c < columns.length; c++) {
                         var col2 = columns[c];
-                        if (cap.indexOf("{" + col2 + "}") !== -1) { // replace {col} with col value
-                            cap = cap.replace("{" + col2 + "}", references[row][col2]);
-                        }
+                        // replace {col} with col value
+                        var search = "{" + col2 + "}";
+                        cap = cap.replace(new RegExp(search, 'g'), references[row][col2]);
                     }
                     references[row][col] = cap; // overwrite existing col value with caption
                 }
@@ -1541,11 +1552,15 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
 
         for (var key in entity){
             var value = entity[key];
-            // Only insert values into filteredEntity if value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object AND if the key is not 'interal'
-            // and key is does not end with "_link" (for pattern linking of another column)
+            // Only insert values into filteredEntity if
+            // * value is not an array OR it is an array, it's elements is greater than 0, and it's elements are not an object
+            // * key is not 'interal'
+            // * key does not end with "_link" (for pattern linking of another column)
+            // * key is not colTooltips
             if (value !== null &&
                 (!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) &&
-                key != 'internal' && !key.match(".*_link")){
+                key != 'internal' && !key.match(".*_link") &&
+                key != 'colTooltips'){
 
                 // use display column name as key
                 // TODO inefficient to do this for each column?

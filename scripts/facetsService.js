@@ -68,6 +68,13 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		FacetsData.entrySubtitle = '';
 		this.initPageRange();
 		clearFacets(FacetsData);
+		if (FacetsData.table != null) {
+			var sortColumn = getTableAnnotation(FacetsData.table, TABLES_MAP_URI, 'sortedBy');
+			if (sortColumn != null) {
+				FacetsData.sortFacet = sortColumn;
+				FacetsData.sortOrder = 'asc';
+			}
+		}
 	};
 
 	this.initPageRange = function () {

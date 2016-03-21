@@ -425,6 +425,7 @@ dl.attribute-group dd {
 	height: 30px;
 	line-height: 30px;
 	font-size: 1em;
+	padding-left: 15px;
 }
 
 .sidebar .sidebar-header h5 {
@@ -544,7 +545,7 @@ dl.attribute-group dd {
 	padding: 10px;
 }
 
-.sidebar a.view-attr:hover, .sidebar .sidebar-header a:hover, .sidebar .sidebar-header .sidebar-toggle:hover {
+.sidebar a.view-attr:hover, .sidebar .sidebar-header a:hover, .sidebar .sidebar-header .sidebar-toggle:hover, .sidebar .field-enable:hover {
 	text-decoration: none;
 	background-color:#e0e0e0;
 }
@@ -677,7 +678,7 @@ p.backlink {
 }
 
 ul.filteritems {
-	padding-left: 15px;
+	/* padding-left: 15px; */
 }
 
 /* Details page styles */

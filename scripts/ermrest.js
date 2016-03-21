@@ -10,6 +10,7 @@ var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 var USER = null;
+var GLOBUS_LOGOUT = false;
 
 var PRIMARY_KEY = [];
 var uniquenessColumns = [];
@@ -407,7 +408,11 @@ function submitLogout() {
 	$('#logout_link').hide();
 	//var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	//window.location = login_url;
+	
 	var logout_url = '../logout?referrer=' + encodeSafeURIComponent(window.location);
+	if (GLOBUS_LOGOUT) {
+		logout_url = 'https://www.globus.org/app/logout?redirect_uri=' + encodeSafeURIComponent(window.location);
+	}
 	window.location = logout_url;
 }
 
@@ -889,8 +894,8 @@ function successUpdateCount(data, textStatus, jqXHR, param) {
 	var cols = param['cols'];
 	$.each(cols, function(i, col) {
 		box[col]['ready'] = true;
-		box[col]['count'] = col + ' (' + data[0]['cnt_' + encodeSafeURIComponent(col)] + ')';
-		box[col]['facetcount'] = data[0]['cnt_' + encodeSafeURIComponent(col)];
+		box[col]['count'] = col + ' (' + data[0]['cnt_' + col] + ')';
+		box[col]['facetcount'] = data[0]['cnt_' + col];
 	});
 	var ready = true;
 	var tables = [options['table']].concat(association_tables_names);
@@ -1248,7 +1253,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var successCallback = param['successCallback'];
 	$.each(cols, function(i, col) {
 		if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
-			if (data[0]['cnt_d_' + encodeSafeURIComponent(col)] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
+			if (data[0]['cnt_d_' + col] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
@@ -1258,7 +1263,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 				attributegroupParam['options'] = options;
 				attributegroupParam['alert'] = alertObject;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, attributegroupParam);
-			} else if (data[0]['cnt_d_' + encodeSafeURIComponent(col)] >= MULTI_SELECT_LIMIT) {
+			} else if (data[0]['cnt_d_' + col] >= MULTI_SELECT_LIMIT) {
 				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
@@ -1699,8 +1704,8 @@ function successGetTableColumnsDistinct(data, textStatus, jqXHR, param) {
 
 function compareUniques(item1, item2) {
 	var ret = 0;
-	var val1 = uniquenessColumns.contains(item1['name']) ? 0 : item1['distinct'] / item1['cnt'];
-	var val2 = uniquenessColumns.contains(item2['name']) ? 0 : item2['distinct'] / item2['cnt'];
+	var val1 = uniquenessColumns.contains(item1['name']) ? -1 : (item1['cnt'] == 0 ? 1 : item1['distinct'] / item1['cnt']) ;
+	var val2 = uniquenessColumns.contains(item2['name']) ? -1 : (item2['cnt'] == 0 ? 1 : item2['distinct'] / item2['cnt']);
 	if (val1 < val2) {
 		ret = -1;
 	} else if (val1 > val2) {
@@ -1820,7 +1825,12 @@ function getSession(param) {
 function successGetSession(data, textStatus, jqXHR, param) {
 	//alert(JSON.stringify(data, null, 4));
 	if (data['client'] != null) {
-		$('#login_user').html(data['client']);
+		if (data['client']['display_name'] !== undefined) {
+			$('#login_user').html(data['client']['display_name']);
+			GLOBUS_LOGOUT = true;
+		} else {
+			$('#login_user').html(data['client']);
+		}
 		$('#login_link').hide();
 		$('#logout_link').show();
 	} else {
