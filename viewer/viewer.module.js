@@ -36,15 +36,16 @@
     }])
 
     // Get a client connection to ERMrest
-    // Note: Can only use Providers and Constants in .config blocks. So if you
-    // want to use a custom factory/service/value provider in a config block,
-    // you add append 'Provider' to the dependency name and run .$get on it.
+    // Note: Only Providers and Constants can be injected into .config blocks. So
+    // if you want to use a factory or service (e.g. $window or your custom one)
+    // in a .config block, you add append 'Provider' to the dependency name and
+    // run .$get() on it. This returns a Provider instance of the factory/service.
     .config(['ermrestClientFactoryProvider', 'context', function configureClient(ermrestClientFactoryProvider, context) {
         client = ermrestClientFactoryProvider.$get().getClient(context.serviceURL);
     }])
 
     // Set user info
-    .config(['userProvider', 'context', function configureUser(userProvider, context) {
+    .config(['$httpProvider', 'userProvider', 'context', function configureUser($httpProvider, userProvider, context) {
         client.getSession().then(function success(session) {
             var groups = context.groups;
             var attributes = session.attributes;
@@ -67,9 +68,31 @@
             }
             console.log('User: ', user);
         }, function error(response) {
-            console.log(response);
-            throw response;
+            if (response.status == 401 || response.status == 404) {
+                if (chaiseConfig.authnProvider == 'goauth') {
+                    getGoauth(encodeSafeURIComponent(window.location.href));
+                }
+                console.log(response);
+                throw response;
+            }
         });
+
+        function getGoauth(referrer) {
+            var url = '/ermrest/authn/preauth?referrer=' + referrer;
+            var $http = angular.injector(['ng']).get('$http');
+            $http.get(url).then(function success(response) {
+                console.log('Success: ', response);
+                window.open(response.data.redirect_url, '_self');
+            }, function error(response) {
+                console.log('Error: ', error);
+            });
+        }
+
+        function encodeSafeURIComponent (str) {
+            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+            });
+        }
     }])
 
     // Get session info, hydrate values providers, and set up iframe
@@ -237,13 +260,7 @@
                 });
             }
         }, function error(response) {
-            if (response.status == 401) {
-                if (chaiseConfig.authnProvider == 'goauth') {
-                    getGoauth(encodeSafeURIComponent(window.location.href));
-                }
-                console.log(response);
-                throw response;
-            }
+            console.log(response);
         });
 
         $window.addEventListener('message', function(event) {
@@ -259,22 +276,6 @@
                 console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
             }
         });
-
-        function getGoauth(referrer) {
-            var url = '/ermrest/authn/preauth?referrer=' + referrer;
-            $http.get(url).then(function success(response) {
-                console.log('Success: ', response);
-                window.open(response.data.redirect_url, '_self');
-            }, function error(response) {
-                console.log('Error: ', error);
-            });
-        }
-
-        function encodeSafeURIComponent (str) {
-            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            });
-        }
     }]);
 
     // Refresh the page when the window's hash changes. Needed because Angular
