@@ -41,15 +41,13 @@
         }
 
         function deleteComment(comment) {
-            if (AuthService.deleteComment(comment)) {
-                comment.delete().then(function success() {
-                    var annotationComments = comments[comment.data.annotation_id];
-                    var index = annotationComments.indexOf(comment);
-                    annotationComments.splice(index, 1);
-                }, function error(response) {
-                    console.log(response);
-                });
-            }
+            comment.delete().then(function success() {
+                var annotationComments = comments[comment.data.annotation_id];
+                var index = annotationComments.indexOf(comment);
+                annotationComments.splice(index, 1);
+            }, function error(response) {
+                console.log(response);
+            });
         }
 
         return {
