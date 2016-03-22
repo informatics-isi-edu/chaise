@@ -567,7 +567,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
     this.patternInterpretationForTable = function(schemaName, tableName, references) {
         var urlInterp = schemaService.getColumnInterpretations(schemaName, tableName);
         var columns = Object.keys(references[0]);
-        for (col in urlInterp) {
+
+        var originals = []; // keep original col values if has caption (so original value is used in other column caption)
+        for (var col in urlInterp) {
             var uriPattern = urlInterp[col].uriPattern;
             var caption = urlInterp[col].captionPattern;
 
@@ -595,13 +597,21 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             if (caption !== null) {
                 for (var row = 0; row < references.length; row++) {
 
+                    // save original
+                    originals[col] = [];
+                    originals[col][row] = references[row][col]; // NOTE 'originals' structure is { col : [rows...] }
+
                     // replace each col used in the pattern
                     var cap = caption;
                     for (var c = 0; c < columns.length; c++) {
                         var col2 = columns[c];
+
                         // replace {col} with col value
                         var search = "{" + col2 + "}";
-                        cap = cap.replace(new RegExp(search, 'g'), references[row][col2]);
+                        if (originals[col2] !== undefined && originals[col2][row] !== undefined) // col values modified
+                            cap = cap.replace(new RegExp(search, 'g'), originals[col2][row]);
+                        else
+                            cap = cap.replace(new RegExp(search, 'g'), references[row][col2]);
                     }
                     references[row][col] = cap; // overwrite existing col value with caption
                 }
