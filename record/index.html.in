@@ -149,7 +149,7 @@
                                     <span class="caret"></span></button>
                                     <ul class="dropdown-menu">
                                         <li ng-repeat="f in element.files">
-                                            <a href="{{f.url}}">{{ f.caption }}</a>
+                                            <a href="{{f.url}}" download>{{ f.caption }}</a>
                                         </li>
                                     </ul>
                                 </div>
