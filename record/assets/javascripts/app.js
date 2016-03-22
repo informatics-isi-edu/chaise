@@ -242,8 +242,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
                                     } else if (anno !== undefined && anno.presentation === 'download') {
 
-                                        var files = [];
-
                                         // TODO we are handling downloads for iFrame items only right now
                                         // TODO therefore download should come after 'embed'
                                         // downloadable files for each embed element
@@ -255,6 +253,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                                             element = elements[e];
 
                                             // for each download pattern
+                                            var files = [];
                                             for (var p = 0; p < downloadPatterns.length; p++) {
 
                                                 var downloadPattern = downloadPatterns[p];
