@@ -3860,6 +3860,7 @@ function getSortPredicate(data, sortColumn, sortOrder, page, pageSize) {
 		});
 		sortPredicate.push(offsetPredicate.join('&'));
 		sortPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
+		sortPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
 	}
 	return sortPredicate;
 }
