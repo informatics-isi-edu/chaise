@@ -1,8 +1,6 @@
 (function() {
     'use strict';
 
-    var client;
-
     angular.module('chaise.dataEntry', [
         'ERMrest',
         'ngSanitize',
@@ -13,6 +11,10 @@
 
     // Configure the context info from the URI
     .config(['context', function configureContext(context) {
+        if (chaiseConfig.headTitle !== undefined) {
+            document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
+        }
+        
         context.serviceURL = window.location.origin + '/ermrest';
         if (chaiseConfig.ermrestLocation) {
             context.serviceURL = chaiseConfig.ermrestLocation + '/ermrest';
