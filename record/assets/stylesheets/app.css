@@ -480,3 +480,16 @@ tbody{
 .fixed-font {
     font-family: "Lucida Console", Courier, monospace;
 }
+
+/****** Embed iFrames ******/
+
+.embed-block {
+    background: #f4f4f4;
+    padding: 10px;
+    margin-bottom: 40px;
+}
+
+.embed-caption {
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
