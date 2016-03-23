@@ -36,7 +36,7 @@
     }])
 
     // Get a client connection to ERMrest
-    // Note: Only Providers and Constants can be injected into .config blocks. So
+    // Note: Only Providers and Constants can be dependencies in .config blocks. So
     // if you want to use a factory or service (e.g. $window or your custom one)
     // in a .config block, you add append 'Provider' to the dependency name and
     // run .$get() on it. This returns a Provider instance of the factory/service.
@@ -45,8 +45,9 @@
     }])
 
     // Set user info
-    .config(['$httpProvider', 'userProvider', 'context', function configureUser($httpProvider, userProvider, context) {
+    .config(['userProvider', 'context', function configureUser(userProvider, context) {
         client.getSession().then(function success(session) {
+            console.log('Session: ', session);
             var groups = context.groups;
             var attributes = session.attributes;
             var user = userProvider.$get();
@@ -61,10 +62,6 @@
                 return user.role = 'user';
             } else {
                 user.role = null;
-                AlertsService.setAlert({
-                    type: 'error',
-                    message: 'Sorry, you are not allowed to view this page.'
-                });
             }
             console.log('User: ', user);
         }, function error(response) {
@@ -79,12 +76,14 @@
 
         function getGoauth(referrer) {
             var url = '/ermrest/authn/preauth?referrer=' + referrer;
+            // Inject $http service
             var $http = angular.injector(['ng']).get('$http');
             $http.get(url).then(function success(response) {
                 console.log('Success: ', response);
                 window.open(response.data.redirect_url, '_self');
             }, function error(response) {
-                console.log('Error: ', error);
+                console.log('Error: ', response);
+                throw response;
             });
         }
 

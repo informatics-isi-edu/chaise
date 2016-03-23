@@ -3,15 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .service('CommentsService', ['ermrestClientFactory', 'comments', 'context', 'image', 'user', function(ermrestClientFactory, comments, context, image, user) {
-        var commentsTable;
-        var client = ermrestClientFactory.getClient(context.serviceURL);
-        var catalog = client.getCatalog(context.catalogID);
-        catalog.introspect().then(function success(schemas) {
-            var schema = schemas[context.schemaName];
-            commentsTable = schema.getTable('annotation_comment');
-        });
-
+    .service('CommentsService', ['comments', 'context', 'image', 'user', function(comments, context, image, user) {
         function getNumComments(annotationId) {
             var _comments = comments[annotationId];
             if (!_comments) {
