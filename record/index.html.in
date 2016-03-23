@@ -136,13 +136,22 @@
                 </accordion-group>
 
                 <!-- EMBEDED TABLES -->
-                <accordion-group ng-repeat="t in entity.embedTables | orderBy: 'title'" is-open="embed.open">
-                    <accordion-heading><div ng-class="{'active': embed.open }">{{t.title | removeUnderScores}}</div></accordion-heading>
+                <accordion-group ng-repeat="(title, elements) in entity.embedTables | orderBy: title" is-open="embed.open">
+                    <accordion-heading><div ng-class="{'active': embed.open }">{{title | removeUnderScores}}</div></accordion-heading>
                         <ul id="embed">
-                            <li ng-repeat="element in t.elements">
+                            <li ng-repeat="element in elements">
+                                <span>{{ element.caption }}</span>
                                 <div>
-                                    <span>{{ element.caption }}</span>
                                     <iframe title="{{ element.caption }}" width="{{ element.width }}" height="{{ element.height }}" frameBorder="0" ng-src="{{ element.uri }}">&lt;p&gt;Your browser does not support iframes.&lt;/p&gt;</iframe>
+                                </div>
+                                <div ng-if="element.files" class="dropdown" dropdown>
+                                    <button class="btn btn-primary dropdown-toggle" type="button" dropdown-toggle="">Download
+                                    <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <li ng-repeat="f in element.files">
+                                            <a href="{{f.url}}" download>{{ f.caption }}</a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </li>
                         </ul>
