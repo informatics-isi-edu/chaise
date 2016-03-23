@@ -38,7 +38,8 @@ HTML=search/index.html \
 	 login/index.html \
 	 record/index.html \
 	 matrix/index.html \
-	 viewer/index.html
+	 viewer/index.html \
+	 data-entry/index.html
 
 # CSS source
 CSS=styles
@@ -155,13 +156,13 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/select.js
 
-VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.module.js \
+VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
 	$(VIEWER_ASSETS)/common/providers/context.js \
 	$(VIEWER_ASSETS)/common/providers/image.js \
 	$(VIEWER_ASSETS)/common/providers/user.js \
 	$(VIEWER_ASSETS)/common/providers/auth.service.js \
-	$(VIEWER_ASSETS)/common/filters/toTitleCase.js \
-	$(VIEWER_ASSETS)/common/filters/underscoreToSpace.js \
+	common/filters/toTitleCase.js \
+	common/filters/underscoreToSpace.js \
 	$(VIEWER_ASSETS)/sidebar/sidebar.controller.js \
 	$(VIEWER_ASSETS)/annotations/annotations.js \
 	$(VIEWER_ASSETS)/annotations/comments.js \
@@ -186,6 +187,36 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(RECORD_ASSETS)/stylesheets/app.css
 
 VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
+
+# JavaScript and CSS source for Data Entry app
+DE_ASSETS=data-entry
+
+DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/select.js \
+	$(JS)/vendor/angular-datepicker.js \
+	$(JS)/vendor/rzslider.js
+
+
+DE_JS_SOURCE=$(DE_ASSETS)/dataEntry.app.js \
+	$(DE_ASSETS)/context.js \
+	$(DE_ASSETS)/table.js \
+	$(DE_ASSETS)/form.controller.js \
+	common/filters/toTitleCase.js \
+	common/filters/underscoreToSpace.js
+
+DE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/material-design/css/material-design-iconic-font.min.css \
+	$(CSS)/vendor/select.css \
+	$(CSS)/vendor/select2.css \
+	$(CSS)/vendor/angular-datepicker.css \
+	$(CSS)/vendor/rzslider.css \
+	$(CSS)/appheader.css \
+	$(RECORD_ASSETS)/stylesheets/app.css
+
+DE_CSS_SOURCE=$(DE_ASSETS)/dataEntry.css
 
 # Config file
 JS_CONFIG=chaise-config.js
@@ -327,6 +358,10 @@ viewer/index.html: viewer/index.html.in .make-viewer-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
 		viewer/index.html.in > viewer/index.html
 
+data-entry/index.html: data-entry/index.html.in .make-de-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
+		data-entry/index.html.in > data-entry/index.html
+
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
@@ -377,7 +412,7 @@ $(JS_CONFIG): chaise-config-sample.js
 		$(CAT) $$file >> .make-matrix-template-block ; \
 	done
 
-.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(ERMRESTJS_SOURCE) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
+.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
 	> .make-viewer-asset-block
 	for file in $(VIEWER_SHARED_CSS_DEPS); do \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-viewer-asset-block ; \
@@ -394,6 +429,25 @@ $(JS_CONFIG): chaise-config-sample.js
 	for file in $(VIEWER_JS_SOURCE) $(JS_CONFIG); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
+	done
+
+.make-de-asset-block: $(DE_SHARED_CSS_DEPS) $(DE_CSS_SOURCE) $(DE_SHARED_JS_DEPS) $(DE_JS_SOURCE) $(JS_CONFIG)
+	> .make-de-asset-block
+	for file in $(DE_SHARED_CSS_DEPS); do \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-de-asset-block ; \
+	done
+	for file in $(DE_CSS_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
+	done
+	for file in $(DE_SHARED_JS_DEPS); do \
+		echo "<script src='../$$file'></script>" >> .make-de-asset-block ; \
+	done
+	echo "<script src='../../../ermrestjs/js/ermrest.js'></script>" >> .make-de-asset-block
+	echo "<script src='../../../ermrestjs/js/ngermrest.js'></script>" >> .make-de-asset-block
+	for file in $(DE_JS_SOURCE) $(JS_CONFIG); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
 
 # Rules for help/usage

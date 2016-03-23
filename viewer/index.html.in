@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html ng-app="chaise.viewer">
 <head>
     <title>Data Viewer | (Re)Building A Kidney</title>

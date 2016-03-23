@@ -8,7 +8,10 @@
     // Configure the context info from the URI
     .config(['context', function configureContext(context) {
         context.serviceURL = window.location.origin + '/ermrest';
-
+        if (chaiseConfig.ermrestLocation) {
+            context.serviceURL = chaiseConfig.ermrestLocation + '/ermrest';
+        }
+        
         var hash = window.location.hash;
 
         if (hash === undefined || hash == '' || hash.length == 1) {
