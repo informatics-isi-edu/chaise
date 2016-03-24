@@ -61,38 +61,33 @@ angular.module('recordsetApp', ['ERMrest'])
     }
 }])
 
-// Register the 'rowset' object, which can be accessed by other
+// Register the 'recordsetModel' object, which can be accessed by other
 // services, but cannot be access by providers (and config, apparently).
-.value('rowset', [])
-
-// Register the context controller
-.controller('contextController', ['$scope', 'context', function($scope, context) {
-    $scope.context = context;
-}])
+.value('recordsetModel', {header:[],rowset:[]})
 
 // Register the recordset controller
-.controller('recordsetController', ['$scope', 'rowset', function($scope, rowset) {
-    $scope.rowset = rowset;
-
-    // process a selected entity when user clicks a row in the view
-    $scope.selectEntity = function(entity) {
-        selected[0] = entity;
-    }
+.controller('recordsetController', ['$scope', 'recordsetModel', function($scope, recordsetModel) {
+    $scope.vm = recordsetModel;
 }])
 
 // Register work to be performed after loading all modules
-.run(['context', 'rowset', 'ermrestServerFactory', function(context, rowset, ermrestServerFactory) {
+.run(['context', 'recordsetModel', 'ermrestServerFactory', function(context, recordsetModel, ermrestServerFactory) {
     // Get rowset data from ermrest
     var server = ermrestServerFactory.getServer(context.serviceURL);
     var catalog = server.catalogs.get(context.catalogID).then(function(catalog) {
         console.log(catalog);
+
+        // get table definition
         var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
         console.log(table);
-        table.entity.get().then(function (_rowset) {
-          console.log(_rowset);
-          for (var i in _rowset) {
-            rowset.push(_rowset[i]);
-          }
+        recordsetModel.table = table;
+        recordsetModel.header = table.columns.names();
+        console.log(recordsetModel.header);
+
+        // get rows TODO: add filters
+        table.entity.get().then(function (rowset) {
+          console.log(rowset);
+          recordsetModel.rowset = rowset;
         }, function(error) {
           console.log(error);
         });

@@ -6,20 +6,20 @@
         %ASSETS%
     </head>
     <body>
-        <h2>Search context</h2>
-        <div ng-controller="contextController">
-            <p><b>Service URL:</b> {{context.serviceURL}}</p>
-            <p><b>Catalog ID:</b> {{context.catalogID}}</p>
-            <p><b>Schema name:</b> {{context.schemaName}}</p>
-            <p><b>Table name:</b> {{context.tableName}}</p>
-        </div>
-        <h2>Records</h2>
-        <div ng-controller="recordsetController">
-            <table border="1">
-                <tr ng-repeat="row in rowset">
-                    <td ng-repeat="value in row">{{value}}</td>
-                </tr>
-            </table>
+        <div class="container">
+            <h2>Records</h2>
+            <div ng-controller="recordsetController">
+                <table class="table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th ng-repeat="name in vm.header">{{name}}</th>
+                        </tr>
+                    </thead>
+                    <tr ng-repeat="row in vm.rowset">
+                        <td ng-repeat="name in vm.header">{{row[name]}}</td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </body>
 </html>
