@@ -162,6 +162,9 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			err = jqXHR.responseText;
 			if (err != null) {
 				msg += 'ResponseText: ' + err + '\n';
+				if (jqXHR.status == 403) {
+					msg += 'Please contact the site administrator.\n';
+				}
 			}
 			if (textStatus != null) {
 				msg += 'TextStatus: ' + textStatus + '\n';
