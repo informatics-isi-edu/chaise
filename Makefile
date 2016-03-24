@@ -156,6 +156,7 @@ VIEWER_ASSETS=viewer
 VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
+	$(COMMON)/filters.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/select.js
 
@@ -164,7 +165,6 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
 	$(VIEWER_ASSETS)/common/providers/image.js \
 	$(VIEWER_ASSETS)/common/providers/user.js \
 	$(VIEWER_ASSETS)/common/providers/auth.service.js \
-	$(COMMON)/filters.js \
 	$(VIEWER_ASSETS)/sidebar/sidebar.controller.js \
 	$(VIEWER_ASSETS)/annotations/annotations.js \
 	$(VIEWER_ASSETS)/annotations/comments.js \
@@ -196,6 +196,7 @@ DE_ASSETS=data-entry
 DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
+	$(COMMON)/filters.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/angular-datepicker.js \
@@ -205,8 +206,7 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 DE_JS_SOURCE=$(DE_ASSETS)/dataEntry.app.js \
 	$(DE_ASSETS)/context.js \
 	$(DE_ASSETS)/table.js \
-	$(DE_ASSETS)/form.controller.js \
-	$(COMMON)/filters.js
+	$(DE_ASSETS)/form.controller.js
 
 DE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \

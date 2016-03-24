@@ -3,7 +3,7 @@
 
     angular.module('chaise.filters', [])
 
-    // Underscore to Space: A filter that replaces underscores with spaces
+    // Underscore to Space: Replaces underscores with spaces
     .filter('underscoreToSpace', function() {
         return function underscoreToSpace(input) {
             if (typeof input === "string") {
@@ -13,7 +13,7 @@
         }
     })
 
-    // toTitleCase: A filter that capitalizes the first character for each word in a string
+    // toTitleCase: Capitalizes the first character for each word in a string
     .filter('toTitleCase', function() {
         return function toTitleCase(input) {
             if (typeof input === "string") {
