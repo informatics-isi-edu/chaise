@@ -118,7 +118,7 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 MATRIX_TEMPLATES_DEPS =$(TEMPLATES)/erminit.html \
     $(TEMPLATES)/ermmatrix.html
 
-RECORD_TEMPLATES=record/assets/views/record.html
+RECSET_TEMPLATES_DEPS=recordset/recordset.html
 
 # JavaScript and CSS source for Record app
 RECORD_ASSETS=record/assets
@@ -373,8 +373,9 @@ record/index.html: record/index.html.in .make-record-asset-block .make-record-te
 		-e '/%TEMPLATES%/ {' -e 'r .make-record-template-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
 
-recordset/index.html: recordset/index.html.in .make-rs-asset-block
+recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
 		recordset/index.html.in > recordset/index.html
 
 matrix/index.html: matrix/index.html.in .make-asset-block .make-matrix-template-block
@@ -432,6 +433,12 @@ $(JS_CONFIG): chaise-config-sample.js
 	> .make-template-block
 	for file in $(TEMPLATES_DEPS); do \
 		$(CAT) $$file >> .make-template-block ; \
+	done
+
+.make-rs-template-block: $(RECSET_TEMPLATES_DEPS)
+	> .make-rs-template-block
+	for file in $(RECSET_TEMPLATES_DEPS); do \
+		$(CAT) $$file >> .make-rs-template-block ; \
 	done
 
 .make-matrix-template-block: $(MATRIX_TEMPLATES_DEPS)
