@@ -23,14 +23,12 @@ angular.module('recordsetApp', ['ERMrest'])
     serviceURL: 'https://localhost/ermrest',
     catalogID: '1',
     schemaName: 'legacy',
-    tableName: 'dataset'
+    tableName: 'dataset',
+    filters: []
 })
 
-// Register work to be performed on module loading.
+// Register configuration work to be performed on module loading.
 .config(['context', function(context) {
-    // This config example shows how one might parse the window
-    // location hash and configure the context for the search.
-    //
     // Note that we do not like using angular's '$location' service because
     // it encodes and/or decodes the URL in ways that are incompatible with
     // our applications. We need control of the encoding of the URLs.
@@ -39,25 +37,39 @@ angular.module('recordsetApp', ['ERMrest'])
     // typical deployment location for ermrest.
     context.serviceURL = window.location.origin + "/ermrest";
 
-    // Then, parse the URL fragment id (aka, hash)
-    // Expected format: "#catalog_id/[schema_name:]table_name"
+    // Then, parse the URL fragment id (aka, hash). Expected format:
+    //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{/attribute::op::value}*]"
     hash = window.location.hash;
     if (hash === undefined || hash == '' || hash.length == 1) {
         return;
     }
 
     var parts = hash.substring(1).split('/');
+    var len = parts.length;
     context.catalogID = parts[0];
-    if (parts[1]) {
-        parts = parts[1].split(':');
-        if (parts.length > 1) {
-            context.schemaName = parts[0];
-            context.tableName = parts[1];
+    if (len > 1) {
+
+        // Parse the schema:table name
+        schemaTable = parts[1].split(':');
+        if (schemaTable.length > 1) {
+            context.schemaName = schemaTable[0];
+            context.tableName = schemaTable[1];
         }
         else {
             context.schemaName = '';
-            context.tableName = parts[0];
+            context.tableName = schemaTable[0];
         }
+
+        // Parse the filters, currently supports only binary predicates
+        for (var i=2; i<len; i++) {
+            var fparts = parts[i].split("::");
+            if (parts[1] == "eq") {
+                context.filters.push({name:fparts[0],op:"=",value:fparts[2]});
+            } else {
+                context.filters.push({name:fparts[0],op:"::"+fparts[1]+"::",value:fparts[2]});
+            }
+        }
+        console.log(context.filters);
     }
 }])
 
@@ -84,8 +96,27 @@ angular.module('recordsetApp', ['ERMrest'])
         recordsetModel.header = table.columns.names();
         console.log(recordsetModel.header);
 
-        // get rows TODO: add filters
-        table.entity.get().then(function (rowset) {
+        // get rows
+        var filter = null;
+        for (var i in context.filters) {
+          if (filter == null) {
+            filter = new ERMrest.BinaryPredicate(
+              table.columns.get(context.filters[i].name),
+              context.filters[i].op,
+              context.filters[i].value);
+          } else if (filter instanceof ERMrest.Conjunction) {
+            filter.filters.push(
+              new ERMrest.BinaryPredicate(
+                table.columns.byName(context.filters[i].name),
+                context.filters[i].op,
+                context.filters[i].value)
+              );
+          } else {
+              var temp = filter;
+              filter = new ERMrest.Conjunction([temp]);
+          }
+        }
+        table.entity.get(filter).then(function (rowset) {
           console.log(rowset);
           recordsetModel.rowset = rowset;
         }, function(error) {
