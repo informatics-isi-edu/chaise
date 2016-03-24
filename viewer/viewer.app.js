@@ -3,7 +3,7 @@
 
     var client;
 
-    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'ui.select'])
+    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'chaise.filters', 'ui.select'])
 
     // Configure the context info from the URI
     .config(['context', function configureContext(context) {
