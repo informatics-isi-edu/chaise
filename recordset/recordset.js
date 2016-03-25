@@ -15,7 +15,7 @@
  */
 
 // The Chaise RecordSet module
-angular.module('recordsetApp', ['ERMrest'])
+angular.module('recordset', ['ERMrest'])
 
 // Register the 'context' object which can be accessed by config and other
 // services.
@@ -130,4 +130,4 @@ angular.module('recordsetApp', ['ERMrest'])
     });
 }])
 
-/* end recordsetApp */;
+/* end recordset */;
