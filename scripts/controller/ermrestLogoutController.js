@@ -6,8 +6,7 @@ var ermLogoutController = angular.module('ermLogoutController', []);
 
 ermLogoutController.controller('LogoutCtrl', ['$scope',
                                             function($scope) {
-	$scope.loggedOfwebApp = '';
-	$scope.webApp = 'Web App';
+	$scope.webApp = '';
 	if (chaiseConfig['customCSS'] !== undefined) {
 		var fileref = document.createElement("link");
 		fileref.setAttribute("rel", "stylesheet");
@@ -19,8 +18,7 @@ ermLogoutController.controller('LogoutCtrl', ['$scope',
 		var title = document.createElement("title");
 		title.innerHTML = chaiseConfig['headTitle'];
 		document.getElementsByTagName("head")[0].appendChild(title);
-		$scope.webApp = chaiseConfig['headTitle'];
-		$scope.loggedOfwebApp = 'of ' + chaiseConfig['headTitle'];
+		$scope.webApp = 'of ' + chaiseConfig['headTitle'];
 	}
 	loadApplicationHeaderAndFooter();
 }]);

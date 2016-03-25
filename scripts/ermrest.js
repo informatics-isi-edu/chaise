@@ -3887,5 +3887,10 @@ function facetIsInBookmark(table_name, column_name, filter) {
 }
 
 function chaiseApp() {
-	window.location = window.location.origin;
+	//window.location = window.location.origin;
+	var url = '/chaise/search';
+	if (chaiseConfig['dataBrowser'] !== undefined) {
+		url = chaiseConfig['dataBrowser'];
+	}
+	window.location = url;
 }
