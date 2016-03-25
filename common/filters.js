@@ -1,9 +1,19 @@
 (function() {
-    // Capitalize: A filter that capitalizes the first character for each word in a string
     'use strict';
 
-    angular.module('chaise.dataEntry')
+    angular.module('chaise.filters', [])
 
+    // Underscore to Space: Replaces underscores with spaces
+    .filter('underscoreToSpace', function() {
+        return function underscoreToSpace(input) {
+            if (typeof input === "string") {
+                return input.replace(/_/g, ' ');
+            }
+            return input;
+        }
+    })
+
+    // toTitleCase: Capitalizes the first character for each word in a string
     .filter('toTitleCase', function() {
         return function toTitleCase(input) {
             if (typeof input === "string") {
