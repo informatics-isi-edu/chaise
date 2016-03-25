@@ -26,9 +26,10 @@ About the script:
   - User-agent: Signifies what types of bots can access/crawl the site. Defined with an asterisk/wildcard signifies that all bots must follow the below instruction.
   - Disallow: Allows the user to define what parts of the site should or should not be crawled. Leaving this blank tells the crawler to look at everything that it can.
   - Sitemap: The user can define a sitemap file that can point to URLs on the site that the crawler should visit. This is especially useful when there isn't links to all of the data and, in our case with chaise, the data is hidden behind pagination.
-  - `Robots.txt format:
+  - Robots.txt format:
 
-  User-agent:*
-  Disallow:
-  Sitemap: http://www.example.com/sitemap.txt`
+    User-agent:*  
+    Disallow:  
+    Sitemap: http://www.example.com/sitemap.txt  
+  
   - The sitemap definition in robots.txt needs to point to where the file is hosted by the application. The crawler CANNOT read into the file structure of the application on the server so it needs to be able to grab the sitemap from a page on the site.
