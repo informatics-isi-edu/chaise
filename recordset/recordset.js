@@ -38,19 +38,19 @@ angular.module('recordsetApp', ['ERMrest'])
     context.serviceURL = window.location.origin + "/ermrest";
 
     // Then, parse the URL fragment id (aka, hash). Expected format:
-    //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{/attribute::op::value}*]"
+    //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*]"
     hash = window.location.hash;
     if (hash === undefined || hash == '' || hash.length == 1) {
         return;
     }
 
-    var parts = hash.substring(1).split('/');
-    var len = parts.length;
-    context.catalogID = parts[0];
+    var fragment = hash.substring(1).split('/');
+    var len = fragment.length;
+    context.catalogID = fragment[0];
     if (len > 1) {
 
         // Parse the schema:table name
-        schemaTable = parts[1].split(':');
+        schemaTable = fragment[1].split(':');
         if (schemaTable.length > 1) {
             context.schemaName = schemaTable[0];
             context.tableName = schemaTable[1];
@@ -61,15 +61,18 @@ angular.module('recordsetApp', ['ERMrest'])
         }
 
         // Parse the filters, currently supports only binary predicates
-        for (var i=2; i<len; i++) {
-            var fparts = parts[i].split("::");
-            if (parts[1] == "eq") {
-                context.filters.push({name:fparts[0],op:"=",value:fparts[2]});
-            } else {
-                context.filters.push({name:fparts[0],op:"::"+fparts[1]+"::",value:fparts[2]});
+        if (len>2) {
+            var conjunction = fragment[2].split('&');
+            for (var i in conjunction) {
+                var filter = conjunction[i].split("::");
+                if (filter[1] === "eq") {
+                    context.filters.push({name:filter[0],op:"=",value:filter[2]});
+                } else {
+                    context.filters.push({name:filter[0],op:"::"+filter[1]+"::",value:filter[2]});
+                }
             }
+            console.log(context.filters);
         }
-        console.log(context.filters);
     }
 }])
 
@@ -96,26 +99,28 @@ angular.module('recordsetApp', ['ERMrest'])
         recordsetModel.header = table.columns.names();
         console.log(recordsetModel.header);
 
-        // get rows
+        // build up filters
         var filter = null;
-        for (var i in context.filters) {
-          if (filter == null) {
-            filter = new ERMrest.BinaryPredicate(
-              table.columns.get(context.filters[i].name),
-              context.filters[i].op,
-              context.filters[i].value);
-          } else if (filter instanceof ERMrest.Conjunction) {
+        var len = context.filters.length;
+        if (len == 1) {
+          filter = new ERMrest.BinaryPredicate(
+            table.columns.get(context.filters[0].name),
+            context.filters[0].op,
+            context.filters[0].value);
+        }
+        else if (len > 1) {
+          filter = new ERMrest.Conjunction([]);
+          for (var i=0; i<len; i++) {
             filter.filters.push(
               new ERMrest.BinaryPredicate(
-                table.columns.byName(context.filters[i].name),
+                table.columns.get(context.filters[i].name),
                 context.filters[i].op,
                 context.filters[i].value)
-              );
-          } else {
-              var temp = filter;
-              filter = new ERMrest.Conjunction([temp]);
+            );
           }
         }
+
+        // get rowset from table
         table.entity.get(filter).then(function (rowset) {
           console.log(rowset);
           recordsetModel.rowset = rowset;
