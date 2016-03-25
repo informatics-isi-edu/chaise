@@ -3,9 +3,10 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['$scope', 'table', function FormController($scope, table) {
+    .controller('FormController', ['editorModel', '$scope', function FormController(editorModel, $scope) {
         var vm = this;
-        vm.table = table;
+        vm.editorModel = editorModel;
+
         vm.showForm = true;
         vm.newData = {};
 
@@ -15,11 +16,22 @@
 
         vm.getDefaultColumns = getDefaultColumns;
 
+        vm.inputType = null;
+
+        vm.setInputType = setInputType;
+        vm.isForeignKey = isForeignKey;
         vm.isTextType = isTextType;
         vm.isDateType = isDateType;
         vm.isNumberType = isNumberType;
         // vm.isSliderType = isSliderType;
         vm.matchType = matchType;
+
+
+        $scope.$watch(function() {
+            return vm.editorModel.rows[0];
+        }, function(newValue, oldValue) {
+            console.log(newValue);
+        });
 
         function confirmSubmission() {
             vm.showForm = false;
@@ -33,7 +45,7 @@
             // Put the new data in an array so that it's compatible with ERMrest
             vm.newData = [vm.newData];
 
-            vm.table.entity.post(vm.newData, getDefaultColumns()).then(null, function error(response) {
+            vm.editorModel.entity.post(vm.newData, getDefaultColumns()).then(null, function error(response) {
                 console.log(response);
             });
 
@@ -45,7 +57,7 @@
         // Determine which columns' values will be automatically filled in by ERMrest
         function getDefaultColumns() {
             var defaults = [];
-            var keys = vm.table.keys;
+            var keys = vm.editorModel.keys;
             for (var i = 0; i < keys.length; i++) {
                 var columns = keys[i].colset.columns;
                 for (var c = 0; c < columns.length; c++) {
@@ -58,14 +70,32 @@
             return defaults;
         }
 
+        function setInputType(column) {
+            var type = column.type.name;
+
+            if (isForeignKey(column.name)) {
+                return 'dropdown';
+            } else if (isDateType(type)) {
+                return 'date';
+            } else if (isNumberType(type)) {
+                return 'number';
+            } else {
+                return 'text';
+            }
+        }
+
+        function isForeignKey(columnName) {
+            return vm.editorModel.domainValues.hasOwnProperty(columnName);
+        }
+
         // TODO: How to differentiate between using a textarea and input? Maybe a column annotation..
         function isTextType(columnType) {
-            var types = ['text', 'jsonb'];
+            var types = ['text'];
             return matchType(columnType, types);
         }
 
         function isDateType(columnType) {
-            var types = ['date'];
+            var types = ['date', 'timestamptz'];
             return matchType(columnType, types);
         }
 

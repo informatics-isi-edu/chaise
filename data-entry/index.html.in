@@ -19,9 +19,43 @@
     <![endif]-->
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <div ng-controller="FormController as form" class="row">
-            <div class="col-md-6 col-md-offset-3">
+            <div class="col-md-12">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th ng-repeat="column in form.editorModel.columns">
+                                {{column.name | underscoreToSpace | toTitleCase}} &bull; <small>{{column.type.name}}</small>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td ng-repeat="column in form.editorModel.columns" ng-switch="form.setInputType(column);">
+                                <datepicker ng-switch-when="date" ng-model="form.editorModel.rows[0][column.name]" date-format="yyyy-MM-dd">
+                                    <input type="text" class="form-control">
+                                </datepicker>
+                                <div ng-switch-when="dropdown">
+                                    <ui-select ng-model="form.editorModel.rows[0][column.name]" theme="select2" ng-disabled="disabled">
+                                        <ui-select-match placeholder="Select a value">
+                                            <span ng-repeat="(key, value) in $select.selected">
+                                                {{value | underscoreToSpace | toTitleCase}}
+                                            </span>
+                                        </ui-select-match>
+                                        <ui-select-choices repeat="domainValue in form.editorModel.domainValues[column.name] | filter: $select.search" >
+                                            <div ng-repeat="(key, value) in domainValue" ng-bind-html="value | underscoreToSpace | toTitleCase | highlight: $select.search"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                                <input ng-switch-when="number" ng-model="form.editorModel.rows[0][column.name]" type="number" class="form-control">
+                                <input ng-switch-default ng-model="form.editorModel.rows[0][column.name]" type="text" class="form-control">
+                            </td>
+                         </tr>
+                     </tbody>
+                 </table>
+            </div>
+            <!-- <div class="col-md-6 col-md-offset-3">
                 <form ng-show="form.showForm">
                     <h2>Add New {{form.table.name | underscoreToSpace | toTitleCase}}</h2>
                     <br>
@@ -37,7 +71,7 @@
                     <div ng-repeat="field in form.table.foreignKeys">
                         <label for="{{field.name}}">{{field.name | underscoreToSpace | toTitleCase}}</label><br>
                         <ui-select ng-model="form.newData[field.name]" theme="select2" ng-disabled="disabled" id="{{field.name}}">
-                            <ui-select-match placeholder="Select a value">{{$select.selected}}</ui-select-match>
+                            <ui-select-match placeholder="Select a value">{{$select.selected | underscoreToSpace | toTitleCase}}</ui-select-match>
                             <ui-select-choices repeat="value in field.domainValues | filter: $select.search">
                                 <div ng-bind-html="value | underscoreToSpace | toTitleCase | highlight: $select.search"></div>
                             </ui-select-choices>
@@ -62,7 +96,7 @@
                         <button ng-click="form.submit();" type="submit" class="btn btn-primary">Add to Database</button>
                         <button ng-click="form.cancel();" type="button" class="btn btn-default">Make Changes</button>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </body>

@@ -205,7 +205,7 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 
 DE_JS_SOURCE=$(DE_ASSETS)/dataEntry.app.js \
 	$(DE_ASSETS)/context.js \
-	$(DE_ASSETS)/table.js \
+	$(DE_ASSETS)/editor.model.js \
 	$(DE_ASSETS)/form.controller.js
 
 DE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
