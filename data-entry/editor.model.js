@@ -11,7 +11,7 @@
         // additional vm per row // optional: use this to store state data for each row
         // domainValues (per column): [id, display]
         table: {},
-        rows: [  //each row of fields in the form, not the table from ERMrest
+        rows: [{} //each row of fields in the form, not the table from ERMrest
             // {
             //     "image_id":11,
             //     "author":"isi",
@@ -38,19 +38,6 @@
             // protocol_id: [
             //     {id: 1, display: 'Potato'}
             // ]
-        },
-        columns: {
-            // columnName: {
-            //     value: null,
-            //     tooltip: ''
-            // },
-            // columnName: {
-            //     value: null,
-            //     tooltip: ''
-            // }
         }
-        // foreignKeys: [],
-        // keys: [],
-        // nativeColumns: []
     });
 })();

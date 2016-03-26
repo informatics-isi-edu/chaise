@@ -50,23 +50,24 @@
                 if (table) {
                     console.log('Data: ', table);
                     editorModel.table = table;
-                    editorModel.keys = table.keys.all();
-                    editorModel.columns = table.columns.all();
+                    editorModel.cols = table.columns.all();
 
                     var foreignKeys = table.foreignKeys.all();
                     var foreignKeysLength = foreignKeys.length;
                     for (var i = 0; i < foreignKeysLength; i++) {
-                        // Capture the i from the containing for loop in a closure so that
-                        // getDomainValues() has the correct i on success
+                        // Capture the i from the containing for loop in a closure
+                        // so that getDomainValues() has the correct i on success
                         (function(i) {
                             var currentKey = foreignKeys[i];
                             currentKey.getDomainValues().then(function success(values) {
                                 var valuesLength = values.length;
+                                var domainValues = editorModel.domainValues[currentKey.colset.columns[0].name] = [];
                                 for (var j = 0; j < valuesLength; j++) {
-                                    editorModel.domainValues[currentKey.colset.columns[0].name] = values;
+                                    var field = Object.keys(values[j])[0];
+                                    domainValues.push(values[j][field]);
                                 }
-                            }, function error(reason) {
-                                console.log(reason);
+                            }, function error(response) {
+                                console.log(response);
                             });
                         })(i);
                     }

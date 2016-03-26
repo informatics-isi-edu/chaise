@@ -1,7 +1,7 @@
-datepicker {
-    margin-bottom: 20px;
-}
-
 .ui-select-container {
     width: 100%;
+}
+
+th, td {
+    min-width: 100px;
 }
