@@ -400,7 +400,7 @@ function make_basic_auth(user, password) {
 	return 'Basic ' + hash;
 }
 
-function submitLogout() {
+function submitLogout(logout_uri) {
 	if (token != null) {
 		$.removeCookie(goauth_cookie);
 		token = null;
@@ -414,7 +414,7 @@ function submitLogout() {
 	
 	var logout_url = '../logout?referrer=' + encodeSafeURIComponent(window.location);
 	if (GLOBUS_LOGOUT) {
-		logout_url = 'https://www.globus.org/app/logout?redirect_uri=' + encodeSafeURIComponent(window.location);
+		logout_url = logout_uri;
 	}
 	window.location = logout_url;
 }
@@ -1816,8 +1816,8 @@ function deleteSession(param) {
 }
 
 function successDeleteSession(data, textStatus, jqXHR, param) {
-	//getSession(param);
-	submitLogout();
+	data = JSON.parse(data);
+	submitLogout(data['logout_url']);
 }
 
 function getSession(param) {
