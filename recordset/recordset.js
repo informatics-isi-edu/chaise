@@ -60,11 +60,21 @@ angular.module('recordset', ['ERMrest'])
             context.tableName = schemaTable[0];
         }
 
-        // Parse the filters, currently supports only binary predicates
+        // Parse the filters
         if (len>2) {
+            // The '/' is also a valid separator for conjunctions but for
+            // simplicity we just support '&' at this point. Something for
+            // future discussion.
             var conjunction = fragment[2].split('&');
             for (var i in conjunction) {
                 var filter = conjunction[i].split("::");
+                if (filter.length != 3) {
+                    // Currently, this only supports binary predicates, skips others
+                    console.log("invalid filter string: " + filter);
+                    continue;
+                }
+
+                // Push filters as simple (name, op, value) triples
                 if (filter[1] === "eq") {
                     context.filters.push({name:filter[0],op:"=",value:filter[2]});
                 } else {
@@ -109,15 +119,16 @@ angular.module('recordset', ['ERMrest'])
             context.filters[0].value);
         }
         else if (len > 1) {
-          filter = new ERMrest.Conjunction([]);
+          var filters = [];
           for (var i=0; i<len; i++) {
-            filter.filters.push(
+            filters.push(
               new ERMrest.BinaryPredicate(
                 table.columns.get(context.filters[i].name),
                 context.filters[i].op,
                 context.filters[i].value)
             );
           }
+          filter = new ERMrest.Conjunction(filters);
         }
 
         // get rowset from table
