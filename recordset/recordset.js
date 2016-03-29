@@ -20,10 +20,10 @@ angular.module('recordset', ['ERMrest'])
 // Register the 'context' object which can be accessed by config and other
 // services.
 .constant('context', {
-    serviceURL: 'https://localhost/ermrest',
-    catalogID: '1',
-    schemaName: 'legacy',
-    tableName: 'dataset',
+    serviceURL: '', // 'https://www.example.org/ermrest'
+    catalogID: '',  // '1'
+    schemaName: '', // 'isa'
+    tableName: '',  // 'assay'
     filters: []
 })
 
@@ -99,7 +99,7 @@ angular.module('recordset', ['ERMrest'])
 .run(['context', 'recordsetModel', 'ermrestServerFactory', function(context, recordsetModel, ermrestServerFactory) {
     // Get rowset data from ermrest
     var server = ermrestServerFactory.getServer(context.serviceURL);
-    var catalog = server.catalogs.get(context.catalogID).then(function(catalog) {
+    server.catalogs.get(context.catalogID).then(function(catalog) {
         console.log(catalog);
 
         // get table definition
