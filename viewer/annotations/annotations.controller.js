@@ -37,6 +37,8 @@
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
+            // TODO: Check if origin is valid first; if not, return and exit.
+            // Do this for the other listeners as well.
             if (event.origin === window.location.origin) {
                 var data = event.data;
                 var messageType = data.messageType;
@@ -58,7 +60,6 @@
                                 // Highlight the annotation in the sidebar
                                 vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
                             });
-                            // scrollIntoView(vm.highlightedAnnotation);
                         }
                         break;
                     case 'onUnHighlighted':
@@ -81,27 +82,20 @@
                 if (!query) {
                     // If query is "" or undefined, then the annotation is considered a match
                     return true;
-                } else {
-                    annotation = annotation.data;
-                    query = query.toLowerCase();
-                    // // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
-                    if (!annotation.anatomy) {
-                        annotation.anatomy = 'No Anatomy';
-                    }
-                    // Loop through the array to find matches
-                    var numKeys = keys.length;
-                    if (numKeys > 0) {
-                        for (var i = 0; i < numKeys; i++) {
-                            if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
-                                return true;
-                            }
+                }
+                annotation = annotation.data;
+                query = query.toLowerCase();
+
+                // Loop through the array to find matches
+                var numKeys = keys.length;
+                if (numKeys > 0) {
+                    for (var i = 0; i < numKeys; i++) {
+                        if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
+                            return true;
                         }
                     }
-                    // // Set the "anatomy" key back to null if it was changed to "No Anatomy" earlier
-                    if (annotation.anatomy === 'No Anatomy') {
-                        annotation.anatomy = null;
-                    }
                 }
+                return false;
             }
         }
 
@@ -176,16 +170,6 @@
                     return vm.sections[i];
                 }
             }
-        }
-
-        // Scroll an element into visible part of the browser
-        function scrollIntoView(elementId) {
-            // Not using angular.element to get element because neither jQuery
-            // nor Angular's jqLite support .scrollIntoView()
-            document.getElementById(elementId).scrollIntoView({
-                block: 'start',
-                behavior: 'smooth'
-            });
         }
     }]);
 })();

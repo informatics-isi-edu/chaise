@@ -11,10 +11,11 @@
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
+        // TODO: Style guide preferences?
         context.serviceURL = window.location.origin + '/ermrest';
 
         if (chaiseConfig.ermrestLocation) {
-            context.serviceURL = chaiseConfig.ermrestLocation + '/ermrest';
+            context.serviceURL = chaiseConfig.ermrestLocation;
         }
 
         var hash = window.location.hash;
@@ -31,7 +32,6 @@
                 context.schemaName = params[0];
                 context.tableName = params[1];
             } else {
-                context.schemaName = '';
                 context.tableName = params[0];
             }
         }
@@ -41,6 +41,8 @@
                 context.imageID = params[1];
             }
         }
+
+        // TODO: Check if context has everything it needs before proceeding. If not, Bad Request
     }])
 
     // Get a client connection to ERMrest
@@ -60,6 +62,7 @@
             var attributes = session.attributes;
             var user = userProvider.$get();
 
+            // Support new and old webauthn!
             user.name = session.client;
 
             if (attributes.indexOf(groups.curators) > -1) {
@@ -73,8 +76,10 @@
             }
             console.log('User: ', user);
         }, function error(response) {
+            // TODO: Abstract this away..
             if (response.status == 401 || response.status == 404) {
                 if (chaiseConfig.authnProvider == 'goauth') {
+                    // TODO: Is it worth injecting $window here?
                     getGoauth(encodeSafeURIComponent(window.location.href));
                 }
                 console.log(response);
@@ -102,8 +107,8 @@
         }
     }])
 
-    // Get session info, hydrate values providers, and set up iframe
-    .run(['$http', '$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($http, $window, context, image, annotations, comments, sections, anatomies, statuses, vocabs) {
+    // Hydrate values providers and set up iframe
+    .run(['$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($window, context, image, annotations, comments, sections, anatomies, statuses, vocabs) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
