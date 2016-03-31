@@ -50,6 +50,10 @@ chaiseRecordApp.service('configService', function() {
     	document.getElementsByTagName("head")[0].appendChild(fileref);
     }
     	
+	// set the navbar-header text
+	if (chaiseConfig['navbarBrandText'] !== undefined) {
+		jQuery(jQuery('span', jQuery(jQuery('.navbar-brand', jQuery('#header'))))[0]).html(chaiseConfig['navbarBrandText']);
+	}
 	// set the navbar-header link
 	if (chaiseConfig['navbarBrand'] !== undefined) {
 		jQuery(jQuery('.navbar-brand', jQuery('#header'))[0]).attr('href', chaiseConfig['navbarBrand']);

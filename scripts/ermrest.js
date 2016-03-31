@@ -88,6 +88,10 @@ function initApplication() {
 	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
 	getSchemas();
 	getSession();
+	// set the navbar-header text
+	if (chaiseConfig['navbarBrandText'] !== undefined) {
+		$($('span', $($('.navbar-brand', $('#ermrestHeader'))))[0]).html(chaiseConfig['navbarBrandText']);
+	}
 	// set the navbar-header link
 	if (chaiseConfig['navbarBrand'] !== undefined) {
 		$($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
