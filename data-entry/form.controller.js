@@ -14,12 +14,13 @@
         vm.cancel = cancel;
         vm.submit = submit;
 
-        vm.getDisplayPatternAnnotation = getDisplayPatternAnnotation;
+        // vm.getDisplayPatternAnnotation = getDisplayPatternAnnotation;
 
         vm.inputType = null;
 
         vm.setInputType = setInputType;
         vm.isAutoGen = isAutoGen;
+        vm.getKeys = getKeys;
         vm.isForeignKey = isForeignKey;
         vm.isTextType = isTextType;
         vm.isDateType = isDateType;
@@ -43,45 +44,38 @@
 
         function submit() {
             console.debug(vm.editorModel.rows); // [{author: 'abc', image_id: 4}, {another row}]
-            //
-            // vm.editorModel.table.entity.post(vm.editorModel.rows, []).then(null, function error(response) {
-            //     console.log(response);
-            // });
-            //
-            // // Reset the form
-            // vm.editorModel.rows = [];
+
+            vm.editorModel.table.entity.post(vm.editorModel.rows, vm.getKeys()).then(null, function error(response) {
+                console.log(response);
+            });
+
+            // Reset the form
+            vm.editorModel.rows = [];
             // vm.showForm = true;
         }
 
         // Returns true if a column's fields should be automatically generated
-        function isAutoGen(columnName) {
-            var displayPattern = vm.getDisplayPatternAnnotation(columnName);
-            // If the column is a key or has a display annotation...
-            if (getKeys().indexOf(columnName) !== -1 ) {
-                return true;
-            } else if (displayPattern) {
-                // TODO: for each item in squigglies, prepend "vm.editorModel.rows[0]."
-                // remove squigglies. concatenate them...
-                vm.editorModel.rows[0][columnName] = displayPattern;
+        function isAutoGen(columnType) {
+            if (columnType.indexOf('serial') === 0) {
                 return true;
             }
             return false;
         }
 
-        function getDisplayPatternAnnotation(columnName) {
-            var columns = vm.editorModel.table.columns.all();
-            for (var i = 0; i < columns.length; i++) {
-                var column = columns[i];
-                if (column.name === columnName) {
-                    var tag = 'tag:' + $window.location.host + ',' + new Date().getFullYear() + ':display';
-                    var annotations = column.annotations.get(tag);
-                    if (annotations) {
-                        console.log(annotations.content[0].pattern);
-                        return annotations.content[0].pattern;
-                    }
-                }
-            }
-        }
+        // function getDisplayPatternAnnotation(columnName) {
+        //     var columns = vm.editorModel.table.columns.all();
+        //     for (var i = 0; i < columns.length; i++) {
+        //         var column = columns[i];
+        //         if (column.name === columnName) {
+        //             var tag = 'tag:' + $window.location.host + ',' + new Date().getFullYear() + ':display';
+        //             var annotations = column.annotations.get(tag);
+        //             if (annotations) {
+        //                 console.log(annotations.content[0].pattern);
+        //                 return annotations.content[0].pattern;
+        //             }
+        //         }
+        //     }
+        // }
 
         function getKeys() {
             var defaults = [];
@@ -103,13 +97,13 @@
             var name = column.name;
             var type = column.type.name;
 
-            if (isAutoGen(name)) {
+            if (vm.isAutoGen(type)) {
                 return 'autoGen';
-            } else if (isForeignKey(name)) {
+            } else if (vm.isForeignKey(name)) {
                 return 'dropdown';
-            } else if (isDateType(type)) {
+            } else if (vm.isDateType(type)) {
                 return 'date';
-            } else if (isNumberType(type)) {
+            } else if (vm.isNumberType(type)) {
                 return 'number';
             } else {
                 return 'text';
@@ -123,17 +117,17 @@
         // TODO: How to differentiate between using a textarea and input? Maybe a column annotation..
         function isTextType(columnType) {
             var types = ['text'];
-            return matchType(columnType, types);
+            return vm.matchType(columnType, types);
         }
 
         function isDateType(columnType) {
             var types = ['date', 'timestamptz'];
-            return matchType(columnType, types);
+            return vm.matchType(columnType, types);
         }
 
         function isNumberType(columnType) {
             var types = ['int4', 'int8'];
-            return matchType(columnType, types);
+            return vm.matchType(columnType, types);
         }
 
         // function isSliderType(columnType) {
