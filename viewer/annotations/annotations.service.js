@@ -34,8 +34,11 @@
                 // Section annotations don't need anatomies
                 delete newAnnotation[0].anatomy;
             }
+
+
             var table = image.entity.getRelatedTable(context.schemaName, type);
-            return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
+            return table.entity.post(newAnnotation, ['id', 'created']).then(function success(annotation) {
+            // return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
                 var messageType = '';
                 switch (type) {
                     case 'annotation':
@@ -63,6 +66,8 @@
             }
 
             // Update in ERMrest
+            // entity.put() has yet to be implemented
+            // annotation.put().then(function success(response) {
             annotation.update().then(function success(response) {
                 // Update in Annotorious
                 iframe.postMessage({messageType: 'updateAnnotation', content: annotation.data}, origin);
@@ -87,6 +92,7 @@
         function deleteAnnotation(annotation) {
             if (!hasComments(annotation)) {
                 // Delete from ERMrest
+                // delete hasn't been implemented in the refactor branch yet
                 annotation.delete().then(function success(response) {
                     // Delete from the 'annotations' or 'sections' provider
                     var type = annotation.table.name;
