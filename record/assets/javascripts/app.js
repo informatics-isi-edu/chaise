@@ -50,14 +50,22 @@ chaiseRecordApp.service('configService', function() {
     	document.getElementsByTagName("head")[0].appendChild(fileref);
     }
     	
-	// set the navbar-header text
-	if (chaiseConfig['navbarBrandText'] !== undefined) {
-		jQuery(jQuery('span', jQuery(jQuery('.navbar-brand', jQuery('#header'))))[0]).html(chaiseConfig['navbarBrandText']);
-	}
-	// set the navbar-header link
-	if (chaiseConfig['navbarBrand'] !== undefined) {
-		jQuery(jQuery('.navbar-brand', jQuery('#header'))[0]).attr('href', chaiseConfig['navbarBrand']);
-	}
+
+    // set the navbar-header text
+    if (chaiseConfig['navbarBrandText'] !== undefined) {
+        document.getElementById('navbarBrandText').innerHTML = chaiseConfig['navbarBrandText'];
+    } else {
+        document.getElementById('navbarBrandText').innerHTML= 'Chaise';
+    }
+    // set the navbar-header image
+    if (chaiseConfig['navbarBrandImage'] !== undefined) {
+        document.getElementById('navbarBrandImage').setAttribute('src',chaiseConfig['navbarBrandImage']);
+    }
+    // set the navbar-header link
+    if (chaiseConfig['navbarBrand'] !== undefined) {
+        $($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
+    }
+
 	
 	if (chaiseConfig['headTitle'] !== undefined) {
 		var title = document.createElement("title");

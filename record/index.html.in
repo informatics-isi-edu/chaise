@@ -8,14 +8,13 @@
 
     <!-- HEADER -->
     <div ng-controller="HeaderCtrl" id="header" class="navbar navbar-fixed-top">
-        <div class="navbar-header"><a id="brand" href="/" class="navbar-brand"><span>Chaise</span></a></div>
+	    <a class="navbar-brand" href="#"><image id="navbarBrandImage"/><span id="navbarBrandText"></span></a>
 	    <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
 
                <p class="navbar-text pull-right">
                	<a class="login" id="login_link" href="javascript:initLogin()">Log in</a>
                	<a id="login_user" href="#"></a>
                	<a class="login" id="logout_link" style="display:none;" href="javascript:deleteSession(window.location)">Logout</a>
-               	<i class="md-account-circle md-lg"></i> Profile
                </p>
 
 	    </div><!-- /.navbar-collapse -->
