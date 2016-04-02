@@ -82,20 +82,30 @@ function loadApplicationHeaderAndFooter() {
 	$( "#ermrestFooter" ).load( "../views/ermfooter.html" );
 }
 
+function setNavbarBrand() {
+	if (document.getElementById('navbarBrandText') == null) {
+		setTimeout(setNavbarBrand, 1);
+	} else {
+		// set the navbar-header text
+		if (chaiseConfig['navbarBrandText'] !== undefined) {
+			document.getElementById('navbarBrandText').innerHTML = chaiseConfig['navbarBrandText'];
+		} else {
+			document.getElementById('navbarBrandText').innerHTML= 'Chaise';
+		}
+		// set the navbar-header link
+		if (chaiseConfig['navbarBrand'] !== undefined) {
+			$($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
+		}
+	}
+}
+
 function initApplication() {
 	loadApplicationHeaderAndFooter();
 	initLocation();
 	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
 	getSchemas();
 	getSession();
-	// set the navbar-header text
-	if (chaiseConfig['navbarBrandText'] !== undefined) {
-		$($('span', $($('.navbar-brand', $('#ermrestHeader'))))[0]).html(chaiseConfig['navbarBrandText']);
-	}
-	// set the navbar-header link
-	if (chaiseConfig['navbarBrand'] !== undefined) {
-		$($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
-	}
+	setNavbarBrand();
 	//alert(JSON.stringify(DATASET_COLUMNS, null, 4));
 }
 
