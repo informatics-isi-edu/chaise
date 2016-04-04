@@ -10,7 +10,6 @@ var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 var USER = null;
-var GLOBUS_LOGOUT = false;
 
 var PRIMARY_KEY = [];
 var uniquenessColumns = [];
@@ -427,7 +426,7 @@ function submitLogout(logout_uri) {
 	//window.location = login_url;
 	
 	var logout_url = '../logout?referrer=' + encodeSafeURIComponent(window.location);
-	if (GLOBUS_LOGOUT) {
+	if (logout_uri != null) {
 		logout_url = logout_uri;
 	}
 	window.location = logout_url;
@@ -1830,8 +1829,12 @@ function deleteSession(param) {
 }
 
 function successDeleteSession(data, textStatus, jqXHR, param) {
-	data = JSON.parse(data);
-	submitLogout(data['logout_url']);
+	var logout_url = null;
+	if (data !== undefined) {
+		data = JSON.parse(data);
+		logout_url = data['logout_url'];
+	}
+	submitLogout(logout_url);
 }
 
 function getSession(param) {
@@ -1844,7 +1847,6 @@ function successGetSession(data, textStatus, jqXHR, param) {
 	if (data['client'] != null) {
 		if (data['client']['display_name'] !== undefined) {
 			$('#login_user').html(data['client']['display_name']);
-			GLOBUS_LOGOUT = true;
 		} else {
 			$('#login_user').html(data['client']);
 		}
