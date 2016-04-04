@@ -91,6 +91,10 @@ function setNavbarBrand() {
 		} else {
 			document.getElementById('navbarBrandText').innerHTML= 'Chaise';
 		}
+		// set the navbar-header image
+		if (chaiseConfig['navbarBrandImage'] !== undefined) {
+			document.getElementById('navbarBrandImage').setAttribute('src',chaiseConfig['navbarBrandImage']);
+		}
 		// set the navbar-header link
 		if (chaiseConfig['navbarBrand'] !== undefined) {
 			$($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
