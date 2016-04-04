@@ -429,9 +429,14 @@ function submitLogout(logout_uri) {
 	//var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	//window.location = login_url;
 	
-	var logout_url = '../logout?referrer=' + encodeSafeURIComponent(window.location);
-	if (logout_uri != null) {
-		logout_url = logout_uri;
+	var logout_url = logout_uri;
+	if (logout_url == null) {
+		if (chaiseConfig['logoutURL'] != null) {
+			logout_url = chaiseConfig['logoutURL'];
+		} else {
+			logout_url = '/chaise/logout';
+		}
+		logout_url += '?referrer=' + encodeSafeURIComponent(window.location);
 	}
 	window.location = logout_url;
 }
