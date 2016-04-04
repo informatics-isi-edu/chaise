@@ -63,7 +63,7 @@ chaiseRecordApp.service('configService', function() {
     }
     // set the navbar-header link
     if (chaiseConfig['navbarBrand'] !== undefined) {
-        $($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
+        $($('.navbar-brand', $('#header'))[0]).attr('href', chaiseConfig['navbarBrand']);
     }
 
 	
