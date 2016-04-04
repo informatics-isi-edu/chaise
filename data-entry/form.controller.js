@@ -3,55 +3,35 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['editorModel', '$scope', '$window', function FormController(editorModel, $scope, $window) {
+    .controller('FormController', ['editorModel', function FormController(editorModel) {
         var vm = this;
         vm.editorModel = editorModel;
 
-        vm.showForm = true;
-        vm.newData = [];
-
-        vm.confirmSubmission = confirmSubmission;
-        vm.cancel = cancel;
         vm.submit = submit;
+        vm.addFormRow = addFormRow;
 
-        // vm.getDisplayPatternAnnotation = getDisplayPatternAnnotation;
+        vm.getKeys = getKeys;
 
         vm.inputType = null;
 
         vm.setInputType = setInputType;
         vm.isAutoGen = isAutoGen;
-        vm.getKeys = getKeys;
         vm.isForeignKey = isForeignKey;
-        vm.isTextType = isTextType;
-        vm.isDateType = isDateType;
-        vm.isNumberType = isNumberType;
-        // vm.isSliderType = isSliderType;
+        vm.isDate = isDate;
+        vm.isNumber = isNumber;
         vm.matchType = matchType;
 
-        $scope.$watch(function() {
-            return vm.editorModel.rows;
-        }, function(newValue, oldValue) {
-            console.log(newValue);
-        });
-
-        function confirmSubmission() {
-            vm.showForm = false;
-        }
-
-        function cancel() {
-            vm.showForm = true;
-        }
-
         function submit() {
-            console.debug(vm.editorModel.rows); // [{author: 'abc', image_id: 4}, {another row}]
-
             vm.editorModel.table.entity.post(vm.editorModel.rows, vm.getKeys()).then(null, function error(response) {
                 console.log(response);
             });
 
             // Reset the form
-            vm.editorModel.rows = [];
-            // vm.showForm = true;
+            vm.editorModel.rows = [{}];
+        }
+
+        function addFormRow() {
+            vm.editorModel.rows.push({});
         }
 
         // Returns true if a column's fields should be automatically generated
@@ -61,21 +41,6 @@
             }
             return false;
         }
-
-        // function getDisplayPatternAnnotation(columnName) {
-        //     var columns = vm.editorModel.table.columns.all();
-        //     for (var i = 0; i < columns.length; i++) {
-        //         var column = columns[i];
-        //         if (column.name === columnName) {
-        //             var tag = 'tag:' + $window.location.host + ',' + new Date().getFullYear() + ':display';
-        //             var annotations = column.annotations.get(tag);
-        //             if (annotations) {
-        //                 console.log(annotations.content[0].pattern);
-        //                 return annotations.content[0].pattern;
-        //             }
-        //         }
-        //     }
-        // }
 
         function getKeys() {
             var defaults = [];
@@ -101,9 +66,9 @@
                 return 'autoGen';
             } else if (vm.isForeignKey(name)) {
                 return 'dropdown';
-            } else if (vm.isDateType(type)) {
+            } else if (vm.isDate(type)) {
                 return 'date';
-            } else if (vm.isNumberType(type)) {
+            } else if (vm.isNumber(type)) {
                 return 'number';
             } else {
                 return 'text';
@@ -114,26 +79,15 @@
             return vm.editorModel.domainValues.hasOwnProperty(columnName);
         }
 
-        // TODO: How to differentiate between using a textarea and input? Maybe a column annotation..
-        function isTextType(columnType) {
-            var types = ['text'];
-            return vm.matchType(columnType, types);
-        }
-
-        function isDateType(columnType) {
+        function isDate(columnType) {
             var types = ['date', 'timestamptz'];
             return vm.matchType(columnType, types);
         }
 
-        function isNumberType(columnType) {
+        function isNumber(columnType) {
             var types = ['int4', 'int8'];
             return vm.matchType(columnType, types);
         }
-
-        // function isSliderType(columnType) {
-        //     var types = [];
-        //     return matchType(columnType, types);
-        // }
 
         // Returns true if a column type is found in the given array of types
         function matchType(columnType, types) {
