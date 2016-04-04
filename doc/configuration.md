@@ -24,4 +24,7 @@ The below table explains the usage of the default parameters:
 | headTitle | An application name | Chaise | "headTitle":\<value\> | N/A | The application name. |
 | customCSS | An URL | N/A | "customCSS":\<value\> | N/A | The URL for a style sheet file to be applied for the application header. |
 | navbarBrand | An URL | N/A | "navbarBrand":\<value\> | N/A | The URL for the branding logo in the top navigation bar. |
+| navbarBrandText | A string | Chaise | "navbarBrandText":\<value\> | N/A | The value to be displayed in the navigation bar. |
+| navbarBrandImage | An URL | N/A | "navbarBrandImage":\<value\> | N/A | The URL for an image to be displayed in the navigation bar. |
+| logoutURL | An URL | /chaise/logout | "logoutURL":\<value\> | N/A | The URL to the logout page. |
 | dataBrowser | An URL | /chaise/search | "dataBrowser":\<value\> | N/A | The URL to continue after a logout. |
