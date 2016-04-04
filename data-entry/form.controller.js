@@ -9,6 +9,7 @@
 
         vm.submit = submit;
         vm.addFormRow = addFormRow;
+        vm.numRowsToAdd = 1;
 
         vm.getKeys = getKeys;
 
@@ -31,15 +32,12 @@
         }
 
         function addFormRow() {
-            vm.editorModel.rows.push({});
-        }
-
-        // Returns true if a column's fields should be automatically generated
-        function isAutoGen(columnType) {
-            if (columnType.indexOf('serial') === 0) {
-                return true;
+            var rowset = vm.editorModel.rows;
+            var prototypeRow = rowset[rowset.length-1];
+            for (var i = 0; i < vm.numRowsToAdd; i++) {
+                var row = Object.assign({}, prototypeRow);
+                rowset.push(row);
             }
-            return false;
         }
 
         function getKeys() {
@@ -62,9 +60,8 @@
             var name = column.name;
             var type = column.type.name;
 
-            if (vm.isAutoGen(type)) {
-                return 'autoGen';
-            } else if (vm.isForeignKey(name)) {
+            // TODO: Add isAutoGen case back in when we've figured out the ID generation stuff
+            if (vm.isForeignKey(name)) {
                 return 'dropdown';
             } else if (vm.isDate(type)) {
                 return 'date';
@@ -73,6 +70,14 @@
             } else {
                 return 'text';
             }
+        }
+
+        // Returns true if a column's fields should be automatically generated
+        function isAutoGen(columnType) {
+            if (columnType.indexOf('serial') === 0) {
+                return true;
+            }
+            return false;
         }
 
         function isForeignKey(columnName) {

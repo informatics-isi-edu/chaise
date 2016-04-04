@@ -5,3 +5,11 @@
 th, td {
     min-width: 100px;
 }
+
+.row {
+    margin-bottom: 20px;
+}
+
+.navbar button {
+    margin-left: 15px;
+}
