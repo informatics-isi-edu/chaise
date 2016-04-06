@@ -110,6 +110,7 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 MATRIX_TEMPLATES_DEPS =$(TEMPLATES)/erminit.html \
     $(TEMPLATES)/ermmatrix.html
 
+RECORD_TEMPLATES=record/assets/views/record.html
 
 # JavaScript and CSS source for Record app
 RECORD_ASSETS=record/assets
@@ -346,8 +347,9 @@ logout/index.html: logout/index.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		logout/index.html.in > logout/index.html
 
-record/index.html: record/index.html.in .make-record-asset-block
+record/index.html: record/index.html.in .make-record-asset-block .make-record-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-record-template-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
 
 matrix/index.html: matrix/index.html.in .make-asset-block .make-matrix-template-block
@@ -411,6 +413,12 @@ $(JS_CONFIG): chaise-config-sample.js
 	> .make-matrix-template-block
 	for file in $(MATRIX_TEMPLATES_DEPS); do \
 		$(CAT) $$file >> .make-matrix-template-block ; \
+	done
+
+.make-record-template-block: $(RECORD_TEMPLATES)
+	> .make-record-template-block
+	for file in $(RECORD_TEMPLATES); do \
+		$(CAT) $$file >> .make-record-template-block; \
 	done
 
 .make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
