@@ -25,7 +25,7 @@ module.exports = function(config) {
         'viewer.app.js',
         '**/*.js',
         '../chaise-config.js',
-        '*.spec.js'
+        'test/*.spec.js'
     ],
 
 
