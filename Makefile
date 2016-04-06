@@ -37,9 +37,17 @@ HTML=search/index.html \
 	 logout/index.html \
 	 login/index.html \
 	 record/index.html \
+	 recordset/index.html \
 	 matrix/index.html \
 	 viewer/index.html \
 	 data-entry/index.html
+
+# ERMrestjs Deps
+ERMRESTJS_DEPS=../../ermrestjs/js/ermrest.js \
+			   ../../ermrestjs/js/utilities.js \
+			   ../../ermrestjs/js/filters.js \
+			   ../../ermrestjs/js/datapath.js \
+			   ../../ermrestjs/js/ngermrest.js
 
 # CSS source
 CSS=styles
@@ -110,7 +118,7 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 MATRIX_TEMPLATES_DEPS =$(TEMPLATES)/erminit.html \
     $(TEMPLATES)/ermmatrix.html
 
-RECORD_TEMPLATES=record/assets/views/record.html
+RECSET_TEMPLATES_DEPS=recordset/recordset.html
 
 # JavaScript and CSS source for Record app
 RECORD_ASSETS=record/assets
@@ -219,6 +227,19 @@ DE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(RECORD_ASSETS)/stylesheets/app.css
 
 DE_CSS_SOURCE=$(DE_ASSETS)/dataEntry.css
+
+# JavaScript and CSS source for RecordSet app
+RECSET_ASSETS=recordset
+
+RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/angular.js \
+	$(JS)/vendor/bootstrap.js
+
+RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.js
+
+RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/material-design/css/material-design-iconic-font.min.css
+
 
 # Config file
 JS_CONFIG=chaise-config.js
@@ -352,6 +373,11 @@ record/index.html: record/index.html.in .make-record-asset-block .make-record-te
 		-e '/%TEMPLATES%/ {' -e 'r .make-record-template-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
 
+recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-template-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
+		recordset/index.html.in > recordset/index.html
+
 matrix/index.html: matrix/index.html.in .make-asset-block .make-matrix-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-matrix-template-block' -e 'd' -e '}' \
@@ -409,6 +435,12 @@ $(JS_CONFIG): chaise-config-sample.js
 		$(CAT) $$file >> .make-template-block ; \
 	done
 
+.make-rs-template-block: $(RECSET_TEMPLATES_DEPS)
+	> .make-rs-template-block
+	for file in $(RECSET_TEMPLATES_DEPS); do \
+		$(CAT) $$file >> .make-rs-template-block ; \
+	done
+
 .make-matrix-template-block: $(MATRIX_TEMPLATES_DEPS)
 	> .make-matrix-template-block
 	for file in $(MATRIX_TEMPLATES_DEPS); do \
@@ -458,6 +490,27 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
+
+.make-rs-asset-block: $(RECSET_SHARED_CSS_DEPS) $(RECSET_CSS_SOURCE) $(RECSET_SHARED_JS_DEPS) $(RECSET_JS_SOURCE) $(JS_CONFIG)
+	> .make-rs-asset-block
+	for file in $(RECSET_SHARED_CSS_DEPS); do \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-rs-asset-block ; \
+	done
+	for file in $(RECSET_CSS_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
+	done
+	for file in $(RECSET_SHARED_JS_DEPS); do \
+		echo "<script src='../$$file'></script>" >> .make-rs-asset-block ; \
+	done
+	for script in $(ERMRESTJS_DEPS); do \
+		echo "<script src='$$script'></script>" >> .make-rs-asset-block ; \
+	done
+	for file in $(RECSET_JS_SOURCE) $(JS_CONFIG); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
+	done
+
 
 # Rules for help/usage
 .PHONY: help usage
