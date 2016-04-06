@@ -88,11 +88,47 @@ angular.module('recordset', ['ERMrest'])
 
 // Register the 'recordsetModel' object, which can be accessed by other
 // services, but cannot be access by providers (and config, apparently).
-.value('recordsetModel', {header:[],rowset:[]})
+.value('recordsetModel', {
+    header:[],
+    columns: [],
+    sortby: null,     // column name
+    sortOrder: null, // asc or desc
+    rowset:[]}
+)
 
 // Register the recordset controller
 .controller('recordsetController', ['$scope', 'recordsetModel', function($scope, recordsetModel) {
     $scope.vm = recordsetModel;
+
+    /**
+     *
+     * @param {Array} columns and array of column names in sort order
+     */
+    $scope.sort = function () {
+        var sort = null;
+        if (recordsetModel.sortby !== "") {
+            if (recordsetModel.sortOrder === null || recordsetModel.sortOrder === 'asc') {
+                sort = [recordsetModel.sortby];
+                recordsetModel.sortOrder = 'asc';
+            } else {
+                sort = [recordsetModel.sortby + "::desc::"];
+            }
+        } else { // default order selected
+            recordsetModel.sortOrder = null; // reset sortOrder for default
+        }
+        recordsetModel.table.entity.get(recordsetModel.filter, null, null, sort).then(function(rowset){
+            console.log(rowset);
+            recordsetModel.rowset = rowset;
+        }, function(response) {
+            console.log("Error getting entities: ");
+            console.log(response);
+        })
+    };
+
+    $scope.toggleSortOrder = function () {
+        recordsetModel.sortOrder = (recordsetModel.sortOrder === 'asc' ? recordsetModel.sortOrder = 'desc' : recordsetModel.sortOrder = 'asc');
+        $scope.sort();
+    }
 }])
 
 // Register work to be performed after loading all modules
@@ -106,7 +142,8 @@ angular.module('recordset', ['ERMrest'])
         var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
         console.log(table);
         recordsetModel.table = table;
-        recordsetModel.header = table.columns.names();
+        recordsetModel.columns = table.columns.names();
+        recordsetModel.header = table.columns.names(); // TODO formatting
         console.log(recordsetModel.header);
 
         // build up filters
@@ -130,6 +167,7 @@ angular.module('recordset', ['ERMrest'])
           }
           filter = new ERMrest.Conjunction(filters);
         }
+        recordsetModel.filter = filter;
 
         // get rowset from table
         table.entity.get(filter).then(function (rowset) {
