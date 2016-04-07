@@ -13,7 +13,7 @@ describe('AlertsController', function() {
     it('closeAlert() should close the alert', function() {
         var controller = $controller('AlertsController');
         spyOn(AlertsService, 'deleteAlert');
-        var val = controller.closeAlert();
+        controller.closeAlert();
         expect(AlertsService.deleteAlert).toHaveBeenCalled();
     });
 });
