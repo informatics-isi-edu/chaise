@@ -9,7 +9,7 @@
 
         vm.submit = submit;
         vm.addFormRow = addFormRow;
-        vm.numRowsToAdd = 1;
+        vm.numRowsToAdd = 2; // Default set at 2, but could be any number
 
         vm.getKeys = getKeys;
 
@@ -23,19 +23,25 @@
         vm.matchType = matchType;
 
         function submit() {
-            vm.editorModel.table.entity.post(vm.editorModel.rows, vm.getKeys()).then(null, function error(response) {
-                console.log(response);
-            });
-
-            // Reset the form
-            vm.editorModel.rows = [{}];
+            console.log(vm.formContainer.row0.author);
+            // vm.formContainer.$setUntouched();
+            // vm.formContainer.$setPristine();
+            //
+            // vm.editorModel.table.entity.post(vm.editorModel.rows, vm.getKeys()).then(function success(entity) {
+            //     console.log(entity);
+            // }, function error(response) {
+            //     console.log(response);
+            // });
+            //
+            // // Reset the form
+            // vm.editorModel.rows = [{}];
         }
 
-        function addFormRow() {
+        function addFormRow(numRows) {
             var rowset = vm.editorModel.rows;
             var prototypeRow = rowset[rowset.length-1];
-            for (var i = 0; i < vm.numRowsToAdd; i++) {
-                var row = Object.assign({}, prototypeRow);
+            for (var i = 0; i < numRows; i++) {
+                var row = angular.copy(prototypeRow);
                 rowset.push(row);
             }
         }

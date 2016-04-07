@@ -7,7 +7,8 @@
         'chaise.filters',
         'ui.select',
         'rzModule',
-        '720kb.datepicker'
+        '720kb.datepicker',
+        'ngMessages'
     ])
 
     // Configure the context info from the URI
@@ -73,9 +74,11 @@
                     }
                     console.log('Model: ', editorModel);
                 } else {
+                    // TODO: Show this to the user
                     console.log('Table not found.');
                 }
             } else {
+                // TODO: Show this to the user
                 console.log('Schema not found.');
             }
         }, function error(response) {
@@ -84,7 +87,6 @@
                     getGoauth(encodeSafeURIComponent(window.location.href));
                 }
                 console.log(response);
-                throw response;
             }
         });
 
