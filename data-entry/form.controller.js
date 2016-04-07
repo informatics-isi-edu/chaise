@@ -23,18 +23,18 @@
         vm.matchType = matchType;
 
         function submit() {
-            console.log(vm.formContainer.row0.author);
-            // vm.formContainer.$setUntouched();
-            // vm.formContainer.$setPristine();
-            //
-            // vm.editorModel.table.entity.post(vm.editorModel.rows, vm.getKeys()).then(function success(entity) {
-            //     console.log(entity);
-            // }, function error(response) {
-            //     console.log(response);
-            // });
-            //
-            // // Reset the form
-            // vm.editorModel.rows = [{}];
+            var form = vm.formContainer;
+            var model = vm.editorModel;
+            if (form.$valid) {
+                form.$setUntouched();
+                form.$setPristine();
+                model.table.entity.post(model.rows, vm.getKeys()).then(null, function error(response) {
+                    console.log(response);
+                });
+
+                // Reset the form
+                model.rows = [{}];
+            }
         }
 
         function addFormRow(numRows) {
