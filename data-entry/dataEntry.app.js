@@ -49,7 +49,6 @@
             if (schema) {
                 var table = schema.tables.get(context.tableName);
                 if (table) {
-                    console.log('Data: ', table);
                     editorModel.table = table;
                     editorModel.cols = table.columns.all();
 
@@ -72,13 +71,12 @@
                             });
                         })(i);
                     }
-                    console.log('Model: ', editorModel);
                 } else {
-                    // TODO: Show this to the user
+                    alert('Sorry, the requested table "' + context.tableName + '" was not found. Please check the URL and refresh the page.');
                     console.log('Table not found.');
                 }
             } else {
-                // TODO: Show this to the user
+                alert('Sorry, the requested schema "' + context.schemaName + '" was not found. Please check the URL and refresh the page');
                 console.log('Schema not found.');
             }
         }, function error(response) {

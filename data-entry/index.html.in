@@ -28,14 +28,14 @@
                     </div>
                     <div class="navbar-collapse collapse">
                         <ul class="navbar-form navbar-right" role="button">
-                            <button class="btn btn-default" type="button" ng-click="form.addFormRow();">Add a Row</button>
+                            <button class="btn btn-default" type="button" ng-click="form.addFormRow(1);">Add a Row</button>
                             <div class="input-group">
                                 <input ng-model="form.numRowsToAdd" type="number" class="form-control" style="width: 60px;">
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" ng-click="form.addFormRow(form.numRowsToAdd);" type="button">Add # of Rows</button>
                                 </span>
                             </div><!-- /input-group -->
-                            <button class="btn btn-primary pull-right" type="submit" ng-click="form.submit();">Submit Data</button>
+                            <button class="btn btn-primary pull-right" type="submit" ng-disabled="form.formContainer.$invalid" ng-click="form.submit();">Submit Data</button>
                         </ul>
                    </div><!--/.nav-collapse -->
                 </div>
@@ -46,29 +46,37 @@
                         <table class="table table-bordered table-striped table-hover">
                             <thead>
                                 <tr>
+                                    <th>#</th>
                                     <th ng-repeat="column in form.editorModel.table.columns.all();" ng-if="!form.isAutoGen(column.type.name);">
                                         {{column.name | underscoreToSpace | toTitleCase}} &bull; <small>{{column.type.name}}</small>
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr ng-repeat="(rowIndex, row) in form.editorModel.rows track by $index">
-                                    <td ng-repeat="column in form.editorModel.table.columns.all();" ng-if="!form.isAutoGen(column.type.name);" ng-switch="form.setInputType(column);">
-                                        <datepicker ng-switch-when="date" date-format="yyyy-MM-dd">
-                                            <input ng-model="form.editorModel.rows[rowIndex][column.name]" type="text" class="form-control">
-                                        </datepicker>
-                                        <div ng-switch-when="dropdown">
-                                            <ui-select ng-model="form.editorModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="disabled">
-                                                <ui-select-match placeholder="Select a value">{{$select.selected | underscoreToSpace | toTitleCase}}</ui-select-match>
-                                                <ui-select-choices repeat="domainValue in form.editorModel.domainValues[column.name] | filter: $select.search" >
-                                                    <div ng-bind-html="domainValue | underscoreToSpace | toTitleCase | highlight: $select.search"></div>
-                                                </ui-select-choices>
-                                            </ui-select>
-                                        </div>
-                                        <input ng-switch-when="number" ng-model="form.editorModel.rows[rowIndex][column.name]" type="number" class="form-control">
-                                        <input ng-switch-default ng-model="form.editorModel.rows[rowIndex][column.name]" type="text" class="form-control">
-                                    </td>
-                                 </tr>
+                            <tbody ng-form="form.formContainer">
+                                    <tr ng-form="form.formContainer.row{{rowIndex}}" ng-repeat="(rowIndex, row) in form.editorModel.rows track by $index">
+                                        <td>{{rowIndex + 1}}</td>
+                                        <td ng-form="form.formContainer.row{{rowIndex}}.{{column.name}}" ng-repeat="column in form.editorModel.table.columns.all();" ng-if="!form.isAutoGen(column.type.name);" ng-switch="form.setInputType(column);">
+                                            <datepicker ng-switch-when="date" date-format="yyyy-MM-dd">
+                                                <input ng-model="form.editorModel.rows[rowIndex][column.name]" name="{{column.name}}" type="date" class="form-control" required>
+                                            </datepicker>
+                                            <div ng-switch-when="dropdown">
+                                                <ui-select ng-model="form.editorModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="disabled">
+                                                    <ui-select-match name="{{column.name}}" placeholder="Select a value">{{$select.selected | underscoreToSpace | toTitleCase}}</ui-select-match>
+                                                    <ui-select-choices repeat="domainValue in form.editorModel.domainValues[column.name] | filter: $select.search" >
+                                                        <div ng-bind-html="domainValue | underscoreToSpace | toTitleCase | highlight: $select.search"></div>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                            <input ng-switch-when="number" ng-model="form.editorModel.rows[rowIndex][column.name]" name="{{column.name}}" type="number" class="form-control" required>
+                                            <input ng-switch-default ng-model="form.editorModel.rows[rowIndex][column.name]" name="{{column.name}}" type="text" class="form-control" required>
+
+                                            <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.row{{rowIndex}}.{{column.name}}.{{column.name}}.$touched" class="text-danger" role="alert">
+                                                <div ng-message="required">Please enter a value for this field.</div>
+                                                <div ng-message="date">This field requires a date value.</div>
+                                                <div ng-message="number">This field requires a numeric value.</div>
+                                            </div>
+                                        </td>
+                                     </tr>
                              </tbody>
                          </table>
                     </div>
