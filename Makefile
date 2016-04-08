@@ -118,6 +118,7 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 MATRIX_TEMPLATES_DEPS =$(TEMPLATES)/erminit.html \
     $(TEMPLATES)/ermmatrix.html
 
+RECORD_TEMPLATES=record/assets/views/record.html
 RECSET_TEMPLATES_DEPS=recordset/recordset.html
 
 # JavaScript and CSS source for Record app
