@@ -1,20 +1,12 @@
 <h2>Records</h2>
 <div ng-controller="recordsetController">
-    <!-- filters -->
-    <div class="col-md-8">
-        <p>Sort by:
-            <select ng-model="vm.sortby" ng-init="vm.sortby=''" ng-change="sort()">
-                <option value="">DEFAULT</option>
-                <option ng-repeat="column in vm.columns" value="{{ column }}">{{ column }}</option>
-            </select>
-            <!-- sort order -->
-            <span ng-show="vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes toggler"></span>
-            <span ng-show="vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes-alt toggler"></span></p>
-    </div>
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th ng-repeat="name in vm.header">{{name}}</th>
+                <th ng-repeat="name in vm.header" ng-click="sortby(name)" ng-style="{'text-decoration': vm.sortby!=name? 'underline' : 'none'}">{{name}}
+                    <span ng-show="vm.sortby==name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes toggler"></span>
+                    <span ng-show="vm.sortby==name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes-alt toggler"></span></p>
+                </th>
             </tr>
         </thead>
         <tr ng-repeat="row in vm.rowset">

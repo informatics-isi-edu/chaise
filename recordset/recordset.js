@@ -24,7 +24,8 @@ angular.module('recordset', ['ERMrest'])
     catalogID: '',  // '1'
     schemaName: '', // 'isa'
     tableName: '',  // 'assay'
-    filters: []
+    filters: [],
+    sort: null        // 'column::desc::' ::desc:: is option, ,only allow 1 column
 })
 
 // Register configuration work to be performed on module loading.
@@ -44,7 +45,18 @@ angular.module('recordset', ['ERMrest'])
         return;
     }
 
-    var fragment = hash.substring(1).split('/');
+    // url format
+    // http://recordset_app/<catalog>/<table>@sort(<column>::desc::)
+    // http://recordset_app/<catalog>/<table>/<filters>@sort(<column>::desc::)
+
+    // parse out @sort(...)
+    if (hash.indexOf("@sort(") !== -1) {
+        context.sort = hash.match(/@sort\((.*)\)/)[1];
+    }
+
+    // content before @sort
+    var parts = hash.split("@sort(")[0];
+    var fragment = parts.substring(1).split('/');
     var len = fragment.length;
     context.catalogID = fragment[0];
     if (len > 1) {
@@ -105,30 +117,34 @@ angular.module('recordset', ['ERMrest'])
      * @param {Array} columns and array of column names in sort order
      */
     $scope.sort = function () {
+
         var sort = null;
-        if (recordsetModel.sortby !== "") {
-            if (recordsetModel.sortOrder === null || recordsetModel.sortOrder === 'asc') {
-                sort = [recordsetModel.sortby];
-                recordsetModel.sortOrder = 'asc';
-            } else {
-                sort = [recordsetModel.sortby + "::desc::"];
-            }
-        } else { // default order selected
-            recordsetModel.sortOrder = null; // reset sortOrder for default
+        if (recordsetModel.sortby !== null) {
+            sort = [{"column": recordsetModel.sortby, "order": recordsetModel.sortOrder}];
         }
-        recordsetModel.table.entity.get(recordsetModel.filter, null, null, sort).then(function(rowset){
+
+        recordsetModel.table.entity.get(recordsetModel.filter, null, null, sort).then(function (rowset) {
             console.log(rowset);
             recordsetModel.rowset = rowset;
-        }, function(response) {
+        }, function (response) {
             console.log("Error getting entities: ");
             console.log(response);
         })
     };
 
+    $scope.sortby = function(column) {
+        if (recordsetModel.sortby !== column) {
+            recordsetModel.sortby = column;
+            recordsetModel.sortOrder = "asc";
+            $scope.sort();
+        }
+
+    };
+
     $scope.toggleSortOrder = function () {
         recordsetModel.sortOrder = (recordsetModel.sortOrder === 'asc' ? recordsetModel.sortOrder = 'desc' : recordsetModel.sortOrder = 'asc');
         $scope.sort();
-    }
+    };
 }])
 
 // Register work to be performed after loading all modules
@@ -169,8 +185,23 @@ angular.module('recordset', ['ERMrest'])
         }
         recordsetModel.filter = filter;
 
+        // sorting
+        if (context.sort !== null) {
+            if (context.sort.endsWith("::desc::")) {
+                recordsetModel.sortby = context.sort.match(/(.*)::desc::/)[1];
+                recordsetModel.sortOrder = 'desc';
+            } else {
+                recordsetModel.sortby = context.sort;
+                recordsetModel.sortOrder = 'asc';
+            }
+        }
+        var sort = null;
+        if (recordsetModel.sortby !== null) {
+            sort = [{"column": recordsetModel.sortby, "order": recordsetModel.sortOrder}];
+        }
+
         // get rowset from table
-        table.entity.get(filter).then(function (rowset) {
+        table.entity.get(filter, null, null, sort).then(function (rowset) {
           console.log(rowset);
           recordsetModel.rowset = rowset;
         }, function(error) {
