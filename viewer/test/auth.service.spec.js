@@ -10,92 +10,144 @@ describe('AuthService', function() {
         });
     });
 
-    it('createAnnotation() should return properly based on the role of the user', function() {
-        mockAuthService.user.role = 'curator';
-        var permitted = mockAuthService.createAnnotation();
-        expect(permitted).toEqual(true);
+    describe('createAnnotation() should return properly based on the role of the user', function() {
+        var permitted;
 
-        mockAuthService.user.role = 'annotator';
-        permitted = mockAuthService.createAnnotation();
-        expect(permitted).toEqual(true);
+        it('should return true if the user is a curator', function() {
+            mockAuthService.user.role = 'curator';
+            permitted = mockAuthService.createAnnotation();
+            expect(permitted).toBe(true);
+        });
 
-        mockAuthService.user.role = 'user';
-        permitted = mockAuthService.createAnnotation();
-        expect(permitted).toEqual(false);
+        it('should return true if the user is an annotator', function() {
+            mockAuthService.user.role = 'annotator';
+            permitted = mockAuthService.createAnnotation();
+            expect(permitted).toBe(true);
+        });
+
+        it('should return false if the user is not an annotator or curator', function() {
+            mockAuthService.user.role = 'user';
+            permitted = mockAuthService.createAnnotation();
+            expect(permitted).toBe(false);
+        });
     });
 
-    it('editAnnotation() should return properly based on the role of the user', function() {
-        var annotation = { data: { author: 'tester' }};
+    describe('editAnnotation() should return properly based on the role of the user', function() {
+        var annotation, permitted;
 
-        mockAuthService.user.role = 'curator';
-        var permitted = mockAuthService.editAnnotation(annotation);
-        expect(permitted).toEqual(true);
+        beforeEach(function() {
+            annotation = { data: { author: 'tester' }};
+        });
 
-        mockAuthService.user.role = 'annotator';
-        mockAuthService.user.name = 'tester';
-        permitted = mockAuthService.editAnnotation(annotation);
-        expect(permitted).toEqual(true);
+        it('should return true if the user is a curator', function() {
+            mockAuthService.user.role = 'curator';
+            permitted = mockAuthService.editAnnotation(annotation);
+            expect(permitted).toBe(true);
+        });
 
-        mockAuthService.user.role = 'user';
-        permitted = mockAuthService.editAnnotation(annotation);
-        expect(permitted).toEqual(false);
+        it('should return true if the user is an annotator and they are the annotation owner', function() {
+            mockAuthService.user.role = 'annotator';
+            mockAuthService.user.name = 'tester';
+            permitted = mockAuthService.editAnnotation(annotation);
+            expect(permitted).toBe(true);
+        });
+
+        it('should return false if the user is not an annotator or curator', function() {
+            mockAuthService.user.role = 'user';
+            permitted = mockAuthService.editAnnotation(annotation);
+            expect(permitted).toBe(false);
+        });
     });
 
-    it('deleteAnnotation() should return properly based on the role of the user', function() {
-        var annotation = { data: { author: 'tester' }};
+    describe('deleteAnnotation() should return properly based on the role of the user', function() {
+        var annotation, permitted;
 
-        mockAuthService.user.role = 'curator';
-        var permitted = mockAuthService.deleteAnnotation(annotation);
-        expect(permitted).toEqual(true);
+        beforeEach(function() {
+            annotation  = { data: { author: 'tester' }};
+        });
 
-        mockAuthService.user.role = 'annotator';
-        mockAuthService.user.name = 'tester';
-        permitted = mockAuthService.deleteAnnotation(annotation);
-        expect(permitted).toEqual(true);
+        it('should return true if the user is a curator', function() {
+            mockAuthService.user.role = 'curator';
+            permitted = mockAuthService.deleteAnnotation(annotation);
+            expect(permitted).toBe(true);
+        });
 
-        mockAuthService.user.role = 'user';
-        permitted = mockAuthService.deleteAnnotation(annotation);
-        expect(permitted).toEqual(false);
+        it('should return true if the user is an annotator and they are the annotation owner', function() {
+            mockAuthService.user.role = 'annotator';
+            mockAuthService.user.name = 'tester';
+            permitted = mockAuthService.deleteAnnotation(annotation);
+            expect(permitted).toBe(true);
+        });
+
+        it('should return false if the user is not an annotator or curator', function() {
+            mockAuthService.user.role = 'user';
+            permitted = mockAuthService.deleteAnnotation(annotation);
+            expect(permitted).toBe(false);
+        });
     });
 
-    it('createComment() should return properly based on the role of the user', function() {
-        mockAuthService.user.role = 'curator';
-        var permitted = mockAuthService.createComment();
-        expect(permitted).toEqual(true);
+    describe('createComment() should return properly based on the role of the user', function() {
+        var permitted;
 
-        mockAuthService.user.role = 'annotator';
-        permitted = mockAuthService.createComment();
-        expect(permitted).toEqual(true);
+        it('should return true if the user is a curator', function() {
+            mockAuthService.user.role = 'curator';
+            permitted = mockAuthService.createComment();
+            expect(permitted).toBe(true);
+        });
 
-        mockAuthService.user.role = 'user';
-        permitted = mockAuthService.createComment();
-        expect(permitted).toEqual(false);
+        it('should return true if the user is an annotator', function() {
+            mockAuthService.user.role = 'annotator';
+            permitted = mockAuthService.createComment();
+            expect(permitted).toBe(true);
+        });
+
+        it('should return false if the user is not an annotator or curator', function() {
+            mockAuthService.user.role = 'user';
+            permitted = mockAuthService.createComment();
+            expect(permitted).toBe(false);
+        });
     });
 
-    it('deleteComment() should return properly based on the role of the user', function() {
-        var comment = { data: { author: 'tester' }};
+    describe('deleteComment() should return properly based on the role of the user', function() {
+        var comment, permitted;
 
-        mockAuthService.user.role = 'curator';
-        var permitted = mockAuthService.deleteComment(comment);
-        expect(permitted).toEqual(true);
+        beforeEach(function() {
+            comment = { data: { author: 'tester' }};
+        });
 
-        mockAuthService.user.role = 'annotator';
-        mockAuthService.user.name = 'tester';
-        permitted = mockAuthService.deleteComment(comment);
-        expect(permitted).toEqual(true);
+        it('should return true if the user is a curator', function() {
+            mockAuthService.user.role = 'curator';
+            permitted = mockAuthService.deleteComment(comment);
+            expect(permitted).toBe(true);
+        });
 
-        mockAuthService.user.role = 'user';
-        permitted = mockAuthService.deleteComment(comment);
-        expect(permitted).toEqual(false);
+        it('should return true if the user is an annotator and they are the annotation owner', function() {
+            mockAuthService.user.role = 'annotator';
+            mockAuthService.user.name = 'tester';
+            permitted = mockAuthService.deleteComment(comment);
+            expect(permitted).toBe(true);
+        });
+
+        it('should return false if the user is not an annotator or curator', function() {
+            mockAuthService.user.role = 'user';
+            permitted = mockAuthService.deleteComment(comment);
+            expect(permitted).toBe(false);
+        });
     });
 
-    it('editMetadata() should return properly based on the role of the user', function() {
-        mockAuthService.user.role = 'curator';
-        var permitted = mockAuthService.editMetadata();
-        expect(permitted).toEqual(true);
+    describe('editMetadata() should return properly based on the role of the user', function() {
+        var permitted;
 
-        mockAuthService.user.role = 'user';
-        permitted = mockAuthService.editMetadata();
-        expect(permitted).toEqual(false);
+        it('should return true if the user is a curator', function() {
+            mockAuthService.user.role = 'curator';
+            permitted = mockAuthService.editMetadata();
+            expect(permitted).toBe(true);
+        });
+
+        it('should return false if the user is not a curator', function() {
+            mockAuthService.user.role = 'user';
+            permitted = mockAuthService.editMetadata();
+            expect(permitted).toBe(false);
+        });
     });
 });

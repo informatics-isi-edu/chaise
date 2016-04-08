@@ -36,9 +36,7 @@
         vm.allowDelete = AuthService.deleteAnnotation;
 
         // Listen to events of type 'message' (from Annotorious)
-        $window.addEventListener('message', annotationControllerListener);
-
-        function annotationControllerListener(event) {
+        $window.addEventListener('message', function annotationControllerListener(event) {
             if (event.origin === window.location.origin) {
                 var data = event.data;
                 var messageType = data.messageType;
