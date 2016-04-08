@@ -39,15 +39,11 @@ angular.module('recordset', ['ERMrest'])
     context.serviceURL = window.location.origin + "/ermrest";
 
     // Then, parse the URL fragment id (aka, hash). Expected format:
-    //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*]"
-    hash = window.location.hash;
+    //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
+    var hash = window.location.hash;
     if (hash === undefined || hash == '' || hash.length == 1) {
         return;
     }
-
-    // url format
-    // http://recordset_app/<catalog>/<table>@sort(<column>::desc::)
-    // http://recordset_app/<catalog>/<table>/<filters>@sort(<column>::desc::)
 
     // parse out @sort(...)
     if (hash.indexOf("@sort(") !== -1) {
@@ -103,13 +99,14 @@ angular.module('recordset', ['ERMrest'])
 .value('recordsetModel', {
     header:[],
     columns: [],
+    filter: null,
     sortby: null,     // column name
     sortOrder: null, // asc or desc
     rowset:[]}
 )
 
 // Register the recordset controller
-.controller('recordsetController', ['$scope', 'recordsetModel', function($scope, recordsetModel) {
+.controller('recordsetController', ['$scope', 'recordsetModel', 'context', function($scope, recordsetModel, context) {
     $scope.vm = recordsetModel;
 
     /**
@@ -145,6 +142,26 @@ angular.module('recordset', ['ERMrest'])
         recordsetModel.sortOrder = (recordsetModel.sortOrder === 'asc' ? recordsetModel.sortOrder = 'desc' : recordsetModel.sortOrder = 'asc');
         $scope.sort();
     };
+
+    $scope.permalink = function() {
+        var url = window.location.href.replace(window.location.hash, ''); // everything before #
+        var url = url + "#" + context.catalogID + "/" +
+            (context.schemaName !== '' ? context.schemaName + ":" : "") +
+            context.tableName;
+
+        if (recordsetModel.filter !== null) {
+            url = url + "/" + recordsetModel.filter.toUri();
+        }
+
+        if (recordsetModel.sortby !== null) {
+            url = url + "@sort(" + recordsetModel.sortby;
+            if (recordsetModel.sortOrder === "desc") {
+                url = url + "::desc::";
+            }
+            url = url + ")";
+        }
+        return url;
+    }
 }])
 
 // Register work to be performed after loading all modules
