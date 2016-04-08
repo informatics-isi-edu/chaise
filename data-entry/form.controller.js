@@ -25,16 +25,20 @@
         function submit() {
             var form = vm.formContainer;
             var model = vm.editorModel;
-            if (form.$valid) {
-                form.$setUntouched();
-                form.$setPristine();
-                model.table.entity.post(model.rows, vm.getKeys()).then(null, function error(response) {
-                    console.log(response);
-                });
 
-                // Reset the form
-                model.rows = [{}];
+            if (form.$invalid) {
+                return alert('Please fix all the errors on the form before submitting.');
             }
+
+            form.$setUntouched();
+            form.$setPristine();
+
+            model.table.entity.post(model.rows, vm.getKeys()).then(null, function error(response) {
+                console.log(response);
+            });
+
+            // Reset the form
+            model.rows = [{}];
         }
 
         function addFormRow(numRows) {

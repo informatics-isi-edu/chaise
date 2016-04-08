@@ -3,7 +3,20 @@
 }
 
 th, td {
-    min-width: 100px;
+    min-width: 50px;
+    width: 100%;
+    max-width: none;
+}
+
+tbody input {
+    min-width: 150px;
+    max-width: 480px;
+}
+
+textarea {
+    min-width: 250px;
+    max-width: none;
+    height: 34px;
 }
 
 .row {
