@@ -22,6 +22,7 @@
 
         function save() {
             vm.editMode = false;
+            // TODO: why you not exist update???
             vm.image.entity.update();
         }
     }]);

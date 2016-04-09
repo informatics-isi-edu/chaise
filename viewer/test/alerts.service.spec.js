@@ -1,7 +1,7 @@
 'use strict';
 
 describe('AlertsService', function() {
-    var mockAlertsService = null;
+    var alert, mockAlertsService = null;
 
     beforeEach(function() {
         angular.mock.module('chaise.viewer');
@@ -9,7 +9,7 @@ describe('AlertsService', function() {
             mockAlertsService = AlertsService;
         });
 
-        var alert = {
+        alert = {
             type: 'info',
             message: 'This is a message'
         };
@@ -17,7 +17,7 @@ describe('AlertsService', function() {
 
     it('addAlert() should add an alert properly', function() {
         mockAlertsService.addAlert(alert);
-        expect(alerts.length).toEqual(1);
+        expect(mockAlertsService.alerts.length).toEqual(1);
     });
 
     it('deleteAlert() should remove an alert properly', function() {

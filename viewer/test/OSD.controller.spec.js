@@ -1,5 +1,6 @@
 'use strict';
 
+// TODO: refactor these tests
 describe('OSDController', function() {
     var $controller, controller;
 

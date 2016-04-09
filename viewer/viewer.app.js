@@ -48,8 +48,8 @@
     // if you want to use a factory or service (e.g. $window or your custom one)
     // in a .config block, you add append 'Provider' to the dependency name and
     // run .$get() on it. This returns a Provider instance of the factory/service.
-    .config(['ermrestClientFactoryProvider', 'context', function configureClient(ermrestClientFactoryProvider, context) {
-        client = ermrestClientFactoryProvider.$get().getServer(context.serviceURL);
+    .config(['ermrestServerFactoryProvider', 'context', function configureClient(ermrestServerFactoryProvider, context) {
+        client = ermrestServerFactoryProvider.$get().getServer(context.serviceURL);
         // client = ermrestClientFactoryProvider.$get().getClient(context.serviceURL);
     }])
 

@@ -1,6 +1,6 @@
 'use strict';
 
-// FILTERS =====================================================================
+// TODO: this should be moved to the common folder for testing or the project/base test folder
 describe('chaise.viewer filters', function() {
     var $filter;
 

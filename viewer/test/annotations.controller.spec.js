@@ -1,34 +1,54 @@
 'use strict';
 
 describe('AnnotationsController', function() {
-    var $controller, controller;
+    var $controller, $scope, controller, mockAnnotationsService = null;
 
     beforeEach(function() {
         angular.mock.module('chaise.viewer');
-        inject(function(_$controller_) {
+        inject(function(_$controller_, AnnotationsService) {
             $controller = _$controller_;
+            mockAnnotationsService = AnnotationsService;
         });
-        controller = $controller('AnnotationsController');
+        $scope = {};
+        controller = $controller('AnnotationsController', { $scope: $scope });
     });
 
     // Unit tests for filterAnnotations(keys) function
     describe('should filter annotations properly based on the input keys', function() {
-        var $filter;
+        var $filter, keys, annotation;
+
         // filter injection just for this test
         beforeEach(function() {
             inject(function(_$filter_) {
                 $filter = _$filter_;
             });
 
-            var keys = ['description', 'anatomy', 'author', 'created'];
-            var annotation = {};
+            keys = ['description', 'anatomy', 'author', 'created'];
+            annotation = {};
         });
 
-        it('should return true if query is undefined or empty string', function() {
-            controller.query = "";
+        it('should return true if query is null', function() {
+            controller.query = null;
 
-            var result = $filter(controller.filterAnnotations)(annotation, keys);
-            expect(result).toBe(true);
+            // syntax for testing our filterAnnotations() function:
+            // assigns the function to a variable with input arguements
+            var result = controller.filterAnnotations(keys);
+            // result(annotation), where annotation is the object to be filtered
+            expect(result(annotation)).toBe(true);
+        });
+
+        it('should return true if query is undefined', function() {
+            controller.query = undefined;
+
+            var result = controller.filterAnnotations(keys);
+            expect(result(annotation)).toBe(true);
+        });
+
+        it('should return true if query is empty string', function() {
+            controller.query = '';
+
+            var result = controller.filterAnnotations(keys);
+            expect(result(annotation)).toBe(true);
         });
 
         // need to figure out how to mock a query
@@ -46,31 +66,31 @@ describe('AnnotationsController', function() {
 
     // drawAnnotation(type) unit test
     it('should draw an annotation', function() {
-        spyOn(AnnotationsService, 'drawAnnotation');
+        spyOn(mockAnnotationsService, 'drawAnnotation');
         controller.drawAnnotation('annotation');
 
         expect(controller.newAnnotationType).toEqual('annotation');
-        expect(AnnotationsService.drawAnnotation).toHaveBeenCalled();
+        expect(mockAnnotationsService.drawAnnotation).toHaveBeenCalled();
     });
 
     // createAnnotation() unit test
     it('should create an annotation', function() {
-        spyOn(AnnotationsService, 'createAnnotation');
+        spyOn(mockAnnotationsService, 'createAnnotation');
         controller.createAnnotation();
 
         expect(controller.createMode).toBe(false);
-        expect(AnnotationsService.createAnnotation).toHaveBeenCalled();
-        expect(AnnotationsService.createAnnotation).toHaveBeenCalledWith(controller.newAnnotation, controller.newAnnotationType);
+        expect(mockAnnotationsService.createAnnotation).toHaveBeenCalled();
+        expect(mockAnnotationsService.createAnnotation).toHaveBeenCalledWith(controller.newAnnotation, controller.newAnnotationType);
         expect(controller.newAnnotationType).toBeNull();
     });
 
     // cancelNewAnnotation() unit test
     it('should cancel a new annotation', function() {
-        spyOn(AnnotationsService, 'cancelNewAnnotation');
+        spyOn(mockAnnotationsService, 'cancelNewAnnotation');
         controller.cancelNewAnnotation();
 
         expect(controller.createMode).toBe(false);
-        expect(AnnotationsService.cancelNewAnnotation).toHaveBeenCalled();
+        expect(mockAnnotationsService.cancelNewAnnotation).toHaveBeenCalled();
     });
 
     // editAnnotation(annotation) unit test
@@ -87,8 +107,6 @@ describe('AnnotationsController', function() {
         controller.editAnnotation(annotation);
 
         expect(controller.editedAnnotation).toEqual('table-id');
-        expect(controller.originalAnnotation.description).toEqual(annotation.data.description);
-        expect(controller.originalAnnotation.anatomy).toEqual(annotation.data.anatomy);
     });
 
     // cancelEdit(annotation) unit test
@@ -102,11 +120,11 @@ describe('AnnotationsController', function() {
             }
         }
 
+        // To initialize the original annotation private/local variable
+        controller.editAnnotation(annotation);
         controller.cancelEdit(annotation);
 
         expect(controller.editedAnnotation).toBeNull();
-        expect(controller.data.description).toEqual(controller.originalAnnotation.description);
-        expect(controller.data.anatomy).toEqual(controller.originalAnnotation.anatomy);
     });
 
     // updateAnnotation(annotation) unit test
@@ -119,13 +137,13 @@ describe('AnnotationsController', function() {
                 description: 'This is the description'
             }
         }
-        spyOn(AnnotationsService, 'updateAnnotation');
+        spyOn(mockAnnotationsService, 'updateAnnotation');
 
         controller.updateAnnotation(annotation);
 
         expect(controller.editedAnnotation).toBeNull();
-        expect(AnnotationsService.updateAnnotation).toHaveBeenCalled();
-        expect(AnnotationsService.updateAnnotation).toHaveBeenCalledWith(annotation);
+        expect(mockAnnotationsService.updateAnnotation).toHaveBeenCalled();
+        expect(mockAnnotationsService.updateAnnotation).toHaveBeenCalledWith(annotation);
     });
 
     // deleteAnnotation(annotation) unit test
@@ -138,28 +156,12 @@ describe('AnnotationsController', function() {
                 description: 'This is the description'
             }
         }
-        spyOn(AnnotationsService, 'deleteAnnotation');
+        spyOn(mockAnnotationsService, 'deleteAnnotation');
 
         controller.deleteAnnotation(annotation);
 
-        expect(AnnotationsService.deleteAnnotation).toHaveBeenCalled();
-        expect(AnnotationsService.deleteAnnotation).toHaveBeenCalledWith(annotation);
-    });
-
-    // setHighlightedAnnotation(annotation) unit test
-    it('should set the highlighted annotation based on the input annotation', function() {
-        var annotation = {
-            table: { name: 'table' },
-            data: {
-                id: 'id',
-                anatomy: 'Some Anatomy',
-                description: 'This is the description'
-            }
-        }
-
-        controller.setHighlightedAnnotation(annotation);
-
-        expect(controller.highlightedAnnotation).toEqual('table-id');
+        expect(mockAnnotationsService.deleteAnnotation).toHaveBeenCalled();
+        expect(mockAnnotationsService.deleteAnnotation).toHaveBeenCalledWith(annotation);
     });
 
     // centerAnnotation(annotation) unit test
@@ -172,13 +174,15 @@ describe('AnnotationsController', function() {
                 description: 'This is the description'
             }
         }
-        spyOn(AnnotationsService, 'centerAnnotation');
+        spyOn(mockAnnotationsService, 'centerAnnotation');
 
         controller.centerAnnotation(annotation);
 
+        // Tests the functionality of the private function setHighlightedAnnotation()
         expect(controller.highlightedAnnotation).toEqual('table-id');
-        expect(AnnotationsService.centerAnnotation).toHaveBeenCalled();
-        expect(AnnotationsService.centerAnnotation).toHaveBeenCalledWith(annotation);
+        // checks service function called
+        expect(mockAnnotationsService.centerAnnotation).toHaveBeenCalled();
+        expect(mockAnnotationsService.centerAnnotation).toHaveBeenCalledWith(annotation);
     });
 
     // getNumComments(annnotation) unit test
@@ -191,12 +195,12 @@ describe('AnnotationsController', function() {
                 description: 'This is the description'
             }
         }
-        spyOn(AnnotationsService, 'getNumComments');
+        spyOn(mockAnnotationsService, 'getNumComments');
 
         controller.getNumComments(annotation);
 
-        expect(AnnotationsService.getNumComments).toHaveBeenCalled();
-        expect(AnnotationsService,getNumComments).toHaveBeenCalledWith(annotation);
+        expect(mockAnnotationsService.getNumComments).toHaveBeenCalled();
+        expect(mockAnnotationsService.getNumComments).toHaveBeenCalledWith(annotation.data.id);
     });
 
     // TODO: figure out coordinates object

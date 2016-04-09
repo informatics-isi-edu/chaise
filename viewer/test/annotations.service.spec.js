@@ -1,5 +1,6 @@
 'use strict';
 
+// TODO: refactor these tests
 // FACTORY: AnnotationsService
 describe('AnnotationsService', function() {
     var mockAnnotationsService = null;
@@ -20,11 +21,6 @@ describe('AnnotationsService', function() {
     it('should define a cancelNewAnnotation() method', function() {
         expect(mockAnnotationsService.cancelNewAnnotation).toBeDefined();
         expect(mockAnnotationsService.cancelNewAnnotation).toEqual(jasmine.any(Function));
-    });
-
-    it('should define a highlightAnnotation() method', function() {
-        expect(mockAnnotationsService.highlightAnnotation).toBeDefined();
-        expect(mockAnnotationsService.highlightAnnotation).toEqual(jasmine.any(Function));
     });
 
     it('should define a createAnnotation() method', function() {

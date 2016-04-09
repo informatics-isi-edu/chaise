@@ -1,12 +1,13 @@
 'use strict';
 
 describe('AuthService', function() {
-    var mockAuthService = null;
+    var mockAuthService = null, mockUser = null;
 
     beforeEach(function() {
-        angular.mock.('chaise.viewer');
-        inject(function(AuthService) {
+        angular.mock.module('chaise.viewer');
+        inject(function(AuthService, user) {
             mockAuthService = AuthService;
+            mockUser = user;
         });
     });
 
@@ -14,19 +15,19 @@ describe('AuthService', function() {
         var permitted;
 
         it('should return true if the user is a curator', function() {
-            mockAuthService.user.role = 'curator';
+            mockUser.role = 'curator';
             permitted = mockAuthService.createAnnotation();
             expect(permitted).toBe(true);
         });
 
         it('should return true if the user is an annotator', function() {
-            mockAuthService.user.role = 'annotator';
+            mockUser.role = 'annotator';
             permitted = mockAuthService.createAnnotation();
             expect(permitted).toBe(true);
         });
 
         it('should return false if the user is not an annotator or curator', function() {
-            mockAuthService.user.role = 'user';
+            mockUser.role = 'user';
             permitted = mockAuthService.createAnnotation();
             expect(permitted).toBe(false);
         });
@@ -40,20 +41,20 @@ describe('AuthService', function() {
         });
 
         it('should return true if the user is a curator', function() {
-            mockAuthService.user.role = 'curator';
+            mockUser.role = 'curator';
             permitted = mockAuthService.editAnnotation(annotation);
             expect(permitted).toBe(true);
         });
 
         it('should return true if the user is an annotator and they are the annotation owner', function() {
-            mockAuthService.user.role = 'annotator';
-            mockAuthService.user.name = 'tester';
+            mockUser.role = 'annotator';
+            mockUser.name = 'tester';
             permitted = mockAuthService.editAnnotation(annotation);
             expect(permitted).toBe(true);
         });
 
         it('should return false if the user is not an annotator or curator', function() {
-            mockAuthService.user.role = 'user';
+            mockUser.role = 'user';
             permitted = mockAuthService.editAnnotation(annotation);
             expect(permitted).toBe(false);
         });
@@ -67,20 +68,20 @@ describe('AuthService', function() {
         });
 
         it('should return true if the user is a curator', function() {
-            mockAuthService.user.role = 'curator';
+            mockUser.role = 'curator';
             permitted = mockAuthService.deleteAnnotation(annotation);
             expect(permitted).toBe(true);
         });
 
         it('should return true if the user is an annotator and they are the annotation owner', function() {
-            mockAuthService.user.role = 'annotator';
-            mockAuthService.user.name = 'tester';
+            mockUser.role = 'annotator';
+            mockUser.name = 'tester';
             permitted = mockAuthService.deleteAnnotation(annotation);
             expect(permitted).toBe(true);
         });
 
         it('should return false if the user is not an annotator or curator', function() {
-            mockAuthService.user.role = 'user';
+            mockUser.role = 'user';
             permitted = mockAuthService.deleteAnnotation(annotation);
             expect(permitted).toBe(false);
         });
@@ -90,19 +91,19 @@ describe('AuthService', function() {
         var permitted;
 
         it('should return true if the user is a curator', function() {
-            mockAuthService.user.role = 'curator';
+            mockUser.role = 'curator';
             permitted = mockAuthService.createComment();
             expect(permitted).toBe(true);
         });
 
         it('should return true if the user is an annotator', function() {
-            mockAuthService.user.role = 'annotator';
+            mockUser.role = 'annotator';
             permitted = mockAuthService.createComment();
             expect(permitted).toBe(true);
         });
 
         it('should return false if the user is not an annotator or curator', function() {
-            mockAuthService.user.role = 'user';
+            mockUser.role = 'user';
             permitted = mockAuthService.createComment();
             expect(permitted).toBe(false);
         });
@@ -116,20 +117,20 @@ describe('AuthService', function() {
         });
 
         it('should return true if the user is a curator', function() {
-            mockAuthService.user.role = 'curator';
+            mockUser.role = 'curator';
             permitted = mockAuthService.deleteComment(comment);
             expect(permitted).toBe(true);
         });
 
         it('should return true if the user is an annotator and they are the annotation owner', function() {
-            mockAuthService.user.role = 'annotator';
-            mockAuthService.user.name = 'tester';
+            mockUser.role = 'annotator';
+            mockUser.name = 'tester';
             permitted = mockAuthService.deleteComment(comment);
             expect(permitted).toBe(true);
         });
 
         it('should return false if the user is not an annotator or curator', function() {
-            mockAuthService.user.role = 'user';
+            mockUser.role = 'user';
             permitted = mockAuthService.deleteComment(comment);
             expect(permitted).toBe(false);
         });
@@ -139,13 +140,13 @@ describe('AuthService', function() {
         var permitted;
 
         it('should return true if the user is a curator', function() {
-            mockAuthService.user.role = 'curator';
+            mockUser.role = 'curator';
             permitted = mockAuthService.editMetadata();
             expect(permitted).toBe(true);
         });
 
         it('should return false if the user is not a curator', function() {
-            mockAuthService.user.role = 'user';
+            mockUser.role = 'user';
             permitted = mockAuthService.editMetadata();
             expect(permitted).toBe(false);
         });
