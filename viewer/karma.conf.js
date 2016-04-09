@@ -39,7 +39,7 @@ module.exports = function(config) {
         // '**/*.js',
         '../chaise-config.js',
         // Specs to run, use test/*.spec.js for all tests
-        'test/sidebar.controller.spec.js'
+        'test/*.spec.js'
     ],
 
 
