@@ -192,18 +192,24 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                             // Base on the annotation, treat the reference differently
                             // Get the elements annotations from the schema
                             var annotations =  schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations;
-                            var urlAnnotation = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations['tag:misd.isi.edu,2015:url'];
+                            var urlAnnotations = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].annotations['tag:misd.isi.edu,2015:url'];
 
-                            // TODO embedded iFrame - annotation could be in table or column
                             // process url annotation :
                             // embed iFrame and related download files
-                            if (urlAnnotation !== undefined) {
+                            if (urlAnnotations !== undefined && urlAnnotations !== null && urlAnnotations !== {}) {
 
                                 var cdef = schemaService.schemas[ft.displaySchemaName].tables[ft.displayTableName].column_definitions;
 
+                                var annotations = null;
+                                if (Array.isArray(urlAnnotations)){
+                                    annotations = urlAnnotations;
+                                } else {
+                                    annotations = [urlAnnotations];
+                                }
+
                                 // for each item under url annotation ["download" | "embed" | "link" | "thumbnail"]
-                                for (var i = 0; i < urlAnnotation.length; i++) {
-                                    var anno = urlAnnotation[i];
+                                for (var i = 0; i < annotations.length; i++) {
+                                    var anno = annotations[i];
 
                                     if (anno !== undefined && anno.presentation === 'embed') {
 
@@ -758,10 +764,16 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                         // if table is embed, initially load them
                         var urlAnnotations = tableSchema.annotations['tag:misd.isi.edu,2015:url'];
 
-                        if (urlAnnotations !== undefined) {
-                            for (var i = 0; i < urlAnnotations.length; i++) {
-                                var urlAnnotation = urlAnnotations[i];
-                                if (urlAnnotation.presentation !== undefined && urlAnnotation.presentation === 'embed') {
+                        if (urlAnnotations !== undefined && urlAnnotations !== null && urlAnnotations !== {}) {
+                            var annotations = [];
+                            if (Array.isArray(urlAnnotations)) { // array
+                                annotations = urlAnnotations;
+                            } else { // object
+                                annotations = [urlAnnotations];
+                            }
+                            for (var j = 0; j < urlAnnotations.length; j++) {
+                                var annotation = annotations[j];
+                                if (annotation.presentation !== undefined && annotation.presentation === 'embed') {
                                     foreignTable.initialLoad = true;
                                     break;
                                 }
@@ -1050,22 +1062,31 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
 
             // If column has interpretation
             if (cd.annotations['tag:misd.isi.edu,2015:url'] !== undefined){
-                for (var j = 0; j < cd.annotations['tag:misd.isi.edu,2015:url'].length; j++) {
+                var urlAnnotations = cd.annotations['tag:misd.isi.edu,2015:url'];
+                var anno = null;
+                if (Array.isArray(urlAnnotations)) {
 
-                    var anno = cd.annotations['tag:misd.isi.edu,2015:url'][j];
+                    // the length of the array should be 1
+                    // only pattern/caption is used for column right now
+                    anno = urlAnnotations[0];
 
-                    if (anno === null || Object.getOwnPropertyNames(anno).length === 0) {
-                        pattern = "auto_link"; // we shouldn't be using auto link anymore, always define pattern
-                    } else if (anno.url !== undefined) {
-                        pattern = anno.url;
-                    }
+                } else { // object
+                    anno = urlAnnotations;
+                }
 
-                    if (anno !== null && anno.caption !== undefined) {
-                        caption = anno.caption;
-                    }
+                if (anno === null || anno === {} || Object.getOwnPropertyNames(anno).length === 0) {
+                    pattern = "auto_link"; // we shouldn't be using auto link anymore, always define pattern
+                } else if (anno.url !== undefined) {
+                    pattern = anno.url;
+                }
+
+                if (anno !== null && anno.caption !== undefined) {
+                    caption = anno.caption;
                 }
 
                 interp[cd.name] = {uriPattern: pattern, captionPattern: caption};
+
+
             }
         }
 
