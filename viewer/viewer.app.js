@@ -275,6 +275,7 @@
             console.log(response);
         });
 
+        // Set up a listener for all "message" events
         $window.addEventListener('message', function(event) {
             if (event.origin === origin) {
                 if (event.data.messageType == 'annotoriousReady') {
@@ -287,6 +288,15 @@
             } else {
                 console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
             }
+        });
+
+        // Initialize Bootstrap tooltips
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'bottom',
+                container: 'body',
+                html: true
+            });
         });
     }]);
 
