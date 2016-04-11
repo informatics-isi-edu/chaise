@@ -7,6 +7,9 @@
         var vm = this;
         vm.editorModel = editorModel;
 
+        vm.alert = null;
+        vm.closeAlert = closeAlert;
+
         vm.submit = submit;
         vm.addFormRow = addFormRow;
         vm.numRowsToAdd = 2; // Default set at 2, but could be any number
@@ -27,13 +30,25 @@
             var model = vm.editorModel;
 
             if (form.$invalid) {
-                return alert('Please fix all the errors on the form before submitting.');
+                vm.alert = {
+                    type: 'error',
+                    message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'
+                };
+                return form.$setSubmitted();
             }
 
-            form.$setUntouched();
-            form.$setPristine();
-
-            model.table.entity.post(model.rows, vm.getKeys()).then(null, function error(response) {
+            model.table.entity.post(model.rows, vm.getKeys()).then(function success(entity) {
+                vm.alert = {
+                    type: 'success',
+                    message: 'Your data has been submitted.'
+                };
+                form.$setUntouched();
+                form.$setPristine();
+            }, function error(response) {
+                vm.alert = {
+                    type: 'error',
+                    message: response.data
+                };
                 console.log(response);
             });
 
@@ -110,6 +125,10 @@
                 return true;
             }
             return false;
+        }
+
+        function closeAlert() {
+            vm.alert = null;
         }
     }]);
 })();
