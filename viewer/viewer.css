@@ -5,7 +5,9 @@ html, body {
 #alert {
     position: fixed;
     top: 15;
-    /* Why set z-index to 3? Because Bootstrap sets input fields to 2.*/
+    /* Why set z-index to 3? Because we want alerts to appear as the top-most layer
+    and it looks like the current top-most layer has a z-index of 2. (Bootstrap
+    sets its input fields to 2.)*/
     z-index: 3;
 }
 

@@ -470,32 +470,34 @@
                                         </small>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <hr class="separator">
-                                </div>
-                                <div ng-controller="CommentsController as comments" class="comments">
-                                    <div ng-repeat="comment in comments.comments[comments.annotationId] | orderBy: ['data.created', 'data.id'] track by $index" class="row comment">
-                                        <div class="col-md-12">
-                                            <strong>{{comment.data.author}}</strong>
-                                            <small><span class="text-muted pull-right">{{comment.data.created | date:'MMM d, y'}}</span></small>
-                                            <br>{{comment.data.comment}}
-                                            <div ng-if="comments.allowDelete(comment);">
-                                                <small>
-                                                    <a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a>
-                                                </small>
+                                <div ng-if="annotations.getNumComments(annotation) !== 0">
+                                    <div class="row">
+                                        <hr class="separator">
+                                    </div>
+                                    <div ng-controller="CommentsController as comments" class="comments">
+                                        <div ng-repeat="comment in comments.comments[comments.annotationId] | orderBy: ['data.created', 'data.id'] track by $index" class="row comment">
+                                            <div class="col-md-12">
+                                                <strong>{{comment.data.author}}</strong>
+                                                <small><span class="text-muted pull-right">{{comment.data.created | date:'MMM d, y'}}</span></small>
+                                                <br>{{comment.data.comment}}
+                                                <div ng-if="comments.allowDelete(comment);">
+                                                    <small>
+                                                        <a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a>
+                                                    </small>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div ng-if="comments.allowCreate();" class="row">
-                                        <div class="col-md-12">
-                                            <div class="comment-input">
-                                                <div class="input-group input-group-sm">
-                                                    <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
-                                                    <span class="input-group-btn">
-                                                        <button ng-click="comments.createComment();" class="btn btn-success" type="submit" role="button">
-                                                            Post
-                                                        </button>
-                                                    </span>
+                                        <div ng-if="comments.allowCreate();" class="row">
+                                            <div class="col-md-12">
+                                                <div class="comment-input">
+                                                    <div class="input-group input-group-sm">
+                                                        <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
+                                                        <span class="input-group-btn">
+                                                            <button ng-click="comments.createComment();" class="btn btn-success" type="submit" role="button">
+                                                                Post
+                                                            </button>
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
