@@ -579,7 +579,8 @@
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
                             <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-camera" data-toggle="tooltip" title="In Safari: "></span> Take a Screenshot
+                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot &nbsp;
+                                <span class="glyphicon glyphicon-info-sign pull-right" data-toggle="tooltip" title="<strong>Safari users:</strong> The screenshot will be saved as 'Unknown.jpg'."></span>
                             </button>
                         </div>
                     </div>
