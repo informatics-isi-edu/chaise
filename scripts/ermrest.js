@@ -411,7 +411,7 @@ function submitLogout() {
 	$('#logout_link').hide();
 	//var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	//window.location = login_url;
-	
+
 	var logout_url = '../logout?referrer=' + encodeSafeURIComponent(window.location);
 	if (GLOBUS_LOGOUT) {
 		logout_url = 'https://www.globus.org/app/logout?redirect_uri=' + encodeSafeURIComponent(window.location);
@@ -531,7 +531,7 @@ function getTableColumns(options, successCallback) {
 			PRIMARY_KEY.push(encodeSafeURIComponent(col['name']));
 		});
 	}
-	
+
 	if (display_columns['title'] == null && display_columns['thumbnail'].length == 0) {
 		display_columns['title'] = decodeURIComponent(PRIMARY_KEY[0]);
 	}
@@ -551,7 +551,7 @@ function getTableColumns(options, successCallback) {
 			options['chooseColumns'][facet['table']][facet['name']] = true;
 		}
 	});
-	
+
 	var columns = {'facets': ret,
 			'sortInfo': sortInfo,
 			'colsDefs': columns_definitions};
@@ -1487,7 +1487,7 @@ function successGetThumbnailUri(data, textStatus, jqXHR, param) {
 	$.each(data, function(i, row) {
 		thumbnails[row[param['primaryKey']]] = row[param['thumbnailColumn']];
 	});
-	param['successCallback'](param['ermrestData'], param['totalItems'], param['options']['pagingOptions']['currentPage'], param['options']['pagingOptions']['pageSize']);	
+	param['successCallback'](param['ermrestData'], param['totalItems'], param['options']['pagingOptions']['currentPage'], param['options']['pagingOptions']['pageSize']);
 }
 
 function getTables(tables, options, successCallback) {
@@ -1828,9 +1828,20 @@ function getSession(param) {
 function successGetSession(data, textStatus, jqXHR, param) {
 	//alert(JSON.stringify(data, null, 4));
 	if (data['client'] != null) {
+        // New webauthen sends back a client Object
+        // Check for display_name first
 		if (data['client']['display_name'] !== undefined) {
 			$('#login_user').html(data['client']['display_name']);
 			GLOBUS_LOGOUT = true;
+        // Then check for full_name
+        } else if (data['client']['full_name'] !== undefined) {
+			$('#login_user').html(data['client']['full_name']);
+            GLOBUS_LOGOUT = true;
+        // Then check for email
+        } else if (data['client']['email'] !== undefined) {
+			$('#login_user').html(data['client']['email']);
+            GLOBUS_LOGOUT = true;
+        // Default to client if none of the above because it's still using the old web authen service
 		} else {
 			$('#login_user').html(data['client']);
 		}
@@ -3393,7 +3404,7 @@ function encodeFilter(filter) {
 					});
 					factors.push(col_name + '::eq::' + terms.join(';'));
 					found = true;
-				} 
+				}
 			});
 			if (!found) {
 				factors.push(col_name + '::geq::' + values['min']);
@@ -3842,7 +3853,7 @@ function getPredicateAttributes(options) {
 			}
 		});
 	});
-	
+
 	return ret;
 }
 
