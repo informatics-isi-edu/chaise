@@ -19,17 +19,12 @@ describe('Chaise initial sidebar,', function () {
         });
 
         it('should show the spinner', function () {
-            //not so sure why adding ignoreSync works
-            //probably not waiting for AngularJS to sync,
-            //so icon can be tested before everything settles down(settling down means img is no longer there)
-            browser.ignoreSynchronization = true;
             expect(spinner.isDisplayed()).toBe(true);
         });
     });
 
     describe('after initialization completes,', function () {
         it('should show the initial sidebar', function () {
-            browser.ignoreSynchronization = false;
             var sidebar = element(by.id('sidebar'));
             browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
                 expect(sidebar.isDisplayed()).toBe(true);
