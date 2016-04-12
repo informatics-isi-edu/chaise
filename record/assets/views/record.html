@@ -117,10 +117,10 @@
                 <accordion-group ng-repeat="(title, elements) in entity.embedTables | orderBy: title" is-open="embed.open">
                     <accordion-heading><div ng-class="{'active': embed.open }">{{title | removeUnderScores}}</div></accordion-heading>
                         <ul id="embed">
-                            <li ng-repeat="element in elements">
-                                <span>{{ element.caption }}</span>
+                            <li ng-repeat="element in elements" class="embed-block">
+                                <div class="embed-caption">{{ element.caption }}</div>
                                 <div>
-                                    <iframe title="{{ element.caption }}" width="{{ element.width }}" height="{{ element.height }}" frameBorder="0" ng-src="{{ element.uri }}">&lt;p&gt;Your browser does not support iframes.&lt;/p&gt;</iframe>
+                                    <iframe title="{{ element.caption }}" width="100%" height="{{ element.height }}" frameBorder="0" ng-src="{{ element.uri }}">&lt;p&gt;Your browser does not support iframes.&lt;/p&gt;</iframe>
                                 </div>
                                 <div ng-if="element.files" class="dropdown" dropdown>
                                     <button class="btn btn-primary dropdown-toggle" type="button" dropdown-toggle="">Download
