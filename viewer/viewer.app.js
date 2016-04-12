@@ -258,7 +258,7 @@
                 });
 
                 // Get all rows from "specimen_fixation" table
-                var specimenFixationTable = scehma.tables.get('specimen_fixation');
+                var specimenFixationTable = schema.tables.get('specimen_fixation');
                 // var specimenFixationTable = schema.getTable('specimen_fixation');
                 specimenFixationTable.entity.get().then(function success(_fixations) {
                 // specimenFixationTable.getEntities().then(function success(_fixations) {
