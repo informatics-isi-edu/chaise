@@ -1279,7 +1279,8 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	$.each(cols, function(i, col) {
 		if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
 			if (data[0]['cnt_d_' + col] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
-				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/$A/' + 
+					getSortGroup(options['table'], col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(options['table'], col, 'rank')) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
 				entity[col]['type'] = 'enum';
@@ -1289,7 +1290,8 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 				attributegroupParam['alert'] = alertObject;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, attributegroupParam);
 			} else if (data[0]['cnt_d_' + col] >= MULTI_SELECT_LIMIT) {
-				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + 
+					getSortGroup(options['table'], col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(options['table'], col, 'rank')) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
 				//entity[col]['type'] = 'select';
@@ -2456,7 +2458,8 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
 	if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
-		var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+		var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' + 
+			getSortGroup(table, col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(table, col, 'rank')) + ')?limit=none';
 		var param = {};
 		param['successCallback'] = successCallback;
 		param['entity'] = entities;
@@ -3545,7 +3548,8 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 	if (searchBoxPresentation.contains(col_type) || checkBoxPresentation.contains(col_type)) {
 		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 			param['col_type'] = 'enum';
-			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + 
+				getSortGroup(table, col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(table, col, 'rank')) + ')?limit=none';
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successInitFacetGroups, errorErmrest, param);
 		} else {
 			ready = true;
@@ -3919,3 +3923,33 @@ function chaiseApp() {
 	}
 	window.location = url;
 }
+
+function getSortColumn(table_name, column_name, annotation) {
+	var ret = column_name;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name']) {
+			var column_definitions = table['column_definitions'];
+			$.each(column_definitions, function(i, col) {
+				if (col['name'] == column_name) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_MAP_URI] != null && col['annotations'][COLUMNS_MAP_URI][annotation] != null) {
+						ret = col['annotations'][COLUMNS_MAP_URI][annotation];
+					}
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	return ret;
+}
+
+function getSortGroup(table_name, column_name, annotation) {
+	var ret = [];
+	ret.push(encodeSafeURIComponent(column_name));
+	var rankColumn = getSortColumn(table_name, column_name, annotation);
+	if (rankColumn != column_name) {
+		ret.push(encodeSafeURIComponent(rankColumn));
+	}
+	return ret.join(',');
+}
+
