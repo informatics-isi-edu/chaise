@@ -12,6 +12,8 @@
         }
 
         function createAnnotation(newAnnotation, type) {
+            var tableName = type;
+
             if (newAnnotation.anatomy == 'No Anatomy') {
                 newAnnotation.anatomy = null;
             }
@@ -34,19 +36,29 @@
                 // Section annotations don't need anatomies
                 delete newAnnotation[0].anatomy;
             }
-            var table = image.entity.getRelatedTable(context.schemaName, type);
+
+            if (type == 'arrow_annotation') {
+                // Arrow annotations are really just regular annotations to ERMrest
+                tableName = 'annotation';
+            }
+
+            var table = image.entity.getRelatedTable(context.schemaName, tableName);
             return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
                 var messageType = '';
-                switch (type) {
-                    case 'annotation':
-                        messageType = 'createAnnotation';
-                        annotations.push(annotation);
-                        break;
-                    case 'section_annotation':
-                        messageType = 'createSpecialAnnotation';
-                        sections.push(annotation);
-                        break;
+
+                if (type == 'arrow_annotation' || type == 'annotation') {
+                    if (type == 'arrow_annotation') {
+                        messageType = 'createArrowAnnotation';
+                    }
+                    if (type == 'annotation') {
+                        messageType = 'createArrowAnnotation';
+                    }
+                    annotations.push(annotation);
+                } else if (type == 'section_annotation') {
+                    messageType = 'createSpecialAnnotation';
+                    sections.push(annotation);
                 }
+
                 iframe.postMessage({messageType: messageType, content: annotation.data}, origin);
             }, function error(response) {
                 console.log(response);

@@ -13,7 +13,7 @@
 
         vm.createMode = false;
         vm.newAnnotation = null;
-        vm.newAnnotationType = null; // Track whether a new annotation is 'annotation' or 'section' type
+        vm.newAnnotationType = null;
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
@@ -43,6 +43,10 @@
                 var data = event.data;
                 var messageType = data.messageType;
                 switch (messageType) {
+                    case 'annotoriousReady':
+                        // annotoriousReady case handled in viewer.app.js.
+                        // Repeating the case here to avoid triggering default case
+                        break;
                     case 'annotationDrawn':
                         vm.newAnnotation = {
                             description: '',
@@ -68,7 +72,7 @@
                         });
                         break;
                     default:
-                        console.log('Invalid event message type "', messageType, '"');
+                        console.log('Invalid event message type "' + messageType + '"');
                 }
             } else {
                 console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
