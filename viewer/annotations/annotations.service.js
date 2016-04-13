@@ -49,8 +49,7 @@
                 if (type == 'arrow_annotation' || type == 'annotation') {
                     if (type == 'arrow_annotation') {
                         messageType = 'createArrowAnnotation';
-                    }
-                    if (type == 'annotation') {
+                    } else if (type == 'annotation') {
                         messageType = 'createArrowAnnotation';
                     }
                     annotations.push(annotation);
