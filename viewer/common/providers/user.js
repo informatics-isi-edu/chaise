@@ -8,5 +8,5 @@
     // name: grabbed from the session.client object in this order: display_name, full_name, then email
     // role: determined based on the session.attributes array
     // info: used to hold the session.client object
-    .value('user', {name: null, role: null, info: null});
+    .value('user', {name: null, role: null, session: null});
 })();
