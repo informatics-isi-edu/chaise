@@ -4,5 +4,9 @@
 
     angular.module('chaise.viewer')
 
-    .value('user', {name: null, role: null});
+    // Name and role are populated based on the data received from the server.session call
+    // name: grabbed from the session.client object in this order: display_name, full_name, then email
+    // role: determined based on the session.attributes array
+    // info: used to hold the session.client object
+    .value('user', {name: null, role: null, info: null});
 })();
