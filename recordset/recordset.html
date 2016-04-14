@@ -1,6 +1,12 @@
 <h2>Records</h2>
 <div ng-controller="recordsetController">
-    <a ng-href="{{ permalink() }}">Permalink</a>
+    <a id="permalink" class="pull-right top-right" ng-href="{{ permalink() }}">
+        <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
+    </a>
+    <div>
+        <button type="button" class="btn btn-primary" ng-click="before()" ng-disabled="previousButtonDisabled">Previous Page</button>
+        <button type="button" class="btn btn-primary" ng-click="after()" ng-disabled="nextButtonDisabled">Next Page</button>
+    </div>
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
@@ -10,8 +16,10 @@
                 </th>
             </tr>
         </thead>
-        <tr ng-repeat="row in vm.rowset">
+        <tr ng-repeat="row in vm.rowset.data">
             <td ng-repeat="name in vm.header">{{row[name]}}</td>
         </tr>
     </table>
+    <button type="button" class="btn btn-primary" ng-click="before()" ng-disabled="previousButtonDisabled">Previous Page</button>
+    <button type="button" class="btn btn-primary" ng-click="after()" ng-disabled="nextButtonDisabled">Next Page</button>
 </div>

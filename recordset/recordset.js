@@ -25,7 +25,8 @@ angular.module('recordset', ['ERMrest'])
     schemaName: '', // 'isa'
     tableName: '',  // 'assay'
     filters: [],
-    sort: null        // 'column::desc::' ::desc:: is option, ,only allow 1 column
+    sort: null,        // 'column::desc::' ::desc:: is option, ,only allow 1 column
+    pageLimit: 10
 })
 
 // Register configuration work to be performed on module loading.
@@ -100,9 +101,10 @@ angular.module('recordset', ['ERMrest'])
     header:[],
     columns: [],
     filter: null,
-    sortby: null,     // column name
-    sortOrder: null, // asc or desc
-    rowset:[]}
+    sortby: null,     // column name, user selected or null
+    sortOrder: null,  // asc (default) or desc
+    rowset:[],
+    key: [] }
 )
 
 // Register the recordset controller
@@ -115,12 +117,19 @@ angular.module('recordset', ['ERMrest'])
      */
     $scope.sort = function () {
 
-        var sort = null;
+        var sort = [];
         if (recordsetModel.sortby !== null) {
-            sort = [{"column": recordsetModel.sortby, "order": recordsetModel.sortOrder}];
+            sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
         }
 
-        recordsetModel.table.entity.get(recordsetModel.filter, null, null, sort).then(function (rowset) {
+        for (var i = 0; i < recordsetModel.key.length; i++) { // all the key columns
+            var col = recordsetModel.key[i].name;
+            if (col !== recordsetModel.sortby) {
+                sort.push({"column": col, "order": "asc"});
+            }
+        }
+
+        recordsetModel.table.entity.get(recordsetModel.filter, context.pageLimit, null, sort).then(function (rowset) {
             console.log(rowset);
             recordsetModel.rowset = rowset;
         }, function (response) {
@@ -145,7 +154,7 @@ angular.module('recordset', ['ERMrest'])
 
     $scope.permalink = function() {
         var url = window.location.href.replace(window.location.hash, ''); // everything before #
-        var url = url + "#" + context.catalogID + "/" +
+        url = url + "#" + context.catalogID + "/" +
             (context.schemaName !== '' ? context.schemaName + ":" : "") +
             context.tableName;
 
@@ -161,7 +170,46 @@ angular.module('recordset', ['ERMrest'])
             url = url + ")";
         }
         return url;
-    }
+    };
+
+    // TODO disable previous  is on page 1
+    // TODO disable next if on last page
+    // Is this possible?
+    // TODO go to top of page after before and after calls
+
+    $scope.before = function() {
+        $scope.previousButtonDisabled = true;
+        $scope.nextButtonDisabled = true;
+        recordsetModel.rowset.before().then(function(rowset) {
+            console.log(rowset);
+            recordsetModel.rowset = rowset;
+            $scope.previousButtonDisabled = false;
+            $scope.nextButtonDisabled = false;
+        }, function(response) {
+            console.log(response);
+            $scope.previousButtonDisabled = false;
+            $scope.nextButtonDisabled = false;
+        });
+    };
+
+    $scope.after = function() {
+        $scope.previousButtonDisabled = true;
+        $scope.nextButtonDisabled = true;
+        recordsetModel.rowset.after().then(function(rowset) {
+            console.log(rowset);
+            recordsetModel.rowset = rowset;
+            $scope.previousButtonDisabled = false;
+            $scope.nextButtonDisabled = false;
+        }, function(response) {
+            console.log(response);
+            $scope.previousButtonDisabled = false;
+            $scope.nextButtonDisabled = false;
+        });
+    };
+
+    $scope.previousButtonDisabled = false;
+    $scope.nextButtonDisabled = false;
+
 }])
 
 // Register work to be performed after loading all modules
@@ -176,7 +224,7 @@ angular.module('recordset', ['ERMrest'])
         console.log(table);
         recordsetModel.table = table;
         recordsetModel.columns = table.columns.names();
-        recordsetModel.header = table.columns.names(); // TODO formatting
+        recordsetModel.header = table.columns.names();
         console.log(recordsetModel.header);
 
         // build up filters
@@ -202,7 +250,14 @@ angular.module('recordset', ['ERMrest'])
         }
         recordsetModel.filter = filter;
 
-        // sorting
+        // Key, used for paging
+        recordsetModel.key = table.keys.all()[0].colset.columns;
+
+        // sorting TODO use key columns to support paging
+        var sort = [];
+
+        // user selected column as the priority in sort
+        // followed by all the key columns
         if (context.sort !== null) {
             if (context.sort.endsWith("::desc::")) {
                 recordsetModel.sortby = context.sort.match(/(.*)::desc::/)[1];
@@ -211,14 +266,19 @@ angular.module('recordset', ['ERMrest'])
                 recordsetModel.sortby = context.sort;
                 recordsetModel.sortOrder = 'asc';
             }
+
+            sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
         }
-        var sort = null;
-        if (recordsetModel.sortby !== null) {
-            sort = [{"column": recordsetModel.sortby, "order": recordsetModel.sortOrder}];
+
+        for (i = 0; i < recordsetModel.key.length; i++) { // all the key columns
+            var col = recordsetModel.key[i].name;
+            if (col !== recordsetModel.sortby) {
+                sort.push({"column": col, "order": "asc"});
+            }
         }
 
         // get rowset from table
-        table.entity.get(filter, null, null, sort).then(function (rowset) {
+        table.entity.get(filter, context.pageLimit, null, sort).then(function (rowset) {
           console.log(rowset);
           recordsetModel.rowset = rowset;
         }, function(error) {

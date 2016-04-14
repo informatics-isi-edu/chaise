@@ -242,6 +242,8 @@ RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.js
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css
 
+RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css
+
 
 # Config file
 JS_CONFIG=chaise-config.js
