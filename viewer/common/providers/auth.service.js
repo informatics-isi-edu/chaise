@@ -19,7 +19,7 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && user.name == annotation.data.author) {
+            if (user.role == 'annotator' && angular.equals(user.info, annotation.data.author)) {
                 return true;
             }
             return false;
@@ -30,7 +30,7 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && user.name == annotation.author) {
+            if (user.role == 'annotator' && angular.equals(user.info, annotation.author)) {
                 return true;
             }
             return false;
@@ -58,7 +58,7 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && user.name == comment.data.author) {
+            if (user.role == 'annotator' && angular.equals(user.info, comment.data.author)) {
                 return true;
             }
             return false;

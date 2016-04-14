@@ -291,18 +291,14 @@
                 <!-- CONTROLLER: AnnotationsController-->
                 <div ng-show="sidebar.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
                     <div class="col-md-12">
-                        <div class="row">
+                        <div ng-if="annotations.allowCreate();" class="row">
                             <div class="btn-group col-md-12">
                                 <button type="button" role="button" class="btn btn-sm btn-success dropdown-toggle form-control" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     New Annotation&nbsp;&nbsp;<span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li ng-if="annotations.allowCreate();">
-                                        <a ng-click="annotations.drawAnnotation('annotation');">Annotation</a>
-                                    </li>
-                                    <li ng-if="annotations.allowCreate();">
-                                        <a ng-click="annotations.drawAnnotation('section_annotation');">Section of Interest</a>
-                                    </li>
+                                    <li><a ng-click="annotations.drawAnnotation('annotation');">Annotation</a></li>
+                                    <li><a ng-click="annotations.drawAnnotation('section_annotation');">Section of Interest</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -386,7 +382,7 @@
                                 <br>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <small>{{section.data.author}} &mdash; {{section.data.created | date:'MMM d, y'}}</small>
+                                        <small>{{annotations.authorName(section.data.author)}} &mdash; {{section.data.created | date:'MMM d, y'}}</small>
                                     </div>
                                 </div>
                             </div>
@@ -406,7 +402,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <small>
-                                            {{section.data.author}} &mdash;
+                                            {{annotations.authorName(section.data.author)}} &mdash;
                                             {{section.data.created | date: 'MMM d, y'}}
                                         </small>
                                     </div>
@@ -461,7 +457,7 @@
                                 <!-- Annotation Author, Date & Comment Icon -->
                                 <div class="row">
                                     <div class="col-md-8">
-                                        <small>{{annotation.data.author}} &mdash; {{annotation.data.created | date:'MMM d, y'}}</small>
+                                        <small>{{annotations.authorName(annotation.data.author)}} &mdash; {{annotation.data.created | date:'MMM d, y'}}</small>
                                     </div>
                                     <div class="col-md-4">
                                         <small class="pull-right">
@@ -476,7 +472,7 @@
                                 <div ng-controller="CommentsController as comments" class="comments">
                                     <div ng-repeat="comment in comments.comments[comments.annotationId] | orderBy: ['data.created', 'data.id'] track by $index" class="row comment">
                                         <div class="col-md-12">
-                                            <strong>{{comment.data.author}}</strong>
+                                            <strong>{{comments.authorName(comment.data.author)}}</strong>
                                             <small><span class="text-muted pull-right">{{comment.data.created | date:'MMM d, y'}}</span></small>
                                             <br>{{comment.data.comment}}
                                             <div ng-if="comments.allowDelete(comment);">
@@ -532,7 +528,7 @@
                                 <div class="row">
                                     <div class="col-md-8">
                                         <small>
-                                            {{annotation.data.author}} &mdash;
+                                            {{annotations.authorName(annotation.data.author)}} &mdash;
                                             {{annotation.data.created | date: 'MMM d, y'}}
                                         </small>
                                     </div>

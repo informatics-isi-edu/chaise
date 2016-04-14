@@ -57,21 +57,41 @@
         client.getSession().then(function success(session) {
             console.log('Session: ', session);
             var groups = context.groups;
-            var attributes = session.attributes;
+            // session.attributes is an array of objects that have a display_name and id
+            // We MUST use the id field to check for role inclusion as it is the unique identifier
+            var attributes = session.attributes.map(function(attribute) { return attribute.id });
             var user = userProvider.$get();
+            user.info = session.client;
 
-            user.name = session.client;
+// TODO Let's try to extract this setup to unclutter *.app.js
+            // Need to check if using the new web authen
+            // if so, there will be a client object with a combination of any or all of the following: display_name, full_name, and email
+            // first priority id display_name
+            if (session.client.display_name) {
+                user.name = session.client.display_name;
+            // full_name is second priority
+            } else if (session.client.full_name) {
+                user.name = session.client.full_name;
+            // fallback if no display_name or full_name
+            } else if (session.client.email) {
+                user.name = session.client.email;
+            // Case for old web authen where client is a string
+            } else {
+                user.name = session.client
+            }
 
             if (attributes.indexOf(groups.curators) > -1) {
-                return user.role = 'curator';
+                user.role = 'curator';
             } else if (attributes.indexOf(groups.annotators) > -1) {
-                return user.role = 'annotator';
+                user.role = 'annotator';
             } else if (attributes.indexOf(groups.users) > -1) {
-                return user.role = 'user';
+                user.role = 'user';
             } else {
                 user.role = null;
             }
+
             console.log('User: ', user);
+            return;
         }, function error(response) {
             if (response.status == 401 || response.status == 404) {
                 if (chaiseConfig.authnProvider == 'goauth') {
