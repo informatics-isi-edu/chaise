@@ -15,7 +15,7 @@
         function createComment(newComment) {
             newComment = [{
                 "annotation_id": newComment.annotationId,
-                "author": user.info,
+                "author": user.session.client,
                 "comment": newComment.comment
             }];
 

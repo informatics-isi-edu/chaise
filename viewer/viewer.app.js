@@ -63,8 +63,8 @@
             // We MUST use the id field to check for role inclusion as it is the unique identifier
             var attributes = session.attributes.map(function(attribute) { return attribute.id });
             var user = userProvider.$get();
-            user.info = session.client;
-            
+            user.session = session;
+
 // TODO Let's try to extract this setup to unclutter *.app.js
             // Need to check if using the new web authen
             // if so, there will be a client object with a combination of any or all of the following: display_name, full_name, and email
