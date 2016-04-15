@@ -48,8 +48,8 @@
     // Get a client connection to ERMrest
     // Note: Only Providers and Constants can be dependencies in .config blocks. So
     // if you want to use a factory or service (e.g. $window or your custom one)
-    // in a .config block, you add append 'Provider' to the dependency name and
-    // run .$get() on it. This returns a Provider instance of the factory/service.
+    // in a .config block, you append 'Provider' to the dependency name and call
+    // .$get() on it. This returns a Provider instance of the factory/service.
     .config(['ermrestClientFactoryProvider', 'context', function configureClient(ermrestClientFactoryProvider, context) {
         client = ermrestClientFactoryProvider.$get().getClient(context.serviceURL);
     }])
@@ -131,6 +131,7 @@
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
+        var chaiseReady = false;
         var arrows = [];
         var rectangles = [];
 
@@ -170,12 +171,12 @@
                                 if (annotation.data.type == 'arrow') {
                                     arrows.push(annotation);
                                 } else if (annotation.data.type == 'rectangle') {
-                                    console.log('Rect: ', annotation);
                                     rectangles.push(annotation);
                                 }
                             }
+                            chaiseReady = true;
 
-                            if (annotoriousReady) {
+                            if (annotoriousReady && chaiseReady) {
                                 iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
                                 iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
                             }
@@ -309,7 +310,7 @@
             if (event.origin === origin) {
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;
-                    if (annotoriousReady) {
+                    if (annotoriousReady && chaiseReady) {
                         iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
                         iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
                         iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
