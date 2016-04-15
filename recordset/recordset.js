@@ -129,6 +129,9 @@ angular.module('recordset', ['ERMrest'])
      */
     $scope.sort = function () {
 
+        $scope.previousButtonDisabled = true;
+        $scope.nextButtonDisabled = true;
+
         var sort = [];
         if (recordsetModel.sortby !== null) {
             sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
@@ -143,10 +146,19 @@ angular.module('recordset', ['ERMrest'])
 
         recordsetModel.table.entity.get(recordsetModel.filter, context.pageLimit, null, sort).then(function (rowset) {
             console.log(rowset);
+            $scope.page = 1;
             recordsetModel.rowset = rowset;
+
+            // enable buttons
+            $scope.previousButtonDisabled = true; // on page 1
+            $scope.nextButtonDisabled = ((recordsetModel.rowset !== null) && ($scope.page === recordsetModel.lastPage));
         }, function (response) {
             console.log("Error getting entities: ");
             console.log(response);
+
+            // enable buttons
+            $scope.previousButtonDisabled = ($scope.page === 1);
+            $scope.nextButtonDisabled = ($scope.page === recordsetModel.lastPage);
         })
     };
 
