@@ -112,6 +112,8 @@
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
+        var arrows = [];
+        var rectangles = [];
 
         var catalog = client.getCatalog(context.catalogID);
         catalog.introspect().then(function success(schemas) {
@@ -133,7 +135,7 @@
                                 sections.push(_sections[i]);
                             }
                             if (annotoriousReady) {
-                                iframe.postMessage({messageType: 'loadAnnotations', content: sections}, origin);
+                                iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
                             }
                             console.log('Sections: ', sections);
                         }, function error(response) {
@@ -144,11 +146,19 @@
                         annotationTable.getEntities().then(function success(_annotations) {
                             var length = _annotations.length;
                             for (var i = 0; i < length; i++) {
-                                annotations.push(_annotations[i]);
+                                var annotation = _annotations[i];
+                                annotations.push(annotation);
+                                if (annotation.data.type == 'arrow') {
+                                    arrows.push(annotation);
+                                } else if (annotation.data.type == 'rectangle') {
+                                    console.log('Rect: ', annotation);
+                                    rectangles.push(annotation);
+                                }
                             }
 
                             if (annotoriousReady) {
-                                iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                                iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
+                                iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
                             }
                             console.log('Annotations: ', annotations);
                         }, function error(response) {
@@ -282,7 +292,8 @@
                     annotoriousReady = event.data.content;
                     if (annotoriousReady) {
                         iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
-                        iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                        iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
+                        iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
                     }
                 }
             } else {
