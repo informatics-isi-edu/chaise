@@ -48,7 +48,7 @@
                     messageType = 'createAnnotation';
                 }
             }
-            
+
             var table = image.entity.getRelatedTable(context.schemaName, tableName);
             return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
                 if (type == 'arrow' || type == 'rectangle') {
