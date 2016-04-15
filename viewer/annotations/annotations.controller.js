@@ -31,6 +31,7 @@
         vm.centerAnnotation = centerAnnotation;
 
         vm.getNumComments = getNumComments;
+        vm.authorName = authorName;
 
         vm.allowCreate = AuthService.createAnnotation;
         vm.allowEdit = AuthService.editAnnotation;
@@ -174,6 +175,12 @@
                     return vm.sections[i];
                 }
             }
+        }
+
+        // Used to set the author based on the info object from the user object (user.info) that is set on every annotation
+        // The info object is the session.client object and may contain a combination of display_name, full_name, and email
+        function authorName(client) {
+            return (client.display_name ? client.display_name : (client.full_name ? client.full_name : client.email ));
         }
     }]);
 })();

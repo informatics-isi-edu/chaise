@@ -19,7 +19,7 @@
             newAnnotation = [{
                 "image_id": context.imageID,
                 "anatomy": newAnnotation.anatomy,
-                "author": user.name,
+                "author": user.session.client,
                 "context_uri": iframe.location.href,
                 "coords": [
                     newAnnotation.shape.geometry.x,

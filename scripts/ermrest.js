@@ -428,7 +428,7 @@ function submitLogout(logout_uri) {
 	$('#logout_link').hide();
 	//var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	//window.location = login_url;
-	
+
 	var logout_url = logout_uri;
 	if (logout_url == null) {
 		if (chaiseConfig['logoutURL'] != null) {
@@ -553,7 +553,7 @@ function getTableColumns(options, successCallback) {
 			PRIMARY_KEY.push(encodeSafeURIComponent(col['name']));
 		});
 	}
-	
+
 	if (display_columns['title'] == null && display_columns['thumbnail'].length == 0) {
 		display_columns['title'] = decodeURIComponent(PRIMARY_KEY[0]);
 	}
@@ -573,7 +573,7 @@ function getTableColumns(options, successCallback) {
 			options['chooseColumns'][facet['table']][facet['name']] = true;
 		}
 	});
-	
+
 	var columns = {'facets': ret,
 			'sortInfo': sortInfo,
 			'colsDefs': columns_definitions};
@@ -1279,7 +1279,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	$.each(cols, function(i, col) {
 		if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
 			if (data[0]['cnt_d_' + col] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
-				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/$A/' + 
+				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/$A/' +
 					getSortGroup(options['table'], col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(options['table'], col, 'rank')) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
@@ -1290,7 +1290,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 				attributegroupParam['alert'] = alertObject;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, attributegroupParam);
 			} else if (data[0]['cnt_d_' + col] >= MULTI_SELECT_LIMIT) {
-				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + 
+				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' +
 					getSortGroup(options['table'], col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(options['table'], col, 'rank')) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
@@ -1511,7 +1511,7 @@ function successGetThumbnailUri(data, textStatus, jqXHR, param) {
 	$.each(data, function(i, row) {
 		thumbnails[row[param['primaryKey']]] = row[param['thumbnailColumn']];
 	});
-	param['successCallback'](param['ermrestData'], param['totalItems'], param['options']['pagingOptions']['currentPage'], param['options']['pagingOptions']['pageSize']);	
+	param['successCallback'](param['ermrestData'], param['totalItems'], param['options']['pagingOptions']['currentPage'], param['options']['pagingOptions']['pageSize']);
 }
 
 function getTables(tables, options, successCallback) {
@@ -1856,8 +1856,17 @@ function getSession(param) {
 function successGetSession(data, textStatus, jqXHR, param) {
 	//alert(JSON.stringify(data, null, 4));
 	if (data['client'] != null) {
+        // New webauthen sends back a client Object
+        // Check for display_name first
 		if (data['client']['display_name'] !== undefined) {
 			$('#login_user').html(data['client']['display_name']);
+        // Then check for full_name
+        } else if (data['client']['full_name'] !== undefined) {
+			$('#login_user').html(data['client']['full_name']);
+        // Then check for email
+        } else if (data['client']['email'] !== undefined) {
+			$('#login_user').html(data['client']['email']);
+        // Default to client if none of the above because it's still using the old web authen service
 		} else {
 			$('#login_user').html(data['client']);
 		}
@@ -2458,7 +2467,7 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
 	if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
-		var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' + 
+		var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' +
 			getSortGroup(table, col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(table, col, 'rank')) + ')?limit=none';
 		var param = {};
 		param['successCallback'] = successCallback;
@@ -3421,7 +3430,7 @@ function encodeFilter(filter) {
 					});
 					factors.push(col_name + '::eq::' + terms.join(';'));
 					found = true;
-				} 
+				}
 			});
 			if (!found) {
 				factors.push(col_name + '::geq::' + values['min']);
@@ -3548,7 +3557,7 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 	if (searchBoxPresentation.contains(col_type) || checkBoxPresentation.contains(col_type)) {
 		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 			param['col_type'] = 'enum';
-			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + 
+			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' +
 				getSortGroup(table, col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(table, col, 'rank')) + ')?limit=none';
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successInitFacetGroups, errorErmrest, param);
 		} else {
@@ -3871,7 +3880,7 @@ function getPredicateAttributes(options) {
 			}
 		});
 	});
-	
+
 	return ret;
 }
 
@@ -3952,4 +3961,3 @@ function getSortGroup(table_name, column_name, annotation) {
 	}
 	return ret.join(',');
 }
-
