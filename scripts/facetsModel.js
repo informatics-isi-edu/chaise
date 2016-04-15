@@ -28,6 +28,7 @@ facetsModel.factory('FacetsData', function() {
 		'entrySubtitle': '',
 		'entryTitle': '',
 		'ermrestData': [],
+		'error': false,
 		'externalReferenceRows': [],
 		'facetClass': {},
 		'facetPreviousValues': {},

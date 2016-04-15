@@ -5,9 +5,12 @@
 var ermInitController = angular.module('ermInitController', ['facetsModel', 'facetsService']);
 
 //angular.module('ermrestApp').controller('InitListCtrl', ['$scope', 'FacetsData',
-ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$window', 'FacetsData', 'FacetsService', 'ermrest',
-                                                      function($rootScope, $scope, $window, FacetsData, FacetsService, ermrest) {
+ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$window', 'FacetsData', 'FacetsService', 'ermrest',
+                                                      function($sce, $rootScope, $scope, $window, FacetsData, FacetsService, ermrest) {
 
+	$scope.status = 0;
+	$scope.errorMessage = null;
+	
 	if (chaiseConfig['customCSS'] !== undefined) {
 		var fileref = document.createElement("link");
 		fileref.setAttribute("rel", "stylesheet");
@@ -111,7 +114,26 @@ ermInitController.controller('InitListCtrl', ['$rootScope', '$scope', '$window',
 		$scope.FacetsData.view = chaiseConfig['layout'];
 	}
 
-	initApplication();
+	$scope.stopSpinner = function stopSpinner(status, errorMessage) {
+		$scope.status = status;
+		$scope.errorMessage = errorMessage;
+		$scope.FacetsData.error = true;
+		$scope.FacetsData.progress = false;
+		setTimeout($scope.render, 1);
+	};
+	
+	this.html = function (errorMessage) {
+		return $sce.trustAsHtml(errorMessage.replace(/\n/g, '<br/>'));
+	};
+
+	$scope.render = function render() {
+		$scope.FacetsData.error = true;
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
+	};
+	
+	initApplication($scope.stopSpinner);
 	this.hideSpinner = function hideSpinner() {
 		//return !$scope.FacetsData.progress;
 		return true;
