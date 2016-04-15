@@ -40,6 +40,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		$('#headerSearch').val('');
 		FacetsData.ready = false;
 		FacetsData.progress = true;
+		FacetsData.error = false;
 		FacetsData.moreFlag = false;
 		FacetsData.isDetail = false;
 		FacetsData.enableAll = false;

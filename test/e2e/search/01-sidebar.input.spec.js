@@ -4,7 +4,7 @@
 
 var chaisePage = require('../chaise.page.js');
 
-describe('Sidebar top search input,', function () {
+xdescribe('Sidebar top search input,', function () {
     var EC = protractor.ExpectedConditions;
 
     beforeAll(function (done) {
@@ -16,15 +16,7 @@ describe('Sidebar top search input,', function () {
     });
     var searchBox = chaisePage.sidebar.searchInput;
     var displayedAttrs = chaisePage.sidebar.sidebarAttrsDisplayed;
-
     var initAttrNum;
-    it('should show >0 attributes when in initial state', function () {
-        displayedAttrs.count().then(function (num) {
-            expect(num).toBeGreaterThan(0);
-            initAttrNum = num;
-        });
-    });
-
     var meaninglessTxt = 'hellogoodbye';
     it('should input meaningless text and wait for seconds', function (done) {
         searchBox.sendKeys(meaninglessTxt);
@@ -33,11 +25,9 @@ describe('Sidebar top search input,', function () {
             done();
         }, 4000);
     });
-
     it('should show 0 attribute when searching for meaningless input', function () {
         expect(displayedAttrs.count()).toBe(0);
     });
-
     it('should show attributes of initial size', function () {
         for (var i = 0; i < meaninglessTxt.length; i++) {
             //hit back space several times to clear input and wait for AJAX
@@ -45,7 +35,6 @@ describe('Sidebar top search input,', function () {
         };
         expect(displayedAttrs.count()).toBe(initAttrNum);
     });
-
     var RNA = 'RNA';
     var displayedEditAttrs = chaisePage.editFilter.editFilterAttrsDisplayed;
     it('should show \'Experiment Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
@@ -60,7 +49,6 @@ describe('Sidebar top search input,', function () {
             }
         });
     });
-
     it('should show \'Data Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
         var dataType = 'Data Type';
         chaisePage.editFilter.goBackToSidebar();

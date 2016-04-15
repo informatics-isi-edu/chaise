@@ -1,11 +1,12 @@
 var chaisePage = require('../chaise.page.js');
 
-describe('Search result columns,', function () {
+xdescribe('Search result columns,', function () {
     var EC = protractor.ExpectedConditions;
 
     beforeAll(function (done) {
         browser.get('');
         var sidebar = element(by.id('sidebar'));
+        browser.ignoreSynchronization = true;
         browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
             done();
         });

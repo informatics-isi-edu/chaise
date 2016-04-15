@@ -11,9 +11,7 @@
             iframe.postMessage({messageType: 'drawAnnotation'}, origin);
         }
 
-        function createAnnotation(newAnnotation, type) {
-            var tableName = type;
-
+        function createAnnotation(newAnnotation) {
             if (newAnnotation.anatomy == 'No Anatomy') {
                 newAnnotation.anatomy = null;
             }
@@ -21,7 +19,7 @@
             newAnnotation = [{
                 "image_id": context.imageID,
                 "anatomy": newAnnotation.anatomy,
-                "author": user.name,
+                "author": user.session.client,
                 "context_uri": iframe.location.href,
                 "coords": [
                     newAnnotation.shape.geometry.x,
@@ -29,35 +27,35 @@
                     newAnnotation.shape.geometry.width,
                     newAnnotation.shape.geometry.height
                 ],
-                "description": newAnnotation.description
+                "description": newAnnotation.description,
+                "type": newAnnotation.type,
+                "config": newAnnotation.config
             }];
 
-            if (type == 'section_annotation') {
+            var type = newAnnotation[0].type;
+            var tableName = '';
+            var messageType = '';
+            if (type == 'section') {
                 // Section annotations don't need anatomies
                 delete newAnnotation[0].anatomy;
-            }
-
-            if (type == 'arrow_annotation') {
-                // Arrow annotations are really just regular annotations to ERMrest
+                tableName = 'section_annotation';
+                messageType = 'createSpecialAnnotation';
+            } else if (type == 'arrow' || type == 'rectangle') {
                 tableName = 'annotation';
+                if (type == 'arrow') {
+                    messageType = 'createArrowAnnotation';
+                } else if (type == 'rectangle') {
+                    messageType = 'createAnnotation';
+                }
             }
-
+            
             var table = image.entity.getRelatedTable(context.schemaName, tableName);
             return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
-                var messageType = '';
-
-                if (type == 'arrow_annotation' || type == 'annotation') {
-                    if (type == 'arrow_annotation') {
-                        messageType = 'createArrowAnnotation';
-                    } else if (type == 'annotation') {
-                        messageType = 'createArrowAnnotation';
-                    }
+                if (type == 'arrow' || type == 'rectangle') {
                     annotations.push(annotation);
-                } else if (type == 'section_annotation') {
-                    messageType = 'createSpecialAnnotation';
+                } else if (type == 'section') {
                     sections.push(annotation);
                 }
-
                 iframe.postMessage({messageType: messageType, content: annotation.data}, origin);
             }, function error(response) {
                 console.log(response);
