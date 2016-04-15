@@ -8,11 +8,12 @@
         vm.annotations = annotations;
         vm.sections = sections;
         vm.anatomies = anatomies;
+        vm.arrowColors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
 
         vm.filterAnnotations = filterAnnotations;
 
         vm.createMode = false;
-        vm.newAnnotation = null;
+        vm.newAnnotation = {config:{}};
         vm.newAnnotationType = null;
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
@@ -48,10 +49,7 @@
                         // Repeating the case here to avoid triggering default case
                         break;
                     case 'annotationDrawn':
-                        vm.newAnnotation = {
-                            description: '',
-                            shape: data.content.shape
-                        };
+                        vm.newAnnotation.shape = data.content.shape;
                         $scope.$apply(function() {
                             vm.createMode = true;
                         });
@@ -104,13 +102,15 @@
         }
 
         function drawAnnotation(type) {
-            vm.newAnnotationType = type;
+            vm.newAnnotation.type = type;
             return AnnotationsService.drawAnnotation();
         }
 
         function createAnnotation() {
+            console.log('Controller:', vm.newAnnotation);
             vm.createMode = false;
-            AnnotationsService.createAnnotation(vm.newAnnotation, vm.newAnnotationType);
+            AnnotationsService.createAnnotation(vm.newAnnotation);
+            vm.newAnnotation = {config:{}};
             vm.newAnnotationType = null;
         }
 
