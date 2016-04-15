@@ -10,6 +10,7 @@ var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 var USER = null;
+var STOP_SPINNER = null;
 
 var PRIMARY_KEY = [];
 var uniquenessColumns = [];
@@ -102,7 +103,8 @@ function setNavbarBrand() {
 	}
 }
 
-function initApplication() {
+function initApplication(errorCallback) {
+	STOP_SPINNER = errorCallback;
 	loadApplicationHeaderAndFooter();
 	initLocation();
 	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
@@ -174,7 +176,7 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			var msg = '';
 			var err = jqXHR.status;
 			if (err != null) {
-				msg += 'Status: ' + err + '\n';
+				//msg += 'Status: ' + err + '\n';
 			}
 			err = jqXHR.responseText;
 			if (err != null) {
@@ -192,7 +194,8 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			msg += 'URL: ' + url + '\n';
 			document.body.style.cursor = 'default';
 			if (!suppressError) {
-				alert(msg);
+				//alert(msg);
+				STOP_SPINNER(jqXHR.status, msg);
 			}
 	}
 }
