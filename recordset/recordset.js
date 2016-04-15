@@ -106,9 +106,7 @@ angular.module('recordset', ['ERMrest'])
     rowset:[],
     key: [] ,
     page: 0,  // current page
-    lastPage : 10000 } // don't know last page yet,
-    // when we reach a page with less than page limit rows, that's the last page
-    // or when we reach a page with no rows, previous page is last page
+    pageCount : 0 } // don't know last page yet,
 )
 
 // Register the recordset controller
@@ -151,14 +149,14 @@ angular.module('recordset', ['ERMrest'])
 
             // enable buttons
             $scope.previousButtonDisabled = true; // on page 1
-            $scope.nextButtonDisabled = ((recordsetModel.rowset !== null) && ($scope.page === recordsetModel.lastPage));
+            $scope.nextButtonDisabled = ((recordsetModel.rowset !== null) && ($scope.page === recordsetModel.pageCount));
         }, function (response) {
             console.log("Error getting entities: ");
             console.log(response);
 
             // enable buttons
             $scope.previousButtonDisabled = ($scope.page === 1);
-            $scope.nextButtonDisabled = ($scope.page === recordsetModel.lastPage);
+            $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
         })
     };
 
@@ -212,21 +210,21 @@ angular.module('recordset', ['ERMrest'])
 
                 // enable buttons
                 $scope.previousButtonDisabled = ($scope.page === 1);
-                $scope.nextButtonDisabled = ($scope.page === recordsetModel.lastPage);
+                $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
 
             }, function (response) {
                 console.log(response);
 
                 // enable buttons
                 $scope.previousButtonDisabled = ($scope.page === 1);
-                $scope.nextButtonDisabled = ($scope.page === recordsetModel.lastPage);
+                $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
             });
         }
     };
 
     $scope.after = function() {
 
-        if ($scope.page < recordsetModel.lastPage) {
+        if ($scope.page < recordsetModel.pageCount) {
 
             // disable buttons while loading
             $scope.previousButtonDisabled = true;
@@ -234,31 +232,21 @@ angular.module('recordset', ['ERMrest'])
 
             recordsetModel.rowset.after().then(function(rowset) {
                 console.log(rowset);
+
                 $window.scrollTo(0, 0);
-                if (rowset.data.length === 0) {
-                    // previous page was last page
-                    // no change to rowset, go back to last page
-                    recordsetModel.lastPage = $scope.page;
-                } else if (rowset.data.length < $scope.pageLimit) {
-                    // reached the last page
-                    $scope.page += 1;
-                    recordsetModel.lastPage = $scope.page;
-                    recordsetModel.rowset = rowset;
-                } else {
-                    $scope.page += 1;
-                    recordsetModel.rowset = rowset;
-                }
+                $scope.page += 1;
+                recordsetModel.rowset = rowset;
 
                 // enable buttons
                 $scope.previousButtonDisabled = ($scope.page === 1);
-                $scope.nextButtonDisabled = ($scope.page === recordsetModel.lastPage);
+                $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
 
             }, function(response) {
                 console.log(response);
 
                 //enable buttons
                 $scope.previousButtonDisabled = ($scope.page === 1);
-                $scope.nextButtonDisabled = ($scope.page === recordsetModel.lastPage);
+                $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
             });
         }
 
@@ -266,7 +254,7 @@ angular.module('recordset', ['ERMrest'])
 
     // initially on first page
     $scope.previousButtonDisabled = true;
-    $scope.nextButtonDisabled = ((recordsetModel.rowset !== null) && ($scope.page === recordsetModel.lastPage));
+    $scope.nextButtonDisabled = ((recordsetModel.rowset !== null) && ($scope.page === recordsetModel.pageCount));
 
 }])
 
@@ -311,7 +299,7 @@ angular.module('recordset', ['ERMrest'])
         // Key, used for paging
         recordsetModel.key = table.keys.all()[0].colset.columns;
 
-        // sorting TODO use key columns to support paging
+        // sorting
         var sort = [];
 
         // user selected column as the priority in sort
@@ -335,16 +323,22 @@ angular.module('recordset', ['ERMrest'])
             }
         }
 
-        // get rowset from table
-        table.entity.get(filter, context.pageLimit, null, sort).then(function (rowset) {
-            console.log(rowset);
-            recordsetModel.rowset = rowset;
-            if (rowset.data.length < context.pageLimit) {
-                context.lastPage = 1;
-            }
-        }, function(error) {
-            console.log(error);
+        // first get row count
+        table.entity.count(filter).then(function(count) {
+            recordsetModel.pageCount = Math.ceil(count / context.pageLimit);
+            console.log(count + " records. " + recordsetModel.pageCount + " pages");
+
+            // get rowset from table
+            table.entity.get(filter, context.pageLimit, null, sort).then(function (rowset) {
+                console.log(rowset);
+                recordsetModel.rowset = rowset;
+            }, function(error) {
+                console.log(error);
+            });
+        }, function(response) {
+            return module._q.reject(response.data);
         });
+
     });
 }])
 
