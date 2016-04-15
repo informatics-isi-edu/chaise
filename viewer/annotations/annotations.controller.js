@@ -44,6 +44,7 @@
             if (event.origin === window.location.origin) {
                 var data = event.data;
                 var messageType = data.messageType;
+
                 switch (messageType) {
                     case 'annotoriousReady':
                         // annotoriousReady case handled in viewer.app.js.
@@ -69,6 +70,17 @@
                         $scope.$apply(function() {
                             vm.highlightedAnnotation = null;
                         });
+                        break;
+                    case 'onClickAnnotation':
+                        var content = JSON.parse(data.content);
+                        var annotation = findAnnotation(content.data.shapes[0].geometry);
+                        if (annotation) {
+                            var annotationId = annotation.table.name + '-' + annotation.data.id;
+                            $scope.$apply(function() {
+                                vm.highlightedAnnotation = annotationId;
+                            });
+                            scrollIntoView(annotationId);
+                        }
                         break;
                     default:
                         console.log('Invalid event message type "' + messageType + '"');
@@ -167,7 +179,6 @@
                     return vm.annotations[i];
                 }
             }
-
             // Search in sections collection
             for (var i = 0; i < vm.sections.length; i++) {
                 var annotationCoords = vm.sections[i].data.coords;
@@ -175,6 +186,16 @@
                     return vm.sections[i];
                 }
             }
+        }
+
+        // Scroll a DOM element into visible part of the browser
+        function scrollIntoView(elementId) {
+            // Using native JS b/c angular.element returns a jQuery/jqLite object,
+            // which is incompatible with .scrollIntoView() 
+            document.getElementById(elementId).scrollIntoView({
+                block: 'start',
+                behavior: 'smooth'
+            });
         }
 
         // Used to set the author based on the info object from the user object (user.info) that is set on every annotation
