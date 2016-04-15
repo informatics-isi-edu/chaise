@@ -112,7 +112,7 @@ angular.module('recordset', ['ERMrest'])
 )
 
 // Register the recordset controller
-.controller('recordsetController', ['$scope', 'recordsetModel', 'context', function($scope, recordsetModel, context) {
+.controller('recordsetController', ['$scope', '$window','recordsetModel', 'context', function($scope, $window, recordsetModel, context) {
 
     // don't know last page yet,
     // when we reach a page with less than page limit rows, that's the last page
@@ -184,8 +184,6 @@ angular.module('recordset', ['ERMrest'])
         return url;
     };
 
-    // TODO go to top of page after before and after calls
-
     $scope.before = function() {
 
         if ($scope.page > 1) {
@@ -196,6 +194,7 @@ angular.module('recordset', ['ERMrest'])
 
             recordsetModel.rowset.before().then(function (rowset) {
                 console.log(rowset);
+                $window.scrollTo(0, 0);
                 recordsetModel.rowset = rowset;
                 $scope.page -= 1;
 
@@ -223,6 +222,7 @@ angular.module('recordset', ['ERMrest'])
 
             recordsetModel.rowset.after().then(function(rowset) {
                 console.log(rowset);
+                $window.scrollTo(0, 0);
                 if (rowset.data.length === 0) {
                     // previous page was last page
                     // no change to rowset, go back to last page
