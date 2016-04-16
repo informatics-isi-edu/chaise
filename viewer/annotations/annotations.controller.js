@@ -13,8 +13,7 @@
         vm.filterAnnotations = filterAnnotations;
 
         vm.createMode = false;
-        vm.newAnnotation = {config:{}};
-        vm.newAnnotationType = null;
+        vm.newAnnotation = {config:{color: 'red'}}; // default color red
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
@@ -57,19 +56,14 @@
                         });
                         break;
                     case 'onHighlighted':
-                        // var content = JSON.parse(data.content);
-                        // var annotation = findAnnotation(content.data.shapes[0].geometry);
-                        // if (annotation) {
-                        //     $scope.$apply(function() {
-                        //         // Highlight the annotation in the sidebar
-                        //         vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
-                        //     });
-                        // }
+                    // On-hover highlighting behavior no longer needed
+                    // OSD still sends this message out on hover though, so the
+                    // is case here to avoid triggering default case
                         break;
                     case 'onUnHighlighted':
-                        // $scope.$apply(function() {
-                        //     vm.highlightedAnnotation = null;
-                        // });
+                    // On-hover highlighting behavior no longer needed
+                    // OSD still sends this message out on hover though, so the
+                    // is case here to avoid triggering default case
                         break;
                     case 'onClickAnnotation':
                         var content = JSON.parse(data.content);
@@ -123,8 +117,7 @@
             console.log('Controller:', vm.newAnnotation);
             vm.createMode = false;
             AnnotationsService.createAnnotation(vm.newAnnotation);
-            vm.newAnnotation = {config:{}};
-            vm.newAnnotationType = null;
+            vm.newAnnotation = {config:{color: 'red'}};
         }
 
         function cancelNewAnnotation() {
