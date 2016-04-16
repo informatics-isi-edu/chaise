@@ -57,19 +57,19 @@
                         });
                         break;
                     case 'onHighlighted':
-                        var content = JSON.parse(data.content);
-                        var annotation = findAnnotation(content.data.shapes[0].geometry);
-                        if (annotation) {
-                            $scope.$apply(function() {
-                                // Highlight the annotation in the sidebar
-                                vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
-                            });
-                        }
+                        // var content = JSON.parse(data.content);
+                        // var annotation = findAnnotation(content.data.shapes[0].geometry);
+                        // if (annotation) {
+                        //     $scope.$apply(function() {
+                        //         // Highlight the annotation in the sidebar
+                        //         vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
+                        //     });
+                        // }
                         break;
                     case 'onUnHighlighted':
-                        $scope.$apply(function() {
-                            vm.highlightedAnnotation = null;
-                        });
+                        // $scope.$apply(function() {
+                        //     vm.highlightedAnnotation = null;
+                        // });
                         break;
                     case 'onClickAnnotation':
                         var content = JSON.parse(data.content);
@@ -191,7 +191,7 @@
         // Scroll a DOM element into visible part of the browser
         function scrollIntoView(elementId) {
             // Using native JS b/c angular.element returns a jQuery/jqLite object,
-            // which is incompatible with .scrollIntoView() 
+            // which is incompatible with .scrollIntoView()
             document.getElementById(elementId).scrollIntoView({
                 block: 'start',
                 behavior: 'smooth'

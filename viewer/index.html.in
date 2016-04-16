@@ -297,7 +297,7 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li><a ng-click="annotations.drawAnnotation('section');">Section of Interest</a></li>
-                                    <li><a ng-click="annotations.drawAnnotation('rectangle');">Regular Annotation</a></li>
+                                    <li><a ng-click="annotations.drawAnnotation('rectangle');">Rectangle Annotation</a></li>
                                     <li><a ng-click="annotations.drawAnnotation('arrow');">Arrow Annotation</a></li>
                                 </ul>
                             </div>
@@ -315,7 +315,7 @@
                                 <div class="col-md-10">
                                     <span class="h4">New
                                         <span ng-if="annotations.newAnnotation.type == 'section'">Section of Interest</span>
-                                        <span ng-if="annotations.newAnnotation.type == 'rectangle'">Regular Annotation</span>
+                                        <span ng-if="annotations.newAnnotation.type == 'rectangle'">Rectangle Annotation</span>
                                         <span ng-if="annotations.newAnnotation.type == 'arrow'">Arrow Annotation</span>
                                     </span>
                                 </div>
