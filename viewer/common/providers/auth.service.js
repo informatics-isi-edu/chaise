@@ -43,15 +43,15 @@
             return false;
         }
 
-        function editComment(comment) {
-            if (user.role == 'curator') {
-                return true;
-            }
-            if (user.role == 'annotator' && isAuthor(comment.data.author, user.session)) {
-                return true;
-            }
-            return false;
-        }
+        // function editComment(comment) {
+        //     if (user.role == 'curator') {
+        //         return true;
+        //     }
+        //     if (user.role == 'annotator' && isAuthor(comment.data.author, user.session)) {
+        //         return true;
+        //     }
+        //     return false;
+        // }
 
         function deleteComment(comment) {
             if (user.role == 'curator') {
@@ -80,7 +80,7 @@
             editAnnotation: editAnnotation,
             deleteAnnotation: deleteAnnotation,
             createComment: createComment,
-            editComment: editComment,
+            // editComment: editComment,
             deleteComment: deleteComment,
             editMetadata: editMetadata
         };
