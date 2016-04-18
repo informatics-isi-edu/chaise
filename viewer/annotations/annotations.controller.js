@@ -8,12 +8,12 @@
         vm.annotations = annotations;
         vm.sections = sections;
         vm.anatomies = anatomies;
+        vm.arrowColors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
 
         vm.filterAnnotations = filterAnnotations;
 
         vm.createMode = false;
-        vm.newAnnotation = null;
-        vm.newAnnotationType = null;
+        vm.newAnnotation = {config:{color: 'red'}}; // default color red
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
@@ -43,34 +43,38 @@
             if (event.origin === window.location.origin) {
                 var data = event.data;
                 var messageType = data.messageType;
+
                 switch (messageType) {
                     case 'annotoriousReady':
                         // annotoriousReady case handled in viewer.app.js.
                         // Repeating the case here to avoid triggering default case
                         break;
                     case 'annotationDrawn':
-                        vm.newAnnotation = {
-                            description: '',
-                            shape: data.content.shape
-                        };
+                        vm.newAnnotation.shape = data.content.shape;
                         $scope.$apply(function() {
                             vm.createMode = true;
                         });
                         break;
                     case 'onHighlighted':
+                    // On-hover highlighting behavior no longer needed
+                    // OSD still sends this message out on hover though, so the
+                    // is case here to avoid triggering default case
+                        break;
+                    case 'onUnHighlighted':
+                    // On-hover highlighting behavior no longer needed
+                    // OSD still sends this message out on hover though, so the
+                    // is case here to avoid triggering default case
+                        break;
+                    case 'onClickAnnotation':
                         var content = JSON.parse(data.content);
                         var annotation = findAnnotation(content.data.shapes[0].geometry);
                         if (annotation) {
+                            var annotationId = annotation.table.name + '-' + annotation.data.id;
                             $scope.$apply(function() {
-                                // Highlight the annotation in the sidebar
-                                vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
+                                vm.highlightedAnnotation = annotationId;
                             });
+                            scrollIntoView(annotationId);
                         }
-                        break;
-                    case 'onUnHighlighted':
-                        $scope.$apply(function() {
-                            vm.highlightedAnnotation = null;
-                        });
                         break;
                     default:
                         console.log('Invalid event message type "' + messageType + '"');
@@ -105,14 +109,15 @@
         }
 
         function drawAnnotation(type) {
-            vm.newAnnotationType = type;
+            vm.newAnnotation.type = type;
             return AnnotationsService.drawAnnotation();
         }
 
         function createAnnotation() {
+            console.log('Controller:', vm.newAnnotation);
             vm.createMode = false;
-            AnnotationsService.createAnnotation(vm.newAnnotation, vm.newAnnotationType);
-            vm.newAnnotationType = null;
+            AnnotationsService.createAnnotation(vm.newAnnotation);
+            vm.newAnnotation = {config:{color: 'red'}};
         }
 
         function cancelNewAnnotation() {
@@ -167,7 +172,6 @@
                     return vm.annotations[i];
                 }
             }
-
             // Search in sections collection
             for (var i = 0; i < vm.sections.length; i++) {
                 var annotationCoords = vm.sections[i].data.coords;
@@ -175,6 +179,16 @@
                     return vm.sections[i];
                 }
             }
+        }
+
+        // Scroll a DOM element into visible part of the browser
+        function scrollIntoView(elementId) {
+            // Using native JS b/c angular.element returns a jQuery/jqLite object,
+            // which is incompatible with .scrollIntoView()
+            document.getElementById(elementId).scrollIntoView({
+                block: 'start',
+                behavior: 'smooth'
+            });
         }
 
         // Used to set the author based on the info object from the user object (user.info) that is set on every annotation

@@ -48,8 +48,8 @@
     // Get a client connection to ERMrest
     // Note: Only Providers and Constants can be dependencies in .config blocks. So
     // if you want to use a factory or service (e.g. $window or your custom one)
-    // in a .config block, you add append 'Provider' to the dependency name and
-    // run .$get() on it. This returns a Provider instance of the factory/service.
+    // in a .config block, you append 'Provider' to the dependency name and call
+    // .$get() on it. This returns a Provider instance of the factory/service.
     .config(['ermrestClientFactoryProvider', 'context', function configureClient(ermrestClientFactoryProvider, context) {
         client = ermrestClientFactoryProvider.$get().getClient(context.serviceURL);
     }])
@@ -131,6 +131,9 @@
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
+        var chaiseReady = false;
+        var arrows = [];
+        var rectangles = [];
 
         var catalog = client.getCatalog(context.catalogID);
         catalog.introspect().then(function success(schemas) {
@@ -152,7 +155,7 @@
                                 sections.push(_sections[i]);
                             }
                             if (annotoriousReady) {
-                                iframe.postMessage({messageType: 'loadAnnotations', content: sections}, origin);
+                                iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
                             }
                             console.log('Sections: ', sections);
                         }, function error(response) {
@@ -163,11 +166,19 @@
                         annotationTable.getEntities().then(function success(_annotations) {
                             var length = _annotations.length;
                             for (var i = 0; i < length; i++) {
-                                annotations.push(_annotations[i]);
+                                var annotation = _annotations[i];
+                                annotations.push(annotation);
+                                if (annotation.data.type == 'arrow') {
+                                    arrows.push(annotation);
+                                } else if (annotation.data.type == 'rectangle') {
+                                    rectangles.push(annotation);
+                                }
                             }
+                            chaiseReady = true;
 
-                            if (annotoriousReady) {
-                                iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                            if (annotoriousReady && chaiseReady) {
+                                iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
+                                iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
                             }
                             console.log('Annotations: ', annotations);
                         }, function error(response) {
@@ -299,9 +310,10 @@
             if (event.origin === origin) {
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;
-                    if (annotoriousReady) {
+                    if (annotoriousReady && chaiseReady) {
                         iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
-                        iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                        iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
+                        iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
                     }
                 }
             } else {

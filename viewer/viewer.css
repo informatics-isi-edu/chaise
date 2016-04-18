@@ -40,6 +40,10 @@ html, body {
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
 }
 
+.annotation-card {
+    margin-bottom: 20px;
+}
+
 .annotation-anatomy-text {
     color: #444;
 }
@@ -77,20 +81,20 @@ a.cardlink.delete {
 
 .comments {
     margin: -10px;
-    padding: 10px;
+    padding: 0 10px 10px 10px;
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
     background-color: #f9f9f9;
 }
 
 .comment {
-    padding-bottom: 20px;
+    padding-bottom: 10px;
 }
 
 .separator {
     width: 97%;
     border-top: 1px solid #ddd;
-    margin: 10px auto 10px auto;
+    margin: 0 auto 10px auto;
 }
 
 #viewer.col-md-9 {
