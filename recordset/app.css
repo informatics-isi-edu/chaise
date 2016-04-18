@@ -3,3 +3,7 @@
     margin-bottom: 10px;
     margin-right: 5px;
 }
+
+.glyphicon{
+    min-width: 15px;
+}
