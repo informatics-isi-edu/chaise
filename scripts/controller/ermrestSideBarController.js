@@ -670,4 +670,8 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		return !$scope.FacetsData.progress;
 	};
 
+	this.displaySidebar = function displaySidebar() {
+		return !$scope.FacetsData.error;
+	};
+
 }]);
