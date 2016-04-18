@@ -1842,7 +1842,7 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 function deleteSession(param) {
 	if (token == null) {
 		var url = HOME + '/ermrest/authn/session';
-		ERMREST.DELETE(url, successDeleteSession, null, param);
+		ERMREST.DELETE(url, successDeleteSession, errorDeleteSession, param);
 	} else {
 		submitLogout();
 	}
@@ -1855,6 +1855,18 @@ function successDeleteSession(data, textStatus, jqXHR, param) {
 		logout_url = data['logout_url'];
 	}
 	submitLogout(logout_url);
+}
+
+function errorDeleteSession(jqXHR, textStatus, errorThrown, url, param) {
+	if (jqXHR.status == 404 && jqXHR.responseText !== undefined) {
+		// this might be a session timeout
+		var logout_url = null;
+		var data = JSON.parse(jqXHR.responseText);
+		logout_url = data['logout_url'];
+		submitLogout(logout_url);
+	} else {
+		handleError(jqXHR, textStatus, errorThrown, url);
+	}
 }
 
 function getSession(param) {
