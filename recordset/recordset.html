@@ -3,6 +3,12 @@
     <a id="permalink" class="pull-right top-right" ng-href="{{ permalink() }}">
         <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
     </a>
+    <!-- SPINNER -->
+    <div ng-show="loading" id="spinner">
+        <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
+        <div style="margin-top: 15px;">Loading...</div>
+    </div>
+
     <span>Show page {{ page }} of {{ vm.pageCount }}</span>
     <div>
         <button type="button" class="btn btn-primary" ng-click="before()" ng-disabled="previousButtonDisabled">Previous Page</button>

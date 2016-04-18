@@ -109,8 +109,9 @@ angular.module('recordset', ['ERMrest'])
     pageCount : 0 } // don't know last page yet,
 )
 
+
 // Register the recordset controller
-.controller('recordsetController', ['$scope', '$window','recordsetModel', 'context', function($scope, $window, recordsetModel, context) {
+.controller('recordsetController', ['$scope', '$rootScope', '$window','recordsetModel', 'context', function($scope, $rootScope, $window, recordsetModel, context) {
 
     // don't know last page yet,
     // when we reach a page with less than page limit rows, that's the last page
@@ -127,8 +128,8 @@ angular.module('recordset', ['ERMrest'])
      */
     $scope.sort = function () {
 
-        $scope.previousButtonDisabled = true;
-        $scope.nextButtonDisabled = true;
+        $rootScope.previousButtonDisabled = true;
+        $rootScope.nextButtonDisabled = true;
 
         var sort = [];
         if (recordsetModel.sortby !== null) {
@@ -142,21 +143,26 @@ angular.module('recordset', ['ERMrest'])
             }
         }
 
+        $rootScope.loading = true;
+
         recordsetModel.table.entity.get(recordsetModel.filter, context.pageLimit, null, sort).then(function (rowset) {
+            $rootScope.loading = false;
             console.log(rowset);
             $scope.page = 1;
             recordsetModel.rowset = rowset;
 
             // enable buttons
-            $scope.previousButtonDisabled = true; // on page 1
-            $scope.nextButtonDisabled = ((recordsetModel.rowset !== null) && ($scope.page === recordsetModel.pageCount));
+            $rootScope.previousButtonDisabled = true; // on page 1
+            $rootScope.nextButtonDisabled = ((recordsetModel.rowset !== null) && ($scope.page === recordsetModel.pageCount));
         }, function (response) {
             console.log("Error getting entities: ");
             console.log(response);
 
+            $rootScope.loading = false;
+
             // enable buttons
-            $scope.previousButtonDisabled = ($scope.page === 1);
-            $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
+            $rootScope.previousButtonDisabled = ($scope.page === 1);
+            $rootScope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
         })
     };
 
@@ -198,9 +204,11 @@ angular.module('recordset', ['ERMrest'])
 
         if ($scope.page > 1) {
 
+            $rootScope.loading = true;
+
             // disable buttons while loading
-            $scope.previousButtonDisabled = true;
-            $scope.nextButtonDisabled = true;
+            $rootScope.previousButtonDisabled = true;
+            $rootScope.nextButtonDisabled = true;
 
             recordsetModel.rowset.before().then(function (rowset) {
                 console.log(rowset);
@@ -208,16 +216,20 @@ angular.module('recordset', ['ERMrest'])
                 recordsetModel.rowset = rowset;
                 $scope.page -= 1;
 
+                $rootScope.loading = false;
+
                 // enable buttons
-                $scope.previousButtonDisabled = ($scope.page === 1);
-                $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
+                $rootScope.previousButtonDisabled = ($scope.page === 1);
+                $rootScope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
 
             }, function (response) {
                 console.log(response);
 
+                $rootScope.loading = false;
+
                 // enable buttons
-                $scope.previousButtonDisabled = ($scope.page === 1);
-                $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
+                $rootScope.previousButtonDisabled = ($scope.page === 1);
+                $rootScope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
             });
         }
     };
@@ -226,9 +238,11 @@ angular.module('recordset', ['ERMrest'])
 
         if ($scope.page < recordsetModel.pageCount) {
 
+            $rootScope.loading = true;
+
             // disable buttons while loading
-            $scope.previousButtonDisabled = true;
-            $scope.nextButtonDisabled = true;
+            $rootScope.previousButtonDisabled = true;
+            $rootScope.nextButtonDisabled = true;
 
             recordsetModel.rowset.after().then(function(rowset) {
                 console.log(rowset);
@@ -237,29 +251,32 @@ angular.module('recordset', ['ERMrest'])
                 $scope.page += 1;
                 recordsetModel.rowset = rowset;
 
+                $rootScope.loading = false;
+
                 // enable buttons
-                $scope.previousButtonDisabled = ($scope.page === 1);
-                $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
+                $rootScope.previousButtonDisabled = ($scope.page === 1);
+                $rootScope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
 
             }, function(response) {
                 console.log(response);
 
+                $rootScope.loading = false;
+
                 //enable buttons
-                $scope.previousButtonDisabled = ($scope.page === 1);
-                $scope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
+                $rootScope.previousButtonDisabled = ($scope.page === 1);
+                $rootScope.nextButtonDisabled = ($scope.page === recordsetModel.pageCount);
             });
         }
 
     };
 
-    // initially on first page
-    $scope.previousButtonDisabled = true;
-    $scope.nextButtonDisabled = ((recordsetModel.rowset !== null) && ($scope.page === recordsetModel.pageCount));
-
 }])
 
 // Register work to be performed after loading all modules
-.run(['context', 'recordsetModel', 'ermrestServerFactory', function(context, recordsetModel, ermrestServerFactory) {
+.run(['$rootScope', 'context', 'recordsetModel', 'ermrestServerFactory', function($rootScope, context, recordsetModel, ermrestServerFactory) {
+
+    $rootScope.loading = true;
+
     // Get rowset data from ermrest
     var server = ermrestServerFactory.getServer(context.serviceURL);
     server.catalogs.get(context.catalogID).then(function(catalog) {
@@ -332,10 +349,21 @@ angular.module('recordset', ['ERMrest'])
             table.entity.get(filter, context.pageLimit, null, sort).then(function (rowset) {
                 console.log(rowset);
                 recordsetModel.rowset = rowset;
+
+                $rootScope.loading = false;
+                $rootScope.previousButtonDisabled = true;
+                $rootScope.nextButtonDisabled = (recordsetModel.pageCount === 1);
+
             }, function(error) {
                 console.log(error);
+                $rootScope.loading = false;
+                $rootScope.previousButtonDisabled = true;
+                $rootScope.nextButtonDisabled = true;
             });
         }, function(response) {
+            $rootScope.loading = false;
+            $rootScope.previousButtonDisabled = true;
+            $rootScope.nextButtonDisabled = true;
             return module._q.reject(response.data);
         });
 
