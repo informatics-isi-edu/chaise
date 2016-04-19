@@ -10,7 +10,7 @@ var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 var USER = null;
-var CHAISE_DATA = null;
+var CHAISE_DATA = {};
 var DISPLAY_ERROR = null;
 
 var PRIMARY_KEY = [];
