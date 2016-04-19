@@ -122,6 +122,13 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
+		setTimeout(function() {
+			$scope.FacetsData.error = true;
+			$scope.FacetsData.progress = false;
+			if (!$scope.$$phase) {
+				$scope.$apply();
+			}
+		}, 1);
 	};
 	
 	this.html = function (errorMessage) {
@@ -135,10 +142,10 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 	};
 	
 	this.showSpinner = function showSpinner() {
-		return FacetsData.progress && !FacetsData.error;
+		return $scope.FacetsData.progress && !$scope.FacetsData.error;
 	};
 	
 	this.showError = function showError() {
-		return FacetsData.error;
+		return $scope.FacetsData.error;
 	};
 }]);
