@@ -483,7 +483,7 @@
                                     <div ng-if="annotations.getNumComments(annotation) !== 0" class="row comments-list">
                                         <hr class="separator">
                                         <div class="col-md-12">
-                                            <div ng-repeat="comment in comments.comments[comments.annotationId] | orderBy: ['data.created', 'data.id'] track by $index" class="row">
+                                            <div ng-repeat="comment in comments.comments[annotation.data.id] | orderBy: ['data.created', 'data.id'] track by $index" class="row">
                                                 <div class="col-md-12 comment">
                                                     <strong>{{annotations.authorName(comment.data.author)}}</strong>
                                                     <small><span class="text-muted pull-right">{{comment.data.created | date:'MMM d, y'}}</span></small>
@@ -505,7 +505,7 @@
                                                 <div class="input-group input-group-sm">
                                                     <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
                                                     <span class="input-group-btn">
-                                                        <button ng-click="comments.createComment();" class="btn btn-success" type="submit" role="button">
+                                                        <button ng-click="comments.createComment(annotation);" class="btn btn-success" type="submit" role="button">
                                                             Post
                                                         </button>
                                                     </span>

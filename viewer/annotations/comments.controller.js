@@ -5,10 +5,9 @@
 
     .controller('CommentsController', ['AuthService', 'CommentsService', '$scope', 'comments', function AnnotationsController(AuthService, CommentsService, $scope, comments) {
         var vm = this;
-        vm.annotationId = $scope.annotation.data.id;
         vm.comments = comments;
         vm.newComment = {
-            annotationId: vm.annotationId,
+            annotationId: null,
             comment: null,
             author: null
         };
@@ -17,19 +16,14 @@
         vm.allowDelete = AuthService.deleteComment;
 
         vm.createComment = createComment;
-        vm.getNumComments = getNumComments;
         vm.deleteComment = deleteComment;
 
         vm.authorName = authorName;
 
-        function createComment() {
+        function createComment(annotation) {
+            vm.newComment.annotationId = annotation.data.id;
             CommentsService.createComment(vm.newComment);
             resetNewComment();
-        }
-
-        // Get the # of comments an annotation has
-        function getNumComments() {
-            CommentsService.getNumComments(vm.annotationId);
         }
 
         function deleteComment(comment) {
@@ -39,7 +33,7 @@
         // Set newComment back to its default vaules
         function resetNewComment() {
             vm.newComment = {
-                annotationId: vm.annotationId,
+                annotationId: null,
                 comment: null,
                 author: null
             };
