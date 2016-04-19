@@ -178,7 +178,6 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
 	$(VIEWER_ASSETS)/sidebar/sidebar.controller.js \
 	$(VIEWER_ASSETS)/annotations/annotations.js \
 	$(VIEWER_ASSETS)/annotations/comments.js \
-	$(VIEWER_ASSETS)/annotations/sections.js \
 	$(VIEWER_ASSETS)/annotations/anatomies.js \
 	$(VIEWER_ASSETS)/annotations/annotations.service.js \
 	$(VIEWER_ASSETS)/annotations/comments.service.js \

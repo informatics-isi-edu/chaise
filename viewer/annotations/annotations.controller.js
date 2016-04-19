@@ -3,17 +3,16 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AuthService', 'annotations', 'sections', 'comments', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(AuthService, annotations, sections, comments, anatomies, AnnotationsService, $window, $scope) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, $window, $scope) {
         var vm = this;
         vm.annotations = annotations;
-        vm.sections = sections;
         vm.anatomies = anatomies;
         vm.arrowColors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
 
         vm.filterAnnotations = filterAnnotations;
 
         vm.createMode = false;
-        vm.newAnnotation = {config:{color: 'red'}}; // default color red
+        vm.newAnnotation = {config:{color: 'orange'}}; // default color orange
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
@@ -35,6 +34,8 @@
         vm.allowCreate = AuthService.createAnnotation;
         vm.allowEdit = AuthService.editAnnotation;
         vm.allowDelete = AuthService.deleteAnnotation;
+
+        vm.showSections = showSections;
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
@@ -90,7 +91,7 @@
             }
 
             vm.query = vm.query.toLowerCase();
-            
+
             annotation = annotation.data;
             var author = annotation.author;
             var props = [annotation.anatomy, annotation.description, author.display_name, author.full_name, author.email, annotation.created];
@@ -126,10 +127,9 @@
         }
 
         function createAnnotation() {
-            console.log('Controller:', vm.newAnnotation);
             vm.createMode = false;
             AnnotationsService.createAnnotation(vm.newAnnotation);
-            vm.newAnnotation = {config:{color: 'red'}};
+            vm.newAnnotation = {config:{color: 'orange'}};
         }
 
         function cancelNewAnnotation() {
@@ -139,9 +139,12 @@
 
         function editAnnotation(annotation) {
             vm.editedAnnotation = annotation.table.name + '-' + annotation.data.id;
+            annotation = annotation.data;
             originalAnnotation = {
-                description: annotation.data.description,
-                anatomy: annotation.data.anatomy
+                description: annotation.description,
+                anatomy: annotation.anatomy,
+                config: annotation.config,
+                type: annotation.type
             };
         };
 
@@ -150,6 +153,8 @@
             var data = annotation.data;
             data.description = originalAnnotation.description;
             data.anatomy = originalAnnotation.anatomy;
+            data.config = originalAnnotation.config;
+            data.type = originalAnnotation.type;
         };
 
         function updateAnnotation(annotation) {
@@ -177,18 +182,11 @@
 
         // Return an annotation/section that matches an object of coordinates
         function findAnnotation(coordinates) {
-            // Search in annotations collection
-            for (var i = 0; i < vm.annotations.length; i++) {
+            var length = vm.annotations.length;
+            for (var i = 0; i < length; i++) {
                 var annotationCoords = vm.annotations[i].data.coords;
                 if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
                     return vm.annotations[i];
-                }
-            }
-            // Search in sections collection
-            for (var i = 0; i < vm.sections.length; i++) {
-                var annotationCoords = vm.sections[i].data.coords;
-                if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
-                    return vm.sections[i];
                 }
             }
         }
@@ -207,6 +205,10 @@
         // The info object is the session.client object and may contain a combination of display_name, full_name, and email
         function authorName(client) {
             return (client.display_name ? client.display_name : (client.full_name ? client.full_name : client.email ));
+        }
+
+        function showSections() {
+
         }
     }]);
 })();
