@@ -20,7 +20,6 @@
             }];
 
             var commentTable = image.entity.getRelatedTable(context.schemaName, 'annotation').getRelatedTable(context.schemaName, 'annotation_comment');
-// TODO check this logic
             return commentTable.createEntity(newComment, ['id', 'created']).then(function success(comment) {
                 var annotationId = comment.data.annotation_id;
                 if (!comments[annotationId]) {
