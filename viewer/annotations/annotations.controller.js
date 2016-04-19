@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AuthService', 'annotations', 'sections', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(AuthService, annotations, sections, anatomies, AnnotationsService, $window, $scope) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'sections', 'comments', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(AuthService, annotations, sections, comments, anatomies, AnnotationsService, $window, $scope) {
         var vm = this;
         vm.annotations = annotations;
         vm.sections = sections;
@@ -84,33 +84,39 @@
             }
         });
 
-        // Returns true if at least one of a specified subset of an object's keys contains a value that contains the query
         function filterAnnotations(annotation) {
             if (!vm.query) {
                 return true;
             }
 
+            vm.query = vm.query.toLowerCase();
+            
             annotation = annotation.data;
             var author = annotation.author;
-
-            var props = [
-                annotation.anatomy,
-                annotation.description,
-                author.display_name,
-                author.full_name,
-                author.email,
-                annotation.created,
-                annotation.type
-            ];
-
-            vm.query = vm.query.toLowerCase();
+            var props = [annotation.anatomy, annotation.description, author.display_name, author.full_name, author.email, annotation.created];
             var numProps = props.length;
-
             for (var i = 0; i < numProps; i++) {
                 if (props[i] && props[i].toLowerCase().indexOf(vm.query) > -1) {
                     return true;
                 }
             }
+
+            var commentsArr = comments[annotation.id];
+            if (commentsArr) {
+                var numComments = commentsArr.length;
+                for (var c = 0; c < numComments; c++) {
+                    var comment = commentsArr[c].data;
+                    var commentAuthor = comment.author;
+                    var commentProps = [comment.comment, comment.created, commentAuthor.display_name, commentAuthor.full_name, commentAuthor.email];
+                    var numCommentProps = commentProps.length;
+                    for (var p = 0; p < numCommentProps; p++) {
+                        if (commentProps[p] && commentProps[p].toLowerCase().indexOf(vm.query) > -1) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
             return false;
         }
 
