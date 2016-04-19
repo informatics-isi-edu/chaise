@@ -6,8 +6,8 @@ var ermResultsController = angular.module('ermResultsController', ['facetsModel'
 
 //angular.module('ermrestApp').controller('ResultsListCtrl', ['$scope', '$timeout', '$sce', 'FacetsData', 'FacetsService',
 
-ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
-                                                      function($scope, $window, $timeout, $sce, FacetsData, FacetsService) {
+ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$window', '$timeout', '$sce', 'FacetsData', 'FacetsService',
+                                                      function($rootScope, $scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
   	$scope.chaiseConfig = chaiseConfig;
@@ -212,6 +212,7 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 	};
 
 	this.changeSortOrder = function changeSortOrder(event) {
+		$rootScope.preventSortOrder = false;
 		$scope.FacetsData.sortOrder = ($scope.FacetsData.sortOrder == 'asc') ? 'desc' : 'asc';
 		$scope.FacetsData.pagingOptions.currentPage = 2;
 		$scope.FacetsData.pagingOptions.currentPage = updatePageTag('backward', $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.pageMap, $scope.FacetsData.tagPages, $scope.FacetsData.maxPages);
