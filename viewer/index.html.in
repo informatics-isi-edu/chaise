@@ -505,7 +505,7 @@
                                             <div class="input-group input-group-sm">
                                                 <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
                                                 <span class="input-group-btn">
-                                                    <button ng-click="comments.createComment();" class="btn btn-success" type="submit" role="button">
+                                                    <button ng-click="comments.createComment(annotation);" class="btn btn-success" type="submit" role="button">
                                                         Post
                                                     </button>
                                                 </span>
