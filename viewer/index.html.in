@@ -439,6 +439,7 @@
                                         <!-- Annotation Anatomy Text -->
                                         <div class="col-md-7 annotation-anatomy-text">
                                             <small><strong>
+                                                <span class="glyphicon" ng-class="{'glyphicon-stop': annotation.data.type == 'rectangle', 'glyphicon-tag': annotation.data.type == 'arrow'}" ng-style="{'color': annotation.data.config.color}"></span>
                                                 <span ng-if="annotation.data.anatomy">{{annotation.data.anatomy | uppercase}}</span>
                                                 <span ng-if="!annotation.data.anatomy">{{'No Anatomy' | uppercase}}</span>
                                             </strong></small>
@@ -501,15 +502,13 @@
                                     <div ng-if="comments.allowCreate();" class="row comment-input">
                                         <hr class="separator">
                                         <div class="col-md-12">
-                                            <div class="comment-input">
-                                                <div class="input-group input-group-sm">
-                                                    <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
-                                                    <span class="input-group-btn">
-                                                        <button ng-click="comments.createComment(annotation);" class="btn btn-success" type="submit" role="button">
-                                                            Post
-                                                        </button>
-                                                    </span>
-                                                </div>
+                                            <div class="input-group input-group-sm">
+                                                <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
+                                                <span class="input-group-btn">
+                                                    <button ng-click="comments.createComment();" class="btn btn-success" type="submit" role="button">
+                                                        Post
+                                                    </button>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
