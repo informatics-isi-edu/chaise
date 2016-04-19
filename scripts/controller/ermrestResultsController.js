@@ -243,6 +243,10 @@ ermResultsController.controller('ResultsListCtrl', ['$scope', '$window', '$timeo
 		return !$scope.FacetsData.progress;
 	};
 
+	this.displayResults = function displayResults() {
+		return !$scope.FacetsData.error;
+	};
+
 	this.selectView = function selectView(event, view) {
 		event.preventDefault();
 		$scope.FacetsData.view = view;
