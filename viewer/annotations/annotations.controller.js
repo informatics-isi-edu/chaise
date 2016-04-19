@@ -85,27 +85,33 @@
         });
 
         // Returns true if at least one of a specified subset of an object's keys contains a value that contains the query
-        function filterAnnotations(keys) {
-            var query = vm.query;
-            return function(annotation) {
-                if (!query) {
-                    // If query is "" or undefined, then the annotation is considered a match
+        function filterAnnotations(annotation) {
+            if (!vm.query) {
+                return true;
+            }
+
+            annotation = annotation.data;
+            var author = annotation.author;
+
+            var props = [
+                annotation.anatomy,
+                annotation.description,
+                author.display_name,
+                author.full_name,
+                author.email,
+                annotation.created,
+                annotation.type
+            ];
+
+            vm.query = vm.query.toLowerCase();
+            var numProps = props.length;
+
+            for (var i = 0; i < numProps; i++) {
+                if (props[i] && props[i].toLowerCase().indexOf(vm.query) > -1) {
                     return true;
                 }
-                annotation = annotation.data;
-                query = query.toLowerCase();
-
-                // Loop through the array to find matches
-                var numKeys = keys.length;
-                if (numKeys > 0) {
-                    for (var i = 0; i < numKeys; i++) {
-                        if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
             }
+            return false;
         }
 
         function drawAnnotation(type) {
