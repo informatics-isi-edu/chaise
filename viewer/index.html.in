@@ -297,7 +297,7 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li><a ng-click="annotations.drawAnnotation('section');">Section of Interest</a></li>
-                                    <li><a ng-click="annotations.drawAnnotation('rectangle');">Regular Annotation</a></li>
+                                    <li><a ng-click="annotations.drawAnnotation('rectangle');">Rectangle Annotation</a></li>
                                     <li><a ng-click="annotations.drawAnnotation('arrow');">Arrow Annotation</a></li>
                                 </ul>
                             </div>
@@ -315,7 +315,7 @@
                                 <div class="col-md-10">
                                     <span class="h4">New
                                         <span ng-if="annotations.newAnnotation.type == 'section'">Section of Interest</span>
-                                        <span ng-if="annotations.newAnnotation.type == 'rectangle'">Regular Annotation</span>
+                                        <span ng-if="annotations.newAnnotation.type == 'rectangle'">Rectangle Annotation</span>
                                         <span ng-if="annotations.newAnnotation.type == 'arrow'">Arrow Annotation</span>
                                     </span>
                                 </div>
@@ -449,6 +449,21 @@
                             </div><!-- /Annotation Display Card -->
                             <form ng-show="annotations.editedAnnotation == (annotation.table.name + '-' + annotation.data.id)" id="edit-annotation-form">
                                 <div class="row">
+                                    <div class="col-md-10">
+                                        <span class="h4">Edit
+                                            <span ng-if="annotation.data.type == 'section'">Section of Interest</span>
+                                            <span ng-if="annotation.data.type == 'rectangle'">Rectangle Annotation</span>
+                                            <span ng-if="annotation.data.type == 'arrow'">Arrow Annotation</span>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button ng-click="annotations.cancelEdit(annotation);" type="button" class="close pull-right" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <br>
                                     <!-- Edit Form: Annotation Anatomy -->
                                     <div ng-if="annotation.data.type != 'section'" class="col-md-10 annotation-anatomy-text">
                                         <label>Anatomy</label>
@@ -458,11 +473,6 @@
                                                 <div ng-bind-html="anatomy | highlight: $select.search"></div>
                                             </ui-select-choices>
                                         </ui-select>
-                                    </div>
-                                    <div class="col-md-2" ng-class="{'pull-right': annotation.data.type == 'section'}">
-                                        <button ng-click="annotations.cancelEdit(annotation);" type="button" class="close pull-right" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
                                     </div>
                                 </div>
                                 <br>
