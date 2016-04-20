@@ -111,12 +111,7 @@ angular.module('recordset', ['ERMrest'])
 
 
 // Register the recordset controller
-.controller('recordsetController', ['$scope', '$rootScope', '$window','recordsetModel', 'context', function($scope, $rootScope, $window, recordsetModel, context) {
-
-    // don't know last page yet,
-    // when we reach a page with less than page limit rows, that's the last page
-    // or when we reach a page with no rows, previous page is last page
-
+.controller('recordsetController', ['$scope', '$rootScope', '$window', 'recordsetModel', 'context', function($scope, $rootScope, $window, recordsetModel, context) {
 
     $scope.vm = recordsetModel;
     
@@ -124,9 +119,13 @@ angular.module('recordset', ['ERMrest'])
 
     /**
      *
-     * @param {Array} columns and array of column names in sort order
      */
     $scope.sort = function () {
+
+        // update the address bar
+        // page does not reload, but save location
+        window.location.href = $scope.permalink();
+        $rootScope.location = window.location.href;
 
         $rootScope.previousButtonDisabled = true;
         $rootScope.nextButtonDisabled = true;
@@ -275,6 +274,7 @@ angular.module('recordset', ['ERMrest'])
 // Register work to be performed after loading all modules
 .run(['$rootScope', 'context', 'recordsetModel', 'ermrestServerFactory', function($rootScope, context, recordsetModel, ermrestServerFactory) {
 
+    $rootScope.location = window.location.hash;
     $rootScope.loading = true;
 
     // Get rowset data from ermrest
@@ -368,6 +368,15 @@ angular.module('recordset', ['ERMrest'])
         });
 
     });
+
+
+    window.onhashchange = function() {
+        // when address bar changes due to back or forward button
+        // reload page
+        if (window.location.href !== $rootScope.location) {
+            location.reload();
+        }
+    }
 }])
 
 /* end recordset */;
