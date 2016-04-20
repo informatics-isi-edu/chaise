@@ -20,7 +20,7 @@
             }];
 
             var commentTable = image.entity.getRelatedTable(context.schemaName, 'annotation').getRelatedTable(context.schemaName, 'annotation_comment');
-            return commentTable.createEntity(newComment, ['id', 'created']).then(function success(comment) {
+            return commentTable.createEntity(newComment, ['id', 'created', 'last_modified']).then(function success(comment) {
                 var annotationId = comment.data.annotation_id;
                 if (!comments[annotationId]) {
                     comments[annotationId] = [];
@@ -28,6 +28,16 @@
                 comments[annotationId].push(comment);
                 console.log('Comments: ', comments);
             }, function error(response) {
+                console.log(response);
+            });
+        }
+
+        function updateComment(comment) {
+            comment.update().then(function success(response) {
+                // Nothing to change in the state of the app
+                // comments[comment.data.annotation_id][comment] is changed in place from the html
+                console.log('Comments: ', comments);
+            }, function error(repsonse) {
                 console.log(response);
             });
         }
@@ -45,6 +55,7 @@
         return {
             getNumComments: getNumComments,
             createComment: createComment,
+            updateComment: updateComment,
             deleteComment: deleteComment
         };
     }]);

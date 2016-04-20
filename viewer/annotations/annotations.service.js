@@ -50,7 +50,7 @@
             }
 
             var table = image.entity.getRelatedTable(context.schemaName, tableName);
-            return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
+            return table.createEntity(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
                 if (type == 'arrow' || type == 'rectangle') {
                     annotations.push(annotation);
                 } else if (type == 'section') {

@@ -487,10 +487,26 @@
                                                 <div class="col-md-12 comment">
                                                     <strong>{{annotations.authorName(comment.data.author)}}</strong>
                                                     <small><span class="text-muted pull-right">{{comment.data.created | date:'MMM d, y'}}</span></small>
-                                                    <br>{{comment.data.comment}}
-                                                    <div ng-if="comments.allowDelete(comment);">
-                                                        <small>
-                                                            <a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a>
+                                                    <div ng-if="comments.editedComment == (comment.table.name + '-' + comment.data.id)">
+                                                        <div class="comment-input">
+                                                            <div class="input-group input-group-sm" id="edit-comment-form">
+                                                                <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comment.data.comment" type="text" class="form-control">
+                                                                <span class="input-group-btn">
+                                                                    <button ng-click="comments.updateComment(comment);" class="btn btn-success" type="submit" role="button">
+                                                                        Update
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <small><a ng-click="comments.cancelEdit(comment);" class="cardlink cancel">Cancel</a></small>
+                                                    </div>
+                                                    <div ng-if="comments.editedComment != (comment.table.name + '-' + comment.data.id)">
+                                                        {{comment.data.comment}}
+                                                        <small ng-if="comments.allowEdit(comment)">
+                                                            <br><a ng-click="comments.editComment(comment);" class="cardlink edit">Edit</a>
+                                                        </small>
+                                                        <small ng-if="comments.allowDelete(comment);">
+                                                            | <a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a>
                                                         </small>
                                                     </div>
                                                 </div>
@@ -498,14 +514,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div ng-if="comments.allowCreate();" class="row comment-input">
+                                    <div ng-if="comments.allowCreate();" ng-hide="comments.editedComment" class="row comment-input">
                                         <hr class="separator">
                                         <div class="col-md-12">
                                             <div class="comment-input">
                                                 <div class="input-group input-group-sm">
                                                     <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
                                                     <span class="input-group-btn">
-                                                        <button ng-click="comments.createComment(annotation);" class="btn btn-success" type="submit" role="button">
+                                                        <button ng-click="comments.createComment(annotation.data.id);" class="btn btn-success" type="submit" role="button">
                                                             Post
                                                         </button>
                                                     </span>
