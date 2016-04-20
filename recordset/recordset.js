@@ -105,8 +105,9 @@ angular.module('recordset', ['ERMrest'])
     sortOrder: null,  // asc (default) or desc
     rowset:[],
     key: [] ,
-    page: 0,  // current page
-    pageCount : 0 } // don't know last page yet,
+    count: 0,         // total number of rows
+    page: 0,          // current page
+    pageCount : 0 }
 )
 
 
@@ -342,6 +343,7 @@ angular.module('recordset', ['ERMrest'])
 
         // first get row count
         table.entity.count(filter).then(function(count) {
+            recordsetModel.count = count;
             recordsetModel.pageCount = Math.ceil(count / context.pageLimit);
             console.log(count + " records. " + recordsetModel.pageCount + " pages");
 

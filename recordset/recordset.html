@@ -9,7 +9,7 @@
         <div style="margin-top: 15px;">Loading...</div>
     </div>
 
-    <span>Show page {{ page }} of {{ vm.pageCount }}</span>
+    <span>{{ vm.count }} rows. Showing page {{ page }} of {{ vm.pageCount }}</span>
     <div>
         <button type="button" class="btn btn-primary" ng-click="before()" ng-disabled="previousButtonDisabled">Previous Page</button>
         <button type="button" class="btn btn-primary" ng-click="after()" ng-disabled="nextButtonDisabled">Next Page</button>
