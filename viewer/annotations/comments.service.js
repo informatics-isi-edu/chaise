@@ -20,14 +20,17 @@
             }];
 
             var commentTable = image.entity.getRelatedTable(context.schemaName, 'annotation').getRelatedTable(context.schemaName, 'annotation_comment');
-            return commentTable.createEntity(newComment, ['id', 'created']).then(function success(comment) {
+            return commentTable.createEntity(newComment, ['id', 'created', 'last_modified']).then(function success(comment) {
                 var annotationId = comment.data.annotation_id;
                 if (!comments[annotationId]) {
                     comments[annotationId] = [];
                 }
                 comments[annotationId].push(comment);
-                console.log('Comments: ', comments);
             }, function error(response) {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: response
+                });
                 console.log(response);
             });
         }
@@ -38,6 +41,10 @@
                 var index = annotationComments.indexOf(comment);
                 annotationComments.splice(index, 1);
             }, function error(response) {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: response
+                });
                 console.log(response);
             });
         }

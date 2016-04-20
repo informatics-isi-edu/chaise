@@ -7,12 +7,13 @@
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;
-        vm.arrowColors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+        vm.colors = ['red', 'orange', 'gold', 'green', 'blue', 'purple'];
+        vm.annotationTypes = ['rectangle', 'arrow']; // 'section' excluded b/c once you set an annotation as a section, that can't change.
 
         vm.filterAnnotations = filterAnnotations;
 
         vm.createMode = false;
-        vm.newAnnotation = {config:{color: 'orange'}}; // default color orange
+        vm.newAnnotation = {config:{color: 'orange'}};
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
@@ -139,6 +140,7 @@
 
         function editAnnotation(annotation) {
             vm.editedAnnotation = annotation.table.name + '-' + annotation.data.id;
+            setHighlightedAnnotation(annotation);
             annotation = annotation.data;
             originalAnnotation = {
                 description: annotation.description,

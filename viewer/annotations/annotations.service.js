@@ -47,10 +47,14 @@
             }
 
             var table = image.entity.getRelatedTable(context.schemaName, 'annotation');
-            return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
+            return table.createEntity(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
                 annotations.push(annotation);
                 iframe.postMessage({messageType: messageType, content: annotation.data}, origin);
             }, function error(response) {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: response
+                });
                 console.log(response);
             });
         }
@@ -69,6 +73,10 @@
                 // Update in Annotorious
                 iframe.postMessage({messageType: 'updateAnnotation', content: annotation.data}, origin);
             }, function error(response) {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: response
+                });
                 console.log(response);
             });
         }
@@ -97,6 +105,10 @@
                     // Delete in Annotorious
                     iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
                 }, function error(response) {
+                    AlertsService.addAlert({
+                        type: 'error',
+                        message: response
+                    });
                     console.log(response);
                 });
             } else {
