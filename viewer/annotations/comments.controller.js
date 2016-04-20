@@ -13,17 +13,41 @@
         };
 
         vm.allowCreate = AuthService.createComment;
+        vm.allowEdit = AuthService.editComment;
         vm.allowDelete = AuthService.deleteComment;
 
         vm.createComment = createComment;
         vm.deleteComment = deleteComment;
 
+        vm.editedComment = null; // Used to track which comment was editted so we can show the form properly
+        var originalComment = null; // For reseting the comment data incase the user clicks cancel
+        vm.editComment = editComment;
+        vm.cancelEdit = cancelEdit;
+        vm.updateComment = updateComment;
+
         vm.authorName = authorName;
 
-        function createComment(annotation) {
-            vm.newComment.annotationId = annotation.data.id;
+        function createComment(annotationId) {
+            vm.newComment.annotationId = annotationId;
             CommentsService.createComment(vm.newComment);
             resetNewComment();
+        }
+
+        function editComment(comment) {
+            vm.editedComment = comment.table.name + '-' + comment.data.id;
+            originalComment = {
+                comment: comment.data.comment
+            }
+        }
+
+        function cancelEdit(comment) {
+            vm.editedComment = null;
+            comment.data.comment = originalComment.comment;
+        }
+
+        function updateComment(comment) {
+            CommentsService.updateComment(comment);
+            vm.editedComment = null;
         }
 
         function deleteComment(comment) {

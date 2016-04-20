@@ -35,6 +35,16 @@
             });
         }
 
+        function updateComment(comment) {
+            comment.update().then(function success(response) {
+                // Nothing to change in the state of the app
+                // comments[comment.data.annotation_id][comment] is changed in place from the html
+                console.log('Comments: ', comments);
+            }, function error(repsonse) {
+                console.log(response);
+            });
+        }
+
         function deleteComment(comment) {
             comment.delete().then(function success() {
                 var annotationComments = comments[comment.data.annotation_id];
@@ -52,6 +62,7 @@
         return {
             getNumComments: getNumComments,
             createComment: createComment,
+            updateComment: updateComment,
             deleteComment: deleteComment
         };
     }]);
