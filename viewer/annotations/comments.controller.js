@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('CommentsController', ['AuthService', 'CommentsService', '$scope', 'comments', function AnnotationsController(AuthService, CommentsService, $scope, comments) {
+    .controller('CommentsController', ['AuthService', 'CommentsService', '$scope', '$uibModal', 'comments', function AnnotationsController(AuthService, CommentsService, $scope, $uibModal, comments) {
         var vm = this;
         vm.comments = comments;
         vm.newComment = {
@@ -51,7 +51,22 @@
         }
 
         function deleteComment(comment) {
-            CommentsService.deleteComment(comment);
+            var modalInstance = $uibModal.open({
+                templateUrl: 'confirm_delete.html',
+                controller: 'confirmDeleteController',
+                size: 'lg',
+                resolve: {
+                    comment: comment
+                }
+            });
+
+            modalInstance.result.then(function () {
+                CommentsService.deleteComment(comment);
+                console.log('comment deleted');
+            }, function () {
+                console.log('Modal dismissed');
+            });
+
         }
 
         // Set newComment back to its default vaules
