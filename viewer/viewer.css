@@ -136,3 +136,7 @@ a.cardlink.delete {
 #metadata-panel .ui-select-container {
     width: 100%;
 }
+
+.new-annotation .dropdown-menu {
+    left: 15px;
+}
