@@ -307,17 +307,16 @@
                             <div class="col-md-12">
                                 <input ng-model="annotations.query" class="form-control" type="search" placeholder="Type to search...">
                                 <div class="checkbox">
-                                    <div class="text-justify">
-                                        <label class="checkbox-inline">
-                                            <input type="checkbox" ng-click="annotations.showSections();"> Sections
-                                        </label>
-                                        <label class="checkbox-inline">
-                                            <input type="checkbox"> Rectangles
-                                        </label>
-                                        <label class="checkbox-inline">
-                                            <input type="checkbox"> Arrows
-                                        </label>
-                                    </div>
+                                    <strong>Show:&nbsp;&nbsp;&nbsp;</strong>
+                                    <label for="showSections" class="checkbox-inline">
+                                        <input ng-model="annotations.filterByType.section" id="showSections" type="checkbox">Sections
+                                    </label>
+                                    <label for="showRectangles" class="checkbox-inline">
+                                        <input ng-model="annotations.filterByType.rectangle" id="showRectangles" type="checkbox">Rectangles
+                                    </label>
+                                    <label for="showArrows" class="checkbox-inline">
+                                        <input ng-model="annotations.filterByType.arrow" id="showArrows" type="checkbox">Arrows
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -386,7 +385,7 @@
                         <!-- Annotations List -->
                         <div ng-repeat="annotation in annotations.annotations | orderBy:['data.anatomy', 'data.id'] | filter:annotations.filterAnnotations track by $index"
                         ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table.name + '-' + annotation.data.id), section: annotation.data.type == 'section'}"
-                        id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation">
+                        ng-show="annotations.filterByType[annotation.data.type]" id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation">
                             <!-- Annotation Display Card -->
                             <div ng-show="annotations.editedAnnotation != (annotation.table.name + '-' + annotation.data.id)">
                                 <div class="annotation-card">
