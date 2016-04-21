@@ -118,9 +118,16 @@ angular.module('recordset', ['ERMrest'])
     
     $scope.page = 1;
 
-    /**
-     *
-     */
+    $scope.pageLimit = function(limit) {
+        context.pageLimit = limit;
+        recordsetModel.pageCount = Math.ceil(recordsetModel.count / context.pageLimit);
+        $scope.sort();
+    };
+
+    $scope.getPageLimit = function() {
+        return context.pageLimit;
+    }
+
     $scope.sort = function () {
 
         // update the address bar

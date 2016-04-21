@@ -1,20 +1,71 @@
 <h2>Records</h2>
 <div ng-controller="recordsetController">
+
+    <!-- permalink -->
     <a id="permalink" class="pull-right top-right" ng-href="{{ permalink() }}">
         <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
     </a>
-    <!-- SPINNER -->
+
+    <!-- loading spinner -->
     <div ng-show="loading" id="spinner">
         <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
         <div style="margin-top: 15px;">Loading...</div>
     </div>
 
-    <span>{{ vm.count }} rows. Showing page {{ page }} of {{ vm.pageCount }}</span>
+    <!-- pagination -->
     <div>
-        <button type="button" class="btn btn-primary" ng-click="before()" ng-disabled="previousButtonDisabled">Previous Page</button>
-        <button type="button" class="btn btn-primary" ng-click="after()" ng-disabled="nextButtonDisabled">Next Page</button>
+        <span>Total Items: {{ vm.count }}</span>
+        <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
+                <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+                <li><a href ng-click="pageLimit(10)">
+                    <span ng-show="getPageLimit() === 10" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="getPageLimit() !== 10" class="glyphicon glyphicon-invisible"></span>
+                    10</a>
+                </li>
+                <li><a href ng-click="pageLimit(25)">
+                    <span ng-show="getPageLimit() === 25" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="getPageLimit() !== 25" class="glyphicon glyphicon-invisible"></span>
+                    25</a>
+                </li>
+                <li><a href ng-click="pageLimit(50)">
+                    <span ng-show="getPageLimit() === 50" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="getPageLimit() !== 50" class="glyphicon glyphicon-invisible"></span>
+                    50</a>
+                </li>
+                <li><a href ng-click="pageLimit(75)">
+                    <span ng-show="getPageLimit() === 75" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="getPageLimit() !== 75" class="glyphicon glyphicon-invisible"></span>
+                    75</a>
+                </li>
+                <li><a href ng-click="pageLimit(100)">
+                    <span ng-show="getPageLimit() === 100" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="getPageLimit() !== 100" class="glyphicon glyphicon-invisible"></span>
+                    100</a>
+                </li>
+                <li><a href ng-click="pageLimit(200)">
+                    <span ng-show="getPageLimit() === 200" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="getPageLimit() !== 200" class="glyphicon glyphicon-invisible"></span>
+                    200</a>
+                </li>
+            </ul>
+        </div>
+        <div class="pager">
+            <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="previousButtonDisabled">
+                <span class="glyphicon glyphicon-chevron-left"></span>
+            </button>
+            <span>{{ page }}/{{ vm.pageCount }}</span>
+            <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="nextButtonDisabled">
+                <span class="glyphicon glyphicon-chevron-right"></span>
+            </button>
+        </div>
     </div>
+
+    <!-- record table -->
     <table class="table table-striped table-bordered">
+
+        <!-- sortable column header -->
         <thead>
             <tr>
                 <th nowrap ng-repeat="name in vm.header">
@@ -25,10 +76,22 @@
                 </th>
             </tr>
         </thead>
+
+        <!-- rows -->
         <tr ng-repeat="row in vm.rowset.data">
             <td ng-repeat="name in vm.header">{{row[name]}}</td>
         </tr>
     </table>
-    <button type="button" class="btn btn-primary" ng-click="before()" ng-disabled="previousButtonDisabled">Previous Page</button>
-    <button type="button" class="btn btn-primary" ng-click="after()" ng-disabled="nextButtonDisabled">Next Page</button>
+
+    <!-- bottom pagination -->
+    <div class="pager">
+        <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="previousButtonDisabled">
+            <span class="glyphicon glyphicon-chevron-left"></span>
+        </button>
+        <span>{{ page }}/{{ vm.pageCount }}</span>
+        <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="nextButtonDisabled">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+        </button>
+    </div>
+
 </div>
