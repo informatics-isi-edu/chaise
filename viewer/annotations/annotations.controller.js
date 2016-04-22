@@ -8,7 +8,8 @@
         vm.annotations = annotations;
         vm.anatomies = anatomies;
         vm.colors = ['red', 'orange', 'gold', 'green', 'blue', 'purple'];
-        vm.annotationTypes = ['rectangle', 'arrow']; // 'section' excluded b/c once you set an annotation as a section, that can't change.
+        vm.annotationTypes = ['rectangle', 'arrow']; // 'section' excluded b/c once you set an annotation as a section, it can't be changed to other types
+        vm.filterByType = {section: true, rectangle: true, arrow: true}; // show all annotation types by default
 
         vm.filterAnnotations = filterAnnotations;
 
@@ -35,8 +36,6 @@
         vm.allowCreate = AuthService.createAnnotation;
         vm.allowEdit = AuthService.editAnnotation;
         vm.allowDelete = AuthService.deleteAnnotation;
-
-        vm.showSections = showSections;
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
@@ -237,10 +236,6 @@
         // The info object is the session.client object and may contain a combination of display_name, full_name, and email
         function authorName(client) {
             return (client.display_name ? client.display_name : (client.full_name ? client.full_name : client.email ));
-        }
-
-        function showSections() {
-
         }
     }]);
 })();
