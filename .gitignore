@@ -19,3 +19,4 @@ deployment-config.json
 index.html
 chaise-config.js
 sftp-config.json
+npm-debug.log

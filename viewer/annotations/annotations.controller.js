@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, $window, $scope) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', '$window', '$scope', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, $window, $scope, $uibModal, AlertsService) {
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;
@@ -165,7 +165,31 @@
         }
 
         function deleteAnnotation(annotation) {
-            return AnnotationsService.deleteAnnotation(annotation);
+            // if annotation has comments, allow it to be deleted
+            if (!hasComments(annotation)) {
+                if (chaiseConfig.confirmDelete){
+                    var modalInstance = $uibModal.open({
+                        templateUrl: 'annotations/confirm_delete.html',
+                        controller: 'ConfirmDeleteController',
+                        size: 'sm'
+                    });
+
+                    modalInstance.result.then(function () {
+                        AnnotationsService.deleteAnnotation(annotation);
+                        console.log('annotation deleted');
+                    }, function () {
+                        console.log('Modal dismissed');
+                    });
+                } else {
+                    AnnotationsService.deleteAnnotation(annotation);
+                    console.log('annotation deleted')
+                }
+            } else {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: 'Sorry, this annotation cannot be deleted because there is at least 1 comment on it.'
+                });
+            }
         };
 
         function setHighlightedAnnotation(annotation) {
@@ -180,6 +204,12 @@
 
         function getNumComments(annotation) {
             return AnnotationsService.getNumComments(annotation.data.id);
+        }
+
+        // Returns boolean
+        function hasComments(annotation) {
+            // if there are comments return true
+            return getNumComments(annotation) > 0 ? true : false;
         }
 
         // Return an annotation/section that matches an object of coordinates

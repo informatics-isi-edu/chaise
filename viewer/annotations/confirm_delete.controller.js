@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
+    .controller('ConfirmDeleteController', ['$uibModalInstance', '$scope', function ConfirmDeleteController($uibModalInstance, $scope) {
         $scope.ok = function () {
             $uibModalInstance.close();
         }

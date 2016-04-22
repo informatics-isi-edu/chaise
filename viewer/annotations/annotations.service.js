@@ -85,38 +85,22 @@
             return CommentsService.getNumComments(annotationId);
         }
 
-        // Returns a boolean
-        function hasComments(annotation) {
-            // If there are comments on annotation, return false.
-            if (getNumComments(annotation.data.id) > 0) {
-                return true;
-            }
-            return false;
-        }
-
         function deleteAnnotation(annotation) {
-            if (!hasComments(annotation)) {
-                // Delete from ERMrest
-                annotation.delete().then(function success(response) {
-                    // Delete from the 'annotations' provider
-                    var index = annotations.indexOf(annotation);
-                    annotations.splice(index, 1);
+            // Delete from ERMrest
+            annotation.delete().then(function success(response) {
+                // Delete from the 'annotations' provider
+                var index = annotations.indexOf(annotation);
+                annotations.splice(index, 1);
 
-                    // Delete in Annotorious
-                    iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
-                }, function error(response) {
-                    AlertsService.addAlert({
-                        type: 'error',
-                        message: response
-                    });
-                    console.log(response);
-                });
-            } else {
+                // Delete in Annotorious
+                iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
+            }, function error(response) {
                 AlertsService.addAlert({
                     type: 'error',
-                    message: 'Sorry, this annotation cannot be deleted because there is at least 1 comment on it.'
+                    message: response
                 });
-            }
+                console.log(response);
+            });
         }
 
         function centerAnnotation(annotation) {

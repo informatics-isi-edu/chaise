@@ -51,22 +51,23 @@
         }
 
         function deleteComment(comment) {
-            var modalInstance = $uibModal.open({
-                templateUrl: 'confirm_delete.html',
-                controller: 'confirmDeleteController',
-                size: 'lg',
-                resolve: {
-                    comment: comment
-                }
-            });
+            if (chaiseConfig.confirmDelete){
+                var modalInstance = $uibModal.open({
+                    templateUrl: 'annotations/confirm_delete.html',
+                    controller: 'ConfirmDeleteController',
+                    size: 'sm'
+                });
 
-            modalInstance.result.then(function () {
+                modalInstance.result.then(function () {
+                    CommentsService.deleteComment(comment);
+                    console.log('comment deleted');
+                }, function () {
+                    console.log('Modal dismissed');
+                });
+            } else {
                 CommentsService.deleteComment(comment);
                 console.log('comment deleted');
-            }, function () {
-                console.log('Modal dismissed');
-            });
-
+            }
         }
 
         // Set newComment back to its default vaules

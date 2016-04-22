@@ -2,6 +2,7 @@
 
 var chaiseConfig = {
     authnProvider: 'goauth',
+    confirmDelete: true,
     feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
     helpURL: '/help/using-the-data-browser/',
     showBadgeCounts: false,
