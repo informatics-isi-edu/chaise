@@ -455,12 +455,14 @@
                                                     </div>
                                                     <div ng-if="comments.editedComment != (comment.table.name + '-' + comment.data.id)">
                                                         {{comment.data.comment}}
-                                                        <small ng-if="comments.allowEdit(comment)">
-                                                            <br><a ng-click="comments.editComment(comment);" class="cardlink edit">Edit</a>
-                                                        </small>
-                                                        <small ng-if="comments.allowDelete(comment);">
-                                                            | <a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a>
-                                                        </small>
+                                                        <div>
+                                                            <small ng-if="comments.allowEdit(comment);">
+                                                                <a ng-click="comments.editComment(comment);" class="cardlink edit">Edit</a>
+                                                            </small>
+                                                            <small ng-if="comments.allowDelete(comment);">
+                                                                | <a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a>
+                                                            </small>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <hr class="separator comment-separator" ng-show="!$last">
