@@ -77,6 +77,7 @@ html, body {
 
 a.cardlink {
     cursor: pointer;
+    margin-left: 5px;
 }
 
 a.cardlink.delete {

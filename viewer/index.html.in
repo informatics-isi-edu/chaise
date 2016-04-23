@@ -391,7 +391,7 @@
                                 <div class="annotation-card">
                                     <div class="row">
                                         <!-- Annotation Title/Label/Heading -->
-                                        <div class="col-md-7" ng-class="{'annotation-anatomy-text': annotation.data.type != 'section'}">
+                                        <div class="col-md-8" ng-class="{'annotation-anatomy-text': annotation.data.type != 'section'}">
                                             <span ng-if="annotation.data.type == 'section'" class="label section-label">{{'Section' | uppercase}}</span>
                                             <small ng-if="annotation.data.type != 'section'"><strong>
                                                 <span class="glyphicon" ng-class="{'glyphicon-stop': annotation.data.type == 'rectangle', 'glyphicon-tag': annotation.data.type == 'arrow'}" ng-style="{'color': annotation.data.config.color}"></span>
@@ -399,14 +399,14 @@
                                             </strong></small>
                                         </div>
                                         <!-- Annotation Edit/Delete Buttons -->
-                                        <div class="col-md-5">
+                                        <div class="col-md-4">
                                             <small class="pull-right">
-                                                <a ng-click="annotations.centerAnnotation(annotation);" title="Center Annotation" class="cardlink">Focus</a>
+                                                <a ng-click="annotations.centerAnnotation(annotation);" title="Find this annotation in the viewer" class="cardlink"><span class="glyphicon glyphicon-eye-open"></span></a>
                                                 <span ng-if="annotations.allowEdit(annotation);">
-                                                    | <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" class="cardlink">Edit</a>
+                                                    <a ng-click="annotations.editAnnotation(annotation);" title="Edit this annotation" class="cardlink"><span class="glyphicon glyphicon-pencil"><span></a>
                                                 </span>
                                                 <span ng-if="annotations.allowDelete(annotation);">
-                                                    | <a ng-if="annotations.allowDelete(annotation);" ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" class="cardlink delete">Delete</a>
+                                                    <a ng-if="annotations.allowDelete(annotation);" ng-click="annotations.deleteAnnotation(annotation);" title="Delete this annotation" class="cardlink delete"><span class="glyphicon glyphicon-trash"></span></a>
                                                 </span>
                                             </small>
                                         </div>
@@ -451,16 +451,16 @@
                                                                 </button>
                                                             </span>
                                                         </div>
-                                                        <small><a ng-click="comments.cancelEdit(comment);" class="cardlink cancel">Cancel</a></small>
+                                                        <small><a ng-click="comments.cancelEdit(comment);" class="cardlink delete pull-right">Cancel this edit</a></small>
                                                     </div>
                                                     <div ng-if="comments.editedComment != (comment.table.name + '-' + comment.data.id)">
-                                                        {{comment.data.comment}}
-                                                        <div>
+                                                        {{comment.data.comment}}<br>
+                                                        <div class="pull-right">
                                                             <small ng-if="comments.allowEdit(comment);">
-                                                                <a ng-click="comments.editComment(comment);" class="cardlink edit">Edit</a>
+                                                                <a ng-click="comments.editComment(comment);" class="cardlink edit" title="Edit this comment"><span class="glyphicon glyphicon-pencil"></span></a>
                                                             </small>
                                                             <small ng-if="comments.allowDelete(comment);">
-                                                                | <a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a>
+                                                                <a ng-click="comments.deleteComment(comment);" class="cardlink delete" title="Delete this comment"><span class="glyphicon glyphicon-trash"></span></a>
                                                             </small>
                                                         </div>
                                                     </div>
