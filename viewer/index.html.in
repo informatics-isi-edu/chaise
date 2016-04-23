@@ -387,7 +387,7 @@
                         ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table.name + '-' + annotation.data.id), section: annotation.data.type == 'section'}"
                         ng-show="annotations.filterByType[annotation.data.type]" id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation">
                             <!-- Annotation Display Card -->
-                            <div ng-show="annotations.editedAnnotation != (annotation.table.name + '-' + annotation.data.id)">
+                            <div ng-show="annotations.editedAnnotation.domId != (annotation.table.name + '-' + annotation.data.id)">
                                 <div class="annotation-card">
                                     <div class="row">
                                         <!-- Annotation Title/Label/Heading -->
@@ -484,13 +484,13 @@
                                     </div>
                                 </div>
                             </div><!-- /Annotation Display Card -->
-                            <form ng-show="annotations.editedAnnotation == (annotation.table.name + '-' + annotation.data.id)" id="edit-annotation-form">
+                            <form ng-show="annotations.editedAnnotation.domId == (annotation.table.name + '-' + annotation.data.id)" id="edit-annotation-form">
                                 <div class="row">
                                     <div class="col-md-10">
                                         <span class="h4">
-                                            Edit {{annotation.data.type | toTitleCase}}
-                                            <span ng-if="annotation.data.type == 'section'"> of Interest</span>
-                                            <span ng-if="annotation.data.type != 'section'"> Annotation</span>
+                                            Edit {{annotations.editedAnnotation.data.type | toTitleCase}}
+                                            <span ng-if="annotations.editedAnnotation.data.type == 'section'"> of Interest</span>
+                                            <span ng-if="annotations.editedAnnotation.data.type != 'section'"> Annotation</span>
                                         </span>
                                     </div>
                                     <div class="col-md-2">
@@ -499,12 +499,12 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div ng-if="annotation.data.type != 'section'" class="row">
+                                <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
                                     <br>
                                     <div class="col-md-12">
                                         <label>Annotation Type</label>
-                                        <ui-select ng-model="annotation.data.type" theme="select2" ng-disabled="disabled">
-                                            <ui-select-match placeholder="Select a type">{{annotation.data.type | toTitleCase}}</ui-select-match>
+                                        <ui-select ng-model="annotations.editedAnnotation.data.type" theme="select2" ng-disabled="disabled">
+                                            <ui-select-match placeholder="Select a type">{{annotations.editedAnnotation.data.type | toTitleCase}}</ui-select-match>
                                             <ui-select-choices repeat="type in (annotations.annotationTypes | filter: $select.search) track by type">
                                                 <div ng-bind-html="type | toTitleCase | highlight: $select.search"></div>
                                             </ui-select-choices>
@@ -512,12 +512,12 @@
                                     </div>
                                 </div>
                                 <!-- Edit Form: Annotation Anatomy -->
-                                <div ng-if="annotation.data.type != 'section'" class="row">
+                                <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
                                     <br>
                                     <div class="col-md-10">
                                         <label>Anatomy</label>
-                                        <ui-select ng-model="annotation.data.anatomy" theme="select2" ng-disabled="disabled">
-                                            <ui-select-match placeholder="Select an anatomy term">{{annotation.data.anatomy | toTitleCase}}</ui-select-match>
+                                        <ui-select ng-model="annotations.editedAnnotation.data.anatomy" theme="select2" ng-disabled="disabled">
+                                            <ui-select-match placeholder="Select an anatomy term">{{annotations.editedAnnotation.data.anatomy | toTitleCase}}</ui-select-match>
                                             <ui-select-choices repeat="anatomy in (annotations.anatomies | filter: $select.search) track by anatomy">
                                                 <div ng-bind-html="anatomy | toTitleCase | highlight: $select.search"></div>
                                             </ui-select-choices>
@@ -528,14 +528,14 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <label>Description</label>
-                                        <textarea ng-model="annotation.data.description" rows="3" class="form-control"></textarea>
+                                        <textarea ng-model="annotations.editedAnnotation.data.description" rows="3" class="form-control"></textarea>
                                     </div>
                                 </div>
-                                <div ng-if="annotation.data.type != 'section'" class="row">
+                                <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
                                     <br>
                                     <div class="col-md-12">
                                         <label>Color</label>
-                                        <ui-select ng-model="annotation.data.config.color" theme="select2" ng-disabled="disabled">
+                                        <ui-select ng-model="annotations.editedAnnotation.data.config.color" theme="select2" ng-disabled="disabled">
                                             <ui-select-match placeholder="Select a color">{{$select.selected | toTitleCase}}</ui-select-match>
                                             <ui-select-choices repeat="color in (annotations.colors | filter: $select.search) track by color">
                                                 <div ng-bind-html="color | toTitleCase | highlight: $select.search"></div>

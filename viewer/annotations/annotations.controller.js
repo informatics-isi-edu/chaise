@@ -19,7 +19,7 @@
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
 
-        vm.editedAnnotation = null; // Track which annotation is being edited right now; used to show/hide the right UI elements depending on which one is being edited.
+        vm.editedAnnotation = null; // Track which annotation is being edited right now
         var originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
         vm.editAnnotation = editAnnotation;
         vm.cancelEdit = cancelEdit;
@@ -138,7 +138,12 @@
         }
 
         function editAnnotation(annotation) {
-            vm.editedAnnotation = annotation.table.name + '-' + annotation.data.id;
+            // Must make a copy instead of assigning to remove original annotation's
+            // references. Otherwise, changing something in editedAnnotation will
+            // also change the original annotation.
+            vm.editedAnnotation = angular.copy(annotation);
+
+            vm.editedAnnotation.domId = annotation.table.name + '-' + annotation.data.id;
             setHighlightedAnnotation(annotation);
             annotation = annotation.data;
             originalAnnotation = {
@@ -147,7 +152,7 @@
                 config: annotation.config,
                 type: annotation.type
             };
-        };
+        }
 
         function cancelEdit(annotation) {
             vm.editedAnnotation = null;
@@ -156,11 +161,12 @@
             data.anatomy = originalAnnotation.anatomy;
             data.config = originalAnnotation.config;
             data.type = originalAnnotation.type;
-        };
+        }
 
         function updateAnnotation(annotation) {
+            annotation.data = vm.editedAnnotation.data;
+            AnnotationsService.updateAnnotation(annotation);
             vm.editedAnnotation = null;
-            return AnnotationsService.updateAnnotation(annotation);
         }
 
         function deleteAnnotation(annotation) {
@@ -237,5 +243,10 @@
         function authorName(client) {
             return (client.display_name ? client.display_name : (client.full_name ? client.full_name : client.email ));
         }
+
+        $scope.$watch('vm.editedAnnotation', function(newValue, oldValue) {
+            console.log('new editedAnnotation:', newValue);
+            console.log('old editedAnnotation:', oldValue);
+        });
     }]);
 })();
