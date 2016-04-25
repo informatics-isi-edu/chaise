@@ -394,7 +394,7 @@
                                         <div class="col-md-8" ng-class="{'annotation-anatomy-text': annotation.data.type != 'section'}">
                                             <span ng-if="annotation.data.type == 'section'" class="label section-label">{{'Section' | uppercase}}</span>
                                             <small ng-if="annotation.data.type != 'section'"><strong>
-                                                <span class="glyphicon" ng-class="{'glyphicon-stop': annotation.data.type == 'rectangle', 'glyphicon-tag': annotation.data.type == 'arrow'}" ng-style="{'color': annotation.data.config.color}"></span>
+                                                <span class="glyphicon" ng-class="{'glyphicon-stop': annotation.data.type == 'rectangle', 'glyphicon-tag': annotation.data.type == 'arrow'}" ng-style="{'color': annotation.data.config.color || annotations.defaultColor}"></span>
                                                 <span>{{annotation.data.anatomy || 'No Anatomy' | uppercase}}</span>
                                             </strong></small>
                                         </div>
