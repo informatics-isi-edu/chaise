@@ -333,7 +333,7 @@ var ERMREST = {
 };
 
 function make_headers() {
-	var res = {'User-agent': 'ERMREST/1.0'};
+	var res = {};
 	token = $.cookie(goauth_cookie);
 	if (token != null) {
 		res['Authorization'] = 'Globus-Goauthtoken ' + token;
