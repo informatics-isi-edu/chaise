@@ -28,3 +28,4 @@ The below table explains the usage of the default parameters:
 | navbarBrandImage | An URL | N/A | "navbarBrandImage":\<value\> | N/A | The URL for an image to be displayed in the navigation bar. |
 | logoutURL | An URL | /chaise/logout | "logoutURL":\<value\> | N/A | The URL to the logout page. |
 | dataBrowser | An URL | /chaise/search | "dataBrowser":\<value\> | N/A | The URL to continue after a logout. |
+| defaultAnnotationColor | red, orange, gold, green, blue, purple | red | "defaultAnnotationColor":\<value\> | N/A | When using /chaise/viewer, annotations' border and color will default to this value. |
