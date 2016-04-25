@@ -7,56 +7,55 @@
     </a>
 
     <!-- loading spinner -->
-    <div ng-show="loading" id="spinner">
+    <div ng-show="pageInfo.loading" id="spinner">
         <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
         <div style="margin-top: 15px;">Loading...</div>
     </div>
 
     <!-- pagination -->
     <div>
-        <span>Total Items: {{ vm.count }}</span>
         <div class="dropdown">
             <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
                 <span class="caret"></span></button>
             <ul class="dropdown-menu">
                 <li><a href ng-click="pageLimit(10)">
-                    <span ng-show="getPageLimit() === 10" class="glyphicon glyphicon-ok"></span>
-                    <span ng-show="getPageLimit() !== 10" class="glyphicon glyphicon-invisible"></span>
+                    <span ng-show="pageInfo.pageLimit === 10" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="pageInfo.pageLimit !== 10" class="glyphicon glyphicon-invisible"></span>
                     10</a>
                 </li>
                 <li><a href ng-click="pageLimit(25)">
-                    <span ng-show="getPageLimit() === 25" class="glyphicon glyphicon-ok"></span>
-                    <span ng-show="getPageLimit() !== 25" class="glyphicon glyphicon-invisible"></span>
+                    <span ng-show="pageInfo.pageLimit === 25" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="pageInfo.pageLimit !== 25" class="glyphicon glyphicon-invisible"></span>
                     25</a>
                 </li>
                 <li><a href ng-click="pageLimit(50)">
-                    <span ng-show="getPageLimit() === 50" class="glyphicon glyphicon-ok"></span>
-                    <span ng-show="getPageLimit() !== 50" class="glyphicon glyphicon-invisible"></span>
+                    <span ng-show="pageInfo.pageLimit === 50" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="pageInfo.pageLimit !== 50" class="glyphicon glyphicon-invisible"></span>
                     50</a>
                 </li>
                 <li><a href ng-click="pageLimit(75)">
-                    <span ng-show="getPageLimit() === 75" class="glyphicon glyphicon-ok"></span>
-                    <span ng-show="getPageLimit() !== 75" class="glyphicon glyphicon-invisible"></span>
+                    <span ng-show="pageInfo.pageLimit === 75" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="pageInfo.pageLimit !== 75" class="glyphicon glyphicon-invisible"></span>
                     75</a>
                 </li>
                 <li><a href ng-click="pageLimit(100)">
-                    <span ng-show="getPageLimit() === 100" class="glyphicon glyphicon-ok"></span>
-                    <span ng-show="getPageLimit() !== 100" class="glyphicon glyphicon-invisible"></span>
+                    <span ng-show="pageInfo.pageLimit === 100" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="pageInfo.pageLimit !== 100" class="glyphicon glyphicon-invisible"></span>
                     100</a>
                 </li>
                 <li><a href ng-click="pageLimit(200)">
-                    <span ng-show="getPageLimit() === 200" class="glyphicon glyphicon-ok"></span>
-                    <span ng-show="getPageLimit() !== 200" class="glyphicon glyphicon-invisible"></span>
+                    <span ng-show="pageInfo.pageLimit === 200" class="glyphicon glyphicon-ok"></span>
+                    <span ng-show="pageInfo.pageLimit !== 200" class="glyphicon glyphicon-invisible"></span>
                     200</a>
                 </li>
             </ul>
         </div>
         <div class="pager">
-            <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="previousButtonDisabled">
+            <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="pageInfo.previousButtonDisabled">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </button>
-            <span>{{ page }}/{{ vm.pageCount }}</span>
-            <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="nextButtonDisabled">
+            <span>{{ pageInfo.recordStart }} to {{ pageInfo.recordEnd }} of {{ vm.count }} Items</span>
+            <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="pageInfo.nextButtonDisabled">
                 <span class="glyphicon glyphicon-chevron-right"></span>
             </button>
         </div>
@@ -85,11 +84,11 @@
 
     <!-- bottom pagination -->
     <div class="pager">
-        <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="previousButtonDisabled">
+        <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="pageInfo.previousButtonDisabled">
             <span class="glyphicon glyphicon-chevron-left"></span>
         </button>
-        <span>{{ page }}/{{ vm.pageCount }}</span>
-        <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="nextButtonDisabled">
+        <span>{{ pageInfo.recordStart }} to {{ pageInfo.recordEnd }} of {{ vm.count }} Items</span>
+        <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="pageInfo.nextButtonDisabled">
             <span class="glyphicon glyphicon-chevron-right"></span>
         </button>
     </div>
