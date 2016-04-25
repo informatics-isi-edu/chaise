@@ -126,7 +126,7 @@ angular.module('recordset', ['ERMrest'])
 
     $scope.getPageLimit = function() {
         return context.pageLimit;
-    }
+    };
 
     $scope.sort = function () {
 
