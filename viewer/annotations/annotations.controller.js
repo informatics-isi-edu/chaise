@@ -173,7 +173,7 @@
         function deleteAnnotation(annotation) {
             // if annotation has comments, allow it to be deleted
             if (!hasComments(annotation)) {
-                if (chaiseConfig.confirmDelete == undefined ||  chaiseConfig.confirmDelete){
+                if (chaiseConfig.confirmDelete == undefined || chaiseConfig.confirmDelete){
                     var modalInstance = $uibModal.open({
                         templateUrl: 'annotations/confirm_delete.html',
                         controller: 'ConfirmDeleteController',
