@@ -618,6 +618,18 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		return ret;
 	};
 
+	this.getUsableFiltersCount = function getUsableFiltersCount() {
+		var count = 0;
+		$.each($scope.FacetsData.facets, function(i, facet) {
+			var ret = $scope.showSearchFilter(facet) &&
+				($scope.FacetsData.narrowFilter.length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || (new RegExp($scope.FacetsData.narrowFilter, 'i')).test(facet['display']));
+			if (ret) {
+				count++;
+			}
+		});
+		return count;
+	};
+
 	this.clear = $scope.clear = function clear() {
 		$scope.FacetsData.narrowFilter = '';
     	$.each($scope.FacetsData.facets, function(i, facet) {

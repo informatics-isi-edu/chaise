@@ -8,13 +8,14 @@
         vm.annotations = annotations;
         vm.anatomies = anatomies;
         vm.colors = ['red', 'orange', 'gold', 'green', 'blue', 'purple'];
+        vm.defaultColor = chaiseConfig.defaultAnnotationColor || 'red';
         vm.annotationTypes = ['rectangle', 'arrow']; // 'section' excluded b/c once you set an annotation as a section, it can't be changed to other types
         vm.filterByType = {section: true, rectangle: true, arrow: true}; // show all annotation types by default
 
         vm.filterAnnotations = filterAnnotations;
 
         vm.createMode = false;
-        vm.newAnnotation = {config:{color: 'orange'}};
+        vm.newAnnotation = {config:{color: vm.defaultColor}};
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
@@ -129,7 +130,7 @@
         function createAnnotation() {
             vm.createMode = false;
             AnnotationsService.createAnnotation(vm.newAnnotation);
-            vm.newAnnotation = {config:{color: 'orange'}};
+            vm.newAnnotation = {config:{color: vm.defaultColor}};
         }
 
         function cancelNewAnnotation() {
@@ -243,10 +244,5 @@
         function authorName(client) {
             return (client.display_name ? client.display_name : (client.full_name ? client.full_name : client.email ));
         }
-
-        $scope.$watch('vm.editedAnnotation', function(newValue, oldValue) {
-            console.log('new editedAnnotation:', newValue);
-            console.log('old editedAnnotation:', oldValue);
-        });
     }]);
 })();

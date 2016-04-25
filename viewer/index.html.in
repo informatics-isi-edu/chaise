@@ -394,7 +394,7 @@
                                         <div class="col-md-8" ng-class="{'annotation-anatomy-text': annotation.data.type != 'section'}">
                                             <span ng-if="annotation.data.type == 'section'" class="label section-label">{{'Section' | uppercase}}</span>
                                             <small ng-if="annotation.data.type != 'section'"><strong>
-                                                <span class="glyphicon" ng-class="{'glyphicon-stop': annotation.data.type == 'rectangle', 'glyphicon-tag': annotation.data.type == 'arrow'}" ng-style="{'color': annotation.data.config.color}"></span>
+                                                <span class="glyphicon" ng-class="{'glyphicon-stop': annotation.data.type == 'rectangle', 'glyphicon-tag': annotation.data.type == 'arrow'}" ng-style="{'color': annotation.data.config.color || annotations.defaultColor}"></span>
                                                 <span>{{annotation.data.anatomy || 'No Anatomy' | uppercase}}</span>
                                             </strong></small>
                                         </div>
@@ -406,7 +406,7 @@
                                                     <a ng-click="annotations.editAnnotation(annotation);" title="Edit this annotation" class="cardlink"><span class="glyphicon glyphicon-pencil"><span></a>
                                                 </span>
                                                 <span ng-if="annotations.allowDelete(annotation);">
-                                                    <a ng-if="annotations.allowDelete(annotation);" ng-click="annotations.deleteAnnotation(annotation);" title="Delete this annotation" class="cardlink delete"><span class="glyphicon glyphicon-trash"></span></a>
+                                                    <a ng-if="annotations.allowDelete(annotation);" ng-click="annotations.deleteAnnotation(annotation);" title="Delete this annotation" class="cardlink"><span class="glyphicon glyphicon-trash"></span></a>
                                                 </span>
                                             </small>
                                         </div>
@@ -460,7 +460,7 @@
                                                                 <a ng-click="comments.editComment(comment);" class="cardlink edit" title="Edit this comment"><span class="glyphicon glyphicon-pencil"></span></a>
                                                             </small>
                                                             <small ng-if="comments.allowDelete(comment);">
-                                                                <a ng-click="comments.deleteComment(comment);" class="cardlink delete" title="Delete this comment"><span class="glyphicon glyphicon-trash"></span></a>
+                                                                <a ng-click="comments.deleteComment(comment);" class="cardlink" title="Delete this comment"><span class="glyphicon glyphicon-trash"></span></a>
                                                             </small>
                                                         </div>
                                                     </div>
