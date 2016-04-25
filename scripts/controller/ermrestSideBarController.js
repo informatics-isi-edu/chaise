@@ -674,4 +674,8 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 		return !$scope.FacetsData.error;
 	};
 
+	this.hideSearchTextFacet = function hideSearchTextFacet() {
+		return chaiseConfig['hideSearchTextFacet'];
+	};
+
 }]);
