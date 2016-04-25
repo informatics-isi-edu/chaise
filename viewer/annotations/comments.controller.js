@@ -51,7 +51,7 @@
         }
 
         function deleteComment(comment) {
-            if (chaiseConfig.confirmDelete){
+            if (chaiseConfig.confirmDelete == undefined ||  chaiseConfig.confirmDelete){
                 var modalInstance = $uibModal.open({
                     templateUrl: 'annotations/confirm_delete.html',
                     controller: 'ConfirmDeleteController',
