@@ -4,7 +4,7 @@
 		<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right open" role="navigation">
 			<div class="sidebar-wrap">
 			    <!-- Sidebar header -->
-					<div class="search-box input-group col-md-12">
+					<div ng-hide="sideBar.hideSearchTextFacet()" class="search-box input-group col-md-12">
 						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search within attributes..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 						<span class="input-group-addon">
 					        <i class="glyphicon glyphicon-search"></i>
