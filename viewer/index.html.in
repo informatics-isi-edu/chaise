@@ -383,7 +383,7 @@
                             </div>
                         </form>
                         <!-- Annotations List -->
-                        <div ng-repeat="annotation in annotations.annotations | orderBy:['data.anatomy', 'data.id'] | filter:annotations.filterAnnotations track by $index"
+                        <div ng-repeat="annotation in annotations.annotations | orderBy:[annotations.sortSectionsFirst, 'data.anatomy', 'data.id'] | filter:annotations.filterAnnotations track by $index"
                         ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table.name + '-' + annotation.data.id), section: annotation.data.type == 'section'}"
                         ng-show="annotations.filterByType[annotation.data.type]" id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation">
                             <!-- Annotation Display Card -->

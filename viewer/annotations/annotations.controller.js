@@ -13,6 +13,7 @@
         vm.filterByType = {section: true, rectangle: true, arrow: true}; // show all annotation types by default
 
         vm.filterAnnotations = filterAnnotations;
+        vm.sortSectionsFirst = sortSectionsFirst;
 
         vm.createMode = false;
         vm.newAnnotation = {config:{color: vm.defaultColor}};
@@ -243,6 +244,12 @@
         // The info object is the session.client object and may contain a combination of display_name, full_name, and email
         function authorName(client) {
             return (client.display_name ? client.display_name : (client.full_name ? client.full_name : client.email ));
+        }
+
+        function sortSectionsFirst(annotation) {
+            if (annotation.data.type == 'section') {
+                return 0;
+            }
         }
     }]);
 })();
