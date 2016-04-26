@@ -308,7 +308,7 @@
                                 <input ng-model="annotations.query" class="form-control" type="search" placeholder="Type to search...">
                                 <div class="checkbox row">
                                     <div class="col-md-2">
-                                        <strong>Show:</strong>
+                                        <strong>Show:&nbsp;&nbsp;</strong>
                                     </div>
                                     <div class="col-md-10">
                                         <div class="row">
