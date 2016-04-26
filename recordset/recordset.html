@@ -1,6 +1,10 @@
 <div ng-controller="recordsetController">
     <h2>Records</h2>
 
+    <!-- permalink -->
+    <a id="permalink" class="topright" ng-href="{{ permalink() }}">
+        <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
+
     <!-- loading spinner -->
     <div ng-show="pageInfo.loading" id="spinner">
         <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
@@ -45,10 +49,6 @@
                 </li>
             </ul>
         </div>
-
-        <!-- permalink -->
-        <a id="permalink" class="pull-right" ng-href="{{ permalink() }}">
-            <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
 
         <div class="pager">
             <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="pageInfo.previousButtonDisabled">
