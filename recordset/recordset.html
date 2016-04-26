@@ -1,10 +1,5 @@
-<h2>Records</h2>
 <div ng-controller="recordsetController">
-
-    <!-- permalink -->
-    <a id="permalink" class="pull-right top-right" ng-href="{{ permalink() }}">
-        <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
-    </a>
+    <h2>Records</h2>
 
     <!-- loading spinner -->
     <div ng-show="pageInfo.loading" id="spinner">
@@ -50,6 +45,11 @@
                 </li>
             </ul>
         </div>
+
+        <!-- permalink -->
+        <a id="permalink" class="pull-right" ng-href="{{ permalink() }}">
+            <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
+
         <div class="pager">
             <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="pageInfo.previousButtonDisabled">
                 <span class="glyphicon glyphicon-chevron-left"></span>
@@ -69,8 +69,8 @@
         <tr>
             <th nowrap ng-repeat="name in vm.header">
                 <span ng-click="sortby(name)">{{name}}</span>
-                <span ng-show="vm.sortby==name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-desc" ng-style="{'cursor': 'pointer'}"></span>
-                <span ng-show="vm.sortby==name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-asc" ng-style="{'cursor': 'pointer'}"></span>
+                <span ng-show="vm.sortby==name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-asc" ng-style="{'cursor': 'pointer'}"></span>
+                <span ng-show="vm.sortby==name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-desc" ng-style="{'cursor': 'pointer'}"></span>
                 <span ng-show="vm.sortby!==name" class="fa fa-fw fa-sort" ng-click="sortby(name)" ng-style="{'cursor': 'pointer'}"></span>
             </th>
         </tr>
