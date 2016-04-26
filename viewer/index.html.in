@@ -306,17 +306,25 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <input ng-model="annotations.query" class="form-control" type="search" placeholder="Type to search...">
-                                <div class="checkbox">
-                                    <strong>Show:&nbsp;&nbsp;&nbsp;</strong>
-                                    <label for="showSections" class="checkbox-inline">
-                                        <input ng-model="annotations.filterByType.section" id="showSections" type="checkbox">Sections
-                                    </label>
-                                    <label for="showRectangles" class="checkbox-inline">
-                                        <input ng-model="annotations.filterByType.rectangle" id="showRectangles" type="checkbox">Rectangles
-                                    </label>
-                                    <label for="showArrows" class="checkbox-inline">
-                                        <input ng-model="annotations.filterByType.arrow" id="showArrows" type="checkbox">Arrows
-                                    </label>
+                                <div class="checkbox row">
+                                    <div class="col-md-2">
+                                        <strong>Show:</strong>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label for="showSections">
+                                                    <input ng-model="annotations.filterByType.section" id="showSections" type="checkbox">Sections&nbsp;&nbsp;
+                                                </label>
+                                                <label for="showRectangles">
+                                                    <input ng-model="annotations.filterByType.rectangle" id="showRectangles" type="checkbox">Rectangles&nbsp;&nbsp;
+                                                </label>
+                                                <label for="showArrows">
+                                                    <input ng-model="annotations.filterByType.arrow" id="showArrows" type="checkbox">Arrows&nbsp;&nbsp;
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
