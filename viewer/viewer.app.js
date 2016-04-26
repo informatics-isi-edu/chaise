@@ -214,7 +214,6 @@
                             return 0;
                         }
                     });
-                    console.log('Anatomies:', anatomies);
                 }, function error(response) {
                     throw response;
                 });
