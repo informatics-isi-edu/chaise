@@ -97,6 +97,7 @@ angular.module('recordset', ['ERMrest'])
 // Register the 'recordsetModel' object, which can be accessed by other
 // services, but cannot be access by providers (and config, apparently).
 .value('recordsetModel', {
+    tableName: null,
     header:[],
     columns: [],
     filter: null,
@@ -294,6 +295,7 @@ angular.module('recordset', ['ERMrest'])
 
     $rootScope.location = window.location.href;
     pageInfo.loading = true;
+    recordsetModel.tableName = context.tableName;
 
     // Get rowset data from ermrest
     var server = ermrestServerFactory.getServer(context.serviceURL);
