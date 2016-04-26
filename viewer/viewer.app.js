@@ -60,21 +60,41 @@
         // client.getSession().then(function success(session) {
             console.log('Session: ', session);
             var groups = context.groups;
-            var attributes = session.attributes;
+            // session.attributes is an array of objects that have a display_name and id
+            // We MUST use the id field to check for role inclusion as it is the unique identifier
+            var attributes = session.attributes.map(function(attribute) { return attribute.id });
             var user = userProvider.$get();
+            user.session = session;
 
-            user.name = session.client;
+// TODO Let's try to extract this setup to unclutter *.app.js
+            // Need to check if using the new web authen
+            // if so, there will be a client object with a combination of any or all of the following: display_name, full_name, and email
+            // first priority id display_name
+            if (session.client.display_name) {
+                user.name = session.client.display_name;
+            // full_name is second priority
+            } else if (session.client.full_name) {
+                user.name = session.client.full_name;
+            // fallback if no display_name or full_name
+            } else if (session.client.email) {
+                user.name = session.client.email;
+            // Case for old web authen where client is a string
+            } else {
+                user.name = session.client
+            }
 
             if (attributes.indexOf(groups.curators) > -1) {
-                return user.role = 'curator';
+                user.role = 'curator';
             } else if (attributes.indexOf(groups.annotators) > -1) {
-                return user.role = 'annotator';
+                user.role = 'annotator';
             } else if (attributes.indexOf(groups.users) > -1) {
-                return user.role = 'user';
+                user.role = 'user';
             } else {
                 user.role = null;
             }
+
             console.log('User: ', user);
+            return;
         }, function error(response) {
             if (response.status == 401 || response.status == 404) {
                 if (chaiseConfig.authnProvider == 'goauth') {
@@ -115,45 +135,30 @@
         // var catalog = client.getCatalog(context.catalogID);
             var schema = catalog.schemas.get(context.schemaName);
         // catalog.introspect().then(function success(schemas) {
-            // console.log('Schemas: ', schemas);
+            console.log('Schema: ', schema);
             // var schema = schemas[context.schemaName];
             if (schema) {
                 var table = schema.tables.get(context.tableName);
                 // var table = schema.getTable(context.tableName);
                 // BinaryPredicate(column, operator, value) is used for building a filter
-                var idFilter = ERMrest.BinaryPredicate(table.columns.get('id'), ERMrest.OPERATOR.EQUAL, context.imageID);
+                var idFilter = new ERMrest.BinaryPredicate(table.columns.get('id'), ERMrest.OPERATOR.EQUAL, context.imageID);
                 table.entity.get(idFilter).then(function success(entity) {
                 // var filteredTable = table.getFilteredTable(['id=' + context.imageID]);
                 // if (filteredTable) {
                     // filteredTable.getEntities().then(function success(_entities) {
-                        image.entity = entity;
+                        image.entity = entity.data[0];
                         // image.entity = _entities[0];
-                        iframe.location.replace(image.entity.data.uri);
+                        iframe.location.replace(image.entity.uri);
                         console.log('Image: ', image);
-
-                        var sectionTable = schema.tables.get('section_annotation');
-                        // var sectionTable = image.entity.getRelatedTable(context.schemaName, 'section_annotation');
-                        sectionTable.entity.get().then(function success(_sections) {
-                        // sectionTable.getEntities().then(function success(_sections) {
-                            var length = _sections.length;
-                            for (var i = 0; i < length; i++) {
-                                sections.push(_sections[i]);
-                            }
-                            if (annotoriousReady) {
-                                iframe.postMessage({messageType: 'loadAnnotations', content: sections}, origin);
-                            }
-                            console.log('Sections: ', sections);
-                        }, function error(response) {
-                            throw response;
-                        });
 
                         var annotationTable = schema.tables.get('annotation');
                         // var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
                         annotationTable.entity.get().then(function success(_annotations) {
+                            console.log(_annotations);
                         // annotationTable.getEntities().then(function success(_annotations) {
-                            var length = _annotations.length;
+                            var length = _annotations.data.length;
                             for (var i = 0; i < length; i++) {
-                                annotations.push(_annotations[i]);
+                                annotations.push(_annotations.data[i]);
                             }
 
                             if (annotoriousReady) {

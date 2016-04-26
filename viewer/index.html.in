@@ -291,18 +291,14 @@
                 <!-- CONTROLLER: AnnotationsController-->
                 <div ng-show="sidebar.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
                     <div class="col-md-12">
-                        <div class="row">
+                        <div ng-if="annotations.allowCreate();" class="row">
                             <div class="btn-group col-md-12">
                                 <button type="button" role="button" class="btn btn-sm btn-success dropdown-toggle form-control" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     New Annotation&nbsp;&nbsp;<span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li ng-if="annotations.allowCreate();">
-                                        <a ng-click="annotations.drawAnnotation('annotation');">Annotation</a>
-                                    </li>
-                                    <li ng-if="annotations.allowCreate();">
-                                        <a ng-click="annotations.drawAnnotation('section_annotation');">Section of Interest</a>
-                                    </li>
+                                    <li><a ng-click="annotations.drawAnnotation('annotation');">Annotation</a></li>
+                                    <li><a ng-click="annotations.drawAnnotation('section_annotation');">Section of Interest</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -354,73 +350,6 @@
                                 </div>
                             </div>
                         </form>
-                        <!-- Sections List -->
-                        <div ng-repeat="section in annotations.sections | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])"
-                         ng-class="{highlighted: annotations.highlightedAnnotation == (section.table.name + '-' + section.data.id)}"
-                          class="annotation section" id="{{section.table.name + '-' + section.data.id}}">
-                            <div ng-show="annotations.editedAnnotation != (section.table.name + '-' + section.data.id)">
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <span class="label label-success">{{'Section' | uppercase}}</span>
-                                    </div>
-                                    <div class="col-md-9">
-                                        <small class="pull-right">
-                                            <a ng-click="annotations.centerAnnotation(section)" title="Center Section" class="cardlink">Focus</a>
-                                            <span ng-if="annotations.allowEdit(section);">
-                                                | <a ng-click="annotations.editAnnotation(section);" title="Edit Annotation" class="cardlink">Edit</a>
-                                            </span>
-                                            <span ng-if="annotations.allowDelete(section);">
-                                                | <a ng-if="annotations.allowDelete(section);" ng-click="annotations.deleteAnnotation(section);" title="Delete Annotation" class="cardlink delete">Delete</a>
-                                            </span>
-                                        </small>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <span class="h5 annotation-description">
-                                            {{section.data.description}}
-                                        </span>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <small>{{section.data.author}} &mdash; {{section.data.created | date:'MMM d, y'}}</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <form ng-show="annotations.editedAnnotation == (section.table.name + '-' + section.data.id)" id="edit-annotation-form">
-                                <div class="row">
-                                    <div class="col-md-10">
-                                        <label>Description</label>
-                                        <textarea ng-model="section.data.description" rows="3" class="form-control"></textarea>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button ng-click="annotations.cancelEdit(annotation);" type="button" class="close pull-right" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <small>
-                                            {{section.data.author}} &mdash;
-                                            {{section.data.created | date: 'MMM d, y'}}
-                                        </small>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <button ng-click="annotations.updateAnnotation(section);" role="button" class="btn btn-xs btn-primary form-control" type="button">
-                                            Save
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
                         <!-- Annotations List -->
                         <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created']) track by $index"
                         ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table.name + '-' + annotation.data.id)}"
@@ -461,7 +390,7 @@
                                 <!-- Annotation Author, Date & Comment Icon -->
                                 <div class="row">
                                     <div class="col-md-8">
-                                        <small>{{annotation.data.author}} &mdash; {{annotation.data.created | date:'MMM d, y'}}</small>
+                                        <small>{{annotations.authorName(annotation.author)}} &mdash; {{annotation.data.created | date:'MMM d, y'}}</small>
                                     </div>
                                     <div class="col-md-4">
                                         <small class="pull-right">
@@ -476,7 +405,7 @@
                                 <div ng-controller="CommentsController as comments" class="comments">
                                     <div ng-repeat="comment in comments.comments[comments.annotationId] | orderBy: ['data.created', 'data.id'] track by $index" class="row comment">
                                         <div class="col-md-12">
-                                            <strong>{{comment.data.author}}</strong>
+                                            <strong>{{annotations.authorName(comment.data.author)}}</strong>
                                             <small><span class="text-muted pull-right">{{comment.data.created | date:'MMM d, y'}}</span></small>
                                             <br>{{comment.data.comment}}
                                             <div ng-if="comments.allowDelete(comment);">
@@ -532,7 +461,7 @@
                                 <div class="row">
                                     <div class="col-md-8">
                                         <small>
-                                            {{annotation.data.author}} &mdash;
+                                            {{annotations.authorName(annotation.data.author)}} &mdash;
                                             {{annotation.data.created | date: 'MMM d, y'}}
                                         </small>
                                     </div>

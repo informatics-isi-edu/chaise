@@ -5,7 +5,7 @@
 
     .controller('CommentsController', ['AuthService', 'CommentsService', '$scope', 'comments', function AnnotationsController(AuthService, CommentsService, $scope, comments) {
         var vm = this;
-        vm.annotationId = $scope.annotation.data.id;
+        vm.annotationId = $scope.annotation.id;
         vm.comments = comments;
         vm.newComment = {
             annotationId: vm.annotationId,

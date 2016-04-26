@@ -19,7 +19,7 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && user.name == annotation.data.author) {
+            if (user.role == 'annotator' && isAuthor(annotation.data.author, user.session)) {
                 return true;
             }
             return false;
@@ -30,7 +30,7 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && user.name == annotation.author) {
+            if (user.role == 'annotator' && isAuthor(annotation.data.author, user.session)) {
                 return true;
             }
             return false;
@@ -58,7 +58,7 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && user.name == comment.data.author) {
+            if (user.role == 'annotator' && isAuthor(annotation.data.author, user.session)) {
                 return true;
             }
             return false;
@@ -69,6 +69,11 @@
                 return true;
             }
             return false;
+        }
+
+        // Used to check group permission
+        function isAuthor(commentAuthor, userSession) {
+            return userSession.attributes.map(function(a) {return a.id}).indexOf(commentAuthor.id) > -1;
         }
 
         return {

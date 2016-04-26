@@ -1,0 +1,107 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   'angular-ui-select@0.14.8' ]
+2 info using npm@2.15.0
+3 info using node@v4.4.2
+4 verbose install initial load of /Users/jchudy/workspace/chaise/package.json
+5 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/angular/package.json
+6 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/angular-animate/package.json
+7 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/angular-mocks/package.json
+8 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/angular-ui-bootstrap/package.json
+9 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/bower/package.json
+10 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/chai/package.json
+11 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/closurecompiler/package.json
+12 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/jasmine-core/package.json
+13 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/jsdoc/package.json
+14 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/jsdoc-to-markdown/package.json
+15 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/jshint/package.json
+16 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/karma/package.json
+17 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/karma-browserify/package.json
+18 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/karma-chrome-launcher/package.json
+19 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/karma-firefox-launcher/package.json
+20 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/karma-ie-launcher/package.json
+21 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/karma-jasmine/package.json
+22 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/karma-osx-reporter/package.json
+23 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/karma-phantomjs-launcher/package.json
+24 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/karma-safari-launcher/package.json
+25 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/phantomjs/package.json
+26 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/protractor/package.json
+27 verbose installManyTop reading scoped package data from /Users/jchudy/workspace/chaise/node_modules/testem/package.json
+28 info package.json closurecompiler@1.5.2 license should be a valid SPDX license expression
+29 verbose readDependencies loading dependencies from /Users/jchudy/workspace/chaise/package.json
+30 silly cache add args [ 'angular-ui-select@0.14.8', null ]
+31 verbose cache add spec angular-ui-select@0.14.8
+32 silly cache add parsed spec Result {
+32 silly cache add   raw: 'angular-ui-select@0.14.8',
+32 silly cache add   scope: null,
+32 silly cache add   name: 'angular-ui-select',
+32 silly cache add   rawSpec: '0.14.8',
+32 silly cache add   spec: '0.14.8',
+32 silly cache add   type: 'version' }
+33 silly addNamed angular-ui-select@0.14.8
+34 verbose addNamed "0.14.8" is a plain semver version for angular-ui-select
+35 silly mapToRegistry name angular-ui-select
+36 silly mapToRegistry using default registry
+37 silly mapToRegistry registry https://registry.npmjs.org/
+38 silly mapToRegistry data Result {
+38 silly mapToRegistry   raw: 'angular-ui-select',
+38 silly mapToRegistry   scope: null,
+38 silly mapToRegistry   name: 'angular-ui-select',
+38 silly mapToRegistry   rawSpec: '',
+38 silly mapToRegistry   spec: 'latest',
+38 silly mapToRegistry   type: 'tag' }
+39 silly mapToRegistry uri https://registry.npmjs.org/angular-ui-select
+40 verbose addNameVersion registry:https://registry.npmjs.org/angular-ui-select not in flight; fetching
+41 verbose request uri https://registry.npmjs.org/angular-ui-select
+42 verbose request no auth needed
+43 info attempt registry request try #1 at 3:15:13 PM
+44 verbose request id 613ee70b1c3c6152
+45 verbose etag "6TE8SCIJF0TFOFI221JJ8BT6B"
+46 http request GET https://registry.npmjs.org/angular-ui-select
+47 http 304 https://registry.npmjs.org/angular-ui-select
+48 verbose headers { date: 'Thu, 21 Apr 2016 22:15:10 GMT',
+48 verbose headers   via: '1.1 varnish',
+48 verbose headers   'cache-control': 'max-age=300',
+48 verbose headers   etag: '"6TE8SCIJF0TFOFI221JJ8BT6B"',
+48 verbose headers   age: '15',
+48 verbose headers   connection: 'keep-alive',
+48 verbose headers   'x-served-by': 'cache-sjc3133-SJC',
+48 verbose headers   'x-cache': 'HIT',
+48 verbose headers   'x-cache-hits': '1',
+48 verbose headers   'x-timer': 'S1461276910.127317,VS0,VE0',
+48 verbose headers   vary: 'Accept-Encoding' }
+49 silly get cb [ 304,
+49 silly get   { date: 'Thu, 21 Apr 2016 22:15:10 GMT',
+49 silly get     via: '1.1 varnish',
+49 silly get     'cache-control': 'max-age=300',
+49 silly get     etag: '"6TE8SCIJF0TFOFI221JJ8BT6B"',
+49 silly get     age: '15',
+49 silly get     connection: 'keep-alive',
+49 silly get     'x-served-by': 'cache-sjc3133-SJC',
+49 silly get     'x-cache': 'HIT',
+49 silly get     'x-cache-hits': '1',
+49 silly get     'x-timer': 'S1461276910.127317,VS0,VE0',
+49 silly get     vary: 'Accept-Encoding' } ]
+50 verbose etag https://registry.npmjs.org/angular-ui-select from cache
+51 verbose get saving angular-ui-select to /Users/jchudy/.npm/registry.npmjs.org/angular-ui-select/.cache.json
+52 verbose correctMkdir /Users/jchudy/.npm correctMkdir not in flight; initializing
+53 verbose stack Error: version not found: angular-ui-select@0.14.8
+53 verbose stack     at setData (/usr/local/lib/node_modules/npm/lib/cache/add-named.js:137:12)
+53 verbose stack     at RES (/usr/local/lib/node_modules/npm/node_modules/inflight/inflight.js:23:14)
+53 verbose stack     at f (/usr/local/lib/node_modules/npm/node_modules/once/once.js:17:25)
+53 verbose stack     at fixName (/usr/local/lib/node_modules/npm/lib/cache/add-named.js:29:5)
+53 verbose stack     at saved (/usr/local/lib/node_modules/npm/lib/cache/caching-client.js:173:7)
+53 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/graceful-fs/polyfills.js:210:7
+53 verbose stack     at FSReqWrap.oncomplete (fs.js:82:15)
+54 verbose statusCode 404
+55 verbose cwd /Users/jchudy/workspace/chaise
+56 error Darwin 15.4.0
+57 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "install" "angular-ui-select@0.14.8"
+58 error node v4.4.2
+59 error npm  v2.15.0
+60 error version not found: angular-ui-select@0.14.8
+61 error If you need help, you may report this error at:
+61 error     <https://github.com/npm/npm/issues>
+62 verbose exit [ 1, true ]
