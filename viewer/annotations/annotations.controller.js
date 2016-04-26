@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', '$window', '$scope', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, $window, $scope, $uibModal, AlertsService) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', '$window', '$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, $window, $scope, $timeout, $uibModal, AlertsService) {
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;
@@ -31,6 +31,7 @@
 
         vm.highlightedAnnotation = null;
         vm.centerAnnotation = centerAnnotation;
+        vm.scrollIntoView = scrollIntoView;
 
         vm.getNumComments = getNumComments;
         vm.authorName = authorName;
@@ -76,7 +77,7 @@
                             $scope.$apply(function() {
                                 vm.highlightedAnnotation = annotationId;
                             });
-                            scrollIntoView(annotationId);
+                            vm.scrollIntoView(annotationId);
                         }
                         break;
                     default:
@@ -130,7 +131,13 @@
 
         function createAnnotation() {
             vm.createMode = false;
-            AnnotationsService.createAnnotation(vm.newAnnotation);
+            AnnotationsService.createAnnotation(vm.newAnnotation).then(function success(annotation) {
+                $timeout(function scrollToNewAnnotation() {
+                    var annotationId = annotation.table.name + '-' + annotation.data.id;
+                    vm.highlightedAnnotation = annotationId;
+                    vm.scrollIntoView(annotationId);
+                }, 200);
+            });
             vm.newAnnotation = {config:{color: vm.defaultColor}};
         }
 
