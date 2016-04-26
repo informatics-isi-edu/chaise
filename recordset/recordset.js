@@ -120,7 +120,7 @@ angular.module('recordset', ['ERMrest'])
 }])
 
 // Register the recordset controller
-.controller('recordsetController', ['$scope', 'pageInfo', '$window', 'recordsetModel', 'context', function($scope, pageInfo, $window, recordsetModel, context) {
+.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'context', function($scope, $rootScope, pageInfo, $window, recordsetModel, context) {
 
     $scope.vm = recordsetModel;
 
@@ -140,6 +140,7 @@ angular.module('recordset', ['ERMrest'])
         // update the address bar
         // page does not reload
         location.replace($scope.permalink());
+        $rootScope.location = window.location.href;
 
         pageInfo.previousButtonDisabled = true;
         pageInfo.nextButtonDisabled = true;
@@ -289,8 +290,9 @@ angular.module('recordset', ['ERMrest'])
 }])
 
 // Register work to be performed after loading all modules
-.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', function(pageInfo, context, recordsetModel, ermrestServerFactory) {
+.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope) {
 
+    $rootScope.location = window.location.href;
     pageInfo.loading = true;
 
     // Get rowset data from ermrest
@@ -385,6 +387,14 @@ angular.module('recordset', ['ERMrest'])
         });
 
     });
+
+    window.onhashchange = function() {
+        // when address bar changes by user
+        if (window.location.href !== $rootScope.location) {
+            location.reload();
+        }
+    }
+
 }])
 
 /* end recordset */;
