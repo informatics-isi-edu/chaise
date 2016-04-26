@@ -44,12 +44,20 @@
                     break;
                 case 'arrow':
                     messageType = 'createArrowAnnotation';
+                    break;
+                default:
+                    AlertsService.addAlert({
+                        type: 'error',
+                        message: "Sorry, the annotation could not be created. Please try again and make sure the annotation type is either a Section, Rectangle, or Arrow."
+                    });
+                    console.log('Attempted to create an annotation of type "' + type + '" but this is an invalid type.');
             }
 
             var table = image.entity.getRelatedTable(context.schemaName, 'annotation');
             return table.createEntity(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
                 annotations.push(annotation);
                 iframe.postMessage({messageType: messageType, content: annotation.data}, origin);
+                return annotation;
             }, function error(response) {
                 AlertsService.addAlert({
                     type: 'error',
