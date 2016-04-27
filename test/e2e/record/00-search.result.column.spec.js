@@ -1,6 +1,6 @@
 var chaisePage = require('../chaise.page.js');
 
-xdescribe('Search result columns,', function () {
+describe('Search result columns,', function () {
     var EC = protractor.ExpectedConditions;
 
     beforeAll(function (done) {

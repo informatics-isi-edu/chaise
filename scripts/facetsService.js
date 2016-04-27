@@ -6,7 +6,7 @@ var facetsService = angular.module('facetsService', ['facetsModel']);
 
 facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, FacetsData) {
 	this.display = function (table, column) {
-		return COLUMNS_ALIAS[table] != null ? COLUMNS_ALIAS[table][column] : '';
+		return COLUMNS_ALIAS != null && COLUMNS_ALIAS[table] != null ? COLUMNS_ALIAS[table][column] : '';
 	};
 
 	this.html = function (table, column, data) {

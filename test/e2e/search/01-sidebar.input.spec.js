@@ -4,7 +4,7 @@
 
 var chaisePage = require('../chaise.page.js');
 
-xdescribe('Sidebar top search input,', function () {
+describe('Sidebar top search input,', function () {
     var EC = protractor.ExpectedConditions;
 
     beforeAll(function (done) {
@@ -16,7 +16,15 @@ xdescribe('Sidebar top search input,', function () {
     });
     var searchBox = chaisePage.sidebar.searchInput;
     var displayedAttrs = chaisePage.sidebar.sidebarAttrsDisplayed;
+
     var initAttrNum;
+    it('should show >0 attributes when in initial state', function () {
+        displayedAttrs.count().then(function (num) {
+            expect(num).toBeGreaterThan(0);
+            initAttrNum = num;
+        });
+    });
+
     var meaninglessTxt = 'hellogoodbye';
     it('should input meaningless text and wait for seconds', function (done) {
         searchBox.sendKeys(meaninglessTxt);
@@ -25,9 +33,11 @@ xdescribe('Sidebar top search input,', function () {
             done();
         }, 4000);
     });
+
     it('should show 0 attribute when searching for meaningless input', function () {
         expect(displayedAttrs.count()).toBe(0);
     });
+
     it('should show attributes of initial size', function () {
         for (var i = 0; i < meaninglessTxt.length; i++) {
             //hit back space several times to clear input and wait for AJAX
@@ -35,9 +45,10 @@ xdescribe('Sidebar top search input,', function () {
         };
         expect(displayedAttrs.count()).toBe(initAttrNum);
     });
+
     var RNA = 'RNA';
     var displayedEditAttrs = chaisePage.editFilter.editFilterAttrsDisplayed;
-    it('should show \'Experiment Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
+    xit('should show \'Experiment Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
         searchBox.sendKeys(RNA);
         var experimentTypeText = 'Experiment Type';
         chaisePage.sidebar.clickSidebarAttr(experimentTypeText);
@@ -49,7 +60,8 @@ xdescribe('Sidebar top search input,', function () {
             }
         });
     });
-    it('should show \'Data Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
+
+    xit('should show \'Data Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
         var dataType = 'Data Type';
         chaisePage.editFilter.goBackToSidebar();
         chaisePage.sidebar.clickSidebarAttr(dataType);

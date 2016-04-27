@@ -28,3 +28,5 @@ The below table explains the usage of the default parameters:
 | navbarBrandImage | An URL | N/A | "navbarBrandImage":\<value\> | N/A | The URL for an image to be displayed in the navigation bar. |
 | logoutURL | An URL | /chaise/logout | "logoutURL":\<value\> | N/A | The URL to the logout page. |
 | dataBrowser | An URL | /chaise/search | "dataBrowser":\<value\> | N/A | The URL to continue after a logout. |
+| defaultAnnotationColor | red, orange, gold, green, blue, purple | red | "defaultAnnotationColor":\<value\> | N/A | In `/chaise/viewer`, annotations' borders and colors will default to this value. |
+| confirmDelete | A boolean | true | "confirmDelete":\<value\> | N/A | Whether the user will be prompted for confirming on deletion of comments and annotations |

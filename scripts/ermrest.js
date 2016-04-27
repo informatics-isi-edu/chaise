@@ -10,7 +10,8 @@ var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 var USER = null;
-var STOP_SPINNER = null;
+var CHAISE_DATA = {};
+var DISPLAY_ERROR = null;
 
 var PRIMARY_KEY = [];
 var uniquenessColumns = [];
@@ -103,8 +104,9 @@ function setNavbarBrand() {
 	}
 }
 
-function initApplication(errorCallback) {
-	STOP_SPINNER = errorCallback;
+function initApplication(chaise_data, errorCallback) {
+	CHAISE_DATA = chaise_data;
+	DISPLAY_ERROR = errorCallback;
 	loadApplicationHeaderAndFooter();
 	initLocation();
 	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
@@ -180,7 +182,7 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			}
 			err = jqXHR.responseText;
 			if (err != null) {
-				msg += 'ResponseText: ' + err + '\n';
+				msg += 'ResponseText: ' + err;
 				if (jqXHR.status == 403) {
 					msg += 'Please contact the site administrator.\n';
 				}
@@ -195,13 +197,14 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			document.body.style.cursor = 'default';
 			if (!suppressError) {
 				//alert(msg);
-				STOP_SPINNER(jqXHR.status, msg);
+				DISPLAY_ERROR(jqXHR.status, msg);
 			}
 	}
 }
 
 var ERMREST = {
 	POST: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
+		CHAISE_DATA['error'] = false;
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
@@ -235,6 +238,7 @@ var ERMREST = {
 		return ERMREST.fetch(url, contentType, true, true, [], successCallback, errorCallback, param);
 	},
 	fetch: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
+		CHAISE_DATA['error'] = false;
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
@@ -268,6 +272,7 @@ var ERMREST = {
 		return ERMREST.remove(url, true, successCallback, errorCallback, param);
 	},
 	remove: function(url, async, successCallback, errorCallback, param) {
+		CHAISE_DATA['error'] = false;
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
@@ -295,6 +300,7 @@ var ERMREST = {
 		return res;
 	},
 	PUT: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
+		CHAISE_DATA['error'] = false;
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
@@ -327,7 +333,7 @@ var ERMREST = {
 };
 
 function make_headers() {
-	var res = {'User-agent': 'ERMREST/1.0'};
+	var res = {};
 	token = $.cookie(goauth_cookie);
 	if (token != null) {
 		res['Authorization'] = 'Globus-Goauthtoken ' + token;
@@ -1836,7 +1842,7 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 function deleteSession(param) {
 	if (token == null) {
 		var url = HOME + '/ermrest/authn/session';
-		ERMREST.DELETE(url, successDeleteSession, null, param);
+		ERMREST.DELETE(url, successDeleteSession, errorDeleteSession, param);
 	} else {
 		submitLogout();
 	}
@@ -1849,6 +1855,18 @@ function successDeleteSession(data, textStatus, jqXHR, param) {
 		logout_url = data['logout_url'];
 	}
 	submitLogout(logout_url);
+}
+
+function errorDeleteSession(jqXHR, textStatus, errorThrown, url, param) {
+	if (jqXHR.status == 404 && jqXHR.responseText !== undefined) {
+		// this might be a session timeout
+		var logout_url = null;
+		var data = JSON.parse(jqXHR.responseText);
+		logout_url = data['logout_url'];
+		submitLogout(logout_url);
+	} else {
+		handleError(jqXHR, textStatus, errorThrown, url);
+	}
 }
 
 function getSession(param) {

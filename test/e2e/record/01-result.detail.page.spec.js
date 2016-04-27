@@ -1,6 +1,6 @@
 var chaisePage = require('../chaise.page.js');
 
-xdescribe('Search result detail page,', function () {
+describe('Search result detail page,', function () {
     var waitTimeAfterClickingEditFilter = 10000;
     var EC = protractor.ExpectedConditions;
     beforeEach(function (done) {

@@ -114,28 +114,38 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 		$scope.FacetsData.view = chaiseConfig['layout'];
 	}
 
-	$scope.stopSpinner = function stopSpinner(status, errorMessage) {
+	$scope.displayError = function displayError(status, errorMessage) {
 		$scope.status = status;
 		$scope.errorMessage = errorMessage;
 		$scope.FacetsData.error = true;
 		$scope.FacetsData.progress = false;
-		setTimeout($scope.render, 1);
-	};
-	
-	this.html = function (errorMessage) {
-		return $sce.trustAsHtml(errorMessage.replace(/\n/g, '<br/>'));
-	};
-
-	$scope.render = function render() {
-		$scope.FacetsData.error = true;
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
+		setTimeout(function() {
+			$scope.FacetsData.error = true;
+			$scope.FacetsData.progress = false;
+			if (!$scope.$$phase) {
+				$scope.$apply();
+			}
+		}, 1);
 	};
 	
-	initApplication($scope.stopSpinner);
+	this.html = function (errorMessage) {
+		return errorMessage != null ? $sce.trustAsHtml(errorMessage.replace(/\n/g, '<br/>')) : '';
+	};
+
+	initApplication($scope.FacetsData, $scope.displayError);
 	this.hideSpinner = function hideSpinner() {
 		//return !$scope.FacetsData.progress;
 		return true;
+	};
+	
+	this.showSpinner = function showSpinner() {
+		return $scope.FacetsData.progress && !$scope.FacetsData.error;
+	};
+	
+	this.showError = function showError() {
+		return $scope.FacetsData.error;
 	};
 }]);

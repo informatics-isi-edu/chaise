@@ -1,9 +1,9 @@
 <div ng-controller="InitListCtrl as facetInit">
-    <div ng-if="FacetsData.progress && !FacetsData.error" id="spinner">
+    <div class="ng-hide" ng-show="facetInit.showSpinner()" id="spinner">
         <img src="../record/assets/images/spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
         <div style="margin-top: 15px;">Loading...</div>
     </div>
-    <div ng-if="FacetsData.error">
+    <div class="ng-hide" ng-show="facetInit.showError()">
     	<h1>ERROR: {{status}}</h1>
     	<p>
     	<blockquote ng-bind-html="facetInit.html(errorMessage)"></blockquote>

@@ -13,7 +13,7 @@ function tools() {
     };
     this.getSiblingByCss = function (ele, cssStr) {
         return ele.element(by.xpath('following-sibling::' + cssStr));
-    }
+    };
 };
 
 var toolkit = new tools();
@@ -45,6 +45,14 @@ function moreFilter() {
     var that = this;
     this.htmlElement = $(moreFilterId);
     this.sidebarHeader = this.htmlElement.$('div.sidebar-title h4');
+    this.findFirstUncheckedAttrCheckBox = function () {
+        return that.htmlElement.
+        all(by.css('label[ng-class="sideBar.getMoreFieldValueClass(facet)"]:not(.toggler--is-active)')).first();
+    };
+    this.findFirstCheckedAttrCheckBox = function () {
+        return that.htmlElement.
+        all(by.css('label[ng-class="sideBar.getMoreFieldValueClass(facet)"]')).first();
+    };
     this.findMorefilterAttrByName = function (attrName) {
         return that.htmlElement.element(by.cssContainingText('div.editvalue-container' +
             ' div[ng-repeat="facet in FacetsData.facets"] label', attrName));
@@ -109,11 +117,15 @@ function resultContent() {
     var that = this;
     this.resultAllRows = element.all(by.repeater('row in FacetsData.ermrestData'));
     this.resultTally = element.all(by.css('#results_tally')).get(1);
+    this.numOfRecords = this.resultTally.all(by.css('strong')).last();
     this.filter = new contentFilter();
     //ele is element found using resultAllRows.get(idx);
     this.getResultTitleElement = function (ele) {
         return ele.$('span.panel-title.ng-binding');
     };
+    this.getResultTitleAnchorUrl = function (ele) {
+        return ele.$('div.panel-heading a').getAttribute('href');
+    }
     this.getResultImgElement = function (ele) {
         return ele.$('img');
     };

@@ -291,13 +291,13 @@
                 <div ng-show="sidebar.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
                     <div class="col-md-12">
                         <div ng-if="annotations.allowCreate();" class="row">
-                            <div class="btn-group col-md-12">
+                            <div class="btn-group col-md-12 new-annotation">
                                 <button type="button" role="button" class="btn btn-sm btn-success dropdown-toggle form-control" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    New Annotation&nbsp;&nbsp;<span class="caret"></span>
+                                    Create New Annotation&nbsp;&nbsp;<span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li><a ng-click="annotations.drawAnnotation('section');">Section of Interest</a></li>
-                                    <li><a ng-click="annotations.drawAnnotation('rectangle');">Regular Annotation</a></li>
+                                    <li><a ng-click="annotations.drawAnnotation('rectangle');">Rectangle Annotation</a></li>
                                     <li><a ng-click="annotations.drawAnnotation('arrow');">Arrow Annotation</a></li>
                                 </ul>
                             </div>
@@ -306,6 +306,26 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <input ng-model="annotations.query" class="form-control" type="search" placeholder="Type to search...">
+                                <div class="checkbox row">
+                                    <div class="col-md-2">
+                                        <strong>Show:&nbsp;&nbsp;</strong>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label for="showSections">
+                                                    <input ng-model="annotations.filterByType.section" id="showSections" type="checkbox">Sections&nbsp;&nbsp;
+                                                </label>
+                                                <label for="showRectangles">
+                                                    <input ng-model="annotations.filterByType.rectangle" id="showRectangles" type="checkbox">Rectangles&nbsp;&nbsp;
+                                                </label>
+                                                <label for="showArrows">
+                                                    <input ng-model="annotations.filterByType.arrow" id="showArrows" type="checkbox">Arrows&nbsp;&nbsp;
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <br>
@@ -313,10 +333,10 @@
                         <form ng-show="annotations.createMode" id="create-annotation-form" class="annotation">
                             <div class="row">
                                 <div class="col-md-10">
-                                    <span class="h4">New
-                                        <span ng-if="annotations.newAnnotation.type == 'section'">Section of Interest</span>
-                                        <span ng-if="annotations.newAnnotation.type == 'rectangle'">Regular Annotation</span>
-                                        <span ng-if="annotations.newAnnotation.type == 'arrow'">Arrow Annotation</span>
+                                    <span class="h4">
+                                        New {{annotations.newAnnotation.type | toTitleCase}}
+                                        <span ng-if="annotations.newAnnotation.type == 'section'"> of Interest</span>
+                                        <span ng-if="annotations.newAnnotation.type != 'section'"> Annotation</span>
                                     </span>
                                 </div>
                                 <div class="col-md-2">
@@ -328,6 +348,15 @@
                             <br>
                             <div class="row">
                                 <div class="col-md-12">
+                                    <label>Annotation Type</label><br>
+                                    <span ng-if="annotations.newAnnotation.type == 'section'">Section of Interest</span>
+                                    <ui-select ng-if="annotations.newAnnotation.type != 'section'" ng-model="annotations.newAnnotation.type" theme="select2" ng-disabled="disabled">
+                                        <ui-select-match placeholder="Select an annotation type">{{annotations.newAnnotation.type | toTitleCase}}</ui-select-match>
+                                        <ui-select-choices repeat="type in (annotations.annotationTypes | filter: $select.search) track by type">
+                                            <div ng-bind-html="type | toTitleCase | highlight: $select.search"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                    <br><br>
                                     <label>Description</label>
                                     <textarea ng-model="annotations.newAnnotation.description" class="form-control description-field" rows="3" placeholder="Write annotation text here."></textarea>
                                     <div ng-if="annotations.newAnnotation.type != 'section'">
@@ -342,10 +371,10 @@
                                     </div>
                                     <div ng-if="annotations.newAnnotation.type == 'arrow'">
                                         <br>
-                                        <label>Arrow Color</label>
-                                        <ui-select ng-model="annotations.newAnnotation.config.color" theme="select2" ng-disabled="disabled">
+                                        <label>Color</label>
+                                        <ui-select ng-model="annotations.newAnnotation.config.color" theme="select2">
                                             <ui-select-match placeholder="Select a color">{{$select.selected | toTitleCase}}</ui-select-match>
-                                            <ui-select-choices repeat="color in (annotations.arrowColors | filter: $select.search) track by color">
+                                            <ui-select-choices repeat="color in (annotations.colors | filter: $select.search) track by color">
                                                 <div ng-bind-html="color | toTitleCase | highlight: $select.search"></div>
                                             </ui-select-choices>
                                         </ui-select>
@@ -361,97 +390,31 @@
                                 </div>
                             </div>
                         </form>
-                        <!-- Sections List -->
-                        <div ng-repeat="section in annotations.sections | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created'])"
-                         ng-class="{highlighted: annotations.highlightedAnnotation == (section.table.name + '-' + section.data.id)}"
-                          class="annotation section" id="{{section.table.name + '-' + section.data.id}}">
-                            <div ng-show="annotations.editedAnnotation != (section.table.name + '-' + section.data.id)">
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <span class="label label-success">{{'Section' | uppercase}}</span>
-                                    </div>
-                                    <div class="col-md-9">
-                                        <small class="pull-right">
-                                            <a ng-click="annotations.centerAnnotation(section)" title="Center Section" class="cardlink">Focus</a>
-                                            <span ng-if="annotations.allowEdit(section);">
-                                                | <a ng-click="annotations.editAnnotation(section);" title="Edit Annotation" class="cardlink">Edit</a>
-                                            </span>
-                                            <span ng-if="annotations.allowDelete(section);">
-                                                | <a ng-if="annotations.allowDelete(section);" ng-click="annotations.deleteAnnotation(section);" title="Delete Annotation" class="cardlink delete">Delete</a>
-                                            </span>
-                                        </small>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <span class="h5 annotation-description">
-                                            {{section.data.description}}
-                                        </span>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <small>{{section.data.author}} &mdash; {{section.data.created | date:'MMM d, y'}}</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <form ng-show="annotations.editedAnnotation == (section.table.name + '-' + section.data.id)" id="edit-annotation-form">
-                                <div class="row">
-                                    <div class="col-md-10">
-                                        <label>Description</label>
-                                        <textarea ng-model="section.data.description" rows="3" class="form-control"></textarea>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button ng-click="annotations.cancelEdit(annotation);" type="button" class="close pull-right" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <small>
-                                            {{section.data.author}} &mdash;
-                                            {{section.data.created | date: 'MMM d, y'}}
-                                        </small>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <button ng-click="annotations.updateAnnotation(section);" role="button" class="btn btn-xs btn-primary form-control" type="button">
-                                            Save
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
                         <!-- Annotations List -->
-                        <div ng-repeat="annotation in annotations.annotations | orderBy:['-data.created', '-data.id'] | filter:annotations.filterAnnotations(['description', 'anatomy', 'author', 'created']) track by $index"
-                        ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table.name + '-' + annotation.data.id)}"
-                        id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation">
+                        <div ng-repeat="annotation in annotations.annotations | orderBy:[annotations.sortSectionsFirst, 'data.anatomy', 'data.id'] | filter:annotations.filterAnnotations track by $index"
+                        ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table.name + '-' + annotation.data.id), section: annotation.data.type == 'section'}"
+                        ng-show="annotations.filterByType[annotation.data.type]" id="{{annotation.table.name + '-' + annotation.data.id}}" class="annotation">
                             <!-- Annotation Display Card -->
-                            <div ng-show="annotations.editedAnnotation != (annotation.table.name + '-' + annotation.data.id)">
+                            <div ng-show="annotations.editedAnnotation.domId != (annotation.table.name + '-' + annotation.data.id)">
                                 <div class="annotation-card">
                                     <div class="row">
-                                        <!-- Annotation Anatomy Text -->
-                                        <div class="col-md-7 annotation-anatomy-text">
-                                            <small><strong>
-                                                <span ng-if="annotation.data.anatomy">{{annotation.data.anatomy | uppercase}}</span>
-                                                <span ng-if="!annotation.data.anatomy">{{'No Anatomy' | uppercase}}</span>
+                                        <!-- Annotation Title/Label/Heading -->
+                                        <div class="col-md-8" ng-class="{'annotation-anatomy-text': annotation.data.type != 'section'}">
+                                            <span ng-if="annotation.data.type == 'section'" class="label section-label">{{'Section' | uppercase}}</span>
+                                            <small ng-if="annotation.data.type != 'section'"><strong>
+                                                <span class="glyphicon" ng-class="{'glyphicon-stop': annotation.data.type == 'rectangle', 'glyphicon-tag': annotation.data.type == 'arrow'}" ng-style="{'color': annotation.data.config.color || annotations.defaultColor}"></span>
+                                                <span>{{annotation.data.anatomy || 'No Anatomy' | uppercase}}</span>
                                             </strong></small>
                                         </div>
                                         <!-- Annotation Edit/Delete Buttons -->
-                                        <div class="col-md-5">
+                                        <div class="col-md-4">
                                             <small class="pull-right">
-                                                <a ng-click="annotations.centerAnnotation(annotation)" title="Center Annotation" class="cardlink">Focus</a>
+                                                <a ng-click="annotations.centerAnnotation(annotation);" title="Find this annotation in the viewer" class="cardlink"><span class="glyphicon glyphicon-eye-open"></span></a>
                                                 <span ng-if="annotations.allowEdit(annotation);">
-                                                    | <a ng-click="annotations.editAnnotation(annotation);" title="Edit Annotation" class="cardlink">Edit</a>
+                                                    <a ng-click="annotations.editAnnotation(annotation);" title="Edit this annotation" class="cardlink"><span class="glyphicon glyphicon-pencil"><span></a>
                                                 </span>
                                                 <span ng-if="annotations.allowDelete(annotation);">
-                                                    | <a ng-if="annotations.allowDelete(annotation);" ng-click="annotations.deleteAnnotation(annotation);" title="Delete Annotation" class="cardlink delete">Delete</a>
+                                                    <a ng-if="annotations.allowDelete(annotation);" ng-click="annotations.deleteAnnotation(annotation);" title="Delete this annotation" class="cardlink"><span class="glyphicon glyphicon-trash"></span></a>
                                                 </span>
                                             </small>
                                         </div>
@@ -469,9 +432,9 @@
                                     <!-- Annotation Author, Date & Comment Icon -->
                                     <div class="row">
                                         <div class="col-md-8">
-                                            <small>{{annotation.data.author}} &mdash; {{annotation.data.created | date:'MMM d, y'}}</small>
+                                            <small>{{annotations.authorName(annotation.data.author)}} &mdash; {{annotation.data.created | date:'MMM d, y'}}</small>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div ng-if="annotation.data.type != 'section'" class="col-md-4">
                                             <small class="pull-right">
                                                 <span class="glyphicon glyphicon-comment"></span>
                                                 {{annotations.getNumComments(annotation);}}
@@ -479,53 +442,64 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div ng-controller="CommentsController as comments" class="comments">
+                                <div ng-if="annotation.data.type != 'section'" ng-controller="CommentsController as comments" class="comments">
                                     <div ng-if="annotations.getNumComments(annotation) !== 0" class="row comments-list">
-                                        <hr class="separator">
+                                        <hr class="separator comment-separator">
                                         <div class="col-md-12">
-                                            <div ng-repeat="comment in comments.comments[comments.annotationId] | orderBy: ['data.created', 'data.id'] track by $index" class="row">
+                                            <div ng-repeat="comment in comments.comments[annotation.data.id] | orderBy: ['data.created', 'data.id'] track by $index" class="row">
                                                 <div class="col-md-12 comment">
-                                                    <strong>{{comment.data.author}}</strong>
+                                                    <strong>{{annotations.authorName(comment.data.author)}}</strong>
                                                     <small><span class="text-muted pull-right">{{comment.data.created | date:'MMM d, y'}}</span></small>
-                                                    <br>{{comment.data.comment}}
-                                                    <div ng-if="comments.allowDelete(comment);">
-                                                        <small>
-                                                            <a ng-click="comments.deleteComment(comment);" class="cardlink delete">Delete</a>
-                                                        </small>
+                                                    <div ng-if="comments.editedComment == (comment.table.name + '-' + comment.data.id)">
+                                                        <div class="input-group input-group-sm" id="edit-comment-form">
+                                                            <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comment.data.comment" type="text" class="form-control">
+                                                            <span class="input-group-btn">
+                                                                <button ng-click="comments.updateComment(comment);" class="btn btn-success" type="submit" role="button">
+                                                                    Update
+                                                                </button>
+                                                            </span>
+                                                        </div>
+                                                        <small><a ng-click="comments.cancelEdit(comment);" class="cardlink delete pull-right">Cancel this edit</a></small>
+                                                    </div>
+                                                    <div ng-if="comments.editedComment != (comment.table.name + '-' + comment.data.id)">
+                                                        {{comment.data.comment}}<br>
+                                                        <div class="pull-right">
+                                                            <small ng-if="comments.allowEdit(comment);">
+                                                                <a ng-click="comments.editComment(comment);" class="cardlink edit" title="Edit this comment"><span class="glyphicon glyphicon-pencil"></span></a>
+                                                            </small>
+                                                            <small ng-if="comments.allowDelete(comment);">
+                                                                <a ng-click="comments.deleteComment(comment);" class="cardlink" title="Delete this comment"><span class="glyphicon glyphicon-trash"></span></a>
+                                                            </small>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <hr class="separator" ng-show="!$last">
+                                                <hr class="separator comment-separator" ng-show="!$last">
                                             </div>
                                         </div>
                                     </div>
-                                    <div ng-if="comments.allowCreate();" class="row comment-input">
+                                    <div ng-if="comments.allowCreate();" ng-hide="comments.editedComment" class="row comment-input">
                                         <hr class="separator">
                                         <div class="col-md-12">
-                                            <div class="comment-input">
-                                                <div class="input-group input-group-sm">
-                                                    <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
-                                                    <span class="input-group-btn">
-                                                        <button ng-click="comments.createComment();" class="btn btn-success" type="submit" role="button">
-                                                            Post
-                                                        </button>
-                                                    </span>
-                                                </div>
+                                            <div class="input-group input-group-sm">
+                                                <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comments.newComment.comment" type="text" class="form-control" placeholder="Add a comment...">
+                                                <span class="input-group-btn">
+                                                    <button ng-click="comments.createComment(annotation.data.id);" class="btn btn-success" type="submit" role="button">
+                                                        Post
+                                                    </button>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div><!-- /Annotation Display Card -->
-                            <form ng-show="annotations.editedAnnotation == (annotation.table.name + '-' + annotation.data.id)" id="edit-annotation-form">
+                            <form ng-show="annotations.editedAnnotation.domId == (annotation.table.name + '-' + annotation.data.id)" id="edit-annotation-form">
                                 <div class="row">
-                                    <!-- Edit Form: Annotation Anatomy -->
-                                    <div class="col-md-10 annotation-anatomy-text">
-                                        <label>Anatomy</label>
-                                        <ui-select ng-model="annotation.data.anatomy" theme="select2" ng-disabled="disabled">
-                                            <ui-select-match placeholder="Select an anatomy term">{{annotation.data.anatomy}}</ui-select-match>
-                                            <ui-select-choices repeat="anatomy in (annotations.anatomies | filter: $select.search) track by anatomy">
-                                                <div ng-bind-html="anatomy | highlight: $select.search"></div>
-                                            </ui-select-choices>
-                                        </ui-select>
+                                    <div class="col-md-10">
+                                        <span class="h4">
+                                            Edit {{annotations.editedAnnotation.data.type | toTitleCase}}
+                                            <span ng-if="annotations.editedAnnotation.data.type == 'section'"> of Interest</span>
+                                            <span ng-if="annotations.editedAnnotation.data.type != 'section'"> Annotation</span>
+                                        </span>
                                     </div>
                                     <div class="col-md-2">
                                         <button ng-click="annotations.cancelEdit(annotation);" type="button" class="close pull-right" aria-label="Close">
@@ -533,20 +507,45 @@
                                         </button>
                                     </div>
                                 </div>
+                                <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
+                                    <br>
+                                    <div class="col-md-12">
+                                        <label>Annotation Type</label>
+                                        <ui-select ng-model="annotations.editedAnnotation.data.type" theme="select2" ng-disabled="disabled">
+                                            <ui-select-match placeholder="Select a type">{{annotations.editedAnnotation.data.type | toTitleCase}}</ui-select-match>
+                                            <ui-select-choices repeat="type in (annotations.annotationTypes | filter: $select.search) track by type">
+                                                <div ng-bind-html="type | toTitleCase | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                                <!-- Edit Form: Annotation Anatomy -->
+                                <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
+                                    <br>
+                                    <div class="col-md-10">
+                                        <label>Anatomy</label>
+                                        <ui-select ng-model="annotations.editedAnnotation.data.anatomy" theme="select2" ng-disabled="disabled">
+                                            <ui-select-match placeholder="Select an anatomy term">{{annotations.editedAnnotation.data.anatomy | toTitleCase}}</ui-select-match>
+                                            <ui-select-choices repeat="anatomy in (annotations.anatomies | filter: $select.search) track by anatomy">
+                                                <div ng-bind-html="anatomy | toTitleCase | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
                                 <br>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <label>Description</label>
-                                        <textarea ng-model="annotation.data.description" rows="3" class="form-control"></textarea>
+                                        <textarea ng-model="annotations.editedAnnotation.data.description" rows="3" class="form-control"></textarea>
                                     </div>
                                 </div>
-                                <div ng-if="annotation.data.type == 'arrow'" class="row">
+                                <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
                                     <br>
                                     <div class="col-md-12">
-                                        <label>Arrow Color</label>
-                                        <ui-select ng-model="annotation.data.config.color" theme="select2" ng-disabled="disabled">
+                                        <label>Color</label>
+                                        <ui-select ng-model="annotations.editedAnnotation.data.config.color" theme="select2" ng-disabled="disabled">
                                             <ui-select-match placeholder="Select a color">{{$select.selected | toTitleCase}}</ui-select-match>
-                                            <ui-select-choices repeat="color in (annotations.arrowColors | filter: $select.search) track by color">
+                                            <ui-select-choices repeat="color in (annotations.colors | filter: $select.search) track by color">
                                                 <div ng-bind-html="color | toTitleCase | highlight: $select.search"></div>
                                             </ui-select-choices>
                                         </ui-select>
@@ -557,11 +556,11 @@
                                 <div class="row">
                                     <div class="col-md-8">
                                         <small>
-                                            {{annotation.data.author}} &mdash;
+                                            {{annotations.authorName(annotation.data.author)}} &mdash;
                                             {{annotation.data.created | date: 'MMM d, y'}}
                                         </small>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div ng-if="annotation.data.type != 'section'" class="col-md-4">
                                         <small class="pull-right">
                                             <span class="glyphicon glyphicon-comment"></span>
                                             {{annotations.getNumComments(annotation);}}

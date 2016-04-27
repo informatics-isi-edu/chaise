@@ -3,7 +3,7 @@
 
     var client;
 
-    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'chaise.filters', 'ui.select'])
+    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'chaise.filters', 'ui.select', 'ui.bootstrap'])
 
     // Configure the context info from the URI
     .config(['context', function configureContext(context) {
@@ -127,13 +127,14 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($window, context, image, annotations, comments, sections, anatomies, statuses, vocabs) {
+    .run(['$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($window, context, image, annotations, comments, anatomies, statuses, vocabs) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
         var chaiseReady = false;
         var arrows = [];
         var rectangles = [];
+        var sections = [];
 
         var catalog = client.getCatalog(context.catalogID);
         catalog.introspect().then(function success(schemas) {
@@ -148,20 +149,6 @@
                         iframe.location.replace(image.entity.data.uri);
                         console.log('Image: ', image);
 
-                        var sectionTable = image.entity.getRelatedTable(context.schemaName, 'section_annotation');
-                        sectionTable.getEntities().then(function success(_sections) {
-                            var length = _sections.length;
-                            for (var i = 0; i < length; i++) {
-                                sections.push(_sections[i]);
-                            }
-                            if (annotoriousReady) {
-                                iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
-                            }
-                            console.log('Sections: ', sections);
-                        }, function error(response) {
-                            throw response;
-                        });
-
                         var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
                         annotationTable.getEntities().then(function success(_annotations) {
                             var length = _annotations.length;
@@ -172,6 +159,8 @@
                                     arrows.push(annotation);
                                 } else if (annotation.data.type == 'rectangle') {
                                     rectangles.push(annotation);
+                                } else if (annotation.data.type == 'section') {
+                                    sections.push(annotation);
                                 }
                             }
                             chaiseReady = true;
@@ -179,6 +168,7 @@
                             if (annotoriousReady && chaiseReady) {
                                 iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
                                 iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
+                                iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
                             }
                             console.log('Annotations: ', annotations);
                         }, function error(response) {
@@ -213,6 +203,17 @@
                     for (var j = 0; j < length; j++) {
                         anatomies.push(_anatomies[j].data.term);
                     }
+                    anatomies.sort(function sortAnatomies(a, b) {
+                        a = a.toLowerCase();
+                        b = b.toLowerCase();
+                        if (a < b) {
+                            return -1;
+                        } else if (a > b) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    });
                 }, function error(response) {
                     throw response;
                 });
