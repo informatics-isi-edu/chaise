@@ -96,12 +96,10 @@ describe('AnnotationsController', function() {
     // editAnnotation(annotation) unit test
     it('should edit an annotation based on the input annotation', function() {
         var annotation = {
-            table: { name: 'table' },
-            data: {
-                id: 'id',
-                anatomy: 'Some Anatomy',
-                description: 'This is the description'
-            }
+            table: 'table',
+            id: 'id',
+            anatomy: 'Some Anatomy',
+            description: 'This is the description'
         }
 
         controller.editAnnotation(annotation);
@@ -112,12 +110,10 @@ describe('AnnotationsController', function() {
     // cancelEdit(annotation) unit test
     it('should cancel editting an annotation based on the input annotation', function() {
         var annotation = {
-            table: { name: 'table' },
-            data: {
-                id: 'id',
-                anatomy: 'Some Anatomy',
-                description: 'This is the description'
-            }
+            table: 'table',
+            id: 'id',
+            anatomy: 'Some Anatomy',
+            description: 'This is the description'
         }
 
         // To initialize the original annotation private/local variable
@@ -130,12 +126,10 @@ describe('AnnotationsController', function() {
     // updateAnnotation(annotation) unit test
     it('should update an annotation based on the input annotation', function() {
         var annotation = {
-            table: { name: 'table' },
-            data: {
-                id: 'id',
-                anatomy: 'Some Anatomy',
-                description: 'This is the description'
-            }
+            table: 'table',
+            id: 'id',
+            anatomy: 'Some Anatomy',
+            description: 'This is the description'
         }
         spyOn(mockAnnotationsService, 'updateAnnotation');
 
@@ -149,12 +143,10 @@ describe('AnnotationsController', function() {
     // deleteAnnotation(annotation) unit test
     it('should delete an annotation based on the input annotation', function() {
         var annotation = {
-            table: { name: 'table' },
-            data: {
-                id: 'id',
-                anatomy: 'Some Anatomy',
-                description: 'This is the description'
-            }
+            table: 'table',
+            id: 'id',
+            anatomy: 'Some Anatomy',
+            description: 'This is the description'
         }
         spyOn(mockAnnotationsService, 'deleteAnnotation');
 
@@ -167,12 +159,10 @@ describe('AnnotationsController', function() {
     // centerAnnotation(annotation) unit test
     it('should center the input annotation', function() {
         var annotation = {
-            table: { name: 'table' },
-            data: {
-                id: 'id',
-                anatomy: 'Some Anatomy',
-                description: 'This is the description'
-            }
+            table: 'table',
+            id: 'id',
+            anatomy: 'Some Anatomy',
+            description: 'This is the description'
         }
         spyOn(mockAnnotationsService, 'centerAnnotation');
 
@@ -188,19 +178,17 @@ describe('AnnotationsController', function() {
     // getNumComments(annnotation) unit test
     it('should get the number of comments associated with the input annotation', function() {
         var annotation = {
-            table: { name: 'table' },
-            data: {
-                id: 'id',
-                anatomy: 'Some Anatomy',
-                description: 'This is the description'
-            }
+            table: 'table',
+            id: 'id',
+            anatomy: 'Some Anatomy',
+            description: 'This is the description'
         }
         spyOn(mockAnnotationsService, 'getNumComments');
 
         controller.getNumComments(annotation);
 
         expect(mockAnnotationsService.getNumComments).toHaveBeenCalled();
-        expect(mockAnnotationsService.getNumComments).toHaveBeenCalledWith(annotation.data.id);
+        expect(mockAnnotationsService.getNumComments).toHaveBeenCalledWith(annotation.id);
     });
 
     // TODO: figure out coordinates object

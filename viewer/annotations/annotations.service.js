@@ -50,7 +50,7 @@
                         sections.push(annotation);
                         break;
                 }
-                iframe.postMessage({messageType: messageType, content: annotation.data}, origin);
+                iframe.postMessage({messageType: messageType, content: annotation}, origin);
             }, function error(response) {
                 console.log(response);
             });
@@ -61,8 +61,8 @@
         }
 
         function updateAnnotation(annotation) {
-            if (annotation.data.anatomy == 'No Anatomy') {
-                annotation.data.anatomy = null;
+            if (annotation.anatomy == 'No Anatomy') {
+                annotation.anatomy = null;
             }
 
             // Update in ERMrest
@@ -70,7 +70,7 @@
             // annotation.put().then(function success(response) {
             annotation.update().then(function success(response) {
                 // Update in Annotorious
-                iframe.postMessage({messageType: 'updateAnnotation', content: annotation.data}, origin);
+                iframe.postMessage({messageType: 'updateAnnotation', content: annotation}, origin);
             }, function error(response) {
                 console.log(response);
             });
@@ -83,7 +83,7 @@
         // Returns a boolean
         function hasComments(annotation) {
             // If there are comments on annotation, return false.
-            if (getNumComments(annotation.data.id) > 0) {
+            if (getNumComments(annotation.id) > 0) {
                 return true;
             }
             return false;
@@ -95,7 +95,7 @@
                 // delete hasn't been implemented in the refactor branch yet
                 annotation.delete().then(function success(response) {
                     // Delete from the 'annotations' or 'sections' provider
-                    var type = annotation.table.name;
+                    var type = annotation.table;
                     if (type == 'annotation') {
                         var index = annotations.indexOf(annotation);
                         annotations.splice(index, 1);
@@ -105,7 +105,7 @@
                     }
 
                     // Delete in Annotorious
-                    iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
+                    iframe.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
                 }, function error(response) {
                     console.log(response);
                 });
@@ -118,7 +118,7 @@
         }
 
         function centerAnnotation(annotation) {
-            iframe.postMessage({messageType: 'centerAnnotation', content: annotation.data}, origin);
+            iframe.postMessage({messageType: 'centerAnnotation', content: annotation}, origin);
         };
 
         return {

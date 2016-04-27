@@ -9,7 +9,7 @@ describe('CommentsController', function() {
             $controller = _$controller_;
             mockCommentsService = CommentsService;
         });
-        $scope = { annotation: { data: { id: 'id' }}};
+        $scope = { annotation: { id: 'id' }};
         controller = $controller('CommentsController', { $scope: $scope });
     });
 

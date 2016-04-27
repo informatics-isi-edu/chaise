@@ -28,7 +28,7 @@ describe('OSDController', function() {
     it("should use the slide id, if known, for the screenshot's filename", function() {
         var iframe = document.getElementsByTagName('iframe')[0].contentWindow;
 
-        controller.image.entity.data.slide_id = 'test123';
+        controller.image.entity.slide_id = 'test123';
         iframe.addEventListener('message', function captureEvent(event) {
             event = event.data;
             expect(event.messageType).toEqual('downloadView');
@@ -40,7 +40,7 @@ describe('OSDController', function() {
     it("should use 'image' as the default screenshot's filename", function() {
         var iframe = document.getElementsByTagName('iframe')[0].contentWindow;
 
-        controller.image.entity.data.slide_id = null;
+        controller.image.entity.slide_id = null;
         iframe.addEventListener('message', function captureEvent(event) {
             event = event.data;
             expect(event.messageType).toEqual('downloadView');

@@ -141,24 +141,28 @@
                 var table = schema.tables.get(context.tableName);
                 // var table = schema.getTable(context.tableName);
                 // BinaryPredicate(column, operator, value) is used for building a filter
-                var idFilter = new ERMrest.BinaryPredicate(table.columns.get('id'), ERMrest.OPERATOR.EQUAL, context.imageID);
-                table.entity.get(idFilter).then(function success(entity) {
+                // This predicate is used to get the image based on the id of the image the user is navigating to
+                var imageFilter = new ERMrest.BinaryPredicate(table.columns.get('id'), ERMrest.OPERATOR.EQUAL, context.imageID);
+                var imagePath = new ERMrest.DataPath(table).filter(imageFilter);
+                imagePath.entity.get().then(function success(entity) {
                 // var filteredTable = table.getFilteredTable(['id=' + context.imageID]);
                 // if (filteredTable) {
                     // filteredTable.getEntities().then(function success(_entities) {
-                        image.entity = entity.data[0];
+                        image.entity = entity[0];
                         // image.entity = _entities[0];
                         iframe.location.replace(image.entity.uri);
                         console.log('Image: ', image);
 
                         var annotationTable = schema.tables.get('annotation');
+                        var annotationFilter = new ERMrest.BinaryPredicate(annotationTable.columns.get('image_id'), ERMrest.OPERATOR.EQUAL, context.imageID);
+                        var annotationPath = imagePath.extend(annotationTable).datapath.filter(annotationFilter);
                         // var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
-                        annotationTable.entity.get().then(function success(_annotations) {
-                            console.log(_annotations);
+                        annotationPath.entity.get().then(function success(_annotations) {
                         // annotationTable.getEntities().then(function success(_annotations) {
-                            var length = _annotations.data.length;
+                            var length = _annotations.length;
                             for (var i = 0; i < length; i++) {
-                                annotations.push(_annotations.data[i]);
+                                _annotations[i].table = annotationPath.context.table.name;
+                                annotations.push(_annotations[i]);
                             }
 
                             if (annotoriousReady) {

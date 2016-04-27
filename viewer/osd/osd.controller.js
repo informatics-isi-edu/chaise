@@ -14,7 +14,7 @@
         vm.homeView = homeView;
 
         function downloadView() {
-            var filename = vm.image.entity.data.slide_id;
+            var filename = vm.image.entity.slide_id;
             if (!filename) {
                 filename = 'image';
             }

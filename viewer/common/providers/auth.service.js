@@ -19,18 +19,17 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && isAuthor(annotation.data.author, user.session)) {
+            if (user.role == 'annotator' && isAuthor(annotation.author, user.session)) {
                 return true;
             }
             return false;
         }
 
         function deleteAnnotation(annotation) {
-            annotation = annotation.data;
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && isAuthor(annotation.data.author, user.session)) {
+            if (user.role == 'annotator' && isAuthor(annotation.author, user.session)) {
                 return true;
             }
             return false;
@@ -58,7 +57,7 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && isAuthor(annotation.data.author, user.session)) {
+            if (user.role == 'annotator' && isAuthor(annotation.author, user.session)) {
                 return true;
             }
             return false;

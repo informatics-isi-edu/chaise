@@ -57,7 +57,7 @@
                         if (annotation) {
                             $scope.$apply(function() {
                                 // Highlight the annotation in the sidebar
-                                vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
+                                vm.highlightedAnnotation = annotation.table + '-' + annotation.id;
                             });
                             // scrollIntoView(vm.highlightedAnnotation);
                         }
@@ -83,7 +83,6 @@
                     // If query is "" or undefined, then the annotation is considered a match
                     return true;
                 } else {
-                    annotation = annotation.data;
                     query = query.toLowerCase();
                     // // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
                     if (!annotation.anatomy) {
@@ -123,16 +122,16 @@
         }
 
         function editAnnotation(annotation) {
-            vm.editedAnnotation = annotation.table.name + '-' + annotation.data.id;
+            vm.editedAnnotation = annotation.table + '-' + annotation.id;
             originalAnnotation = {
-                description: annotation.data.description,
-                anatomy: annotation.data.anatomy
+                description: annotation.description,
+                anatomy: annotation.anatomy
             };
         };
 
         function cancelEdit(annotation) {
             vm.editedAnnotation = null;
-            var data = annotation.data;
+            var data = annotation;
             data.description = originalAnnotation.description;
             data.anatomy = originalAnnotation.anatomy;
         };
@@ -147,7 +146,7 @@
         };
 
         function setHighlightedAnnotation(annotation) {
-            vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
+            vm.highlightedAnnotation = annotation.table + '-' + annotation.id;
         }
 
         // Centers and zooms to the annotation inside Annotorious
@@ -164,7 +163,7 @@
         function findAnnotation(coordinates) {
             // Search in annotations collection
             for (var i = 0; i < vm.annotations.length; i++) {
-                var annotationCoords = vm.annotations[i].data.coords;
+                var annotationCoords = vm.annotations[i].coords;
                 if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
                     return vm.annotations[i];
                 }
@@ -172,7 +171,7 @@
 
             // Search in sections collection
             for (var i = 0; i < vm.sections.length; i++) {
-                var annotationCoords = vm.sections[i].data.coords;
+                var annotationCoords = vm.sections[i].coords;
                 if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
                     return vm.sections[i];
                 }
