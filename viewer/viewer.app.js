@@ -131,22 +131,25 @@
 
         client.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
+            // So the schema and tables can be accessed in controllers
+            context.schema = schema;
             console.log('Schema: ', schema);
             if (schema) {
                 var table = schema.tables.get(context.tableName);
                 // BinaryPredicate(column, operator, value) is used for building a filter
                 // This predicate is used to get the image based on the id of the image the user is navigating to
-                var imageFilter = new ERMrest.BinaryPredicate(table.columns.get('id'), ERMrest.OPERATOR.EQUAL, context.imageID);
-                var imagePath = new ERMrest.DataPath(table).filter(imageFilter);
-                imagePath.entity.get().then(function success(entity) {
+                var imagePath = new ERMrest.DataPath(table);
+                var imagePathColumn = imagePath.context.columns.get('id');
+                var imageFilter = new ERMrest.BinaryPredicate(imagePathColumn, ERMrest.OPERATOR.EQUAL, context.imageID);
+                imagePath.filter(imageFilter).entity.get().then(function success(entity) {
                         image.entity = entity[0];
                         iframe.location.replace(image.entity.uri);
                         console.log('Image: ', image);
 
                         var annotationTable = schema.tables.get('annotation');
-                        var annotationFilter = new ERMrest.BinaryPredicate(annotationTable.columns.get('image_id'), ERMrest.OPERATOR.EQUAL, context.imageID);
-                        var annotationPath = new ERMrest.DataPath(annotationTable).filter(annotationFilter);
-                        annotationPath.entity.get().then(function success(_annotations) {
+                        // var annotationFilter = new ERMrest.BinaryPredicate(annotationTable.columns.get('image_id'), ERMrest.OPERATOR.EQUAL, context.imageID);
+                        var annotationPath = imagePath.extend(annotationTable).datapath;
+                        annotationPath.filter(imageFilter).entity.get().then(function success(_annotations) {
                             var length = _annotations.length;
                             for (var i = 0; i < length; i++) {
                                 _annotations[i].table = annotationPath.context.table.name;
@@ -159,17 +162,11 @@
                             console.log('Annotations: ', annotations);
 
                             var commentTable = schema.tables.get('annotation_comment');
-                            var commentFilterArray = [];
-                            // Go through the set of annotations and build a BinaryPredicate for each one to grab it's comments
-                            angular.forEach(annotations, function(annotation) {
-                                commentFilterArray.push(new ERMrest.BinaryPredicate(commentTable.columns.get('annotation_id'), ERMrest.OPERATOR.EQUAL, annotation.id));
-                            });
-                            // Disjunction checks if each comment has each annotation id and if it has 1 of the IDs then it is a comment associated with that set of annotaitons for that image
-                            var disjunctionFilter = new ERMrest.Disjunction(commentFilterArray);
-                            var commentPath = new ERMrest.DataPath(commentTable).filter(disjunctionFilter);
+                            var commentPath = annotationPath.extend(commentTable).datapath;
 
                             // Get all the comments for this image
-                            commentPath.entity.get().then(function success(_comments){
+                            // Nest comments fetch in annotations so annotations will be fetched and loaded to the DOM before the comments
+                            commentPath.filter(imageFilter).entity.get().then(function success(_comments){
                                 var length = _comments.length;
                                 for (var i = 0; i < length; i++) {
                                     var annotationId = _comments[i].annotation_id;
@@ -300,7 +297,6 @@
 
 
         $window.addEventListener('message', function(event) {
-            console.log("Event: ", event);
             if (event.origin === origin) {
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;

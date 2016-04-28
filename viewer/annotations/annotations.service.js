@@ -35,9 +35,8 @@
                 delete newAnnotation[0].anatomy;
             }
 
-
-            var table = image.entity.getRelatedTable(context.schemaName, type);
-            return table.entity.post(newAnnotation, ['id', 'created']).then(function success(annotation) {
+            var table = context.schema.tables.get('annotation');
+            return table.entity.post(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
             // return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
                 var messageType = '';
                 switch (type) {
