@@ -50,14 +50,12 @@
     // run .$get() on it. This returns a Provider instance of the factory/service.
     .config(['ermrestServerFactoryProvider', 'context', function configureClient(ermrestServerFactoryProvider, context) {
         client = ermrestServerFactoryProvider.$get().getServer(context.serviceURL);
-        // client = ermrestClientFactoryProvider.$get().getClient(context.serviceURL);
     }])
 
     // Set user info
     .config(['userProvider', 'context', function configureUser(userProvider, context) {
 
         client.session.get().then(function success(session) {
-        // client.getSession().then(function success(session) {
             console.log('Session: ', session);
             var groups = context.groups;
             // session.attributes is an array of objects that have a display_name and id
@@ -132,33 +130,23 @@
         var annotoriousReady = false;
 
         client.catalogs.get(context.catalogID).then(function success(catalog) {
-        // var catalog = client.getCatalog(context.catalogID);
             var schema = catalog.schemas.get(context.schemaName);
-        // catalog.introspect().then(function success(schemas) {
             console.log('Schema: ', schema);
-            // var schema = schemas[context.schemaName];
             if (schema) {
                 var table = schema.tables.get(context.tableName);
-                // var table = schema.getTable(context.tableName);
                 // BinaryPredicate(column, operator, value) is used for building a filter
                 // This predicate is used to get the image based on the id of the image the user is navigating to
                 var imageFilter = new ERMrest.BinaryPredicate(table.columns.get('id'), ERMrest.OPERATOR.EQUAL, context.imageID);
                 var imagePath = new ERMrest.DataPath(table).filter(imageFilter);
                 imagePath.entity.get().then(function success(entity) {
-                // var filteredTable = table.getFilteredTable(['id=' + context.imageID]);
-                // if (filteredTable) {
-                    // filteredTable.getEntities().then(function success(_entities) {
                         image.entity = entity[0];
-                        // image.entity = _entities[0];
                         iframe.location.replace(image.entity.uri);
                         console.log('Image: ', image);
 
                         var annotationTable = schema.tables.get('annotation');
                         var annotationFilter = new ERMrest.BinaryPredicate(annotationTable.columns.get('image_id'), ERMrest.OPERATOR.EQUAL, context.imageID);
-                        var annotationPath = imagePath.extend(annotationTable).datapath.filter(annotationFilter);
-                        // var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
+                        var annotationPath = new ERMrest.DataPath(annotationTable).filter(annotationFilter);
                         annotationPath.entity.get().then(function success(_annotations) {
-                        // annotationTable.getEntities().then(function success(_annotations) {
                             var length = _annotations.length;
                             for (var i = 0; i < length; i++) {
                                 _annotations[i].table = annotationPath.context.table.name;
@@ -169,42 +157,47 @@
                                 iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                             }
                             console.log('Annotations: ', annotations);
+
+                            var commentTable = schema.tables.get('annotation_comment');
+                            var commentFilterArray = [];
+                            // Go through the set of annotations and build a BinaryPredicate for each one to grab it's comments
+                            angular.forEach(annotations, function(annotation) {
+                                commentFilterArray.push(new ERMrest.BinaryPredicate(commentTable.columns.get('annotation_id'), ERMrest.OPERATOR.EQUAL, annotation.id));
+                            });
+                            // Disjunction checks if each comment has each annotation id and if it has 1 of the IDs then it is a comment associated with that set of annotaitons for that image
+                            var disjunctionFilter = new ERMrest.Disjunction(commentFilterArray);
+                            var commentPath = new ERMrest.DataPath(commentTable).filter(disjunctionFilter);
+
+                            // Get all the comments for this image
+                            commentPath.entity.get().then(function success(_comments){
+                                var length = _comments.length;
+                                for (var i = 0; i < length; i++) {
+                                    var annotationId = _comments[i].annotation_id;
+                                    if (!comments[annotationId]) {
+                                        comments[annotationId] = [];
+                                    }
+                                    comments[annotationId].push(_comments[i]);
+                                }
+                                console.log('Comments: ', comments);
+                            }, function error(response) {
+                                console.log(response);
+                            });
+
                         }, function error(response) {
                             throw response;
                         });
-
-                        // Get all the comments for this image
-                        var commentTable = schema.tables.get('annotation_comment');
-                        // var commentTable = annotationTable.getRelatedTable(context.schemaName, 'annotation_comment');
-                        commentTable.entity.get().then(function success(_comments) {
-                        // commentTable.getEntities().then(function success(_comments) {
-                            var length = _comments.length;
-                            for (var i = 0; i < length; i++) {
-                                var annotationId = _comments[i].data.annotation_id;
-                                if (!comments[annotationId]) {
-                                    comments[annotationId] = [];
-                                }
-                                comments[annotationId].push(_comments[i]);
-                            }
-                            console.log('Comments: ', comments);
-                        }, function error(response) {
-                            console.log(response);
-                        });
-// table.entity.get(filter) => entity response
                     }, function error(response) {
                         throw response;
                     });
-                // }
 
                 // Get all rows from "anatomy" table
                 var anatomyTable = schema.tables.get('anatomy');
-                // var anatomyTable = schema.getTable('anatomy');
-                anatomyTable.entity.get().then(function success(_anatomies) {
-                // anatomyTable.getEntities().then(function success(_anatomies) {
+                var anatomyPath = new ERMrest.DataPath(anatomyTable);
+                anatomyPath.entity.get().then(function success(_anatomies) {
                     anatomies.push('No Anatomy');
                     var length = _anatomies.length;
                     for (var j = 0; j < length; j++) {
-                        anatomies.push(_anatomies[j].data.term);
+                        anatomies.push(_anatomies[j].term);
                     }
                 }, function error(response) {
                     throw response;
@@ -212,12 +205,11 @@
 
                 // Get all rows from "image_grade_code" table.
                 var statusTable = schema.tables.get('image_grade_code');
-                // var statusTable = schema.getTable('image_grade_code');
-                statusTable.entity.get().then(function success(_statuses) {
-                // statusTable.getEntities().then(function success(_statuses) {
+                var statusPath = new ERMrest.DataPath(statusTable);
+                statusPath.entity.get().then(function success(_statuses) {
                     var length = _statuses.length;
                     for (var j = 0; j < length; j++) {
-                        statuses.push(_statuses[j].data.code);
+                        statuses.push(_statuses[j].code);
                     }
                 }, function error(response) {
                     throw response;
@@ -226,13 +218,12 @@
 
                 // Get all rows from "tissues" table
                 var tissueTable = schema.tables.get('tissue');
-                // var tissueTable = schema.getTable('tissue');
-                tissueTable.entity.get().then(function success(_tissues) {
-                // tissueTable.getEntities().then(function success(_tissues) {
+                var tissuePath = new ERMrest.DataPath(tissueTable);
+                tissuePath.entity.get().then(function success(_tissues) {
                     var length = _tissues.length;
                     vocabs['tissue'] = [];
                     for (var j = 0; j < length; j++) {
-                        vocabs['tissue'].push(_tissues[j].data.term);
+                        vocabs['tissue'].push(_tissues[j].term);
                     }
                 }, function error(response) {
                     throw response;
@@ -240,13 +231,12 @@
 
                 // Get all rows from "age stage" table
                 var ageStageTable = schema.tables.get('age_stage');
-                // var ageStageTable = schema.getTable('age_stage');
-                ageStageTable.entity.get().then(function success(_stages) {
-                // ageStageTable.getEntities().then(function success(_stages) {
+                var ageStagePath = new ERMrest.DataPath(ageStageTable);
+                ageStagePath.entity.get().then(function success(_stages) {
                     var length = _stages.length;
                     vocabs['age_stage'] = [];
                     for (var j = 0; j < length; j++) {
-                        vocabs['age_stage'].push(_stages[j].data.term);
+                        vocabs['age_stage'].push(_stages[j].term);
                     }
                 }, function error(response) {
                     throw response;
@@ -254,13 +244,12 @@
 
                 // Get all rows from "gender" table
                 var genderTable = schema.tables.get('gender');
-                // var genderTable = schema.getTable('gender');
-                genderTable.entity.get().then(function success(_genders) {
-                // genderTable.getEntities().then(function success(_genders) {
+                var genderPath = new ERMrest.DataPath(genderTable);
+                genderPath.entity.get().then(function success(_genders) {
                     var length = _genders.length;
                     vocabs['gender'] = [];
                     for (var j = 0; j < length; j++) {
-                        vocabs['gender'].push(_genders[j].data.term);
+                        vocabs['gender'].push(_genders[j].term);
                     }
                 }, function error(response) {
                     throw response;
@@ -268,13 +257,12 @@
 
                 // Get all rows from "specimen_fixation" table
                 var specimenFixationTable = schema.tables.get('specimen_fixation');
-                // var specimenFixationTable = schema.getTable('specimen_fixation');
-                specimenFixationTable.entity.get().then(function success(_fixations) {
-                // specimenFixationTable.getEntities().then(function success(_fixations) {
+                var specimenFixationPath = new ERMrest.DataPath(specimenFixationTable);
+                specimenFixationPath.entity.get().then(function success(_fixations) {
                     var length = _fixations.length;
                     vocabs['specimen_fixation'] = [];
                     for (var j = 0; j < length; j++) {
-                        vocabs['specimen_fixation'].push(_fixations[j].data.term);
+                        vocabs['specimen_fixation'].push(_fixations[j].term);
                     }
                 }, function error(response) {
                     throw response;
@@ -282,13 +270,12 @@
 
                 // Get all rows from "embedding_medium" table
                 var embeddingMediumTable = schema.tables.get('embedding_medium');
-                // var embeddingMediumTable = schema.getTable('embedding_medium');
-                embeddingMediumTable.entity.get().then(function success(_media) {
-                // embeddingMediumTable.getEntities().then(function success(_media) {
+                var embeddingMediumPath = new ERMrest.DataPath(embeddingMediumTable);
+                embeddingMediumPath.entity.get().then(function success(_media) {
                     var length = _media.length;
                     vocabs['embedding_medium'] = [];
                     for (var j = 0; j < _media.length; j++) {
-                        vocabs['embedding_medium'].push(_media[j].data.term);
+                        vocabs['embedding_medium'].push(_media[j].term);
                     }
                 }, function error(response) {
                     throw response;
@@ -296,29 +283,24 @@
 
                 // Get all rows from "staining_protocol" table
                 var stainingProtocolTable = schema.tables.get('staining_protocol');
-                // var stainingProtocolTable = schema.getTable('staining_protocol');
-                stainingProtocolTable.entity.get().then(function success(_protocols) {
-                // stainingProtocolTable.getEntities().then(function success(_protocols) {
+                var stainingProtocolPath = new ERMrest.DataPath(stainingProtocolTable);
+                stainingProtocolPath.entity.get().then(function success(_protocols) {
                     var length = _protocols.length;
                     vocabs['staining_protocol'] = [];
                     for (var j = 0; j < length; j++) {
-                        vocabs['staining_protocol'].push(_protocols[j].data.term);
+                        vocabs['staining_protocol'].push(_protocols[j].term);
                     }
                 }, function error(response) {
                     throw response;
                 });
             }
-// catalog.introspect() => schemas response
-        // }, function error(response) {
-        //     console.log(response);
-        // });
-// catalog promise response
         }, function error(response) {
           console.log(response);
         });
 
 
         $window.addEventListener('message', function(event) {
+            console.log("Event: ", event);
             if (event.origin === origin) {
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;

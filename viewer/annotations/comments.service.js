@@ -22,7 +22,7 @@
             var commentTable = image.entity.getRelatedTable(context.schemaName, 'annotation').getRelatedTable(context.schemaName, 'annotation_comment');
             return commentTable.entity.post(newComment, ['id', 'created']).then(function success(comment) {
             // return commentTable.createEntity(newComment, ['id', 'created']).then(function success(comment) {
-                var annotationId = comment.data.annotation_id;
+                var annotationId = comment.annotation_id;
                 if (!comments[annotationId]) {
                     comments[annotationId] = [];
                 }
@@ -36,7 +36,7 @@
         function deleteComment(comment) {
             // delete hasn't been implemented in refactor branch yet
             comment.delete().then(function success() {
-                var annotationComments = comments[comment.data.annotation_id];
+                var annotationComments = comments[comment.annotation_id];
                 var index = annotationComments.indexOf(comment);
                 annotationComments.splice(index, 1);
             }, function error(response) {

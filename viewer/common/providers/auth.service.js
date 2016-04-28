@@ -47,7 +47,7 @@
         //     if (user.role == 'curator') {
         //         return true;
         //     }
-        //     if (user.role == 'annotator' && user.name == comment.data.author) {
+        //     if (user.role == 'annotator' && user.name == comment.author) {
         //         return true;
         //     }
         //     return false;
