@@ -185,6 +185,7 @@
                     var modalInstance = $uibModal.open({
                         templateUrl: 'annotations/confirm_delete.html',
                         controller: 'ConfirmDeleteController',
+                        controllerAs: 'ctrl',
                         size: 'sm'
                     });
 
