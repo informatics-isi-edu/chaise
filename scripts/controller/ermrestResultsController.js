@@ -336,6 +336,8 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
   	if ($scope.if_type(facet, 'slider') || $scope.if_type(facet, 'date')) {
   		$scope.FacetsData.box[facet['table']][facet['name']]['min'] = $scope.FacetsData.box[facet['table']][facet['name']]['floor'];
   		$scope.FacetsData.box[facet['table']][facet['name']]['max'] = $scope.FacetsData.box[facet['table']][facet['name']]['ceil'];
+  		delete $scope.FacetsData.box[facet['table']][facet['name']]['left'];
+  		delete $scope.FacetsData.box[facet['table']][facet['name']]['right'];
   		$scope.delay_slider(facet);
   	} else if ($scope.if_type(facet, 'text')) {
   		$scope.FacetsData.box[facet['table']][facet['name']]['value'] = '';
