@@ -20,6 +20,7 @@ angular.module('recordset', ['ERMrest'])
 // Register the 'context' object which can be accessed by config and other
 // services.
 .constant('context', {
+    chaiseURL: '',  // 'https://www.example.org/chaise
     serviceURL: '', // 'https://www.example.org/ermrest'
     catalogID: '',  // '1'
     schemaName: '', // 'isa'
@@ -44,6 +45,10 @@ angular.module('recordset', ['ERMrest'])
     if (hash === undefined || hash == '' || hash.length == 1) {
         return;
     }
+
+    context.chaiseURL = window.location.href.replace(hash, '');
+    context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
+    console.log(context.chaiseURL);
 
     // parse out @sort(...)
     if (hash.indexOf("@sort(") !== -1) {
@@ -97,15 +102,17 @@ angular.module('recordset', ['ERMrest'])
 // Register the 'recordsetModel' object, which can be accessed by other
 // services, but cannot be access by providers (and config, apparently).
 .value('recordsetModel', {
-    tableName: null,
-    header:[],
-    columns: [],
+    tableName: null,  // table name
+    header:[],        // columns display names
+    columns: [],      // column names
     filter: null,
     sortby: null,     // column name, user selected or null
     sortOrder: null,  // asc (default) or desc
-    rowset:[],
-    key: [] ,
+    rowset:null,      // rows of data
+    rowlink:[],       // row's link to its record page, in same order as in rowset.data
+    key: [] ,         // primary key set as an array of Column objects
     count: 0          // total number of rows
+
 })
 
 .factory('pageInfo', ['context', function(context) {
@@ -164,6 +171,22 @@ angular.module('recordset', ['ERMrest'])
             pageInfo.loading = false;
             console.log(rowset);
             recordsetModel.rowset = rowset;
+
+            // row links
+            recordsetModel.rowlink = [];
+            for (var r = 0; r < rowset.data.length; r ++) {
+                var row = rowset.data[r];
+                var path = context.chaiseURL + "/record/#" + context.catalogID + "/" + context.schemaName + ":" + context.tableName + "/";
+                for (var k = 0; k < recordsetModel.key.length; k++) {
+                    var key = recordsetModel.key[k].name;
+                    if (k === 0) {
+                        path = path + key + "=" + row[key];
+                    } else {
+                        path = path + "&" + key + "=" + row[key];
+                    }
+                }
+                recordsetModel.rowlink.push(path);
+            }
 
             // enable buttons
             pageInfo.recordStart = 1;
@@ -288,6 +311,10 @@ angular.module('recordset', ['ERMrest'])
 
     };
 
+    $scope.go = function(url) {
+        location.assign(url);
+    }
+
 }])
 
 // Register work to be performed after loading all modules
@@ -368,6 +395,21 @@ angular.module('recordset', ['ERMrest'])
             table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
                 console.log(rowset);
                 recordsetModel.rowset = rowset;
+
+                recordsetModel.rowlink = [];
+                for (var r = 0; r < rowset.data.length; r ++) {
+                    var row = rowset.data[r];
+                    var path = context.chaiseURL + "/record/#" + context.catalogID + "/" + context.schemaName + ":" + context.tableName + "/";
+                    for (var k = 0; k < recordsetModel.key.length; k++) {
+                        var key = recordsetModel.key[k].name;
+                        if (k === 0) {
+                            path = path + key + "=" + row[key];
+                        } else {
+                            path = path + "&" + key + "=" + row[key];
+                        }
+                    }
+                    recordsetModel.rowlink.push(path);
+                }
 
                 pageInfo.loading = false;
                 pageInfo.recordStart = 1;

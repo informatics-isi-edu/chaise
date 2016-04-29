@@ -54,7 +54,7 @@
 
     <!-- record table -->
     <div>
-        <table class="table table-striped table-bordered">
+        <table class="table table-striped table-bordered table-hover">
 
             <!-- sortable column header -->
             <thead>
@@ -69,7 +69,7 @@
             </thead>
 
             <!-- rows -->
-            <tr ng-repeat="row in vm.rowset.data" >
+            <tr ng-repeat="row in vm.rowset.data" ng-click="go(vm.rowlink[$index])" ng-style="{'cursor': 'pointer'}">
                 <td ng-repeat="name in vm.header">{{row[name]}}</td>
             </tr>
         </table>
