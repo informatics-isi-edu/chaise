@@ -114,7 +114,7 @@
                 </accordion-group>
 
                 <!-- EMBEDED TABLES -->
-                <accordion-group ng-repeat="(title, elements) in entity.embedTables | orderBy: title" is-open="embed.open">
+                <accordion-group ng-repeat="(title, elements) in entity.embedTables" is-open="embed.open">
                     <accordion-heading><div ng-class="{'active': embed.open }">{{title | removeUnderScores}}</div></accordion-heading>
                         <ul id="embed">
                             <li ng-repeat="element in elements" class="embed-block">
