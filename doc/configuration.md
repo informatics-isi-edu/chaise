@@ -30,3 +30,4 @@ The below table explains the usage of the default parameters:
 | dataBrowser | An URL | /chaise/search | "dataBrowser":\<value\> | N/A | The URL to continue after a logout. |
 | defaultAnnotationColor | red, orange, gold, green, blue, purple | red | "defaultAnnotationColor":\<value\> | N/A | In `/chaise/viewer`, annotations' borders and colors will default to this value. |
 | confirmDelete | A boolean | true | "confirmDelete":\<value\> | N/A | Whether the user will be prompted for confirming on deletion of comments and annotations |
+| hideSearchTextFacet | A boolean | false | "hideSearchTextFacet":\<value\> | N/A | Whether the search box for attributes names and values should be hidden |
