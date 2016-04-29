@@ -507,7 +507,8 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
+                                <!-- Commenting this out while we wait for OSD to support editing annotation type -->
+                                <!-- <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
                                     <br>
                                     <div class="col-md-12">
                                         <label>Annotation Type</label>
@@ -518,7 +519,7 @@
                                             </ui-select-choices>
                                         </ui-select>
                                     </div>
-                                </div>
+                                </div> -->
                                 <!-- Edit Form: Annotation Anatomy -->
                                 <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
                                     <br>
