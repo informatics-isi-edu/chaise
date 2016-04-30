@@ -21,7 +21,7 @@
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
 
-        vm.editedAnnotation = null; // Track which annotation is being edited right now
+        resetEditedValues();
         var originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
         vm.editAnnotation = editAnnotation;
         vm.cancelEdit = cancelEdit;
@@ -164,19 +164,22 @@
         }
 
         function cancelEdit(annotation) {
-            vm.editedAnnotation = null;
-            // TODO @howdyjessie What is the point of the following code
-            var data = annotation;
-            data.description = originalAnnotation.description;
-            data.anatomy = originalAnnotation.anatomy;
-            data.config = originalAnnotation.config;
-            data.type = originalAnnotation.type;
+            resetEditedValues();
+            annotation.description = originalAnnotation.description;
+            annotation.anatomy = originalAnnotation.anatomy;
+            annotation.config = originalAnnotation.config;
+            annotation.type = originalAnnotation.type;
         }
 
         function updateAnnotation(annotation) {
             annotation = vm.editedAnnotation;
             AnnotationsService.updateAnnotation(annotation);
-            vm.editedAnnotation = null;
+            resetEditedValues();
+        }
+
+        function resetEditedValues() {
+            vm.editedAnnotation = null; // Track which annotation is being edited right now
+            vm.editedAnnotationDomId = null; // Tracks the currently edited annotation's id for the dom for showing/hiding forms
         }
 
         function deleteAnnotation(annotation) {
@@ -218,14 +221,14 @@
             return AnnotationsService.centerAnnotation(annotation);
         }
 
-        function getNumComments(annotation) {
-            return CommentsService.getNumComments(annotation.id);
-        }
-
         // Returns boolean
         function hasComments(annotation) {
             // if there are comments return true
             return getNumComments(annotation) > 0 ? true : false;
+        }
+
+        function getNumComments(annotation) {
+            return CommentsService.getNumComments(annotation.id);
         }
 
         // Return an annotation/section that matches an object of coordinates

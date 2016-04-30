@@ -108,14 +108,16 @@
         function deleteAnnotation(annotation) {
             // Delete from ERMrest
             if (!table) table = context.schema.tables.get('annotation');
-            // NOTE: delete takes a filter
-            table.entity.delete().then(function success(response) {
+            var deleteFilter = new ERMrest.BinaryPredicate(table.columns.get('id'), ERMrest.OPERATOR.EQUAL, annotation.id);
+            table.entity.delete(deleteFilter).then(function success(response) {
                 // Delete from the 'annotations' provider
                 var index = annotations.indexOf(annotation);
                 annotations.splice(index, 1);
 
                 // Delete in Annotorious
-                iframe.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
+                var stub = {};
+                stub.data = annotation;
+                iframe.postMessage({messageType: 'deleteAnnotation', content: stub}, origin);
             }, function error(response) {
                 console.log(response);
             });
