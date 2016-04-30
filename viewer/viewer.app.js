@@ -162,12 +162,16 @@
                             _annotations[i].table = annotationPath.context.table.name;
                             var annotation = _annotations[i];
                             annotations.push(annotation);
+                            // TODO remove this stub stuff
+                            // this is temporary so annotorious doesn't cry all the time
+                            var stub = {};
+                            stub.data = annotation;
                             if (annotation.type == 'arrow') {
-                                arrows.push(annotation);
+                                arrows.push(stub);
                             } else if (annotation.type == 'rectangle') {
-                                rectangles.push(annotation);
+                                rectangles.push(stub);
                             } else if (annotation.type == 'section') {
-                                sections.push(annotation);
+                                sections.push(stub);
                             }
                         }
                         chaiseReady = true;

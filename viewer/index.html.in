@@ -492,7 +492,7 @@
                                     </div>
                                 </div>
                             </div><!-- /Annotation Display Card -->
-                            <form ng-show="annotations.editedAnnotation == (annotation.table + '-' + annotation.id)" id="edit-annotation-form">
+                            <form ng-show="annotations.editedAnnotation.domId == (annotation.table + '-' + annotation.id)" id="edit-annotation-form">
                                 <div class="row">
                                     <div class="col-md-10">
                                         <span class="h4">

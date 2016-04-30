@@ -97,8 +97,6 @@
 
             vm.query = vm.query.toLowerCase();
 
-//TODO check data objects
-            annotation = annotation.data;
             var author = annotation.author;
             var props = [annotation.anatomy, annotation.description, author.display_name, author.full_name, author.email, annotation.created];
             var numProps = props.length;
@@ -112,7 +110,7 @@
             if (commentsArr) {
                 var numComments = commentsArr.length;
                 for (var c = 0; c < numComments; c++) {
-                    var comment = commentsArr[c].data;
+                    var comment = commentsArr[c];
                     var commentAuthor = comment.author;
                     var commentProps = [comment.comment, comment.created, commentAuthor.display_name, commentAuthor.full_name, commentAuthor.email];
                     var numCommentProps = commentProps.length;
@@ -149,7 +147,6 @@
             return AnnotationsService.cancelNewAnnotation();
         }
 
-// TODO check data object
         function editAnnotation(annotation) {
             // Must make a copy instead of assigning to remove original annotation's
             // references. Otherwise, changing something in editedAnnotation will
@@ -166,9 +163,9 @@
             };
         }
 
-//TODO check data
         function cancelEdit(annotation) {
             vm.editedAnnotation = null;
+            // TODO @howdyjessie What is the point of the following code
             var data = annotation;
             data.description = originalAnnotation.description;
             data.anatomy = originalAnnotation.anatomy;
@@ -259,9 +256,8 @@
             return (client.display_name ? client.display_name : (client.full_name ? client.full_name : client.email ));
         }
 
-//TODO check data
         function sortSectionsFirst(annotation) {
-            if (annotation.data.type == 'section') {
+            if (annotation.type == 'section') {
                 return 0;
             }
         }

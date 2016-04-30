@@ -55,9 +55,16 @@
 
             var table = context.schema.tables.get('annotation');
             return table.entity.post(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
-                annotations.push(annotation);
-                iframe.postMessage({messageType: messageType, content: annotation}, origin);
-                return annotation;
+                // table.entity.post returns an array of objects now.
+                var _annotation = annotation[0];
+                _annotation.table = table.name;
+                annotations.push(_annotation);
+                //TODO remove when annotorious refactored
+                //temporary stubbing so annotorious stops crying about data
+                var stub = {};
+                stub.data = _annotation;
+                iframe.postMessage({messageType: messageType, content: stub}, origin);
+                return _annotation;
             }, function error(response) {
                 AlertsService.addAlert({
                     type: 'error',
