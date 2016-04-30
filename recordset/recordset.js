@@ -109,7 +109,6 @@ angular.module('recordset', ['ERMrest'])
     sortby: null,     // column name, user selected or null
     sortOrder: null,  // asc (default) or desc
     rowset:null,      // rows of data
-    rowlink:[],       // row's link to its record page, in same order as in rowset.data
     key: [] ,         // primary key set as an array of Column objects
     count: 0          // total number of rows
 
@@ -171,22 +170,6 @@ angular.module('recordset', ['ERMrest'])
             pageInfo.loading = false;
             console.log(rowset);
             recordsetModel.rowset = rowset;
-
-            // row links
-            recordsetModel.rowlink = [];
-            for (var r = 0; r < rowset.data.length; r ++) {
-                var row = rowset.data[r];
-                var path = context.chaiseURL + "/record/#" + context.catalogID + "/" + context.schemaName + ":" + context.tableName + "/";
-                for (var k = 0; k < recordsetModel.key.length; k++) {
-                    var key = recordsetModel.key[k].name;
-                    if (k === 0) {
-                        path = path + key + "=" + row[key];
-                    } else {
-                        path = path + "&" + key + "=" + row[key];
-                    }
-                }
-                recordsetModel.rowlink.push(path);
-            }
 
             // enable buttons
             pageInfo.recordStart = 1;
@@ -311,9 +294,21 @@ angular.module('recordset', ['ERMrest'])
 
     };
 
-    $scope.go = function(url) {
-        location.assign(url);
+    $scope.gotoRowLink = function(index) {
+        var row = recordsetModel.rowset.data[index];
+        var path = context.chaiseURL + "/record/#" + context.catalogID + "/" + context.schemaName + ":" + context.tableName + "/";
+        for (var k = 0; k < recordsetModel.key.length; k++) {
+            var key = recordsetModel.key[k].name;
+            if (k === 0) {
+                path = path + key + "=" + row[key];
+            } else {
+                path = path + "&" + key + "=" + row[key];
+            }
+        }
+
+        location.assign(path);
     }
+
 
 }])
 
@@ -395,21 +390,6 @@ angular.module('recordset', ['ERMrest'])
             table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
                 console.log(rowset);
                 recordsetModel.rowset = rowset;
-
-                recordsetModel.rowlink = [];
-                for (var r = 0; r < rowset.data.length; r ++) {
-                    var row = rowset.data[r];
-                    var path = context.chaiseURL + "/record/#" + context.catalogID + "/" + context.schemaName + ":" + context.tableName + "/";
-                    for (var k = 0; k < recordsetModel.key.length; k++) {
-                        var key = recordsetModel.key[k].name;
-                        if (k === 0) {
-                            path = path + key + "=" + row[key];
-                        } else {
-                            path = path + "&" + key + "=" + row[key];
-                        }
-                    }
-                    recordsetModel.rowlink.push(path);
-                }
 
                 pageInfo.loading = false;
                 pageInfo.recordStart = 1;
