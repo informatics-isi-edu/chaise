@@ -10,7 +10,7 @@ record_urls()
   do
     # This does NOT take into account URL encoding
     # if ${4} (schema) is something like "schema 1", the blankspace character will not be encoded properly as %20
-    echo "https://${1}/${2}/record#${3}/${4}:${5}/${6}=${key}"
+    echo "https://${1}/${2}/record/#${3}/${4}:${5}/${6}=${key}"
   done
 }
 

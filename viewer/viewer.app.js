@@ -3,7 +3,7 @@
 
     var client;
 
-    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'chaise.filters', 'ui.select'])
+    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'chaise.filters', 'ui.select', 'ui.bootstrap'])
 
     // Configure the context info from the URI
     .config(['context', function configureContext(context) {
@@ -11,10 +11,11 @@
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
+        // TODO: Style guide preferences?
         context.serviceURL = window.location.origin + '/ermrest';
 
         if (chaiseConfig.ermrestLocation) {
-            context.serviceURL = chaiseConfig.ermrestLocation + '/ermrest';
+            context.serviceURL = chaiseConfig.ermrestLocation;
         }
 
         var hash = window.location.hash;
@@ -31,7 +32,6 @@
                 context.schemaName = params[0];
                 context.tableName = params[1];
             } else {
-                context.schemaName = '';
                 context.tableName = params[0];
             }
         }
@@ -41,13 +41,15 @@
                 context.imageID = params[1];
             }
         }
+
+        // TODO: Check if context has everything it needs before proceeding. If not, Bad Request
     }])
 
     // Get a client connection to ERMrest
     // Note: Only Providers and Constants can be dependencies in .config blocks. So
     // if you want to use a factory or service (e.g. $window or your custom one)
-    // in a .config block, you add append 'Provider' to the dependency name and
-    // run .$get() on it. This returns a Provider instance of the factory/service.
+    // in a .config block, you append 'Provider' to the dependency name and call
+    // .$get() on it. This returns a Provider instance of the factory/service.
     .config(['ermrestServerFactoryProvider', 'context', function configureClient(ermrestServerFactoryProvider, context) {
         client = ermrestServerFactoryProvider.$get().getServer(context.serviceURL);
     }])
@@ -94,8 +96,10 @@
             console.log('User: ', user);
             return;
         }, function error(response) {
+            // TODO: Abstract this away..
             if (response.status == 401 || response.status == 404) {
                 if (chaiseConfig.authnProvider == 'goauth') {
+                    // TODO: Is it worth injecting $window here?
                     getGoauth(encodeSafeURIComponent(window.location.href));
                 }
                 console.log(response);
@@ -123,11 +127,15 @@
         }
     }])
 
-    // Get session info, hydrate values providers, and set up iframe
-    .run(['$http', '$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($http, $window, context, image, annotations, comments, sections, anatomies, statuses, vocabs) {
+    // Hydrate values providers and set up iframe
+    .run(['$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($window, context, image, annotations, comments, anatomies, statuses, vocabs) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
+        var chaiseReady = false;
+        var arrows = [];
+        var rectangles = [];
+        var sections = [];
 
         client.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
@@ -142,50 +150,60 @@
                 var imagePathColumn = imagePath.context.columns.get('id');
                 var imageFilter = new ERMrest.BinaryPredicate(imagePathColumn, ERMrest.OPERATOR.EQUAL, context.imageID);
                 imagePath.filter(imageFilter).entity.get().then(function success(entity) {
-                        image.entity = entity[0];
-                        iframe.location.replace(image.entity.uri);
-                        console.log('Image: ', image);
+                    image.entity = entity[0];
+                    iframe.location.replace(image.entity.uri);
+                    console.log('Image: ', image);
 
-                        var annotationTable = schema.tables.get('annotation');
-                        // var annotationFilter = new ERMrest.BinaryPredicate(annotationTable.columns.get('image_id'), ERMrest.OPERATOR.EQUAL, context.imageID);
-                        var annotationPath = imagePath.extend(annotationTable).datapath;
-                        annotationPath.filter(imageFilter).entity.get().then(function success(_annotations) {
-                            var length = _annotations.length;
+                    var annotationTable = schema.tables.get('annotation');
+                    var annotationPath = imagePath.extend(annotationTable).datapath;
+                    annotationPath.filter(imageFilter).entity.get().then(function success(_annotations) {
+                        var length = _annotations.length;
+                        for (var i = 0; i < length; i++) {
+                            _annotations[i].table = annotationPath.context.table.name;
+                            var annotation = _annotations[i];
+                            annotations.push(annotation);
+                            if (annotation.type == 'arrow') {
+                                arrows.push(annotation);
+                            } else if (annotation.type == 'rectangle') {
+                                rectangles.push(annotation);
+                            } else if (annotation.type == 'section') {
+                                sections.push(annotation);
+                            }
+                        }
+                        chaiseReady = true;
+
+                        if (annotoriousReady && chaiseReady) {
+                            iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
+                            iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
+                            iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
+                        }
+                        console.log('Annotations: ', annotations);
+
+                        var commentTable = schema.tables.get('annotation_comment');
+                        var commentPath = annotationPath.extend(commentTable).datapath;
+
+                        // Get all the comments for this image
+                        // Nest comments fetch in annotations so annotations will be fetched and loaded to the DOM before the comments
+                        commentPath.filter(imageFilter).entity.get().then(function success(_comments){
+                            var length = _comments.length;
                             for (var i = 0; i < length; i++) {
-                                _annotations[i].table = annotationPath.context.table.name;
-                                annotations.push(_annotations[i]);
-                            }
-
-                            if (annotoriousReady) {
-                                iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
-                            }
-                            console.log('Annotations: ', annotations);
-
-                            var commentTable = schema.tables.get('annotation_comment');
-                            var commentPath = annotationPath.extend(commentTable).datapath;
-
-                            // Get all the comments for this image
-                            // Nest comments fetch in annotations so annotations will be fetched and loaded to the DOM before the comments
-                            commentPath.filter(imageFilter).entity.get().then(function success(_comments){
-                                var length = _comments.length;
-                                for (var i = 0; i < length; i++) {
-                                    var annotationId = _comments[i].annotation_id;
-                                    if (!comments[annotationId]) {
-                                        comments[annotationId] = [];
-                                    }
-                                    comments[annotationId].push(_comments[i]);
+                                var annotationId = _comments[i].annotation_id;
+                                if (!comments[annotationId]) {
+                                    comments[annotationId] = [];
                                 }
-                                console.log('Comments: ', comments);
-                            }, function error(response) {
-                                console.log(response);
-                            });
-
+                                comments[annotationId].push(_comments[i]);
+                            }
+                            console.log('Comments: ', comments);
                         }, function error(response) {
-                            throw response;
+                            console.log(response);
                         });
+
                     }, function error(response) {
                         throw response;
                     });
+                }, function error(response) {
+                    throw response;
+                });
 
                 // Get all rows from "anatomy" table
                 var anatomyTable = schema.tables.get('anatomy');
@@ -196,6 +214,17 @@
                     for (var j = 0; j < length; j++) {
                         anatomies.push(_anatomies[j].term);
                     }
+                    anatomies.sort(function sortAnatomies(a, b) {
+                        a = a.toLowerCase();
+                        b = b.toLowerCase();
+                        if (a < b) {
+                            return -1;
+                        } else if (a > b) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    });
                 }, function error(response) {
                     throw response;
                 });
@@ -295,19 +324,29 @@
           console.log(response);
         });
 
-
+        // Set up a listener for all "message" events
         $window.addEventListener('message', function(event) {
             if (event.origin === origin) {
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;
-                    if (annotoriousReady) {
+                    if (annotoriousReady && chaiseReady) {
                         iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
-                        iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                        iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
+                        iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
                     }
                 }
             } else {
                 console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
             }
+        });
+
+        // Initialize Bootstrap tooltips
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'bottom',
+                container: 'body',
+                html: true
+            });
         });
     }]);
 

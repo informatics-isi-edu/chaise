@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'sections', 'CommentsService', 'AlertsService', '$window', '$q', function(context, user, image, annotations, sections, CommentsService, AlertsService, $window, $q) {
+    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', '$window', '$q', function(context, user, image, annotations, AlertsService, $window, $q) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
 
@@ -11,7 +11,7 @@
             iframe.postMessage({messageType: 'drawAnnotation'}, origin);
         }
 
-        function createAnnotation(newAnnotation, type) {
+        function createAnnotation(newAnnotation) {
             if (newAnnotation.anatomy == 'No Anatomy') {
                 newAnnotation.anatomy = null;
             }
@@ -27,30 +27,42 @@
                     newAnnotation.shape.geometry.width,
                     newAnnotation.shape.geometry.height
                 ],
-                "description": newAnnotation.description
+                "description": newAnnotation.description,
+                "type": newAnnotation.type,
+                "config": newAnnotation.config
             }];
 
-            if (type == 'section_annotation') {
-                // Section annotations don't need anatomies
-                delete newAnnotation[0].anatomy;
+            var type = newAnnotation[0].type;
+            var messageType = '';
+
+            switch (type) {
+                case 'section':
+                    messageType = 'createSpecialAnnotation';
+                    break;
+                case 'rectangle':
+                    messageType = 'createAnnotation';
+                    break;
+                case 'arrow':
+                    messageType = 'createArrowAnnotation';
+                    break;
+                default:
+                    AlertsService.addAlert({
+                        type: 'error',
+                        message: "Sorry, the annotation could not be created. Please try again and make sure the annotation type is either a Section, Rectangle, or Arrow."
+                    });
+                    console.log('Attempted to create an annotation of type "' + type + '" but this is an invalid type.');
             }
 
             var table = context.schema.tables.get('annotation');
             return table.entity.post(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
-            // return table.createEntity(newAnnotation, ['id', 'created']).then(function success(annotation) {
-                var messageType = '';
-                switch (type) {
-                    case 'annotation':
-                        messageType = 'createAnnotation';
-                        annotations.push(annotation);
-                        break;
-                    case 'section_annotation':
-                        messageType = 'createSpecialAnnotation';
-                        sections.push(annotation);
-                        break;
-                }
+                annotations.push(annotation);
                 iframe.postMessage({messageType: messageType, content: annotation}, origin);
+                return annotation;
             }, function error(response) {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: response
+                });
                 console.log(response);
             });
         }
@@ -71,49 +83,27 @@
                 // Update in Annotorious
                 iframe.postMessage({messageType: 'updateAnnotation', content: annotation}, origin);
             }, function error(response) {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: response
+                });
                 console.log(response);
             });
         }
 
-        function getNumComments(annotationId) {
-            return CommentsService.getNumComments(annotationId);
-        }
-
-        // Returns a boolean
-        function hasComments(annotation) {
-            // If there are comments on annotation, return false.
-            if (getNumComments(annotation.id) > 0) {
-                return true;
-            }
-            return false;
-        }
-
         function deleteAnnotation(annotation) {
-            if (!hasComments(annotation)) {
-                // Delete from ERMrest
-                // delete hasn't been implemented in the refactor branch yet
-                annotation.delete().then(function success(response) {
-                    // Delete from the 'annotations' or 'sections' provider
-                    var type = annotation.table;
-                    if (type == 'annotation') {
-                        var index = annotations.indexOf(annotation);
-                        annotations.splice(index, 1);
-                    } else if (type == 'section_annotation') {
-                        var index = sections.indexOf(annotation);
-                        sections.splice(index, 1);
-                    }
+            // Delete from ERMrest
+            // delete hasn't been implemented in the refactor branch yet
+            annotation.delete().then(function success(response) {
+                // Delete from the 'annotations' provider
+                var index = annotations.indexOf(annotation);
+                annotations.splice(index, 1);
 
-                    // Delete in Annotorious
-                    iframe.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
-                }, function error(response) {
-                    console.log(response);
-                });
-            } else {
-                AlertsService.addAlert({
-                    type: 'error',
-                    message: 'Sorry, this annotation cannot be deleted because there are comments on it.'
-                });
-            }
+                // Delete in Annotorious
+                iframe.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
+            }, function error(response) {
+                console.log(response);
+            });
         }
 
         function centerAnnotation(annotation) {
@@ -126,8 +116,7 @@
             cancelNewAnnotation: cancelNewAnnotation,
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
-            centerAnnotation: centerAnnotation,
-            getNumComments: getNumComments
+            centerAnnotation: centerAnnotation
         };
 
     }]);

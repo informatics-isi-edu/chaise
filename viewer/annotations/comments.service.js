@@ -19,16 +19,29 @@
                 "comment": newComment.comment
             }];
 
-            var commentTable = image.entity.getRelatedTable(context.schemaName, 'annotation').getRelatedTable(context.schemaName, 'annotation_comment');
-            return commentTable.entity.post(newComment, ['id', 'created']).then(function success(comment) {
+            var commentTable = context.schema.tables.get('annotation_comment');
+            return commentTable.entity.post(newComment, ['id', 'created', 'last_modified']).then(function success(comment) {
             // return commentTable.createEntity(newComment, ['id', 'created']).then(function success(comment) {
                 var annotationId = comment.annotation_id;
                 if (!comments[annotationId]) {
                     comments[annotationId] = [];
                 }
                 comments[annotationId].push(comment);
-                console.log('Comments: ', comments);
             }, function error(response) {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: response
+                });
+                console.log(response);
+            });
+        }
+
+        function updateComment(comment) {
+            comment.update().then(function success(response) {
+                // Nothing to change in the state of the app
+                // comments[comment.annotation_id][comment] is changed in place from the html
+                console.log('Comments: ', comments);
+            }, function error(repsonse) {
                 console.log(response);
             });
         }
@@ -40,6 +53,10 @@
                 var index = annotationComments.indexOf(comment);
                 annotationComments.splice(index, 1);
             }, function error(response) {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: response
+                });
                 console.log(response);
             });
         }
@@ -47,6 +64,7 @@
         return {
             getNumComments: getNumComments,
             createComment: createComment,
+            updateComment: updateComment,
             deleteComment: deleteComment
         };
     }]);

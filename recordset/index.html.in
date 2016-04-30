@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" id="recordset" ng-app="recordset">
+    <head>
+        <meta charset="UTF-8">
+        <title>Record Set App</title>
+        %ASSETS%
+    </head>
+    <body>
+        <div class="container-fluid">
+        %TEMPLATES%
+        </div>
+    </body>
+</html>

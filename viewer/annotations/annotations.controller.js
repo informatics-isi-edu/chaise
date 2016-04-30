@@ -3,22 +3,25 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AuthService', 'annotations', 'sections', 'anatomies', 'AnnotationsService', '$window', '$scope', function AnnotationsController(AuthService, annotations, sections, anatomies, AnnotationsService, $window, $scope) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', '$window', '$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, $window, $scope, $timeout, $uibModal, AlertsService) {
         var vm = this;
         vm.annotations = annotations;
-        vm.sections = sections;
         vm.anatomies = anatomies;
+        vm.colors = ['red', 'orange', 'gold', 'green', 'blue', 'purple'];
+        vm.defaultColor = chaiseConfig.defaultAnnotationColor || 'red';
+        vm.annotationTypes = ['rectangle', 'arrow']; // 'section' excluded b/c once you set an annotation as a section, it can't be changed to other types
+        vm.filterByType = {section: true, rectangle: true, arrow: true}; // show all annotation types by default
 
         vm.filterAnnotations = filterAnnotations;
+        vm.sortSectionsFirst = sortSectionsFirst;
 
         vm.createMode = false;
-        vm.newAnnotation = null;
-        vm.newAnnotationType = null; // Track whether a new annotation is 'annotation' or 'section' type
+        vm.newAnnotation = {config:{color: vm.defaultColor}};
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
 
-        vm.editedAnnotation = null; // Track which annotation is being edited right now; used to show/hide the right UI elements depending on which one is being edited.
+        vm.editedAnnotation = null; // Track which annotation is being edited right now
         var originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
         vm.editAnnotation = editAnnotation;
         vm.cancelEdit = cancelEdit;
@@ -28,6 +31,7 @@
 
         vm.highlightedAnnotation = null;
         vm.centerAnnotation = centerAnnotation;
+        vm.scrollIntoView = scrollIntoView;
 
         vm.getNumComments = getNumComments;
         vm.authorName = authorName;
@@ -38,82 +42,106 @@
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
+            // TODO: Check if origin is valid first; if not, return and exit.
+            // Do this for the other listeners as well.
             if (event.origin === window.location.origin) {
                 var data = event.data;
                 var messageType = data.messageType;
+
                 switch (messageType) {
+                    case 'annotoriousReady':
+                        // annotoriousReady case handled in viewer.app.js.
+                        // Repeating the case here to avoid triggering default case
+                        break;
                     case 'annotationDrawn':
-                        vm.newAnnotation = {
-                            description: '',
-                            shape: data.content.shape
-                        };
+                        vm.newAnnotation.shape = data.content.shape;
                         $scope.$apply(function() {
                             vm.createMode = true;
                         });
                         break;
                     case 'onHighlighted':
-                        var content = JSON.parse(data.content);
-                        var annotation = findAnnotation(content.data.shapes[0].geometry);
-                        if (annotation) {
-                            $scope.$apply(function() {
-                                // Highlight the annotation in the sidebar
-                                vm.highlightedAnnotation = annotation.table + '-' + annotation.id;
-                            });
-                            // scrollIntoView(vm.highlightedAnnotation);
-                        }
+                    // On-hover highlighting behavior no longer needed
+                    // OSD still sends this message out on hover though, so the
+                    // is case here to avoid triggering default case
                         break;
                     case 'onUnHighlighted':
-                        $scope.$apply(function() {
-                            vm.highlightedAnnotation = null;
-                        });
+                    // On-hover highlighting behavior no longer needed
+                    // OSD still sends this message out on hover though, so the
+                    // is case here to avoid triggering default case
+                        break;
+                    case 'onClickAnnotation':
+                        var content = JSON.parse(data.content);
+                        //TODO check data object
+                        var annotation = findAnnotation(content.data.shapes[0].geometry);
+                        if (annotation) {
+                            var annotationId = annotation.table + '-' + annotation.id;
+                            $scope.$apply(function() {
+                                // Highlight the annotation in the sidebar
+                                vm.highlightedAnnotation = annotationId;
+                            });
+                            vm.scrollIntoView(annotationId);
+                        }
                         break;
                     default:
-                        console.log('Invalid event message type "', messageType, '"');
+                        console.log('Invalid event message type "' + messageType + '"');
                 }
             } else {
                 console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
             }
         });
 
-        // Returns true if at least one of a specified subset of an object's keys contains a value that contains the query
-        function filterAnnotations(keys) {
-            var query = vm.query;
-            return function(annotation) {
-                if (!query) {
-                    // If query is "" or undefined, then the annotation is considered a match
+        function filterAnnotations(annotation) {
+            if (!vm.query) {
+                return true;
+            }
+
+            vm.query = vm.query.toLowerCase();
+
+//TODO check data objects
+            annotation = annotation.data;
+            var author = annotation.author;
+            var props = [annotation.anatomy, annotation.description, author.display_name, author.full_name, author.email, annotation.created];
+            var numProps = props.length;
+            for (var i = 0; i < numProps; i++) {
+                if (props[i] && props[i].toLowerCase().indexOf(vm.query) > -1) {
                     return true;
-                } else {
-                    query = query.toLowerCase();
-                    // // If the "anatomy" key is null, make it "No Anatomy" so that a query for "No Anatomy" will match this key
-                    if (!annotation.anatomy) {
-                        annotation.anatomy = 'No Anatomy';
-                    }
-                    // Loop through the array to find matches
-                    var numKeys = keys.length;
-                    if (numKeys > 0) {
-                        for (var i = 0; i < numKeys; i++) {
-                            if (annotation[keys[i]].toLowerCase().indexOf(query) !== -1) {
-                                return true;
-                            }
+                }
+            }
+
+            var commentsArr = comments[annotation.id];
+            if (commentsArr) {
+                var numComments = commentsArr.length;
+                for (var c = 0; c < numComments; c++) {
+                    var comment = commentsArr[c].data;
+                    var commentAuthor = comment.author;
+                    var commentProps = [comment.comment, comment.created, commentAuthor.display_name, commentAuthor.full_name, commentAuthor.email];
+                    var numCommentProps = commentProps.length;
+                    for (var p = 0; p < numCommentProps; p++) {
+                        if (commentProps[p] && commentProps[p].toLowerCase().indexOf(vm.query) > -1) {
+                            return true;
                         }
-                    }
-                    // // Set the "anatomy" key back to null if it was changed to "No Anatomy" earlier
-                    if (annotation.anatomy === 'No Anatomy') {
-                        annotation.anatomy = null;
                     }
                 }
             }
+
+            return false;
         }
 
         function drawAnnotation(type) {
-            vm.newAnnotationType = type;
+            vm.newAnnotation.type = type;
             return AnnotationsService.drawAnnotation();
         }
 
         function createAnnotation() {
             vm.createMode = false;
-            AnnotationsService.createAnnotation(vm.newAnnotation, vm.newAnnotationType);
-            vm.newAnnotationType = null;
+            AnnotationsService.createAnnotation(vm.newAnnotation).then(function success(annotation) {
+                $timeout(function scrollToNewAnnotation() {
+                    var annotationId = annotation.table + '-' + annotation.id;
+                    vm.highlightedAnnotation = annotationId;
+                    vm.scrollIntoView(annotationId);
+                }, 200);
+            });
+            vm.newAnnotation = {config:{color: vm.defaultColor}};
         }
 
         function cancelNewAnnotation() {
@@ -121,28 +149,67 @@
             return AnnotationsService.cancelNewAnnotation();
         }
 
+// TODO check data object
         function editAnnotation(annotation) {
-            vm.editedAnnotation = annotation.table + '-' + annotation.id;
+            // Must make a copy instead of assigning to remove original annotation's
+            // references. Otherwise, changing something in editedAnnotation will
+            // also change the original annotation.
+            vm.editedAnnotation = angular.copy(annotation);
+
+            vm.editedAnnotation.domId = annotation.table + '-' + annotation.id;
+            setHighlightedAnnotation(annotation);
             originalAnnotation = {
                 description: annotation.description,
-                anatomy: annotation.anatomy
+                anatomy: annotation.anatomy,
+                config: annotation.config,
+                type: annotation.type
             };
-        };
+        }
 
+//TODO check data
         function cancelEdit(annotation) {
             vm.editedAnnotation = null;
             var data = annotation;
             data.description = originalAnnotation.description;
             data.anatomy = originalAnnotation.anatomy;
-        };
+            data.config = originalAnnotation.config;
+            data.type = originalAnnotation.type;
+        }
 
+//TODO check data
         function updateAnnotation(annotation) {
+            annotation.data = vm.editedAnnotation.data;
+            AnnotationsService.updateAnnotation(annotation);
             vm.editedAnnotation = null;
-            return AnnotationsService.updateAnnotation(annotation);
         }
 
         function deleteAnnotation(annotation) {
-            return AnnotationsService.deleteAnnotation(annotation);
+            // if annotation has comments, allow it to be deleted
+            if (!hasComments(annotation)) {
+                if (chaiseConfig.confirmDelete == undefined || chaiseConfig.confirmDelete){
+                    var modalInstance = $uibModal.open({
+                        templateUrl: 'annotations/confirm_delete.html',
+                        controller: 'ConfirmDeleteController',
+                        controllerAs: 'ctrl',
+                        size: 'sm'
+                    });
+
+                    modalInstance.result.then(function () {
+                        AnnotationsService.deleteAnnotation(annotation);
+                        console.log('annotation deleted');
+                    }, function () {
+                        console.log('Modal dismissed');
+                    });
+                } else {
+                    AnnotationsService.deleteAnnotation(annotation);
+                    console.log('annotation deleted')
+                }
+            } else {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: 'Sorry, this annotation cannot be deleted because there is at least 1 comment on it. Please delete the comments before trying to delete the annotation.'
+                });
+            }
         };
 
         function setHighlightedAnnotation(annotation) {
@@ -156,26 +223,34 @@
         }
 
         function getNumComments(annotation) {
-            return AnnotationsService.getNumComments(annotation.id);
+            return CommentsService.getNumComments(annotation.id);
+        }
+
+        // Returns boolean
+        function hasComments(annotation) {
+            // if there are comments return true
+            return getNumComments(annotation) > 0 ? true : false;
         }
 
         // Return an annotation/section that matches an object of coordinates
         function findAnnotation(coordinates) {
-            // Search in annotations collection
-            for (var i = 0; i < vm.annotations.length; i++) {
+            var length = vm.annotations.length;
+            for (var i = 0; i < length; i++) {
                 var annotationCoords = vm.annotations[i].coords;
                 if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
                     return vm.annotations[i];
                 }
             }
+        }
 
-            // Search in sections collection
-            for (var i = 0; i < vm.sections.length; i++) {
-                var annotationCoords = vm.sections[i].coords;
-                if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
-                    return vm.sections[i];
-                }
-            }
+        // Scroll a DOM element into visible part of the browser
+        function scrollIntoView(elementId) {
+            // Using native JS b/c angular.element returns a jQuery/jqLite object,
+            // which is incompatible with .scrollIntoView()
+            document.getElementById(elementId).scrollIntoView({
+                block: 'start',
+                behavior: 'smooth'
+            });
         }
 
         // Used to set the author based on the info object from the user object (user.info) that is set on every annotation
@@ -184,14 +259,11 @@
             return (client.display_name ? client.display_name : (client.full_name ? client.full_name : client.email ));
         }
 
-        // Scroll an element into visible part of the browser
-        function scrollIntoView(elementId) {
-            // Not using angular.element to get element because neither jQuery
-            // nor Angular's jqLite support .scrollIntoView()
-            document.getElementById(elementId).scrollIntoView({
-                block: 'start',
-                behavior: 'smooth'
-            });
+//TODO check data
+        function sortSectionsFirst(annotation) {
+            if (annotation.data.type == 'section') {
+                return 0;
+            }
         }
     }]);
 })();

@@ -6,7 +6,7 @@ var facetsService = angular.module('facetsService', ['facetsModel']);
 
 facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, FacetsData) {
 	this.display = function (table, column) {
-		return COLUMNS_ALIAS[table] != null ? COLUMNS_ALIAS[table][column] : '';
+		return COLUMNS_ALIAS != null && COLUMNS_ALIAS[table] != null ? COLUMNS_ALIAS[table][column] : '';
 	};
 
 	this.html = function (table, column, data) {
@@ -40,6 +40,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		$('#headerSearch').val('');
 		FacetsData.ready = false;
 		FacetsData.progress = true;
+		FacetsData.error = false;
 		FacetsData.moreFlag = false;
 		FacetsData.isDetail = false;
 		FacetsData.enableAll = false;

@@ -10,7 +10,8 @@ var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 var USER = null;
-var GLOBUS_LOGOUT = false;
+var CHAISE_DATA = {};
+var DISPLAY_ERROR = null;
 
 var PRIMARY_KEY = [];
 var uniquenessColumns = [];
@@ -82,16 +83,36 @@ function loadApplicationHeaderAndFooter() {
 	$( "#ermrestFooter" ).load( "../views/ermfooter.html" );
 }
 
-function initApplication() {
+function setNavbarBrand() {
+	if (document.getElementById('navbarBrandText') == null) {
+		setTimeout(setNavbarBrand, 1);
+	} else {
+		// set the navbar-header text
+		if (chaiseConfig['navbarBrandText'] !== undefined) {
+			document.getElementById('navbarBrandText').innerHTML = chaiseConfig['navbarBrandText'];
+		} else {
+			document.getElementById('navbarBrandText').innerHTML= 'Chaise';
+		}
+		// set the navbar-header image
+		if (chaiseConfig['navbarBrandImage'] !== undefined) {
+			document.getElementById('navbarBrandImage').setAttribute('src',chaiseConfig['navbarBrandImage']);
+		}
+		// set the navbar-header link
+		if (chaiseConfig['navbarBrand'] !== undefined) {
+			$($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
+		}
+	}
+}
+
+function initApplication(chaise_data, errorCallback) {
+	CHAISE_DATA = chaise_data;
+	DISPLAY_ERROR = errorCallback;
 	loadApplicationHeaderAndFooter();
 	initLocation();
 	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
 	getSchemas();
 	getSession();
-	// set the navbar-header link
-	if (chaiseConfig['navbarBrand'] !== undefined) {
-		$($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
-	}
+	setNavbarBrand();
 	//alert(JSON.stringify(DATASET_COLUMNS, null, 4));
 }
 
@@ -157,11 +178,11 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			var msg = '';
 			var err = jqXHR.status;
 			if (err != null) {
-				msg += 'Status: ' + err + '\n';
+				//msg += 'Status: ' + err + '\n';
 			}
 			err = jqXHR.responseText;
 			if (err != null) {
-				msg += 'ResponseText: ' + err + '\n';
+				msg += 'ResponseText: ' + err;
 				if (jqXHR.status == 403) {
 					msg += 'Please contact the site administrator.\n';
 				}
@@ -175,13 +196,15 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 			msg += 'URL: ' + url + '\n';
 			document.body.style.cursor = 'default';
 			if (!suppressError) {
-				alert(msg);
+				//alert(msg);
+				DISPLAY_ERROR(jqXHR.status, msg);
 			}
 	}
 }
 
 var ERMREST = {
 	POST: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
+		CHAISE_DATA['error'] = false;
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
@@ -215,6 +238,7 @@ var ERMREST = {
 		return ERMREST.fetch(url, contentType, true, true, [], successCallback, errorCallback, param);
 	},
 	fetch: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
+		CHAISE_DATA['error'] = false;
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
@@ -248,6 +272,7 @@ var ERMREST = {
 		return ERMREST.remove(url, true, successCallback, errorCallback, param);
 	},
 	remove: function(url, async, successCallback, errorCallback, param) {
+		CHAISE_DATA['error'] = false;
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
@@ -275,6 +300,7 @@ var ERMREST = {
 		return res;
 	},
 	PUT: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
+		CHAISE_DATA['error'] = false;
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
@@ -307,7 +333,7 @@ var ERMREST = {
 };
 
 function make_headers() {
-	var res = {'User-agent': 'ERMREST/1.0'};
+	var res = {};
 	token = $.cookie(goauth_cookie);
 	if (token != null) {
 		res['Authorization'] = 'Globus-Goauthtoken ' + token;
@@ -400,7 +426,7 @@ function make_basic_auth(user, password) {
 	return 'Basic ' + hash;
 }
 
-function submitLogout() {
+function submitLogout(logout_uri) {
 	if (token != null) {
 		$.removeCookie(goauth_cookie);
 		token = null;
@@ -411,10 +437,15 @@ function submitLogout() {
 	$('#logout_link').hide();
 	//var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
 	//window.location = login_url;
-	
-	var logout_url = '../logout?referrer=' + encodeSafeURIComponent(window.location);
-	if (GLOBUS_LOGOUT) {
-		logout_url = 'https://www.globus.org/app/logout?redirect_uri=' + encodeSafeURIComponent(window.location);
+
+	var logout_url = logout_uri;
+	if (logout_url == null) {
+		if (chaiseConfig['logoutURL'] != null) {
+			logout_url = chaiseConfig['logoutURL'];
+		} else {
+			logout_url = '/chaise/logout';
+		}
+		logout_url += '?referrer=' + encodeSafeURIComponent(window.location);
 	}
 	window.location = logout_url;
 }
@@ -531,7 +562,7 @@ function getTableColumns(options, successCallback) {
 			PRIMARY_KEY.push(encodeSafeURIComponent(col['name']));
 		});
 	}
-	
+
 	if (display_columns['title'] == null && display_columns['thumbnail'].length == 0) {
 		display_columns['title'] = decodeURIComponent(PRIMARY_KEY[0]);
 	}
@@ -551,7 +582,7 @@ function getTableColumns(options, successCallback) {
 			options['chooseColumns'][facet['table']][facet['name']] = true;
 		}
 	});
-	
+
 	var columns = {'facets': ret,
 			'sortInfo': sortInfo,
 			'colsDefs': columns_definitions};
@@ -1257,7 +1288,8 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	$.each(cols, function(i, col) {
 		if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
 			if (data[0]['cnt_d_' + col] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
-				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/$A/' +
+					getSortGroup(options['table'], col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(options['table'], col, 'rank')) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
 				entity[col]['type'] = 'enum';
@@ -1267,7 +1299,8 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 				attributegroupParam['alert'] = alertObject;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, attributegroupParam);
 			} else if (data[0]['cnt_d_' + col] >= MULTI_SELECT_LIMIT) {
-				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' +
+					getSortGroup(options['table'], col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(options['table'], col, 'rank')) + ')?limit=none';
 				var attributegroupParam = {};
 				attributegroupParam['successCallback'] = successCallback;
 				//entity[col]['type'] = 'select';
@@ -1487,7 +1520,7 @@ function successGetThumbnailUri(data, textStatus, jqXHR, param) {
 	$.each(data, function(i, row) {
 		thumbnails[row[param['primaryKey']]] = row[param['thumbnailColumn']];
 	});
-	param['successCallback'](param['ermrestData'], param['totalItems'], param['options']['pagingOptions']['currentPage'], param['options']['pagingOptions']['pageSize']);	
+	param['successCallback'](param['ermrestData'], param['totalItems'], param['options']['pagingOptions']['currentPage'], param['options']['pagingOptions']['pageSize']);
 }
 
 function getTables(tables, options, successCallback) {
@@ -1809,15 +1842,31 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 function deleteSession(param) {
 	if (token == null) {
 		var url = HOME + '/ermrest/authn/session';
-		ERMREST.DELETE(url, successDeleteSession, null, param);
+		ERMREST.DELETE(url, successDeleteSession, errorDeleteSession, param);
 	} else {
 		submitLogout();
 	}
 }
 
 function successDeleteSession(data, textStatus, jqXHR, param) {
-	//getSession(param);
-	submitLogout();
+	var logout_url = null;
+	if (data !== undefined) {
+		data = JSON.parse(data);
+		logout_url = data['logout_url'];
+	}
+	submitLogout(logout_url);
+}
+
+function errorDeleteSession(jqXHR, textStatus, errorThrown, url, param) {
+	if (jqXHR.status == 404 && jqXHR.responseText !== undefined) {
+		// this might be a session timeout
+		var logout_url = null;
+		var data = JSON.parse(jqXHR.responseText);
+		logout_url = data['logout_url'];
+		submitLogout(logout_url);
+	} else {
+		handleError(jqXHR, textStatus, errorThrown, url);
+	}
 }
 
 function getSession(param) {
@@ -1828,9 +1877,17 @@ function getSession(param) {
 function successGetSession(data, textStatus, jqXHR, param) {
 	//alert(JSON.stringify(data, null, 4));
 	if (data['client'] != null) {
+        // New webauthen sends back a client Object
+        // Check for display_name first
 		if (data['client']['display_name'] !== undefined) {
 			$('#login_user').html(data['client']['display_name']);
-			GLOBUS_LOGOUT = true;
+        // Then check for full_name
+        } else if (data['client']['full_name'] !== undefined) {
+			$('#login_user').html(data['client']['full_name']);
+        // Then check for email
+        } else if (data['client']['email'] !== undefined) {
+			$('#login_user').html(data['client']['email']);
+        // Default to client if none of the above because it's still using the old web authen service
 		} else {
 			$('#login_user').html(data['client']);
 		}
@@ -2431,7 +2488,8 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 	var alertObject = param['alert'];
 	var successCallback = param['successCallback'];
 	if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
-		var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+		var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options'], table) + '/' +
+			getSortGroup(table, col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(table, col, 'rank')) + ')?limit=none';
 		var param = {};
 		param['successCallback'] = successCallback;
 		param['entity'] = entities;
@@ -3393,7 +3451,7 @@ function encodeFilter(filter) {
 					});
 					factors.push(col_name + '::eq::' + terms.join(';'));
 					found = true;
-				} 
+				}
 			});
 			if (!found) {
 				factors.push(col_name + '::geq::' + values['min']);
@@ -3520,7 +3578,8 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 	if (searchBoxPresentation.contains(col_type) || checkBoxPresentation.contains(col_type)) {
 		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 			param['col_type'] = 'enum';
-			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' + encodeSafeURIComponent(col) + '@sort(' + encodeSafeURIComponent(col) + ')?limit=none';
+			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' +
+				getSortGroup(table, col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(table, col, 'rank')) + ')?limit=none';
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successInitFacetGroups, errorErmrest, param);
 		} else {
 			ready = true;
@@ -3842,7 +3901,7 @@ function getPredicateAttributes(options) {
 			}
 		});
 	});
-	
+
 	return ret;
 }
 
@@ -3893,4 +3952,33 @@ function chaiseApp() {
 		url = chaiseConfig['dataBrowser'];
 	}
 	window.location = url;
+}
+
+function getSortColumn(table_name, column_name, annotation) {
+	var ret = column_name;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name']) {
+			var column_definitions = table['column_definitions'];
+			$.each(column_definitions, function(i, col) {
+				if (col['name'] == column_name) {
+					if (col['annotations'] != null && col['annotations'][COLUMNS_MAP_URI] != null && col['annotations'][COLUMNS_MAP_URI][annotation] != null) {
+						ret = col['annotations'][COLUMNS_MAP_URI][annotation];
+					}
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	return ret;
+}
+
+function getSortGroup(table_name, column_name, annotation) {
+	var ret = [];
+	ret.push(encodeSafeURIComponent(column_name));
+	var rankColumn = getSortColumn(table_name, column_name, annotation);
+	if (rankColumn != column_name) {
+		ret.push(encodeSafeURIComponent(rankColumn));
+	}
+	return ret.join(',');
 }
