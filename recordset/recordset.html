@@ -69,7 +69,7 @@
             </thead>
 
             <!-- rows -->
-            <tr ng-repeat="row in vm.rowset.data" ng-click="go(vm.rowlink[$index])" ng-style="{'cursor': 'pointer'}">
+            <tr ng-repeat="row in vm.rowset.data" ng-click="gotoRowLink($index)" ng-style="{'cursor': 'pointer'}">
                 <td ng-repeat="name in vm.header">{{row[name]}}</td>
             </tr>
         </table>
