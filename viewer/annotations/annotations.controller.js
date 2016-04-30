@@ -153,7 +153,7 @@
             // also change the original annotation.
             vm.editedAnnotation = angular.copy(annotation);
 
-            vm.editedAnnotation.domId = annotation.table + '-' + annotation.id;
+            vm.editedAnnotationDomId = annotation.table + '-' + annotation.id;
             setHighlightedAnnotation(annotation);
             originalAnnotation = {
                 description: annotation.description,
@@ -173,9 +173,8 @@
             data.type = originalAnnotation.type;
         }
 
-//TODO check data
         function updateAnnotation(annotation) {
-            annotation.data = vm.editedAnnotation.data;
+            annotation = vm.editedAnnotation;
             AnnotationsService.updateAnnotation(annotation);
             vm.editedAnnotation = null;
         }

@@ -6,6 +6,7 @@
     .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', '$window', '$q', function(context, user, image, annotations, AlertsService, $window, $q) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
+        var table = null;
 
         function drawAnnotation() {
             iframe.postMessage({messageType: 'drawAnnotation'}, origin);
@@ -53,9 +54,9 @@
                     console.log('Attempted to create an annotation of type "' + type + '" but this is an invalid type.');
             }
 
-            var table = context.schema.tables.get('annotation');
+            if (!table) table = context.schema.tables.get('annotation');
             return table.entity.post(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
-                // table.entity.post returns an array of objects now.
+                // table.entity.post returns an array of objects
                 var _annotation = annotation[0];
                 _annotation.table = table.name;
                 annotations.push(_annotation);
@@ -83,12 +84,18 @@
                 annotation.anatomy = null;
             }
 
+            var annArray = [];
+            annArray.push(annotation);
+
             // Update in ERMrest
-            // entity.put() has yet to be implemented
-            // annotation.put().then(function success(response) {
-            annotation.update().then(function success(response) {
+            if (!table) table = context.schema.tables.get('annotation');
+            table.entity.put(annArray).then(function success(response) {
+                // Returns an array of objects that were updated
                 // Update in Annotorious
-                iframe.postMessage({messageType: 'updateAnnotation', content: annotation}, origin);
+                //TODO remove after annotorious refactor3
+                var stub = {};
+                stub.data = response[0];
+                iframe.postMessage({messageType: 'updateAnnotation', content: stub}, origin);
             }, function error(response) {
                 AlertsService.addAlert({
                     type: 'error',
@@ -100,8 +107,9 @@
 
         function deleteAnnotation(annotation) {
             // Delete from ERMrest
-            // delete hasn't been implemented in the refactor branch yet
-            annotation.delete().then(function success(response) {
+            if (!table) table = context.schema.tables.get('annotation');
+            // NOTE: delete takes a filter
+            table.entity.delete().then(function success(response) {
                 // Delete from the 'annotations' provider
                 var index = annotations.indexOf(annotation);
                 annotations.splice(index, 1);

@@ -395,7 +395,7 @@
                         ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table + '-' + annotation.id), section: annotation.type == 'section'}"
                         ng-show="annotations.filterByType[annotation.type]" id="{{annotation.table + '-' + annotation.id}}" class="annotation">
                             <!-- Annotation Display Card -->
-                            <div ng-show="annotations.editedAnnotation.domId != (annotation.table + '-' + annotation.id)">
+                            <div ng-show="annotations.editedAnnotationDomId != (annotation.table + '-' + annotation.id)">
                                 <div class="annotation-card">
                                     <div class="row">
                                         <!-- Annotation Title/Label/Heading -->
@@ -492,7 +492,7 @@
                                     </div>
                                 </div>
                             </div><!-- /Annotation Display Card -->
-                            <form ng-show="annotations.editedAnnotation.domId == (annotation.table + '-' + annotation.id)" id="edit-annotation-form">
+                            <form ng-show="annotations.editedAnnotationDomId == (annotation.table + '-' + annotation.id)" id="edit-annotation-form">
                                 <div class="row">
                                     <div class="col-md-10">
                                         <span class="h4">
