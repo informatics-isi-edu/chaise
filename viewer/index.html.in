@@ -540,7 +540,7 @@
                                         <textarea ng-model="annotations.editedAnnotation.data.description" rows="3" class="form-control"></textarea>
                                     </div>
                                 </div>
-                                <div ng-if="annotations.editedAnnotation.data.type != 'section'" class="row">
+                                <div ng-if="annotations.editedAnnotation.data.type == 'arrow'" class="row">
                                     <br>
                                     <div class="col-md-12">
                                         <label>Color</label>
