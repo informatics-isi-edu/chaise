@@ -348,15 +348,6 @@
                             <br>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <label>Annotation Type</label><br>
-                                    <span ng-if="annotations.newAnnotation.type == 'section'">Section of Interest</span>
-                                    <ui-select ng-if="annotations.newAnnotation.type != 'section'" ng-model="annotations.newAnnotation.type" theme="select2" ng-disabled="disabled">
-                                        <ui-select-match placeholder="Select an annotation type">{{annotations.newAnnotation.type | toTitleCase}}</ui-select-match>
-                                        <ui-select-choices repeat="type in (annotations.annotationTypes | filter: $select.search) track by type">
-                                            <div ng-bind-html="type | toTitleCase | highlight: $select.search"></div>
-                                        </ui-select-choices>
-                                    </ui-select>
-                                    <br><br>
                                     <label>Description</label>
                                     <textarea ng-model="annotations.newAnnotation.description" class="form-control description-field" rows="3" placeholder="Write annotation text here."></textarea>
                                     <div ng-if="annotations.newAnnotation.type != 'section'">
