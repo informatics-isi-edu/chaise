@@ -191,6 +191,7 @@
                         commentPath.filter(imageFilter).entity.get().then(function success(_comments){
                             var length = _comments.length;
                             for (var i = 0; i < length; i++) {
+                                _comments[i].table = commentPath.context.table.name;
                                 var annotationId = _comments[i].annotation_id;
                                 if (!comments[annotationId]) {
                                     comments[annotationId] = [];
