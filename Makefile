@@ -489,8 +489,9 @@ $(JS_CONFIG): chaise-config-sample.js
 	for file in $(DE_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-de-asset-block ; \
 	done
-	echo "<script src='../../../ermrestjs/js/ermrest.js'></script>" >> .make-de-asset-block
-	echo "<script src='../../../ermrestjs/js/ngermrest.js'></script>" >> .make-de-asset-block
+	for script in $(ERMRESTJS_DEPS); do \
+		echo "<script src='$$script'></script>" >> .make-de-asset-block ; \
+	done
 	for file in $(DE_JS_SOURCE) $(JS_CONFIG); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
