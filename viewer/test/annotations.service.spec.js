@@ -13,6 +13,7 @@ describe('AnnotationsService', function() {
         });
     });
 
+//TODO
     it('should define a drawAnnotation() method', function() {
         expect(mockAnnotationsService.drawAnnotation).toBeDefined();
         expect(mockAnnotationsService.drawAnnotation).toEqual(jasmine.any(Function));
@@ -41,10 +42,5 @@ describe('AnnotationsService', function() {
     it('should define a centerAnnotation() method', function() {
         expect(mockAnnotationsService.centerAnnotation).toBeDefined();
         expect(mockAnnotationsService.centerAnnotation).toEqual(jasmine.any(Function));
-    });
-
-    it('should define a getNumComments() method', function() {
-        expect(mockAnnotationsService.getNumComments).toBeDefined();
-        expect(mockAnnotationsService.getNumComments).toEqual(jasmine.any(Function));
     });
 });

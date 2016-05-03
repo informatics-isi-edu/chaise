@@ -16,6 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
         '../scripts/vendor/jquery-latest.min.js',
+        '../scripts/vendor/jquery.js',
         '../scripts/vendor/angular.js',
         '../scripts/vendor/angular-sanitize.js',
         '../node_modules/angular-mocks/angular-mocks.js',
@@ -37,7 +38,7 @@ module.exports = function(config) {
         // '**/*.js',
         '../chaise-config.js',
         // Specs to run, use test/*.spec.js for all tests
-        'test/alerts.controller.spec.js'
+        'test/*.spec.js'
     ],
 
 

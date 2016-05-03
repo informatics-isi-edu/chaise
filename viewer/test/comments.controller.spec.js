@@ -14,7 +14,7 @@ describe('CommentsController', function() {
     });
 
     it('should define a newComment', function() {
-        expect(controller.newComment.annotationId).toEqual(controller.annotationId);
+        expect(controller.newComment.annotationId).toBeNull();
         expect(controller.newComment.comment).toBeNull();
         expect(controller.newComment.author).toBeNull();
     });
@@ -37,14 +37,6 @@ describe('CommentsController', function() {
         expect(controller.newComment.comment).toBeNull();
         expect(controller.newComment.author).not.toEqual(author);
         expect(controller.newComment.author).toBeNull();
-    });
-
-    it('should be able to get the number of comments', function() {
-        spyOn(mockCommentsService, 'getNumComments');
-
-        controller.getNumComments();
-
-        expect(mockCommentsService.getNumComments).toHaveBeenCalled();
     });
 
     it('should be able to delete comments', function() {

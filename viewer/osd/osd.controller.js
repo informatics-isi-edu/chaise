@@ -18,10 +18,11 @@
             if (!filename) {
                 filename = 'image';
             }
-            iframe.postMessage({
+            var obj = {
                 messageType: 'downloadView',
                 content: filename
-            }, origin);
+            }
+            iframe.postMessage(obj, origin);
         }
 
         function zoomInView() {

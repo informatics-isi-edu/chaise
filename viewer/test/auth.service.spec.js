@@ -37,7 +37,7 @@ describe('AuthService', function() {
         var annotation, permitted;
 
         beforeEach(function() {
-            annotation = { data: { author: 'tester' }};
+            annotation = { author: {id: 'author-id' }};
         });
 
         it('should return true if the user is a curator', function() {
@@ -47,8 +47,12 @@ describe('AuthService', function() {
         });
 
         it('should return true if the user is an annotator and they are the annotation owner', function() {
+            mockUser.session = {};
+            mockUser.session.attributes = [
+                {id: 'author-id'},
+                {display_name: 'kidney-annotators', id: 'kidney-annotator-id'}
+            ];
             mockUser.role = 'annotator';
-            mockUser.name = 'tester';
             permitted = mockAuthService.editAnnotation(annotation);
             expect(permitted).toBe(true);
         });
@@ -64,7 +68,7 @@ describe('AuthService', function() {
         var annotation, permitted;
 
         beforeEach(function() {
-            annotation  = { data: { author: 'tester' }};
+            annotation  = { author: {id: 'author-id' }};
         });
 
         it('should return true if the user is a curator', function() {
@@ -74,8 +78,12 @@ describe('AuthService', function() {
         });
 
         it('should return true if the user is an annotator and they are the annotation owner', function() {
+            mockUser.session = {};
+            mockUser.session.attributes = [
+                {id: 'author-id'},
+                {display_name: 'kidney-annotators', id: 'kidney-annotator-id'}
+            ];
             mockUser.role = 'annotator';
-            mockUser.name = 'tester';
             permitted = mockAuthService.deleteAnnotation(annotation);
             expect(permitted).toBe(true);
         });
@@ -109,11 +117,11 @@ describe('AuthService', function() {
         });
     });
 
-    describe('deleteComment() should return properly based on the role of the user', function() {
+    describe('editComment() should return properly based on the role of the user', function() {
         var comment, permitted;
 
         beforeEach(function() {
-            comment = { data: { author: 'tester' }};
+            comment = { author: {id: 'author-id' } };
         });
 
         it('should return true if the user is a curator', function() {
@@ -123,8 +131,43 @@ describe('AuthService', function() {
         });
 
         it('should return true if the user is an annotator and they are the annotation owner', function() {
+            mockUser.session = {};
+            mockUser.session.attributes = [
+                {id: 'author-id'},
+                {display_name: 'kidney-annotators', id: 'kidney-annotator-id'}
+            ];
             mockUser.role = 'annotator';
-            mockUser.name = 'tester';
+            permitted = mockAuthService.deleteComment(comment);
+            expect(permitted).toBe(true);
+        });
+
+        it('should return false if the user is not an annotator or curator', function() {
+            mockUser.role = 'user';
+            permitted = mockAuthService.deleteComment(comment);
+            expect(permitted).toBe(false);
+        });
+    });
+
+    describe('deleteComment() should return properly based on the role of the user', function() {
+        var comment, permitted;
+
+        beforeEach(function() {
+            comment = { author: {id: 'author-id' } };
+        });
+
+        it('should return true if the user is a curator', function() {
+            mockUser.role = 'curator';
+            permitted = mockAuthService.deleteComment(comment);
+            expect(permitted).toBe(true);
+        });
+
+        it('should return true if the user is an annotator and they are the annotation owner', function() {
+            mockUser.session = {};
+            mockUser.session.attributes = [
+                {id: 'author-id'},
+                {display_name: 'kidney-annotators', id: 'kidney-annotator-id'}
+            ];
+            mockUser.role = 'annotator';
             permitted = mockAuthService.deleteComment(comment);
             expect(permitted).toBe(true);
         });
