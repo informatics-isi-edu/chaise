@@ -20,8 +20,6 @@ module.exports = function(config) {
         '../scripts/vendor/angular-sanitize.js',
         '../node_modules/angular-mocks/angular-mocks.js',
         '../scripts/vendor/select.js',
-        'https://dev.rebuildingakidney.org/ermrestjs/js/ermrest.js',
-        'https://dev.rebuildingakidney.org/ermrestjs/js/ngermrest.js',
         'viewer.app.js',
         // including the common dependencies
         '../common/filters.js',
@@ -39,7 +37,7 @@ module.exports = function(config) {
         // '**/*.js',
         '../chaise-config.js',
         // Specs to run, use test/*.spec.js for all tests
-        'test/*.spec.js'
+        'test/alerts.controller.spec.js'
     ],
 
 
@@ -80,7 +78,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: ['PhantomJS2'],
 
 
     // Continuous Integration mode
