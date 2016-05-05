@@ -6,7 +6,7 @@
 
     .value('editorModel', {
         table: {},
-        rows: [{}], // each row of fields in the form, not the table from ERMrest
+        rows: [{}], // rows of fields in the form, not the table from ERMrest
         domainValues: {}
     });
 })();

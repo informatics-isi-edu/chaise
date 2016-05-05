@@ -28,7 +28,6 @@
         function submit() {
             var form = vm.formContainer;
             var model = vm.editorModel;
-
             if (form.$invalid) {
                 vm.alert = {
                     type: 'error',
@@ -38,17 +37,11 @@
             }
 
             model.table.entity.post(model.rows, vm.getKeys()).then(function success(entity) {
-                vm.alert = {
-                    type: 'success',
-                    message: 'Your data has been submitted.'
-                };
+                vm.alert = {type: 'success', message: 'Your data has been submitted.'};
                 form.$setUntouched();
                 form.$setPristine();
             }, function error(response) {
-                vm.alert = {
-                    type: 'error',
-                    message: response.data
-                };
+                vm.alert = {type: 'error', message: response.data};
                 console.log(response);
             });
 
