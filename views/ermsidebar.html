@@ -1,10 +1,10 @@
-<div class="col-md-3 sidebar-outer">
-	<div ng-init="FacetsData.progress=true" ng-controller="SideBarCtrl as sideBar" class="ng-hide" ng-show="sideBar.showSidebar()">
+<div ng-controller="SideBarCtrl as sideBar" ng-show="sideBar.displaySidebar()" class="col-md-3 sidebar-outer">
+	<div ng-init="FacetsData.progress=true" class="ng-hide" ng-show="sideBar.showSidebar()">
 		<!-- Selected Attributes sidebar -->
 		<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right open" role="navigation">
 			<div class="sidebar-wrap">
 			    <!-- Sidebar header -->
-					<div class="search-box input-group col-md-12">
+					<div ng-hide="sideBar.hideSearchTextFacet()" class="search-box input-group col-md-12">
 						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search within attributes..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 						<span class="input-group-addon">
 					        <i class="glyphicon glyphicon-search"></i>
@@ -24,7 +24,7 @@
 			                <span class="md-chevron-right md-lg"></span>
 			            </a>
 				        </li>
-								<li class="small"><a class="field-toggle view-attr" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')" title="Click to view all attributes"><strong>View all attributes ({{FacetsData.facets.length}})<span class="md-chevron-right md-lg"></span></strong></a></li>
+								<li class="small"><a class="field-toggle view-attr" href="#" ng-click="sideBar.slideMoreFilter($event, 'more-field-toggle')" title="Click to view all attributes"><strong>View all attributes ({{sideBar.getUsableFiltersCount()}})<span class="md-chevron-right md-lg"></span></strong></a></li>
 			        </ul>
 		        </div>
 			</div>
@@ -57,7 +57,7 @@
 						<span class="glyphicon glyphicon-chevron-left"></span>
 					</div>
 					<div class="sidebar-title">
-						<h4 class="text-left">All Attributes ({{FacetsData.facets.length}})</h4>
+						<h4 class="text-left">All Attributes ({{sideBar.getUsableFiltersCount()}})</h4>
 					</div>
 					<!--
 					<div class="sidebar-back">

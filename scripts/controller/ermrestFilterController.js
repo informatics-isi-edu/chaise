@@ -5,25 +5,25 @@
 var ermFilterController = angular.module('ermFilterController', ['facetsModel', 'facetsService']);
 
 //angular.module('ermrestApp').controller('FilterListCtrl', ['$scope', '$timeout', 'FacetsData', 'FacetsService',
-ermFilterController.controller('FilterListCtrl', ['$scope', '$timeout', 'FacetsData', 'FacetsService',
-                                                      function($scope, $timeout, FacetsData, FacetsService) {
+ermFilterController.controller('FilterListCtrl', ['$rootScope', '$scope', '$timeout', 'FacetsData', 'FacetsService',
+                                                      function($rootScope, $scope, $timeout, FacetsData, FacetsService) {
 	
 	$scope.FacetsData = FacetsData;
-	$scope.preventSortOrder = false;
+	$rootScope.preventSortOrder = false;
 	
 	$scope.$watch('FacetsData.sortFacet', function (newVal, oldVal) {
 		if ($scope.FacetsData.ready && newVal !== oldVal) {
 			$scope.FacetsData.pagingOptions.currentPage = 1;
-			$scope.preventSortOrder = true;
+			$rootScope.preventSortOrder = true;
 			$scope.getPagedDataAsync($scope.FacetsData.pagingOptions.pageSize, $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.filterOptions.filterText, $scope.FacetsData.sortInfo);
 		}
 	}, true);
 	
 	$scope.$watch('FacetsData.sortOrder', function (newVal, oldVal) {
 		if ($scope.FacetsData.ready && newVal !== oldVal) {
-			if ($scope.preventSortOrder) {
+			if ($rootScope.preventSortOrder) {
 				// the data was already got from sortFacet
-				$scope.preventSortOrder = false;
+				$rootScope.preventSortOrder = false;
 			} else {
 				$scope.FacetsData.pagingOptions.currentPage = 1;
 				$scope.getPagedDataAsync($scope.FacetsData.pagingOptions.pageSize, $scope.FacetsData.pagingOptions.currentPage, $scope.FacetsData.filterOptions.filterText, $scope.FacetsData.sortInfo);

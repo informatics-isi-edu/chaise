@@ -1,0 +1,26 @@
+.glyphicon{
+    min-width: 15px;
+}
+
+#spinner{
+    background: #fff;
+    width: 130px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 14px 0;
+    border: 1px solid #C3C3C3;
+    border-radius: 7px;
+    color: #828282;
+    top: 50vh;
+    position: absolute;
+    left: 50%;
+    margin-top: -75px;
+    margin-left: -75px;
+    z-index: 10;
+}
+
+.topright {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+}

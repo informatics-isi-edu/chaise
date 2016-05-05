@@ -14,6 +14,8 @@
     })
 
     // toTitleCase: Capitalizes the first character for each word in a string
+    // TODO: Make it more ~ROBUST~ internationalize this
+    // Account for names with slashes, hyphens, Cyrillic names, Klingon, Chinese, etc.
     .filter('toTitleCase', function() {
         return function toTitleCase(input) {
             if (typeof input === "string") {

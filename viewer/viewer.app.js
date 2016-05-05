@@ -3,7 +3,7 @@
 
     var client;
 
-    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'chaise.filters', 'ui.select'])
+    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'chaise.filters', 'ui.select', 'ui.bootstrap'])
 
     // Configure the context info from the URI
     .config(['context', function configureContext(context) {
@@ -11,10 +11,11 @@
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
+        // TODO: Style guide preferences?
         context.serviceURL = window.location.origin + '/ermrest';
 
         if (chaiseConfig.ermrestLocation) {
-            context.serviceURL = chaiseConfig.ermrestLocation + '/ermrest';
+            context.serviceURL = chaiseConfig.ermrestLocation;
         }
 
         var hash = window.location.hash;
@@ -31,7 +32,6 @@
                 context.schemaName = params[0];
                 context.tableName = params[1];
             } else {
-                context.schemaName = '';
                 context.tableName = params[0];
             }
         }
@@ -41,13 +41,15 @@
                 context.imageID = params[1];
             }
         }
+
+        // TODO: Check if context has everything it needs before proceeding. If not, Bad Request
     }])
 
     // Get a client connection to ERMrest
     // Note: Only Providers and Constants can be dependencies in .config blocks. So
     // if you want to use a factory or service (e.g. $window or your custom one)
-    // in a .config block, you add append 'Provider' to the dependency name and
-    // run .$get() on it. This returns a Provider instance of the factory/service.
+    // in a .config block, you append 'Provider' to the dependency name and call
+    // .$get() on it. This returns a Provider instance of the factory/service.
     .config(['ermrestClientFactoryProvider', 'context', function configureClient(ermrestClientFactoryProvider, context) {
         client = ermrestClientFactoryProvider.$get().getClient(context.serviceURL);
     }])
@@ -57,24 +59,46 @@
         client.getSession().then(function success(session) {
             console.log('Session: ', session);
             var groups = context.groups;
-            var attributes = session.attributes;
+            // session.attributes is an array of objects that have a display_name and id
+            // We MUST use the id field to check for role inclusion as it is the unique identifier
+            var attributes = session.attributes.map(function(attribute) { return attribute.id });
             var user = userProvider.$get();
+            user.session = session;
 
-            user.name = session.client;
+// TODO Let's try to extract this setup to unclutter *.app.js
+            // Need to check if using the new web authen
+            // if so, there will be a client object with a combination of any or all of the following: display_name, full_name, and email
+            // first priority id display_name
+            if (session.client.display_name) {
+                user.name = session.client.display_name;
+            // full_name is second priority
+            } else if (session.client.full_name) {
+                user.name = session.client.full_name;
+            // fallback if no display_name or full_name
+            } else if (session.client.email) {
+                user.name = session.client.email;
+            // Case for old web authen where client is a string
+            } else {
+                user.name = session.client
+            }
 
             if (attributes.indexOf(groups.curators) > -1) {
-                return user.role = 'curator';
+                user.role = 'curator';
             } else if (attributes.indexOf(groups.annotators) > -1) {
-                return user.role = 'annotator';
+                user.role = 'annotator';
             } else if (attributes.indexOf(groups.users) > -1) {
-                return user.role = 'user';
+                user.role = 'user';
             } else {
                 user.role = null;
             }
+
             console.log('User: ', user);
+            return;
         }, function error(response) {
+            // TODO: Abstract this away..
             if (response.status == 401 || response.status == 404) {
                 if (chaiseConfig.authnProvider == 'goauth') {
+                    // TODO: Is it worth injecting $window here?
                     getGoauth(encodeSafeURIComponent(window.location.href));
                 }
                 console.log(response);
@@ -102,11 +126,15 @@
         }
     }])
 
-    // Get session info, hydrate values providers, and set up iframe
-    .run(['$http', '$window', 'context', 'image', 'annotations', 'comments', 'sections', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($http, $window, context, image, annotations, comments, sections, anatomies, statuses, vocabs) {
+    // Hydrate values providers and set up iframe
+    .run(['$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($window, context, image, annotations, comments, anatomies, statuses, vocabs) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
+        var chaiseReady = false;
+        var arrows = [];
+        var rectangles = [];
+        var sections = [];
 
         var catalog = client.getCatalog(context.catalogID);
         catalog.introspect().then(function success(schemas) {
@@ -121,29 +149,26 @@
                         iframe.location.replace(image.entity.data.uri);
                         console.log('Image: ', image);
 
-                        var sectionTable = image.entity.getRelatedTable(context.schemaName, 'section_annotation');
-                        sectionTable.getEntities().then(function success(_sections) {
-                            var length = _sections.length;
-                            for (var i = 0; i < length; i++) {
-                                sections.push(_sections[i]);
-                            }
-                            if (annotoriousReady) {
-                                iframe.postMessage({messageType: 'loadAnnotations', content: sections}, origin);
-                            }
-                            console.log('Sections: ', sections);
-                        }, function error(response) {
-                            throw response;
-                        });
-
                         var annotationTable = image.entity.getRelatedTable(context.schemaName, 'annotation');
                         annotationTable.getEntities().then(function success(_annotations) {
                             var length = _annotations.length;
                             for (var i = 0; i < length; i++) {
-                                annotations.push(_annotations[i]);
+                                var annotation = _annotations[i];
+                                annotations.push(annotation);
+                                if (annotation.data.type == 'arrow') {
+                                    arrows.push(annotation);
+                                } else if (annotation.data.type == 'rectangle') {
+                                    rectangles.push(annotation);
+                                } else if (annotation.data.type == 'section') {
+                                    sections.push(annotation);
+                                }
                             }
+                            chaiseReady = true;
 
-                            if (annotoriousReady) {
-                                iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                            if (annotoriousReady && chaiseReady) {
+                                iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
+                                iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
+                                iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
                             }
                             console.log('Annotations: ', annotations);
                         }, function error(response) {
@@ -178,6 +203,17 @@
                     for (var j = 0; j < length; j++) {
                         anatomies.push(_anatomies[j].data.term);
                     }
+                    anatomies.sort(function sortAnatomies(a, b) {
+                        a = a.toLowerCase();
+                        b = b.toLowerCase();
+                        if (a < b) {
+                            return -1;
+                        } else if (a > b) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    });
                 }, function error(response) {
                     throw response;
                 });
@@ -270,18 +306,29 @@
             console.log(response);
         });
 
+        // Set up a listener for all "message" events
         $window.addEventListener('message', function(event) {
             if (event.origin === origin) {
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;
-                    if (annotoriousReady) {
+                    if (annotoriousReady && chaiseReady) {
                         iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
-                        iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                        iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
+                        iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
                     }
                 }
             } else {
                 console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
             }
+        });
+
+        // Initialize Bootstrap tooltips
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'bottom',
+                container: 'body',
+                html: true
+            });
         });
     }]);
 

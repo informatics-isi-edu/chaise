@@ -5,7 +5,9 @@ html, body {
 #alert {
     position: fixed;
     top: 15;
-    /* Why set z-index to 3? Because Bootstrap sets input fields to 2.*/
+    /* Why set z-index to 3? Because we want alerts to appear as the top-most layer
+    and it looks like the current top-most layer has a z-index of 2. (Bootstrap
+    sets its input fields to 2.)*/
     z-index: 3;
 }
 
@@ -27,15 +29,23 @@ html, body {
 }
 
 .annotation.section {
-    border-color: #5cb85c;
+    border-color: green;
+}
+
+.section-label {
+    background-color: green;
 }
 
 .annotation.section.highlighted {
-    border-left: 5px solid #5cb85c;
+    border-left: 5px solid green;
 }
 
 .annotation, input[type=search] {
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+}
+
+.annotation-card {
+    margin-bottom: 20px;
 }
 
 .annotation-anatomy-text {
@@ -67,6 +77,7 @@ html, body {
 
 a.cardlink {
     cursor: pointer;
+    margin-left: 5px;
 }
 
 a.cardlink.delete {
@@ -75,20 +86,38 @@ a.cardlink.delete {
 
 .comments {
     margin: -10px;
-    padding: 10px;
+    padding: 0 10px 0 10px;
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
     background-color: #f9f9f9;
 }
 
 .comment {
-    padding-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.comment-input {
+    background-color: #f3f3f3;
+    padding-bottom: 10px;
+    margin-left: -10px;
+    margin-right: -10px;
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+}
+
+.comment-input .input-group {
+    margin-left: -7px;
+    margin-right: -7px;
 }
 
 .separator {
-    width: 97%;
+    width: 100%;
     border-top: 1px solid #ddd;
-    margin: 10px auto 10px auto;
+    margin: 0 auto 10px auto;
+}
+
+.comment-separator {
+    width: 97%;
 }
 
 #viewer.col-md-9 {
@@ -107,4 +136,8 @@ a.cardlink.delete {
 #edit-annotation-form .ui-select-container,
 #metadata-panel .ui-select-container {
     width: 100%;
+}
+
+.new-annotation .dropdown-menu {
+    left: 15px;
 }

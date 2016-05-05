@@ -20,3 +20,14 @@ The below table explains the usage of the default parameters:
 | recordResource | The sub path for the record resource | /record | "recordResource":\<value\> | N/A | |
 | showBadgeCounts | true <br> false | false | "showBadgeCounts":\<value\> | N/A | If true, facet counts will be displayed in the sidebar. |
 | tableThreshold | Number of rows. | 0 | "tableThreshold":\<value\> | N/A | Max number of rows default to transpose view. |
+| showAllAttributes | A boolean | False | "showAllAttributes":\<value\> | N/A | If present and True, select all the attributes in the search page. |
+| headTitle | An application name | Chaise | "headTitle":\<value\> | N/A | The application name. |
+| customCSS | An URL | N/A | "customCSS":\<value\> | N/A | The URL for a style sheet file to be applied for the application header. |
+| navbarBrand | An URL | N/A | "navbarBrand":\<value\> | N/A | The URL for the branding logo in the top navigation bar. |
+| navbarBrandText | A string | Chaise | "navbarBrandText":\<value\> | N/A | The value to be displayed in the navigation bar. |
+| navbarBrandImage | An URL | N/A | "navbarBrandImage":\<value\> | N/A | The URL for an image to be displayed in the navigation bar. |
+| logoutURL | An URL | /chaise/logout | "logoutURL":\<value\> | N/A | The URL to the logout page. |
+| dataBrowser | An URL | /chaise/search | "dataBrowser":\<value\> | N/A | The URL to continue after a logout. |
+| defaultAnnotationColor | red, orange, gold, green, blue, purple | red | "defaultAnnotationColor":\<value\> | N/A | In `/chaise/viewer`, annotations' borders and colors will default to this value. |
+| confirmDelete | A boolean | true | "confirmDelete":\<value\> | N/A | Whether the user will be prompted for confirming on deletion of comments and annotations |
+| hideSearchTextFacet | A boolean | false | "hideSearchTextFacet":\<value\> | N/A | Whether the search box for attributes names and values should be hidden |
