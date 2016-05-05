@@ -81,9 +81,7 @@
             }
         }, function error(response) {
             if (response.status == 401) {
-                if (chaiseConfig.authnProvider == 'goauth') {
-                    getGoauth(encodeSafeURIComponent(window.location.href));
-                }
+                getGoauth(encodeSafeURIComponent(window.location.href));
                 console.log(response);
             }
         });
