@@ -24,11 +24,10 @@
             <nav class="navbar navbar-default navbar-fixed-top">
                 <div class="container-fluid">
                     <div class="navbar-header">
-                        <li class="navbar-brand" href="#">New {{form.editorModel.table.name | underscoreToSpace | toTitleCase}}</li>
+                        <li class="navbar-brand" href="#">New {{::form.editorModel.table.name | underscoreToSpace | toTitleCase}}</li>
                     </div>
                     <div class="navbar-collapse collapse">
                         <ul class="navbar-form navbar-right" role="button">
-                            <button class="btn btn-default" type="button" ng-click="form.addFormRow(1);">Add a Row</button>
                             <div class="input-group">
                                 <input ng-model="form.numRowsToAdd" type="number" class="form-control" style="width: 60px;">
                                 <span class="input-group-btn">
@@ -41,6 +40,14 @@
                 </div>
             </nav>
             <div class="col-md-12">
+                <div ng-show="form.alert" class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-dismissible" ng-class="{'alert-danger': form.alert.type == 'error', 'alert-success': form.alert.type == 'success'}" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <strong>{{form.alert.type | underscoreToSpace | toTitleCase}}</strong> {{form.alert.message}}
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-12">
                         <table class="table table-bordered table-striped table-hover">
@@ -48,7 +55,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th ng-repeat="column in form.editorModel.table.columns.all();" ng-if="!form.isAutoGen(column.type.name);">
-                                        {{column.name | underscoreToSpace | toTitleCase}} &bull; <small>{{column.type.name}}</small>
+                                        {{::column.name | underscoreToSpace | toTitleCase}} &bull; <small>{{::column.type.name}}</small>
                                     </th>
                                 </tr>
                             </thead>

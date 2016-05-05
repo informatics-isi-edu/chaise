@@ -5,9 +5,10 @@
     angular.module('chaise.dataEntry')
 
     .constant('context', {
-        serviceURL: 'https://localhost/ermrest',
-        catalogID: '1',
-        schemaName: 'rbk',
-        tableName: 'image'
+        serviceURL: null,
+        catalogID: null,
+        schemaName: null,
+        tableName: null,
+        maxRowsToAdd: 25
     });
 })();

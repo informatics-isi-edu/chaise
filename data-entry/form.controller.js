@@ -3,16 +3,19 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['editorModel', function FormController(editorModel) {
+    .controller('FormController', ['editorModel', 'context', function FormController(editorModel, context) {
         var vm = this;
         vm.editorModel = editorModel;
 
+        // TODO: Decide whether alert or modal is better. Modal might be better so
+        // that users don't have to scroll all the way up to see alert message.
         vm.alert = null;
         vm.closeAlert = closeAlert;
 
         vm.submit = submit;
         vm.addFormRow = addFormRow;
-        vm.numRowsToAdd = 2; // Default set at 2, but could be any number
+        vm.numRowsToAdd = 1;
+        var MAX_ROWS_TO_ADD = context.maxRowsToAdd; // add too many rows and browser could hang
 
         vm.getKeys = getKeys;
 
@@ -28,12 +31,13 @@
         function submit() {
             var form = vm.formContainer;
             var model = vm.editorModel;
+            form.$setUntouched();
+            form.$setPristine();
+
             if (form.$invalid) {
-                vm.alert = {
-                    type: 'error',
-                    message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'
-                };
-                return form.$setSubmitted();
+                vm.alert = {type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'};
+                form.$setSubmitted();
+                return;
             }
 
             model.table.entity.post(model.rows, vm.getKeys()).then(function success(entity) {
@@ -50,6 +54,12 @@
         }
 
         function addFormRow(numRows) {
+            numRows = parseInt(numRows, 10);
+            if (Number.isNaN(numRows) || numRows < 0 || numRows > MAX_ROWS_TO_ADD) {
+                return vm.alert = {type: 'error', message: "Sorry, you can only add 1 to " + MAX_ROWS_TO_ADD + " rows at a time. Please enter a whole number from 1 to " + MAX_ROWS_TO_ADD + "."};
+            } else if (numRows === 0) {
+                return;
+            }
             var rowset = vm.editorModel.rows;
             var prototypeRow = rowset[rowset.length-1];
             for (var i = 0; i < numRows; i++) {
