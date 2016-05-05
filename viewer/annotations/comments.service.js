@@ -25,6 +25,7 @@
             return table.entity.post(newComment, ['id', 'created', 'last_modified']).then(function success(commentArr) {
                 var comment = commentArr[0];
                 var annotationId = comment.annotation_id;
+                comment.table = table.name;
                 if (!comments[annotationId]) {
                     comments[annotationId] = [];
                 }
