@@ -37,9 +37,9 @@
     "karma-ie-launcher": "^0.2.0",
     "karma-jasmine": "^0.3.7",
     "karma-osx-reporter": "^0.2.1",
-    "karma-phantomjs-launcher": "^0.2.1",
+    "karma-phantomjs2-launcher": "0.4.0",
     "karma-safari-launcher": "^0.1.1",
-    "phantomjs": "^1.9.18",
+    "phantomjs2": "2.2.0",
     "protractor": "x",
     "testem": "x"
   }

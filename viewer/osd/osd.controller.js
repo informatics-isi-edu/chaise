@@ -14,14 +14,15 @@
         vm.homeView = homeView;
 
         function downloadView() {
-            var filename = vm.image.entity.data.slide_id;
+            var filename = vm.image.entity.slide_id;
             if (!filename) {
                 filename = 'image';
             }
-            iframe.postMessage({
+            var obj = {
                 messageType: 'downloadView',
                 content: filename
-            }, origin);
+            }
+            iframe.postMessage(obj, origin);
         }
 
         function zoomInView() {

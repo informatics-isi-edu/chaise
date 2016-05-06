@@ -34,15 +34,15 @@
         }
 
         function editComment(comment) {
-            vm.editedComment = comment.table.name + '-' + comment.data.id;
+            vm.editedComment = comment.table + '-' + comment.id;
             originalComment = {
-                comment: comment.data.comment
+                comment: comment.comment
             }
         }
 
         function cancelEdit(comment) {
             vm.editedComment = null;
-            comment.data.comment = originalComment.comment;
+            comment.comment = originalComment.comment;
         }
 
         function updateComment(comment) {

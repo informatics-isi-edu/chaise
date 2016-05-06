@@ -4,6 +4,8 @@
     angular.module('chaise.viewer')
 
     .service('CommentsService', ['comments', 'context', 'image', 'user', function(comments, context, image, user) {
+        var table = null;
+
         function getNumComments(annotationId) {
             var _comments = comments[annotationId];
             if (!_comments) {
@@ -19,9 +21,11 @@
                 "comment": newComment.comment
             }];
 
-            var commentTable = image.entity.getRelatedTable(context.schemaName, 'annotation').getRelatedTable(context.schemaName, 'annotation_comment');
-            return commentTable.createEntity(newComment, ['id', 'created', 'last_modified']).then(function success(comment) {
-                var annotationId = comment.data.annotation_id;
+            if (!table) table = context.schema.tables.get('annotation_comment');
+            return table.entity.post(newComment, ['id', 'created', 'last_modified']).then(function success(commentArr) {
+                var comment = commentArr[0];
+                var annotationId = comment.annotation_id;
+                comment.table = table.name;
                 if (!comments[annotationId]) {
                     comments[annotationId] = [];
                 }
@@ -36,9 +40,13 @@
         }
 
         function updateComment(comment) {
-            comment.update().then(function success(response) {
+            var commentArr = [];
+            commentArr.push(comment);
+
+            if (!table) table = context.schema.tables.get('annotation_comment');
+            table.entity.put(commentArr).then(function success(response) {
                 // Nothing to change in the state of the app
-                // comments[comment.data.annotation_id][comment] is changed in place from the html
+                // comments[comment.annotation_id][comment] is changed in place from the html
                 console.log('Comments: ', comments);
             }, function error(repsonse) {
                 console.log(response);
@@ -46,8 +54,11 @@
         }
 
         function deleteComment(comment) {
-            comment.delete().then(function success() {
-                var annotationComments = comments[comment.data.annotation_id];
+
+            if (!table) table = context.schema.tables.get('annotation_comment');
+            var deleteFilter = new ERMrest.BinaryPredicate(table.columns.get('id'), ERMrest.OPERATOR.EQUAL, comment.id);
+            table.entity.delete(deleteFilter).then(function success() {
+                var annotationComments = comments[comment.annotation_id];
                 var index = annotationComments.indexOf(comment);
                 annotationComments.splice(index, 1);
             }, function error(response) {

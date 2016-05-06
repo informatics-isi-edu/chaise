@@ -16,16 +16,29 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
         '../scripts/vendor/jquery-latest.min.js',
+        '../scripts/vendor/jquery.js',
         '../scripts/vendor/angular.js',
         '../scripts/vendor/angular-sanitize.js',
         '../node_modules/angular-mocks/angular-mocks.js',
         '../scripts/vendor/select.js',
-        'https://dev.rebuildingakidney.org/ermrestjs/js/ermrest.js',
-        'https://dev.rebuildingakidney.org/ermrestjs/js/ngermrest.js',
         'viewer.app.js',
-        '**/*.js',
+        // including the common dependencies
+        '../common/filters.js',
+        // including the scripts/ dependencies
+        '../scripts/**/*.js',
+        // including the ermrestjs dependencies
+        '../../ermrestjs/js/*.js',
+        // placeholder to only include specified files
+        'alerts/*.js',
+        'annotations/*.js',
+        'common/**/*.js',
+        'image-metadata/*.js',
+        'osd/*.js',
+        'sidebar/*.js',
+        // '**/*.js',
         '../chaise-config.js',
-        '*.spec.js'
+        // Specs to run, use test/*.spec.js for all tests
+        'test/*.spec.js'
     ],
 
 
@@ -37,7 +50,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'viewer.spec.js': ['browserify']
+      'test/*.spec.js': ['browserify']
     },
 
 
@@ -66,7 +79,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: ['PhantomJS2'],
 
 
     // Continuous Integration mode

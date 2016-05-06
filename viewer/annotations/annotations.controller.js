@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', '$window', '$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, $window, $scope, $timeout, $uibModal, AlertsService) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', '$window', '$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, $window, $scope, $timeout, $uibModal, AlertsService) {
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;
@@ -21,7 +21,7 @@
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
 
-        vm.editedAnnotation = null; // Track which annotation is being edited right now
+        resetEditedValues();
         var originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
         vm.editAnnotation = editAnnotation;
         vm.cancelEdit = cancelEdit;
@@ -71,10 +71,12 @@
                         break;
                     case 'onClickAnnotation':
                         var content = JSON.parse(data.content);
+                        //TODO check data object
                         var annotation = findAnnotation(content.data.shapes[0].geometry);
                         if (annotation) {
-                            var annotationId = annotation.table.name + '-' + annotation.data.id;
+                            var annotationId = annotation.table + '-' + annotation.id;
                             $scope.$apply(function() {
+                                // Highlight the annotation in the sidebar
                                 vm.highlightedAnnotation = annotationId;
                             });
                             vm.scrollIntoView(annotationId);
@@ -95,7 +97,6 @@
 
             vm.query = vm.query.toLowerCase();
 
-            annotation = annotation.data;
             var author = annotation.author;
             var props = [annotation.anatomy, annotation.description, author.display_name, author.full_name, author.email, annotation.created];
             var numProps = props.length;
@@ -109,7 +110,7 @@
             if (commentsArr) {
                 var numComments = commentsArr.length;
                 for (var c = 0; c < numComments; c++) {
-                    var comment = commentsArr[c].data;
+                    var comment = commentsArr[c];
                     var commentAuthor = comment.author;
                     var commentProps = [comment.comment, comment.created, commentAuthor.display_name, commentAuthor.full_name, commentAuthor.email];
                     var numCommentProps = commentProps.length;
@@ -133,7 +134,7 @@
             vm.createMode = false;
             AnnotationsService.createAnnotation(vm.newAnnotation).then(function success(annotation) {
                 $timeout(function scrollToNewAnnotation() {
-                    var annotationId = annotation.table.name + '-' + annotation.data.id;
+                    var annotationId = annotation.table + '-' + annotation.id;
                     vm.highlightedAnnotation = annotationId;
                     vm.scrollIntoView(annotationId);
                 }, 200);
@@ -152,9 +153,8 @@
             // also change the original annotation.
             vm.editedAnnotation = angular.copy(annotation);
 
-            vm.editedAnnotation.domId = annotation.table.name + '-' + annotation.data.id;
+            vm.editedAnnotationDomId = annotation.table + '-' + annotation.id;
             setHighlightedAnnotation(annotation);
-            annotation = annotation.data;
             originalAnnotation = {
                 description: annotation.description,
                 anatomy: annotation.anatomy,
@@ -164,18 +164,22 @@
         }
 
         function cancelEdit(annotation) {
-            vm.editedAnnotation = null;
-            var data = annotation.data;
-            data.description = originalAnnotation.description;
-            data.anatomy = originalAnnotation.anatomy;
-            data.config = originalAnnotation.config;
-            data.type = originalAnnotation.type;
+            resetEditedValues();
+            annotation.description = originalAnnotation.description;
+            annotation.anatomy = originalAnnotation.anatomy;
+            annotation.config = originalAnnotation.config;
+            annotation.type = originalAnnotation.type;
         }
 
         function updateAnnotation(annotation) {
-            annotation.data = vm.editedAnnotation.data;
+            annotation = vm.editedAnnotation;
             AnnotationsService.updateAnnotation(annotation);
-            vm.editedAnnotation = null;
+            resetEditedValues();
+        }
+
+        function resetEditedValues() {
+            vm.editedAnnotation = null; // Track which annotation is being edited right now
+            vm.editedAnnotationDomId = null; // Tracks the currently edited annotation's id for the dom for showing/hiding forms
         }
 
         function deleteAnnotation(annotation) {
@@ -208,7 +212,7 @@
         };
 
         function setHighlightedAnnotation(annotation) {
-            vm.highlightedAnnotation = annotation.table.name + '-' + annotation.data.id;
+            vm.highlightedAnnotation = annotation.table + '-' + annotation.id;
         }
 
         // Centers and zooms to the annotation inside Annotorious
@@ -217,21 +221,21 @@
             return AnnotationsService.centerAnnotation(annotation);
         }
 
-        function getNumComments(annotation) {
-            return AnnotationsService.getNumComments(annotation.data.id);
-        }
-
         // Returns boolean
         function hasComments(annotation) {
             // if there are comments return true
             return getNumComments(annotation) > 0 ? true : false;
         }
 
+        function getNumComments(annotation) {
+            return CommentsService.getNumComments(annotation.id);
+        }
+
         // Return an annotation/section that matches an object of coordinates
         function findAnnotation(coordinates) {
             var length = vm.annotations.length;
             for (var i = 0; i < length; i++) {
-                var annotationCoords = vm.annotations[i].data.coords;
+                var annotationCoords = vm.annotations[i].coords;
                 if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
                     return vm.annotations[i];
                 }
@@ -255,7 +259,7 @@
         }
 
         function sortSectionsFirst(annotation) {
-            if (annotation.data.type == 'section') {
+            if (annotation.type == 'section') {
                 return 0;
             }
         }
