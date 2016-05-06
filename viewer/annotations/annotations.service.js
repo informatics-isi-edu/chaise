@@ -60,11 +60,7 @@
                 var _annotation = annotation[0];
                 _annotation.table = table.name;
                 annotations.push(_annotation);
-                //TODO remove when annotorious refactored
-                //temporary stubbing so annotorious stops crying about data
-                var stub = {};
-                stub.data = _annotation;
-                iframe.postMessage({messageType: messageType, content: stub}, origin);
+                iframe.postMessage({messageType: messageType, content: _annotation}, origin);
                 return _annotation;
             }, function error(response) {
                 AlertsService.addAlert({
@@ -91,11 +87,9 @@
             if (!table) table = context.schema.tables.get('annotation');
             table.entity.put(annArray).then(function success(response) {
                 // Returns an array of objects that were updated
+                var _annotation = response[0]
                 // Update in Annotorious
-                //TODO remove after annotorious refactor3
-                var stub = {};
-                stub.data = response[0];
-                iframe.postMessage({messageType: 'updateAnnotation', content: stub}, origin);
+                iframe.postMessage({messageType: 'updateAnnotation', content: _annotation}, origin);
             }, function error(response) {
                 AlertsService.addAlert({
                     type: 'error',
@@ -114,10 +108,7 @@
                 var index = annotations.indexOf(annotation);
                 annotations.splice(index, 1);
 
-                // Delete in Annotorious
-                var stub = {};
-                stub.data = annotation;
-                iframe.postMessage({messageType: 'deleteAnnotation', content: stub}, origin);
+                iframe.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
             }, function error(response) {
                 console.log(response);
             });
