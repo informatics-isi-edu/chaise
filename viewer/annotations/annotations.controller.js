@@ -21,8 +21,8 @@
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
 
+        var originalAnnotation; // Holds the original contents of annotation in the event that a user cancels an edit
         resetEditedValues();
-        var originalAnnotation = null; // Holds the original contents of annotation in the event that a user cancels an edit
         vm.editAnnotation = editAnnotation;
         vm.cancelEdit = cancelEdit;
         vm.updateAnnotation = updateAnnotation;
@@ -151,6 +151,9 @@
             // Must make a copy instead of assigning to remove original annotation's
             // references. Otherwise, changing something in editedAnnotation will
             // also change the original annotation.
+
+            // This isn't a big deal except when editing the anatomy. When the anatomy
+            // is edited it reorders the list of annotations before the user clicks save.
             vm.editedAnnotation = angular.copy(annotation);
 
             vm.editedAnnotationDomId = annotation.table + '-' + annotation.id;
@@ -164,20 +167,25 @@
         }
 
         function cancelEdit(annotation) {
-            resetEditedValues();
             annotation.description = originalAnnotation.description;
             annotation.anatomy = originalAnnotation.anatomy;
             annotation.config = originalAnnotation.config;
             annotation.type = originalAnnotation.type;
+            resetEditedValues();
         }
 
         function updateAnnotation(annotation) {
             annotation = vm.editedAnnotation;
             AnnotationsService.updateAnnotation(annotation);
+            var index = annotations.findIndex(function (_annotation){
+                return _annotation.id == annotation.id;
+            });
+            annotations[index] = vm.editedAnnotation;
             resetEditedValues();
         }
 
         function resetEditedValues() {
+            originalAnnotation = null;
             vm.editedAnnotation = null; // Track which annotation is being edited right now
             vm.editedAnnotationDomId = null; // Tracks the currently edited annotation's id for the dom for showing/hiding forms
         }

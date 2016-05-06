@@ -65,10 +65,12 @@
             // Update in ERMrest
             if (!table) table = context.schema.tables.get('annotation');
             table.entity.put(annArray).then(function success(response) {
-                // Returns an array of objects that were updated
-                var _annotation = response[0]
-                // Update in Annotorious
-                iframe.postMessage({messageType: 'updateAnnotation', content: _annotation}, origin);
+                if (response[0]) {
+                    // Returns an array of objects that were updated
+                    var _annotation = response[0]
+                    // Update in Annotorious
+                    iframe.postMessage({messageType: 'updateAnnotation', content: _annotation}, origin);
+                }
             }, function error(response) {
                 AlertsService.addAlert({
                     type: 'error',
