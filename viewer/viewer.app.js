@@ -162,21 +162,11 @@
                             _annotations[i].table = annotationPath.context.table.name;
                             var annotation = _annotations[i];
                             annotations.push(annotation);
-
-                            if (annotation.type == 'arrow') {
-                                arrows.push(annotation);
-                            } else if (annotation.type == 'rectangle') {
-                                rectangles.push(annotation);
-                            } else if (annotation.type == 'section') {
-                                sections.push(annotation);
-                            }
                         }
                         chaiseReady = true;
 
                         if (annotoriousReady && chaiseReady) {
-                            iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
-                            iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
-                            iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
+                            iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                         }
                         console.log('Annotations: ', annotations);
 
@@ -332,9 +322,7 @@
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;
                     if (annotoriousReady && chaiseReady) {
-                        iframe.postMessage({messageType: 'loadSpecialAnnotations', content: sections}, origin);
-                        iframe.postMessage({messageType: 'loadArrowAnnotations', content: arrows}, origin);
-                        iframe.postMessage({messageType: 'loadAnnotations', content: rectangles}, origin);
+                        iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                     }
                 }
             } else {

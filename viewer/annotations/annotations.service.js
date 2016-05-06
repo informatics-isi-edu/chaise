@@ -33,34 +33,13 @@
                 "config": newAnnotation.config
             }];
 
-            var type = newAnnotation[0].type;
-            var messageType = '';
-
-            switch (type) {
-                case 'section':
-                    messageType = 'createSpecialAnnotation';
-                    break;
-                case 'rectangle':
-                    messageType = 'createAnnotation';
-                    break;
-                case 'arrow':
-                    messageType = 'createArrowAnnotation';
-                    break;
-                default:
-                    AlertsService.addAlert({
-                        type: 'error',
-                        message: "Sorry, the annotation could not be created. Please try again and make sure the annotation type is either a Section, Rectangle, or Arrow."
-                    });
-                    console.log('Attempted to create an annotation of type "' + type + '" but this is an invalid type.');
-            }
-
             if (!table) table = context.schema.tables.get('annotation');
             return table.entity.post(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
                 // table.entity.post returns an array of objects
                 var _annotation = annotation[0];
                 _annotation.table = table.name;
                 annotations.push(_annotation);
-                iframe.postMessage({messageType: messageType, content: _annotation}, origin);
+                iframe.postMessage({messageType: 'createAnnotation', content: _annotation}, origin);
                 return _annotation;
             }, function error(response) {
                 AlertsService.addAlert({
