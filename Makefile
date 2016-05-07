@@ -107,6 +107,12 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/tour.js \
 	$(JS)/matrix.js
 
+# error definitions
+ERROR_SOURCE=error-handling/authenerrors.js \
+             error-handling/networkerrors.js \
+             error-handling/schemaerrors.js \
+             error-handling/validationerrors.js
+
 # HTML templates
 TEMPLATES=views
 
@@ -240,7 +246,8 @@ RECSET_ASSETS=recordset
 
 RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
-	$(JS)/vendor/bootstrap.js
+	$(JS)/vendor/bootstrap.js \
+	$(RECORD_ASSETS)/lib/angular-animate.min.js
 
 RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.js
 
@@ -248,7 +255,8 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/font-awesome/css/font-awesome.min.css
 
-RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css
+RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css \
+    error-handling/notification.css
 
 
 # Config file
@@ -519,6 +527,9 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
 	done
+	for script in $(ERROR_SOURCE); do \
+    		echo "<script src='../$$script'></script>" >> .make-rs-asset-block ; \
+    	done
 	for file in $(RECSET_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-rs-asset-block ; \
 	done

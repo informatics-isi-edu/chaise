@@ -1,4 +1,9 @@
 <div ng-controller="recordsetController">
+
+    <div id="notification" ng-hide="errorMessage===''">
+        {{ errorMessage }}
+    </div>
+
     <h2>Records for {{ vm.tableName }}</h2>
 
     <!-- permalink -->

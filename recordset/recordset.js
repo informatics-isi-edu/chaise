@@ -327,103 +327,141 @@ angular.module('recordset', ['ERMrest'])
     pageInfo.loading = true;
     recordsetModel.tableName = context.tableName;
 
+    $rootScope.errorMessage='';
+
     // Get rowset data from ermrest
-    var server = ermrestServerFactory.getServer(context.serviceURL);
-    server.catalogs.get(context.catalogID).then(function(catalog) {
-        console.log(catalog);
+    ermrestServerFactory.getServer(context.serviceURL).then(function(server) {
 
-        // get table definition
-        var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
-        console.log(table);
-        recordsetModel.table = table;
-        recordsetModel.columns = table.columns.names();
-        recordsetModel.header = table.columns.names();
-        console.log(recordsetModel.header);
+        server.catalogs.get(context.catalogID).then(function(catalog) {
+            console.log(catalog);
 
-        // build up filters
-        var filter = null;
-        var len = context.filters.length;
-        if (len == 1) {
-          filter = new ERMrest.BinaryPredicate(
-            table.columns.get(context.filters[0].name),
-            context.filters[0].op,
-            context.filters[0].value);
-        }
-        else if (len > 1) {
-          var filters = [];
-          for (var i=0; i<len; i++) {
-            filters.push(
-              new ERMrest.BinaryPredicate(
-                table.columns.get(context.filters[i].name),
-                context.filters[i].op,
-                context.filters[i].value)
-            );
-          }
-          filter = new ERMrest.Conjunction(filters);
-        }
-        recordsetModel.filter = filter;
+            try {
+                // get table definition
+                var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
+                console.log(table);
+                recordsetModel.table = table;
+                recordsetModel.columns = table.columns.names();
+                recordsetModel.header = table.columns.names();
+                console.log(recordsetModel.header);
 
-        // Find shortest Key, used for paging and linking
-        var keys = table.keys.all().sort( function(a, b) {
-          return a.colset.length() - b.colset.length();
-        });
-        recordsetModel.keycols = keys[0].colset.columns;
+                // build up filters
+                var filter = null;
+                var len = context.filters.length;
+                if (len == 1) {
+                    filter = new ERMrest.BinaryPredicate(
+                        table.columns.get(context.filters[0].name),
+                        context.filters[0].op,
+                        context.filters[0].value);
+                }
+                else if (len > 1) {
+                    var filters = [];
+                    for (var i = 0; i < len; i++) {
+                        filters.push(
+                            new ERMrest.BinaryPredicate(
+                                table.columns.get(context.filters[i].name),
+                                context.filters[i].op,
+                                context.filters[i].value)
+                        );
+                    }
+                    filter = new ERMrest.Conjunction(filters);
+                }
+                recordsetModel.filter = filter;
 
-        // sorting
-        var sort = [];
+                // Find shortest Key, used for paging and linking
+                var keys = table.keys.all().sort( function(a, b) {
+                  return a.colset.length() - b.colset.length();
+                });
+                recordsetModel.keycols = keys[0].colset.columns;
 
-        // user selected column as the priority in sort
-        // followed by all the key columns
-        if (context.sort !== null) {
-            if (context.sort.endsWith("::desc::")) {
-                recordsetModel.sortby = decodeURIComponent(
-                    context.sort.match(/(.*)::desc::/)[1]
-                );
-                recordsetModel.sortOrder = 'desc';
-            } else {
-                recordsetModel.sortby = decodeURIComponent(context.sort);
-                recordsetModel.sortOrder = 'asc';
+                // sorting
+                var sort = [];
+
+                // user selected column as the priority in sort
+                // followed by all the key columns
+                if (context.sort !== null) {
+                    if (context.sort.endsWith("::desc::")) {
+                        recordsetModel.sortby = decodeURIComponent(
+                            context.sort.match(/(.*)::desc::/)[1]
+                        );
+                        recordsetModel.sortOrder = 'desc';
+                    } else {
+                        recordsetModel.sortby = decodeURIComponent(context.sort);
+                        recordsetModel.sortOrder = 'asc';
+                    }
+
+                    sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
+                }
+
+                for (i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
+                    var col = recordsetModel.keycols[i].name;
+                    if (col !== recordsetModel.sortby) {
+                        sort.push({"column": col, "order": "asc"});
+                    }
+                }
+
+                // first get row count
+                table.entity.count(filter).then(function (count) {
+                    recordsetModel.count = count;
+
+                    // get rowset from table
+                    table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
+                        console.log(rowset);
+                        recordsetModel.rowset = rowset;
+
+                        pageInfo.loading = false;
+                        pageInfo.recordStart = 1;
+                        pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
+                        pageInfo.previousButtonDisabled = true;
+                        pageInfo.nextButtonDisabled = recordsetModel.count <= pageInfo.recordEnd;
+
+                    }, function (error) {
+                        console.log(error);
+                        pageInfo.loading = false;
+                        pageInfo.previousButtonDisabled = true;
+                        pageInfo.nextButtonDisabled = true;
+
+                        // TODO get entity error
+                    });
+                }, function (error) {
+                    pageInfo.loading = false;
+                    pageInfo.previousButtonDisabled = true;
+                    pageInfo.nextButtonDisabled = true;
+
+                    // TODO get count error
+                });
+            } catch (error) {
+                pageInfo.loading = false;
+                if (error instanceof Errors.SchemaNotFoundError ||
+                    error instanceof Errors.TableNotFoundError ||
+                    error instanceof Errors.ColumnNotFoundError ||
+                    error instanceof Errors.InvalidFilterOperatorError) {
+                    $rootScope.errorMessage = error.message;
+                }
             }
 
-            sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
-        }
+        }, function(error) {
 
-        for (i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
-            var col = recordsetModel.keycols[i].name;
-            if (col !== recordsetModel.sortby) {
-                sort.push({"column": col, "order": "asc"});
-            }
-        }
-
-        // first get row count
-        table.entity.count(filter).then(function(count) {
-            recordsetModel.count = count;
-
-            // get rowset from table
-            table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
-                console.log(rowset);
-                recordsetModel.rowset = rowset;
-
-                pageInfo.loading = false;
-                pageInfo.recordStart = 1;
-                pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
-                pageInfo.previousButtonDisabled = true;
-                pageInfo.nextButtonDisabled = recordsetModel.count <= pageInfo.recordEnd;
-
-            }, function(error) {
-                console.log(error);
-                pageInfo.loading = false;
-                pageInfo.previousButtonDisabled = true;
-                pageInfo.nextButtonDisabled = true;
-            });
-        }, function(response) {
+            // get catalog error
+            console.log(error);
             pageInfo.loading = false;
-            pageInfo.previousButtonDisabled = true;
-            pageInfo.nextButtonDisabled = true;
-            return module._q.reject(response.data);
+
+            // TODO
+            $rootScope.errorMessage = error.message;
+            if (error instanceof Errors.NotFoundError) {
+                // catalog not found
+            } else if (error instanceof Errors.ForbiddenError) {
+
+            } else if (error instanceof Errors.UnauthorizedError) {
+
+            }
         });
+
+    }, function(error) {
+        console.log(error);
+        // TODO authen error
 
     });
+
 
     window.onhashchange = function() {
         // when address bar changes by user
