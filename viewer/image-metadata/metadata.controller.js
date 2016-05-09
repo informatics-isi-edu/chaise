@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('ImageMetadataController', ['AuthService', 'vocabs', 'image', 'statuses', function(AuthService, vocabs, image, statuses) {
+    .controller('ImageMetadataController', ['AuthService', 'vocabs', 'image', 'statuses', 'context', function(AuthService, vocabs, image, statuses, context) {
         var vm = this;
         vm.image = image;
         vm.vocabs = vocabs;
@@ -22,7 +22,19 @@
 
         function save() {
             vm.editMode = false;
-            vm.image.entity.update();
+
+            var table = context.schema.tables.get(context.tableName);
+            var imageArr = [];
+            imageArr.push(vm.image.entity);
+            table.entity.put(imageArr).then(function success(response){
+                // do nothing
+            }, function error(response){
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: 'Your image data was not updated.'
+                });
+                console.log(response);
+            });
         }
     }]);
 })();

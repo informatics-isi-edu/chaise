@@ -43,11 +43,11 @@ HTML=search/index.html \
 	 data-entry/index.html
 
 # ERMrestjs Deps
-ERMRESTJS_DEPS=../../ermrestjs/js/ermrest.js \
-			   ../../ermrestjs/js/utilities.js \
+ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
+			   ../../ermrestjs/js/ermrest.js \
 			   ../../ermrestjs/js/filters.js \
-			   ../../ermrestjs/js/datapath.js \
-			   ../../ermrestjs/js/ngermrest.js
+			   ../../ermrestjs/js/ngermrest.js \
+			   ../../ermrestjs/js/utilities.js 
 
 # CSS source
 CSS=styles
@@ -471,8 +471,9 @@ $(JS_CONFIG): chaise-config-sample.js
 	for file in $(VIEWER_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-viewer-asset-block ; \
 	done
-	echo "<script src='../../../ermrestjs/js/ermrest.js'></script>" >> .make-viewer-asset-block
-	echo "<script src='../../../ermrestjs/js/ngermrest.js'></script>" >> .make-viewer-asset-block
+	for script in $(ERMRESTJS_DEPS); do \
+		echo "<script src='$$script'></script>" >> .make-viewer-asset-block ; \
+	done
 	for file in $(VIEWER_JS_SOURCE) $(JS_CONFIG); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \

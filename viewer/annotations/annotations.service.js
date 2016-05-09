@@ -3,9 +3,10 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'CommentsService', 'AlertsService', '$window', '$q', function(context, user, image, annotations, CommentsService, AlertsService, $window, $q) {
+    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', '$window', '$q', function(context, user, image, annotations, AlertsService, $window, $q) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
+        var table = null;
 
         function drawAnnotation() {
             iframe.postMessage({messageType: 'drawAnnotation'}, origin);
@@ -32,32 +33,14 @@
                 "config": newAnnotation.config
             }];
 
-            var type = newAnnotation[0].type;
-            var messageType = '';
-
-            switch (type) {
-                case 'section':
-                    messageType = 'createSpecialAnnotation';
-                    break;
-                case 'rectangle':
-                    messageType = 'createAnnotation';
-                    break;
-                case 'arrow':
-                    messageType = 'createArrowAnnotation';
-                    break;
-                default:
-                    AlertsService.addAlert({
-                        type: 'error',
-                        message: "Sorry, the annotation could not be created. Please try again and make sure the annotation type is either a Section, Rectangle, or Arrow."
-                    });
-                    console.log('Attempted to create an annotation of type "' + type + '" but this is an invalid type.');
-            }
-
-            var table = image.entity.getRelatedTable(context.schemaName, 'annotation');
-            return table.createEntity(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
-                annotations.push(annotation);
-                iframe.postMessage({messageType: messageType, content: annotation.data}, origin);
-                return annotation;
+            if (!table) table = context.schema.tables.get('annotation');
+            return table.entity.post(newAnnotation, ['id', 'created', 'last_modified']).then(function success(annotation) {
+                // table.entity.post returns an array of objects
+                var _annotation = annotation[0];
+                _annotation.table = table.name;
+                annotations.push(_annotation);
+                iframe.postMessage({messageType: 'createAnnotation', content: _annotation}, origin);
+                return _annotation;
             }, function error(response) {
                 AlertsService.addAlert({
                     type: 'error',
@@ -72,14 +55,22 @@
         }
 
         function updateAnnotation(annotation) {
-            if (annotation.data.anatomy == 'No Anatomy') {
-                annotation.data.anatomy = null;
+            if (annotation.anatomy == 'No Anatomy') {
+                annotation.anatomy = null;
             }
 
+            var annArray = [];
+            annArray.push(annotation);
+
             // Update in ERMrest
-            annotation.update().then(function success(response) {
-                // Update in Annotorious
-                iframe.postMessage({messageType: 'updateAnnotation', content: annotation.data}, origin);
+            if (!table) table = context.schema.tables.get('annotation');
+            table.entity.put(annArray).then(function success(response) {
+                if (response[0]) {
+                    // Returns an array of objects that were updated
+                    var _annotation = response[0]
+                    // Update in Annotorious
+                    iframe.postMessage({messageType: 'updateAnnotation', content: _annotation}, origin);
+                }
             }, function error(response) {
                 AlertsService.addAlert({
                     type: 'error',
@@ -89,30 +80,23 @@
             });
         }
 
-        function getNumComments(annotationId) {
-            return CommentsService.getNumComments(annotationId);
-        }
-
         function deleteAnnotation(annotation) {
             // Delete from ERMrest
-            annotation.delete().then(function success(response) {
+            if (!table) table = context.schema.tables.get('annotation');
+            var deleteFilter = new ERMrest.BinaryPredicate(table.columns.get('id'), ERMrest.OPERATOR.EQUAL, annotation.id);
+            table.entity.delete(deleteFilter).then(function success(response) {
                 // Delete from the 'annotations' provider
                 var index = annotations.indexOf(annotation);
                 annotations.splice(index, 1);
 
-                // Delete in Annotorious
-                iframe.postMessage({messageType: 'deleteAnnotation', content: annotation.data}, origin);
+                iframe.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
             }, function error(response) {
-                AlertsService.addAlert({
-                    type: 'error',
-                    message: response
-                });
                 console.log(response);
             });
         }
 
         function centerAnnotation(annotation) {
-            iframe.postMessage({messageType: 'centerAnnotation', content: annotation.data}, origin);
+            iframe.postMessage({messageType: 'centerAnnotation', content: annotation}, origin);
         };
 
         return {
@@ -121,8 +105,7 @@
             cancelNewAnnotation: cancelNewAnnotation,
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
-            centerAnnotation: centerAnnotation,
-            getNumComments: getNumComments
+            centerAnnotation: centerAnnotation
         };
 
     }]);

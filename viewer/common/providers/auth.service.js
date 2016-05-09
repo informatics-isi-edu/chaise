@@ -19,14 +19,13 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && isAuthor(annotation.data.author, user.session)) {
+            if (user.role == 'annotator' && isAuthor(annotation.author, user.session)) {
                 return true;
             }
             return false;
         }
 
         function deleteAnnotation(annotation) {
-            annotation = annotation.data;
             if (user.role == 'curator') {
                 return true;
             }
@@ -47,7 +46,7 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && isAuthor(comment.data.author, user.session)) {
+            if (user.role == 'annotator' && isAuthor(comment.author, user.session)) {
                 return true;
             }
             return false;
@@ -57,7 +56,7 @@
             if (user.role == 'curator') {
                 return true;
             }
-            if (user.role == 'annotator' && isAuthor(comment.data.author, user.session)) {
+            if (user.role == 'annotator' && isAuthor(comment.author, user.session)) {
                 return true;
             }
             return false;
@@ -71,8 +70,8 @@
         }
 
         // Used to check group permission
-        function isAuthor(commentAuthor, userSession) {
-            return userSession.attributes.map(function(a) {return a.id}).indexOf(commentAuthor.id) > -1;
+        function isAuthor(author, userSession) {
+            return userSession.attributes.map(function(a) {return a.id}).indexOf(author.id) > -1;
         }
 
         return {
