@@ -47,7 +47,7 @@ ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
 			   ../../ermrestjs/js/ermrest.js \
 			   ../../ermrestjs/js/filters.js \
 			   ../../ermrestjs/js/ngermrest.js \
-			   ../../ermrestjs/js/utilities.js 
+			   ../../ermrestjs/js/utilities.js
 
 # CSS source
 CSS=styles
@@ -157,7 +157,7 @@ RECORD_CSS_DEPS=$(RECORD_ASSETS)/lib/slippry/slippry.css \
 	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css \
 	$(RECORD_ASSETS)/stylesheets/ui-grid.css
 
-RECORD_CSS_SOURCE=$(RECORD_ASSETS)/stylesheets/app.css
+RECORD_CSS_SOURCE=$(COMMON)/styles/app.css
 
 
 # JavaScript and CSS source for Viewer app
@@ -197,7 +197,7 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
 	$(CSS)/appheader.css \
-	$(RECORD_ASSETS)/stylesheets/app.css
+	$(COMMON)/styles/app.css
 
 VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
@@ -227,7 +227,7 @@ DE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/angular-datepicker.css \
 	$(CSS)/vendor/rzslider.css \
 	$(CSS)/appheader.css \
-	$(RECORD_ASSETS)/stylesheets/app.css
+	$(COMMON)/styles/app.css
 
 DE_CSS_SOURCE=$(DE_ASSETS)/dataEntry.css
 
