@@ -47,7 +47,7 @@ ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
 			   ../../ermrestjs/js/ermrest.js \
 			   ../../ermrestjs/js/filters.js \
 			   ../../ermrestjs/js/ngermrest.js \
-			   ../../ermrestjs/js/utilities.js 
+			   ../../ermrestjs/js/utilities.js
 
 # CSS source
 CSS=styles
@@ -209,6 +209,7 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/validators.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/angular-datepicker.js \

@@ -5,6 +5,7 @@
         'ERMrest',
         'ngSanitize',
         'chaise.filters',
+        'chaise.validators',
         'ui.select',
         'rzModule',
         '720kb.datepicker',

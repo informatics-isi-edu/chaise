@@ -62,10 +62,14 @@
                             <tbody ng-form="form.formContainer">
                                     <tr ng-form="form.formContainer.row{{rowIndex}}" ng-repeat="(rowIndex, row) in form.editorModel.rows track by $index">
                                         <td>{{rowIndex + 1}}</td>
-                                        <td ng-form="form.formContainer.row{{rowIndex}}.{{column.name}}" ng-repeat="column in form.editorModel.table.columns.all();" ng-if="!form.isAutoGen(column.type.name);" ng-switch="form.setInputType(column);">
+                                        <td ng-form="form.formContainer.row{{rowIndex}}.{{column.name}}" ng-repeat="column in form.editorModel.table.columns.all();"
+                                            ng-if="!form.isAutoGen(column.type.name);" ng-switch="form.setInputType(column);" novalidate>
+                                            <!-- date input -->
                                             <datepicker ng-switch-when="date" date-format="yyyy-MM-dd">
-                                                <input ng-model="form.editorModel.rows[rowIndex][column.name]" name="{{column.name}}" type="date" class="form-control" required>
+                                                <input ng-model="form.editorModel.rows[rowIndex][column.name]"
+                                                    name="{{column.name}}" type="date" class="form-control" required>
                                             </datepicker>
+                                            <!-- dropdown select input -->
                                             <div ng-switch-when="dropdown">
                                                 <ui-select ng-model="form.editorModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="disabled">
                                                     <ui-select-match name="{{column.name}}" placeholder="Select a value">{{$select.selected | underscoreToSpace | toTitleCase}}</ui-select-match>
@@ -74,8 +78,14 @@
                                                     </ui-select-choices>
                                                 </ui-select>
                                             </div>
-                                            <input ng-switch-when="number" ng-model="form.editorModel.rows[rowIndex][column.name]" name="{{column.name}}" type="number" class="form-control" required>
-                                            <input ng-switch-default ng-model="form.editorModel.rows[rowIndex][column.name]" name="{{column.name}}" type="text" class="form-control" required>
+                                            <!-- numeric input -->
+                                            <input ng-switch-when="number" ng-model="form.editorModel.rows[rowIndex][column.name]"
+                                                name="{{column.name}}" type="number" class="form-control" required integer>
+                                            <!-- decimal input -->
+                                            <!-- boolean input -->
+                                            <!-- text input -->
+                                            <input ng-switch-default ng-model="form.editorModel.rows[rowIndex][column.name]"
+                                                name="{{column.name}}" type="text" class="form-control" required>
 
                                             <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
                                                 <div ng-message="required">Please enter a value for this field.</div>
