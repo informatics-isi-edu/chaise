@@ -83,6 +83,9 @@
                                                 name="{{column.name}}" type="number" class="form-control" required integer>
                                             <!-- decimal input -->
                                             <!-- boolean input -->
+                                            <input ng-switch-when="boolean" ng-model="form.editorModel.rows[rowIndex][column.name]"
+                                                name="{{column.name}}" type="checkbox" class="form-control" required>
+
                                             <!-- text input -->
                                             <input ng-switch-default ng-model="form.editorModel.rows[rowIndex][column.name]"
                                                 name="{{column.name}}" type="text" class="form-control" required>

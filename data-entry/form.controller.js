@@ -25,6 +25,7 @@
         vm.isAutoGen = isAutoGen;
         vm.isForeignKey = isForeignKey;
         vm.isDate = isDate;
+        vm.isBoolean = isBoolean;
         vm.isNumber = isNumber;
         vm.matchType = matchType;
 
@@ -95,6 +96,8 @@
                 return 'date';
             } else if (vm.isNumber(type)) {
                 return 'number';
+            } else if (vm.isBoolean(type)) {
+                return 'boolean';
             } else {
                 return 'text';
             }
@@ -114,6 +117,11 @@
 
         function isDate(columnType) {
             var types = ['date', 'timestamptz'];
+            return vm.matchType(columnType, types);
+        }
+
+        function isBoolean(columnType) {
+            var types = ['bool'];
             return vm.matchType(columnType, types);
         }
 
