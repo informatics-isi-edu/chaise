@@ -2,8 +2,8 @@
 <html ng-app="chaise.dataEntry">
 <head>
     <title>Data Entry App</title>
-    %ASSETS%
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
+    %ASSETS%
     <!--
         IE8 support, see AngularJS Internet Explorer Compatibility http://docs.angularjs.org/guide/ie
         For Firefox 3.6, you will also need to include jQuery and ECMAScript 5 shim
@@ -19,29 +19,23 @@
     <![endif]-->
 </head>
 <body>
-    <div class="container-fluid" style="margin-top: 70px;">
+    <div class="container-fluid">
         <div ng-controller="FormController as form" class="row">
-            <nav class="navbar navbar-default navbar-fixed-top">
+            <nav class="navbar navbar-default">
                 <div class="container-fluid">
                     <div class="navbar-header">
-                        <li class="navbar-brand" href="#">New {{::form.editorModel.table.name | underscoreToSpace | toTitleCase}}</li>
+                        <li class="navbar-brand" href="/">Chaise</li>
                     </div>
                     <div class="navbar-collapse collapse">
-                        <ul class="navbar-form navbar-right" role="button">
-                            <div class="input-group">
-                                <input ng-model="form.numRowsToAdd" type="number" class="form-control" style="width: 60px;">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" ng-click="form.addFormRow(form.numRowsToAdd);" type="button">Add # of Rows</button>
-                                </span>
-                            </div><!-- /input-group -->
-                            <button class="btn btn-primary pull-right" type="submit" ng-click="form.submit();">Submit Data</button>
-                        </ul>
+                        <p class="navbar-text pull-right">
+                            Log In/Log Out links here
+                        </p>
                    </div><!--/.nav-collapse -->
                 </div>
             </nav>
-            <div class="col-md-12">
+            <div class="col-xs-10 col-xs-offset-1">
                 <div ng-show="form.alert" class="row">
-                    <div class="col-md-12">
+                    <div class="col-xs-12">
                         <div class="alert alert-dismissible" ng-class="{'alert-danger': form.alert.type == 'error', 'alert-success': form.alert.type == 'success'}" role="alert">
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             <strong>{{form.alert.type | underscoreToSpace | toTitleCase}}</strong> {{form.alert.message}}
@@ -49,15 +43,21 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-12">
-                        <table ng-form="form.formContainer" class="table table-bordered table-striped table-hover">
-                            <tr>
-                                <td><strong>#</strong></td>
-                                <td ng-repeat="(rowIndex, row) in form.editorModel.rows track by $index"><strong>{{rowIndex + 1}}</strong></td>
-                            </tr>
+                    <div class="col-xs-12">
+                        <div class="row">
+                            <div class="col-xs-9">
+                                <div id="entity-title">New {{::form.editorModel.table.name | underscoreToSpace | toTitleCase}}</div>
+                                <div id="entity-subtitle">{{::form.editorModel.table.name | underscoreToSpace | toTitleCase}}</div>
+                            </div>
+                            <div class="col-xs-3">
+                                <button class="btn btn-primary pull-right" type="submit" ng-click="form.submit();">Submit Data</button>
+                                <!-- <button class="btn btn-default pull-right" ng-click="form.addFormRow(1);" type="button">Add a Record</button> -->
+                            </div>
+                        </div>
+                        <table ng-form="form.formContainer" class="table">
                             <tr ng-form="form.formContainer.row{{rowIndex}}" ng-repeat="column in form.editorModel.table.columns.all();" ng-if="!form.isAutoGen(column.type.name);">
-                                <td><strong>{{::column.name | underscoreToSpace | toTitleCase}}</strong> &bull; <small>{{::column.type.name}}</small></td>
-                                <td ng-form="form.formContainer.row{{rowIndex}}.{{column.name}}" ng-repeat="(rowIndex, row) in form.editorModel.rows track by $index" ng-switch="form.setInputType(column);">
+                                <td class="entity-key col-xs-1">{{::column.name | underscoreToSpace | toTitleCase}}</td>
+                                <td class="entity-value col-xs-3" ng-form="form.formContainer.row{{rowIndex}}.{{column.name}}" ng-repeat="(rowIndex, row) in form.editorModel.rows track by $index" ng-switch="form.setInputType(column);">
                                     <datepicker ng-switch-when="date" date-format="yyyy-MM-dd">
                                         <input ng-model="form.editorModel.rows[rowIndex][column.name]" name="{{column.name}}" type="date" class="form-control" required>
                                     </datepicker>

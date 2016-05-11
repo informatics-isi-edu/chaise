@@ -7,8 +7,6 @@
         var vm = this;
         vm.editorModel = editorModel;
 
-        // TODO: Decide whether alert or modal is better. Modal might be better so
-        // that users don't have to scroll all the way up to see alert message.
         vm.alert = null;
         vm.closeAlert = closeAlert;
 
