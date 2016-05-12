@@ -15,7 +15,7 @@
         vm.numRowsToAdd = 1;
         var MAX_ROWS_TO_ADD = context.maxRowsToAdd; // add too many rows and browser could hang
 
-        vm.getKeys = getKeys;
+        vm.getDefaults = getDefaults;
 
         vm.inputType = null;
 
@@ -38,7 +38,7 @@
                 return;
             }
 
-            model.table.entity.post(model.rows, vm.getKeys()).then(function success(entity) {
+            model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entity) {
                 vm.alert = {type: 'success', message: 'Your data has been submitted.'};
                 form.$setUntouched();
                 form.$setPristine();
@@ -66,28 +66,40 @@
             }
         }
 
-        function getKeys() {
+        // defaults = keys of serial* type
+        function getDefaults() {
             var defaults = [];
-            var keys = vm.editorModel.table.keys.all();
+            var keys = getKeyColumns();
             var numKeys = keys.length;
             for (var i = 0; i < numKeys; i++) {
-                var columns = keys[i].colset.columns;
-                for (var c = 0; c < columns.length; c++) {
-                    var column = columns[c];
-                    if (column.type.name.indexOf('serial') === 0) {
-                        defaults.push(column.name);
-                    }
+                if (keys[i].type.name.indexOf('serial') === 0) {
+                    defaults.push(keys[i].name);
                 }
             }
             return defaults;
+        }
+
+        function getKeyColumns() {
+            var keys = [];
+            var _keys = vm.editorModel.table.keys.all();
+            var numKeys = _keys.length;
+            for (var i = 0; i < numKeys; i++) {
+                var columns = _keys[i].colset.columns;
+                var numColumns = columns.length;
+                for (var c = 0; c < numColumns; c++) {
+                    keys.push(columns[c]);
+                }
+            }
+            return keys;
         }
 
         function setInputType(column) {
             var name = column.name;
             var type = column.type.name;
 
-            // TODO: Add isAutoGen case back in when we've figured out the ID generation stuff
-            if (vm.isForeignKey(name)) {
+            if (vm.isAutoGen(name)) {
+                return 'autogen'
+            } else if (vm.isForeignKey(name)) {
                 return 'dropdown';
             } else if (vm.isDate(type)) {
                 return 'date';
@@ -99,8 +111,8 @@
         }
 
         // Returns true if a column's fields should be automatically generated
-        function isAutoGen(columnType) {
-            if (columnType.indexOf('serial') === 0) {
+        function isAutoGen(name) {
+            if (vm.getDefaults().indexOf(name) != -1) {
                 return true;
             }
             return false;

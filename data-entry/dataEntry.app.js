@@ -71,6 +71,7 @@
                             });
                         })(i);
                     }
+                    console.log('Model:',editorModel);
                 } else {
                     alert('Sorry, the requested table "' + context.tableName + '" was not found. Please check the URL and refresh the page.');
                     console.log('Table not found.');
