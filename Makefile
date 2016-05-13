@@ -209,6 +209,7 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/validators.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/angular-datepicker.js \
