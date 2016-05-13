@@ -65,12 +65,12 @@ angular.module('recordset', ['ERMrest'])
         // Parse the schema:table name
         schemaTable = fragment[1].split(':');
         if (schemaTable.length > 1) {
-            context.schemaName = schemaTable[0];
-            context.tableName = schemaTable[1];
+            context.schemaName = decodeURIComponent(schemaTable[0]);
+            context.tableName = decodeURIComponent(schemaTable[1]);
         }
         else {
             context.schemaName = '';
-            context.tableName = schemaTable[0];
+            context.tableName = decodeURIComponent(schemaTable[0]);
         }
 
         // Parse the filters
@@ -89,9 +89,17 @@ angular.module('recordset', ['ERMrest'])
 
                 // Push filters as simple (name, op, value) triples
                 if (filter[1] === "eq") {
-                    context.filters.push({name:filter[0],op:"=",value:filter[2]});
+                    context.filters.push({
+                        name: decodeURIComponent(filter[0]),
+                        op: "=",
+                        value: decodeURIComponent(filter[2])
+                    });
                 } else {
-                    context.filters.push({name:filter[0],op:"::"+filter[1]+"::",value:filter[2]});
+                    context.filters.push({
+                        name: decodeURIComponent(filter[0]),
+                        op: "::"+filter[1]+"::",
+                        value: decodeURIComponent(filter[2])
+                    });
                 }
             }
             console.log(context.filters);
@@ -368,10 +376,12 @@ angular.module('recordset', ['ERMrest'])
         // followed by all the key columns
         if (context.sort !== null) {
             if (context.sort.endsWith("::desc::")) {
-                recordsetModel.sortby = context.sort.match(/(.*)::desc::/)[1];
+                recordsetModel.sortby = decodeURIComponent(
+                    context.sort.match(/(.*)::desc::/)[1]
+                );
                 recordsetModel.sortOrder = 'desc';
             } else {
-                recordsetModel.sortby = context.sort;
+                recordsetModel.sortby = decodeURIComponent(context.sort);
                 recordsetModel.sortOrder = 'asc';
             }
 
