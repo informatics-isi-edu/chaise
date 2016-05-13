@@ -36,7 +36,6 @@
                 context.schemaName = decodeURIComponent(params[0]);
                 context.tableName = decodeURIComponent(params[1]);
             } else {
-                context.schemaName = '';
                 context.tableName = decodeURIComponent(params[0]);
             }
         }
