@@ -65,12 +65,12 @@ angular.module('recordset', ['ERMrest'])
         // Parse the schema:table name
         schemaTable = fragment[1].split(':');
         if (schemaTable.length > 1) {
-            context.schemaName = schemaTable[0];
-            context.tableName = schemaTable[1];
+            context.schemaName = decodeURIComponent(schemaTable[0]);
+            context.tableName = decodeURIComponent(schemaTable[1]);
         }
         else {
             context.schemaName = '';
-            context.tableName = schemaTable[0];
+            context.tableName = decodeURIComponent(schemaTable[0]);
         }
 
         // Parse the filters
@@ -89,9 +89,17 @@ angular.module('recordset', ['ERMrest'])
 
                 // Push filters as simple (name, op, value) triples
                 if (filter[1] === "eq") {
-                    context.filters.push({name:filter[0],op:"=",value:filter[2]});
+                    context.filters.push({
+                        name: decodeURIComponent(filter[0]),
+                        op: "=",
+                        value: decodeURIComponent(filter[2])
+                    });
                 } else {
-                    context.filters.push({name:filter[0],op:"::"+filter[1]+"::",value:filter[2]});
+                    context.filters.push({
+                        name: decodeURIComponent(filter[0]),
+                        op: "::"+filter[1]+"::",
+                        value: decodeURIComponent(filter[2])
+                    });
                 }
             }
             console.log(context.filters);
@@ -109,7 +117,7 @@ angular.module('recordset', ['ERMrest'])
     sortby: null,     // column name, user selected or null
     sortOrder: null,  // asc (default) or desc
     rowset:null,      // rows of data
-    key: [] ,         // primary key set as an array of Column objects
+    keycols: [],      // primary key set as an array of Column objects
     count: 0          // total number of rows
 
 })
@@ -123,7 +131,7 @@ angular.module('recordset', ['ERMrest'])
         recordStart: 1,
         recordEnd: this.pageLimit
     };
-    
+
 }])
 
 // Register the recordset controller
@@ -132,11 +140,11 @@ angular.module('recordset', ['ERMrest'])
     $scope.vm = recordsetModel;
 
     $scope.pageInfo = pageInfo;
-    
+
     pageInfo.recordStart = 1;
-    
+
     pageInfo.recordEnd = pageInfo.pageLimit;
-    
+
     $scope.pageLimit = function(limit) {
         pageInfo.pageLimit = limit;
         $scope.sort();
@@ -157,8 +165,8 @@ angular.module('recordset', ['ERMrest'])
             sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
         }
 
-        for (var i = 0; i < recordsetModel.key.length; i++) { // all the key columns
-            var col = recordsetModel.key[i].name;
+        for (var i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
+            var col = recordsetModel.keycols[i].name;
             if (col !== recordsetModel.sortby) {
                 sort.push({"column": col, "order": "asc"});
             }
@@ -297,12 +305,12 @@ angular.module('recordset', ['ERMrest'])
     $scope.gotoRowLink = function(index) {
         var row = recordsetModel.rowset.data[index];
         var path = context.chaiseURL + "/record/#" + context.catalogID + "/" + context.schemaName + ":" + context.tableName + "/";
-        for (var k = 0; k < recordsetModel.key.length; k++) {
-            var key = recordsetModel.key[k].name;
+        for (var k = 0; k < recordsetModel.keycols.length; k++) {
+            var col = recordsetModel.keycols[k].name;
             if (k === 0) {
-                path = path + key + "=" + row[key];
+                path = path + col + "=" + row[col];
             } else {
-                path = path + "&" + key + "=" + row[key];
+                path = path + "&" + col + "=" + row[col];
             }
         }
 
@@ -355,8 +363,11 @@ angular.module('recordset', ['ERMrest'])
         }
         recordsetModel.filter = filter;
 
-        // Key, used for paging
-        recordsetModel.key = table.keys.all()[0].colset.columns;
+        // Find shortest Key, used for paging and linking
+        var keys = table.keys.all().sort( function(a, b) {
+          return a.colset.length() - b.colset.length();
+        });
+        recordsetModel.keycols = keys[0].colset.columns;
 
         // sorting
         var sort = [];
@@ -365,18 +376,20 @@ angular.module('recordset', ['ERMrest'])
         // followed by all the key columns
         if (context.sort !== null) {
             if (context.sort.endsWith("::desc::")) {
-                recordsetModel.sortby = context.sort.match(/(.*)::desc::/)[1];
+                recordsetModel.sortby = decodeURIComponent(
+                    context.sort.match(/(.*)::desc::/)[1]
+                );
                 recordsetModel.sortOrder = 'desc';
             } else {
-                recordsetModel.sortby = context.sort;
+                recordsetModel.sortby = decodeURIComponent(context.sort);
                 recordsetModel.sortOrder = 'asc';
             }
 
             sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
         }
 
-        for (i = 0; i < recordsetModel.key.length; i++) { // all the key columns
-            var col = recordsetModel.key[i].name;
+        for (i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
+            var col = recordsetModel.keycols[i].name;
             if (col !== recordsetModel.sortby) {
                 sort.push({"column": col, "order": "asc"});
             }

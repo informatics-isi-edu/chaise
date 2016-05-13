@@ -22,11 +22,12 @@
             <div id="entity-subtitle">{{ entity.internal.displayTableName }}</div>
             <table class="table">
                 <tr ng-repeat="(key, value) in entity | filteredEntity">
-                    <td class="entity-key col-xs-2">
-                        <div ng-if="entity.colTooltips[key]" class="coltooltip">{{ key | removeUnderScores }}
+                    <td class="col-xs-2">
+                        <div ng-if="entity.colTooltips[key]" class="coltooltip">
+                            <span class="entity-key">{{ key | removeUnderScores }}</span>
                             <span class="coltooltiptext">{{ entity.colTooltips[key] }}</span>
                         </div>
-                        <span ng-if="!entity.colTooltips[key]">{{ key | removeUnderScores }}</span>
+                        <span ng-if="!entity.colTooltips[key]" class="entity-key">{{ key | removeUnderScores }}</span>
                     </td>
                     <td class="entity-value col-xs-10">
                         <a ng-if="entity[key + '_link'] && value !== null" ng-href="{{entity[key + '_link']}}" ng-click="isExternalUrl(reference[key + '_link']) || reloadPage()"

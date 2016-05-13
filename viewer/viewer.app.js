@@ -11,7 +11,6 @@
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
-        // TODO: Style guide preferences?
         context.serviceURL = window.location.origin + '/ermrest';
 
         if (chaiseConfig.ermrestLocation) {
@@ -29,16 +28,16 @@
         if (parts[1]) {
             var params = parts[1].split(':');
             if (params.length > 1) {
-                context.schemaName = params[0];
-                context.tableName = params[1];
+                context.schemaName = decodeURIComponent(params[0]);
+                context.tableName = decodeURIComponent(params[1]);
             } else {
-                context.tableName = params[0];
+                context.tableName = decodeURIComponent(params[0]);
             }
         }
         if (parts[2]) {
             params = parts[2].split('=');
             if (params.length > 1) {
-                context.imageID = params[1];
+                context.imageID = decodeURIComponent(params[1]);
             }
         }
 

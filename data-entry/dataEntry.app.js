@@ -33,11 +33,10 @@
         if (parts[1]) {
             var params = parts[1].split(':');
             if (params.length > 1) {
-                context.schemaName = params[0];
-                context.tableName = params[1];
+                context.schemaName = decodeURIComponent(params[0]);
+                context.tableName = decodeURIComponent(params[1]);
             } else {
-                context.schemaName = '';
-                context.tableName = params[0];
+                context.tableName = decodeURIComponent(params[0]);
             }
         }
     }])
