@@ -74,13 +74,13 @@
                                     </div>
                                     <!-- int2 input -->
                                     <input ng-switch-when="integer2" ng-model="form.editorModel.rows[rowIndex][column.name]"
-                                        name="{{column.name}}" type="number" class="form-control" required min="{{vm.int2min}}" max="{{vm.int2max}}" integer>
+                                        name="{{column.name}}" type="number" class="form-control" required min="{{form.int2min}}" max="{{form.int2max}}" integer>
                                     <!-- int4 input -->
                                     <input ng-switch-when="integer4" ng-model="form.editorModel.rows[rowIndex][column.name]"
-                                        name="{{column.name}}" type="number" class="form-control" required min="{{vm.int4min}}" max="{{vm.int4max}}" integer>
+                                        name="{{column.name}}" type="number" class="form-control" required min="{{form.int4min}}" max="{{form.int4max}}" integer>
                                     <!-- int8 input -->
                                     <input ng-switch-when="integer8" ng-model="form.editorModel.rows[rowIndex][column.name]"
-                                        name="{{column.name}}" type="number" class="form-control" required min="{{vm.int8min}}" max="{{vm.int8max}}" integer>
+                                        name="{{column.name}}" type="number" class="form-control" required min="{{form.int8min}}" max="{{form.int8max}}" integer>
                                     <!-- float/decimal/numeric -->
                                     <input ng-switch-when="number" ng-model="form.editorModel.rows[rowIndex][column.name]"
                                         name="{{column.name}}" type="number" class="form-control" required float>
