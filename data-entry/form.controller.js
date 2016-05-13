@@ -18,12 +18,16 @@
         vm.getDefaults = getDefaults;
 
         vm.inputType = null;
+        vm.int2min = -32768;
+        vm.int2max = 32767;
+        vm.int4min = -2147483648;
+        vm.int4max = 2147483647;
+        vm.int8min = -9223372036854775808
+        vm.int8max = 9223372036854775807;
 
         vm.setInputType = setInputType;
         vm.isAutoGen = isAutoGen;
         vm.isForeignKey = isForeignKey;
-        vm.isDate = isDate;
-        vm.isNumber = isNumber;
         vm.matchType = matchType;
 
         function submit() {
@@ -96,18 +100,39 @@
         function setInputType(column) {
             var name = column.name;
             var type = column.type.name;
+            var displayType;
 
             if (vm.isAutoGen(name)) {
-                return 'autogen'
+                return 'autogen';
             } else if (vm.isForeignKey(name)) {
-                return 'dropdown';
-            } else if (vm.isDate(type)) {
-                return 'date';
-            } else if (vm.isNumber(type)) {
-                return 'number';
+                displayType = 'dropdown';
             } else {
-                return 'text';
+                switch (type) {
+                    case 'timestamptz':
+                    case 'date':
+                        displayType = 'date';
+                        break;
+                    case 'numeric':
+                        displayType = 'number';
+                        break;
+                    case 'int2':
+                        displayType = 'integer2';
+                        break;
+                    case 'int4':
+                        displayType = 'integer4';
+                        break;
+                    case 'int8':
+                        displayType = 'integer8';
+                        break;
+                    case 'boolean':
+                        displayType = 'boolean';
+                        break;
+                    default:
+                        displayType = 'text';
+                        break;
+                }
             }
+            return displayType;
         }
 
         // Returns true if a column's fields should be automatically generated
@@ -120,16 +145,6 @@
 
         function isForeignKey(columnName) {
             return vm.editorModel.domainValues.hasOwnProperty(columnName);
-        }
-
-        function isDate(columnType) {
-            var types = ['date', 'timestamptz'];
-            return vm.matchType(columnType, types);
-        }
-
-        function isNumber(columnType) {
-            var types = ['int4', 'int8'];
-            return vm.matchType(columnType, types);
         }
 
         // Returns true if a column type is found in the given array of types
