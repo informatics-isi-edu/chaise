@@ -8,7 +8,6 @@
         serviceURL: null,
         catalogID: null,
         schemaName: null,
-        tableName: null,
-        maxRowsToAdd: 25
+        tableName: null
     });
 })();

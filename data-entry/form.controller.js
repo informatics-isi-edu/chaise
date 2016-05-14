@@ -25,7 +25,7 @@
         vm.int8min = -9223372036854775808
         vm.int8max = 9223372036854775807;
 
-        vm.setInputType = setInputType;
+        vm.columnToDisplayType = columnToDisplayType;
         vm.isAutoGen = isAutoGen;
         vm.isForeignKey = isForeignKey;
         vm.matchType = matchType;
@@ -70,17 +70,14 @@
             }
         }
 
-        // defaults = keys of serial* type
         function getDefaults() {
-            var defaults = [];
-            var keys = getKeyColumns();
-            var numKeys = keys.length;
-            for (var i = 0; i < numKeys; i++) {
-                if (keys[i].type.name.indexOf('serial') === 0) {
-                    defaults.push(keys[i].name);
+            var autogens = [];
+            for (var column in vm.editorModel.table.columns.all()) {
+                if (vm.isAutoGen(column.name)) {
+                    autogens.push(column.name);
                 }
             }
-            return defaults;
+            return autogens;
         }
 
         function getKeyColumns() {
@@ -97,13 +94,13 @@
             return keys;
         }
 
-        function setInputType(column) {
+        function columnToDisplayType(column) {
             var name = column.name;
             var type = column.type.name;
             var displayType;
 
             if (vm.isAutoGen(name)) {
-                return 'autogen';
+                displayType = 'autogen';
             } else if (vm.isForeignKey(name)) {
                 displayType = 'dropdown';
             } else {
@@ -136,14 +133,16 @@
         }
 
         // Returns true if a column's fields should be automatically generated
+        // In this case, columns of type serial* == auto-generated
         function isAutoGen(name) {
-            if (vm.getDefaults().indexOf(name) != -1) {
-                return true;
-            }
-            return false;
+            return (vm.editorModel.table.columns.get(name).type.name.indexOf('serial') === 0);
         }
 
         function isForeignKey(columnName) {
+            // Columns with FK refs and their FK values are stored in the domainValues
+            // obj with the column name as keys and FK values as values. For now,
+            // we can determine whether a column is a FK by checking whether domainValues
+            // has a key of that column's name.
             return vm.editorModel.domainValues.hasOwnProperty(columnName);
         }
 
