@@ -389,6 +389,9 @@ angular.module('recordset', ['ERMrest'])
                         recordsetModel.sortOrder = 'asc';
                     }
 
+                    // this will cause program to throw exception is sort column is not valid
+                    table.columns.get(recordsetModel.sortby);
+
                     sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
                 }
 
