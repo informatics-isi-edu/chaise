@@ -245,11 +245,13 @@ DE_CSS_SOURCE=$(DE_ASSETS)/dataEntry.css
 RECSET_ASSETS=recordset
 
 RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+    $(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/bootstrap.js \
 	$(RECORD_ASSETS)/lib/angular-animate.min.js
 
-RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.js
+RECSET_JS_SOURCE=$(JS)/ermrest.js \
+    $(RECSET_ASSETS)/recordset.js
 
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \

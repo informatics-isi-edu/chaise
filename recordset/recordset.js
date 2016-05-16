@@ -461,7 +461,12 @@ angular.module('recordset', ['ERMrest'])
 
     }, function(error) {
         console.log(error);
-        // TODO authen error
+        // not logged in
+        if (error instanceof Errors.SessionNotFoundError) {
+            if (chaiseConfig.authnProvider == 'goauth') {
+                getGoauth(encodeSafeURIComponent(window.location.href));
+            }
+        }
 
     });
 
