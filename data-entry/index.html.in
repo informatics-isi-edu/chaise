@@ -75,12 +75,29 @@
                                     <!-- int2 input -->
                                     <input ng-switch-when="integer2" ng-model="form.editorModel.rows[rowIndex][column.name]"
                                         name="{{column.name}}" type="number" class="form-control" required min="{{form.int2min}}" max="{{form.int2max}}" integer>
+                                        <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int2'">
+                                            <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
+                                            <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
+                                        </div>
+                                    </input>
+
                                     <!-- int4 input -->
                                     <input ng-switch-when="integer4" ng-model="form.editorModel.rows[rowIndex][column.name]"
                                         name="{{column.name}}" type="number" class="form-control" required min="{{form.int4min}}" max="{{form.int4max}}" integer>
+                                        <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int4'">
+                                            <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
+                                            <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
+                                        </div>
+                                    </input>
+
                                     <!-- int8 input -->
                                     <input ng-switch-when="integer8" ng-model="form.editorModel.rows[rowIndex][column.name]"
                                         name="{{column.name}}" type="number" class="form-control" required min="{{form.int8min}}" max="{{form.int8max}}" integer>
+                                        <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int8'">
+                                            <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
+                                            <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
+                                        </div>
+                                    </input>
                                     <!-- float/decimal/numeric -->
                                     <input ng-switch-when="number" ng-model="form.editorModel.rows[rowIndex][column.name]"
                                         name="{{column.name}}" type="number" class="form-control" required float>
@@ -102,8 +119,6 @@
                                         <div ng-message="date">This field requires a date value.</div>
                                         <div ng-message="integer">This field requires an integer value.</div>
                                         <div ng-message="float">This field requires a decimal value.</div>
-                                        <div ng-message="min">This field requires a greater value.</div>
-                                        <div ng-message="max">This field requires a lesser value.</div>
                                     </div>
                                 </td>
                             </tr>
