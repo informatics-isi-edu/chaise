@@ -49,6 +49,7 @@
             if (schema) {
                 var table = schema.tables.get(context.tableName);
                 if (table) {
+                    console.log('Table:', table);
                     editorModel.table = table;
                     editorModel.cols = table.columns.all();
 

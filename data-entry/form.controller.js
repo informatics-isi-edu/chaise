@@ -43,16 +43,46 @@
             }
 
             model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entity) {
-                vm.alert = {type: 'success', message: 'Your data has been submitted.'};
+                vm.alert = {type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'};
                 form.$setUntouched();
                 form.$setPristine();
+                var rowset = model.rows;
+                console.log('Entity:',entity);
+
+                var redirectUrl = window.location.origin;
+
+                if (rowset.length === 1) {
+                    // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
+                    redirectUrl += '/chaise/record/#' + context.catalogID + '/' + encodeURIComponent(context.schemaName) + ':' + encodeURIComponent(context.tableName);
+                }
+                // TODO: Implement redirect to recordset app when data entry supports multi-row insertion
+                // else if (rowset.length > 1) {
+                //     // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
+                //     redirectUrlBase += '/chaise/recordset/#' + context.catalogID + '/' + context.schemaName + ':' + context.tableName;
+                // }
+
+                // Find the best "primary key" (ideally the key with smallest colset and all cols have nullok = false)
+                var keyColSets = model.table.keys.colsets();
+                var smallestKey = keyColSets[0];
+                for (var i = 1; i < keyColSets.length; i++) {
+                    if (keyColSets[i].length < smallestKey.length) {
+                        smallestKey = keyColSets[i];
+                    }
+                }
+
+                // Build the redirect url with key cols and entity's values
+                for (var c = 0; c < smallestKey.columns.length; c++) {
+                    var colName = smallestKey.columns[c].name;
+                    redirectUrl += "/" + encodeURIComponent(colName) + '=' + encodeURIComponent(entity[0][colName]);
+                }
+
+                // Redirect to record or recordset app..
+                window.location.replace(redirectUrl);
+
             }, function error(response) {
                 vm.alert = {type: 'error', message: response.data};
                 console.log(response);
             });
-
-            // Reset the form
-            model.rows = [{}];
         }
 
         function addFormRow(numRows) {
@@ -72,9 +102,14 @@
 
         function getDefaults() {
             var autogens = [];
-            for (var column in vm.editorModel.table.columns.all()) {
-                if (vm.isAutoGen(column.name)) {
-                    autogens.push(column.name);
+            var columns =  vm.editorModel.table.columns.all();
+            var numColumns = columns.length;
+            // Switched from for..in loop to this because for..in somehow loops
+            // over a blank ("") column name every time, causing an error
+            for (var i = 0; i < numColumns; i++) {
+                var columnName = columns[i].name;
+                if (vm.isAutoGen(columnName)) {
+                    autogens.push(columnName);
                 }
             }
             return autogens;
