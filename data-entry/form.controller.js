@@ -75,7 +75,6 @@
 
                 // Redirect to record or recordset app..
                 window.location.replace(redirectUrl);
-
             }, function error(response) {
                 vm.alert = {type: 'error', message: response.data};
                 console.log(response);
