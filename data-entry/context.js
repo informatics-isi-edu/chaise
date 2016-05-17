@@ -9,6 +9,7 @@
         catalogID: null,
         schemaName: null,
         tableName: null,
-        maxRowsToAdd: 25
+        maxRowsToAdd: 25,
+        booleanValues: ['', true, false]
     });
 })();

@@ -6,6 +6,7 @@
     .controller('FormController', ['editorModel', 'context', function FormController(editorModel, context) {
         var vm = this;
         vm.editorModel = editorModel;
+        vm.booleanValues = context.booleanValues;
 
         vm.alert = null;
         vm.closeAlert = closeAlert;
