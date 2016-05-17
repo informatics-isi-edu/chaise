@@ -1442,6 +1442,28 @@ function getPage(options, totalItems, successCallback) {
 	}
 }
 
+function primaryKeySortPredicate(uniqueKeys, values) {
+	if (uniqueKeys.length == 0) {
+		return [];
+	} else {
+		var value = values[decodeURIComponent(uniqueKeys[0])];
+		if (value == null) {
+			var ret = primaryKeySortPredicate(uniqueKeys.slice(1, uniqueKeys.length), values);
+			for (var i=0; i < ret.length; i++) {
+				ret[i] = [uniqueKeys[0] + '::null::'].concat(ret[i]);
+			}
+			return ret;
+		} else {
+			var part1 = primaryKeySortPredicate(uniqueKeys.slice(1, uniqueKeys.length), values);
+			for (var i=0; i < part1.length; i++) {
+				part1[i] = [uniqueKeys[0] + '=' + encodeSafeURIComponent(value)].concat(part1[i]);
+			}
+			var part2 = [[uniqueKeys[0] + '::gt::' + encodeSafeURIComponent(value)]];
+			return part1.concat(part2);
+		}
+	}
+}
+
 function successGetPagePredicate(data, textStatus, jqXHR, param) {
 	var page = param['options']['pagingOptions']['currentPage'];
 	var pageSize = param['options']['pagingOptions']['pageSize'];
@@ -1456,17 +1478,24 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 			var sortPredicate = getSortPredicate(data, sortOption, sortOrder, page, pageSize);
 			predicate.push('$A/' + sortPredicate.join(';'));
 		} else {
-			var primaryKeyPredicate = [];
-			var firstKey = null;
-			$.each(PRIMARY_KEY, function(i, col) {
-				if (i==0) {
-					firstKey = col + '::gt::' + encodeSafeURIComponent(data[(page-1)*pageSize][col]);
+			if (page > 1) {
+				var firstRow = [];
+				for (var i=0; i < PRIMARY_KEY.length; i++) {
+					var value = data[(page-1)*pageSize][decodeURIComponent(PRIMARY_KEY[i])];
+					if (value == null) {
+						firstRow.push(PRIMARY_KEY[i] + '::null::');
+					} else {
+						firstRow.push(PRIMARY_KEY[i] + '=' + encodeSafeURIComponent(value));
+					}
 				}
-				primaryKeyPredicate.push(col + (i==0 ? '=' : '::geq::') + encodeSafeURIComponent(data[(page-1)*pageSize][col]));
-			});
-			primaryKeyPredicate = [primaryKeyPredicate.join('&')];
-			primaryKeyPredicate.push(firstKey);
-			predicate.push('$A/' + primaryKeyPredicate.join(';'));
+				firstRow = [firstRow.join('&')];
+				var primaryKeyPredicate = primaryKeySortPredicate(PRIMARY_KEY, data[(page-1)*pageSize]);
+				$.each(primaryKeyPredicate, function(i, row) {
+					primaryKeyPredicate[i] = row.join('&');
+				});
+				primaryKeyPredicate = firstRow.concat(primaryKeyPredicate);
+				predicate.push('$A/' + primaryKeyPredicate.join(';'));
+			}
 		}
 		var url = ERMREST_DATA_HOME + '/entity/' + getQueryPredicate(param['options']);
 		param['queryPredicate'] = getQueryPredicate(param['options']);

@@ -6,6 +6,7 @@
     .controller('FormController', ['dataEntryModel', 'context', '$window', function FormController(dataEntryModel, context, $window) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
+        vm.booleanValues = context.booleanValues;
 
         vm.alert = null;
         vm.closeAlert = closeAlert;

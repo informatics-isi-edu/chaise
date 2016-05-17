@@ -8,6 +8,8 @@
         serviceURL: null,
         catalogID: null,
         schemaName: null,
-        tableName: null
+        tableName: null,
+        maxRowsToAdd: 25,
+        booleanValues: ['', true, false]
     });
 })();
