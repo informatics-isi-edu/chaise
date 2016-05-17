@@ -1332,12 +1332,12 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			entity[col]['values'] = values;
 		} else if (sliderPresentation.contains(entity[col]['type'])) {
 			entity[col]['ready'] = true;
-			entity[col]['min'] = data[0]['min_' + encodeSafeURIComponent(col)];
-			entity[col]['max'] = data[0]['max_' + encodeSafeURIComponent(col)];
+			entity[col]['min'] = data[0]['min_' + col];
+			entity[col]['max'] = data[0]['max_' + col];
 		} else if (datepickerPresentation.contains(entity[col]['type'])) {
 			entity[col]['ready'] = true;
-			entity[col]['min'] = data[0]['min_' + encodeSafeURIComponent(col)];
-			entity[col]['max'] = data[0]['max_' + encodeSafeURIComponent(col)];
+			entity[col]['min'] = data[0]['min_' + col];
+			entity[col]['max'] = data[0]['max_' + col];
 		}
 	});
 	var ready = true;
