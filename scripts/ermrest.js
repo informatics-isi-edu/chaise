@@ -174,6 +174,16 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 				window.location = login_url;
 			}
 			break;
+		case 403:
+			// Forbidden: pop up an alert window and redirect to the static home page
+			document.body.style.cursor = 'default';
+			alert('Access to the requested resource is forbidden.\nPlease contact the site administrator.\n');
+			var redirect_url = window.location.origin;
+			if (chaiseConfig['dataBrowser'] !== undefined) {
+				redirect_url = chaiseConfig['dataBrowser'];
+			}
+			window.location = redirect_url;
+			break;
 		default:
 			var msg = '';
 			var err = jqXHR.status;
