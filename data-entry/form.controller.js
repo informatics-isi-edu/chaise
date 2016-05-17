@@ -3,9 +3,9 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['editorModel', 'context', function FormController(editorModel, context) {
+    .controller('FormController', ['dataEntryModel', 'context', '$window', function FormController(dataEntryModel, context, $window) {
         var vm = this;
-        vm.editorModel = editorModel;
+        vm.dataEntryModel = dataEntryModel;
 
         vm.alert = null;
         vm.closeAlert = closeAlert;
@@ -32,7 +32,7 @@
 
         function submit() {
             var form = vm.formContainer;
-            var model = vm.editorModel;
+            var model = vm.dataEntryModel;
             form.$setUntouched();
             form.$setPristine();
 
@@ -47,9 +47,8 @@
                 form.$setUntouched();
                 form.$setPristine();
                 var rowset = model.rows;
-                console.log('Entity:',entity);
 
-                var redirectUrl = window.location.origin;
+                var redirectUrl = $window.location.origin;
 
                 if (rowset.length === 1) {
                     // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
@@ -89,7 +88,7 @@
             } else if (numRows === 0) {
                 return;
             }
-            var rowset = vm.editorModel.rows;
+            var rowset = vm.dataEntryModel.rows;
             var prototypeRow = rowset[rowset.length-1];
             for (var i = 0; i < numRows; i++) {
                 var row = angular.copy(prototypeRow);
@@ -99,7 +98,7 @@
 
         function getDefaults() {
             var autogens = [];
-            var columns =  vm.editorModel.table.columns.all();
+            var columns =  vm.dataEntryModel.table.columns.all();
             var numColumns = columns.length;
             // Switched from for..in loop to this because for..in somehow loops
             // over a blank ("") column name every time, causing an error
@@ -114,7 +113,7 @@
 
         function getKeyColumns() {
             var keys = [];
-            var _keys = vm.editorModel.table.keys.all();
+            var _keys = vm.dataEntryModel.table.keys.all();
             var numKeys = _keys.length;
             for (var i = 0; i < numKeys; i++) {
                 var columns = _keys[i].colset.columns;
@@ -167,7 +166,7 @@
         // Returns true if a column's fields should be automatically generated
         // In this case, columns of type serial* == auto-generated
         function isAutoGen(name) {
-            return (vm.editorModel.table.columns.get(name).type.name.indexOf('serial') === 0);
+            return (vm.dataEntryModel.table.columns.get(name).type.name.indexOf('serial') === 0);
         }
 
         function isForeignKey(columnName) {
@@ -175,7 +174,7 @@
             // obj with the column name as keys and FK values as values. For now,
             // we can determine whether a column is a FK by checking whether domainValues
             // has a key of that column's name.
-            return vm.editorModel.domainValues.hasOwnProperty(columnName);
+            return vm.dataEntryModel.domainValues.hasOwnProperty(columnName);
         }
 
         // Returns true if a column type is found in the given array of types

@@ -42,7 +42,7 @@
         }
     }])
 
-    .run(['context', 'ermrestServerFactory', 'editorModel', '$http', function runApp(context, ermrestServerFactory, editorModel, $http) {
+    .run(['context', 'ermrestServerFactory', 'dataEntryModel', '$http', function runApp(context, ermrestServerFactory, dataEntryModel, $http) {
         var server = ermrestServerFactory.getServer(context.serviceURL);
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
@@ -50,8 +50,8 @@
                 var table = schema.tables.get(context.tableName);
                 if (table) {
                     console.log('Table:', table);
-                    editorModel.table = table;
-                    editorModel.cols = table.columns.all();
+                    dataEntryModel.table = table;
+                    dataEntryModel.cols = table.columns.all();
 
                     var foreignKeys = table.foreignKeys.all();
                     var foreignKeysLength = foreignKeys.length;
@@ -62,7 +62,7 @@
                             var currentKey = foreignKeys[i];
                             currentKey.getDomainValues().then(function success(values) {
                                 var valuesLength = values.length;
-                                var domainValues = editorModel.domainValues[currentKey.colset.columns[0].name] = [];
+                                var domainValues = dataEntryModel.domainValues[currentKey.colset.columns[0].name] = [];
                                 for (var j = 0; j < valuesLength; j++) {
                                     var field = Object.keys(values[j])[0];
                                     domainValues.push(values[j][field]);
@@ -72,7 +72,7 @@
                             });
                         })(i);
                     }
-                    console.log('Model:',editorModel);
+                    console.log('Model:',dataEntryModel);
                 } else {
                     alert('Sorry, the requested table "' + context.tableName + '" was not found. Please check the URL and refresh the page.');
                     console.log('Table not found.');
