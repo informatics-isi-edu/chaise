@@ -61,18 +61,15 @@
                 //     redirectUrlBase += '/chaise/recordset/#' + context.catalogID + '/' + context.schemaName + ':' + context.tableName;
                 // }
 
-                // Find the best "primary key" (ideally the key with smallest colset and all cols have nullok = false)
-                var keyColSets = model.table.keys.colsets();
-                var smallestKey = keyColSets[0];
-                for (var i = 1; i < keyColSets.length; i++) {
-                    if (keyColSets[i].length < smallestKey.length) {
-                        smallestKey = keyColSets[i];
-                    }
-                }
+                // Find the shortest "primary key" for use in redirect url
+                var keys = model.table.keys.all().sort(function(a, b) {
+                    return a.colset.length() - b.colset.length();
+                });
+                var shortestKey = keys[0].colset.columns;
 
                 // Build the redirect url with key cols and entity's values
-                for (var c = 0; c < smallestKey.columns.length; c++) {
-                    var colName = smallestKey.columns[c].name;
+                for (var c = 0, len = shortestKey.length; c < len; c++) {
+                    var colName = shortestKey[c].name;
                     redirectUrl += "/" + encodeURIComponent(colName) + '=' + encodeURIComponent(entity[0][colName]);
                 }
 
