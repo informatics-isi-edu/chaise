@@ -14,16 +14,13 @@
                     if (ctrl.$isEmpty(modelValue)) {
                         // consider empty models to be valid
                         // use the `required` attribute in the HTML
-                        console.log("Empty");
                         return true;
                     }
                     if (INTEGER_REGEXP.test(viewValue)) {
                         // it is valid
-                        console.log("Passed REGEX");
                         return true;
                     }
                     // it is invalid
-                    console.log("Invalid integer value");
                     return false;
                 };
             }
@@ -40,16 +37,13 @@
                     if (ctrl.$isEmpty(modelValue)) {
                         // consider empty models to be valid
                         // use the `required` attribute in the HTML
-                        console.log("Empty");
                         return true;
                     }
                     if (angular.isNumber(parseFloat(viewValue))) {
                         // it is valid
-                        console.log("Passed REGEX");
                         return true;
                     }
                     // it is invalid
-                    console.log("Invalid float value");
                     return false;
                 };
             }
