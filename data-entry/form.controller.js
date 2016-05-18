@@ -59,6 +59,9 @@
                 // else if (rowset.length > 1) {
                 //     // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
                 //     redirectUrlBase += '/chaise/recordset/#' + context.catalogID + '/' + context.schemaName + ':' + context.tableName;
+                // } else {
+                // // Rowset count is either 0 or negative so there's something/nothing to submit..
+                // // alert('Nothing to submit'); ???
                 // }
 
                 // Find the shortest "primary key" for use in redirect url
