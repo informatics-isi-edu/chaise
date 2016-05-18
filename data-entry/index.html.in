@@ -75,7 +75,7 @@
                                     <!-- int2 input -->
                                     <input ng-switch-when="integer2" ng-model="form.editorModel.rows[rowIndex][column.name]"
                                         name="{{column.name}}" type="number" class="form-control" required min="{{form.int2min}}" max="{{form.int2max}}" integer>
-                                        <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int2'">
+                                        <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.row{{rowIndex}}.{{column.name}}.$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int2'">
                                             <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
                                             <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
                                         </div>
@@ -84,7 +84,7 @@
                                     <!-- int4 input -->
                                     <input ng-switch-when="integer4" ng-model="form.editorModel.rows[rowIndex][column.name]"
                                         name="{{column.name}}" type="number" class="form-control" required min="{{form.int4min}}" max="{{form.int4max}}" integer>
-                                        <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int4'">
+                                        <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.row{{rowIndex}}.{{column.name}}.$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int4'">
                                             <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
                                             <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
                                         </div>
@@ -93,7 +93,7 @@
                                     <!-- int8 input -->
                                     <input ng-switch-when="integer8" ng-model="form.editorModel.rows[rowIndex][column.name]"
                                         name="{{column.name}}" type="number" class="form-control" required min="{{form.int8min}}" max="{{form.int8max}}" integer>
-                                        <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int8'">
+                                        <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.row{{rowIndex}}.{{column.name}}.$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int8'">
                                             <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
                                             <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
                                         </div>
@@ -114,11 +114,16 @@
                                     <input ng-switch-default ng-model="form.editorModel.rows[rowIndex][column.name]"
                                         name="{{column.name}}" type="text" class="form-control" required>
 
-                                    <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
-                                        <div ng-message="required">Please enter a value for this field.</div>
+                                    <!-- Validation error messages to show when the form field is touched -->
+                                    <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.row{{rowIndex}}.{{column.name}}.$dirty || form.formContainer.$submitted" class="text-danger" role="alert">
                                         <div ng-message="date">This field requires a date value.</div>
                                         <div ng-message="integer">This field requires an integer value.</div>
                                         <div ng-message="float">This field requires a decimal value.</div>
+                                    </div>
+
+                                    <!-- Validation error messages to show when the form is submitted -->
+                                    <div ng-messages="form.formContainer.row{{rowIndex}}.{{column.name}}.$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
+                                        <div ng-message="required">Please enter a value for this field.</div>
                                     </div>
                                 </td>
                             </tr>
