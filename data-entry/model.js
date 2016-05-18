@@ -4,9 +4,9 @@
 
     angular.module('chaise.dataEntry')
 
-    .value('editorModel', {
+    .value('dataEntryModel', {
         table: {},
-        rows: [{}], // rows of fields in the form, not the table from ERMrest
+        rows: [{}], // rows of data in the form, not the table from ERMrest
         domainValues: {}
     });
 })();
