@@ -4,7 +4,9 @@
     angular.module('chaise.dataEntry', [
         'ERMrest',
         'ngSanitize',
+        'chaise.errors',
         'chaise.filters',
+        'chaise.interceptors',
         'chaise.validators',
         'ui.select',
         'rzModule',
@@ -13,7 +15,9 @@
     ])
 
     // Configure the context info from the URI
-    .config(['context', function configureContext(context) {
+    .config(['context', '$httpProvider', function configureContext(context, $httpProvider) {
+        $httpProvider.interceptors.push('Interceptors');
+
         if (chaiseConfig.headTitle !== undefined) {
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
