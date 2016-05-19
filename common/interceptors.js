@@ -11,8 +11,12 @@
                 return response;
             },
             responseError: function(error) {
+                switch (error.status) {
+                    case 409:
+                        ErrorService.error409(error);
+                }
                 console.log("Error", error);
-                return error;
+                return $q.reject(error);
             }
         };
 
