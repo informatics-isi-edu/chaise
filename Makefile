@@ -248,7 +248,8 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
     $(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/bootstrap.js \
-	$(RECORD_ASSETS)/lib/angular-animate.min.js
+	$(RECORD_ASSETS)/lib/angular-animate.min.js \
+	$(COMMON)/views.js
 
 RECSET_JS_SOURCE=$(JS)/ermrest.js \
     $(RECSET_ASSETS)/recordset.js

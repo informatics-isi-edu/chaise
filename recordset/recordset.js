@@ -15,7 +15,7 @@
  */
 
 // The Chaise RecordSet module
-angular.module('recordset', ['ERMrest'])
+angular.module('recordset', ['ERMrest', 'chaise.views'])
 
 // Register the 'context' object which can be accessed by config and other
 // services.
@@ -26,8 +26,10 @@ angular.module('recordset', ['ERMrest'])
     schemaName: '', // 'isa'
     tableName: '',  // 'assay'
     filters: [],
-    sort: null        // 'column::desc::' ::desc:: is option, ,only allow 1 column
+    sort: null,     // 'column::desc::' ::desc:: is option, ,only allow 1 column
+    server: null
 })
+
 
 // Register configuration work to be performed on module loading.
 .config(['context', function(context) {
@@ -148,6 +150,19 @@ angular.module('recordset', ['ERMrest'])
     $scope.pageLimit = function(limit) {
         pageInfo.pageLimit = limit;
         $scope.sort();
+    };
+
+    $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
+    $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
+    $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
+
+    // login logout should be factored out into a common module
+    $scope.login = function() {
+        context.server.session.login(window.location.href);
+    };
+
+    $scope.logout = function() {
+        context.server.session.logout(window.location);
     };
 
     $scope.sort = function () {
@@ -326,12 +341,13 @@ angular.module('recordset', ['ERMrest'])
     $rootScope.location = window.location.href;
     pageInfo.loading = true;
     recordsetModel.tableName = context.tableName;
-
     $rootScope.errorMessage='';
 
     // Get rowset data from ermrest
     ermrestServerFactory.getServer(context.serviceURL).then(function(server) {
 
+        $rootScope.user = server.getUser().display_name;
+        context.server = server;
         server.catalogs.get(context.catalogID).then(function(catalog) {
             console.log(catalog);
 

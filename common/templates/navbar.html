@@ -1,0 +1,26 @@
+<header class="row">
+    <nav id="mainnav" class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#fb-navbar-main-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="md-chevron-down"></span>
+                    MENU
+                </button>
+                <a class="navbar-brand" href="#"><image>{{ navbarBrandImage }}</image><span>{{ navbarBrandText }}</span></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
+
+                <p class="navbar-text pull-right">
+                    <span ng-show="user === null" ng-click="login()">Log in</span>
+                    <span ng-show="user !== null">{{ user }}</span>
+                    <a ng-show="user !== null" ng-click="logout()">Logout</a>
+                </p>
+
+            </div><!-- /.navbar-collapse -->
+        </div>
+    </nav>
+</header>
