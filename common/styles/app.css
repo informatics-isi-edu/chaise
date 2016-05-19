@@ -98,6 +98,7 @@ a:hover, a:focus{
     font-size: 11px;
     position: absolute;
     z-index: 1;
+    text-transform: none;
 }
 
 .coltooltip:hover .coltooltiptext {
