@@ -1,10 +1,10 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.errors', ['ui.bootstrap'])
+    angular.module('chaise.errors', [])
 
     // Factory for each error type
-    .factory('ErrorService', ['$injector', function ErrorService($injector) {
+    .factory('ErrorService', [function ErrorService() {
 
         function error409(error) {
             // retry logic
