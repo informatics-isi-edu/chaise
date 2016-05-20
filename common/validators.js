@@ -3,6 +3,7 @@
 
 
     var INTEGER_REGEXP = /^\-?\d+$/;
+    var FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
     angular.module('chaise.validators', [])
     // Validation directive for testing if an input value is an integer
     // Use: <input type="number" required integer>
@@ -39,7 +40,7 @@
                         // use the `required` attribute in the HTML
                         return true;
                     }
-                    if (angular.isNumber(parseFloat(viewValue))) {
+                    if (FLOAT_REGEXP.test(viewValue)) {
                         // it is valid
                         return true;
                     }
