@@ -16,7 +16,7 @@ describe('Search result detail page,', function () {
         var randomEditAttr = '';
         var randomRecordTitle = '';
         beforeEach(function (done) {
-            var allAttrs = chaisePage.sidebar.sidebarAttrsDisplayed;
+            var allAttrs = chaisePage.sidebar.getSidebarAttrsDisplayed();
             allAttrs.count().then(function (num) {
                     var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
                     var ranAttr = allAttrs.get(ranInt);
@@ -71,7 +71,7 @@ describe('Search result detail page,', function () {
 
         describe('should check one random edit filter,', function () {
             beforeEach(function (done) {
-                var allFilters = chaisePage.editFilter.editFilterAttrsDisplayed;
+                var allFilters = chaisePage.editFilter.getEditFilterAttrsDisplayed();
                 allFilters.count().then(function (num) {
                     var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
                     var ranAttr = allFilters.get(ranInt);
@@ -89,7 +89,7 @@ describe('Search result detail page,', function () {
 
             describe('should click one random record in results,', function () {
                 beforeEach(function (done) {
-                    var allResults = chaisePage.resultContent.resultAllRows;
+                    var allResults = chaisePage.resultContent.getAllResultRows();
                     allResults.count().then(function (num) {
                         var rand = chaisePage.tools.getRandomInt(0, num - 1);
                         var randResult = allResults.get(rand);
@@ -115,7 +115,7 @@ describe('Search result detail page,', function () {
                     });
 
                     it('should have the same title as previous record column', function () {
-                        var entityTitle = chaisePage.recordPage.entityTitle;
+                        var entityTitle = chaisePage.recordPage.getEntityTitle();
                         expect(entityTitle.getText()).toBe(randomRecordTitle);
                     });
 
