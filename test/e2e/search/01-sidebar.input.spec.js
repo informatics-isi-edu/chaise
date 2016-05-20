@@ -48,7 +48,7 @@ describe('Sidebar top search input,', function () {
 
     var RNA = 'RNA';
     var displayedEditAttrs = chaisePage.editFilter.editFilterAttrsDisplayed;
-    it('should show \'Experiment Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
+    xit('should show \'Experiment Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
         searchBox.sendKeys(RNA);
         var experimentTypeText = 'Experiment Type';
         chaisePage.sidebar.clickSidebarAttr(experimentTypeText);
@@ -61,7 +61,7 @@ describe('Sidebar top search input,', function () {
         });
     });
 
-    it('should show \'Data Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
+    xit('should show \'Data Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
         var dataType = 'Data Type';
         chaisePage.editFilter.goBackToSidebar();
         chaisePage.sidebar.clickSidebarAttr(dataType);
