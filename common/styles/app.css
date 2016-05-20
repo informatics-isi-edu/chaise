@@ -83,6 +83,10 @@ a:hover, a:focus{
     border-bottom: 1px dotted black;
 }
 
+.coltooltiplabel {
+    border-bottom: 1px dotted black;
+}
+
 .coltooltip .coltooltiptext {
     visibility: hidden;
     width: 100px;
@@ -94,6 +98,7 @@ a:hover, a:focus{
     font-size: 11px;
     position: absolute;
     z-index: 1;
+    text-transform: none;
 }
 
 .coltooltip:hover .coltooltiptext {
