@@ -55,7 +55,7 @@
                             </div>
                         </div>
                         <table ng-form="form.formContainer" class="table">
-                            <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in form.dataEntryModel.table.columns.all();">
+                            <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in form.dataEntryModel.table.columns.all();" ng-if="!form.isHiddenColumn(column);">
                                 <td class="entity-key col-xs-1" ng-class="{'coltooltip': column.comment}">
                                     <span ng-if="!column.nullok" class="text-danger">{{'*'}}</span>
                                     <span ng-class="{'coltooltiplabel': column.comment}">{{::column.name | underscoreToSpace | toTitleCase}}</span>
