@@ -196,7 +196,7 @@
         function isHiddenColumn(column) {
             var ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
             var hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
-            if ((ignore && (ignore.content == [] || ignore.content == null || ignore.content.indexOf('entry'))) || hidden) {
+            if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
                 return true;
             }
             return false;
