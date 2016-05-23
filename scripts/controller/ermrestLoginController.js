@@ -8,33 +8,27 @@ ermLoginController.controller('LoginCtrl', ['$scope', 'ermrest',
                                            function($scope, ermrest) {
 	if (HOME == null) {
 		initLocation();
-		authnProvider = ermrest.authnProvider;
-		if (chaiseConfig['authnProvider'] != null) {
-			authnProvider = chaiseConfig['authnProvider'];
-		}
 	}
 	
-	$scope.authnProvider = authnProvider;
+	if (chaiseConfig['customCSS'] !== undefined) {
+		var fileref = document.createElement("link");
+		fileref.setAttribute("rel", "stylesheet");
+		fileref.setAttribute("type", "text/css");
+		fileref.setAttribute("href", chaiseConfig['customCSS']);
+		document.getElementsByTagName("head")[0].appendChild(fileref);
+	}
+	if (chaiseConfig['headTitle'] !== undefined) {
+		var title = document.createElement("title");
+		title.innerHTML = chaiseConfig['headTitle'];
+		document.getElementsByTagName("head")[0].appendChild(title);
+	}
+	loadApplicationHeaderAndFooter();
+	setNavbarBrand();
 
 	this.login = function login() {
-		if (authnProvider == 'goauth') {
-			var referrer = $scope.getReferrer();
-			getGoauth(encodeSafeURIComponent(referrer));
-		} else {
-			if (authnProvider == 'globusonline') {
-				// nexus
-				var myToken = submitGlobusLogin($scope.username, $scope.password);
-				if (myToken != null) {
-					var referrer = $scope.getReferrer();
-					window.location = referrer;
-				}
-			} else if (authnProvider == 'session') {
-				var referrer = $scope.getReferrer();
-				submitLogin($scope.username, $scope.password, referrer);
-			} else {
-				alert('Authentication "' + authnProvider + '" is not supported.');
-			}
-		}
+		var params = $scope.getParameters();
+		//console.log(JSON.stringify(params, null, 4));
+		submitLogin($scope.username, $scope.password, params['referrer'], params['action'], params['text'], params['password']);
 	};
 	this.cancelLogin = function cancelLogin() {
 		window.location = '#/retrieve';
@@ -63,6 +57,32 @@ ermLoginController.controller('LoginCtrl', ['$scope', 'ermrest',
 			}
 		});
 		return referrer;
-	}
+	};
+	
+	$scope.getParameters = function getParameters() {
+		var result = {};
+		//var query = decodeURIComponent(window.location.search);
+		var query = window.location.search;
+		if (query.length > 0) {
+			query = query.substring(1);
+		}
+		var parameters = query.split('&');
+		$.each(parameters, function(i, parameter) {
+			var item = parameter.split('=');
+			if ([item[0]] == 'referrer') {
+				result['referrer'] = decodeURIComponent(item[1]);
+			} else if ([item[0]] == 'method') {
+				result['method'] = item[1];
+			} else if ([item[0]] == 'action') {
+				result['action'] = decodeURIComponent(item[1]);
+			} else if ([item[0]] == 'text') {
+				result['text'] = decodeURIComponent(item[1]);
+			} else if ([item[0]] == 'hidden') {
+				result['password'] = decodeURIComponent(item[1]);
+			}
+		});
+		return result;
+	};
+	
 }]);
 

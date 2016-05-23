@@ -4,7 +4,6 @@ var goauth_cookie = 'globusonline-goauth';
 var token = null;
 var SCHEMA = null;
 var CATALOG = null;
-var authnProvider = null;
 var ERMREST_CATALOG_PATH = '/ermrest/catalog/';
 var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
@@ -164,15 +163,12 @@ function setSchema() {
  */
 function handleError(jqXHR, textStatus, errorThrown, url) {
 	switch (jqXHR.status) {
+		case 0:
+			return;
 		case 401:
 			// redirect to login in case of an Unauthorized error
 			document.body.style.cursor = 'default';
-			if (authnProvider == 'goauth') {
-				getGoauth(encodeSafeURIComponent(window.location.href));
-			} else {
-				var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location.href);
-				window.location = login_url;
-			}
+			login(encodeSafeURIComponent(window.location.href));
 			break;
 		case 403:
 			// Forbidden: pop up an alert window and redirect to the static home page
@@ -351,12 +347,20 @@ function make_headers() {
 	return res;
 }
 
-function submitLogin(username, password, referrer) {
-	var url = HOME + '/ermrest/authn/session';
-	var obj = {
-		'username': username,
-		'password': password
-	};
+function submitLogin(username, password, referrer, action, input_user, input_password) {
+	var url = HOME + (action != null ? action : '/ermrest/authn/session');
+	var obj = {};
+	
+	if (input_user != null) {
+		obj[input_user] = username;
+	} else {
+		obj['username'] = username;
+	}
+	if (input_password != null) {
+		obj[input_password] = password;
+	} else {
+		obj['password'] = password;
+	}
 	var param = {};
 	param['referrer'] = referrer;
 	ERMREST.POST(url, 'application/x-www-form-urlencoded; charset=UTF-8', true, true, obj, successSubmitLogin, errorSubmitLogin, param);
@@ -394,42 +398,6 @@ function errorSubmitLogin(jqXHR, textStatus, errorThrown, url, param) {
 	}
 }
 
-function submitGlobusLogin(username, password) {
-	token = $.cookie(goauth_cookie);
-	if (token == null) {
-		var url = '/service/nexus/goauth/token?grant_type=client_credentials';
-		var result = {};
-		$.ajax({
-			async: false,
-			type: 'GET',
-			dataType: 'json',
-			url: url,
-			headers: { Authorization: make_basic_auth(username, password) },
-			error: function(jqXHR, textStatus, errorThrown) {
-				handleError(jqXHR, textStatus, errorThrown, url);
-				result = null;
-			},
-			success: function(json) {
-				result = json;
-			}
-		});
-
-		if (result != null) {
-			token = result['access_token'];
-			//alert(token);
-			var path = window.location.pathname.replace('/login/','/search/');
-			$.cookie(goauth_cookie, token, { path: path, expires: 7 });
-		} else {
-			return null;
-		}
-		USER = username;
-		return token;
-	} else {
-		USER = username;
-		return token;
-	}
-}
-
 function make_basic_auth(user, password) {
 	var tok = user + ':' + password;
 	var hash = btoa(tok);
@@ -445,8 +413,6 @@ function submitLogout(logout_uri) {
 	$('#login_user').hide();
 	$('#login_link').hide();
 	$('#logout_link').hide();
-	//var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location);
-	//window.location = login_url;
 
 	var logout_url = logout_uri;
 	if (logout_url == null) {
@@ -1993,39 +1959,41 @@ function errorGetSession(jqXHR, textStatus, errorThrown, url, param) {
 	}
 }
 
-function getGoauth(referrer) {
-	//var url = '/service/goauth/ermrest/authn/preauth';
-	var url = '/ermrest/authn/preauth?referrer='+referrer;
-	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetGoauth, null, null);
+function login(referrer) {
+	var url = HOME + '/ermrest/authn/preauth?referrer='+referrer;
+	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
 }
 
-function successGetGoauth(data, textStatus, jqXHR) {
-	var url = data['redirect_url'];
-	suppressError = true;
-	window.open(url, '_self');
-	//globusWindow = window.open(url, '_self');
-	//checkGlobusWindow();
-}
-
-function checkGlobusWindow() {
-	if (globusWindow.closed) {
-		var url = '#/retrieve';
-		if (CATALOG != null) {
-			url += '?catalog=' + CATALOG;
-		}
-		if (SCHEMA != null) {
-			if (url == '#/login') {
-				url += '?';
-			} else {
-				url += '&';
-			}
-			url += 'schema=' + SCHEMA;
-		}
-		globusWindow = null;
-		window.location = url;
+function successLogin(data, textStatus, jqXHR) {
+	if (data['redirect_url'] != null) {
+		var url = data['redirect_url'];
+		suppressError = true;
+		window.open(url, '_self');
 	} else {
-		setTimeout(checkGlobusWindow, 1);
+		var login_form = data['login_form'];
+		var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location.href);
+		if (login_form != null) {
+			var method = login_form['method'];
+			var action = encodeSafeURIComponent(login_form['action']);
+			var text = '';
+			var hidden = '';
+			$.each(login_form['input_fields'], function(i, item) {
+				if (item['type'] == 'text') {
+					text = encodeSafeURIComponent(item['name']);
+				} else {
+					hidden = encodeSafeURIComponent(item['name']);
+				}
+			});
+			login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden;
+		}
+		window.location = login_url;
 	}
+}
+
+function errorLogin(jqXHR, textStatus, errorThrown, url, param) {
+	document.body.style.cursor = 'default';
+	var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location.href);
+	window.location = login_url;
 }
 
 function hasCheckedValues(box, facet) {
@@ -3522,8 +3490,7 @@ function encodeRegularExpression (str) {
 }
 
 function initLogin() {
-	var url = '../login?referrer=' + encodeSafeURIComponent(window.location);
-	window.location = url;
+	login(encodeSafeURIComponent(window.location));
 }
 
 function hasTableFacetsHidden(table_name) {

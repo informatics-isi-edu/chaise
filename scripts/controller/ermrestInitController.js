@@ -67,10 +67,6 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 			CATALOG = ermrest.catalog;
 		}
 	}
-	authnProvider = ermrest.authnProvider;
-	if (chaiseConfig['authnProvider'] != null) {
-		authnProvider = chaiseConfig['authnProvider'];
-	}
 
 	if (chaiseConfig['facetPolicy'] != null) {
 		facetPolicy = chaiseConfig['facetPolicy'];
