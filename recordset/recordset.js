@@ -227,16 +227,16 @@ angular.module('recordset', ['ERMrest', 'chaise.views'])
 
     $scope.permalink = function() {
         var url = window.location.href.replace(window.location.hash, ''); // everything before #
-        url = url + "#" + context.catalogID + "/" +
-            (context.schemaName !== '' ? context.schemaName + ":" : "") +
-            context.tableName;
+        url = url + "#" + encodeURIComponent(context.catalogID) + "/" +
+            (context.schemaName !== '' ? encodeURIComponent(context.schemaName) + ":" : "") +
+            encodeURIComponent(context.tableName);
 
         if (recordsetModel.filter !== null) {
             url = url + "/" + recordsetModel.filter.toUri();
         }
 
         if (recordsetModel.sortby !== null) {
-            url = url + "@sort(" + recordsetModel.sortby;
+            url = url + "@sort(" + encodeURIComponent(recordsetModel.sortby);
             if (recordsetModel.sortOrder === "desc") {
                 url = url + "::desc::";
             }

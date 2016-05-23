@@ -259,6 +259,7 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/font-awesome/css/font-awesome.min.css
 
 RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css \
+    $(CSS)/appheader.css \
     error-handling/notification.css
 
 
