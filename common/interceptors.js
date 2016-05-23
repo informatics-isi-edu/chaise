@@ -7,7 +7,6 @@
 
         var responseInterceptor = {
             response: function(response) {
-                console.log("Success", response);
                 return response;
             },
             responseError: function(error) {
