@@ -319,13 +319,13 @@ angular.module('recordset', ['ERMrest', 'chaise.views'])
 
     $scope.gotoRowLink = function(index) {
         var row = recordsetModel.rowset.data[index];
-        var path = context.chaiseURL + "/record/#" + context.catalogID + "/" + context.schemaName + ":" + context.tableName + "/";
+        var path = context.chaiseURL + "/record/#" + encodeURIComponent(context.catalogID) + "/" + encodeURIComponent(context.schemaName) + ":" + encodeURIComponent(context.tableName) + "/";
         for (var k = 0; k < recordsetModel.keycols.length; k++) {
             var col = recordsetModel.keycols[k].name;
             if (k === 0) {
-                path = path + col + "=" + row[col];
+                path = path + encodeURIComponent(col) + "=" + encodeURIComponent(row[col]);
             } else {
-                path = path + "&" + col + "=" + row[col];
+                path = path + "&" + encodeURIComponent(col) + "=" + encodeURIComponent(row[col]);
             }
         }
 
