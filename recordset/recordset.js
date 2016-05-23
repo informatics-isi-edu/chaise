@@ -479,9 +479,8 @@ angular.module('recordset', ['ERMrest', 'chaise.views'])
         console.log(error);
         // not logged in
         if (error instanceof Errors.SessionNotFoundError) {
-            if (chaiseConfig.authnProvider == 'goauth') {
-                getGoauth(encodeSafeURIComponent(window.location.href));
-            }
+            var url = context.serviceURL + '/authn/preauth?referrer=' + encodeSafeURIComponent(window.location.href);
+            ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
         }
 
     });
