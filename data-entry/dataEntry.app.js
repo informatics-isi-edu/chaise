@@ -58,24 +58,25 @@
                     dataEntryModel.cols = table.columns.all();
 
                     var foreignKeys = table.foreignKeys.all();
-                    var foreignKeysLength = foreignKeys.length;
-                    for (var i = 0; i < foreignKeysLength; i++) {
-                        // Capture the i from the containing for loop in a closure
-                        // so that getDomainValues() has the correct i on success
-                        (function(i) {
-                            var currentKey = foreignKeys[i];
-                            currentKey.getDomainValues().then(function success(values) {
-                                var valuesLength = values.length;
-                                var domainValues = dataEntryModel.domainValues[currentKey.colset.columns[0].name] = [];
-                                for (var j = 0; j < valuesLength; j++) {
-                                    var field = Object.keys(values[j])[0];
-                                    domainValues.push(values[j][field]);
-                                }
-                            }, function error(response) {
-                                console.log(response);
-                            });
-                        })(i);
-                    }
+                    angular.forEach(foreignKeys, function(key) {
+                        // Capture the key from the containing for loop in a closure
+                        // so that getDomainValues() has the correct key on success
+                        if (key.simple) {
+                            (function(key) {
+                                key.getDomainValues().then(function success(values) {
+                                    dataEntryModel.domainValues[key.colset.columns[0].name] = [];
+                                    var domainValues = dataEntryModel.domainValues[key.colset.columns[0].name];
+
+                                    angular.forEach(values.data, function(value) {
+                                        var field = Object.keys(value)[0];
+                                        domainValues.push(value[field]);
+                                    });
+                                }, function error(response) {
+                                    console.log(response);
+                                });
+                            })(key);
+                        }
+                    });
                     console.log('Model:',dataEntryModel);
                 } else {
                     alert('Sorry, the requested table "' + context.tableName + '" was not found. Please check the URL and refresh the page.');
