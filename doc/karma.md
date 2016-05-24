@@ -8,8 +8,8 @@ Karma and Jasmine is a NodeJS application, and should be installed through npm.
 
 ###To install Karma and Jasmine on your system follow these steps
 
-1. Delete folder "node_modules" from you  application directory
-2. Run "sudo npm install" from you command prompt, to install all node.js dependencies.
+1. Delete folder "node_modules" from your application directory if present.
+2. Run "sudo npm install --force" from you command prompt, to install all node.js dependencies.
 
 ###To run all Karma tests
 
@@ -19,9 +19,9 @@ By Default Karma will look for *"karma.conf.js"*, and run the configuration ment
 
 ###To run specific Karma tests
 
-You can create you own test configuration file to avoid running all Unit tests. To create one simply copy the existing `karma.conf.js` and rename it to the one that you want and place in a folder karma-test-config(If not present then create it). Now you just need to change `test/unit/*.js` to `test/unit/youtest.spec.js', to test specific file.
+You can create you own test configuration file to avoid running all Unit tests. To create one simply copy the existing `karma-sample.conf.js` in folder `karma-test-config` and give it a different name [KarmaNewTestconfigname.js]. Now you just need to change `test/unit/*.js` to `test/unit/yourtest.spec.js', to test specific file.
 
-Run `"karma start [KarmaTestconfigname].js"` from your command prompt.
+Run `"node_modules/.bin/karma start karma-test-config/[KarmaNewTestconfigname].js"` from your command prompt.
 
 
 
