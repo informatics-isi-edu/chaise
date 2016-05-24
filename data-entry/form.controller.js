@@ -30,6 +30,7 @@
         vm.isAutoGen = isAutoGen;
         vm.isForeignKey = isForeignKey;
         vm.matchType = matchType;
+        vm.isHiddenColumn = isHiddenColumn;
 
         function submit() {
             var form = vm.formContainer;
@@ -100,18 +101,16 @@
         }
 
         function getDefaults() {
-            var autogens = [];
+            var defaults = [];
             var columns =  vm.dataEntryModel.table.columns.all();
             var numColumns = columns.length;
-            // Switched from for..in loop to this because for..in somehow loops
-            // over a blank ("") column name every time, causing an error
             for (var i = 0; i < numColumns; i++) {
                 var columnName = columns[i].name;
-                if (vm.isAutoGen(columnName)) {
-                    autogens.push(columnName);
+                if (vm.isAutoGen(columnName) || vm.isHiddenColumn(columns[i])) {
+                    defaults.push(columnName);
                 }
             }
-            return autogens;
+            return defaults;
         }
 
         function getKeyColumns() {
@@ -190,6 +189,17 @@
 
         function closeAlert() {
             vm.alert = null;
+        }
+
+        // Returns true if a column has a 2015:hidden annotation or a 2016:ignore
+        // (with entry context) annotation.
+        function isHiddenColumn(column) {
+            var ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
+            var hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
+            if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
+                return true;
+            }
+            return false;
         }
     }]);
 })();
