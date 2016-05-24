@@ -1142,9 +1142,9 @@ chaiseRecordApp.service('locationService', function(){
         var params                  = path.split('/');
         var namespace               = params[1].split(':');
 
-        hashParams['catalogueId']   = params[0];
-        hashParams['schemaName']    = namespace[0];
-        hashParams['tableName']     = namespace[1];
+        hashParams['catalogueId']   = decodeURIComponent(params[0]);
+        hashParams['schemaName']    = decodeURIComponent(namespace[0]);
+        hashParams['tableName']     = decodeURIComponent(namespace[1]);
         hashParams['keys']          = this.convertParamsToObject(params[2]);
 
         return hashParams;
@@ -1157,7 +1157,7 @@ chaiseRecordApp.service('locationService', function(){
 
         for (var i = 0; i < predicates.length; i++){
             var key = predicates[i].split('=');
-            obj[key[0]] = key[1];
+            obj[decodeURIComponent(key[0])] = decodeURIComponent(key[1]);
         }
 
         // Join predicates with a conjunctive filter '&'
@@ -1206,7 +1206,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', 'spinn
 
     // cid
     var cidRegex = /^[0-9]+$/;
-    var tableNameRegex = /^[0-9a-zA-z_-]+$/;
+    var tableNameRegex = /^[\s0-9a-zA-z_-]+$/;
 
     $scope.reloadPage = function(url){
         setTimeout(function(){
