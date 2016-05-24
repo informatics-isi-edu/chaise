@@ -44,7 +44,7 @@
     "karma-safari-launcher": "^0.1.1",
     "karma-sinon-chai": "x",
     "mocha": "^2.4.5",
-    "phantomjs": "",
+    "phantomjs-prebuilt": "x",
     "protractor": "x",
     "testem": "x"
   }
