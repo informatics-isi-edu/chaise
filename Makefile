@@ -360,6 +360,13 @@ testem:
 karma:
 	$(BIN)/karma start
 
+# Rule to run tests
+.PHONY: testall
+testall:
+	$(BIN)/karma start
+	$(BIN)/protractor $(E2Esearch) && $(BIN)/protractor $(E2Erecord) && $(BIN)/protractor $(E2Elogin)
+
+
 # Rule to make html
 .PHONY: html
 html: $(HTML)
