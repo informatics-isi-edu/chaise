@@ -735,8 +735,8 @@ function initModels(options, successCallback) {
 			} else if (searchBoxPresentation.contains(value['type'])) {
 				box[col]['value'] = '';
 			} else if (datepickerPresentation.contains(value['type'])) {
-				box[col]['min'] = box[col]['floor'] = value['min'];
-				box[col]['max'] = box[col]['ceil'] = value['max'];
+				box[col]['min'] = box[col]['floor'] = getDateString(value['min']);
+				box[col]['max'] = box[col]['ceil'] = getDateString(value['max']);
 				sentRequests = true;
 			} else if (sliderPresentation.contains(value['type'])) {
 				box[col]['min'] = box[col]['floor'] = value['min'];
@@ -775,8 +775,8 @@ function initModels(options, successCallback) {
 				} else if (searchBoxPresentation.contains(value['type'])) {
 					box[col]['value'] = '';
 				} else if (datepickerPresentation.contains(value['type'])) {
-					box[col]['min'] = box[col]['floor'] = value['min'];
-					box[col]['max'] = box[col]['ceil'] = value['max'];
+					box[col]['min'] = box[col]['floor'] = getDateString(value['min']);
+					box[col]['max'] = box[col]['ceil'] = getDateString(value['max']);
 					sentRequests = true;
 				} else if (sliderPresentation.contains(value['type'])) {
 					box[col]['min'] = box[col]['floor'] = value['min'];
@@ -794,7 +794,7 @@ function initModels(options, successCallback) {
 			options['searchFilterValue'][table][extraFacets[i]] = '';
 		});
 	}
-
+	
 	if (!sentRequests) {
 		successCallback(true);
 	} else {
@@ -1142,11 +1142,18 @@ function successUpdateSliders(data, textStatus, jqXHR, param) {
 	$.each(cols, function(i, col) {
 		box[col]['ready'] = true;
 		if (data[0]['min_' + encodeSafeURIComponent(col)] != null) {
+			var colType = options['colsDescr'][table][col]['type'];
 			if (!box[col]['left']) {
 				box[col]['min'] = data[0]['min_' + encodeSafeURIComponent(col)];
+				if (datepickerPresentation.contains(colType)) {
+					box[col]['min'] = getDateString(box[col]['min']);
+				}
 			}
 			if (!box[col]['right']) {
 				box[col]['max'] = data[0]['max_' + encodeSafeURIComponent(col)];
+				if (datepickerPresentation.contains(colType)) {
+					box[col]['max'] = getDateString(box[col]['max']);
+				}
 			}
 			if (box[col]['right'] && box[col]['max'] == box[col]['ceil']) {
 				delete box[col]['right'];
@@ -1312,8 +1319,8 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			entity[col]['max'] = data[0]['max_' + col];
 		} else if (datepickerPresentation.contains(entity[col]['type'])) {
 			entity[col]['ready'] = true;
-			entity[col]['min'] = data[0]['min_' + col];
-			entity[col]['max'] = data[0]['max_' + col];
+			entity[col]['min'] = getDateString(data[0]['min_' + col]);
+			entity[col]['max'] = getDateString(data[0]['max_' + col]);
 		}
 	});
 	var ready = true;
@@ -2524,10 +2531,14 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 			}
 		});
 		entity[col]['values'] = values;
-	} else if (sliderPresentation.contains(entity[col]['type']) || datepickerPresentation.contains(entity[col]['type'])) {
+	} else if (sliderPresentation.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
 		entity[col]['min'] = data[0]['min'];
 		entity[col]['max'] = data[0]['max'];
+	} else if (datepickerPresentation.contains(entity[col]['type'])) {
+		entity[col]['ready'] = true;
+		entity[col]['min'] = getDateString(data[0]['min']);
+		entity[col]['max'] = getDateString(data[0]['max']);
 	} else {
 		console.log('No match found for column type ', entity[col]['type']);
 	}
@@ -3602,7 +3613,12 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 		options['colsDescr'][table][col]['type'] = col_type;
 		options['colsDescr'][table][col]['values'] = values;
 		options['box'][table][col]['values'] = {};
-	} else if (sliderPresentation.contains(col_type) || datepickerPresentation.contains(col_type)) {
+	} else if (datepickerPresentation.contains(col_type)) {
+		ready = true;
+		options['colsDescr'][table][col]['min'] = options['box'][table][col]['min'] = options['box'][table][col]['floor'] = getDateString(data[0]['min']);
+		options['colsDescr'][table][col]['max'] = options['box'][table][col]['max'] = options['box'][table][col]['ceil'] = getDateString(data[0]['max']);
+		options['box'][table][col]['values'] = {};
+	} else if (sliderPresentation.contains(col_type)) {
 		ready = true;
 		options['colsDescr'][table][col]['min'] = options['box'][table][col]['min'] = options['box'][table][col]['floor'] = data[0]['min'];
 		options['colsDescr'][table][col]['max'] = options['box'][table][col]['max'] = options['box'][table][col]['ceil'] = data[0]['max'];
@@ -3987,4 +4003,9 @@ function getSortGroup(table_name, column_name, annotation) {
 		ret.push(encodeSafeURIComponent(rankColumn));
 	}
 	return ret.join(',');
+}
+
+function getDateString(value) {
+	var ret = value.slice(0,10);
+	return ret;
 }
