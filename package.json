@@ -8,7 +8,7 @@
   "scripts": {
     "build": "make build",
     "pretest": "make build",
-    "test": "make test",
+    "test": "make testall",
     "test:testem": "make testem",
     "docs": "make doc"
   },
@@ -41,11 +41,10 @@
     "karma-mocha-reporter": "^2.0.3",
     "karma-osx-reporter": "^0.2.1",
     "karma-phantomjs-launcher": "^1.0.0",
-    "karma-phantomjs2-launcher": "0.4.0",
     "karma-safari-launcher": "^0.1.1",
     "karma-sinon-chai": "x",
     "mocha": "^2.4.5",
-    "phantomjs2": "2.2.0",
+    "phantomjs-prebuilt": "x",
     "protractor": "x",
     "testem": "x"
   }
