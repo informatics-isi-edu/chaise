@@ -46,6 +46,8 @@ var CATALOG_COLUMNS_ALIAS = {};
 var COLUMNS_LIST_URI = 'comment';
 var TABLES_LIST_URI = 'comment';
 var SCHEMAS_LIST_URI = 'comment';
+var SCHEMA_RECORD_LINK_URI = 'tag:isrd.isi.edu,2016:recordlink';
+var TABLE_RECORD_LINK_URI = 'tag:isrd.isi.edu,2016:recordlink';
 var COLUMNS_MAP_URI = 'description';
 var TABLES_MAP_URI = 'description';
 var COLUMNS_FACET_URI = 'facet';
@@ -4009,3 +4011,32 @@ function getDateString(value) {
 	var ret = value.slice(0,10);
 	return ret;
 }
+
+function getSchemaAnnotation(schema_name, annotation_uri) {
+	var ret = null;
+	
+	$.each(CATALOG_SCHEMAS, function(schema, value) {
+		if (schema == schema_name) {
+			var annotations = value['annotations'];
+			if (annotations != null && annotations[annotation_uri] != null) {
+				ret = annotations[annotation_uri];
+				return false;
+			}
+		}
+	});
+	
+	return ret;
+}
+
+function getTableAnnotationValue(table_name, annotation) {
+	var ret = null;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name'] && table['annotations'] != null &&
+			table['annotations'][annotation] != null) {
+			ret = table['annotations'][annotation];
+			return false;
+		}
+	});
+	return ret;
+}
+
