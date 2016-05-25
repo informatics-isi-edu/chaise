@@ -869,8 +869,8 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         error(function(data, status, headers, config) {
             console.log("Error querying schemas", data);
             if (status == 401) {
-				var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location.href);
-				window.location = login_url;
+                var url =  window.location.origin + '/ermrest/authn/preauth?referrer=' + encodeSafeURIComponent(window.location.href);
+                ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
             } else {
                 notFoundService.show("We're sorry, the catalogue id " + cid + " does not exist. Please try again!");
             }
