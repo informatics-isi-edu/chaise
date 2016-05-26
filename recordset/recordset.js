@@ -344,7 +344,10 @@ angular.module('recordset', ['ERMrest', 'chaise.views'])
     $rootScope.errorMessage='';
 
     // Get rowset data from ermrest
-    ermrestServerFactory.getServer(context.serviceURL).then(function(server) {
+    var server = ermrestServerFactory.getServer(context.serviceURL);
+
+    // authenticiation
+    server.session.get().then(function() {
 
         $rootScope.user = server.getUser().display_name;
         context.server = server;
@@ -385,7 +388,7 @@ angular.module('recordset', ['ERMrest', 'chaise.views'])
 
                 // Find shortest Key, used for paging and linking
                 var keys = table.keys.all().sort( function(a, b) {
-                  return a.colset.length() - b.colset.length();
+                    return a.colset.length() - b.colset.length();
                 });
                 recordsetModel.keycols = keys[0].colset.columns;
 
@@ -474,15 +477,13 @@ angular.module('recordset', ['ERMrest', 'chaise.views'])
 
             }
         });
-
+        
     }, function(error) {
-        console.log(error);
-        // not logged in
+        // not logged in, redirect to login
         if (error instanceof Errors.SessionNotFoundError) {
             var url = context.serviceURL + '/authn/preauth?referrer=' + encodeSafeURIComponent(window.location.href);
             ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
         }
-
     });
 
 
