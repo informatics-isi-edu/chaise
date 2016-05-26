@@ -116,7 +116,9 @@
                                             </ui-select-choices>
                                         </ui-select>
                                     </div>
-                                    <!-- text input -->
+                                    <!-- longtext/textarea input -->
+                                    <textarea ng-switch-when="longtext" ng-model="form.dataEntryModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="form-control" ng-required="!column.nullok"></textarea>
+                                    <!-- shorttext/default text input -->
                                     <input ng-switch-default ng-model="form.dataEntryModel.rows[rowIndex][column.name]"
                                         name="{{::column.name}}" type="text" class="form-control" ng-required="!column.nullok">
 
