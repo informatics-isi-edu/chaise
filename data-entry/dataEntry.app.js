@@ -98,7 +98,11 @@
                             var column = path.context.columns.get(key);
                             filters.push(new ERMrest.BinaryPredicate(column, ERMrest.OPERATOR.EQUAL, value));
                         });
-                        var path = path.filter(new ERMrest.Conjunction(filters));
+                        // TODO: Store filters in URI form in model to use later on form submission
+                        var filterString = new ERMrest.Conjunction(filters);
+                        // dataEntryModel.filterUri = filterString.toUri();
+
+                        var path = path.filter(filterString);
                         path.entity.get().then(function success(entity) {
                             angular.forEach(entity[0], function(value, colName) {
                                 var pathColumnType = path.context.columns.get(colName).column.type.name;

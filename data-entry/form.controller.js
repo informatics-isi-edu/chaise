@@ -47,6 +47,8 @@
 
             if (rowset.length === 1) {
                 // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
+                // TODO: Postpone using datapath api to build redirect url until
+                // datapath is redeveloped to only use aliases when necessary
                 redirectUrl += '/chaise/record/#' + context.catalogID + '/' + encodeURIComponent(context.schemaName) + ':' + encodeURIComponent(context.tableName);
             }
             // TODO: Implement redirect to recordset app when data entry supports multi-row insertion
@@ -93,7 +95,7 @@
 
             if (vm.editMode) {
                 model.table.entity.put(model.rows).then(function success(entities) {
-                    // wrapping redirectAfterSubmission callback fn in the success callback fn
+                    // Wrapping redirectAfterSubmission callback fn in the success callback fn
                     // due to inability to pass the success/error responses directly
                     // into redirectAfterSubmission fn. (ReferenceError)
                     vm.redirectAfterSubmission(entities);
