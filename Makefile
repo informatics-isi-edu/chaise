@@ -108,10 +108,10 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/matrix.js
 
 # error definitions
-ERROR_SOURCE=error-handling/authenerrors.js \
-             error-handling/networkerrors.js \
-             error-handling/schemaerrors.js \
-             error-handling/validationerrors.js
+ERROR_SOURCE=common/errors/authenerrors.js \
+             common/errors/networkerrors.js \
+             common/errors/schemaerrors.js \
+             common/errors/validationerrors.js
 
 # HTML templates
 TEMPLATES=views
@@ -259,9 +259,7 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/font-awesome/css/font-awesome.min.css
 
 RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css \
-    $(CSS)/appheader.css \
-    error-handling/notification.css
-
+    $(CSS)/appheader.css
 
 # Config file
 JS_CONFIG=chaise-config.js
