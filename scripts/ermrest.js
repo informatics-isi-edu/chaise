@@ -2069,6 +2069,9 @@ function setCollectionsReferences(tree) {
 		'nodes': nodes};
 	tree.push(node);
 	$.each(CATALOG_METADATA, function(schema, metadata) {
+		if (schema != SCHEMA) {
+			return true;
+		}
 		var tables = [];
 		$.each(metadata, function(i, table) {
 			var exclude = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null &&
@@ -4015,7 +4018,7 @@ function getSortGroup(table_name, column_name, annotation) {
 }
 
 function getDateString(value) {
-	var ret = value.slice(0,10);
+	var ret = (value != null ? value.slice(0,10) : null);
 	return ret;
 }
 
