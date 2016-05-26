@@ -157,6 +157,10 @@
                     case 'boolean':
                         displayType = 'boolean';
                         break;
+                    case 'longtext':
+                        displayType = 'longtext';
+                        break;
+                    case 'shorttext':
                     default:
                         displayType = 'text';
                         break;
