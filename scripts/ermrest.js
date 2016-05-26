@@ -25,7 +25,8 @@ var display_columns = {
 		'zoomify': [],
 		'3dview': [],
 		'hidden': [],
-		'url': []
+		'url': [],
+		'top_columns': []
 };
 
 var back_references = {};
@@ -455,7 +456,8 @@ function getTableColumns(options, successCallback) {
 		'zoomify': [],
 		'3dview': [],
 		'hidden': [],
-		'url': []
+		'url': [],
+		'top_columns': []
 	};
 
 	PRIMARY_KEY = [];
@@ -1591,6 +1593,7 @@ function initSchema(newSchema) {
 }
 
 function getTableColumnsUniques(options, successCallback) {
+	var sentRequests = false;
 	var tables = [options['table']].concat(association_tables_names);
 	var alertObject = {'display': true};
 	var obj = {};
@@ -1624,11 +1627,15 @@ function getTableColumnsUniques(options, successCallback) {
 				param['options'] = options;
 				param['successCallback'] = successCallback;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsUniques, errorErmrest, param);
+				sentRequests = true;
 			} else {
 				delete obj[table];
 			}
 		}
 	});
+	if (!sentRequests) {
+		successCallback();
+	}
 }
 
 function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
