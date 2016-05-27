@@ -15,7 +15,7 @@
  */
 
 // The Chaise RecordSet module
-angular.module('recordset', ['ERMrest'])
+angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 
 // Register the 'context' object which can be accessed by config and other
 // services.
@@ -26,8 +26,10 @@ angular.module('recordset', ['ERMrest'])
     schemaName: '', // 'isa'
     tableName: '',  // 'assay'
     filters: [],
-    sort: null        // 'column::desc::' ::desc:: is option, ,only allow 1 column
+    sort: null,     // 'column::desc::' ::desc:: is option, ,only allow 1 column
+    server: null
 })
+
 
 // Register configuration work to be performed on module loading.
 .config(['context', function(context) {
@@ -135,7 +137,7 @@ angular.module('recordset', ['ERMrest'])
 }])
 
 // Register the recordset controller
-.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'context', function($scope, $rootScope, pageInfo, $window, recordsetModel, context) {
+.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'context', 'UriUtils', function($scope, $rootScope, pageInfo, $window, recordsetModel, context, UriUtils) {
 
     $scope.vm = recordsetModel;
 
@@ -148,6 +150,19 @@ angular.module('recordset', ['ERMrest'])
     $scope.pageLimit = function(limit) {
         pageInfo.pageLimit = limit;
         $scope.sort();
+    };
+
+    $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
+    $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
+    $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
+
+    // login logout should be factored out into a common module
+    $scope.login = function() {
+        context.server.session.login(window.location.href);
+    };
+
+    $scope.logout = function() {
+        context.server.session.logout(window.location);
     };
 
     $scope.sort = function () {
@@ -212,16 +227,16 @@ angular.module('recordset', ['ERMrest'])
 
     $scope.permalink = function() {
         var url = window.location.href.replace(window.location.hash, ''); // everything before #
-        url = url + "#" + context.catalogID + "/" +
-            (context.schemaName !== '' ? context.schemaName + ":" : "") +
-            context.tableName;
+        url = url + "#" + UriUtils.fixedEncodeURIComponent(context.catalogID) + "/" +
+            (context.schemaName !== '' ? UriUtils.fixedEncodeURIComponent(context.schemaName) + ":" : "") +
+            UriUtils.fixedEncodeURIComponent(context.tableName);
 
         if (recordsetModel.filter !== null) {
             url = url + "/" + recordsetModel.filter.toUri();
         }
 
         if (recordsetModel.sortby !== null) {
-            url = url + "@sort(" + recordsetModel.sortby;
+            url = url + "@sort(" + UriUtils.fixedEncodeURIComponent(recordsetModel.sortby);
             if (recordsetModel.sortOrder === "desc") {
                 url = url + "::desc::";
             }
@@ -304,13 +319,13 @@ angular.module('recordset', ['ERMrest'])
 
     $scope.gotoRowLink = function(index) {
         var row = recordsetModel.rowset.data[index];
-        var path = context.chaiseURL + "/record/#" + context.catalogID + "/" + context.schemaName + ":" + context.tableName + "/";
+        var path = context.chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(context.catalogID) + "/" + UriUtils.fixedEncodeURIComponent(context.schemaName) + ":" + UriUtils.fixedEncodeURIComponent(context.tableName) + "/";
         for (var k = 0; k < recordsetModel.keycols.length; k++) {
             var col = recordsetModel.keycols[k].name;
             if (k === 0) {
-                path = path + col + "=" + row[col];
+                path = path + UriUtils.fixedEncodeURIComponent(col) + "=" + UriUtils.fixedEncodeURIComponent(row[col]);
             } else {
-                path = path + "&" + col + "=" + row[col];
+                path = path + "&" + UriUtils.fixedEncodeURIComponent(col) + "=" + UriUtils.fixedEncodeURIComponent(row[col]);
             }
         }
 
@@ -326,104 +341,149 @@ angular.module('recordset', ['ERMrest'])
     $rootScope.location = window.location.href;
     pageInfo.loading = true;
     recordsetModel.tableName = context.tableName;
+    $rootScope.errorMessage='';
 
     // Get rowset data from ermrest
     var server = ermrestServerFactory.getServer(context.serviceURL);
-    server.catalogs.get(context.catalogID).then(function(catalog) {
-        console.log(catalog);
 
-        // get table definition
-        var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
-        console.log(table);
-        recordsetModel.table = table;
-        recordsetModel.columns = table.columns.names();
-        recordsetModel.header = table.columns.names();
-        console.log(recordsetModel.header);
+    // authenticiation
+    server.session.get().then(function() {
 
-        // build up filters
-        var filter = null;
-        var len = context.filters.length;
-        if (len == 1) {
-          filter = new ERMrest.BinaryPredicate(
-            table.columns.get(context.filters[0].name),
-            context.filters[0].op,
-            context.filters[0].value);
-        }
-        else if (len > 1) {
-          var filters = [];
-          for (var i=0; i<len; i++) {
-            filters.push(
-              new ERMrest.BinaryPredicate(
-                table.columns.get(context.filters[i].name),
-                context.filters[i].op,
-                context.filters[i].value)
-            );
-          }
-          filter = new ERMrest.Conjunction(filters);
-        }
-        recordsetModel.filter = filter;
+        $rootScope.user = server.getUser().display_name;
+        context.server = server;
+        server.catalogs.get(context.catalogID).then(function(catalog) {
+            console.log(catalog);
 
-        // Find shortest Key, used for paging and linking
-        var keys = table.keys.all().sort( function(a, b) {
-          return a.colset.length() - b.colset.length();
-        });
-        recordsetModel.keycols = keys[0].colset.columns;
+            try {
+                // get table definition
+                var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
+                console.log(table);
+                recordsetModel.table = table;
+                recordsetModel.columns = table.columns.names();
+                recordsetModel.header = table.columns.names();
+                console.log(recordsetModel.header);
 
-        // sorting
-        var sort = [];
+                // build up filters
+                var filter = null;
+                var len = context.filters.length;
+                if (len == 1) {
+                    filter = new ERMrest.BinaryPredicate(
+                        table.columns.get(context.filters[0].name),
+                        context.filters[0].op,
+                        context.filters[0].value);
+                }
+                else if (len > 1) {
+                    var filters = [];
+                    for (var i = 0; i < len; i++) {
+                        filters.push(
+                            new ERMrest.BinaryPredicate(
+                                table.columns.get(context.filters[i].name),
+                                context.filters[i].op,
+                                context.filters[i].value)
+                        );
+                    }
+                    filter = new ERMrest.Conjunction(filters);
+                }
+                recordsetModel.filter = filter;
 
-        // user selected column as the priority in sort
-        // followed by all the key columns
-        if (context.sort !== null) {
-            if (context.sort.endsWith("::desc::")) {
-                recordsetModel.sortby = decodeURIComponent(
-                    context.sort.match(/(.*)::desc::/)[1]
-                );
-                recordsetModel.sortOrder = 'desc';
-            } else {
-                recordsetModel.sortby = decodeURIComponent(context.sort);
-                recordsetModel.sortOrder = 'asc';
+                // Find shortest Key, used for paging and linking
+                var keys = table.keys.all().sort( function(a, b) {
+                    return a.colset.length() - b.colset.length();
+                });
+                recordsetModel.keycols = keys[0].colset.columns;
+
+                // sorting
+                var sort = [];
+
+                // user selected column as the priority in sort
+                // followed by all the key columns
+                if (context.sort !== null) {
+                    if (context.sort.endsWith("::desc::")) {
+                        recordsetModel.sortby = decodeURIComponent(
+                            context.sort.match(/(.*)::desc::/)[1]
+                        );
+                        recordsetModel.sortOrder = 'desc';
+                    } else {
+                        recordsetModel.sortby = decodeURIComponent(context.sort);
+                        recordsetModel.sortOrder = 'asc';
+                    }
+
+                    // this will cause program to throw exception is sort column is not valid
+                    table.columns.get(recordsetModel.sortby);
+
+                    sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
+                }
+
+                for (i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
+                    var col = recordsetModel.keycols[i].name;
+                    if (col !== recordsetModel.sortby) {
+                        sort.push({"column": col, "order": "asc"});
+                    }
+                }
+
+                // first get row count
+                table.entity.count(filter).then(function (count) {
+                    recordsetModel.count = count;
+
+                    // get rowset from table
+                    table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
+                        console.log(rowset);
+                        recordsetModel.rowset = rowset;
+
+                        pageInfo.loading = false;
+                        pageInfo.recordStart = 1;
+                        pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
+                        pageInfo.previousButtonDisabled = true;
+                        pageInfo.nextButtonDisabled = recordsetModel.count <= pageInfo.recordEnd;
+
+                    }, function (error) {
+                        console.log(error);
+                        pageInfo.loading = false;
+                        pageInfo.previousButtonDisabled = true;
+                        pageInfo.nextButtonDisabled = true;
+
+                        // TODO get entity error
+                    });
+                }, function (error) {
+                    pageInfo.loading = false;
+                    pageInfo.previousButtonDisabled = true;
+                    pageInfo.nextButtonDisabled = true;
+
+                    // TODO get count error
+                });
+            } catch (error) {
+                pageInfo.loading = false;
+                if (error instanceof Errors.NotFoundError ||
+                    error instanceof Errors.InvalidFilterOperatorError) {
+                    $rootScope.errorMessage = error.message;
+                }
             }
 
-            sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
-        }
+        }, function(error) {
 
-        for (i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
-            var col = recordsetModel.keycols[i].name;
-            if (col !== recordsetModel.sortby) {
-                sort.push({"column": col, "order": "asc"});
-            }
-        }
-
-        // first get row count
-        table.entity.count(filter).then(function(count) {
-            recordsetModel.count = count;
-
-            // get rowset from table
-            table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
-                console.log(rowset);
-                recordsetModel.rowset = rowset;
-
-                pageInfo.loading = false;
-                pageInfo.recordStart = 1;
-                pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
-                pageInfo.previousButtonDisabled = true;
-                pageInfo.nextButtonDisabled = recordsetModel.count <= pageInfo.recordEnd;
-
-            }, function(error) {
-                console.log(error);
-                pageInfo.loading = false;
-                pageInfo.previousButtonDisabled = true;
-                pageInfo.nextButtonDisabled = true;
-            });
-        }, function(response) {
+            // get catalog error
+            console.log(error);
             pageInfo.loading = false;
-            pageInfo.previousButtonDisabled = true;
-            pageInfo.nextButtonDisabled = true;
-            return module._q.reject(response.data);
-        });
 
+            // TODO
+            $rootScope.errorMessage = error.message;
+            if (error instanceof Errors.NotFoundError) {
+                // catalog not found
+            } else if (error instanceof Errors.ForbiddenError) {
+
+            } else if (error instanceof Errors.UnauthorizedError) {
+
+            }
+        });
+        
+    }, function(error) {
+        // not logged in, redirect to login
+        if (error instanceof Errors.NotFoundError) {
+            var url = context.serviceURL + '/authn/preauth?referrer=' + encodeSafeURIComponent(window.location.href);
+            ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
+        }
     });
+
 
     window.onhashchange = function() {
         // when address bar changes by user
