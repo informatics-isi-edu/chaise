@@ -13,6 +13,12 @@ body > .container {
 	padding-top: 70px;
 }
 
+.content {
+	min-height: 100%;
+	position: relative;
+	padding-top: 70px;
+}
+
 .navbar-inverse .navbar-brand {
    color: #FFFFFF;
 }
