@@ -1,11 +1,3 @@
-/**
- * Created by jenniferchen on 5/6/16.
- */
-
-/**
- * Created by jenniferchen on 5/2/16.
- */
-
 var Errors = (function(module) {
 
     module.InvalidFilterOperatorError = InvalidFilterOperatorError;
