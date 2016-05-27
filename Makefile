@@ -153,6 +153,7 @@ RECORD_JS_SOURCE= $(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \
 	$(JS)/ermrest.js \
+	$(COMMON)/utils.js \
 	$(RECORD_ASSETS)/javascripts/app.js
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
@@ -252,6 +253,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/views.js
 
 RECSET_JS_SOURCE=$(JS)/ermrest.js \
+    $(COMMON)/utils.js \
     $(RECSET_ASSETS)/recordset.js
 
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \

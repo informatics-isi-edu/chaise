@@ -15,7 +15,7 @@
  */
 
 // The Chaise RecordSet module
-angular.module('recordset', ['ERMrest', 'chaise.views'])
+angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 
 // Register the 'context' object which can be accessed by config and other
 // services.
@@ -137,7 +137,7 @@ angular.module('recordset', ['ERMrest', 'chaise.views'])
 }])
 
 // Register the recordset controller
-.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'context', function($scope, $rootScope, pageInfo, $window, recordsetModel, context) {
+.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'context', 'UriUtils', function($scope, $rootScope, pageInfo, $window, recordsetModel, context, UriUtils) {
 
     $scope.vm = recordsetModel;
 
@@ -227,16 +227,16 @@ angular.module('recordset', ['ERMrest', 'chaise.views'])
 
     $scope.permalink = function() {
         var url = window.location.href.replace(window.location.hash, ''); // everything before #
-        url = url + "#" + encodeURIComponent(context.catalogID) + "/" +
-            (context.schemaName !== '' ? encodeURIComponent(context.schemaName) + ":" : "") +
-            encodeURIComponent(context.tableName);
+        url = url + "#" + UriUtils.fixedEncodeURIComponent(context.catalogID) + "/" +
+            (context.schemaName !== '' ? UriUtils.fixedEncodeURIComponent(context.schemaName) + ":" : "") +
+            UriUtils.fixedEncodeURIComponent(context.tableName);
 
         if (recordsetModel.filter !== null) {
             url = url + "/" + recordsetModel.filter.toUri();
         }
 
         if (recordsetModel.sortby !== null) {
-            url = url + "@sort(" + encodeURIComponent(recordsetModel.sortby);
+            url = url + "@sort(" + UriUtils.fixedEncodeURIComponent(recordsetModel.sortby);
             if (recordsetModel.sortOrder === "desc") {
                 url = url + "::desc::";
             }
@@ -319,13 +319,13 @@ angular.module('recordset', ['ERMrest', 'chaise.views'])
 
     $scope.gotoRowLink = function(index) {
         var row = recordsetModel.rowset.data[index];
-        var path = context.chaiseURL + "/record/#" + encodeURIComponent(context.catalogID) + "/" + encodeURIComponent(context.schemaName) + ":" + encodeURIComponent(context.tableName) + "/";
+        var path = context.chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(context.catalogID) + "/" + UriUtils.fixedEncodeURIComponent(context.schemaName) + ":" + UriUtils.fixedEncodeURIComponent(context.tableName) + "/";
         for (var k = 0; k < recordsetModel.keycols.length; k++) {
             var col = recordsetModel.keycols[k].name;
             if (k === 0) {
-                path = path + encodeURIComponent(col) + "=" + encodeURIComponent(row[col]);
+                path = path + UriUtils.fixedEncodeURIComponent(col) + "=" + UriUtils.fixedEncodeURIComponent(row[col]);
             } else {
-                path = path + "&" + encodeURIComponent(col) + "=" + encodeURIComponent(row[col]);
+                path = path + "&" + UriUtils.fixedEncodeURIComponent(col) + "=" + UriUtils.fixedEncodeURIComponent(row[col]);
             }
         }
 

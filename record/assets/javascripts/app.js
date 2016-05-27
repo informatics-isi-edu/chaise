@@ -1,6 +1,6 @@
 // Chaise Record App
 
-var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ui.bootstrap','ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.grid.selection', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.grouping', 'ui.grid.infiniteScroll', 'ngCookies', 'ngSanitize']);
+var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ui.bootstrap','ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.grid.selection', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.grouping', 'ui.grid.infiniteScroll', 'ngCookies', 'ngSanitize', 'chaise.utils']);
 
 // Refreshes page when fragment identifier changes
 setTimeout(function(){
@@ -75,7 +75,7 @@ chaiseRecordApp.service('configService', function() {
 });
 
 // REST API for Ermrest
-chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schemaService', 'spinnerService', 'notFoundService', 'configService', function($http, $rootScope, $sce, schemaService, spinnerService, notFoundService, configService){
+chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schemaService', 'spinnerService', 'notFoundService', 'configService', 'UriUtils', function($http, $rootScope, $sce, schemaService, spinnerService, notFoundService, configService, UriUtils){
 
     // Get the entity in JSON format
     // Note: By this point,the schema should be loaded already
@@ -101,8 +101,8 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
         var schema = schemaService.schemas[schemaName];
 
         // Build the entity path.
-        var path            = configService.CR_BASE_URL + schema.cid + '/entity/' + fixedEncodeURIComponent(schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
-        var aggregatePath   = configService.CR_BASE_URL + schema.cid + '/aggregate/' + fixedEncodeURIComponent(schema.schema_name) + ':' + fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
+        var path            = configService.CR_BASE_URL + schema.cid + '/entity/' + UriUtils.fixedEncodeURIComponent(schema.schema_name) + ':' + UriUtils.fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
+        var aggregatePath   = configService.CR_BASE_URL + schema.cid + '/aggregate/' + UriUtils.fixedEncodeURIComponent(schema.schema_name) + ':' + UriUtils.fixedEncodeURIComponent(tableName) + '/' + self.buildPredicate(keys);
 
         // Execute API Request to get main entity
         $http.get(path).success(function(data, status, headers, config) {
@@ -698,7 +698,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
     // Get the Chaise Detail lin for entity, keys are the key value pair to search for
     this.getEntityLink = function(schemaName, tableName, keys){
-        return window.location.href.replace(window.location.hash, '') + '#' + schemaService.schemas[schemaName].cid + '/' +  fixedEncodeURIComponent(schemaName) + ':' + fixedEncodeURIComponent(tableName)+ '/' + this.buildPredicate(keys);
+        return window.location.href.replace(window.location.hash, '') + '#' + schemaService.schemas[schemaName].cid + '/' +  UriUtils.fixedEncodeURIComponent(schemaName) + ':' + UriUtils.fixedEncodeURIComponent(tableName)+ '/' + this.buildPredicate(keys);
     };
 
     // Scan through schema to find related tables
@@ -829,9 +829,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
         // TODO this doesn't work when value is an uri
         for (var key in params){
-            var predicate   = fixedEncodeURIComponent(key) + '=';
+            var predicate   = UriUtils.fixedEncodeURIComponent(key) + '=';
             // Do not encoude already encoded string
-            predicate       += params[key].toString().indexOf('%') > -1 ? params[key] : fixedEncodeURIComponent(params[key]);
+            predicate       += params[key].toString().indexOf('%') > -1 ? params[key] : UriUtils.fixedEncodeURIComponent(params[key]);
 
             predicates.push(predicate);
         }
