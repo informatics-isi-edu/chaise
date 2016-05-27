@@ -22,6 +22,7 @@
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
+        // Parse the url
         context.serviceURL = window.location.origin + '/ermrest';
         if (chaiseConfig.ermrestLocation) {
             context.serviceURL = chaiseConfig.ermrestLocation + '/ermrest';
@@ -44,6 +45,17 @@
                 context.tableName = decodeURIComponent(params[0]);
             }
         }
+        if (parts[2]) {
+            context.filters = {};
+            var filters = parts[2].split('&');
+            for (var i = 0, len = filters.length; i < len; i++) {
+                var filter = filters[i].split('=');
+                if (filter[0] && filter[1]) {
+                    context.filters[decodeURIComponent(filter[0])] = decodeURIComponent(filter[1]);
+                }
+            }
+        }
+        console.log('Context:',context);
     }])
 
     .run(['context', 'ermrestServerFactory', 'dataEntryModel', '$http', function runApp(context, ermrestServerFactory, dataEntryModel, $http) {
@@ -77,6 +89,36 @@
                             })(key);
                         }
                     });
+
+                    // Populate model with existing records' column values
+                    if (context.filters) {
+                        var path = new ERMrest.DataPath(table);
+                        var filters = [];
+                        angular.forEach(context.filters, function(value, key) {
+                            var column = path.context.columns.get(key);
+                            filters.push(new ERMrest.BinaryPredicate(column, ERMrest.OPERATOR.EQUAL, value));
+                        });
+                        // TODO: Store filters in URI form in model to use later on form submission
+                        var filterString = new ERMrest.Conjunction(filters);
+                        // dataEntryModel.filterUri = filterString.toUri();
+
+                        var path = path.filter(filterString);
+                        path.entity.get().then(function success(entity) {
+                            angular.forEach(entity[0], function(value, colName) {
+                                var pathColumnType = path.context.columns.get(colName).column.type.name;
+                                if (pathColumnType == 'date' || pathColumnType == 'timestamptz') {
+                                    // Must transform the value into a Date so that
+                                    // Angular won't complain when putting the value
+                                    // in an input of type "date" in the view
+                                    value = new Date(value);
+                                }
+                                dataEntryModel.rows[dataEntryModel.rows.length - 1][colName] = value;
+                            });
+                        }, function error(response) {
+                            alert('Sorry, the requested record was not found. Please check the URL and refresh the page.');
+                            console.log('The requested record in schema ' + context.schemaName + ', table ' + context.tableName + ' with the following attributes: ' + context.filters + ' was not found.');
+                        });
+                    }
                     console.log('Model:',dataEntryModel);
                 } else {
                     alert('Sorry, the requested table "' + context.tableName + '" was not found. Please check the URL and refresh the page.');
@@ -102,7 +144,7 @@
             });
         }
 
-        function encodeSafeURIComponent (str) {
+        function encodeSafeURIComponent(str) {
             return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
                 return '%' + c.charCodeAt(0).toString(16).toUpperCase();
             });
