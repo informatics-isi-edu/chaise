@@ -157,7 +157,6 @@
             var name = column.name;
             var type = column.type.name;
             var displayType;
-
             if (vm.isAutoGen(name)) {
                 displayType = 'autogen';
             } else if (vm.isForeignKey(name)) {
