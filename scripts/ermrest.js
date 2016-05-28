@@ -2366,7 +2366,8 @@ function setVocabularyTables(index) {
 		if (association_tables[table['table_name']] == null && association_tables_names.contains(table['table_name'])) {
 			var columns = [];
 			$.each(table['column_definitions'], function(k, column_definition) {
-				if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_LIST_URI] != null && !column_definition['annotations'][COLUMNS_LIST_URI].contains('hidden')) {
+				// if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_LIST_URI] != null && !column_definition['annotations'][COLUMNS_LIST_URI].contains('hidden')) {
+				if (column_definition['annotations'][COLUMNS_LIST_URI] == null || !column_definition['annotations'][COLUMNS_LIST_URI].contains('hidden')) {
 					var display = getColumnDisplayName(column_definition['name']);
 					if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_MAP_URI] != null && column_definition['annotations'][COLUMNS_MAP_URI]['display'] != null) {
 						display = column_definition['annotations'][COLUMNS_MAP_URI]['display'];
