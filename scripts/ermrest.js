@@ -1004,7 +1004,13 @@ function successUpdateGroups(data, textStatus, jqXHR, param) {
 		var key = value[col];
 		if (key != null) {
 			colsGroup[col][key] = value['cnt'];
-			values.push(key);
+			if (key===true) {
+				values.push('true');
+			} else if (key===false) {
+				values.push('false');
+			} else {
+				values.push(key);
+			}
 		}
 	});
 	$.each(colsGroup[col], function(key, value) {
