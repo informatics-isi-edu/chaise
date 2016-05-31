@@ -8,6 +8,7 @@
         vm.dataEntryModel = dataEntryModel;
         vm.editMode = context.filters || false;
         vm.booleanValues = context.booleanValues;
+        vm.getAutoGenValue = getAutoGenValue;
 
         vm.alert = null;
         vm.closeAlert = closeAlert;
@@ -229,6 +230,15 @@
                 return true;
             }
             return false;
+        }
+
+        // If in edit mode, autogen fields show the value of the existing record
+        // Otherwise, show a static string in entry mode.
+        function getAutoGenValue(value) {
+            if (vm.editMode) {
+                return value;
+            }
+            return 'To be set by system';
         }
     }]);
 })();

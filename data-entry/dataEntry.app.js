@@ -45,6 +45,8 @@
                 context.tableName = decodeURIComponent(params[0]);
             }
         }
+
+        // If there are filters appended to the URL, add them to context.js
         if (parts[2]) {
             context.filters = {};
             var filters = parts[2].split('&');
@@ -90,7 +92,7 @@
                         }
                     });
 
-                    // Populate model with existing records' column values
+                    // If there are filters, populate the model with existing records' column values
                     if (context.filters) {
                         var path = new ERMrest.DataPath(table);
                         var filters = [];
