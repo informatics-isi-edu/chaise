@@ -1189,84 +1189,93 @@ chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($root
 }]);
 
 // Detail controller
-chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', function($rootScope, $scope, $sce, spinnerService, ermrestService, schemaService, locationService, notFoundService){
+chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', 'UriUtils', function($rootScope, $scope, $sce, $http, spinnerService, ermrestService, schemaService, locationService, notFoundService, UriUtils){
     // C: Catalogue id
     // T: Table name
     // K: Key
 
-    $scope.chaiseConfig = chaiseConfig;
+    $http.get(window.location.origin + "/ermrest/authn/session").then(function() {
+        // authorized
 
-    // Set up the parameters base on url
-    var params      = locationService.getHashParams();
-    // var params      = $location.search();  query parameters
-    var cid         = params['catalogueId'];
-    var tableName   = params['tableName'];
-    var schemaName  = params['schemaName'];
-    var keys        = params['keys'];
+        $scope.chaiseConfig = chaiseConfig;
 
-    // cid
-    var cidRegex = /^[0-9]+$/;
-    var tableNameRegex = /^[\s0-9a-zA-z_-]+$/;
+        // Set up the parameters base on url
+        var params      = locationService.getHashParams();
+        // var params      = $location.search();  query parameters
+        var cid         = params['catalogueId'];
+        var tableName   = params['tableName'];
+        var schemaName  = params['schemaName'];
+        var keys        = params['keys'];
 
-    $scope.reloadPage = function(url){
-        setTimeout(function(){
-            location.reload();
-        }, 500);
-    };
+        // cid
+        var cidRegex = /^[0-9]+$/;
+        var tableNameRegex = /^[\s0-9a-zA-z_-]+$/;
 
-    // Validation
-    if (cid == undefined){
-        notFoundService.show("Please provide a catalogue id");
+        $scope.reloadPage = function(url){
+            setTimeout(function(){
+                location.reload();
+            }, 500);
+        };
 
-    } else if (!cidRegex.test(cid)){
+        // Validation
+        if (cid == undefined){
+            notFoundService.show("Please provide a catalogue id");
 
-        notFoundService.show("'" + cid + "' is an invalid catalogue id. Please try again!");
+        } else if (!cidRegex.test(cid)){
 
-    } else if (tableName == undefined){
+            notFoundService.show("'" + cid + "' is an invalid catalogue id. Please try again!");
 
-        notFoundService.show("Please provide a table name");
+        } else if (tableName == undefined){
 
-    } else if (!tableNameRegex.test(tableName)){
+            notFoundService.show("Please provide a table name");
 
-        notFoundService.show("'" + tableName + "' is an invalid table name. Please try again!");
+        } else if (!tableNameRegex.test(tableName)){
 
-    } else if (Object.keys(keys).length === 0){
+            notFoundService.show("'" + tableName + "' is an invalid table name. Please try again!");
 
-        notFoundService.show("Please provide keys to search for an entity");
+        } else if (Object.keys(keys).length === 0){
 
-    // Data is valid!
-    } else{
+            notFoundService.show("Please provide keys to search for an entity");
 
-        schemaService.initSchemas(cid, function(data) {
-            // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
-            ermrestService.getEntity(schemaName, tableName, keys, function(data){
-                if (data['previews']) {
-                    var origin = window.location.protocol + "//" + window.location.hostname; // TBD: portno?
-                    for (var i = 0, len = data['previews'].length; i < len; i++) {
-                        preview = data['previews'][i];
-                        preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?url=' + preview.preview;
-                        preview.enlargeUrl = origin + '/_viewer/xtk/view.html?url=' + preview.preview;
-                        $sce.trustAsResourceUrl(preview.embedUrl);
+        // Data is valid!
+        } else{
+
+            schemaService.initSchemas(cid, function(data) {
+                // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
+                ermrestService.getEntity(schemaName, tableName, keys, function(data){
+                    if (data['previews']) {
+                        var origin = window.location.protocol + "//" + window.location.hostname; // TBD: portno?
+                        for (var i = 0, len = data['previews'].length; i < len; i++) {
+                            preview = data['previews'][i];
+                            preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?url=' + preview.preview;
+                            preview.enlargeUrl = origin + '/_viewer/xtk/view.html?url=' + preview.preview;
+                            $sce.trustAsResourceUrl(preview.embedUrl);
+                        }
                     }
-                }
-                $scope.entity = data;
+                    $scope.entity = data;
+                });
             });
-        });
 
-    }
+        }
 
-    $scope.permanentLink = function(){
-        return window.location.href;
-    };
+        $scope.permanentLink = function(){
+            return window.location.href;
+        };
 
-    // When the accordion for foreign table is clicked
-    $scope.foreignTableToggle = function(index){
-        ermrestService.loadReferencesForEntity($scope.entity, index);
-    };
+        // When the accordion for foreign table is clicked
+        $scope.foreignTableToggle = function(index){
+            ermrestService.loadReferencesForEntity($scope.entity, index);
+        };
 
-    $scope.isExternalUrl = function(url) {
-        return (url.indexOf(window.location.origin) === -1);
-    }
+        $scope.isExternalUrl = function(url) {
+            return (url.indexOf(window.location.origin) === -1);
+        }
+
+    }, function() {
+        // session not found
+        var url = window.location.origin + '/ermrest/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href);
+        ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
+    });
 
 }]);
 
