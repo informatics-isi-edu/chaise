@@ -510,6 +510,9 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
+	for script in $(ERROR_SOURCE); do \
+		echo "<script src='../$$script'></script>" >> .make-de-asset-block ; \
+	done
 	for file in $(DE_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-de-asset-block ; \
 	done
@@ -532,7 +535,7 @@ $(JS_CONFIG): chaise-config-sample.js
 	done
 	for script in $(ERROR_SOURCE); do \
     		echo "<script src='../$$script'></script>" >> .make-rs-asset-block ; \
-    	done
+	done
 	for file in $(RECSET_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-rs-asset-block ; \
 	done
