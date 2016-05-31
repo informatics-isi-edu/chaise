@@ -3,7 +3,7 @@ var chaisePage = require('../chaise.page.js');
 describe('Search result columns,', function () {
 
     var EC = protractor.ExpectedConditions;
-
+    var timeout  = 10000;
     it('should load the page correctly', function (done) {
         browser.get('');
         var sidebar = element(by.id('sidebar'));
@@ -17,6 +17,8 @@ describe('Search result columns,', function () {
         allAttrs.count().then(function (num) {
             var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
             var ranAttr = allAttrs.get(ranInt);
+            var isClickable = EC.elementToBeClickable(ranAttr);
+            browser.wait(isClickable, timeout, 'Waiting for element  to click sidebar' + '\' timed out');
             ranAttr.click();
         });
     });
@@ -27,6 +29,8 @@ describe('Search result columns,', function () {
             var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
             var ranAttr = allFilters.get(ranInt);
             var randAttrLabel = ranAttr.$('label');
+            var isClickable = EC.elementToBeClickable(randAttrLabel);
+            browser.wait(isClickable, timeout, 'Waiting for element to check one filter in sidebar' + '\' timed out');
             randAttrLabel.click();
         });
     });
