@@ -46,7 +46,7 @@
         }
     }])
 
-    .run(['context', 'ermrestServerFactory', 'dataEntryModel', '$http', function runApp(context, ermrestServerFactory, dataEntryModel, $http) {
+    .run(['context', 'ermrestServerFactory', 'dataEntryModel', '$http', '$filter', function runApp(context, ermrestServerFactory, dataEntryModel, $http, $filter) {
         var server = ermrestServerFactory.getServer(context.serviceURL);
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
@@ -64,12 +64,62 @@
                         if (key.simple) {
                             (function(key) {
                                 key.getDomainValues().then(function success(values) {
-                                    dataEntryModel.domainValues[key.colset.columns[0].name] = [];
-                                    var domainValues = dataEntryModel.domainValues[key.colset.columns[0].name];
+                                    var domainValues = dataEntryModel.domainValues[key.colset.columns[0].name] = [];
+                                    var table = key.key._table;
+                                    var annotations = table.annotations.all();
+                                    var termColumnName = null;
 
-                                    angular.forEach(values.data, function(value) {
-                                        var field = Object.keys(value)[0];
-                                        domainValues.push(value[field]);
+
+                                    // TODO need to figure out how to handle if mutiple annotations are present
+                                    angular.forEach(annotations, function(annotation) {
+                                        // there should only be one term annotation
+                                        if (annotation.content.term) {
+                                            termColumnName = annotation.content.term;
+                                        }
+                                    });
+                                    // if a term annotation is defined
+                                    if (termColumnName) {
+                                        // do nothing and break out of "if"
+                                    }
+                                    // use the term column instead
+                                    else if(table.columns._columns.Term) {
+                                        termColumnName = "Term";
+                                    }
+                                    // next choice is name
+                                    else if(table.columns._columns.Name) {
+                                        termColumnName = "Name";
+                                    }
+                                    // find a column with unambigous text field ?
+                                    else {
+                                        // TODO
+                                        // angular.forEach(table.columns.all(), function(column) {
+                                        //
+                                        // });
+                                    };
+
+                                    var foreignKeyTablePath = new ERMrest.DataPath(table);
+                                    foreignKeyTablePath.entity.get().then(function success(entitySet) {
+                                        angular.forEach(values.data, function(value) {
+                                            var field = null;
+                                            if (value[termColumnName]) {
+                                                field = value;
+                                            } else {
+                                                var foreignKey = Object.keys(value)[0];
+                                                // this returns a set
+                                                var filteredSet = $filter('filter')(entitySet,
+                                                    // checks that the foreign key and key are the same
+                                                    function (_value, index, array) {
+                                                        return _value[foreignKey] == value[foreignKey];
+                                                    }
+                                                );
+                                                // there should only be one
+                                                field = filteredSet[0];
+                                            }
+                                            // push the annotation defined field from foreign key table
+                                            domainValues.push(field[termColumnName]);
+                                        });
+                                    }, function error(response) {
+                                        console.log(response);
                                     });
                                 }, function error(response) {
                                     console.log(response);
