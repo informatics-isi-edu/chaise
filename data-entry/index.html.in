@@ -34,11 +34,11 @@
                 </div>
             </nav>
             <div class="col-xs-10 col-xs-offset-1">
-                <div ng-show="form.alert" class="row">
+                <div ng-repeat="alert in form.alerts" class="row">
                     <div class="col-xs-12">
-                        <div class="alert alert-dismissible" ng-class="{'alert-danger': form.alert.type == 'error', 'alert-success': form.alert.type == 'success'}" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <strong>{{form.alert.type | underscoreToSpace | toTitleCase}}</strong> {{form.alert.message}}
+                        <div class="alert alert-dismissible" ng-class="{'alert-danger': alert.type == 'error', 'alert-success': alert.type == 'success'}" role="alert">
+                            <button type="button" class="close" ng-click="form.closeAlert(alert);" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <strong>{{alert.type | toTitleCase}}</strong> {{alert.message}}
                         </div>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
                             </div>
                             <div class="col-xs-3">
                                 <button class="btn btn-primary pull-right" type="submit" ng-click="form.submit();">Submit Data</button>
-                                <!-- <button class="btn btn-default pull-right" ng-click="form.addFormRow(1);" type="button">Add a Record</button> -->
+                                <button class="btn btn-default pull-right" ng-if="!form.editMode" ng-click="form.addFormRow();" type="button"><span class="glyphicon glyphicon-plus"></span> Add Another</button>
                             </div>
                         </div>
                         <table ng-form="form.formContainer" class="table">

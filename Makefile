@@ -171,6 +171,7 @@ VIEWER_ASSETS=viewer
 VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
+	$(COMMON)/alerts.js \
 	$(COMMON)/filters.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
@@ -194,7 +195,6 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
 	$(VIEWER_ASSETS)/image-metadata/vocabs.js \
 	$(VIEWER_ASSETS)/image-metadata/statuses.js \
 	$(VIEWER_ASSETS)/image-metadata/metadata.controller.js \
-	$(VIEWER_ASSETS)/alerts/alerts.service.js \
 	$(VIEWER_ASSETS)/alerts/alerts.controller.js
 
 VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
@@ -214,6 +214,7 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/alerts.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/interceptors.js \
 	$(COMMON)/validators.js \

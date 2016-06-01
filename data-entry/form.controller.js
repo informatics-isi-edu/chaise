@@ -3,22 +3,21 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['dataEntryModel', 'context', '$window', function FormController(dataEntryModel, context, $window) {
+    .controller('FormController', ['AlertsService', 'dataEntryModel', 'context', '$window', function FormController(AlertsService, dataEntryModel, context, $window) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
         vm.editMode = context.filters || false;
         vm.booleanValues = context.booleanValues;
         vm.getAutoGenValue = getAutoGenValue;
 
-        vm.alert = null;
-        vm.closeAlert = closeAlert;
+        vm.alerts = AlertsService.alerts;
+        vm.closeAlert = AlertsService.deleteAlert;
 
         vm.submit = submit;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.addFormRow = addFormRow;
         vm.numRowsToAdd = 1;
-        var MAX_ROWS_TO_ADD = context.maxRowsToAdd; // add too many rows and browser could hang
 
         vm.getDefaults = getDefaults;
 
@@ -112,19 +111,11 @@
             }
         }
 
-        function addFormRow(numRows) {
-            numRows = parseInt(numRows, 10);
-            if (Number.isNaN(numRows) || numRows < 0 || numRows > MAX_ROWS_TO_ADD) {
-                return vm.alert = {type: 'error', message: "Sorry, you can only add 1 to " + MAX_ROWS_TO_ADD + " rows at a time. Please enter a whole number from 1 to " + MAX_ROWS_TO_ADD + "."};
-            } else if (numRows === 0) {
-                return;
-            }
+        function addFormRow() {
             var rowset = vm.dataEntryModel.rows;
             var prototypeRow = rowset[rowset.length-1];
-            for (var i = 0; i < numRows; i++) {
-                var row = angular.copy(prototypeRow);
-                rowset.push(row);
-            }
+            var newRow = angular.copy(prototypeRow);
+            rowset.push(newRow);
         }
 
         function getDefaults() {
@@ -215,10 +206,6 @@
                 return true;
             }
             return false;
-        }
-
-        function closeAlert() {
-            vm.alert = null;
         }
 
         // Returns true if a column has a 2015:hidden annotation or a 2016:ignore
