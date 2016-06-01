@@ -40,11 +40,11 @@
             var model = vm.dataEntryModel;
             var rowset = model.rows;
             var redirectUrl = $window.location.origin;
-            AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
             form.$setUntouched();
             form.$setPristine();
 
             if (rowset.length == 1) {
+                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
                 // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
                 // TODO: Postpone using datapath api to build redirect url until
                 // datapath is redeveloped to only use aliases when necessary
@@ -65,6 +65,7 @@
                     }
                 }
             } else if (rowset.length > 1) {
+                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record set...'});
                 // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
                 redirectUrl += '/chaise/recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
             } else {
