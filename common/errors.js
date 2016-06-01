@@ -4,7 +4,7 @@
     angular.module('chaise.errors', [])
 
     // Factory for each error type
-    .factory('ErrorService', [function ErrorService() {
+    .factory('ErrorService', ['$log', function ErrorService($log) {
 
         function error409(error) {
             // retry logic
@@ -15,7 +15,7 @@
         // annotation that wasn't found != a true 404 error. Just means an
         // ERMrest resource doesn't have a particular annotation.
         function annotationNotFound(error) {
-            console.log(error);
+            $log.info(error);
         }
 
         return {
