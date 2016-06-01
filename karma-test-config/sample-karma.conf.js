@@ -21,6 +21,7 @@ module.exports = function(config) {
       '../scripts/vendor/*.js',
       '../scripts/controller/*.js',
       '../scripts/*.js',
+      '../common/utils.js',
       '../test/unit/*.js'
     ],
 

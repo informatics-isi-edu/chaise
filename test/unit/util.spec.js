@@ -2,6 +2,17 @@ var expect = require('chai').expect;
 
 describe('Utility: URLEnconding', function() {
 
+  beforeEach(angular.mock.module('chaise.utils'));
+  var UriUtils;
+  beforeEach(inject(function(_UriUtils_) {
+    UriUtils = _UriUtils_;
+  }));
+
+  it ("Utils should have fixedEncodeURIComponent function", function() {
+    var isValid = (UriUtils && UriUtils.fixedEncodeURIComponent) ? true : false;
+    expect(isValid).to.be.equal(true);
+  });
+
   var urlCombinations = [{
     title: "should encode special characters (! * ' ( ) ; : @ & = + $ , / ? % [ ]) and ignore alphabets, numbers and '-', '_', '~', '/'",
     value: "mailto:info_bot@example.com?body=send \'current-issue\' !&product=2*3&division=10/5&addition=2+2&money=$30&percent=%20&reg=[~/();,'']",
@@ -22,7 +33,7 @@ describe('Utility: URLEnconding', function() {
   urlCombinations.forEach(function(urlC) {
     it (urlC.title, function() {
       
-        var output = encodeSafeURIComponent(urlC.value);
+        var output = UriUtils.fixedEncodeURIComponent(urlC.value);
         expect(/[!'()*]/.test(output)).to.be.equal(urlC.assertion);
         expect(output).to.be.equal(urlC.output);
       

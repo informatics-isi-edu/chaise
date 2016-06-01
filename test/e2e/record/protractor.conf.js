@@ -3,7 +3,11 @@ exports.config = {
   sauceKey: process.env.SAUCE_ACCESS_KEY,
   framework: 'jasmine2',
   capabilities: {
-    browserName: 'chrome'
+    browserName: 'chrome',
+    'chromeOptions' : {
+       args: ['--lang=en',
+              '--window-size=1280,1024']
+    }
   },
   specs: [
     '*.spec.js'
