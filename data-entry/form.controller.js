@@ -3,7 +3,7 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['AlertsService', 'dataEntryModel', 'context', '$window', function FormController(AlertsService, dataEntryModel, context, $window) {
+    .controller('FormController', ['AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', function FormController(AlertsService, UriUtils, dataEntryModel, context, $window) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
         vm.editMode = context.filters || false;
@@ -40,40 +40,39 @@
             var model = vm.dataEntryModel;
             var rowset = model.rows;
             var redirectUrl = $window.location.origin;
-
-            vm.alert = {type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'};
+            AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
             form.$setUntouched();
             form.$setPristine();
 
-            if (rowset.length === 1) {
+            if (rowset.length == 1) {
                 // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
                 // TODO: Postpone using datapath api to build redirect url until
                 // datapath is redeveloped to only use aliases when necessary
-                redirectUrl += '/chaise/record/#' + context.catalogID + '/' + encodeURIComponent(context.schemaName) + ':' + encodeURIComponent(context.tableName);
-            }
-            // TODO: Implement redirect to recordset app when data entry supports multi-row insertion
-            // else if (rowset.length > 1) {
-            //     // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
-            //     redirectUrl += '/chaise/recordset/#' + context.catalogID + '/' + context.schemaName + ':' + context.tableName;
-            // } else {
-            // // Rowset count is either 0 or negative so there's nothing to submit..
-            // // alert('Nothing to submit'); ???
-            // }
+                redirectUrl += '/chaise/record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
 
-            // Find the shortest "primary key" for use in redirect url
-            var keys = model.table.keys.all().sort(function(a, b) {
-                return a.colset.length() - b.colset.length();
-            });
-            var shortestKey = keys[0].colset.columns;
+                // Find the shortest "primary key" for use in redirect url
+                var keys = model.table.keys.all().sort(function(a, b) {
+                    return a.colset.length() - b.colset.length();
+                });
+                var shortestKey = keys[0].colset.columns;
 
-            // Build the redirect url with key cols and entity's values
-            for (var c = 0, len = shortestKey.length; c < len; c++) {
-                var colName = shortestKey[c].name;
-                redirectUrl += "/" + encodeURIComponent(colName) + '=' + encodeURIComponent(entities[0][colName]);
+                // Build the redirect url with key cols and entity's values
+                for (var c = 0, len = shortestKey.length; c < len; c++) {
+                    var colName = shortestKey[c].name;
+                    var separator = null;
+                    if (rowset.length == 1) {
+                        redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
+                    }
+                }
+            } else if (rowset.length > 1) {
+                // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
+                redirectUrl += '/chaise/recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
+            } else {
+                return AlertsService.addAlert({type: 'error', message: 'Sorry, there is no data to submit. You must have at least 1 set of data for submission.'});
             }
 
             // Redirect to record or recordset app..
-            window.location.replace(redirectUrl);
+            $window.location.replace(redirectUrl);
         }
 
         function showSubmissionError(response) {

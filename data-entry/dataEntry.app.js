@@ -4,6 +4,7 @@
     angular.module('chaise.dataEntry', [
         'ERMrest',
         'ngSanitize',
+        'chaise.utils',
         'chaise.errors',
         'chaise.alerts',
         'chaise.filters',
@@ -135,7 +136,7 @@
             }
         }, function error(response) {
             if (response.status == 401) {
-                getGoauth(encodeSafeURIComponent(window.location.href));
+                getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
                 console.log(response);
             }
         });
@@ -148,13 +149,6 @@
                 console.log('Error: ', error);
             });
         }
-
-        function encodeSafeURIComponent(str) {
-            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            });
-        }
-
     }]);
 
     // Refresh the page when the window's hash changes. Needed because Angular

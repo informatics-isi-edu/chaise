@@ -213,6 +213,7 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
+	$(COMMON)/utils.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/filters.js \
