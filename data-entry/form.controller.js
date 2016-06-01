@@ -77,7 +77,7 @@
         }
 
         function showSubmissionError(response) {
-            vm.alert = {type: 'error', message: response.data};
+            AlertsService.addAlert({type: 'error', message: response.data});
             console.log(response);
         }
 
@@ -88,7 +88,7 @@
             form.$setPristine();
 
             if (form.$invalid) {
-                vm.alert = {type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'};
+                AlertsService.addAlert({type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'});
                 form.$setSubmitted();
                 return;
             }
