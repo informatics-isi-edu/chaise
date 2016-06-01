@@ -211,19 +211,29 @@
         // Returns true if a column has a 2015:hidden annotation or a 2016:ignore
         // (with entry context) annotation.
         function isHiddenColumn(column) {
+            var ignore, hidden;
             try {
-                var ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
-                var hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
-            } catch (e) {
-                if (e instanceof Errors.NotFoundError) {
-                    ErrorService.annotationNotFound(e);
-                    return false;
+                try {
+                    ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
+                } catch (e) {
+                    if (e instanceof Errors.NotFoundError) {
+                        ErrorService.annotationNotFound(e);
+                    }
                 }
+                try {
+                    hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
+                } catch (e) {
+                    if (e instanceof Errors.NotFoundError) {
+                        ErrorService.annotationNotFound(e);
+                    }
+                }
+            } finally {
+               if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
+                   return true;
+               }
+               return false;
             }
-            if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
-                return true;
-            }
-            return false;
+
         }
 
         // If in edit mode, autogen fields show the value of the existing record
