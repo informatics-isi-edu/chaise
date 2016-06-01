@@ -406,6 +406,9 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 			}
 		}
 		$scope.FacetsData.progress = false;
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
 	};
 
 	$scope.morePage = function morePage() {

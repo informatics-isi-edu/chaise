@@ -107,6 +107,10 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/tour.js \
 	$(JS)/matrix.js
 
+# error definitions
+ERROR_SOURCE=common/errors/networkerrors.js \
+             common/errors/validationerrors.js
+
 # HTML templates
 TEMPLATES=views
 
@@ -147,6 +151,7 @@ RECORD_JS_SOURCE= $(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \
 	$(JS)/ermrest.js \
+	$(COMMON)/utils.js \
 	$(RECORD_ASSETS)/javascripts/app.js
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
@@ -239,17 +244,23 @@ DE_CSS_SOURCE=$(DE_ASSETS)/dataEntry.css
 RECSET_ASSETS=recordset
 
 RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+    $(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
-	$(JS)/vendor/bootstrap.js
+	$(JS)/vendor/bootstrap.js \
+	$(RECORD_ASSETS)/lib/angular-animate.min.js \
+	$(COMMON)/views.js
 
-RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.js
+RECSET_JS_SOURCE=$(JS)/ermrest.js \
+    $(COMMON)/utils.js \
+    $(RECSET_ASSETS)/recordset.js
 
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/font-awesome/css/font-awesome.min.css
 
-RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css
-
+RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css \
+    $(COMMON)/styles/app.css \
+    $(CSS)/appheader.css
 
 # Config file
 JS_CONFIG=chaise-config.js
@@ -359,6 +370,13 @@ testem:
 .PHONY: karma
 karma:
 	$(BIN)/karma start
+
+# Rule to run tests
+.PHONY: testall
+testall:
+	$(BIN)/karma start
+	$(BIN)/protractor $(E2Esearch) && $(BIN)/protractor $(E2Erecord) && $(BIN)/protractor $(E2Elogin)
+
 
 # Rule to make html
 .PHONY: html
@@ -492,6 +510,9 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
+	for script in $(ERROR_SOURCE); do \
+		echo "<script src='../$$script'></script>" >> .make-de-asset-block ; \
+	done
 	for file in $(DE_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-de-asset-block ; \
 	done
@@ -511,6 +532,9 @@ $(JS_CONFIG): chaise-config-sample.js
 	for file in $(RECSET_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
+	done
+	for script in $(ERROR_SOURCE); do \
+    		echo "<script src='../$$script'></script>" >> .make-rs-asset-block ; \
 	done
 	for file in $(RECSET_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-rs-asset-block ; \

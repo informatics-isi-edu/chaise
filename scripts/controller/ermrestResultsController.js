@@ -67,16 +67,36 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
         if (index != -1) {
             prefix = prefix.substring(0, index);
         }
-        var recordResource = "/record/";
-        if (chaiseConfig['recordResource'] != null) {
-            recordResource = chaiseConfig['recordResource'];
-        }
         // in case we have a view, we want the "original" table in the detail
         var table_name = getTableAnnotation($scope.FacetsData.table, TABLES_MAP_URI, 'originalTable');
         if (table_name == null) {
         	table_name = $scope.FacetsData.table;
         }
-        var detailPath = prefix + recordResource + '#' + CATALOG + '/' + SCHEMA + ':' +  encodeSafeURIComponent(table_name) + '/' + this.buildPredicate(PRIMARY_KEY, row);
+        
+        // defaults
+        var resource = "record/";
+        var mode = 'tag:isrd.isi.edu,2016:recordlink/fragmentfilter';
+        
+        // schema Record Link overwrites the defaults
+        var recordLink = getSchemaAnnotation(SCHEMA, SCHEMA_RECORD_LINK_URI);
+        if (recordLink != null) {
+        	resource = recordLink['resource'];
+        	mode = recordLink['mode'];
+        }
+        
+        // table Record Link overwrites the defaults or schema Record Link
+        recordLink = getTableAnnotationValue(table_name, TABLE_RECORD_LINK_URI);
+        if (recordLink != null) {
+        	resource = recordLink['resource'];
+        	mode = recordLink['mode'];
+        }
+        
+        var suffix = '';
+        if (mode == 'tag:isrd.isi.edu,2016:recordlink/fragmentfilter') {
+        	suffix = '#' + CATALOG + '/' + SCHEMA + ':' +  encodeSafeURIComponent(table_name) + '/' + this.buildPredicate(PRIMARY_KEY, row);
+        }
+        
+        var detailPath = prefix + '/' + resource + suffix;
         return detailPath;
     };
 

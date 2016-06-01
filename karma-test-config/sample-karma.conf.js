@@ -14,14 +14,14 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'scripts/vendor/angular.js',
-      'node_modules/angular-mocks/angular-mocks.js',
-      'scripts/vendor/jquery-latest.min.js',
-      'scripts/vendor/bootstrap.js',
-      'scripts/vendor/*.js',
-      'scripts/controller/*.js',
-      'scripts/*.js',
-      'test/unit/*.js'
+      '../scripts/vendor/angular.js',
+      '../node_modules/angular-mocks/angular-mocks.js',
+      '../scripts/vendor/jquery-latest.min.js',
+      '../scripts/vendor/bootstrap.js',
+      '../scripts/vendor/*.js',
+      '../scripts/controller/*.js',
+      '../scripts/*.js',
+      '../test/unit/*.js'
     ],
 
 
@@ -32,7 +32,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'test/unit/*.js': ['browserify']
+      '../test/unit/*.js': ['browserify']
     },
 
 

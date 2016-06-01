@@ -6,12 +6,16 @@
     .controller('FormController', ['dataEntryModel', 'context', '$window', function FormController(dataEntryModel, context, $window) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
+        vm.editMode = context.filters || false;
         vm.booleanValues = context.booleanValues;
+        vm.getAutoGenValue = getAutoGenValue;
 
         vm.alert = null;
         vm.closeAlert = closeAlert;
 
         vm.submit = submit;
+        vm.redirectAfterSubmission = redirectAfterSubmission;
+        vm.showSubmissionError = showSubmissionError;
         vm.addFormRow = addFormRow;
         vm.numRowsToAdd = 1;
         var MAX_ROWS_TO_ADD = context.maxRowsToAdd; // add too many rows and browser could hang
@@ -32,6 +36,52 @@
         vm.matchType = matchType;
         vm.isHiddenColumn = isHiddenColumn;
 
+        function redirectAfterSubmission(entities) {
+            var form = vm.formContainer;
+            var model = vm.dataEntryModel;
+            var rowset = model.rows;
+            var redirectUrl = $window.location.origin;
+
+            vm.alert = {type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'};
+            form.$setUntouched();
+            form.$setPristine();
+
+            if (rowset.length === 1) {
+                // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
+                // TODO: Postpone using datapath api to build redirect url until
+                // datapath is redeveloped to only use aliases when necessary
+                redirectUrl += '/chaise/record/#' + context.catalogID + '/' + encodeURIComponent(context.schemaName) + ':' + encodeURIComponent(context.tableName);
+            }
+            // TODO: Implement redirect to recordset app when data entry supports multi-row insertion
+            // else if (rowset.length > 1) {
+            //     // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
+            //     redirectUrl += '/chaise/recordset/#' + context.catalogID + '/' + context.schemaName + ':' + context.tableName;
+            // } else {
+            // // Rowset count is either 0 or negative so there's nothing to submit..
+            // // alert('Nothing to submit'); ???
+            // }
+
+            // Find the shortest "primary key" for use in redirect url
+            var keys = model.table.keys.all().sort(function(a, b) {
+                return a.colset.length() - b.colset.length();
+            });
+            var shortestKey = keys[0].colset.columns;
+
+            // Build the redirect url with key cols and entity's values
+            for (var c = 0, len = shortestKey.length; c < len; c++) {
+                var colName = shortestKey[c].name;
+                redirectUrl += "/" + encodeURIComponent(colName) + '=' + encodeURIComponent(entities[0][colName]);
+            }
+
+            // Redirect to record or recordset app..
+            window.location.replace(redirectUrl);
+        }
+
+        function showSubmissionError(response) {
+            vm.alert = {type: 'error', message: response.data};
+            console.log(response);
+        }
+
         function submit() {
             var form = vm.formContainer;
             var model = vm.dataEntryModel;
@@ -44,45 +94,22 @@
                 return;
             }
 
-            model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entity) {
-                vm.alert = {type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'};
-                form.$setUntouched();
-                form.$setPristine();
-                var rowset = model.rows;
-
-                var redirectUrl = $window.location.origin;
-
-                if (rowset.length === 1) {
-                    // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
-                    redirectUrl += '/chaise/record/#' + context.catalogID + '/' + encodeURIComponent(context.schemaName) + ':' + encodeURIComponent(context.tableName);
-                }
-                // TODO: Implement redirect to recordset app when data entry supports multi-row insertion
-                // else if (rowset.length > 1) {
-                //     // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
-                //     redirectUrlBase += '/chaise/recordset/#' + context.catalogID + '/' + context.schemaName + ':' + context.tableName;
-                // } else {
-                // // Rowset count is either 0 or negative so there's something/nothing to submit..
-                // // alert('Nothing to submit'); ???
-                // }
-
-                // Find the shortest "primary key" for use in redirect url
-                var keys = model.table.keys.all().sort(function(a, b) {
-                    return a.colset.length() - b.colset.length();
+            if (vm.editMode) {
+                model.table.entity.put(model.rows).then(function success(entities) {
+                    // Wrapping redirectAfterSubmission callback fn in the success callback fn
+                    // due to inability to pass the success/error responses directly
+                    // into redirectAfterSubmission fn. (ReferenceError)
+                    vm.redirectAfterSubmission(entities);
+                }, function error(response) {
+                    vm.showSubmissionError(response);
                 });
-                var shortestKey = keys[0].colset.columns;
-
-                // Build the redirect url with key cols and entity's values
-                for (var c = 0, len = shortestKey.length; c < len; c++) {
-                    var colName = shortestKey[c].name;
-                    redirectUrl += "/" + encodeURIComponent(colName) + '=' + encodeURIComponent(entity[0][colName]);
-                }
-
-                // Redirect to record or recordset app..
-                window.location.replace(redirectUrl);
-            }, function error(response) {
-                vm.alert = {type: 'error', message: response.data};
-                console.log(response);
-            });
+            } else {
+                model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
+                    vm.redirectAfterSubmission(entities);
+                }, function error(response) {
+                    vm.showSubmissionError(response);
+                });
+            }
         }
 
         function addFormRow(numRows) {
@@ -131,7 +158,6 @@
             var name = column.name;
             var type = column.type.name;
             var displayType;
-
             if (vm.isAutoGen(name)) {
                 displayType = 'autogen';
             } else if (vm.isForeignKey(name)) {
@@ -157,6 +183,10 @@
                     case 'boolean':
                         displayType = 'boolean';
                         break;
+                    case 'longtext':
+                        displayType = 'longtext';
+                        break;
+                    case 'shorttext':
                     default:
                         displayType = 'text';
                         break;
@@ -200,6 +230,15 @@
                 return true;
             }
             return false;
+        }
+
+        // If in edit mode, autogen fields show the value of the existing record
+        // Otherwise, show a static string in entry mode.
+        function getAutoGenValue(value) {
+            if (vm.editMode) {
+                return value;
+            }
+            return 'To be set by system';
         }
     }]);
 })();

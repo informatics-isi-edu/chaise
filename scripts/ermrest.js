@@ -25,7 +25,8 @@ var display_columns = {
 		'zoomify': [],
 		'3dview': [],
 		'hidden': [],
-		'url': []
+		'url': [],
+		'top_columns': []
 };
 
 var back_references = {};
@@ -46,6 +47,8 @@ var CATALOG_COLUMNS_ALIAS = {};
 var COLUMNS_LIST_URI = 'comment';
 var TABLES_LIST_URI = 'comment';
 var SCHEMAS_LIST_URI = 'comment';
+var SCHEMA_RECORD_LINK_URI = 'tag:isrd.isi.edu,2016:recordlink';
+var TABLE_RECORD_LINK_URI = 'tag:isrd.isi.edu,2016:recordlink';
 var COLUMNS_MAP_URI = 'description';
 var TABLES_MAP_URI = 'description';
 var COLUMNS_FACET_URI = 'facet';
@@ -453,7 +456,8 @@ function getTableColumns(options, successCallback) {
 		'zoomify': [],
 		'3dview': [],
 		'hidden': [],
-		'url': []
+		'url': [],
+		'top_columns': []
 	};
 
 	PRIMARY_KEY = [];
@@ -735,8 +739,8 @@ function initModels(options, successCallback) {
 			} else if (searchBoxPresentation.contains(value['type'])) {
 				box[col]['value'] = '';
 			} else if (datepickerPresentation.contains(value['type'])) {
-				box[col]['min'] = box[col]['floor'] = value['min'];
-				box[col]['max'] = box[col]['ceil'] = value['max'];
+				box[col]['min'] = box[col]['floor'] = getDateString(value['min']);
+				box[col]['max'] = box[col]['ceil'] = getDateString(value['max']);
 				sentRequests = true;
 			} else if (sliderPresentation.contains(value['type'])) {
 				box[col]['min'] = box[col]['floor'] = value['min'];
@@ -775,8 +779,8 @@ function initModels(options, successCallback) {
 				} else if (searchBoxPresentation.contains(value['type'])) {
 					box[col]['value'] = '';
 				} else if (datepickerPresentation.contains(value['type'])) {
-					box[col]['min'] = box[col]['floor'] = value['min'];
-					box[col]['max'] = box[col]['ceil'] = value['max'];
+					box[col]['min'] = box[col]['floor'] = getDateString(value['min']);
+					box[col]['max'] = box[col]['ceil'] = getDateString(value['max']);
 					sentRequests = true;
 				} else if (sliderPresentation.contains(value['type'])) {
 					box[col]['min'] = box[col]['floor'] = value['min'];
@@ -794,7 +798,7 @@ function initModels(options, successCallback) {
 			options['searchFilterValue'][table][extraFacets[i]] = '';
 		});
 	}
-
+	
 	if (!sentRequests) {
 		successCallback(true);
 	} else {
@@ -1000,7 +1004,13 @@ function successUpdateGroups(data, textStatus, jqXHR, param) {
 		var key = value[col];
 		if (key != null) {
 			colsGroup[col][key] = value['cnt'];
-			values.push(key);
+			if (key===true) {
+				values.push('true');
+			} else if (key===false) {
+				values.push('false');
+			} else {
+				values.push(key);
+			}
 		}
 	});
 	$.each(colsGroup[col], function(key, value) {
@@ -1142,11 +1152,18 @@ function successUpdateSliders(data, textStatus, jqXHR, param) {
 	$.each(cols, function(i, col) {
 		box[col]['ready'] = true;
 		if (data[0]['min_' + encodeSafeURIComponent(col)] != null) {
+			var colType = options['colsDescr'][table][col]['type'];
 			if (!box[col]['left']) {
 				box[col]['min'] = data[0]['min_' + encodeSafeURIComponent(col)];
+				if (datepickerPresentation.contains(colType)) {
+					box[col]['min'] = getDateString(box[col]['min']);
+				}
 			}
 			if (!box[col]['right']) {
 				box[col]['max'] = data[0]['max_' + encodeSafeURIComponent(col)];
+				if (datepickerPresentation.contains(colType)) {
+					box[col]['max'] = getDateString(box[col]['max']);
+				}
 			}
 			if (box[col]['right'] && box[col]['max'] == box[col]['ceil']) {
 				delete box[col]['right'];
@@ -1312,8 +1329,8 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			entity[col]['max'] = data[0]['max_' + col];
 		} else if (datepickerPresentation.contains(entity[col]['type'])) {
 			entity[col]['ready'] = true;
-			entity[col]['min'] = data[0]['min_' + col];
-			entity[col]['max'] = data[0]['max_' + col];
+			entity[col]['min'] = getDateString(data[0]['min_' + col]);
+			entity[col]['max'] = getDateString(data[0]['max_' + col]);
 		}
 	});
 	var ready = true;
@@ -1582,6 +1599,7 @@ function initSchema(newSchema) {
 }
 
 function getTableColumnsUniques(options, successCallback) {
+	var sentRequests = false;
 	var tables = [options['table']].concat(association_tables_names);
 	var alertObject = {'display': true};
 	var obj = {};
@@ -1615,11 +1633,15 @@ function getTableColumnsUniques(options, successCallback) {
 				param['options'] = options;
 				param['successCallback'] = successCallback;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetTableColumnsUniques, errorErmrest, param);
+				sentRequests = true;
 			} else {
 				delete obj[table];
 			}
 		}
 	});
+	if (!sentRequests) {
+		successCallback();
+	}
 }
 
 function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
@@ -2053,6 +2075,9 @@ function setCollectionsReferences(tree) {
 		'nodes': nodes};
 	tree.push(node);
 	$.each(CATALOG_METADATA, function(schema, metadata) {
+		if (schema != SCHEMA) {
+			return true;
+		}
 		var tables = [];
 		$.each(metadata, function(i, table) {
 			var exclude = table['annotations'] != null && table['annotations'][TABLES_LIST_URI] != null &&
@@ -2347,7 +2372,8 @@ function setVocabularyTables(index) {
 		if (association_tables[table['table_name']] == null && association_tables_names.contains(table['table_name'])) {
 			var columns = [];
 			$.each(table['column_definitions'], function(k, column_definition) {
-				if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_LIST_URI] != null && !column_definition['annotations'][COLUMNS_LIST_URI].contains('hidden')) {
+				// if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_LIST_URI] != null && !column_definition['annotations'][COLUMNS_LIST_URI].contains('hidden')) {
+				if (column_definition['annotations'][COLUMNS_LIST_URI] == null || !column_definition['annotations'][COLUMNS_LIST_URI].contains('hidden')) {
 					var display = getColumnDisplayName(column_definition['name']);
 					if (column_definition['annotations'] != null && column_definition['annotations'][COLUMNS_MAP_URI] != null && column_definition['annotations'][COLUMNS_MAP_URI]['display'] != null) {
 						display = column_definition['annotations'][COLUMNS_MAP_URI]['display'];
@@ -2524,10 +2550,14 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 			}
 		});
 		entity[col]['values'] = values;
-	} else if (sliderPresentation.contains(entity[col]['type']) || datepickerPresentation.contains(entity[col]['type'])) {
+	} else if (sliderPresentation.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
 		entity[col]['min'] = data[0]['min'];
 		entity[col]['max'] = data[0]['max'];
+	} else if (datepickerPresentation.contains(entity[col]['type'])) {
+		entity[col]['ready'] = true;
+		entity[col]['min'] = getDateString(data[0]['min']);
+		entity[col]['max'] = getDateString(data[0]['max']);
 	} else {
 		console.log('No match found for column type ', entity[col]['type']);
 	}
@@ -3602,7 +3632,12 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 		options['colsDescr'][table][col]['type'] = col_type;
 		options['colsDescr'][table][col]['values'] = values;
 		options['box'][table][col]['values'] = {};
-	} else if (sliderPresentation.contains(col_type) || datepickerPresentation.contains(col_type)) {
+	} else if (datepickerPresentation.contains(col_type)) {
+		ready = true;
+		options['colsDescr'][table][col]['min'] = options['box'][table][col]['min'] = options['box'][table][col]['floor'] = getDateString(data[0]['min']);
+		options['colsDescr'][table][col]['max'] = options['box'][table][col]['max'] = options['box'][table][col]['ceil'] = getDateString(data[0]['max']);
+		options['box'][table][col]['values'] = {};
+	} else if (sliderPresentation.contains(col_type)) {
 		ready = true;
 		options['colsDescr'][table][col]['min'] = options['box'][table][col]['min'] = options['box'][table][col]['floor'] = data[0]['min'];
 		options['colsDescr'][table][col]['max'] = options['box'][table][col]['max'] = options['box'][table][col]['ceil'] = data[0]['max'];
@@ -3988,3 +4023,37 @@ function getSortGroup(table_name, column_name, annotation) {
 	}
 	return ret.join(',');
 }
+
+function getDateString(value) {
+	var ret = (value != null ? value.slice(0,10) : null);
+	return ret;
+}
+
+function getSchemaAnnotation(schema_name, annotation_uri) {
+	var ret = null;
+	
+	$.each(CATALOG_SCHEMAS, function(schema, value) {
+		if (schema == schema_name) {
+			var annotations = value['annotations'];
+			if (annotations != null && annotations[annotation_uri] != null) {
+				ret = annotations[annotation_uri];
+				return false;
+			}
+		}
+	});
+	
+	return ret;
+}
+
+function getTableAnnotationValue(table_name, annotation) {
+	var ret = null;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name'] && table['annotations'] != null &&
+			table['annotations'][annotation] != null) {
+			ret = table['annotations'][annotation];
+			return false;
+		}
+	});
+	return ret;
+}
+
