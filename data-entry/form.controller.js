@@ -3,7 +3,7 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', function FormController(AlertsService, UriUtils, dataEntryModel, context, $window) {
+    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
         vm.editMode = context.filters || false;
@@ -211,8 +211,15 @@
         // Returns true if a column has a 2015:hidden annotation or a 2016:ignore
         // (with entry context) annotation.
         function isHiddenColumn(column) {
-            var ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
-            var hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
+            try {
+                var ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
+                var hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
+            } catch (e) {
+                if (e instanceof Errors.NotFoundError) {
+                    ErrorService.annotationNotFound(e);
+                    return false;
+                }
+            }
             if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
                 return true;
             }
