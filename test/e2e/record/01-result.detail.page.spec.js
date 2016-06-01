@@ -9,6 +9,7 @@ describe('Search result detail page,', function () {
         browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
             done();
         });
+        browser.executeScript('document.cookie = "ermrest=C6KFIQn2JS37CGovofWnjKfu;path=/;secure;"');
     });
 
     describe('should click one random sidebar attribute', function () {
@@ -101,7 +102,7 @@ describe('Search result detail page,', function () {
                             browser.rootEl = "#recordApp";
                             browser.ignoreSynchronization = true;
                             var newPageTitleEle = element(by.id('record-bookmark-container'));
-                            browser.wait(EC.visibilityOf(newPageTitleEle), 10000).then(function () {
+                            browser.wait(EC.visibilityOf(newPageTitleEle), 5000).then(function () {
                                 done();
                             });
                         });

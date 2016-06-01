@@ -17,9 +17,11 @@ describe('Search result columns,', function () {
         allAttrs.count().then(function (num) {
             var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
             var ranAttr = allAttrs.get(ranInt);
-            var isClickable = EC.elementToBeClickable(ranAttr);
-            browser.wait(isClickable, timeout, 'Waiting for element  to click sidebar' + '\' timed out');
-            ranAttr.click();
+            browser.wait(EC.elementToBeClickable(ranAttr), timeout).then(function() {
+                ranAttr.click();
+            }, function() {
+                console.log('Waiting for element to click sidebar' + '\' timed out');
+            });
         });
     });
 
@@ -29,13 +31,16 @@ describe('Search result columns,', function () {
             var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
             var ranAttr = allFilters.get(ranInt);
             var randAttrLabel = ranAttr.$('label');
-            var isClickable = EC.elementToBeClickable(randAttrLabel);
-            browser.wait(isClickable, timeout, 'Waiting for element to check one filter in sidebar' + '\' timed out');
-            randAttrLabel.click();
+            browser.wait(EC.elementToBeClickable(randAttrLabel), timeout).then(function() {
+                randAttrLabel.click();
+            }, function() {
+                console.log('Waiting for element to check one filter in sidebar' + '\' timed out');
+            });
         });
     });
 
     it('should show >0 results', function () {
+        browser.sleep(3000);
         var allResults = chaisePage.resultContent.getAllResultRows();
         expect(allResults.count()).toBeGreaterThan(0);
     });
@@ -46,9 +51,9 @@ describe('Search result columns,', function () {
         var randResult, rand, length;
 
         it('should be chosen randomly', function () {
-            browser.sleep(200);
             var allResults = chaisePage.resultContent.getAllResultRows();
             allResults.then(function (items) {
+
                 length = items.length;
                 rand = chaisePage.tools.getRandomInt(0, items.length - 1);
                 randResult = allResults.get(rand);
