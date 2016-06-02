@@ -57,11 +57,11 @@
                             </div>
                         </div>
                         <table ng-form="form.formContainer" class="table">
-                            <tr  ng-if="!form.editMode">
-                                <td></td>
-                                <td ng-repeat="(rowIndex, row) in form.dataEntryModel.rows track by $index">
-                                    <button ng-click="form.removeFormRow(rowIndex);" class="btn btn-xs btn-danger center-block" type="button"><span class="glyphicon glyphicon-trash"></span> Remove</button>
-                                </td>
+                            <tr ng-if="!form.editMode">
+                                    <td>&nbsp;</td>
+                                    <td ng-repeat="(rowIndex, row) in form.dataEntryModel.rows track by $index">
+                                        <button ng-show="form.dataEntryModel.rows.length > 1" ng-click="form.removeFormRow(rowIndex);" class="btn btn-xs btn-danger center-block" type="button"><span class="glyphicon glyphicon-trash"></span> Remove</button>
+                                    </td>
                             </tr>
                             <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in form.dataEntryModel.table.columns.all();" ng-if="::!form.isHiddenColumn(column);">
                                 <td class="entity-key col-xs-1" ng-class="{'coltooltip': column.comment}">
