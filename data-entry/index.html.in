@@ -60,7 +60,7 @@
                             <tr>
                                 <td></td>
                                 <td ng-repeat="(rowIndex, row) in form.dataEntryModel.rows track by $index">
-                                    <button ng-click="form.deleteFormRow(rowIndex);" class="btn btn-xs btn-danger center-block" type="button"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+                                    <button ng-click="form.removeFormRow(rowIndex);" class="btn btn-xs btn-danger center-block" type="button"><span class="glyphicon glyphicon-trash"></span> Remove</button>
                                 </td>
                             </tr>
                             <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in form.dataEntryModel.table.columns.all();" ng-if="::!form.isHiddenColumn(column);">

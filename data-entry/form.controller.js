@@ -17,7 +17,7 @@
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.addFormRow = addFormRow;
-        vm.deleteFormRow = deleteFormRow;
+        vm.removeFormRow = removeFormRow;
 
         vm.getDefaults = getDefaults;
 
@@ -118,7 +118,7 @@
             rowset.push(newRow);
         }
 
-        function deleteFormRow(index) {
+        function removeFormRow(index) {
             vm.dataEntryModel.rows.splice(index, 1);
         }
 
