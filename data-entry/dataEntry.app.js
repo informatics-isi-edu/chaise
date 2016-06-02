@@ -72,73 +72,81 @@
                     dataEntryModel.cols = table.columns.all();
 
                     var foreignKeys = table.foreignKeys.all();
-                    angular.forEach(foreignKeys, function(key) {
-                        // Capture the key from the containing for loop in a closure
-                        // so that getDomainValues() has the correct key on success
-                        if (key.simple) {
-                            (function(key) {
-                                key.getDomainValues().then(function success(values) {
-                                    var domainValues = dataEntryModel.domainValues[key.colset.columns[0].name] = [];
-                                    var table = key.key._table;
-                                    var annotations = table.annotations.all();
-                                    var termColumnName = null;
+                    angular.forEach(foreignKeys, function(fkey) {
+                        // simple implies one column
+                        if (fkey.simple) {
+                            var ftable = fkey.key.table;
+                            var keyColumn = fkey.key.colset.columns[0];
 
+                            /* FIRST USE CASE: covered by default; display = key column */
 
-                                    // TODO need to figure out how to handle if mutiple annotations are present
-                                    angular.forEach(annotations, function(annotation) {
-                                        // there should only be one term annotation
-                                        if (annotation.content.term) {
-                                            termColumnName = annotation.content.term;
-                                        }
-                                    });
-                                    // if a term annotation is defined
-                                    if (termColumnName) {
-                                        // do nothing and break out of "if"
+                            var pattern = "{" + keyColumn.name + "}";
+                            var displayColumns = [keyColumn];
+
+                            /* SECOND USE CASE: conditional if the table is tagged as a vocabulary */
+
+                            try {
+                                try {
+                                    var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
+                                } catch (error) {
+                                    // handle error
+                                }
+
+                                try {
+                                    var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
+                                } catch (error) {
+                                    // handle error
+                                }
+
+                                if (vocabAnnotation) {
+                                    if (vocabAnnotation.content.term) {
+                                        var termColumn = ftable.columns.get(vocabAnnotation.content.term);
+                                        displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
                                     }
-                                    // use the term column instead
-                                    else if(table.columns._columns.Term) {
-                                        termColumnName = "Term";
-                                    }
-                                    // next choice is name
-                                    else if(table.columns._columns.Name) {
-                                        termColumnName = "Name";
-                                    }
-                                    // find a column with unambigous text field ?
+                                    // vocabulary term is undefined
                                     else {
-                                        // TODO
-                                        // angular.forEach(table.columns.all(), function(column) {
-                                        //
-                                        // });
-                                    };
-
-                                    var foreignKeyTablePath = new ERMrest.DataPath(table);
-                                    foreignKeyTablePath.entity.get().then(function success(entitySet) {
-                                        angular.forEach(values.data, function(value) {
-                                            var field = null;
-                                            if (value[termColumnName]) {
-                                                field = value;
-                                            } else {
-                                                var foreignKey = Object.keys(value)[0];
-                                                // this returns a set
-                                                var filteredSet = $filter('filter')(entitySet,
-                                                    // checks that the foreign key and key are the same
-                                                    function (_value, index, array) {
-                                                        return _value[foreignKey] == value[foreignKey];
-                                                    }
-                                                );
-                                                // there should only be one
-                                                field = filteredSet[0];
+                                        var ftableColumns = ftable.columns.all();
+                                        for (var i = 0, length = ftableColumns.length; i < length; i++) {
+                                            var uppColumnName = $filter('uppercase')(column.name);
+                                            if (uppColumnName == 'TERM' || uppColumnName == 'NAME') {
+                                                displayColumns.push(column);
+                                                break;
                                             }
-                                            // push the annotation defined field from foreign key table
-                                            domainValues.push(field[termColumnName]);
+                                        } /* term undefined */
+
+                                        pattern = "{" + displayColumns[1].name + "}";
+                                    }
+                                    /* END USE CASE 2 */
+                                }
+                                /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
+                                else if (displayAnnotation) {
+                                    if (displayAnnotation.content.row_name) {
+                                        // TODO
+                                        // var array_of_col_names = REGEX THE array of column_name strings from “ … `{` column_name `}` …” patterns
+                                        // angular.forEach(array_of_col_names, function(column_name) {
+                                        //     displayColumns.push(table.columns.get(column_name));
+                                        // });
+                                        //
+                                        // pattern = displayAnnotation.row_name;
+                                    }
+                                }
+                            } finally {
+                                console.log("Display Column:", displayColumns);
+                                try {
+                                    (function(fkey) {
+                                        ftable.entity.get(null, null, displayColumns).then(function success(columns){
+                                            var domainValues = dataEntryModel.domainValues[fkey.colset.columns[0].name] = [];
+                                            console.log("Columns:", columns);
+                                            angular.forEach(columns, function(column) {
+                                                //  console.log(column);
+                                                //  domainValues.push( {key: column.data[keyColumn.name], display: column.data[displayColumns[1]]/*Util.patternExpansion( pattern, column.data )*/} );
+                                            });
                                         });
-                                    }, function error(response) {
-                                        console.log(response);
-                                    });
-                                }, function error(response) {
-                                    console.log(response);
-                                });
-                            })(key);
+                                    })(fkey);
+                                } catch (error) {
+                                    // handle error
+                                }
+                            }
                         }
                     });
 
