@@ -57,7 +57,7 @@
                             </div>
                         </div>
                         <table ng-form="form.formContainer" class="table">
-                            <tr>
+                            <tr  ng-if="!form.editMode">
                                 <td></td>
                                 <td ng-repeat="(rowIndex, row) in form.dataEntryModel.rows track by $index">
                                     <button ng-click="form.removeFormRow(rowIndex);" class="btn btn-xs btn-danger center-block" type="button"><span class="glyphicon glyphicon-trash"></span> Remove</button>
