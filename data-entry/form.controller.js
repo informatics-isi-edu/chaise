@@ -3,22 +3,21 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['dataEntryModel', 'context', '$window', function FormController(dataEntryModel, context, $window) {
+    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
         vm.editMode = context.filters || false;
         vm.booleanValues = context.booleanValues;
         vm.getAutoGenValue = getAutoGenValue;
 
-        vm.alert = null;
-        vm.closeAlert = closeAlert;
+        vm.alerts = AlertsService.alerts;
+        vm.closeAlert = AlertsService.deleteAlert;
 
         vm.submit = submit;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.addFormRow = addFormRow;
-        vm.numRowsToAdd = 1;
-        var MAX_ROWS_TO_ADD = context.maxRowsToAdd; // add too many rows and browser could hang
+        vm.removeFormRow = removeFormRow;
 
         vm.getDefaults = getDefaults;
 
@@ -41,44 +40,44 @@
             var model = vm.dataEntryModel;
             var rowset = model.rows;
             var redirectUrl = $window.location.origin;
-
-            vm.alert = {type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'};
             form.$setUntouched();
             form.$setPristine();
 
-            if (rowset.length === 1) {
+            if (rowset.length == 1) {
+                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
                 // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
                 // TODO: Postpone using datapath api to build redirect url until
                 // datapath is redeveloped to only use aliases when necessary
-                redirectUrl += '/chaise/record/#' + context.catalogID + '/' + encodeURIComponent(context.schemaName) + ':' + encodeURIComponent(context.tableName);
-            }
-            // TODO: Implement redirect to recordset app when data entry supports multi-row insertion
-            // else if (rowset.length > 1) {
-            //     // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
-            //     redirectUrl += '/chaise/recordset/#' + context.catalogID + '/' + context.schemaName + ':' + context.tableName;
-            // } else {
-            // // Rowset count is either 0 or negative so there's nothing to submit..
-            // // alert('Nothing to submit'); ???
-            // }
+                redirectUrl += '/chaise/record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
 
-            // Find the shortest "primary key" for use in redirect url
-            var keys = model.table.keys.all().sort(function(a, b) {
-                return a.colset.length() - b.colset.length();
-            });
-            var shortestKey = keys[0].colset.columns;
+                // Find the shortest "primary key" for use in redirect url
+                var keys = model.table.keys.all().sort(function(a, b) {
+                    return a.colset.length() - b.colset.length();
+                });
+                var shortestKey = keys[0].colset.columns;
 
-            // Build the redirect url with key cols and entity's values
-            for (var c = 0, len = shortestKey.length; c < len; c++) {
-                var colName = shortestKey[c].name;
-                redirectUrl += "/" + encodeURIComponent(colName) + '=' + encodeURIComponent(entities[0][colName]);
+                // Build the redirect url with key cols and entity's values
+                for (var c = 0, len = shortestKey.length; c < len; c++) {
+                    var colName = shortestKey[c].name;
+                    var separator = null;
+                    if (rowset.length == 1) {
+                        redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
+                    }
+                }
+            } else if (rowset.length > 1) {
+                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record set...'});
+                // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
+                redirectUrl += '/chaise/recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
+            } else {
+                return AlertsService.addAlert({type: 'error', message: 'Sorry, there is no data to submit. You must have at least 1 set of data for submission.'});
             }
 
             // Redirect to record or recordset app..
-            window.location.replace(redirectUrl);
+            $window.location.replace(redirectUrl);
         }
 
         function showSubmissionError(response) {
-            vm.alert = {type: 'error', message: response.data};
+            AlertsService.addAlert({type: 'error', message: response.data});
             console.log(response);
         }
 
@@ -89,7 +88,7 @@
             form.$setPristine();
 
             if (form.$invalid) {
-                vm.alert = {type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'};
+                AlertsService.addAlert({type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'});
                 form.$setSubmitted();
                 return;
             }
@@ -112,24 +111,20 @@
             }
         }
 
-        function addFormRow(numRows) {
-            numRows = parseInt(numRows, 10);
-            if (Number.isNaN(numRows) || numRows < 0 || numRows > MAX_ROWS_TO_ADD) {
-                return vm.alert = {type: 'error', message: "Sorry, you can only add 1 to " + MAX_ROWS_TO_ADD + " rows at a time. Please enter a whole number from 1 to " + MAX_ROWS_TO_ADD + "."};
-            } else if (numRows === 0) {
-                return;
-            }
+        function addFormRow() {
             var rowset = vm.dataEntryModel.rows;
             var prototypeRow = rowset[rowset.length-1];
-            for (var i = 0; i < numRows; i++) {
-                var row = angular.copy(prototypeRow);
-                rowset.push(row);
-            }
+            var newRow = angular.copy(prototypeRow);
+            rowset.push(newRow);
+        }
+
+        function removeFormRow(index) {
+            vm.dataEntryModel.rows.splice(index, 1);
         }
 
         function getDefaults() {
             var defaults = [];
-            var columns =  vm.dataEntryModel.table.columns.all();
+            var columns = vm.dataEntryModel.table.columns.all();
             var numColumns = columns.length;
             for (var i = 0; i < numColumns; i++) {
                 var columnName = columns[i].name;
@@ -217,19 +212,32 @@
             return false;
         }
 
-        function closeAlert() {
-            vm.alert = null;
-        }
-
         // Returns true if a column has a 2015:hidden annotation or a 2016:ignore
         // (with entry context) annotation.
         function isHiddenColumn(column) {
-            var ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
-            var hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
-            if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
-                return true;
+            var ignore, hidden;
+            try {
+                try {
+                    ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
+                } catch (e) {
+                    if (e instanceof Errors.NotFoundError) {
+                        ErrorService.annotationNotFound(e);
+                    }
+                }
+                try {
+                    hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
+                } catch (e) {
+                    if (e instanceof Errors.NotFoundError) {
+                        ErrorService.annotationNotFound(e);
+                    }
+                }
+            } finally {
+               if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
+                   return true;
+               }
+               return false;
             }
-            return false;
+
         }
 
         // If in edit mode, autogen fields show the value of the existing record

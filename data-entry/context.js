@@ -10,7 +10,6 @@
         schemaName: null,
         tableName: null,
         filters: null,
-        maxRowsToAdd: 25,
         booleanValues: ['', true, false]
     });
 })();

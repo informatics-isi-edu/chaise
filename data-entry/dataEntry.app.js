@@ -4,7 +4,9 @@
     angular.module('chaise.dataEntry', [
         'ERMrest',
         'ngSanitize',
+        'chaise.utils',
         'chaise.errors',
+        'chaise.alerts',
         'chaise.filters',
         'chaise.interceptors',
         'chaise.validators',
@@ -60,7 +62,7 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'dataEntryModel', '$http', function runApp(context, ermrestServerFactory, dataEntryModel, $http) {
+    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', '$http', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, $http) {
         var server = ermrestServerFactory.getServer(context.serviceURL);
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
@@ -106,6 +108,11 @@
 
                         var path = path.filter(filterString);
                         path.entity.get().then(function success(entity) {
+                            if (entity.length === 0) {
+                                AlertsService.addAlert({type: 'error', message: 'Sorry, the requested record was not found. Please check the URL and refresh the page.' });
+                                console.log('The requested record in schema ' + context.schemaName + ', table ' + context.tableName + ' with the following attributes: ' + context.filters + ' was not found.');
+                            }
+
                             angular.forEach(entity[0], function(value, colName) {
                                 var pathColumnType = path.context.columns.get(colName).column.type.name;
                                 if (pathColumnType == 'date' || pathColumnType == 'timestamptz') {
@@ -116,9 +123,6 @@
                                 }
                                 dataEntryModel.rows[dataEntryModel.rows.length - 1][colName] = value;
                             });
-                        }, function error(response) {
-                            alert('Sorry, the requested record was not found. Please check the URL and refresh the page.');
-                            console.log('The requested record in schema ' + context.schemaName + ', table ' + context.tableName + ' with the following attributes: ' + context.filters + ' was not found.');
                         });
                     }
                     console.log('Model:',dataEntryModel);
@@ -132,7 +136,7 @@
             }
         }, function error(response) {
             if (response.status == 401) {
-                getGoauth(encodeSafeURIComponent(window.location.href));
+                getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
                 console.log(response);
             }
         });
@@ -145,13 +149,6 @@
                 console.log('Error: ', error);
             });
         }
-
-        function encodeSafeURIComponent(str) {
-            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            });
-        }
-
     }]);
 
     // Refresh the page when the window's hash changes. Needed because Angular
