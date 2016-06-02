@@ -91,13 +91,13 @@
                                 try {
                                     var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
                                 } catch (error) {
-                                    // handle error
+                                    // no vocab annotation, do nothing
                                 }
 
                                 try {
                                     var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
                                 } catch (error) {
-                                    // handle error
+                                    // no display annotation, do nothing
                                 }
 
                                 if (vocabAnnotation) {
@@ -133,15 +133,14 @@
                                     }
                                 }
                             } finally {
-                                console.log("Display Column:", displayColumns);
                                 try {
                                     (function(fkey) {
                                         ftable.entity.get(null, null, displayColumns).then(function success(columns){
                                             var domainValues = dataEntryModel.domainValues[fkey.colset.columns[0].name] = [];
-                                            console.log("Columns:", columns);
-                                            angular.forEach(columns, function(column) {
-                                                //  console.log(column);
-                                                //  domainValues.push( {key: column.data[keyColumn.name], display: column.data[displayColumns[1]]/*Util.patternExpansion( pattern, column.data )*/} );
+                                            var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
+
+                                            angular.forEach(columns.data, function(column) {
+                                                 domainValues.push( {key: column[keyColumn.name], display: column[displayColumnName]/*Util.patternExpansion( pattern, column.data )*/} );
                                             });
                                         });
                                     })(fkey);
