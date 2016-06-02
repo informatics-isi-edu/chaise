@@ -646,7 +646,7 @@ function getErmrestData(options, successCallback, successUpdateModels) {
 	}
 	updateGroups(options, successUpdateModels);
 	updateSliders(options, successUpdateModels);
-	var aggregateFunction = (PRIMARY_KEY.length == 1) ? 'cnt_d(' + PRIMARY_KEY[0] + ')' : 'cnt(*)';
+	var aggregateFunction = (PRIMARY_KEY.length >= 1) ? 'cnt_d(' + PRIMARY_KEY[0] + ')' : 'cnt(*)';
 	url += '/$A/cnt:=' + aggregateFunction;
 	var param = {};
 	param['options'] = options;
