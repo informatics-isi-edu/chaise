@@ -17,7 +17,7 @@
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.addFormRow = addFormRow;
-        vm.numRowsToAdd = 1;
+        vm.deleteFormRow = deleteFormRow;
 
         vm.getDefaults = getDefaults;
 
@@ -118,9 +118,13 @@
             rowset.push(newRow);
         }
 
+        function deleteFormRow(index) {
+            vm.dataEntryModel.rows.splice(index, 1);
+        }
+
         function getDefaults() {
             var defaults = [];
-            var columns =  vm.dataEntryModel.table.columns.all();
+            var columns = vm.dataEntryModel.table.columns.all();
             var numColumns = columns.length;
             for (var i = 0; i < numColumns; i++) {
                 var columnName = columns[i].name;
