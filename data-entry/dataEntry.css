@@ -1,27 +1,14 @@
-
-.ui-select-container {
-    width: 100%;
+.padding-top-10 {
+    padding-top: 10px;
 }
 
 textarea {
     resize: vertical;
 }
 
-/*th, td {
-    min-width: 50px;
-    max-width: none;
-}
-
-tbody input {
-    min-width: 150px;
+.ui-select-container {
     width: 100%;
-    max-width: 480px;
 }
-
-.row {
-    margin-bottom: 20px;
-}
-*/
 
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {

@@ -4,8 +4,9 @@
 
 var ermLoginController = angular.module('ermLoginController', []);
 
-ermLoginController.controller('LoginCtrl', ['$scope', 'ermrest',
-                                           function($scope, ermrest) {
+ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest',
+                                           function($sce, $scope, ermrest) {
+	$scope.error = false;
 	if (HOME == null) {
 		initLocation();
 	}
@@ -25,6 +26,22 @@ ermLoginController.controller('LoginCtrl', ['$scope', 'ermrest',
 	loadApplicationHeaderAndFooter();
 	setNavbarBrand();
 
+	this.html = function (errorMessage) {
+		return errorMessage != null ? $sce.trustAsHtml(errorMessage.replace(/\n/g, '<br/>')) : '';
+	};
+
+	this.showError = function showError() {
+		return $scope.error;
+	};
+	$scope.displayError = function displayError(status, errorMessage) {
+		$scope.status = status;
+		$scope.errorMessage = errorMessage;
+		$scope.error = true;
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
+	};
+	
 	this.login = function login() {
 		var params = $scope.getParameters();
 		//console.log(JSON.stringify(params, null, 4));
@@ -84,5 +101,6 @@ ermLoginController.controller('LoginCtrl', ['$scope', 'ermrest',
 		return result;
 	};
 	
+	DISPLAY_ERROR = $scope.displayError;
 }]);
 

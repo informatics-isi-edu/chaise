@@ -418,13 +418,10 @@ function submitLogout(logout_uri) {
 	$('#logout_link').hide();
 
 	var logout_url = logout_uri;
-	if (logout_url == null) {
-		if (chaiseConfig['logoutURL'] != null) {
-			logout_url = chaiseConfig['logoutURL'];
-		} else {
-			logout_url = '/chaise/logout';
-		}
-		logout_url += '?referrer=' + encodeSafeURIComponent(window.location);
+	if (chaiseConfig['logoutURL'] != null) {
+		logout_url = chaiseConfig['logoutURL'];
+	} else if (logout_url == null) {
+		logout_url = '/chaise/logout';
 	}
 	window.location = logout_url;
 }
@@ -649,7 +646,7 @@ function getErmrestData(options, successCallback, successUpdateModels) {
 	}
 	updateGroups(options, successUpdateModels);
 	updateSliders(options, successUpdateModels);
-	var aggregateFunction = (PRIMARY_KEY.length == 1) ? 'cnt_d(' + PRIMARY_KEY[0] + ')' : 'cnt(*)';
+	var aggregateFunction = (PRIMARY_KEY.length >= 1) ? 'cnt_d(' + PRIMARY_KEY[0] + ')' : 'cnt(*)';
 	url += '/$A/cnt:=' + aggregateFunction;
 	var param = {};
 	param['options'] = options;

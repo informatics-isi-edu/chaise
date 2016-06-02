@@ -9,6 +9,10 @@ exports.config = {
     browserName: 'chrome',
     //using firefox causes problems - not showing the right result and -
     //Apache log shows firefox is not requesting the server.
+    'chromeOptions' : {
+       args: ['--lang=en',
+              '--window-size=1280,1024']
+    }
   },
   specs: [
     '*.spec.js'
