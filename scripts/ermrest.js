@@ -417,12 +417,7 @@ function submitLogout(logout_uri) {
 	$('#login_link').hide();
 	$('#logout_link').hide();
 
-	var logout_url = logout_uri;
-	if (chaiseConfig['logoutURL'] != null) {
-		logout_url = chaiseConfig['logoutURL'];
-	} else if (logout_url == null) {
-		logout_url = '/chaise/logout';
-	}
+	var logout_url = (logout_uri != null ? logout_uri : '/chaise/logout');
 	window.location = logout_url;
 }
 
@@ -1866,6 +1861,9 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 function deleteSession(param) {
 	if (token == null) {
 		var url = HOME + '/ermrest/authn/session';
+		if (chaiseConfig['logoutURL'] != null) {
+			url += '?logout_url=' + encodeSafeURIComponent(chaiseConfig['logoutURL']);
+		}
 		ERMREST.DELETE(url, successDeleteSession, errorDeleteSession, param);
 	} else {
 		submitLogout();
