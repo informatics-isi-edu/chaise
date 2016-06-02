@@ -1,5 +1,10 @@
 <div name="loginForm" ng-controller="LoginCtrl as loginController">
-  <div class="center_fieldset">
+  <div class="ng-show" ng-show="loginController.showError()">
+  	<h1>ERROR: {{status}}</h1>
+  	<p>
+  	<blockquote ng-bind-html="loginController.html(errorMessage)"></blockquote>
+  </div>
+  <div  ng-hide="loginController.showError()" class="center_fieldset">
     <br><br>
     <fieldset>
       <table>
