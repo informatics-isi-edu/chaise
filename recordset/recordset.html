@@ -71,8 +71,8 @@
                     <!-- sortable column header -->
                     <thead>
                     <tr>
-                        <th nowrap ng-repeat="name in vm.header">
-                            <span ng-click="sortby(name)">{{name}}</span>
+                        <th nowrap ng-repeat="name in vm.columns">
+                            <span ng-click="sortby(name)">{{vm.header[name]}}</span>
                             <span ng-show="vm.sortby==name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-asc" ng-style="{'cursor': 'pointer'}"></span>
                             <span ng-show="vm.sortby==name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-desc" ng-style="{'cursor': 'pointer'}"></span>
                             <span ng-show="vm.sortby!==name" class="fa fa-fw fa-sort" ng-click="sortby(name)" ng-style="{'cursor': 'pointer'}"></span>
@@ -82,7 +82,7 @@
 
                     <!-- rows -->
                     <tr ng-repeat="row in vm.rowset.data" ng-click="gotoRowLink($index)" ng-style="{'cursor': 'pointer'}">
-                        <td ng-repeat="name in vm.header">{{row[name]}}</td>
+                        <td ng-repeat="name in vm.columns">{{row[name]}}</td>
                     </tr>
                 </table>
             </div>
