@@ -8,16 +8,15 @@
                     <span class="md-chevron-down"></span>
                     MENU
                 </button>
-                <a class="navbar-brand" href="#"><image>{{ navbarBrandImage }}</image><span>{{ navbarBrandText }}</span></a>
+                <a class="navbar-brand" href="#"><image>{{vm.navbarBrandImage}}</image><span>{{vm.navbarBrandText}}</span></a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
 
                 <p class="navbar-text pull-right">
-                    <span ng-show="user === null" ng-click="login()">Log in</span>
-                    <span ng-show="user !== null">{{ user }}</span>
-                    <a ng-show="user !== null" ng-click="logout()">Logout</a>
+                    <span ng-show="vm.user === null" ng-click="vm.login()">Log in</span>
+                    <span ng-show="vm.user !== null">{{vm.user}} <a ng-show="vm.user !== null" ng-click="vm.logout()">Logout</a></span>
                 </p>
 
             </div><!-- /.navbar-collapse -->

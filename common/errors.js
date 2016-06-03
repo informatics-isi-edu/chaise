@@ -15,7 +15,8 @@
         // annotation that wasn't found != a true 404 error. Just means an
         // ERMrest resource doesn't have a particular annotation.
         function annotationNotFound(error) {
-            $log.info(error);
+            // $log.info(error);
+            return;
         }
 
         return {

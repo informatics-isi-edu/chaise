@@ -209,14 +209,18 @@ VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 # JavaScript and CSS source for Data Entry app
 DE_ASSETS=data-entry
 
+# TODO: Remove $(JS)/ermrest.js when ermrestjs api no longer depends on ERMREST
 DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
+	$(JS)/ermrest.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/views.js \
 	$(COMMON)/interceptors.js \
 	$(COMMON)/validators.js \
 	$(JS)/vendor/bootstrap.js \

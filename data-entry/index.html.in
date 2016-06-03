@@ -19,9 +19,10 @@
     <![endif]-->
 </head>
 <body>
-    <div class="container-fluid">
+    <navbar></navbar>
+    <div class="container-fluid" style="margin-top: 70px;">
         <div ng-controller="FormController as form" class="row">
-            <nav class="navbar navbar-default">
+            <!-- <nav class="navbar navbar-default">
                 <div class="container-fluid">
                     <div class="navbar-header">
                         <li class="navbar-brand" href="/">Chaise</li>
@@ -30,9 +31,9 @@
                         <p class="navbar-text pull-right">
                             Log In/Log Out links here
                         </p>
-                   </div><!--/.nav-collapse -->
+                   </div>
                 </div>
-            </nav>
+            </nav> -->
             <div class="col-xs-10 col-xs-offset-1">
                 <div ng-repeat="alert in form.alerts" class="row">
                     <div class="col-xs-12">
