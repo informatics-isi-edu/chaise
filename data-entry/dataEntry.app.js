@@ -65,96 +65,114 @@
     .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', 'ErrorService', '$http', '$filter', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, ErrorService, $http, $filter) {
         var server = ermrestServerFactory.getServer(context.serviceURL);
         server.catalogs.get(context.catalogID).then(function success(catalog) {
-            var schema = catalog.schemas.get(context.schemaName);
-            if (schema) {
-                var table = schema.tables.get(context.tableName);
-                if (table) {
+            try {
+                var schema = catalog.schemas.get(context.schemaName);
+                try {
+                    var table = schema.tables.get(context.tableName);
+
                     console.log('Table:', table);
                     dataEntryModel.table = table;
-                    dataEntryModel.cols = table.columns.all();
 
-                    var foreignKeys = table.foreignKeys.all();
-                    angular.forEach(foreignKeys, function(fkey) {
-                        // simple implies one column
-                        if (fkey.simple) {
-                            var ftable = fkey.key.table;
-                            var keyColumn = fkey.key.colset.columns[0];
+                    try {
+                        var foreignKeys = table.foreignKeys.all();
+                        angular.forEach(foreignKeys, function(fkey) {
+                            // simple implies one column
+                            if (fkey.simple) {
+                                var ftable = fkey.key.table;
+                                var keyColumn = fkey.key.colset.columns[0];
 
-                            /* FIRST USE CASE: covered by default; display = key column */
+                                /* FIRST USE CASE: covered by default; display = key column */
 
-                            var pattern = "{" + keyColumn.name + "}";
-                            var displayColumns = [keyColumn];
+                                var pattern = "{" + keyColumn.name + "}";
+                                var displayColumns = [keyColumn];
 
-                            /* SECOND USE CASE: conditional if the table is tagged as a vocabulary */
-
-                            try {
-                                try {
-                                    var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
-                                } catch (error) {
-                                    if (error instanceof Errors.NotFoundError) {
-                                        ErrorService.annotationNotFound(error);
-                                    }
-                                }
+                                /* SECOND USE CASE: conditional if the table is tagged as a vocabulary */
 
                                 try {
-                                    var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
-                                } catch (error) {
-                                    if (error instanceof Errors.NotFoundError) {
-                                        ErrorService.annotationNotFound(error);
+                                    try {
+                                        var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
+                                    } catch (error) {
+                                        // An error being caught means the `vocabulary` annotation is not defined
+                                        if (error instanceof Errors.NotFoundError) {
+                                            ErrorService.annotationNotFound(error);
+                                        }
                                     }
-                                }
 
-                                if (vocabAnnotation) {
-                                    if (vocabAnnotation.content.term) {
-                                        var termColumn = ftable.columns.get(vocabAnnotation.content.term);
-                                        displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
+                                    try {
+                                        var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
+                                    } catch (error) {
+                                        // An error being caught means the `display` annotation is not defined
+                                        if (error instanceof Errors.NotFoundError) {
+                                            ErrorService.annotationNotFound(error);
+                                        }
                                     }
-                                    // vocabulary term is undefined
-                                    else {
-                                        var ftableColumns = ftable.columns.all();
-                                        for (var i = 0, length = ftableColumns.length; i < length; i++) {
-                                            var uppColumnName = ftableColumns[i].name.toUpperCase();
-                                            if (uppColumnName == 'TERM' || uppColumnName == 'NAME') {
-                                                displayColumns.push(ftableColumns[i]);
-                                                break;
+
+                                    if (vocabAnnotation) {
+                                        if (vocabAnnotation.content.term) {
+                                            try {
+                                                var termColumn = ftable.columns.get(vocabAnnotation.content.term);
+                                                displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
+                                            } catch (error) {
+                                                // notFoundError should not occur
+                                                $log.info(error);
                                             }
-                                        } /* term undefined */
+                                        }
+                                        // vocabulary term is undefined
+                                        else {
+                                            try {
+                                                var ftableColumns = ftable.columns.all();
+                                                for (var i = 0, length = ftableColumns.length; i < length; i++) {
+                                                    var uppColumnName = ftableColumns[i].name.toUpperCase();
+                                                    if (uppColumnName == 'TERM' || uppColumnName == 'NAME') {
+                                                        displayColumns.push(ftableColumns[i]);
+                                                        break;
+                                                    }
+                                                } /* term undefined */
+                                            } catch (error) {
+                                                // ftable.columns.all() should not fail
+                                                $log.infor(error);
+                                            }
+                                        }
+                                        if (displayColumns.length > 1) {
+                                            pattern = "{" + displayColumns[1].name + "}";
+                                        }
+                                        /* END USE CASE 2 */
                                     }
-                                    if (displayColumns.length > 1) {
-                                        pattern = "{" + displayColumns[1].name + "}";
+                                    /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
+                                    else if (displayAnnotation) {
+                                        if (displayAnnotation.content.row_name) {
+                                            // TODO
+                                            // var array_of_col_names = REGEX THE array of column_name strings from “ … `{` column_name `}` …” patterns
+                                            // angular.forEach(array_of_col_names, function(column_name) {
+                                            //     displayColumns.push(table.columns.get(column_name));
+                                            // });
+                                            //
+                                            // pattern = displayAnnotation.row_name;
+                                        }
                                     }
-                                    /* END USE CASE 2 */
-                                }
-                                /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
-                                else if (displayAnnotation) {
-                                    if (displayAnnotation.content.row_name) {
-                                        // TODO
-                                        // var array_of_col_names = REGEX THE array of column_name strings from “ … `{` column_name `}` …” patterns
-                                        // angular.forEach(array_of_col_names, function(column_name) {
-                                        //     displayColumns.push(table.columns.get(column_name));
-                                        // });
-                                        //
-                                        // pattern = displayAnnotation.row_name;
-                                    }
-                                }
-                            } finally {
-                                try {
-                                    (function(fkey) {
-                                        ftable.entity.get(null, null, displayColumns).then(function success(rowset){
-                                            var domainValues = dataEntryModel.domainValues[fkey.colset.columns[0].name] = [];
-                                            var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
+                                } finally {
+                                    try {
+                                        (function(fkey) {
+                                            ftable.entity.get(null, null, displayColumns).then(function success(rowset){
+                                                var domainValues = dataEntryModel.domainValues[fkey.colset.columns[0].name] = [];
+                                                var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
 
-                                            angular.forEach(rowset.data, function(column) {
-                                                 domainValues.push( {key: column[keyColumn.name], display: column[displayColumnName]/*Util.patternExpansion( pattern, column.data )*/} );
+                                                angular.forEach(rowset.data, function(column) {
+                                                    domainValues.push( {key: column[keyColumn.name], display: column[displayColumnName]/*Util.patternExpansion( pattern, column.data )*/} );
+                                                });
                                             });
-                                        });
-                                    })(fkey);
-                                } catch (error) {
-                                    // handle error
+                                        })(fkey);
+                                    } catch (error) {
+                                        // handle error
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+                    // catches table.foreignKays.all()
+                    } catch (error) {
+                        // this shouldn't error out
+                        $log.info(error);
+                    }
 
                     // If there are filters, populate the model with existing records' column values
                     if (context.filters) {
@@ -188,29 +206,32 @@
                         });
                     }
                     console.log('Model:',dataEntryModel);
-                } else {
-                    alert('Sorry, the requested table "' + context.tableName + '" was not found. Please check the URL and refresh the page.');
-                    console.log('Table not found.');
+
+                // catches schema.tables.get(table name)
+                } catch (error) {
+                    console.log(error);
+                    console.log(error instanceof Errors.NotFoundError);
+                    if (error instanceof Errors.NotFoundError) {
+                        alert('Sorry, the requested table "' + context.tableName + '" was not found. Please check the URL and refresh the page.');
+                        ErrorService.tableNotFound(error);
+                    }
                 }
-            } else {
-                alert('Sorry, the requested schema "' + context.schemaName + '" was not found. Please check the URL and refresh the page');
-                console.log('Schema not found.');
+
+            // catches catalog.schemas.get(schema name)
+            } catch (error) {
+                if (error instanceof Errors.NotFoundError) {
+                    alert('Sorry, the requested schema "' + context.schemaName + '" was not found. Please check the URL and refresh the page');
+                    ErrorService.schemaNotFound(error);
+                }
             }
         }, function error(response) {
+            console.log("Go auth spot:", response);
+            // TODO verify this is handled via an interceptor by the function in the ErrorService
             if (response.status == 401) {
                 getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
                 console.log(response);
             }
         });
-
-        function getGoauth(referrer) {
-            var url = '/ermrest/authn/preauth?referrer=' + referrer;
-            $http.get(url).then(function success(response) {
-                window.open(response.data.redirect_url, '_self');
-            }, function error(response) {
-                console.log('Error: ', error);
-            });
-        }
     }]);
 
     // Refresh the page when the window's hash changes. Needed because Angular

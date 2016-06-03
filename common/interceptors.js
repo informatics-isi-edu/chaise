@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.interceptors', [])
+    angular.module('chaise.interceptors', ['chaise.errors'])
 
     .factory('Interceptors', ['$q', 'ErrorService', function Interceptors($q, ErrorService) {
 
@@ -11,10 +11,14 @@
             },
             responseError: function(error) {
                 switch (error.status) {
+                    case 401:
+                        ErrorService.error401(error);
                     case 409:
                         ErrorService.error409(error);
+                    default:
+                    // warn or error?
+                        $log.warn(error);
                 }
-                console.log("Error", error);
                 return $q.reject(error);
             }
         };
