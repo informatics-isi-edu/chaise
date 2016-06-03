@@ -46,14 +46,6 @@ a:hover, a:focus{
     display: inline-block; */
 }
 
-#login_user {
-	color: yellow;
-}
-
-#logout_link {
-	padding-left: 10px;
-}
-
 #entity-title, .entity-title{
     clear: both;
     padding-top: 10px;
