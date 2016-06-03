@@ -156,15 +156,6 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
     $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
     $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
 
-    // login logout should be factored out into a common module
-    $scope.login = function() {
-        context.server.session.login(window.location.href);
-    };
-
-    $scope.logout = function() {
-        context.server.session.logout(window.location);
-    };
-
     $scope.sort = function () {
 
         // update the address bar
@@ -475,7 +466,7 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 
             }
         });
-        
+
     }, function(error) {
         // not logged in, redirect to login
         if (error instanceof Errors.NotFoundError) {

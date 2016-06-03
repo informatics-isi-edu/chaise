@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.views', ['chaise.errors', 'chaise.utils'])
+    angular.module('chaise.views', ['chaise.utils'])
     .directive('navbar', function() {
         var controller = ['ermrestServerFactory', 'context', '$window', 'UriUtils', function (ermrestServerFactory, context, $window, UriUtils) {
             var vm = this;
@@ -9,13 +9,13 @@
             vm.login = login;
             vm.logout = logout;
             vm.user = null;
-            vm.navbarBrandImage = chaiseConfig['navbarBrandImage'] ? chaiseConfig.navbarBrandImage : '';
-            vm.navbarBrandText = chaiseConfig['navbarBrandText'] ? chaiseConfig.navbarBrandText : 'Chaise';
+            vm.navbarBrandImage = chaiseConfig.navbarBrandImage ? chaiseConfig.navbarBrandImage : '';
+            vm.navbarBrandText = chaiseConfig.navbarBrandText ? chaiseConfig.navbarBrandText : 'Chaise';
 
             function getUser() {
                 server.session.get().then(function() {
                     var user = server.getUser();
-                    vm.user = user.display_name;
+                    vm.user = user.display_name || user.full_name || user.email || user;
                 }, function(error) {
                     // not logged in, redirect to login
                     if (error instanceof Errors.NotFoundError) {
@@ -39,15 +39,7 @@
 
         return {
             restrict: 'EA',
-            // TODO: Do you really need 2-way in everything?
-            // https://blog.umur.io/2013/07/02/angularjs-directives-using-isolated-scope-with-attributes/
-            scope: {
-                // login: '=',
-                // logout: '=',
-                // user: '=',
-                // navbarBrandImage: '=',
-                // navbarBrandText: '='
-            },
+            scope: {},
             controller: controller,
             controllerAs: 'vm',
             bindToController: true,
