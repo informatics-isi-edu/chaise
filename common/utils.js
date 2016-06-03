@@ -3,7 +3,7 @@
 
     angular.module('chaise.utils', [])
 
-    .factory('UriUtils', ['$injector', function($injector) {
+    .factory('UriUtils', ['$injector', '$window', function($injector, $window) {
 
         return {
 
@@ -25,7 +25,7 @@
                 // trying to define it as a controller depency causes a circular depency
                 // UriUtils <- ErrorService <- interceptors <- $http <- ermrestServletFactory
                 $injector.get('$http').get(url).then(function success(response) {
-                    window.open(response.data.redirect_url, '_self');
+                    $window.open(response.data.redirect_url, '_self');
                 }, function error(response) {
                     console.log('Error: ', error);
                 });
