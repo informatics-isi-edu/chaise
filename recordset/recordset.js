@@ -113,6 +113,7 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 // services, but cannot be access by providers (and config, apparently).
 .value('recordsetModel', {
     tableName: null,  // table name
+    tableDisplayName: null,
     header: {},       // <column : display name>
     columns: [],      // column names
     filter: null,
@@ -350,6 +351,7 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
                 var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
                 console.log(table);
                 recordsetModel.table = table;
+                recordsetModel.tableDisplayName = table.displayname;
                 recordsetModel.columns = table.columns.names();
                 for (var i = 0; i < recordsetModel.columns.length; i++) {
                     var colname = recordsetModel.columns[i];
