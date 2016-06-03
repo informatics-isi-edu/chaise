@@ -116,6 +116,55 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             // Extract the first entity
             var entity          = data[0];
 
+            // pattern interpretation (create _link entries for url linking)
+            self.patternInterpretationForTable(schemaName, tableName, data);
+
+            // get display columns
+            // this is a list of key values of column names and display column names
+            // where hidden columns are omitted
+            var displayColumns = schemaService.getDisplayColumns(schemaName, tableName);
+
+
+            // get actual columns
+            var actualColumns = Object.keys(entity);
+
+            // remove hidden columns and update column display name
+            for (var i = 0; i < actualColumns.length; i++) {
+                var col = actualColumns[i];
+
+                if (col.endsWith('_link')) {
+                    var subCol = col.substring(0, col.length - 5); // col name without _link
+
+                    // if hidden, delete
+                    if (!displayColumns.hasOwnProperty(subCol)) {
+                        for (var j = 0; j < entity.length; j++) {
+                            delete entity[j][col];
+                        }
+                    }
+                    // rename col_link if col display name is different
+                    else if (displayColumns[subCol] !== subCol) {
+                        // if display name is different from column name
+                        // update display name
+                        for (var j = 0; j < entity.length; j++) {
+                            entity[j][displayColumns[subCol] + '_link'] = entity[j][col];
+                            delete entity[j][col];
+                        }
+                    }
+                } else if (!displayColumns.hasOwnProperty(col)) {
+                    // if hidden column, delete
+                    for (var j = 0; j < entity.length; j++) {
+                        delete entity[j][col];
+                    }
+                } else if (displayColumns[col] !== col) {
+                    // if display name is different from column name
+                    // update display name
+                    for (var j = 0; j < entity.length; j++) {
+                        entity[j][displayColumns[col]] = entity[j][col];
+                        delete entity[j][col];
+                    }
+                }
+            }
+
             entity.sequences = []; // array of sequence columns
             entity.colTooltips = {}; // column tool tips
 
@@ -149,7 +198,6 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                 }
             }
 
-            self.patternInterpretationForTable(schemaName, tableName, data);
 
             entity.foreignTables    = [];
             entity.embedTables      = {};
@@ -1664,13 +1712,9 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
                 key != 'internal' && key != 'embedTables' && !key.match(".*_link") &&
                 key != 'colTooltips'){
 
-                // use display column name as key
-                // TODO inefficient to do this for each column?
-                var newKey = schemaService.getColumnDisplayName(entity.internal.schemaName, entity.internal.tableName, key);
-
                 // Only include column (key) if column is not hidden
                 if (!schemaService.isHiddenColumn(entity.internal.schemaName, entity.internal.tableName, key)){
-                    filteredEntity[newKey] = entity[key];
+                    filteredEntity[key] = entity[key];
                 }
             }
         }
