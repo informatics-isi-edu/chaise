@@ -62,7 +62,7 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', '$http', '$filter', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, $http, $filter) {
+    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', 'ErrorService', '$http', '$filter', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, ErrorService, $http, $filter) {
         var server = ermrestServerFactory.getServer(context.serviceURL);
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
@@ -91,13 +91,17 @@
                                 try {
                                     var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
                                 } catch (error) {
-                                    // no vocab annotation, do nothing
+                                    if (error instanceof Errors.NotFoundError) {
+                                        ErrorService.annotationNotFound(error);
+                                    }
                                 }
 
                                 try {
                                     var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
                                 } catch (error) {
-                                    // no display annotation, do nothing
+                                    if (error instanceof Errors.NotFoundError) {
+                                        ErrorService.annotationNotFound(error);
+                                    }
                                 }
 
                                 if (vocabAnnotation) {
