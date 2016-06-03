@@ -19,7 +19,7 @@
                 }, function(error) {
                     // not logged in, redirect to login
                     if (error instanceof Errors.NotFoundError) {
-                        var url = context.serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href);
+                        var url = context.serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent($window.location.href);
                         // TODO: Switch this ajax call to $http.get when Jennifer has completed conversion in ermrestjs
                         ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
                     }
