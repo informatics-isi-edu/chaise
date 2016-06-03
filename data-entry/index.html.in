@@ -118,9 +118,9 @@
                                     <!-- boolean input -->
                                     <div ng-switch-when="boolean">
                                         <ui-select ng-model="form.dataEntryModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="disabled">
-                                            <ui-select-match name="{{column.name}}" placeholder="Select a value">{{$select.selected | toTitleCase}}</ui-select-match>
+                                            <ui-select-match name="{{column.name}}" placeholder="Select a value">{{$select.selected}}</ui-select-match>
                                             <ui-select-choices repeat="domainValue in form.booleanValues | filter: $select.search" >
-                                                <div ng-bind-html="domainValue | toTitleCase | highlight: $select.search"></div>
+                                                <div ng-bind-html="domainValue | highlight: $select.search"></div>
                                             </ui-select-choices>
                                         </ui-select>
                                     </div>
