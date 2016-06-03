@@ -80,9 +80,9 @@
                                     <!-- dropdown select input -->
                                     <div ng-switch-when="dropdown">
                                         <ui-select ng-model="form.dataEntryModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="disabled">
-                                            <ui-select-match name="{{::column.name}}" placeholder="Select a value">{{$select.selected | underscoreToSpace | toTitleCase}}</ui-select-match>
-                                            <ui-select-choices repeat="domainValue in form.dataEntryModel.domainValues[column.name] | filter: $select.search" >
-                                                <div ng-bind-html="domainValue | underscoreToSpace | toTitleCase | highlight: $select.search"></div>
+                                            <ui-select-match name="{{::column.name}}" placeholder="Select a value">{{$select.selected.display}}</ui-select-match>
+                                            <ui-select-choices repeat="domainValue.key as domainValue in form.dataEntryModel.domainValues[column.name] | filter: $select.search" >
+                                                <div ng-bind-html="domainValue.display | highlight: $select.search"></div>
                                             </ui-select-choices>
                                         </ui-select>
                                     </div>
@@ -118,9 +118,9 @@
                                     <!-- boolean input -->
                                     <div ng-switch-when="boolean">
                                         <ui-select ng-model="form.dataEntryModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="disabled">
-                                            <ui-select-match name="{{column.name}}" placeholder="Select a value">{{$select.selected | underscoreToSpace | toTitleCase}}</ui-select-match>
+                                            <ui-select-match name="{{column.name}}" placeholder="Select a value">{{$select.selected}}</ui-select-match>
                                             <ui-select-choices repeat="domainValue in form.booleanValues | filter: $select.search" >
-                                                <div ng-bind-html="domainValue | underscoreToSpace | toTitleCase | highlight: $select.search"></div>
+                                                <div ng-bind-html="domainValue | highlight: $select.search"></div>
                                             </ui-select-choices>
                                         </ui-select>
                                     </div>

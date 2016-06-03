@@ -62,7 +62,7 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', '$http', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, $http) {
+    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', '$http', '$filter', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, $http, $filter) {
         var server = ermrestServerFactory.getServer(context.serviceURL);
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
@@ -74,23 +74,81 @@
                     dataEntryModel.cols = table.columns.all();
 
                     var foreignKeys = table.foreignKeys.all();
-                    angular.forEach(foreignKeys, function(key) {
-                        // Capture the key from the containing for loop in a closure
-                        // so that getDomainValues() has the correct key on success
-                        if (key.simple) {
-                            (function(key) {
-                                key.getDomainValues().then(function success(values) {
-                                    dataEntryModel.domainValues[key.colset.columns[0].name] = [];
-                                    var domainValues = dataEntryModel.domainValues[key.colset.columns[0].name];
+                    angular.forEach(foreignKeys, function(fkey) {
+                        // simple implies one column
+                        if (fkey.simple) {
+                            var ftable = fkey.key.table;
+                            var keyColumn = fkey.key.colset.columns[0];
 
-                                    angular.forEach(values.data, function(value) {
-                                        var field = Object.keys(value)[0];
-                                        domainValues.push(value[field]);
-                                    });
-                                }, function error(response) {
-                                    console.log(response);
-                                });
-                            })(key);
+                            /* FIRST USE CASE: covered by default; display = key column */
+
+                            var pattern = "{" + keyColumn.name + "}";
+                            var displayColumns = [keyColumn];
+
+                            /* SECOND USE CASE: conditional if the table is tagged as a vocabulary */
+
+                            try {
+                                try {
+                                    var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
+                                } catch (error) {
+                                    // no vocab annotation, do nothing
+                                }
+
+                                try {
+                                    var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
+                                } catch (error) {
+                                    // no display annotation, do nothing
+                                }
+
+                                if (vocabAnnotation) {
+                                    if (vocabAnnotation.content.term) {
+                                        var termColumn = ftable.columns.get(vocabAnnotation.content.term);
+                                        displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
+                                    }
+                                    // vocabulary term is undefined
+                                    else {
+                                        var ftableColumns = ftable.columns.all();
+                                        for (var i = 0, length = ftableColumns.length; i < length; i++) {
+                                            var uppColumnName = ftableColumns[i].name.toUpperCase();
+                                            if (uppColumnName == 'TERM' || uppColumnName == 'NAME') {
+                                                displayColumns.push(ftableColumns[i]);
+                                                break;
+                                            }
+                                        } /* term undefined */
+                                    }
+                                    if (displayColumns.length > 1) {
+                                        pattern = "{" + displayColumns[1].name + "}";
+                                    }
+                                    /* END USE CASE 2 */
+                                }
+                                /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
+                                else if (displayAnnotation) {
+                                    if (displayAnnotation.content.row_name) {
+                                        // TODO
+                                        // var array_of_col_names = REGEX THE array of column_name strings from “ … `{` column_name `}` …” patterns
+                                        // angular.forEach(array_of_col_names, function(column_name) {
+                                        //     displayColumns.push(table.columns.get(column_name));
+                                        // });
+                                        //
+                                        // pattern = displayAnnotation.row_name;
+                                    }
+                                }
+                            } finally {
+                                try {
+                                    (function(fkey) {
+                                        ftable.entity.get(null, null, displayColumns).then(function success(rowset){
+                                            var domainValues = dataEntryModel.domainValues[fkey.colset.columns[0].name] = [];
+                                            var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
+
+                                            angular.forEach(rowset.data, function(column) {
+                                                 domainValues.push( {key: column[keyColumn.name], display: column[displayColumnName]/*Util.patternExpansion( pattern, column.data )*/} );
+                                            });
+                                        });
+                                    })(fkey);
+                                } catch (error) {
+                                    // handle error
+                                }
+                            }
                         }
                     });
 
