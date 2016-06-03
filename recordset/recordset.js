@@ -114,8 +114,7 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 .value('recordsetModel', {
     tableName: null,  // table name
     tableDisplayName: null,
-    header: {},       // <column : display name>
-    columns: [],      // column names
+    columns: [],      // [{name, displayname, hidden}, ...]
     filter: null,
     sortby: null,     // column name, user selected or null
     sortOrder: null,  // asc (default) or desc
@@ -352,12 +351,13 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
                 console.log(table);
                 recordsetModel.table = table;
                 recordsetModel.tableDisplayName = table.displayname;
-                recordsetModel.columns = table.columns.names();
-                for (var i = 0; i < recordsetModel.columns.length; i++) {
-                    var colname = recordsetModel.columns[i];
-                    recordsetModel.header[colname] = table.columns.get(colname).displayname;
+
+                // columns
+                var columns = table.columns.all();
+                for (var i = 0; i < columns.length; i++) {
+                    var col = {name: columns[i].name, displayname: columns[i].displayname, hidden: columns[i].ignore};
+                    recordsetModel.columns.push(col);
                 }
-                console.log(recordsetModel.header);
 
                 // build up filters
                 var filter = null;
