@@ -33,6 +33,8 @@ exports.config = {
   onPrepare: function() {
     var codeDone = false, successful = false;
     
+    console.log(process.env.CHAISE_BASE_URL);
+
     dataSetupCode.setup({
       schemaName: 'legacy',
       url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/'),
