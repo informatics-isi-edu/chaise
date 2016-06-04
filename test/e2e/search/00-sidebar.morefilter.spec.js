@@ -15,7 +15,7 @@ describe('Chaise initial sidebar,', function () {
     var spinner = element(by.id('spinner'));
     describe('when initializing,', function () {
         beforeAll(function () {
-            browser.get('');
+            browser.get(browser.params.url || "");
         });
 
         it('should show the spinner', function () {

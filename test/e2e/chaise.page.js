@@ -183,6 +183,9 @@ function chaisePage() {
     this.resultContent = new resultContent();
     this.recordPage = new recordPage();
     this.tools = new tools();
+    this.setCookie = function() {
+        if (browser.params.authCookie) browser.executeScript('document.cookie = "' + browser.params.authCookie + '"');
+    };
     this.customExpect = {
         elementContainClass: function (ele, className) {
             expect(ele.getAttribute('class')).toContain(className);

@@ -1,0 +1,33 @@
+{
+  "comment": "vocabulary", 
+  "kind": "table", 
+  "keys": [
+    {
+      "comment": null, 
+      "annotations": {}, 
+      "unique_columns": [
+        "id"
+      ]
+    }
+  ], 
+  "catalogId" : 2,
+  "foreign_keys": [], 
+  "table_name": "sample_name", 
+  "column_definitions": [
+    {
+      "comment": null, 
+      "name": "id", 
+      "default": null, 
+      "nullok": false, 
+      "type": {
+        "typename": "int8"
+      }, 
+      "annotations": {}
+    }
+  ], 
+  "annotations": {
+    "comment": [
+      "exclude"
+    ]
+  }
+}

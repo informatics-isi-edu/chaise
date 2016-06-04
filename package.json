@@ -46,6 +46,11 @@
     "mocha": "^2.4.5",
     "phantomjs-prebuilt": "x",
     "protractor": "x",
-    "testem": "x"
+    "testem": "x",
+    "request": "x",
+    "q": "x"
+  },
+  "dependencies": {
+    "jasmine-bail-fast": "0.0.1"
   }
 }
