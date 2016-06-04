@@ -34,11 +34,7 @@ exports.setup = function(options) {
 
 	var defer = Q.defer();
 
-	var server = ermRest.ermrestFactory.getServer(config.url);
-	server.session.get().then(function(response) {
-		console.log("Valid session found");
-		return createCatalog(catalog);
-	}).then(function() {
+	createCatalog(catalog).then(function() {
 		return createSchema(schema);
 	}).then(function() {
 		return createTables(schema);
