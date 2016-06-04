@@ -9,7 +9,6 @@
         'chaise.alerts',
         'chaise.filters',
         'chaise.interceptors',
-        'chaise.views',
         'chaise.validators',
         'ui.select',
         'rzModule',
