@@ -8,7 +8,7 @@ describe('Filters on top of the records,', function () {
     var EC = protractor.ExpectedConditions;
 
     beforeAll(function (done) {
-        browser.get('');
+        browser.get(browser.params.url || "");
         var sidebar = element(by.id('sidebar'));
         browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
             done();
