@@ -1,7 +1,11 @@
 var chance =  new (require('chance'))();
 var Q = require('q');
 var http = require('../plugin/q-request.js');
-
+var fixedEncodeURIComponent = function(str) {
+	return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+		return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+	});
+}
 /* @namespace Schema
  * @desc
  * The Schema module allows you to create and delete schemas for the ERMrest API
@@ -53,21 +57,18 @@ Schema.prototype.remove = function() {
 
 var annotate = function(self, key, value) {
 	var d = Q.defer();
-	http.put(this.url + 'catalog/' + self.catalog.id + "/schema/" + self.name + "/annotation/" + key, value).then(function(response) {
+	http.put(self.url + 'catalog/' + self.catalog.id + "/schema/" + self.name + "/annotation/" + fixedEncodeURIComponent(key), value).then(function(response) {
 		d.resolve();
 	}, function(err) {
-		d.resolve(err);
+		d.reject(err);
 	});
 	return d.promise;
 };
 
 Schema.prototype.createAnnotation = function() {
 	var annotations = this.content.annotations || {}, defer = Q.defer(), self = this, promises = [];
-	var possibleAnnotations = ["comment"];
 	for (var k in annotations) {
-		if (possibleAnnotations.indexOf(k) != -1) {
-		  promises.push(annotate(self, k, annotations[k]));
-		}
+		if (annotations[k] != null) promises.push(annotate(self, k, annotations[k]));
 	}
 
 	Q.all(promises).then(function() {

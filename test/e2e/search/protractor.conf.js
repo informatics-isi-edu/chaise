@@ -1,4 +1,4 @@
-var catalogId = null; 
+var catalogId = null, data = null; 
 var dataSetupCode = require("../data_setup/import.js");
 var authCookie = "ermrest=C6KFIQn2JS37CGovofWnjKfu;";
 
@@ -32,8 +32,6 @@ exports.config = {
 
   onPrepare: function() {
     var codeDone = false, successful = false;
-    
-    console.log(process.env.CHAISE_BASE_URL);
 
     dataSetupCode.setup({
       schemaName: 'legacy',
@@ -42,6 +40,7 @@ exports.config = {
     }).then(function(data) {
       codeDone = true;
       catalogId = data.catalogId;
+      data = data;
       successful = true
     }, function(err) {
       catalogId = err.catalogId || null; 
@@ -53,6 +52,7 @@ exports.config = {
     }, 120000).then(function(data) {
       
       if (successful) {
+        browser.params.schema = data.schema;
         browser.baseUrl = process.env.CHAISE_BASE_URL + '/search';
         browser.get("");
         browser.wait(function() {
@@ -104,6 +104,7 @@ exports.config = {
   },
 
   onCleanUp: function() {
+    return;
     if (catalogId != null) {
 
       var codeDone = false;
