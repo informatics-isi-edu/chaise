@@ -13,7 +13,7 @@
                 <a id="permalink" class="pull-right" ng-href="{{ permalink() }}">
                     <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
 
-                <h2>Records for {{ vm.tableName }}</h2>
+                <h2>Records for {{ vm.tableDisplayName }}</h2>
 
             </div>
 
@@ -71,18 +71,18 @@
                     <!-- sortable column header -->
                     <thead>
                     <tr>
-                        <th nowrap ng-repeat="name in vm.header">
-                            <span ng-click="sortby(name)">{{name}}</span>
-                            <span ng-show="vm.sortby==name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-asc" ng-style="{'cursor': 'pointer'}"></span>
-                            <span ng-show="vm.sortby==name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-desc" ng-style="{'cursor': 'pointer'}"></span>
-                            <span ng-show="vm.sortby!==name" class="fa fa-fw fa-sort" ng-click="sortby(name)" ng-style="{'cursor': 'pointer'}"></span>
+                        <th nowrap ng-repeat="col in vm.columns | filter: {hidden: false}">
+                            <span ng-click="sortby(col.name)">{{col.displayname}}</span>
+                            <span ng-show="vm.sortby==col.name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-asc" ng-style="{'cursor': 'pointer'}"></span>
+                            <span ng-show="vm.sortby==col.name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-desc" ng-style="{'cursor': 'pointer'}"></span>
+                            <span ng-show="vm.sortby!==col.name" class="fa fa-fw fa-sort" ng-click="sortby(col.name)" ng-style="{'cursor': 'pointer'}"></span>
                         </th>
                     </tr>
                     </thead>
 
                     <!-- rows -->
                     <tr ng-repeat="row in vm.rowset.data" ng-click="gotoRowLink($index)" ng-style="{'cursor': 'pointer'}">
-                        <td ng-repeat="name in vm.header">{{row[name]}}</td>
+                        <td ng-repeat="col in vm.columns | filter: {hidden: false}">{{row[col.name]}}</td>
                     </tr>
                 </table>
             </div>
