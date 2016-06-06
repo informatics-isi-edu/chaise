@@ -220,14 +220,14 @@
                 try {
                     ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
                 } catch (e) {
-                    if (e instanceof Errors.NotFoundError) {
+                    if (e instanceof ERMrest.NotFoundError) {
                         ErrorService.annotationNotFound(e);
                     }
                 }
                 try {
                     hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
                 } catch (e) {
-                    if (e instanceof Errors.NotFoundError) {
+                    if (e instanceof ERMrest.NotFoundError) {
                         ErrorService.annotationNotFound(e);
                     }
                 }

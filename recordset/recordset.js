@@ -458,8 +458,8 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
                 });
             } catch (error) {
                 pageInfo.loading = false;
-                if (error instanceof Errors.NotFoundError ||
-                    error instanceof Errors.InvalidFilterOperatorError) {
+                if (error instanceof ERMrest.NotFoundError ||
+                    error instanceof ERMrest.InvalidFilterOperatorError) {
                     $rootScope.errorMessage = error.message;
                 }
             }
@@ -472,18 +472,18 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 
             // TODO
             $rootScope.errorMessage = error.message;
-            if (error instanceof Errors.NotFoundError) {
+            if (error instanceof ERMrest.NotFoundError) {
                 // catalog not found
-            } else if (error instanceof Errors.ForbiddenError) {
+            } else if (error instanceof ERMrest.ForbiddenError) {
 
-            } else if (error instanceof Errors.UnauthorizedError) {
+            } else if (error instanceof ERMrest.UnauthorizedError) {
 
             }
         });
         
     }, function(error) {
         // not logged in, redirect to login
-        if (error instanceof Errors.NotFoundError) {
+        if (error instanceof ERMrest.NotFoundError) {
             var url = context.serviceURL + '/authn/preauth?referrer=' + encodeSafeURIComponent(window.location.href);
             ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
         }
