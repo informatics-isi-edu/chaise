@@ -44,7 +44,7 @@ exports.setup = function(options) {
 		return createTables(schema);
 	}).then(function() {
 		console.log("=======================Catalog imported with Id : " + catalog.id + "===========================");
-		defer.resolve({ catalogId: catalog.id });
+		defer.resolve({ catalogId: catalog.id, schema: schema });
 	}, function(err) {
 		console.dir(err);
 		if (catalog.id) defer.reject({ catalogId: catalog.id });
