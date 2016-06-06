@@ -104,7 +104,6 @@ exports.config = {
   },
 
   onCleanUp: function() {
-    return;
     if (catalogId != null) {
 
       var codeDone = false;
