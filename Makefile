@@ -47,7 +47,9 @@ ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
 			   ../../ermrestjs/js/ermrest.js \
 			   ../../ermrestjs/js/filters.js \
 			   ../../ermrestjs/js/ngermrest.js \
-			   ../../ermrestjs/js/utilities.js
+			   ../../ermrestjs/js/utilities.js \
+			   ../../ermrestjs/errors/networkerrors.js \
+			   ../../ermrestjs/errors/validationerrors.js
 
 # CSS source
 CSS=styles
@@ -106,10 +108,6 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestMatrixController.js \
 	$(JS)/tour.js \
 	$(JS)/matrix.js
-
-# error definitions
-ERROR_SOURCE=common/errors/networkerrors.js \
-             common/errors/validationerrors.js
 
 # HTML templates
 TEMPLATES=views
@@ -513,9 +511,6 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
-	for script in $(ERROR_SOURCE); do \
-		echo "<script src='../$$script'></script>" >> .make-de-asset-block ; \
-	done
 	for file in $(DE_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-de-asset-block ; \
 	done
@@ -535,9 +530,6 @@ $(JS_CONFIG): chaise-config-sample.js
 	for file in $(RECSET_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
-	done
-	for script in $(ERROR_SOURCE); do \
-    		echo "<script src='../$$script'></script>" >> .make-rs-asset-block ; \
 	done
 	for file in $(RECSET_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-rs-asset-block ; \
