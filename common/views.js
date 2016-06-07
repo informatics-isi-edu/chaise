@@ -13,7 +13,7 @@
     * If unspecified, no image is displayed
     * @param {String} brand-text ["Chaise"] - A string of text (e.g. company name).
     * Default text is 'Chaise'.
-    * @example <navbar server="controller.server" brand-image="/src/to/img.png" brand-text="FaceBase"></navbar>
+    * @example <navbar server="controller.server" brand-image="/path/to/img.png" brand-text="FaceBase"></navbar>
     */
     .directive('navbar', ['$window', function($window) {
         return {
@@ -23,6 +23,7 @@
                 brandImage: '@',
                 brandText: '@'
             },
+            templateUrl: '../common/templates/navbar.html',
             link: function(scope) {
                 scope.server.session.get().then(function() {
                     var user = scope.server.getUser();
@@ -39,8 +40,7 @@
                 scope.logout = function logout() {
                     scope.server.session.logout($window.location);
                 }
-            },
-            templateUrl: '../common/templates/navbar.html'
+            }
         };
     }]);
 })();

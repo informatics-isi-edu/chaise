@@ -19,21 +19,9 @@
     <![endif]-->
 </head>
 <body>
-    <navbar></navbar>
-    <div class="container-fluid" style="margin-top: 70px;">
+    <div class="container-fluid">
         <div ng-controller="FormController as form" class="row">
-            <!-- <nav class="navbar navbar-default">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <li class="navbar-brand" href="/">Chaise</li>
-                    </div>
-                    <div class="navbar-collapse collapse">
-                        <p class="navbar-text pull-right">
-                            Log In/Log Out links here
-                        </p>
-                   </div>
-                </div>
-            </nav> -->
+            <navbar server="form.server"></navbar>
             <div class="col-xs-10 col-xs-offset-1">
                 <div ng-repeat="alert in form.alerts" class="row">
                     <div class="col-xs-12">
