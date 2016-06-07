@@ -1,0 +1,24 @@
+{
+    "search": {
+        "dataSetup": {
+            "catalog": {
+                //"id": 1  //existing id of a catalog
+            },
+            "schema": {
+                "name": "legacy",   //name of the schema
+                "createNew": true,  //change this to false to avoid creating new schema
+                "path": "./schema/legacy.json"  //path of the schema json files in data_setup folder
+            },
+            "tables": {
+                "newTables": []
+            },
+            "entities": {
+                "path": "./data/legacy",  //path of the data json files in data_setup folder for schema
+                "importedEntites": []     //list of entites that do not need to be imported 
+            },
+            "authCookie": "ermrest=C6KFIQn2JS37CGovofWnjKfu;"
+        }
+    },
+    "record": {},
+    "login": {}
+}

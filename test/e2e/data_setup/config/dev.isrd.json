@@ -1,0 +1,23 @@
+{
+    "search": {
+        "dataSetup": {
+            "catalog": {},
+            "schema": {
+                "name": "legacy",
+                "createNew": true, 
+                "path": "./schema/legacy.json" 
+            },
+            "tables": {
+                "newTables": []
+            },
+            "entities": {
+                "path": "./data/legacy",
+                "importedEntites": []
+            },
+            "authCookie": "ermrest=C6KFIQn2JS37CGovofWnjKfu;"
+        },
+        "cleanup" : true
+    },
+    "record": {},
+    "login": {}
+}

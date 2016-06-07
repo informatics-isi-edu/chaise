@@ -12,9 +12,9 @@ var config = {};
 
 exports.setup = function(options) {
 	config = options;
-	config.url = config.url || 'https://dev.isrd.isi.edu/ermrest';
+	config.url = config.url || 'https://dev.isrd.isi.edu/ermrest/';
 	config.authCookie = config.authCookie || 'oauth2_auth_nonce=1464217155.1jyAUppOZlRPdOR-KGkZTK-dtN_Z0RtO24zkxdOg.; ermrest=C6KFIQn2JS37CGovofWnjKfu';
-	config.schemaName = config.schemaName || "legacy";
+	config.schemaName = config.schema.name || "legacy";
 
 	http.setDefaults({
 	    headers: { 'Cookie': config.authCookie },
@@ -23,13 +23,13 @@ exports.setup = function(options) {
 
 	var catalog = new Catalog({ 
 		url: config.url, 
-		id: config.catalogId 
+		id: config.catalog.id 
 	});
 
 	var schema = new Schema({
 		url: config.url,
 		catalog: catalog,
-		schema: require('./schema/' + config.schemaName  + '.json')
+		schema: require(config.schema.path || './schema/' + config.schemaName  + '.json')
 	});
 
 	var defer = Q.defer();
@@ -56,8 +56,8 @@ exports.setup = function(options) {
 
 exports.tear = function(options) {
 	config = options;
-	config.url = config.url || 'https://dev.isrd.isi.edu/ermrest';
-	config.authCookie = config.authCookie || 'oauth2_auth_nonce=1464217155.1jyAUppOZlRPdOR-KGkZTK-dtN_Z0RtO24zkxdOg.; ermrest=C6KFIQn2JS37CGovofWnjKfu';
+	config.url = config.url || 'https://dev.isrd.isi.edu/ermrest/';
+	config.authCookie = config.dataSetup.authCookie || 'oauth2_auth_nonce=1464217155.1jyAUppOZlRPdOR-KGkZTK-dtN_Z0RtO24zkxdOg.; ermrest=C6KFIQn2JS37CGovofWnjKfu';
 
 	var defer = Q.defer();
 
@@ -65,16 +65,71 @@ exports.tear = function(options) {
 	    headers: { 'Cookie': config.authCookie },
 	    json: true
 	});
-	var catalog = new Catalog({ url: config.url, id: options.catalogId });
-	catalog.remove().then(function() {
+
+	if (!config.dataSetup.catalog.id) {
+		removeCatalog(defer, options.catalogId);
+	} else if (config.dataSetup.schema.createNew) {
+		removeSchema(defer, options.catalogId, config.dataSetup.schema)
+	} else if (!config.dataSetup.tables.newTables.length > 0) {
+		removeTables(defer, options.catalogId, config.dataSetup.schema);
+	} else {
+		defer.resolve();
+	}
+
+	return defer.promise;
+};
+
+var removeCatalog = function(defer, catalogId) {
+	var catalog = new Catalog({ url: config.url, id: catalogId });
+	catalog.remove().then(function() {	
 		console.log("Catalog deleted with id " + catalog.id);
-		defer.reject({ });
+		defer.resolve();
 	}, function(err) {
 		console.log("Unable to delete the catalog with id " + catalog.id);
 		defer.reject(err);
 	});
+};
 
-	return defer.promise;
+var removeSchema = function(defer, catalogId, schemaName) {
+	var catalog = new Catalog({ url: config.url, id: catalogId });
+	var schema = new Schema({
+		url: config.url,
+		catalog: catalog,
+		schema: require(config.dataSetup.schema.path || './schema/' + config.dataSetup.schemaName  + '.json')
+	});
+	schema.remove().then(function() {	
+		console.log("Schema deleted with name " + schema.name);
+		defer.resolve();
+	}, function(err) {
+		console.log("Unable to delete the schema with name " + schema.name);
+		defer.reject(err);
+	});
+};
+
+var removeTables = function(defer, catalogId, schemaName) {
+	var promises = [], catalog = new Catalog({ url: config.url, id: catalogId });
+	var schema = new Schema({
+		url: config.url,
+		catalog: catalog,
+		schema: require(config.dataSetup.schema.path || './schema/' + config.dataSetup.schemaName  + '.json')
+	});
+	for (var k in schema.content.tables) {
+		var table = new Table({
+			url: config.url,
+			schema: schema,
+			table: schema.content.tables[k]
+		});
+		tables[k] = table;
+		tableNames.push(k);
+		if (!schema.content.tables[k].exists || (config.dataSetup.tables.newTables.indexOf(k) != -1)) promises.push(table.remove());
+	}
+
+	Q.all(promises).then(function() {
+		console.log("Tables removed");
+		defer.resolve();
+	}, function(err) {
+		defer.reject(err);
+	});
 };
 
 var createCatalog = function(catalog) {
@@ -97,15 +152,15 @@ var createCatalog = function(catalog) {
 var createSchema = function(schema) {
 	var defer = Q.defer();
 
-	if (config.createSchema == false) {
-		defer.resolve();
-	} else {
+	if (config.schema.createNew) {
 		schema.create().then(function() {	
 			console.log("Schema created with name " + schema.name);
 			defer.resolve();
 		}, function(err) {
 			defer.reject(err);
 		});
+	} else {
+		defer.resolve();
 	}
 
 	return defer.promise;
@@ -132,7 +187,7 @@ var createTables = function(schema) {
 		});
 		tables[k] = table;
 		tableNames.push(k);
-		promises.push(table.create());
+		if (!schema.content.tables[k].exists || (config.tables.newTables.indexOf(k) != -1)) promises.push(table.create());
 	}
 
 	Q.all(promises).then(function() {
@@ -162,25 +217,31 @@ var createTables = function(schema) {
  */
 var importEntities = function(tableNames, tables, schema) {
 	var defer = Q.defer(), index = -1, importedTables = []; 
-	delete require.cache[require.resolve('./schema/' + schema.name +'.json')];
-	var association = new Association({ schema: require('./schema/' + schema.name + '.json') });
+	delete require.cache[require.resolve(config.schema.path)];
+	var association = new Association({ schema: require(config.schema.path) });
 
 	var cb = function() {
 		if (tableNames.length == 0) return defer.resolve();
 		var name = tableNames.shift();
-		if (association.hasAReference(name, importedTables)) {
-			tableNames.push(name);
-			cb();
+		var table = tables[name];
+		if (!table.exists || config.entities.newTables.indexOf(name) != -1) {
+			if (association.hasAReference(name, importedTables)) {
+				tableNames.push(name);
+				cb();
+			} else {
+				var table = tables[name];
+				insertEntitiesForATable(table, schema.name).then(function() {
+					importedTables.push(name);
+					cb();
+				}, function(err) {
+					console.log(err);
+					importedTables.push(name);
+					cb();
+				});
+			}
 		} else {
-			var table = tables[name];
-			insertEntitiesForATable(table, schema.name).then(function() {
-				importedTables.push(name);
-				cb();
-			}, function(err) {
-				console.log(err);
-				importedTables.push(name);
-				cb();
-			});
+			importedTables.push(name);
+			cb();
 		}
 	};
 
@@ -203,7 +264,7 @@ var insertEntitiesForATable = function(table, schemaName) {
 		table: table 
 	});
 	datasets.create({
-		entities: require('./data/' + schemaName + "/" + table.name + '.json')
+		entities: require(config.entities.path + "/" + table.name + '.json')
 	}).then(function(entities) {
 		console.log(entities.length + " Entities of type " + table.name.toLowerCase() + " created");
 		table.entites = entities;
@@ -227,9 +288,11 @@ var createForeignKeys = function(schema) {
 	var promises = [];
 	for (var k in schema.tables) {
 		var table = schema.tables[k];
-		table.foreignKeys.forEach(function(fk) {
-			promises.push(table.addForeignKey(fk));
-		});
+		if (!schema.content.tables[k].exists || (config.tables.newTables.indexOf(k) != -1)) {
+			table.foreignKeys.forEach(function(fk) {
+				promises.push(table.addForeignKey(fk));
+			});
+		}
 	}
 
     Q.all(promises).then(function() {
