@@ -15,7 +15,7 @@
  */
 
 // The Chaise RecordSet module
-angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
+angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
 
 // Register the 'context' object which can be accessed by config and other
 // services.

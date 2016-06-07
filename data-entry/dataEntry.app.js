@@ -5,6 +5,7 @@
         'ERMrest',
         'ngSanitize',
         'chaise.utils',
+        'chaise.navbar',
         'chaise.errors',
         'chaise.alerts',
         'chaise.filters',
