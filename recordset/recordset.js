@@ -113,8 +113,8 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 // services, but cannot be access by providers (and config, apparently).
 .value('recordsetModel', {
     tableName: null,  // table name
-    header:[],        // columns display names
-    columns: [],      // column names
+    tableDisplayName: null,
+    columns: [],      // [{name, displayname, hidden}, ...]
     filter: null,
     sortby: null,     // column name, user selected or null
     sortOrder: null,  // asc (default) or desc
@@ -157,6 +157,15 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
     $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
     $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
     $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
+
+    // login logout should be factored out into a common module
+    $scope.login = function() {
+        context.server.session.login(window.location.href);
+    };
+
+    $scope.logout = function() {
+        context.server.session.logout(window.location);
+    };
 
     $scope.sort = function () {
 
@@ -351,9 +360,14 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
                 var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
                 console.log(table);
                 recordsetModel.table = table;
-                recordsetModel.columns = table.columns.names();
-                recordsetModel.header = table.columns.names();
-                console.log(recordsetModel.header);
+                recordsetModel.tableDisplayName = table.displayname;
+
+                // columns
+                var columns = table.columns.all();
+                for (var i = 0; i < columns.length; i++) {
+                    var col = {name: columns[i].name, displayname: columns[i].displayname, hidden: columns[i].ignore};
+                    recordsetModel.columns.push(col);
+                }
 
                 // build up filters
                 var filter = null;
@@ -445,8 +459,8 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
                 });
             } catch (error) {
                 pageInfo.loading = false;
-                if (error instanceof Errors.NotFoundError ||
-                    error instanceof Errors.InvalidFilterOperatorError) {
+                if (error instanceof ERMrest.NotFoundError ||
+                    error instanceof ERMrest.InvalidFilterOperatorError) {
                     $rootScope.errorMessage = error.message;
                 }
             }
@@ -459,18 +473,18 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 
             // TODO
             $rootScope.errorMessage = error.message;
-            if (error instanceof Errors.NotFoundError) {
+            if (error instanceof ERMrest.NotFoundError) {
                 // catalog not found
-            } else if (error instanceof Errors.ForbiddenError) {
+            } else if (error instanceof ERMrest.ForbiddenError) {
 
-            } else if (error instanceof Errors.UnauthorizedError) {
+            } else if (error instanceof ERMrest.UnauthorizedError) {
 
             }
         });
-
+        
     }, function(error) {
         // not logged in, redirect to login
-        if (error instanceof Errors.NotFoundError) {
+        if (error instanceof ERMrest.NotFoundError) {
             var url = context.serviceURL + '/authn/preauth?referrer=' + encodeSafeURIComponent(window.location.href);
             ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
         }
