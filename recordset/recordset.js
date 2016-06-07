@@ -141,6 +141,8 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 
     $scope.vm = recordsetModel;
 
+    $scope.server = context.server;
+
     $scope.pageInfo = pageInfo;
 
     pageInfo.recordStart = 1;
@@ -335,13 +337,12 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
     $rootScope.errorMessage='';
 
     // Get rowset data from ermrest
-    var server = ermrestServerFactory.getServer(context.serviceURL);
+    var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
 
     // authenticiation
     server.session.get().then(function() {
 
         $rootScope.user = server.getUser().display_name;
-        context.server = server;
         server.catalogs.get(context.catalogID).then(function(catalog) {
             console.log(catalog);
 
