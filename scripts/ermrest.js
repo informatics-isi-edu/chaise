@@ -2021,9 +2021,7 @@ function successLogin(data, textStatus, jqXHR) {
 }
 
 function errorLogin(jqXHR, textStatus, errorThrown, url, param) {
-	document.body.style.cursor = 'default';
-	var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location.href);
-	window.location = login_url;
+	handleError(jqXHR, textStatus, errorThrown, url);
 }
 
 function hasCheckedValues(box, facet) {
