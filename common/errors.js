@@ -36,14 +36,12 @@
         // This may change, but figured each app would handle this similarly
         function tableNotFound(tableName, error) {
             AlertsService.addAlert({type: 'error', message: 'Sorry, the requested table "' + tableName + '" was not found. Please check the URL and refresh the page.' });
-            alert();
             $log.info(error);
         }
 
         // This may change, but figured each app would handle this similarly
         function schemaNotFound(schemaName, error) {
             AlertsService.addAlert({type: 'error', message: 'Sorry, the requested schema "' + schemaName + '" was not found. Please check the URL and refresh the page' });
-            alert();
             $log.info(error);
         }
 
