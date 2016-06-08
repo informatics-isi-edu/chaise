@@ -697,6 +697,19 @@ function initModels(options, successCallback) {
 			}
 		});
 	});
+	var topColumns = display_columns['top_columns'];
+	display_columns['top_columns'] = [];
+	if (topN[table] != null) {
+		$.each(topN[table], function(i, col) {
+			display_columns['top_columns'].push(col);
+		});
+	}
+	$.each(topColumns, function(i,col) {
+		if (!display_columns['top_columns'].contains(col)) {
+			display_columns['top_columns'].push(col);
+		}
+	});
+	
 	var facetOrder = j;
 	var extraFacets = [];
 	$.each(options['score'], function(i,col) {
@@ -3856,7 +3869,7 @@ function getFacetOrder(facet) {
 			$.each(column_definitions, function(i, col) {
 				if (col['name'] == column_name) {
 					if (col['annotations'] != null && col['annotations'][COLUMNS_FACET_ORDER_URI] != null) {
-						ret = col['annotations'][COLUMNS_FACET_ORDER_URI];
+						ret = parseInt(col['annotations'][COLUMNS_FACET_ORDER_URI], 10);
 					}
 					return false;
 				}
