@@ -10,6 +10,7 @@
         schemaName: null,
         tableName: null,
         filters: null,
-        booleanValues: ['', true, false]
+        booleanValues: ['', true, false],
+        server: null
     });
 })();

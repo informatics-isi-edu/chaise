@@ -15,7 +15,7 @@
  */
 
 // The Chaise RecordSet module
-angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
+angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
 
 // Register the 'context' object which can be accessed by config and other
 // services.
@@ -136,10 +136,23 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 
 }])
 
+.factory('utils', ['ermrestServerFactory', function (ermrestServerFactory) {
+    return {
+        login: function (serviceURL) {
+            var server = ermrestServerFactory.getServer(serviceURL);
+
+            // authenticiation
+            server.session.login(window.location.href);
+        }
+    };
+}])
+
 // Register the recordset controller
-.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'context', 'UriUtils', function($scope, $rootScope, pageInfo, $window, recordsetModel, context, UriUtils) {
+.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'context', 'UriUtils', 'utils', function($scope, $rootScope, pageInfo, $window, recordsetModel, context, UriUtils, utils) {
 
     $scope.vm = recordsetModel;
+
+    $scope.server = context.server;
 
     $scope.pageInfo = pageInfo;
 
@@ -158,7 +171,7 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 
     // login logout should be factored out into a common module
     $scope.login = function() {
-        context.server.session.login(window.location.href);
+        utils.login(context.serviceURL);
     };
 
     $scope.logout = function() {
@@ -199,15 +212,25 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
             pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
             pageInfo.previousButtonDisabled = true; // on page 1
             pageInfo.nextButtonDisabled = (recordsetModel.count <= pageInfo.recordEnd);
-        }, function (response) {
+        }, function (error) {
             console.log("Error getting entities: ");
-            console.log(response);
+            console.log(error);
 
             pageInfo.loading = false;
 
-            // enable buttons
-            pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
-            pageInfo.nextButtonDisabled = (recordsetModel.count <= pageInfo.recordEnd);
+            if (error instanceof ERMrest.UnauthorizedError) {
+                // session has expired, login
+                utils.login(context.serviceURL);
+            } else {
+
+                // TODO alert error
+
+                // enable buttons
+                pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
+                pageInfo.nextButtonDisabled = (recordsetModel.count <= pageInfo.recordEnd);
+            }
+
+
         })
     };
 
@@ -268,14 +291,21 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
                 pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
                 pageInfo.nextButtonDisabled = (recordsetModel.count <= pageInfo.recordEnd);  // on last page
 
-            }, function (response) {
-                console.log(response);
+            }, function (error) {
+                console.log(error);
 
                 pageInfo.loading = false;
 
-                // enable buttons
-                pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
-                pageInfo.nextButtonDisabled = (recordsetModel.count <= pageInfo.recordEnd);  // on last page
+                if (error instanceof ERMrest.UnauthorizedError) {
+                    // session has expired, login
+                    utils.login(context.serviceURL);
+                } else {
+                    // enable buttons
+                    pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
+                    pageInfo.nextButtonDisabled = (recordsetModel.count <= pageInfo.recordEnd);  // on last page
+                }
+
+
             });
         }
     };
@@ -304,14 +334,21 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
                 pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
                 pageInfo.nextButtonDisabled = (recordsetModel.count <= pageInfo.recordEnd);  // on last page
 
-            }, function(response) {
-                console.log(response);
+            }, function(error) {
+                console.log(error);
 
                 pageInfo.loading = false;
 
-                //enable buttons
-                pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
-                pageInfo.nextButtonDisabled = (recordsetModel.count <= pageInfo.recordEnd);  // on last page
+                if (error instanceof ERMrest.UnauthorizedError) {
+                    // session has expired, login
+                    utils.login(context.serviceURL);
+                } else {
+
+                    //enable buttons
+                    pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
+                    pageInfo.nextButtonDisabled = (recordsetModel.count <= pageInfo.recordEnd);  // on last page
+                }
+
             });
         }
 
@@ -336,7 +373,7 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
 }])
 
 // Register work to be performed after loading all modules
-.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope) {
+.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'utils', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, utils) {
 
     $rootScope.location = window.location.href;
     pageInfo.loading = true;
@@ -344,13 +381,12 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
     $rootScope.errorMessage='';
 
     // Get rowset data from ermrest
-    var server = ermrestServerFactory.getServer(context.serviceURL);
+    var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
 
     // authenticiation
     server.session.get().then(function() {
 
         $rootScope.user = server.getUser().display_name;
-        context.server = server;
         server.catalogs.get(context.catalogID).then(function(catalog) {
             console.log(catalog);
 
@@ -448,6 +484,10 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
                         pageInfo.nextButtonDisabled = true;
 
                         // TODO get entity error
+                        if (error instanceof ERMrest.UnauthorizedError) {
+                            // session has expired, login
+                            utils.login(context.serviceURL);
+                        }
                     });
                 }, function (error) {
                     pageInfo.loading = false;
@@ -455,7 +495,12 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
                     pageInfo.nextButtonDisabled = true;
 
                     // TODO get count error
+                    if (error instanceof ERMrest.UnauthorizedError) {
+                        // session has expired, login
+                        utils.login(context.serviceURL);
+                    }
                 });
+
             } catch (error) {
                 pageInfo.loading = false;
                 if (error instanceof ERMrest.NotFoundError ||
@@ -477,15 +522,14 @@ angular.module('recordset', ['ERMrest', 'chaise.views', 'chaise.utils'])
             } else if (error instanceof ERMrest.ForbiddenError) {
 
             } else if (error instanceof ERMrest.UnauthorizedError) {
-
+                utils.login(context.serviceURL);
             }
         });
         
     }, function(error) {
         // not logged in, redirect to login
         if (error instanceof ERMrest.NotFoundError) {
-            var url = context.serviceURL + '/authn/preauth?referrer=' + encodeSafeURIComponent(window.location.href);
-            ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
+            utils.login(context.serviceURL);
         }
     });
 

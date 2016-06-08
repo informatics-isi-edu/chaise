@@ -217,7 +217,7 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/interceptors.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
-	$(COMMON)/views.js \
+	$(COMMON)/navbar.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \
@@ -249,7 +249,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/bootstrap.js \
 	$(RECORD_ASSETS)/lib/angular-animate.min.js \
-	$(COMMON)/views.js
+	$(COMMON)/navbar.js
 
 RECSET_JS_SOURCE=$(JS)/ermrest.js \
     $(COMMON)/utils.js \

@@ -5,6 +5,7 @@
         'ERMrest',
         'ngSanitize',
         'chaise.utils',
+        'chaise.navbar',
         'chaise.errors',
         'chaise.alerts',
         'chaise.filters',
@@ -62,8 +63,8 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', '$http', '$filter', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, $http, $filter) {
-        var server = ermrestServerFactory.getServer(context.serviceURL);
+    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', '$http', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, $http) {
+        var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
             if (schema) {
