@@ -210,7 +210,8 @@
             try {
                 return (vm.dataEntryModel.table.columns.get(name).type.name.indexOf('serial') === 0);
             } catch (exception) {
-                return false;
+                // handle exception
+                $log.info(exception);
             }
         }
 
@@ -219,11 +220,7 @@
             // obj with the column name as keys and FK values as values. For now,
             // we can determine whether a column is a FK by checking whether domainValues
             // has a key of that column's name.
-            try {
-                return vm.dataEntryModel.domainValues.hasOwnProperty(columnName);
-            } catch (exception) {
-                return false;
-            }
+            return vm.dataEntryModel.domainValues.hasOwnProperty(columnName);
         }
 
         // Returns true if a column type is found in the given array of types
