@@ -16,7 +16,7 @@
 
                 <p class="navbar-text pull-right">
                     <a ng-show="user === null" ng-click="login()">Log In</a>
-                    <span ng-show="user !== null"><a id="login_user" href="https://www.globus.org/app/account">{{user}}</a> <a ng-click="logout()" id="logout_link">Log Out</a></span>
+                    <span ng-show="user !== null"><a style="color: yellow;" href="https://www.globus.org/app/account">{{user}}</a> <a ng-click="logout()">Log Out</a></span>
                 </p>
 
             </div><!-- /.navbar-collapse -->

@@ -40,7 +40,7 @@ chaiseRecordApp.service('configService', function() {
     if (chaiseConfig['tableThreshold'] != null) {
         this.TABLE_THRESHOLD = chaiseConfig['tableThreshold'];
     }
-    
+
     // dynamic load the custom CSS file defined in chaise-config.js
     if (chaiseConfig['customCSS'] !== undefined) {
     	var fileref = document.createElement("link");
@@ -49,7 +49,7 @@ chaiseRecordApp.service('configService', function() {
     	fileref.setAttribute("href", chaiseConfig['customCSS']);
     	document.getElementsByTagName("head")[0].appendChild(fileref);
     }
-    	
+
 
     // set the navbar-header text
     if (chaiseConfig['navbarBrandText'] !== undefined) {
@@ -66,7 +66,7 @@ chaiseRecordApp.service('configService', function() {
         $($('.navbar-brand', $('#header'))[0]).attr('href', chaiseConfig['navbarBrand']);
     }
 
-	
+
 	if (chaiseConfig['headTitle'] !== undefined) {
 		var title = document.createElement("title");
 		title.innerHTML = chaiseConfig['headTitle'];
@@ -1305,6 +1305,10 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
             });
 
         }
+
+        $scope.editRecord = function(){
+            window.location.replace(window.location.origin + '/chaise/data-entry/' + window.location.hash);
+        };
 
         $scope.permanentLink = function(){
             return window.location.href;

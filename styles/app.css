@@ -583,7 +583,7 @@ dl.attribute-group dd {
 }
 
 .sidebar-title {
-	display: inline-block; 
+	display: inline-block;
 	color: #333;
   	/* margin-right: 0;
   	cursor: pointer;*/
@@ -1110,5 +1110,3 @@ th.table-more-bt {
         display: none !important;
     }
 }
-
-
