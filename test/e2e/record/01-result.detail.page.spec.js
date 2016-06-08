@@ -12,60 +12,24 @@ describe('Search result detail page,', function () {
         browser.executeScript('document.cookie = "ermrest=C6KFIQn2JS37CGovofWnjKfu;path=/;secure;"');
     });
 
+    afterEach(function () {
+        browser.rootEl = "#main-content";
+        browser.ignoreSynchronization = false;
+    });
+
     describe('should click one random sidebar attribute', function () {
         var randomSidebarAttr = '';
         var randomEditAttr = '';
         var randomRecordTitle = '';
-        beforeEach(function (done) {
+        beforeEach(function () {
             var allAttrs = chaisePage.sidebar.getSidebarAttrsDisplayed();
             allAttrs.count().then(function (num) {
                     var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
                     var ranAttr = allAttrs.get(ranInt);
-                    //var ranAttr = allAttrs.get(4);
-                    ranAttr.getText().then(function (attrName) {
-                        //avoid 'Somite Count' and other attributes because it will not show in record page
-                        //might need other ways to check it
-                        if (attrName === 'Somite Count') {
-                            var nextAttr = allAttrs.get(ranInt + 1);
-                            nextAttr.getText().then(function (txt) {
-                                randomSidebarAttr = txt;
-                                console.log(' ');
-                                console.log('' + txt);
-                                nextAttr.click();
-                                done();
-                            });
-                        } else if (attrName === 'Mouse Chromosome') {
-                            var nextAttr = allAttrs.get(ranInt - 1);
-                            nextAttr.getText().then(function (txt) {
-                                randomSidebarAttr = txt;
-                                console.log('' + txt);
-                                nextAttr.click();
-                                done();
-                            });
-                        } else if (attrName === 'Investigator') {
-                            var nextAttr = allAttrs.get(ranInt + 1);
-                            nextAttr.getText().then(function (txt) {
-                                randomSidebarAttr = txt;
-                                console.log('' + txt);
-                                nextAttr.click();
-                                done();
-                            });
-                        } else if (attrName === 'Accession') {
-                            var nextAttr = allAttrs.get(ranInt - 1);
-                            nextAttr.getText().then(function (txt) {
-                                randomSidebarAttr = txt;
-                                console.log('' + txt);
-                                nextAttr.click();
-                                done();
-                            });
-                        } else {
-                            randomSidebarAttr = attrName;
-                            ranAttr.getText().then(function (txt) {
-                                console.log('' + txt);
-                                ranAttr.click();
-                                done();
-                            });
-                        }
+                    ranAttr.getText().then(function (txt) {
+                        randomSidebarAttr = txt;
+                        console.log('' + txt);
+                        ranAttr.click();
                     });
             });
         });
@@ -111,7 +75,6 @@ describe('Search result detail page,', function () {
 
                 describe('the record detail page,', function () {
                     beforeEach(function (done) {
-                        browser.ignoreSynchronization = true;
                         done();
                     });
 
@@ -157,23 +120,22 @@ describe('Search result detail page,', function () {
                         expect(accKey.getText()).toBe('Pubmed Id');
                     }).pend('Some record page may not contain "Pumbed Id", ex. Mouse Phenotype -> Normative');
 
-                    it('should contain the randomly chosen attribute field', function () {
+                    xit('should contain the randomly chosen attribute field', function () {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
                         var sidebarAttrKey = chaisePage.recordPage.findAssociationKeyByName(sidebarAttr);
                         expect(sidebarAttrKey.isDisplayed()).toBe(true);
                     });
-                    it('should contain the randomly chosen edit filter in association key', function (done) {
+
+                    xit('should contain the randomly chosen edit filter in association key', function () {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
                         var sidebarAttrValue = chaisePage.recordPage.findAssociationValueByName(sidebarAttr);
                         expect(sidebarAttrValue.isDisplayed()).toBe(true);
                         sidebarAttrValue.getText().then(function (valueText) {
                             expect(valueText.toLowerCase()).toContain(randomEditAttr.toLowerCase());
-                            done();
                         });
                     });
 
-                    xit('should display \'Files\', toggle it ' +
-                        'to display file icon or \'No rows found\'', function (done) {
+                    xit('should display \'Files\', toggle it ' + 'to display file icon or \'No rows found\'', function () {
                         var fileWrapper = chaisePage.recordPage.findToggleWrapperByName('Files');
                         expect(fileWrapper.isDisplayed()).toBe(true);
                         expect(fileWrapper.getText()).toBe('FILES');
@@ -187,9 +149,6 @@ describe('Search result detail page,', function () {
                             if (text.toLowerCase() !== 'no rows found') {
                                 var fileImg = collapseArea.$('img');
                                 expect(fileImg.isDisplayed()).toBe(true);
-                                done();
-                            } else {
-                                done();
                             }
                         });
                     }).pend('Some record page may not contain "Files", ex. Organism -> Human');
@@ -202,12 +161,6 @@ describe('Search result detail page,', function () {
                         expect(collapseArea.isDisplayed()).toBe(true);
                     });
 
-                });
-
-                afterEach(function (done) {
-                    browser.rootEl = "#main-content";
-                    browser.ignoreSynchronization = false;
-                    done();
                 });
 
 

@@ -1,0 +1,15 @@
+{
+  "name": "chaise-data-import",
+  "description": "Allows you to import data for testing chaise UI. ",
+  "version": "0.0.0",
+  "engines": [
+    "node >= 0.8.16"
+  ],
+  "main": "import.js",
+  "scripts": {},
+  "dependencies": {
+    "jasmine-bail-fast": "0.0.1",
+    "q": "x",
+    "request": "x"
+  }
+}

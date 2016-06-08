@@ -1,4 +1,4 @@
-exports.config = {
+var config = {
   sauceUser: process.env.SAUCE_USERNAME,
   sauceKey: process.env.SAUCE_ACCESS_KEY,
   framework: 'jasmine2',
@@ -24,3 +24,9 @@ exports.config = {
   // CHAISE_BASE_URL should be https://dev.misd.isi.edu/chaise for now.
   //baseUrl: process.env.CHAISE_BASE_URL + '/data/record'
 };
+
+var dataSetup = require('../data_setup/configuration.js');
+dataSetup.parameterize(config, 'record', '/search');
+
+exports.config = config;
+
