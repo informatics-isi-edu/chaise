@@ -206,7 +206,11 @@
         // Returns true if a column's fields should be automatically generated
         // In this case, columns of type serial* == auto-generated
         function isAutoGen(name) {
-            return (vm.dataEntryModel.table.columns.get(name).type.name.indexOf('serial') === 0);
+            try {
+                return (vm.dataEntryModel.table.columns.get(name).type.name.indexOf('serial') === 0);
+            } catch (exception) {
+                return false;
+            }
         }
 
         function isForeignKey(columnName) {
@@ -214,7 +218,11 @@
             // obj with the column name as keys and FK values as values. For now,
             // we can determine whether a column is a FK by checking whether domainValues
             // has a key of that column's name.
-            return vm.dataEntryModel.domainValues.hasOwnProperty(columnName);
+            try {
+                return vm.dataEntryModel.domainValues.hasOwnProperty(columnName);
+            } catch (exception) {
+                return false;
+            }
         }
 
         // Returns true if a column type is found in the given array of types
