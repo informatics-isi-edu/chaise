@@ -47,7 +47,9 @@ ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
 			   ../../ermrestjs/js/ermrest.js \
 			   ../../ermrestjs/js/filters.js \
 			   ../../ermrestjs/js/ngermrest.js \
-			   ../../ermrestjs/js/utilities.js
+			   ../../ermrestjs/js/utilities.js \
+			   ../../ermrestjs/errors/networkerrors.js \
+			   ../../ermrestjs/errors/validationerrors.js
 
 # CSS source
 CSS=styles
@@ -106,10 +108,6 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestMatrixController.js \
 	$(JS)/tour.js \
 	$(JS)/matrix.js
-
-# error definitions
-ERROR_SOURCE=common/errors/networkerrors.js \
-             common/errors/validationerrors.js
 
 # HTML templates
 TEMPLATES=views
@@ -213,12 +211,13 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/errors.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/interceptors.js \
+	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
+	$(COMMON)/navbar.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \
@@ -250,7 +249,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/bootstrap.js \
 	$(RECORD_ASSETS)/lib/angular-animate.min.js \
-	$(COMMON)/views.js
+	$(COMMON)/navbar.js
 
 RECSET_JS_SOURCE=$(JS)/ermrest.js \
     $(COMMON)/utils.js \
@@ -512,9 +511,6 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
-	for script in $(ERROR_SOURCE); do \
-		echo "<script src='../$$script'></script>" >> .make-de-asset-block ; \
-	done
 	for file in $(DE_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-de-asset-block ; \
 	done
@@ -534,9 +530,6 @@ $(JS_CONFIG): chaise-config-sample.js
 	for file in $(RECSET_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
-	done
-	for script in $(ERROR_SOURCE); do \
-    		echo "<script src='../$$script'></script>" >> .make-rs-asset-block ; \
 	done
 	for file in $(RECSET_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-rs-asset-block ; \

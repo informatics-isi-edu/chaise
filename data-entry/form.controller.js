@@ -6,6 +6,7 @@
     .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
+        vm.server = context.server;
         vm.editMode = context.filters || false;
         vm.booleanValues = context.booleanValues;
         vm.getAutoGenValue = getAutoGenValue;
@@ -242,14 +243,14 @@
                     ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
                 } catch (e) {
                     if (e instanceof Errors.NotFoundError) {
-                        ErrorService.annotationNotFound(e);
+                        return;
                     }
                 }
                 try {
                     hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
                 } catch (e) {
                     if (e instanceof Errors.NotFoundError) {
-                        ErrorService.annotationNotFound(e);
+                        return;
                     }
                 }
             } finally {

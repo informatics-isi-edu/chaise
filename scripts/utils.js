@@ -216,6 +216,9 @@ function getDetailColumns(row) {
 }
 
 function getTableColumnsNames(table_name, maxCols) {
+	if (chaiseConfig['maxColumns'] != null) {
+		maxCols = chaiseConfig['maxColumns'];
+	}
 	var ret = [];
     $.each(display_columns['top_columns'], function(i, col) {
         if (display_columns['title'] == col || display_columns['summary'] == col ||

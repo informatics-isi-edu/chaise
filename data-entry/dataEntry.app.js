@@ -5,6 +5,7 @@
         'ERMrest',
         'ngSanitize',
         'chaise.utils',
+        'chaise.navbar',
         'chaise.errors',
         'chaise.alerts',
         'chaise.filters',
@@ -64,7 +65,7 @@
 
     .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', 'ErrorService', '$log', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, ErrorService, $log) {
         try {
-            var server = ermrestServerFactory.getServer(context.serviceURL);
+            var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
         } catch (exception) {
             // The domain is typed incorrectly or does not exist ....?
             $log.info(exception);
