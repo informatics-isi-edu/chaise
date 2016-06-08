@@ -1307,7 +1307,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
         }
 
         $scope.editRecord = function(){
-            window.location.replace(window.location.origin + '/chaise/data-entry/' + window.location.hash);
+            window.location.replace('../data-entry/' + window.location.hash);
         };
 
         $scope.permanentLink = function(){

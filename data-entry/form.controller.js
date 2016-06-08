@@ -40,7 +40,8 @@
             var form = vm.formContainer;
             var model = vm.dataEntryModel;
             var rowset = model.rows;
-            var redirectUrl = $window.location.origin;
+            // '../data-entry/' + window.location.hash
+            var redirectUrl = '../';
             form.$setUntouched();
             form.$setPristine();
 
@@ -49,7 +50,7 @@
                 // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
                 // TODO: Postpone using datapath api to build redirect url until
                 // datapath is redeveloped to only use aliases when necessary
-                redirectUrl += '/chaise/record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
+                redirectUrl += 'record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
 
                 // Find the shortest "primary key" for use in redirect url
                 var keys = model.table.keys.all().sort(function(a, b) {
@@ -68,7 +69,7 @@
             } else if (rowset.length > 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record set...'});
                 // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
-                redirectUrl += '/chaise/recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
+                redirectUrl += 'recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
             } else {
                 return AlertsService.addAlert({type: 'error', message: 'Sorry, there is no data to submit. You must have at least 1 set of data for submission.'});
             }
