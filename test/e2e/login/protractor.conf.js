@@ -10,14 +10,14 @@ exports.config = {
     }
   },
   specs: [
-    '*.spec.js'
+    'login.spec.js'
   ],
   jasmineNodeOpts: {
     showColors: true,
     defaultTimeoutInterval: 30000
   },
   // If ng-app attribute is in a descendant <body>, tell Protractor where ng-app is
-  //rootElement: '#loginApp',
-  rootElement: '#main-content',
+  rootElement: '#loginApp',
+  //rootElement: '#main-content',
   baseUrl: process.env.CHAISE_BASE_URL
 };
