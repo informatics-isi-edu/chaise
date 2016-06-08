@@ -27,7 +27,7 @@
                 $injector.get('$http').get(url).then(function success(response) {
                     $window.open(response.data.redirect_url, '_self');
                 }, function error(response) {
-                    console.log('Error: ', error);
+                    console.log('Error: ', response);
                 });
             }
         }

@@ -3,7 +3,7 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window) {
+    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
         vm.editMode = context.filters || false;
@@ -50,19 +50,24 @@
                 // datapath is redeveloped to only use aliases when necessary
                 redirectUrl += '/chaise/record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
 
-                // Find the shortest "primary key" for use in redirect url
-                var keys = model.table.keys.all().sort(function(a, b) {
-                    return a.colset.length() - b.colset.length();
-                });
-                var shortestKey = keys[0].colset.columns;
+                try {
+                    // Find the shortest "primary key" for use in redirect url
+                    var keys = model.table.keys.all().sort(function(a, b) {
+                        return a.colset.length() - b.colset.length();
+                    });
+                    var shortestKey = keys[0].colset.columns;
 
-                // Build the redirect url with key cols and entity's values
-                for (var c = 0, len = shortestKey.length; c < len; c++) {
-                    var colName = shortestKey[c].name;
-                    var separator = null;
-                    if (rowset.length == 1) {
-                        redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
+                    // Build the redirect url with key cols and entity's values
+                    for (var c = 0, len = shortestKey.length; c < len; c++) {
+                        var colName = shortestKey[c].name;
+                        var separator = null;
+                        if (rowset.length == 1) {
+                            redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
+                        }
                     }
+                } catch (exception) { // catches model.table.keys.all()
+                    // handle exception
+                    $log.info(exception);
                 }
             } else if (rowset.length > 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record set...'});
@@ -123,30 +128,38 @@
         }
 
         function getDefaults() {
-            var defaults = [];
-            var columns = vm.dataEntryModel.table.columns.all();
-            var numColumns = columns.length;
-            for (var i = 0; i < numColumns; i++) {
-                var columnName = columns[i].name;
-                if (vm.isAutoGen(columnName) || vm.isHiddenColumn(columns[i])) {
-                    defaults.push(columnName);
+            try {
+                var defaults = [];
+                var columns = vm.dataEntryModel.table.columns.all();
+                var numColumns = columns.length;
+                for (var i = 0; i < numColumns; i++) {
+                    var columnName = columns[i].name;
+                    if (vm.isAutoGen(columnName) || vm.isHiddenColumn(columns[i])) {
+                        defaults.push(columnName);
+                    }
                 }
+                return defaults;
+            } catch (exception) { // catches table.columns.all()
+                // Should not error, if none it returns an empty array
             }
-            return defaults;
         }
 
         function getKeyColumns() {
-            var keys = [];
-            var _keys = vm.dataEntryModel.table.keys.all();
-            var numKeys = _keys.length;
-            for (var i = 0; i < numKeys; i++) {
-                var columns = _keys[i].colset.columns;
-                var numColumns = columns.length;
-                for (var c = 0; c < numColumns; c++) {
-                    keys.push(columns[c]);
+            try {
+                var keys = [];
+                var _keys = vm.dataEntryModel.table.keys.all();
+                var numKeys = _keys.length;
+                for (var i = 0; i < numKeys; i++) {
+                    var columns = _keys[i].colset.columns;
+                    var numColumns = columns.length;
+                    for (var c = 0; c < numColumns; c++) {
+                        keys.push(columns[c]);
+                    }
                 }
+                return keys;
+            } catch (exception) { // catches table.keys.all()
+                // Should not error, if none it returns an empty array
             }
-            return keys;
         }
 
         function columnToDisplayType(column) {

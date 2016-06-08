@@ -62,8 +62,13 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', 'ErrorService', '$http', '$filter', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, ErrorService, $http, $filter) {
-        var server = ermrestServerFactory.getServer(context.serviceURL);
+    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', 'ErrorService', '$log', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, ErrorService, $log) {
+        try {
+            var server = ermrestServerFactory.getServer(context.serviceURL);
+        } catch (exception) {
+            // The domain is typed incorrectly or does not exist ....?
+            $log.info(exception);
+        }
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             try {
                 var schema = catalog.schemas.get(context.schemaName);
@@ -91,19 +96,19 @@
                                 try {
                                     try {
                                         var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
-                                    } catch (error) {
+                                    } catch (exception) {
                                         // An error being caught means the `vocabulary` annotation is not defined
-                                        if (error instanceof Errors.NotFoundError) {
-                                            ErrorService.annotationNotFound(error);
+                                        if (exception instanceof Errors.NotFoundError) {
+                                            ErrorService.annotationNotFound(exception);
                                         }
                                     }
 
                                     try {
                                         var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
-                                    } catch (error) {
+                                    } catch (exception) {
                                         // An error being caught means the `display` annotation is not defined
-                                        if (error instanceof Errors.NotFoundError) {
-                                            ErrorService.annotationNotFound(error);
+                                        if (exception instanceof Errors.NotFoundError) {
+                                            ErrorService.annotationNotFound(exception);
                                         }
                                     }
 
@@ -112,9 +117,9 @@
                                             try {
                                                 var termColumn = ftable.columns.get(vocabAnnotation.content.term);
                                                 displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
-                                            } catch (error) {
+                                            } catch (exception) {
                                                 // notFoundError should not occur
-                                                $log.info(error);
+                                                $log.info(exception);
                                             }
                                         }
                                         // vocabulary term is undefined
@@ -128,9 +133,9 @@
                                                         break;
                                                     }
                                                 } /* term undefined */
-                                            } catch (error) {
+                                            } catch (exception) {
                                                 // ftable.columns.all() should not fail
-                                                $log.infor(error);
+                                                $log.infor(exception);
                                             }
                                         }
                                         if (displayColumns.length > 1) {
@@ -139,6 +144,7 @@
                                         /* END USE CASE 2 */
                                     }
                                     /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
+                                    /* Git issue #358 */
                                     else if (displayAnnotation) {
                                         if (displayAnnotation.content.row_name) {
                                             // TODO
@@ -151,27 +157,25 @@
                                         }
                                     }
                                 } finally {
-                                    try {
-                                        (function(fkey) {
-                                            ftable.entity.get(null, null, displayColumns).then(function success(rowset){
-                                                var domainValues = dataEntryModel.domainValues[fkey.colset.columns[0].name] = [];
-                                                var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
+                                    (function(fkey) {
+                                        ftable.entity.get(null, null, displayColumns).then(function success(rowset) {
+                                            var domainValues = dataEntryModel.domainValues[fkey.colset.columns[0].name] = [];
+                                            var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
 
-                                                angular.forEach(rowset.data, function(column) {
-                                                    domainValues.push( {key: column[keyColumn.name], display: column[displayColumnName]/*Util.patternExpansion( pattern, column.data )*/} );
-                                                });
+                                            angular.forEach(rowset.data, function(column) {
+                                                domainValues.push( {key: column[keyColumn.name], display: column[displayColumnName]/*Util.patternExpansion( pattern, column.data )*/} );
                                             });
-                                        })(fkey);
-                                    } catch (error) {
-                                        // handle error
-                                    }
+                                        }, function error(response) {
+                                            // shouldn't error out
+                                            $log.info(response);
+                                        });
+                                    })(fkey);
                                 }
                             }
                         });
-                    // catches table.foreignKays.all()
-                    } catch (error) {
+                    } catch (exception) { // catches table.foreignKays.all()
                         // this shouldn't error out
-                        $log.info(error);
+                        $log.info(exception);
                     }
 
                     // If there are filters, populate the model with existing records' column values
@@ -179,8 +183,12 @@
                         var path = new ERMrest.DataPath(table);
                         var filters = [];
                         angular.forEach(context.filters, function(value, key) {
-                            var column = path.context.columns.get(key);
-                            filters.push(new ERMrest.BinaryPredicate(column, ERMrest.OPERATOR.EQUAL, value));
+                            try {
+                                var column = path.context.columns.get(key);
+                                filters.push(new ERMrest.BinaryPredicate(column, ERMrest.OPERATOR.EQUAL, value));
+                            } catch (exception) {
+                                // handle error
+                            }
                         });
                         // TODO: Store filters in URI form in model to use later on form submission
                         var filterString = new ERMrest.Conjunction(filters);
@@ -194,12 +202,16 @@
                             }
 
                             angular.forEach(entity[0], function(value, colName) {
-                                var pathColumnType = path.context.columns.get(colName).column.type.name;
-                                if (pathColumnType == 'date' || pathColumnType == 'timestamptz') {
-                                    // Must transform the value into a Date so that
-                                    // Angular won't complain when putting the value
-                                    // in an input of type "date" in the view
-                                    value = new Date(value);
+                                try {
+                                    var pathColumnType = path.context.columns.get(colName).column.type.name;
+                                    if (pathColumnType == 'date' || pathColumnType == 'timestamptz') {
+                                        // Must transform the value into a Date so that
+                                        // Angular won't complain when putting the value
+                                        // in an input of type "date" in the view
+                                        value = new Date(value);
+                                    }
+                                } catch (exception) {
+                                    // should not error out
                                 }
                                 dataEntryModel.rows[dataEntryModel.rows.length - 1][colName] = value;
                             });
@@ -207,29 +219,30 @@
                     }
                     console.log('Model:',dataEntryModel);
 
-                // catches schema.tables.get(table name)
-                } catch (error) {
-                    console.log(error);
-                    console.log(error instanceof Errors.NotFoundError);
-                    if (error instanceof Errors.NotFoundError) {
-                        alert('Sorry, the requested table "' + context.tableName + '" was not found. Please check the URL and refresh the page.');
-                        ErrorService.tableNotFound(error);
+
+                } catch (exception) { // catches schema.tables.get(table name)
+                    if (exception instanceof Errors.NotFoundError) {
+                        ErrorService.tableNotFound(context.tableName, exception);
                     }
                 }
-
-            // catches catalog.schemas.get(schema name)
-            } catch (error) {
-                if (error instanceof Errors.NotFoundError) {
-                    alert('Sorry, the requested schema "' + context.schemaName + '" was not found. Please check the URL and refresh the page');
-                    ErrorService.schemaNotFound(error);
+            } catch (exception) { // catches catalog.schemas.get(schema name)
+                if (exception instanceof Errors.NotFoundError) {
+                    ErrorService.schemaNotFound(context.schemaName, exception);
                 }
             }
-        }, function error(response) {
+        }, function error(response) { // error promise for server.catalogs.get()
             console.log("Go auth spot:", response);
             // TODO verify this is handled via an interceptor by the function in the ErrorService
-            if (response.status == 401) {
-                getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
-                console.log(response);
+            // If the interceptor handles this, do nothing here
+            // 401 should not be caught here.
+            if (response.code == 401) {
+                UriUtils.getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
+                $log.info(response);
+            }
+
+            // Not sure why this is getting an error promise instead of being caught by the try/catch
+            if (response.code == 404) {
+                ErrorService.catalogNotFound(context.catalogID, response);
             }
         });
     }]);

@@ -12,15 +12,18 @@
             responseError: function(error) {
                 $log.info(error);
                 switch (error.status) {
+                    default:
+                        // warn or error?
+                        $log.warn(error);
                     case 401:
                         ErrorService.error401(error);
+                        break;
+                    case 404:
+                        ErrorService.error404(error);
                         break;
                     case 409:
                         ErrorService.error409(error);
                         break;
-                    default:
-                    // warn or error?
-                        $log.warn(error);
                 }
                 return $q.reject(error);
             }
