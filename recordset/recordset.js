@@ -15,7 +15,7 @@
  */
 
 // The Chaise RecordSet module
-angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
+angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise.authen'])
 
 // Register the 'context' object which can be accessed by config and other
 // services.
@@ -136,19 +136,8 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
 
 }])
 
-.factory('utils', ['ermrestServerFactory', function (ermrestServerFactory) {
-    return {
-        login: function (serviceURL) {
-            var server = ermrestServerFactory.getServer(serviceURL);
-
-            // authenticiation
-            server.session.login(window.location.href);
-        }
-    };
-}])
-
 // Register the recordset controller
-.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'context', 'UriUtils', 'utils', function($scope, $rootScope, pageInfo, $window, recordsetModel, context, UriUtils, utils) {
+.controller('recordsetController', ['$scope', '$rootScope', 'ermrestServerFactory', 'pageInfo', '$window', 'recordsetModel', 'context', 'UriUtils', 'Session', function($scope, $rootScope, ermrestServerFactory, pageInfo, $window, recordsetModel, context, UriUtils, Session) {
 
     $scope.vm = recordsetModel;
 
@@ -171,11 +160,11 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
 
     // login logout should be factored out into a common module
     $scope.login = function() {
-        utils.login(context.serviceURL);
+        Session.login(window.location.href);
     };
 
     $scope.logout = function() {
-        context.server.session.logout(window.location);
+        Session.logout();
     };
 
     $scope.sort = function () {
@@ -220,7 +209,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
 
             if (error instanceof ERMrest.UnauthorizedError) {
                 // session has expired, login
-                utils.login(context.serviceURL);
+                Session.login(window.location.href);
             } else {
 
                 // TODO alert error
@@ -298,7 +287,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    utils.login(context.serviceURL);
+                    Session.login(window.location.href);
                 } else {
                     // enable buttons
                     pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
@@ -341,7 +330,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    utils.login(context.serviceURL);
+                    Session.login(window.location.href);
                 } else {
 
                     //enable buttons
@@ -373,7 +362,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
 }])
 
 // Register work to be performed after loading all modules
-.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'utils', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, utils) {
+.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session) {
 
     $rootScope.location = window.location.href;
     pageInfo.loading = true;
@@ -384,9 +373,9 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
     var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
 
     // authenticiation
-    server.session.get().then(function() {
+    Session.getSession().then(function(session) {
 
-        $rootScope.user = server.getUser().display_name;
+        $rootScope.user = session.client.display_name;
         server.catalogs.get(context.catalogID).then(function(catalog) {
             console.log(catalog);
 
@@ -483,10 +472,9 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
                         pageInfo.previousButtonDisabled = true;
                         pageInfo.nextButtonDisabled = true;
 
-                        // TODO get entity error
                         if (error instanceof ERMrest.UnauthorizedError) {
                             // session has expired, login
-                            utils.login(context.serviceURL);
+                            Session.login(window.location.href);
                         }
                     });
                 }, function (error) {
@@ -494,10 +482,9 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
                     pageInfo.previousButtonDisabled = true;
                     pageInfo.nextButtonDisabled = true;
 
-                    // TODO get count error
                     if (error instanceof ERMrest.UnauthorizedError) {
                         // session has expired, login
-                        utils.login(context.serviceURL);
+                        Session.login(window.location.href);
                     }
                 });
 
@@ -522,14 +509,14 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils'])
             } else if (error instanceof ERMrest.ForbiddenError) {
 
             } else if (error instanceof ERMrest.UnauthorizedError) {
-                utils.login(context.serviceURL);
+                Session.login(window.location.href);
             }
         });
         
     }, function(error) {
         // not logged in, redirect to login
-        if (error instanceof ERMrest.NotFoundError) {
-            utils.login(context.serviceURL);
+        if (error instanceof Session.NotFoundError) {
+            Session.login(window.location.href);
         }
     });
 

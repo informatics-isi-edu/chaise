@@ -700,18 +700,13 @@ function initModels(options, successCallback) {
 			}
 		});
 	});
-	var topColumns = display_columns['top_columns'];
-	display_columns['top_columns'] = [];
-	if (topN[table] != null) {
-		$.each(topN[table], function(i, col) {
+	var topColumns = getTableAnnotation(table, TABLES_MAP_URI, 'top_columns');
+	if (topColumns != null) {
+		display_columns['top_columns'] = [];
+		$.each(topColumns, function(i,col) {
 			display_columns['top_columns'].push(col);
 		});
 	}
-	$.each(topColumns, function(i,col) {
-		if (!display_columns['top_columns'].contains(col)) {
-			display_columns['top_columns'].push(col);
-		}
-	});
 	
 	var facetOrder = j;
 	var extraFacets = [];

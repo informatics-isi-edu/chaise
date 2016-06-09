@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.navbar', ['chaise.utils'])
+    angular.module('chaise.navbar', ['chaise.utils', 'chaise.authen'])
 
     /**
     * @desc
@@ -15,7 +15,7 @@
     * Default text is 'Chaise'.
     * @example <navbar server="controller.server" brand-image="/path/to/img.png" brand-text="FaceBase"></navbar>
     */
-    .directive('navbar', ['$window', function($window) {
+    .directive('navbar', ['$window', 'Session', function($window, Session) {
         return {
             restrict: 'EA',
             scope: {
@@ -25,8 +25,8 @@
             },
             templateUrl: '../common/templates/navbar.html',
             link: function(scope) {
-                scope.server.session.get().then(function() {
-                    var user = scope.server.getUser();
+                Session.getSession().then(function(session) {
+                    var user = session.client;
                     scope.user = user.display_name || user.full_name || user.email || user;
                 }, function(error) {
                     // No session = no user
@@ -34,12 +34,12 @@
                 });
 
                 scope.login = function login() {
-                    scope.server.session.login($window.location.href);
-                }
+                    Session.login($window.location.href);
+                };
 
                 scope.logout = function logout() {
-                    scope.server.session.logout($window.location);
-                }
+                    Session.logout();
+                };
             }
         };
     }]);
