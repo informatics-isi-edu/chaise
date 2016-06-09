@@ -19,14 +19,6 @@
             // passthrough to app for now
         }
 
-        // Special behavior for handling annotations not found because an
-        // annotation that wasn't found != a true 404 error. Just means an
-        // ERMrest resource doesn't have a particular annotation.
-        function annotationNotFound(error) {
-            $log.info(error);
-        }
-
-
         // This may change, but figured each app would handle this similarly
         function catalogNotFound(catalogID, error) {
             AlertsService.addAlert({type: 'error', message: 'Sorry, the requested catalog "' + catalogID + '" was not found. Please check the URL and refresh the page' });

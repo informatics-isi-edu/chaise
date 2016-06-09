@@ -97,21 +97,13 @@
                                 try {
                                     try {
                                         var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
-                                    } catch (exception) {
-                                        // An error being caught means the `vocabulary` annotation is not defined
-                                        if (exception instanceof Errors.NotFoundError) {
-                                            ErrorService.annotationNotFound(exception);
-                                        }
-                                    }
+                                    // An error being caught means the `vocabulary` annotation is not defined and that's okay
+                                    } catch (exception) { }
 
                                     try {
                                         var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
-                                    } catch (exception) {
-                                        // An error being caught means the `display` annotation is not defined
-                                        if (exception instanceof Errors.NotFoundError) {
-                                            ErrorService.annotationNotFound(exception);
-                                        }
-                                    }
+                                    // An error being caught means the `display` annotation is not defined and that's okay
+                                    } catch (exception) { }
 
                                     if (vocabAnnotation) {
                                         if (vocabAnnotation.content.term) {
@@ -136,7 +128,7 @@
                                                 } /* term undefined */
                                             } catch (exception) {
                                                 // ftable.columns.all() should not fail
-                                                $log.infor(exception);
+                                                $log.info(exception);
                                             }
                                         }
                                         if (displayColumns.length > 1) {
@@ -222,6 +214,7 @@
 
 
                 } catch (exception) { // catches schema.tables.get(table name)
+                    console.log(exception);
                     if (exception instanceof Errors.NotFoundError) {
                         ErrorService.tableNotFound(context.tableName, exception);
                     }
