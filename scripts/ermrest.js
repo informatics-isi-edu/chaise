@@ -417,6 +417,9 @@ function submitLogout(logout_uri) {
 	$('#login_link').hide();
 	$('#logout_link').hide();
 
+	if (logout_uri == null) {
+		logout_uri = chaiseConfig['logoutURL'];
+	}
 	var logout_url = (logout_uri != null ? logout_uri : '/chaise/logout');
 	window.location = logout_url;
 }
@@ -2021,9 +2024,7 @@ function successLogin(data, textStatus, jqXHR) {
 }
 
 function errorLogin(jqXHR, textStatus, errorThrown, url, param) {
-	document.body.style.cursor = 'default';
-	var login_url = '../login?referrer=' + encodeSafeURIComponent(window.location.href);
-	window.location = login_url;
+	handleError(jqXHR, textStatus, errorThrown, url);
 }
 
 function hasCheckedValues(box, facet) {
