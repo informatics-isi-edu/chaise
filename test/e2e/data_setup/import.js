@@ -39,6 +39,9 @@ exports.setup = function(options) {
 		console.log("Valid session found");
 		return createCatalog(catalog);
 	}).then(function() {
+		return catalog.addACLs([{ name: "read_user", user: "*" }, { name: "content_read_user", user : "*"}]);
+	}).then(function() {
+		console.log("ACL's added to catalog");
 		return createSchema(schema);
 	}).then(function() {
 		return createTables(schema);
@@ -176,7 +179,7 @@ var createSchema = function(schema) {
 var createTables = function(schema) {
 	var defer = Q.defer();
 
-	var promises = [], tables = {}, tableNames = [];
+	var promises = [], tables = {}, tableNames = [], index = 0;
 
 	// Populate tables from their json on basis of schema tables field and then create them
 	for (var k in schema.content.tables) {
@@ -187,7 +190,7 @@ var createTables = function(schema) {
 		});
 		tables[k] = table;
 		tableNames.push(k);
-		if (!schema.content.tables[k].exists || (config.tables.newTables.indexOf(k) != -1)) promises.push(table.create());
+		if (!schema.content.tables[k].exists || (config.tables.newTables.indexOf(k) != -1)) promises.push(table.create(++index * 500));
 	}
 
 	Q.all(promises).then(function() {

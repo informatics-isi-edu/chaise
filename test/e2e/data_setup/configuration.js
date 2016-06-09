@@ -4,6 +4,8 @@ exports.parameterize = function(config, configParam, page) {
   var dataSetupCode = require("./import.js");
 
   config.onPrepare = function() {
+    browser.params.configuration = testConfiguration;
+    
     if (testConfiguration.dataSetup) {
       var codeDone = false, successful = false;
       testConfiguration.dataSetup.url = process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/');
@@ -37,7 +39,7 @@ exports.parameterize = function(config, configParam, page) {
             codeDone = false;
             dataSetupCode.tear({
               url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/'),
-              authCookie: testConfiguration.dataSetup.authCookie,
+              dataSetup: testConfiguration.dataSetup,
               catalogId: catalogId
             }).done(function() {
               codeDone = true;
@@ -57,7 +59,7 @@ exports.parameterize = function(config, configParam, page) {
           codeDone = false;
           dataSetupCode.tear({
             url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/'),
-            authCookie: testConfiguration.dataSetup.authCookie,
+            dataSetup: testConfiguration.dataSetup,
             catalogId: catalogId
           }).done(function() {
             codeDone = true;

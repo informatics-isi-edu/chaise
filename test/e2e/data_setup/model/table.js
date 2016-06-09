@@ -34,27 +34,26 @@ var Table = function(options) {
 	};
 };
 
-Table.prototype.create = function(table) {
+Table.prototype.create = function(timeout) {
 	var defer = Q.defer(), self  = this;
-	if (typeof table == 'string') {
-		this.setTableParameters(table);
-	} else if (typeof table == 'object'){
-		this.content = table;
-		this.name = table.table_name;
-	}
 
 	if (!this.catalog.id || !this.schema.name || !this.name) return defer.reject("No catalog or schema set : create table function"), defer.promise;
 	
 	this.content.schema_name = this.schema.name;
 	this.foreignKeys = this.content.foreign_keys;
 	this.content.foreign_keys = [];
-	http.post(this.url + 'catalog/' + this.catalog.id + "/schema/" + this.schema.name + "/table", this.content).then(function(response) {
-		self.content = response.data;
-		self.name = self.content.table_name;
-		defer.resolve(self);
-	}, function(err) {
-		defer.reject(err, self);
-	});
+
+	setTimeout(function() {
+
+		http.post(self.url + 'catalog/' + self.catalog.id + "/schema/" + self.schema.name + "/table", self.content).then(function(response) {
+			self.content = response.data;
+			self.name = self.content.table_name;
+			defer.resolve(self);
+		}, function(err) {
+			defer.reject(err, self);
+		});
+
+	}, timeout || 0);
 
 	return defer.promise;
 };

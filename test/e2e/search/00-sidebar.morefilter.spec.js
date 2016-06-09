@@ -11,7 +11,6 @@ var chaisePage = require('../chaise.page.js');
 
 describe('Chaise initial sidebar,', function () {
 
-
     var EC = protractor.ExpectedConditions;
 
     var spinner = element(by.id('spinner'));
@@ -28,6 +27,7 @@ describe('Chaise initial sidebar,', function () {
     });
 
     describe('after initialization,', function () {
+
         var numOfAttrs, ranInt;
         it('should show the initial sidebar', function () {
             var sidebar = element(by.id('sidebar'));
@@ -69,21 +69,21 @@ describe('Chaise initial sidebar,', function () {
                 expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
             });
         });
-
-        //previously displayed attribute
-        var somiteCount = 'Somite Count';
-        //previously non-displayed attribute
-        var nonDisplayedAttrName = 'Title';
-
-
-        var somiteCountAttr = chaisePage.sidebar.findSidebarAttrByName(somiteCount);
-        var nonDisplayedAttr = chaisePage.sidebar.findSidebarAttrByName(nonDisplayedAttrName);
-        it('should show \'Somite Count\' attribute', function () {
-            expect(somiteCountAttr.isDisplayed()).toBe(true);
+        
+        it('should show attribute', function () {
+            var config = chaisePage.getConfig(["Chaise initial sidebar,",'after initialization,','should show attribute'])
+            if (config) {
+                var displayedAttr = chaisePage.sidebar.findSidebarAttrByName(config['attribute']);
+                expect(displayedAttr.isDisplayed()).toBe(true);
+            }
         });
 
-        it('should not show \'' + nonDisplayedAttrName + '\' attribute', function () {
-            expect(nonDisplayedAttr.isDisplayed()).toBe(false);
+        var suite = it('should not show attribute', function () {
+            var config = chaisePage.getConfig(["Chaise initial sidebar,",'after initialization,','should not show attribute'])
+            if (config) {
+                var nonDisplayedAttr = chaisePage.sidebar.findSidebarAttrByName(config['attribute']);
+                expect(nonDisplayedAttr.isDisplayed()).toBe(false);
+            }
         });
 
         var viewAll = chaisePage.sidebar.viewMoreBtn;

@@ -203,6 +203,19 @@ function chaisePage() {
             expect(ele.getAttribute('class')).toContain(className);
         },
     };
+    this.getConfig = function(paths) {
+        var suite = browser.params.configuration.tests;
+        for (var i = 0; i < paths.length; i++) {
+            if (!suite) break;
+            suite = suite[paths[i]];
+        }
+
+        if (!suite || suite == 'ignore') {
+            expect(true).toBe(true);
+            return false;
+        }
+        return suite;
+    }
 };
 
 module.exports = new chaisePage();

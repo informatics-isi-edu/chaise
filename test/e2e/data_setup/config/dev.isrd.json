@@ -16,8 +16,36 @@
             },
             "authCookie": "ermrest=C6KFIQn2JS37CGovofWnjKfu;"
         },
-        "cleanup" : false
+        "cleanup" : true,
+        "tests" : {
+        	"Chaise initial sidebar,": {
+        		"after initialization," : {
+        			"should show attribute" : {
+        				"attribute": "Price"
+    				},
+    				"should not show attribute": {
+    					"attribute": "Website"
+    				}
+        		}
+        	},
+        	"Filters on top of the records," : {
+        		"attribute1" : {
+        			"text": "Category",
+        			"filters": ["Hotel", "Motel", "Resort"]
+        		},
+        		"attribute2" : {
+        			"text": "Luxurious",
+        			"filters": ["false"]
+        		}
+        	}
+        }
     },
-    "record": {},
+    "record": {
+    	"tests" : {
+        	"Search result columns,": {
+        		"one randomly chosen record in the results," : {}
+        	}
+        }
+    },
     "login": {}
 }

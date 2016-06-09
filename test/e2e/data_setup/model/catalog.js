@@ -34,7 +34,42 @@ Catalog.prototype.create = function() {
 	});
 
 	return defer.promise;
+};
+
+
+Catalog.prototype.addACLs = function(acls) {
+	var defer = Q.defer(), self = this;
+	if (!this.id) return defer.reject("No Id set : addACL catalog function"), defer.promise;
+	if (!acls || acls.length == 0) defer.resolve();
+
+	var promises = [];
+
+	acls.forEach(function(acl) {
+		promises.push(self.addACL(acl));
+	});
+
+	Q.all(promises).then(function() {
+		defer.resolve();
+	}, function(err) {
+		defer.reject(err);
+	});
+
+	return defer.promise;
 }
+
+
+Catalog.prototype.addACL = function(acl) {
+	var defer = Q.defer(), self = this;
+	if (!this.id || !acl) return defer.reject("No Id or ACL set : addACL catalog function"), defer.promise;
+	
+	http.put(this.url + 'catalog/' + this.id + "/meta/" + acl.name + "/" + acl.user).then(function(response) {
+		defer.resolve(self);
+	}, function(err) {
+		defer.reject(err, self);
+	});
+
+	return defer.promise;
+};
 
 /**
  *

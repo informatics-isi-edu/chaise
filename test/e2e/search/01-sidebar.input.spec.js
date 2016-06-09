@@ -47,40 +47,4 @@ describe('Sidebar top search input,', function () {
         expect(displayedAttrs.count()).toBe(initAttrNum);
     });
 
-    var RNA = 'RNA';
-    var displayedEditAttrs = chaisePage.editFilter.editFilterAttrsDisplayed;
-    xit('should show \'Experiment Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
-        searchBox.sendKeys(RNA);
-        var experimentTypeText = 'Experiment Type';
-        chaisePage.sidebar.clickSidebarAttr(experimentTypeText);
-        displayedEditAttrs.count().then(function (num) {
-            for (var i = 0; i < num; i++) {
-                displayedEditAttrs.get(i).getText().then(function (txt) {
-                    expect(txt.toUpperCase()).toContain(RNA);
-                });
-            }
-        });
-    });
-
-    xit('should show \'Data Type\' filters containing \'RNA\' when searching for \'RNA\'', function () {
-        var dataType = 'Data Type';
-        chaisePage.editFilter.goBackToSidebar();
-        chaisePage.sidebar.clickSidebarAttr(dataType);
-        displayedEditAttrs.count().then(function (num) {
-            for (var i = 0; i < num; i++) {
-                displayedEditAttrs.get(i).getText().then(function (txt) {
-                    expect(txt.toUpperCase()).toContain(RNA);
-                });
-            }
-        });
-    });
-
-    it('should clear input and show attributes of initial size', function () {
-        for (var i = 0; i < RNA.length; i++) {
-            //hit back space several times to clear input and wait for AJAX
-            searchBox.sendKeys(protractor.Key.BACK_SPACE);
-        };
-        expect(displayedAttrs.count()).toBe(initAttrNum);
-    });
-
 });

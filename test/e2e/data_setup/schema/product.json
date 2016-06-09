@@ -47,7 +47,9 @@
               "column_name": "thumbnail"
             }
           ],
-          "annotations": {},
+          "annotations": {
+            "comment": ["thumbnail"]
+          },
           "referenced_columns": [
             {
               "table_name": "file",
@@ -65,7 +67,9 @@
               "column_name": "cover"
             }
           ],
-          "annotations": {},
+          "annotations": {
+            "comment": ["thumbnail"]
+          },
           "referenced_columns": [
             {
               "table_name": "file",
@@ -124,7 +128,6 @@
           },
           "annotations": {
             "comment": [
-              "top",
               "url"
             ],
             "description": {
@@ -180,7 +183,6 @@
             "comment": [
               "text",
               "unsortable",
-              "bottom",
               "summary",
               "hidden"
             ]
@@ -199,7 +201,6 @@
               "text",
               "unsortable",
               "html",
-              "bottom",
               "hidden"
             ]
           }
@@ -246,10 +247,7 @@
           "annotations": {
             "description": {
               "display": "Date since operational"
-            },
-            "facetOrder": [
-              "4"
-            ]
+            }
           }
         },
         {
@@ -261,12 +259,10 @@
             "typename": "boolean"
           },
           "annotations": {
+            "comment": ["top"],
             "description": {
               "display": "Luxurious"
-            },
-            "facetOrder": [
-              "5"
-            ]
+            }
           }
         }
       ],
@@ -326,7 +322,9 @@
           "type": {
             "typename": "serial4"
           },
-          "annotations": {}
+          "annotations": {
+            "comment": ["hidden"]
+          }
         },
         {
           "comment": null,
@@ -336,7 +334,9 @@
           "type": {
             "typename": "int4"
           },
-          "annotations": {}
+          "annotations": {
+            "comment": ["hidden"]
+          }
         },
         {
           "comment": null,
@@ -349,7 +349,8 @@
           "annotations": {
             "description": {
               "display": "Price"
-            }
+            },
+            "facetOrder": ["4"]
           }
         },
         {
@@ -363,11 +364,15 @@
           "annotations": {
             "description": {
               "display": "Date of Booking"
-            }
+            },
+            "facetOrder": ["5"]
           }
         }
       ],
       "annotations": {
+        "comment": [
+          "association"
+        ],
         "description": {
           "display": "Bookings"
         }
@@ -520,7 +525,7 @@
       "kind": "table",
       "keys": [
         {
-          "comment": null,
+          "comment": "vocabulary", 
           "annotations": {},
           "unique_columns": [
             "image_id",
@@ -603,9 +608,11 @@
       ],
       "annotations": {
         "comment": [
-          "association",
           "image"
-        ]
+        ],
+        "description": {
+          "display": "Accommodation Images"
+        }
       }
     },
     "category": {

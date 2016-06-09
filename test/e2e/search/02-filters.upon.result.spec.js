@@ -14,69 +14,80 @@ describe('Filters on top of the records,', function () {
             done();
         });
     });
-    var experimentTypeText = 'Experiment Type';
-    var microarrayText = 'RNA expression (microarray)';
-    var enhancerRepText = 'Enhancer reporter gene assay';
-    var proteinExpText = 'Protein expression data';
-    var expeSubfilters = filterObj.findCheckedSubfiltersByName(experimentTypeText);
 
-    describe('after checking 1 edit filter (\'RNA expression microarray\' in \'Experiment Type\'),', function () {
+    var config = chaisePage.getConfig(['Filters on top of the records,']);
+
+    if (!config || !config.attribute1 || !config.attribute1.filters || !config.attribute1.filters.length) return;
+
+    var attribute1 = config.attribute1;
+    var expeSubfilters = filterObj.findCheckedSubfiltersByName(attribute1.text);
+
+    describe('after checking 1 edit filter (\'' + attribute1.filters[0] + '\' in \'' + attribute1.text + '\'),', function () {
         it('should show the \'Clear All Filters\' button', function () {
-            chaisePage.sidebar.clickSidebarAttr(experimentTypeText);
-            chaisePage.editFilter.clickEditFilter(microarrayText);
+            chaisePage.sidebar.clickSidebarAttr(attribute1.text);
+            chaisePage.editFilter.clickEditFilter(attribute1.filters[0]);
             var clearAllBtn = filterObj.clearAllBtn;
             expect(clearAllBtn.isDisplayed()).toBe(true);
         });
 
-        it('should show \'Experiment Type\' wrapper', function () {
-            var microWrapper = filterObj.findFilterWrapperByName(experimentTypeText);
+        it('should show \'' + attribute1.text + '\' wrapper', function () {
+            var microWrapper = filterObj.findFilterWrapperByName(attribute1.text);
             expect(microWrapper.isDisplayed()).toBe(true);
         });
 
-        it('should show 1 edit filter in \'Experiment Type\' wrapper', function () {
+        it('should show 1 edit filter in \'' + attribute1.text + '\' wrapper', function () {
             expect(expeSubfilters.count()).toBe(1);
         });
 
-        it('should show \'RNA expression microarray\' in \'Experiment Type\' wrapper', function () {
-            var title = filterObj.findFitlerWrapperTitleByWrapperName(experimentTypeText);
-            expect(title).toContain(microarrayText);
+        it('should show \'' + attribute1.filters[0] + '\' in \'' + attribute1.text + '\' wrapper', function () {
+            var title = filterObj.findFitlerWrapperTitleByWrapperName(attribute1.text);
+            expect(title).toContain(attribute1.filters[0]);
         });
     });
 
-    var microArrStatus = chaisePage.editFilter.findCheckStatusDivByName(microarrayText);
-    var enhancerStatus = chaisePage.editFilter.findCheckStatusDivByName(enhancerRepText);
-    var proteinStatus = chaisePage.editFilter.findCheckStatusDivByName(proteinExpText);
-    it('should show 3 edit filters in \'Experiment Type\' wrapper ' +
-        'after 2 more edit filters are checked', function () {
-        chaisePage.editFilter.clickEditFilter(enhancerRepText);
-        chaisePage.editFilter.clickEditFilter(proteinExpText);
-        expect(microArrStatus.getAttribute('class')).not.toContain('disabled');
-        expect(expeSubfilters.count()).toBe(3);
-    });
+    if (attribute1.filters.length > 1) {
 
-    it('should uncheck edit filters when cancel is clicked', function () {
-        filterObj.clickFilterWrapperCancelByName(experimentTypeText);
-        chaisePage.customExpect.elementContainClass(microArrStatus, 'disabled');
-        chaisePage.customExpect.elementContainClass(enhancerStatus, 'disabled');
-        chaisePage.customExpect.elementContainClass(proteinStatus, 'disabled');
-    });
+        var filters = [];
 
-    it('should check \'Enhancer reporter gene assay\' and go back to initial sidebar', function () {
-        chaisePage.editFilter.clickEditFilter(enhancerRepText);
-        chaisePage.editFilter.goBackToSidebar();
-        expect(chaisePage.sidebar.sidebarHeader.isDisplayed()).toBe(true);
-        expect(chaisePage.editFilter.sidebarHeader.getText()).toBe('');
-    });
+        it('should show ' + attribute1.filters.length + ' edit filters in \'' + attribute1.text + '\' wrapper ' + 'after ' + (attribute1.filters.length-1) + ' more edit filters are checked', function () {
+            for (i = 0; i < attribute1.filters.length; i++) {  
+                var f = chaisePage.editFilter.findCheckStatusDivByName(attribute1.filters[i]);
+                filters.push(f);
+                if (i > 0) chaisePage.editFilter.clickEditFilter(attribute1.filters[i]);
+            }
+            expect(filters[0].getAttribute('class')).not.toContain('disabled');
+            expect(expeSubfilters.count()).toBe(filters.length);
+        });
 
-    var dataTypeText = 'Data Type';
-    var optImgText = 'OPT images';
+        it('should uncheck edit filters when cancel is clicked', function () {
+            filterObj.clickFilterWrapperCancelByName(attribute1.text);
+            for (i = 0; i < filters.length; i++) {  
+                chaisePage.customExpect.elementContainClass(filters[i], 'disabled');
+            }
+        });
 
-    it('should show 2 filter wrappers after \'OPT images\' in \'Data Type\' is checked', function () {
-        chaisePage.sidebar.clickSidebarAttr(dataTypeText);
-        chaisePage.editFilter.clickEditFilter(optImgText);
-        //Experiment Type, Data Type, Clear All Filters add up to 3
-        expect(filterObj.displayedFilters.count()).toBe(3);
-    });
+        it('should check \'' + attribute1.filters[1] + '\' and go back to initial sidebar', function () {
+            chaisePage.editFilter.clickEditFilter(attribute1.filters[1]);
+            chaisePage.editFilter.goBackToSidebar();
+            expect(chaisePage.sidebar.sidebarHeader.isDisplayed()).toBe(true);
+            expect(chaisePage.editFilter.sidebarHeader.getText()).toBe('');
+        });
+    }
+
+    var secondAttributeSet = false;
+    if (config.attribute2 && config.attribute2.filters && config.attribute2.filters.length)  {
+
+        secondAttributeSet = true;
+        var attribute2 = config.attribute2;
+
+        it('should show 2 filter wrappers after \'' + attribute2.filters[0] + '\' in \'' + attribute2.text + '\' is checked', function () {
+            chaisePage.sidebar.clickSidebarAttr(attribute2.text);
+            chaisePage.editFilter.clickEditFilter(attribute2.filters[0]);
+            //Experiment Type, Data Type, Clear All Filters add up to 3
+            expect(filterObj.displayedFilters.count()).toBe(3);
+        });
+
+    }
 
     describe('after \'Clear All Filters\' is clicked', function () {
         it('should show 0 filter wrappers and go back to initial sidebar', function () {
@@ -88,18 +99,21 @@ describe('Filters on top of the records,', function () {
             expect(chaisePage.sidebar.sidebarHeader.getText()).toBe('CHOOSE ATTRIBUTES:');
         });
 
-        it('should have unchecked \'enhancer Reporter\' edit filter in \'Experiment Type\'', function () {
-            chaisePage.sidebar.clickSidebarAttr(experimentTypeText);
-            var enhancerStatus = chaisePage.editFilter.findCheckStatusDivByName(enhancerRepText);
-            chaisePage.customExpect.elementContainClass(enhancerStatus, 'disabled');
+        it('should have unchecked \'' + attribute1.filters[1] + '\' edit filter in \'' + attribute1.text + '\'', function () {
+            chaisePage.sidebar.clickSidebarAttr(attribute1.text);
+            var el = chaisePage.editFilter.findCheckStatusDivByName(attribute1.filters[1]);
+            chaisePage.customExpect.elementContainClass(el, 'disabled');
         });
 
-        it('should have unchecked \'OPT images\' in \'Data Type\'', function () {
-            chaisePage.editFilter.goBackToSidebar();
-            chaisePage.sidebar.clickSidebarAttr(dataTypeText);
-            var optImgStatus = chaisePage.editFilter.findCheckStatusDivByName(optImgText);
-            chaisePage.customExpect.elementContainClass(optImgStatus, 'disabled');
-        });
+        if (secondAttributeSet) {
+
+            it('should have unchecked \'' + attribute2.filters[0] + '\' in \'' + attribute2.text + '\'', function () {
+                chaisePage.editFilter.goBackToSidebar();
+                chaisePage.sidebar.clickSidebarAttr(attribute2.text);
+                var el = chaisePage.editFilter.findCheckStatusDivByName(attribute2.filters[0]);
+                chaisePage.customExpect.elementContainClass(el, 'disabled');
+            });
+        }
     });
 
 });
