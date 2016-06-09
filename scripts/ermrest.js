@@ -417,6 +417,9 @@ function submitLogout(logout_uri) {
 	$('#login_link').hide();
 	$('#logout_link').hide();
 
+	if (logout_uri == null) {
+		logout_uri = chaiseConfig['logoutURL'];
+	}
 	var logout_url = (logout_uri != null ? logout_uri : '/chaise/logout');
 	window.location = logout_url;
 }
