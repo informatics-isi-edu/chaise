@@ -129,8 +129,9 @@
         }
 
         function getDefaults() {
+            var defaults = [];
+
             try {
-                var defaults = [];
                 var columns = vm.dataEntryModel.table.columns.all();
                 var numColumns = columns.length;
                 for (var i = 0; i < numColumns; i++) {
@@ -139,15 +140,16 @@
                         defaults.push(columnName);
                     }
                 }
-                return defaults;
             } catch (exception) { // catches table.columns.all()
                 // Should not error, if none it returns an empty array
+            } finally {
+                return defaults;
             }
         }
 
         function getKeyColumns() {
+            var keys = [];
             try {
-                var keys = [];
                 var _keys = vm.dataEntryModel.table.keys.all();
                 var numKeys = _keys.length;
                 for (var i = 0; i < numKeys; i++) {
@@ -157,9 +159,10 @@
                         keys.push(columns[c]);
                     }
                 }
-                return keys;
             } catch (exception) { // catches table.keys.all()
                 // Should not error, if none it returns an empty array
+            } finally {
+                return keys;
             }
         }
 
@@ -238,18 +241,14 @@
             try {
                 try {
                     ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
-                } catch (e) {
-                    if (e instanceof Errors.NotFoundError) {
-                        return;
-                    }
-                }
+                // catch does nothing, if it returns an exception ignore should be undefined
+                } catch (e) { }
+
                 try {
                     hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
-                } catch (e) {
-                    if (e instanceof Errors.NotFoundError) {
-                        return;
-                    }
-                }
+                // catch does nothing, if it returns an exception hidden should be undefined
+                } catch (e) { }
+
             } finally {
                if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
                    return true;

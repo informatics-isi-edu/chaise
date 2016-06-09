@@ -79,6 +79,7 @@
                     console.log('Table:', table);
                     dataEntryModel.table = table;
 
+                    // generic try/catch
                     try {
                         var foreignKeys = table.foreignKeys.all();
                         angular.forEach(foreignKeys, function(fkey) {
@@ -107,13 +108,8 @@
 
                                     if (vocabAnnotation) {
                                         if (vocabAnnotation.content.term) {
-                                            try {
-                                                var termColumn = ftable.columns.get(vocabAnnotation.content.term);
-                                                displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
-                                            } catch (exception) {
-                                                // notFoundError should not occur
-                                                $log.info(exception);
-                                            }
+                                            var termColumn = ftable.columns.get(vocabAnnotation.content.term);
+                                            displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
                                         }
                                         // vocabulary term is undefined
                                         else {

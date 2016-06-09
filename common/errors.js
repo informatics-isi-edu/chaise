@@ -41,7 +41,6 @@
             error401: error401,
             error404: error404,
             error409: error409,
-            annotationNotFound: annotationNotFound,
             catalogNotFound: catalogNotFound,
             tableNotFound: tableNotFound,
             schemaNotFound: schemaNotFound
