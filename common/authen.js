@@ -3,22 +3,33 @@
 
     angular.module('chaise.authen', [])
 
-    .factory('Session', ['$http', '$q', 'UriUtils', 'SessionNotFoundError', function ($http, $q, UriUtils, SessionNotFoundError) {
+    .factory('Session', ['$http', '$q', '$window', 'UriUtils', function ($http, $q, $window, UriUtils) {
+
+        function NotFoundError(status, message) {
+                this.code = 404;
+                this.status = status;
+                this.message = message;
+        }
+
+        NotFoundError.prototype = Object.create(Error.prototype);
+
+        NotFoundError.prototype.constructor = NotFoundError;
+
         return {
 
             getSession: function() {
-                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + "/ermrest");
+                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : $window.location.origin + "/ermrest");
 
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
                     return response.data;
                 }, function(response) {
                     // get session failed, not logged in
-                    return $q.reject(new SessionNotFoundError(response.statusText, response.data));
+                    return $q.reject(new NotFoundError(response.statusText, response.data));
                 });
             },
 
             login: function (referrer) {
-                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + "/ermrest");
+                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : $window.location.origin + "/ermrest");
                 var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
                 var config = {
                     headers: {
@@ -31,7 +42,7 @@
                     var data = response.data;
                     if (data['redirect_url'] !== undefined) {
                         var url = data['redirect_url'];
-                        window.open(url, '_self');
+                        $window.open(url, '_self');
                     } else if (data['login_form'] !== undefined) {
                         var login_form = data['login_form'];
                         var login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
@@ -48,17 +59,17 @@
                             }
                         }
                         login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden;
-                        window.location = login_url;
+                        $window.location = login_url;
                     }
                 }, function() {
                     document.body.style.cursor = 'default';
-                    window.location = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
+                    $window.location = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
                 });
 
             },
 
             logout: function() {
-                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + "/ermrest");
+                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : $window.location.origin + "/ermrest");
                 var logoutURL = chaiseConfig['logoutURL'];
                 var url = serviceURL + "/authn/session";
                 if (logoutURL !== undefined) {
@@ -66,29 +77,16 @@
                 }
 
                 $http.delete(url).then(function(response) {
-                    window.location = response.data.logout_url ;
+                    $window.location = response.data.logout_url ;
                 }, function() {
                     // user not logged in
-                    window.location = "/chaise/logout";
+                    $window.location = "/chaise/logout";
                 });
-            }
+            },
 
+            NotFoundError: NotFoundError
 
-        };
-    }])
-
-    .factory('SessionNotFoundError', [function(){
-        function SessionNotFoundError(status, message) {
-            this.code = 404;
-            this.status = status;
-            this.message = message;
         }
-
-        SessionNotFoundError.prototype = Object.create(Error.prototype);
-
-        SessionNotFoundError.prototype.constructor = SessionNotFoundError;
-
-        return SessionNotFoundError;
     }])
 
 })();

@@ -362,7 +362,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 }])
 
 // Register work to be performed after loading all modules
-.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', 'SessionNotFoundError', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session, SessionNotFoundError) {
+.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session) {
 
     $rootScope.location = window.location.href;
     pageInfo.loading = true;
@@ -515,7 +515,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         
     }, function(error) {
         // not logged in, redirect to login
-        if (error instanceof SessionNotFoundError) {
+        if (error instanceof Session.NotFoundError) {
             Session.login(window.location.href);
         }
     });
