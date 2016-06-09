@@ -5,18 +5,18 @@
             "schema": {
                 "name": "legacy",
                 "createNew": true, 
-                "path": "./schema/legacy.json" 
+                "path": "./schema/product.json" 
             },
             "tables": {
                 "newTables": []
             },
             "entities": {
-                "path": "./data/legacy",
+                "path": "./data/product",
                 "importedEntites": []
             },
             "authCookie": "ermrest=C6KFIQn2JS37CGovofWnjKfu;"
         },
-        "cleanup" : true
+        "cleanup" : false
     },
     "record": {},
     "login": {}

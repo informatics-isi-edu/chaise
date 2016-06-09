@@ -57,7 +57,7 @@ exports.parameterize = function(config, configParam, page) {
           codeDone = false;
           dataSetupCode.tear({
             url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/'),
-            authCookie: authCookie,
+            authCookie: testConfiguration.dataSetup.authCookie,
             catalogId: catalogId
           }).done(function() {
             codeDone = true;
@@ -77,7 +77,7 @@ exports.parameterize = function(config, configParam, page) {
 
 
   config.onCleanUp = function() {
-    if (testConfiguration.dataSetup && catalogId != null) {
+    if (testConfiguration.cleanup && testConfiguration.dataSetup && catalogId != null) {
 
       var codeDone = false;
       dataSetupCode.tear({

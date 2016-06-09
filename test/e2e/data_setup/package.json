@@ -8,8 +8,8 @@
   "main": "import.js",
   "scripts": {},
   "dependencies": {
-    "jasmine-bail-fast": "0.0.1",
     "q": "x",
-    "request": "x"
+    "request": "x",
+    "chance": "x"
   }
 }
