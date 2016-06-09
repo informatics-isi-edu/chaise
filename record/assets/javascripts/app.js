@@ -1237,12 +1237,12 @@ chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($root
 }]);
 
 // Detail controller
-chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', 'UriUtils', function($rootScope, $scope, $sce, $http, spinnerService, ermrestService, schemaService, locationService, notFoundService, UriUtils){
+chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http', 'spinnerService', 'ermrestService', 'configService', 'schemaService', 'locationService', 'notFoundService', 'UriUtils', function($rootScope, $scope, $sce, $http, spinnerService, ermrestService, configService, schemaService, locationService, notFoundService, UriUtils){
     // C: Catalogue id
     // T: Table name
     // K: Key
 
-    $http.get(window.location.origin + "/ermrest/authn/session").then(function() {
+    $http.get(window.location.origin + "/ermrest/authn/session").then(function(session) {
         // authorized
 
         $scope.chaiseConfig = chaiseConfig;
@@ -1306,9 +1306,54 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
 
         }
 
+        // Redirect user to data entry app to edit the entity
         $scope.editRecord = function(){
-            window.location.replace('../data-entry/' + window.location.hash);
-        };
+            window.location.href = '../data-entry/' + window.location.hash;
+        }
+
+        // If the catalog allows write access and the user is part of the
+        // content_write_users, then return true.
+
+        // Get this catalog's content_write_users
+        $http.get(configService.CR_BASE_URL + cid + '/meta/content_write_user').success(function(data, status, headers, config) {
+            var writeUsers = [];
+
+            for (var i = 0, len = data.length; i < len; i++) {
+                if (data[i].v === '*') {
+                // Wildcard value under 'content_write_user' == anybody can
+                // write to catalog, so allow redirect.
+                    return $scope.allowEdit = true;
+                }
+                writeUsers.push(data[i].v);
+            }
+
+            if (writeUsers.length > 0) {
+                // Get current user's session attributes
+                var attrs = session.data.attributes;
+                var attrIds = [];
+                for (var j = 0, len = attrs.length; j < len; j++) {
+                    attrIds.push(attrs[j].id);
+                }
+
+                // Find intersection of user's session attrs and catalog's
+                // content_write_users. To do this: Create an object/associative
+                // array, the keys of which are the elements of one
+                // array. Then check if the obj has a key that matches an element
+                // of the 2nd array.
+                // Borrowed from: http://stackoverflow.com/a/1885766/3581097
+                var obj = {};
+                for (var k = 0, len = writeUsers.length; k < len; k++) {
+                    obj[writeUsers[k]] = true;
+                }
+                for (var l = 0, len = attrIds.length; l < len; l++) {
+                    if (obj[attrIds[l]]) {
+                    // A match has been found, allow redirect.
+                        return $scope.allowEdit = true;
+                    }
+                }
+            }
+            return $scope.allowEdit = false;
+        });
 
         $scope.permanentLink = function(){
             return window.location.href;
