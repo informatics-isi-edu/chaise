@@ -9,7 +9,6 @@
         'chaise.errors',
         'chaise.alerts',
         'chaise.filters',
-        'chaise.interceptors',
         'chaise.validators',
         'ui.select',
         'rzModule',
@@ -19,7 +18,6 @@
 
     // Configure the context info from the URI
     .config(['context', '$httpProvider', function configureContext(context, $httpProvider) {
-        $httpProvider.interceptors.push('Interceptors');
 
         if (chaiseConfig.headTitle !== undefined) {
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
@@ -63,11 +61,21 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', 'ErrorService', '$log', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, ErrorService, $log) {
+    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', 'ErrorService', 'Session', '$log', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, ErrorService, Session, $log) {
         // generic try/catch
         try {
-            var server = context.server = ermrestServerFactory.getServer(context.serviceURL); // caught by generic exception case
-            server.catalogs.get(context.catalogID).then(function success(catalog) {
+            var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
+        } catch (exception) {
+            if (exception instanceof Errors.UnauthorizedError) {
+                Session.login(window.location.href);
+            }
+            // TODO implement error hierarchy in ermrestJS
+            // if (exception instanceof Errors.serverNotFoundError) {
+            //     ErrorService.serverNotFound();
+            // }
+        }
+        server.catalogs.get(context.catalogID).then(function success(catalog) {
+            try {
                 var schema = catalog.schemas.get(context.schemaName); // caught by generic exception case
                 var table = schema.tables.get(context.tableName); // caught by generic exception case
 
@@ -173,48 +181,47 @@
                         }
 
                         angular.forEach(entity[0], function(value, colName) {
-                            var pathColumnType = path.context.columns.get(colName).column.type.name; // caught by generic exception case
-                            if (pathColumnType == 'date' || pathColumnType == 'timestamptz') {
-                                // Must transform the value into a Date so that
-                                // Angular won't complain when putting the value
-                                // in an input of type "date" in the view
-                                value = new Date(value);
-                            }
-                            dataEntryModel.rows[dataEntryModel.rows.length - 1][colName] = value;
+                            try {
+                                var pathColumnType = path.context.columns.get(colName).column.type.name;
+                                if (pathColumnType == 'date' || pathColumnType == 'timestamptz') {
+                                    // Must transform the value into a Date so that
+                                    // Angular won't complain when putting the value
+                                    // in an input of type "date" in the view
+                                    value = new Date(value);
+                                }
+                                dataEntryModel.rows[dataEntryModel.rows.length - 1][colName] = value;
+                            } catch (exception) { }
                         });
                     });
                 }
                 console.log('Model:',dataEntryModel);
 
-            }, function error(response) { // error promise for server.catalogs.get()
-                console.log("Go auth spot:", response);
-                // TODO verify this is handled via an interceptor by the function in the ErrorService
-                // If the interceptor handles this, do nothing here
-                // 401 should not be caught here.
-                if (response.code == 401) {
-                    UriUtils.getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
-                    $log.info(response);
-                }
+            } catch (exception) { // handle generic catch
+                // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
 
-                // Not sure why this is getting an error promise instead of being caught by the try/catch
-                if (response.code == 404) {
-                    ErrorService.catalogNotFound(context.catalogID, response);
-                }
-            });
-        } catch (exception) {
-            // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-            // handle generic catch
+                // if (exception instanceof Errors.TableNotFoundError) {
+                //     ErrorService.tableNotFound(context.tableName);
+                // } else if (exception instanceof Errors.SchemaNotFoundError) {
+                //     ErrorService.schemaNotFound(context.schemaName);
+                // }
+                AlertsService.addAlert({type: 'error', message: exception.message});
+                $log.info(exception);
+            }
 
-            // if (exception instanceof Errors.TableNotFoundError) {
-            //     ErrorService.tableNotFound(context.tableName);
-            // } else if (exception instanceof Errors.SchemaNotFoundError) {
-            //     ErrorService.schemaNotFound(context.schemaName);
-            // } else if (exception instanceof Errors.ServerNotFoundError) {
-            //     ErrorService.serverNotFound(context.serviceURL);
-            // }
-            AlertsService.addAlert({type: 'error', message: exception.message});
-            $log.info(exception);
-        }
+        }, function error(response) { // error promise for server.catalogs.get()
+            // TODO verify this is handled via an interceptor by the function in the ErrorService
+            // If the interceptor handles this, do nothing here
+            // 401 should not be caught here.
+            if (response.code == 401) {
+                UriUtils.getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
+                $log.info(response);
+            }
+
+            // Not sure why this is getting an error promise instead of being caught by the try/catch
+            if (response.code == 404) {
+                ErrorService.catalogNotFound(context.catalogID, response);
+            }
+        });
     }]);
 
     // Refresh the page when the window's hash changes. Needed because Angular
