@@ -17,7 +17,8 @@
         vm.submit = submit;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
-        vm.addFormRow = addFormRow;
+        vm.addEmptyFormRow = addEmptyFormRow;
+        vm.copyLastFormRow = copyLastFormRow;
         vm.removeFormRow = removeFormRow;
 
         vm.getDefaults = getDefaults;
@@ -117,11 +118,28 @@
             }
         }
 
-        function addFormRow() {
-            var rowset = vm.dataEntryModel.rows;
-            var prototypeRow = rowset[rowset.length-1];
-            var newRow = angular.copy(prototypeRow);
-            rowset.push(newRow);
+        function addEmptyFormRow() {
+            vm.dataEntryModel.rows.push({});
+        }
+
+        function copyLastFormRow() {
+            // Check if the prototype row to copy has any invalid values. If it
+            // does, display an error. Otherwise, copy the row.
+            var protoRowIndex = vm.dataEntryModel.rows.length - 1;
+            var protoRowValidityStates = vm.formContainer.row[protoRowIndex];
+            var validRow = true;
+            angular.forEach(protoRowValidityStates, function(value, key) {
+                if (value.$invalid) {
+                    AlertsService.addAlert({type: 'error', message: "Sorry, we couldn't copy the last record because it has invalid values in it. Please check the fields in the last record and try again."});
+                    validRow = false;
+                }
+            });
+            if (validRow) {
+                var rowset = vm.dataEntryModel.rows;
+                var protoRow = rowset[protoRowIndex];
+                var newRow = angular.copy(protoRow);
+                rowset.push(angular.copy(protoRow));
+            }
         }
 
         function removeFormRow(index) {
