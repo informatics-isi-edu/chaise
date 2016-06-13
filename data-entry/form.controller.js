@@ -221,6 +221,7 @@
             try {
                 try {
                     ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
+                    console.log(ignore);
                 } catch (e) {
                     if (e instanceof Errors.NotFoundError) {
                         return;

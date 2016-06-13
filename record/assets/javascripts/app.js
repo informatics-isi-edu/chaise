@@ -1303,28 +1303,26 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                     $scope.entity = data;
                 });
             });
-
         }
 
-        // Redirect user to data entry app to edit the entity
-        $scope.editRecord = function(){
-            window.location.href = '../data-entry/' + window.location.hash;
-        }
-
-        // If the catalog allows write access and the user is part of the
-        // content_write_users, then return true.
+        // A record is can be edited if:
+        // 1. The catalog allows write access and the user is part of the
+        // catalog's content_write_users; AND
+        // 2. The table doesn't have an ignore annotation "entry" or "edit" context
 
         // Get this catalog's content_write_users
         $http.get(configService.CR_BASE_URL + cid + '/meta/content_write_user').success(function(data, status, headers, config) {
             var writeUsers = [];
+            var editCatalog = false;
 
             for (var i = 0, len = data.length; i < len; i++) {
                 if (data[i].v === '*') {
                 // Wildcard value under 'content_write_user' == anybody can
                 // write to catalog, so allow redirect.
-                    return $scope.allowEdit = true;
+                    editCatalog = true;
+                } else {
+                    writeUsers.push(data[i].v);
                 }
-                writeUsers.push(data[i].v);
             }
 
             if (writeUsers.length > 0) {
@@ -1348,12 +1346,29 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                 for (var l = 0, len = attrIds.length; l < len; l++) {
                     if (obj[attrIds[l]]) {
                     // A match has been found, allow redirect.
-                        return $scope.allowEdit = true;
+                        editCatalog = true;
                     }
                 }
             }
-            return $scope.allowEdit = false;
+
+            if (editCatalog) {
+                schemaService.initSchemas(cid, function(data) {
+                    // Get this table's annotations to see if table has ignore annotation
+                    var tableAnnotations = data.schemas[schemaName].tables[tableName].annotations;
+                    var ignore = tableAnnotations['tag:isrd.isi.edu,2016:ignore'];
+                    if (ignore && (ignore.indexOf('edit') || ignore.indexOf('entry') || ignore === [] || ignore === null)) {
+                        return $scope.allowEdit = false;
+                    }
+                    return $scope.allowEdit = true;
+                });
+            }
+            $scope.allowEdit = false;
         });
+
+        // Redirect user to data entry app to edit the entity
+        $scope.editRecord = function(){
+            window.location.href = '../data-entry/' + window.location.hash;
+        }
 
         $scope.permanentLink = function(){
             return window.location.href;
