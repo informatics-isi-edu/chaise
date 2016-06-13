@@ -255,20 +255,18 @@
         // Returns true if a column has a 2015:hidden annotation or a 2016:ignore
         // (with entry context) annotation.
         function isHiddenColumn(column) {
-            var ignore, hidden;
-            try {
-                try {
-                    ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
-                // catch does nothing, if it returns an exception ignore should be undefined
-                } catch (e) { }
+            var ignore, ignoreCol, hidden;
+            var ignoreAnnotation = 'tag:isrd.isi.edu,2016:ignore';
 
-                try {
-                    hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
-                // catch does nothing, if it returns an exception hidden should be undefined
-                } catch (e) { }
+            try {
+                ignore = column.annotations.include(ignoreAnnotation);
+                if (ignore) {
+                    ignoreCol = column.annotations.get(ignoreAnnotation); // still needs to be caught in case something gets out of sync
+                }
+                hidden = column.annotations.include('tag:misd.isi.edu,2015:hidden');
 
             } finally {
-               if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
+               if ((ignore && (ignoreCol.content.length === 0 || ignoreCol.content === null || ignoreCol.content.indexOf('entry') !== -1)) || hidden) {
                    return true;
                }
                return false;

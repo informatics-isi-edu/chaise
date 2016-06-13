@@ -97,19 +97,13 @@
                         /* SECOND USE CASE: conditional if the table is tagged as a vocabulary */
 
                         try {
+                            var vocabAnnotationTag = "tag:misd.isi.edu,2015:vocabulary";
+                            var displayAnnotationTag = "tag:misd.isi.edu,2015:display";
 
-                            try {
-                                var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
-                                // An error being caught means the `vocabulary` annotation is not defined and that's okay
-                            } catch (exception) { }
-
-                            try {
-                                var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
-                                // An error being caught means the `display` annotation is not defined and that's okay
-                            } catch (exception) { }
-
-
-                            if (vocabAnnotation) {
+                            if (ftable.annotations.includes(vocabAnnotationTag)) {
+                                // no need to catch this, using `.includes` verifies it exists or not
+                                // if an exception is thrown at this point it will be caught by generic exception case
+                                var vocabAnnotation = ftable.annotations.get(vocabAnnotationTag);
                                 if (vocabAnnotation.content.term) {
                                     var termColumn = ftable.columns.get(vocabAnnotation.content.term); // caught by generic exception case
                                     displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
@@ -132,7 +126,10 @@
                             }
                             /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
                             /* Git issue #358 */
-                            else if (displayAnnotation) {
+                            else if (ftable.annotations.includes(displayAnnotationTag)) {
+                                // no need to catch this, using `.includes` verifies it exists or not
+                                // if an exception is thrown at this point it will be caught by generic exception case
+                                var displayAnnotation = ftable.annotations.get(displayAnnotationTag);
                                 if (displayAnnotation.content.row_name) {
                                     // TODO
                                     // var array_of_col_names = REGEX THE array of column_name strings from “ … `{` column_name `}` …” patterns
