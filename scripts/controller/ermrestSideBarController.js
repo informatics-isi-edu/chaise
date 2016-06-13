@@ -474,6 +474,11 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	    		setTimeout(function () {
 	    		    $('.sidebar-overlay').click();
 	    		}, 1);
+	    		setTimeout(function () {
+	    			if ($('#editfilter').hasClass('open')) {
+		    		    $('#attributeValues').click();
+	    			}
+	    		}, 200);
 	    	}
 		}
 	};

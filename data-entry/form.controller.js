@@ -3,7 +3,7 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window) {
+    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
         vm.server = context.server;
@@ -17,7 +17,8 @@
         vm.submit = submit;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
-        vm.addFormRow = addFormRow;
+        vm.addEmptyFormRow = addEmptyFormRow;
+        vm.copyLastFormRow = copyLastFormRow;
         vm.removeFormRow = removeFormRow;
 
         vm.getDefaults = getDefaults;
@@ -52,19 +53,24 @@
                 // datapath is redeveloped to only use aliases when necessary
                 redirectUrl += 'record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
 
-                // Find the shortest "primary key" for use in redirect url
-                var keys = model.table.keys.all().sort(function(a, b) {
-                    return a.colset.length() - b.colset.length();
-                });
-                var shortestKey = keys[0].colset.columns;
+                try {
+                    // Find the shortest "primary key" for use in redirect url
+                    var keys = model.table.keys.all().sort(function(a, b) {
+                        return a.colset.length() - b.colset.length();
+                    });
+                    var shortestKey = keys[0].colset.columns;
 
-                // Build the redirect url with key cols and entity's values
-                for (var c = 0, len = shortestKey.length; c < len; c++) {
-                    var colName = shortestKey[c].name;
-                    var separator = null;
-                    if (rowset.length == 1) {
-                        redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
+                    // Build the redirect url with key cols and entity's values
+                    for (var c = 0, len = shortestKey.length; c < len; c++) {
+                        var colName = shortestKey[c].name;
+                        var separator = null;
+                        if (rowset.length == 1) {
+                            redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
+                        }
                     }
+                } catch (exception) { // catches model.table.keys.all()
+                    // handle exception
+                    $log.info(exception);
                 }
             } else if (rowset.length > 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record set...'});
@@ -113,11 +119,28 @@
             }
         }
 
-        function addFormRow() {
-            var rowset = vm.dataEntryModel.rows;
-            var prototypeRow = rowset[rowset.length-1];
-            var newRow = angular.copy(prototypeRow);
-            rowset.push(newRow);
+        function addEmptyFormRow() {
+            vm.dataEntryModel.rows.push({});
+        }
+
+        function copyLastFormRow() {
+            // Check if the prototype row to copy has any invalid values. If it
+            // does, display an error. Otherwise, copy the row.
+            var protoRowIndex = vm.dataEntryModel.rows.length - 1;
+            var protoRowValidityStates = vm.formContainer.row[protoRowIndex];
+            var validRow = true;
+            angular.forEach(protoRowValidityStates, function(value, key) {
+                if (value.$invalid) {
+                    AlertsService.addAlert({type: 'error', message: "Sorry, we couldn't copy the last record because it has invalid values in it. Please check the fields in the last record and try again."});
+                    validRow = false;
+                }
+            });
+            if (validRow) {
+                var rowset = vm.dataEntryModel.rows;
+                var protoRow = rowset[protoRowIndex];
+                var newRow = angular.copy(protoRow);
+                rowset.push(angular.copy(protoRow));
+            }
         }
 
         function removeFormRow(index) {
@@ -126,29 +149,40 @@
 
         function getDefaults() {
             var defaults = [];
-            var columns = vm.dataEntryModel.table.columns.all();
-            var numColumns = columns.length;
-            for (var i = 0; i < numColumns; i++) {
-                var columnName = columns[i].name;
-                if (vm.isAutoGen(columnName) || vm.isHiddenColumn(columns[i])) {
-                    defaults.push(columnName);
+
+            try {
+                var columns = vm.dataEntryModel.table.columns.all();
+                var numColumns = columns.length;
+                for (var i = 0; i < numColumns; i++) {
+                    var columnName = columns[i].name;
+                    if (vm.isAutoGen(columnName) || vm.isHiddenColumn(columns[i])) {
+                        defaults.push(columnName);
+                    }
                 }
+            } catch (exception) { // catches table.columns.all()
+                // Should not error, if none it returns an empty array
+            } finally {
+                return defaults;
             }
-            return defaults;
         }
 
         function getKeyColumns() {
             var keys = [];
-            var _keys = vm.dataEntryModel.table.keys.all();
-            var numKeys = _keys.length;
-            for (var i = 0; i < numKeys; i++) {
-                var columns = _keys[i].colset.columns;
-                var numColumns = columns.length;
-                for (var c = 0; c < numColumns; c++) {
-                    keys.push(columns[c]);
+            try {
+                var _keys = vm.dataEntryModel.table.keys.all();
+                var numKeys = _keys.length;
+                for (var i = 0; i < numKeys; i++) {
+                    var columns = _keys[i].colset.columns;
+                    var numColumns = columns.length;
+                    for (var c = 0; c < numColumns; c++) {
+                        keys.push(columns[c]);
+                    }
                 }
+            } catch (exception) { // catches table.keys.all()
+                // Should not error, if none it returns an empty array
+            } finally {
+                return keys;
             }
-            return keys;
         }
 
         function columnToDisplayType(column) {
@@ -195,7 +229,12 @@
         // Returns true if a column's fields should be automatically generated
         // In this case, columns of type serial* == auto-generated
         function isAutoGen(name) {
-            return (vm.dataEntryModel.table.columns.get(name).type.name.indexOf('serial') === 0);
+            try {
+                return (vm.dataEntryModel.table.columns.get(name).type.name.indexOf('serial') === 0);
+            } catch (exception) {
+                // handle exception
+                $log.info(exception);
+            }
         }
 
         function isForeignKey(columnName) {
@@ -221,19 +260,14 @@
             try {
                 try {
                     ignore = column.annotations.get('tag:isrd.isi.edu,2016:ignore');
-                    console.log(ignore);
-                } catch (e) {
-                    if (e instanceof Errors.NotFoundError) {
-                        return;
-                    }
-                }
+                // catch does nothing, if it returns an exception ignore should be undefined
+                } catch (e) { }
+
                 try {
                     hidden = column.annotations.get('tag:misd.isi.edu,2015:hidden');
-                } catch (e) {
-                    if (e instanceof Errors.NotFoundError) {
-                        return;
-                    }
-                }
+                // catch does nothing, if it returns an exception hidden should be undefined
+                } catch (e) { }
+
             } finally {
                if ((ignore && (ignore.content.length === 0 || ignore.content === null || ignore.content.indexOf('entry') !== -1)) || hidden) {
                    return true;

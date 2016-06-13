@@ -212,9 +212,9 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
-	$(COMMON)/interceptors.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
@@ -251,7 +251,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(RECORD_ASSETS)/lib/angular-animate.min.js \
 	$(COMMON)/navbar.js
 
-RECSET_JS_SOURCE=$(JS)/ermrest.js \
+RECSET_JS_SOURCE=$(COMMON)/authen.js \
     $(COMMON)/utils.js \
     $(RECSET_ASSETS)/recordset.js
 

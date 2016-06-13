@@ -1774,7 +1774,7 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
             if (value !== null &&
                 (!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) &&
                 key != 'internal' && key != 'embedTables' && !key.match(".*_link") &&
-                key != 'colTooltips'){
+                key != 'colTooltips' && key != 'sequences'){
 
                 // Only include column (key) if column is not hidden
                 if (!schemaService.isHiddenColumn(entity.internal.schemaName, entity.internal.tableName, key)){
