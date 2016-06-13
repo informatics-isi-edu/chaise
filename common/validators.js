@@ -3,6 +3,8 @@
 
 
     var INTEGER_REGEXP = /^\-?\d+$/;
+    // updated float regex
+    // ^(Infinity|-Infinity|NaN|-?\d+(\.\d+)?([eE][-+]?\d+)?$
     var FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
     angular.module('chaise.validators', [])
     // Validation directive for testing if an input value is an integer

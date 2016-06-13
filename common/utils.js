@@ -3,7 +3,8 @@
 
     angular.module('chaise.utils', [])
 
-    .factory('UriUtils', function() {
+    .factory('UriUtils', ['$injector', '$window', function($injector, $window) {
+
         return {
 
             /**
@@ -18,6 +19,5 @@
                 })
             }
         }
-    });
-
+    }]);
 })();
