@@ -494,8 +494,12 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	this.displayRange = function displayRange() {
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
 	};
-
-  this.hasSelectedFacets = function hasSelectedFacets() {
+	
+  this.showUnfilteredResults = function showUnfilteredResults() {
+	  return chaiseConfig['showUnfilteredResults'] === true || $scope.hasSelectedFacets();
+		  
+  }
+  this.hasSelectedFacets = $scope.hasSelectedFacets = function hasSelectedFacets() {
     var selectedFacets = false;
     $.each($scope.FacetsData.box, function(table, columns) {
       var colsDescr = $scope.FacetsData['colsDescr'][table];

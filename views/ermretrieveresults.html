@@ -173,7 +173,7 @@
 							of <strong>{{FacetsData.totalServerItems}}.</strong>
 						</p>
 					</div>
-					<div id="results_tally" class="row" ng-show="facetResults.hasSelectedFacets()">
+					<div id="results_tally" class="row" ng-show="facetResults.showUnfilteredResults()">
 						<div class="col-md-8">
 							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results, sort by:
 							<ui-select ng-model="FacetsData.sortFacet" theme="select2" ng-disabled="disabled" on-select="facetResults.sortData($event)">
@@ -198,7 +198,7 @@
 							<span class="btn btn-label pull-right">Switch view:</span>
 						</div>
 					</div>
-					<div id="resultstable" class="row" ng-show="facetResults.hasSelectedFacets()">
+					<div id="resultstable" class="row" ng-show="facetResults.showUnfilteredResults()">
 						<div ng-if="FacetsData.view=='list'" class="col-md-12 ng-hide" ng-repeat="row in FacetsData.ermrestData" ng-show="FacetsData.view=='list'">
 		                    <div ng-if="FacetsData.view=='list'" class="panel panel-default">
 		                    	<div class="panel-heading">
@@ -343,7 +343,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="row bottompgr" ng-show="facetResults.hasSelectedFacets()">
+					<div class="row bottompgr" ng-show="facetResults.showUnfilteredResults()">
 						<div class="form-group col-md-12">
 							<ul class="pagination bottompagination">
 								<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="prev"><a href="#"
