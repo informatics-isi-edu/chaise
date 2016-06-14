@@ -46,7 +46,8 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
         var predicates = [];
 
         for (var i = 0; i< keys.length; i++){
-            var key = keys[i];
+        	// the PRIMARY_KEY array has the keys already encoded, so decode them in order to extract the value from the row
+            var key = decodeURIComponent(keys[i]);
             var predicate = encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(entity[key]);
             predicates.push(predicate);
         }
