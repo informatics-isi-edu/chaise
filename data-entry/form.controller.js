@@ -128,7 +128,7 @@
             var protoRowValidityStates = vm.formContainer.row[index];
             var validRow = true;
             angular.forEach(protoRowValidityStates, function(value, key) {
-                if (value.$invalid) {
+                if (value.$dirty && value.$invalid) {
                     AlertsService.addAlert({type: 'error', message: "Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again."});
                     validRow = false;
                 }
