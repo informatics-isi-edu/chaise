@@ -40,8 +40,6 @@
                             </div>
                             <div class="col-xs-5 padding-top-10">
                                 <div class="pull-right">
-                                    <button class="btn btn-default" ng-if="!form.editMode" ng-click="form.addEmptyFormRow();" type="button">&#43; Add Record</button>
-                                    <button class="btn btn-default" ng-if="!form.editMode" ng-click="form.copyLastFormRow();" type="button">&#43; Duplicate Last Record</button>
                                     <button class="btn btn-primary" type="submit" ng-click="form.submit();">Submit Data</button>
                                 </div>
                             </div>
@@ -50,8 +48,18 @@
                             <tr ng-if="!form.editMode">
                                     <td>&nbsp;</td>
                                     <td ng-repeat="(rowIndex, row) in form.dataEntryModel.rows track by $index">
-                                        <button ng-show="form.dataEntryModel.rows.length > 1" ng-click="form.removeFormRow(rowIndex);" class="btn btn-xs btn-danger center-block" type="button"><span class="glyphicon glyphicon-trash"></span> Remove</button>
+                                        <div class="row">
+                                            <div class="record-controls">
+                                                <button ng-if="form.dataEntryModel.rows.length > 1" ng-click="form.removeFormRow(rowIndex);" class="btn btn-sm btn-danger remove-btn" type="button">
+                                                    Remove
+                                                </button>
+                                                <button ng-click="form.copyFormRow(rowIndex);" class="btn btn-sm btn-primary copy-btn" type="button">
+                                                    Copy
+                                                </button>
+                                            </div>
+                                        </div>
                                     </td>
+                                    <td class="new-row-btn text-center"><button class="btn btn-sm btn-success" ng-if="!form.editMode" ng-click="form.addEmptyFormRow();" type="button">New Record</button></td>
                             </tr>
                             <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in form.dataEntryModel.table.columns.all();" ng-if="::!form.isHiddenColumn(column);">
                                 <td class="entity-key col-xs-1" ng-class="{'coltooltip': column.comment}">
