@@ -17,7 +17,6 @@
         vm.submit = submit;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
-        vm.addEmptyFormRow = addEmptyFormRow;
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
 
@@ -118,13 +117,10 @@
             }
         }
 
-        function addEmptyFormRow() {
-            vm.dataEntryModel.rows.push({});
-        }
-
-        function copyFormRow(index) {
+        function copyFormRow() {
             // Check if the prototype row to copy has any invalid values. If it
             // does, display an error. Otherwise, copy the row.
+            var index = vm.dataEntryModel.rows.length - 1;
             var protoRowValidityStates = vm.formContainer.row[index];
             var validRow = true;
             angular.forEach(protoRowValidityStates, function(value, key) {
