@@ -52,7 +52,9 @@
                                         <td ng-repeat="(rowIndex, row) in form.dataEntryModel.rows track by $index">
                                             <div class="row">
                                                 <div class="col-xs-12">
-                                                    <a ng-show="form.dataEntryModel.rows.length > 1" ng-click="form.removeFormRow(rowIndex);"><span class="glyphicon glyphicon-trash"></span></a>
+                                                    <button ng-show="form.dataEntryModel.rows.length > 1" ng-click="form.removeFormRow(rowIndex);" class="btn btn-sm btn-primary">
+                                                        <span class="glyphicon glyphicon-trash"></span>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </td>
@@ -144,7 +146,9 @@
                 </div>
             </div>
             <div class="col-xs-1">
-                <button id="copy-record-btn" class="btn btn-sm btn-default pull-right" ng-if="!form.editMode" ng-click="form.copyFormRow();" type="button">&#43;</button>
+                <button id="copy-record-btn" class="btn btn-sm btn-primary pull-right" ng-if="!form.editMode" ng-click="form.copyFormRow();" type="button">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
             </div>
         </div>
     </div>
