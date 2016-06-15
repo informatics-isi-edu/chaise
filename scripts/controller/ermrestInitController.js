@@ -88,8 +88,32 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 		$scope.FacetsData.bookmarkPage = null;
 	}
 
+	$scope.displayError = function displayError(status, errorMessage) {
+		$scope.status = status;
+		$scope.errorMessage = errorMessage;
+		$scope.FacetsData.error = true;
+		$scope.FacetsData.progress = false;
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
+		setTimeout(function() {
+			$scope.FacetsData.error = true;
+			$scope.FacetsData.progress = false;
+			if (!$scope.$$phase) {
+				$scope.$apply();
+			}
+		}, 1);
+	};
+	
 	if (searchQuery['facets'] != null) {
-		$scope.FacetsData.filter = decodeFilter(searchQuery['facets']);
+		try {
+			$scope.FacetsData.filter = decodeFilter(searchQuery['facets']);
+		} catch(err) {
+			loadApplicationHeaderAndFooter();
+			setNavbarBrand();
+			$scope.errorMessage = err.message + '<br/>facets=' + searchQuery['facets'];
+			$scope.displayError('', $scope.errorMessage);
+		}
 	} else {
 		$scope.FacetsData.filter = null;
 	}
@@ -110,28 +134,13 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 		$scope.FacetsData.view = chaiseConfig['layout'];
 	}
 
-	$scope.displayError = function displayError(status, errorMessage) {
-		$scope.status = status;
-		$scope.errorMessage = errorMessage;
-		$scope.FacetsData.error = true;
-		$scope.FacetsData.progress = false;
-		if (!$scope.$$phase) {
-			$scope.$apply();
-		}
-		setTimeout(function() {
-			$scope.FacetsData.error = true;
-			$scope.FacetsData.progress = false;
-			if (!$scope.$$phase) {
-				$scope.$apply();
-			}
-		}, 1);
-	};
-	
 	this.html = function (errorMessage) {
 		return errorMessage != null ? $sce.trustAsHtml(errorMessage.replace(/\n/g, '<br/>')) : '';
 	};
 
-	initApplication($scope.FacetsData, $scope.displayError);
+	if ($scope.errorMessage == null) {
+		initApplication($scope.FacetsData, $scope.displayError);
+	}
 	this.hideSpinner = function hideSpinner() {
 		//return !$scope.FacetsData.progress;
 		return true;
