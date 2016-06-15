@@ -495,7 +495,7 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
 	};
 	
-  this.showUnfilteredResults = function showUnfilteredResults() {
+  this.showupResults = function showupResults() {
 	  return chaiseConfig['showUnfilteredResults'] === true || $scope.hasSelectedFacets();
 		  
   }
