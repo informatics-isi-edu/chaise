@@ -24,10 +24,8 @@ input[type=number]::-webkit-outer-spin-button {
 
 .form-container {
     margin-top: 30px;
-    overflow: scroll;
 }
 
 #copy-record-btn {
-    margin-top: 95px;
-    margin-right: 20px;
+    margin-top: 8px;
 }
