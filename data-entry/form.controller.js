@@ -3,7 +3,7 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log) {
+    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', '$uibModal', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log, $uibModal) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
         vm.server = context.server;
@@ -137,7 +137,22 @@
         }
 
         function removeFormRow(index) {
-            vm.dataEntryModel.rows.splice(index, 1);
+            if (chaiseConfig.confirmDelete === false) {
+                return vm.dataEntryModel.rows.splice(index, 1);
+            }
+
+            var modalInstance = $uibModal.open({
+                templateUrl: '../common/templates/confirm_delete.modal.html',
+                controller: 'ConfirmDeleteController',
+                controllerAs: 'ctrl',
+                size: 'sm'
+            });
+
+            modalInstance.result.then(function() {
+                vm.dataEntryModel.rows.splice(index, 1);
+            }, function() {
+                console.log('Modal dismissed');
+            });
         }
 
         function getDefaults() {

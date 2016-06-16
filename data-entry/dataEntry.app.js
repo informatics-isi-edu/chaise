@@ -11,6 +11,8 @@
         'chaise.alerts',
         'chaise.filters',
         'chaise.validators',
+        'ui.bootstrap',
+        'chaise.modal',
         'ui.select',
         'rzModule',
         '720kb.datepicker',
