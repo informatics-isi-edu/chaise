@@ -145,14 +145,21 @@
                 templateUrl: '../common/templates/confirm_delete.modal.html',
                 controller: 'ConfirmDeleteController',
                 controllerAs: 'ctrl',
-                size: 'sm'
+                size: 'sm',
+                resolve: {
+                    // Wrap function in an object because uibModal only allows passing of objects
+                    params: function() {
+                        var callbacks = {
+                            ok: function() {
+                                vm.dataEntryModel.rows.splice(index, 1);
+                            }
+                        };
+                        return callbacks;
+                    }
+                }
             });
-
-            modalInstance.result.then(function() {
-                vm.dataEntryModel.rows.splice(index, 1);
-            }, function() {
-                console.log('Modal dismissed');
-            });
+            // TODO: Note to self: Should I pass in the callback fn in resolve or just run it
+            // on "success" click?
         }
 
         function getDefaults() {
