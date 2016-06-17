@@ -259,11 +259,17 @@
             var ignoreAnnotation = 'tag:isrd.isi.edu,2016:ignore';
 
             try {
-                ignore = column.annotations.include(ignoreAnnotation);
+                console.log(column.annotations);
+                ignore = column.annotations.includes(ignoreAnnotation);
+                console.log(ignore);
                 if (ignore) {
                     ignoreCol = column.annotations.get(ignoreAnnotation); // still needs to be caught in case something gets out of sync
                 }
-                hidden = column.annotations.include('tag:misd.isi.edu,2015:hidden');
+                hidden = column.annotations.includes('tag:misd.isi.edu,2015:hidden');
+                console.log("=====================");
+                console.log(ignore);
+                console.log(ignoreCol);
+                console.log(hidden);
 
             } finally {
                if ((ignore && (ignoreCol.content.length === 0 || ignoreCol.content === null || ignoreCol.content.indexOf('entry') !== -1)) || hidden) {
