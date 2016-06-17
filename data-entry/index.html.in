@@ -52,9 +52,7 @@
                                         <td ng-repeat="(rowIndex, row) in form.dataEntryModel.rows track by $index">
                                             <div class="row">
                                                 <div class="col-xs-12">
-                                                    <button ng-show="form.dataEntryModel.rows.length > 1" ng-click="form.removeFormRow(rowIndex);" class="btn btn-sm btn-primary">
-                                                        <span class="glyphicon glyphicon-trash"></span>
-                                                    </button>
+                                                    <delete-link ng-show="form.dataEntryModel.rows.length > 1" button-size="sm" tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
                                                 </div>
                                             </div>
                                         </td>

@@ -11,6 +11,7 @@
         'chaise.alerts',
         'chaise.filters',
         'chaise.validators',
+        'chaise.delete',
         'ui.bootstrap',
         'chaise.modal',
         'ui.select',

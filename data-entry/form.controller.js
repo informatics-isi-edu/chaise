@@ -3,7 +3,7 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', '$uibModal', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log, $uibModal) {
+    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
         vm.server = context.server;
@@ -137,29 +137,7 @@
         }
 
         function removeFormRow(index) {
-            if (chaiseConfig.confirmDelete === false) {
-                return vm.dataEntryModel.rows.splice(index, 1);
-            }
-
-            var modalInstance = $uibModal.open({
-                templateUrl: '../common/templates/confirm_delete.modal.html',
-                controller: 'ConfirmDeleteController',
-                controllerAs: 'ctrl',
-                size: 'sm',
-                resolve: {
-                    // Wrap function in an object because uibModal only allows passing of objects
-                    params: function() {
-                        var callbacks = {
-                            ok: function() {
-                                vm.dataEntryModel.rows.splice(index, 1);
-                            }
-                        };
-                        return callbacks;
-                    }
-                }
-            });
-            // TODO: Note to self: Should I pass in the callback fn in resolve or just run it
-            // on "success" click?
+            return vm.dataEntryModel.rows.splice(index, 1);
         }
 
         function getDefaults() {
