@@ -1,11 +1,11 @@
 /**
 * @desc
-* The deleteLink directive can be used to display a UI control for a delete operation.
-* If the confirmDelete property of chaise-config.js is true or undefined, the
-* directive will display a modal and, if the user clicks the affirmative button,
-* run the provided callback to delete your resource. If confirmDelete is false,
-* the directive simply runs the provided callback when the user clicks the UI
-* control.
+* The deleteLink directive can be used to display a UI control that performs your
+* chosen deletion routine. If the confirmDelete property of chaise-config.js is
+* true or undefined, the directive will display a modal and, if the user clicks
+* the affirmative button, run the provided callback to delete your resource. If
+* confirmDelete is false, the directive simply runs the provided callback when
+* the user clicks the UI control.
 * The deleteLink directive can be used as an element tag (<delete-link></delete-link>)
 * or an attribute (<div delete-link></div>). It accepts the following attributes:
 * @param {Function} callback - The function to delete your resource (required)
