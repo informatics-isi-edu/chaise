@@ -85,14 +85,17 @@ function editFilter() {
     this.clickEditFilter = function (attrName) {
         that.findEditfilterAttrByName(attrName).click();
     };
+    this.getCheckedEditFilters = function() {
+        return this.htmlElement.all(by.css('ul.nav.filteritems li.ng-scope:not(.ng-hide) label[ng-class="sideBar.getFieldValueClass(FacetsData.tag, value)"].toggler--is-active'));
+    };
     this.goBackToSidebar = function () {
         that.sidebarHeader.click();
     };
-    this.findEditfilterLiByName = function (attrName) {
+    this.findEditFilterLiByName = function (attrName) {
         return that.htmlElement.element(by.cssContainingText('ul.nav.filteritems li.ng-scope:not(.ng-hide)', attrName));
     };
     this.findCheckStatusDivByName = function (attr) {
-        return that.findEditfilterLiByName(attr).$('div[ng-click="sideBar.checkUncheck($event,value)"]');
+        return that.findEditFilterLiByName(attr).$('div[ng-click="sideBar.checkUncheck($event,value)"]');
     }
 };
 
@@ -118,7 +121,7 @@ function contentFilter() {
     };
     this.findCheckedSubfiltersByName = function (attrName) {
         return that.findFilterWrapperByName(attrName).all(by.css('span.filter-item-value.ng-scope > span'));
-    }
+    };
 };
 
 function resultContent() {

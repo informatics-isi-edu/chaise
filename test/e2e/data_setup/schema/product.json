@@ -275,7 +275,8 @@
           "name": "Accommodations"
         },
         "description": {
-          "display": "Accommodations"
+          "display": "Accommodations",
+          "top_columns": ["title", "rating", "category", "opened_on"]
         }
       }
     },

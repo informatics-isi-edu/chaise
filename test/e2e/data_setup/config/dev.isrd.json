@@ -53,9 +53,9 @@
         				"entityCount": 1
         			}, {
         				"content" : ["false", "true"],
-        				"entityCount": 1
+        				"entityCount": 4
         			}],
-        			"totalContentCount": 1,
+        			"totalContentCount": 2,
         			"totalEntityCount": 4
         		}, {
         			"clearAllFilters": false,
@@ -70,11 +70,11 @@
         			},	{
         				"content": ["Sherathon Hotel"],
         				"entityCount" : 1
-        			},{
+        			}, {
         				"content": ["Radisson Hotel", "Super 8 North Hollywood Motel", "NH Munich Resort"],
         				"entityCount" : 3
         			}],
-        			"totalContentCount": 3,
+        			"totalContentCount": 4,
         			"totalEntityCount": 3
         		}]
         	}

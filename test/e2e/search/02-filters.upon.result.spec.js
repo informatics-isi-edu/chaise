@@ -9,17 +9,25 @@ var filterCount = 0;
 
 var testAttributes = function(attr, attrCount) {
     describe("for attribute " + attr.text, function() {     
-        var startInd = attr.clearAllFilters ? 0 : ( attr.clearPreviousFilters ? attrCount - 1 : attrCount);
+        var clearAttributes = [];
+        if (!attr.clearAllFilters && attr.clearPreviousFilters) {
+            if (attr.clearPreviousFilters.length > 0) {
+                clearAttributes = attr.clearPreviousFilters;
+            } else {
+                startInd = attrCount - 1;
+                clearAttributes.push(startInd);
+            }
+        }
+
         var endIndex = attrCount;
         var contentCount = 0;
-        filterCount = filterCount - (endIndex - startInd);
+        filterCount = filterCount - clearAttributes.length;
         filterCount++;
-
+        
         beforeAll(function() {
-            for (var i = startInd; i < endIndex; i++) {
-               var previousAttr = config.attributes[i];
-               filterObj.clickFilterWrapperCancelByName(previousAttr.text); 
-            }
+            clearAttributes.forEach(function(ca) {
+                 filterObj.clickFilterWrapperCancelByName(config.attributes[ca].text); 
+            });
         });
         
         attr.filters.forEach(function(filter) {
@@ -56,10 +64,8 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
         if (contentCount > 0) {
             it("should uncheck edit filters when cancel is clicked", function() {
                 filterObj.clickFilterWrapperCancelByName(attr.text);
-                for (i = 0; i < attr.filters[contentCount - 1].content.length; i++) {  
-                    var c = chaisePage.editFilter.findCheckStatusDivByName(filter.content[i]);
-                    chaisePage.customExpect.elementContainClass(c, 'disabled');
-                }
+                var filters = chaisePage.editFilter.getCheckedEditFilters();
+                expect(filters.count()).toBe(0);
             });
         } else {
             it('should click the attr ' + attr.text + ' in sidebar', function() {
@@ -87,7 +93,6 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
             expect(chaisePage.resultContent.filter.findCheckedSubfiltersByName(attr.text).count()).toBe(filter.content.length);
         });
 
-       
         it('should show ' + filter.entityCount + ' results for filters ' + filter.content.join(','), function () {
             if (filter.entityCount != undefined) {
                 browser.sleep(3000);
@@ -98,7 +103,9 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
 
         it('should show \'' + filter.content.join(', ') + '\' in \'' + attr.text + '\' wrapper', function () {
             filterObj.findFilterWrapperTitleByWrapperName(attr.text).then(function(title) {
-                expect(title).toContain(filter.content.join(', '));
+                filter.content.forEach(function(content) {
+                    expect(title).toContain(content);
+                });
             });
         });
 
@@ -111,7 +118,42 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
     });
 };
 
+var testResultContent = function() {
+    describe('one randomly chosen record in the results,', function () {
+
+        var randResult, rand, length;
+
+        it('should be chosen randomly', function () {
+            var allResults = chaisePage.resultContent.getAllResultRows();
+            allResults.then(function (items) {
+                length = items.length;
+                rand = chaisePage.tools.getRandomInt(0, items.length - 1);
+                randResult = allResults.get(rand);
+                expect(randResult.isDisplayed()).toBe(true);
+            });
+        });
+
+        it('should have non-empty title', function () {
+            var titleEle = chaisePage.resultContent.getResultTitleElement(randResult);
+            expect(titleEle.getText()).not.toBe('');
+        });
+
+        it('should display the title', function () {
+            var titleEle = chaisePage.resultContent.getResultTitleElement(randResult);
+            expect(titleEle.isDisplayed()).toBe(true);
+        });
+
+
+        it('should display the image', function () {
+            var imgEle = chaisePage.resultContent.getResultImgElement(randResult);
+            expect(imgEle.isDisplayed()).toBe(true);
+        });
+        
+    });
+};
+
 var afterAttributeTestCompletion = function() {
+
     describe('after \'Clear All Filters\' is clicked', function () {
         it('should show 0 filter wrappers and go back to initial sidebar', function () {
             filterObj.clickClearAllBtn();
@@ -142,6 +184,8 @@ var determineFiltersUnchecked = function(attr) {
     });
 };
 
+
+
 describe('Filters on top of the records,', function () {
     var EC = protractor.ExpectedConditions;
 
@@ -161,5 +205,6 @@ describe('Filters on top of the records,', function () {
         attrCount++;
     });
     
+    testResultContent();
     afterAttributeTestCompletion();
 });

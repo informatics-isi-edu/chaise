@@ -15,7 +15,7 @@ var config = {
     }
   },
   specs: [
-    '02-filters.upon.result.spec.js'
+    '*.js'
   ],
   jasmineNodeOpts: {
     showColors: true,
