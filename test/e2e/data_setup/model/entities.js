@@ -27,6 +27,7 @@ Entities.prototype.create = function(options) {
 		return defer.promise;
 	}
 	http.post(this.url + "catalog/" + this.catalog.id + "/entity/" + this.schema.name + ":" + this.table.name, options.entities).then(function(response) {
+		self.table.entityCount = options.entities.length;
 		defer.resolve(response.data);
 	}, function(err) {
 		defer.reject(err, self);

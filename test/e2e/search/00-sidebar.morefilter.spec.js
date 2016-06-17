@@ -69,30 +69,67 @@ describe('Chaise initial sidebar,', function () {
                 expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
             });
         });
-        
-        it('should show attribute', function () {
-            var config = chaisePage.getConfig(["Chaise initial sidebar,",'after initialization,','should show attribute'])
-            if (config) {
-                var displayedAttr = chaisePage.sidebar.findSidebarAttrByName(config['attribute']);
-                expect(displayedAttr.isDisplayed()).toBe(true);
-            }
+
+
+        it('should show attributes with top or facetOrder annotation initially', function () {
+            var columns = chaisePage.dataUtils.sidebar.getAllVisibleSidebarColumns(browser.params.defaultSchema, browser.params.defaultTable);
+            chaisePage.sidebar.getSidebarAttrsDisplayed().then(function(sidebarAttributes) {
+                expect(sidebarAttributes.length).toBe(columns.length);
+                if (columns.length > 0) {
+                    columns.forEach(function(c) {
+                        var displayedAttr = chaisePage.sidebar.findSidebarAttrByName(chaisePage.dataUtils.sidebar.getColumnDisplayName(c));
+                        expect(displayedAttr.isDisplayed()).toBe(true);
+                    });
+                }
+            });
         });
 
-        var suite = it('should not show attribute', function () {
-            var config = chaisePage.getConfig(["Chaise initial sidebar,",'after initialization,','should not show attribute'])
-            if (config) {
-                var nonDisplayedAttr = chaisePage.sidebar.findSidebarAttrByName(config['attribute']);
+        it('should show attributes with facetOrder annotation first and then the top ones', function () {
+            var columns = chaisePage.dataUtils.sidebar.getVisibleSidebarColumnOrder(browser.params.defaultSchema, browser.params.defaultTable);
+            chaisePage.sidebar.getSidebarAttrsDisplayed().then(function(sidebarAttributes) {
+                for (var i=0; i <sidebarAttributes.length; i++) {
+                    expect(sidebarAttributes[i].getText()).toBe(chaisePage.dataUtils.sidebar.getColumnDisplayName(columns[i]));
+                }
+            });
+        });
+       
+        it('should not show attributes with bottom', function () {
+            var columns = chaisePage.dataUtils.sidebar.getInvisibleSidebarColumns(browser.params.defaultSchema, browser.params.defaultTable);
+            columns.forEach(function(column) {
+                var nonDisplayedAttr = chaisePage.sidebar.findSidebarAttrByName(chaisePage.dataUtils.sidebar.getColumnDisplayName(column));
                 expect(nonDisplayedAttr.isDisplayed()).toBe(false);
-            }
+            });
         });
 
         var viewAll = chaisePage.sidebar.viewMoreBtn;
+
+        it('the number in the () should be consistent with the number of items displayed in the list under "View all attributes"', function () {
+            var columns = chaisePage.dataUtils.sidebar.getAllSidebarColumns(browser.params.defaultSchema, browser.params.defaultTable);
+            expect(viewAll.getText()).toBe("View all attributes (" + columns.length + ")");
+        });
+
         var sidebarHeader = chaisePage.sidebar.sidebarHeader;
         var previousChecked, previousCheckedText, previousUnchecked, previousUncheckedText;
+
         describe('when entering \'View All Attributes\'', function () {
             it('sidebar header should change to \'view all attributes\'', function () {
                 viewAll.click();
                 expect(chaisePage.moreFilter.sidebarHeader.getText()).toContain('ALL ATTRIBUTES');
+            });
+
+            it('attributes with "top" and "facetOrder" annotations should only be checked with proper ordering', function() {
+                var columns = chaisePage.dataUtils.sidebar.getAllVisibleSidebarColumns(browser.params.defaultSchema, browser.params.defaultTable);
+                chaisePage.moreFilter.findAllCheckedAttrCheckbox().then(function(checkedAttrs) {
+                    expect(checkedAttrs.length).toBe(columns.length);
+                    for (var i=0; i < checkedAttrs.length; i++) {
+                        checkedAttrs[i].getText().then(function(txt) {
+                            var found = columns.find(function(c) {
+                                return chaisePage.dataUtils.sidebar.getColumnDisplayName(c) == txt;
+                            }) ? true : false; 
+                            expect(found).toBe(true);
+                        });
+                    }
+                });
             });
 
             it('first checked attribute name should be defined', function () {
@@ -129,6 +166,7 @@ describe('Chaise initial sidebar,', function () {
                 previousUncheckedAttr = chaisePage.sidebar.findSidebarAttrByName(previousUncheckedText);
                 expect(previousUncheckedAttr.isDisplayed()).toBe(false);
             });
+            
             it('should entering \'View All Attributes\', check previously unchecked and uncheck' +
                 'previously checked', function () {
                 viewAll.click();

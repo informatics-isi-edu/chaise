@@ -3,6 +3,7 @@
     "accommodation": {
       "comment": "List of different types of accommodations",
       "kind": "table",
+      "entityCount": 0,
       "keys": [
         {
           "comment": null,
@@ -281,6 +282,7 @@
     "booking": {
       "comment": null,
       "kind": "table",
+      "entityCount": 0,
       "keys": [
         {
           "comment": null,
@@ -390,6 +392,7 @@
           ]
         }
       ],
+      "entityCount": 0,
       "foreign_keys": [],
       "table_name": "file",
       "schema_name": "product",
@@ -533,6 +536,7 @@
           ]
         }
       ],
+      "entityCount": 0,
       "foreign_keys": [
         {
           "comment": null,
@@ -584,7 +588,7 @@
           },
           "annotations": {
             "comment": [
-              "accommodation"
+              "dataset"
             ]
           }
         },
@@ -634,6 +638,7 @@
           ]
         }
       ],
+      "entityCount": 0,
       "foreign_keys": [],
       "table_name": "category",
       "schema_name": "product",

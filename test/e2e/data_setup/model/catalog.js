@@ -1,5 +1,6 @@
 var Q = require('q');
 var http = require('../plugin/q-request.js');
+var Schema = require('./schema.js');
 
 /* @namespace Catalog
  * @desc
@@ -88,15 +89,66 @@ Catalog.prototype.remove = function() {
 	});
 
 	return defer.promise;
-}
+};
+
+Catalog.prototype.setDefaultSchema = function() {
+	var defaultSchema = null, schemas = this.content.schemas;	
+	
+	for (var k in schemas) {
+		var annotations = schemas[k].annotations; 
+
+		if (annotations != null && annotations['comment'] != null && annotations['comment'].contains('default')) {
+			defaultSchema = schemas[k];
+			break;
+		}
+	}
+	
+	if (defaultSchema == null) {
+		for (var k in schemas) {
+			var s = schemas[k];
+			for (var t in s.tables) {
+				var table = s.tables[t];
+				if (table['annotations'] != null && table['annotations']['comment'] != null && table['annotations']['comment'].contains('default')) {
+					defaultSchema = s;
+					break;
+				}
+			}
+			if (defaultSchema != null) break;
+		}
+		
+		if (defaultSchema == null) {
+			// get the first schema from the catalog
+			for (var k in schemas) {
+				defaultSchema = schemas[k];
+				break;
+			}
+		}
+	}
+	var schema = new Schema({ schema: defaultSchema, catalog: this, name: defaultSchema.schema_name });				
+	this.defaultSchema = schema;
+	schema.setDefaultTable();
+};
 
 /**
  *
  * @desc
- * Not yet implemented.
+ * Retrieves all schema and tables for them respectively.
  */
 Catalog.prototype.get = function() {
-	throw new Error("Not Implemented");
-}
+	var defer = Q.defer(), self = this;
+	if (!this.id) return defer.reject("No Id set : get catalog function"), defer.promise;
+	http.get(this.url + 'catalog/' + this.id + "/schema").then(function(response) {
+		self.content = response.data;
+		self.setDefaultSchema();
+		defer.resolve(self.defaultSchema);
+	}, function(err) {
+		console.log("some error");
+		defer.reject(err, self);
+	});
+
+	return defer.promise;
+};
+
+
 
 module.exports = Catalog;

@@ -101,6 +101,26 @@ QRequest.body = function(response, body) {
 
 QRequest.setDefaults = function(defaults) {
     this.defaults = defaults || {}; 
+};
+
+Array.prototype.contains = function(obj) {
+    var i = this.length;
+    while (i--) {
+        if (this[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+};
+
+Array.prototype.intersect = function( array ) {
+    // this is naive--could use some optimization
+    var result = [];
+    for ( var i = 0; i < this.length; i++ ) {
+        if ( array.contains(this[i]) && !result.contains(this[i]) )
+            result.push( this[i] );
+    }
+    return result;
 }
 
 module.exports = QRequest;

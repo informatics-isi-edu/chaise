@@ -18,7 +18,6 @@ var Table = function(options) {
 	this.name = this.content.table_name;
 	this.foreignKeys = this.content.foreign_keys || [];
 	this.content.schema_name = this.schema.name;
-
 	this.setTableParameters = function(name) {
 		this.content = {
 		  "comment": "", 

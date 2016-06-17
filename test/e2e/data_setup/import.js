@@ -5,10 +5,39 @@ var Table = require('./model/table.js');
 var Entites = require('./model/entities.js');
 var Association = require('./model/association.js');
 var Q = require('q');
+
 var ermRest = require('./model/ermrest.js');
 ermRest.configure(http, require('q'))
 
 var config = {};
+
+exports.introspect = function(options) {
+	var defer = Q.defer();
+
+	config = options;
+	config.url = config.url || 'https://dev.isrd.isi.edu/ermrest/';
+	config.authCookie = config.authCookie || 'oauth2_auth_nonce=1464217155.1jyAUppOZlRPdOR-KGkZTK-dtN_Z0RtO24zkxdOg.; ermrest=C6KFIQn2JS37CGovofWnjKfu';
+
+	http.setDefaults({
+	    headers: { 'Cookie': config.authCookie },
+	    json: true
+	});
+
+	var catalog = new Catalog({ 
+		url: config.url, 
+		id: config.catalogId 
+	});
+
+	// introspect
+	catalog.get().then(function(schema) {
+        defer.resolve(schema);
+    }, function(err) {
+        console.dir(err);
+        defer.reject(err);
+    });
+
+    return defer.promise;
+};
 
 exports.setup = function(options) {
 	config = options;
@@ -21,16 +50,22 @@ exports.setup = function(options) {
 	    json: true
 	});
 
-	var catalog = new Catalog({ 
-		url: config.url, 
-		id: config.catalog.id 
-	});
+	var schema, catalog;
 
-	var schema = new Schema({
-		url: config.url,
-		catalog: catalog,
-		schema: require(config.schema.path || './schema/' + config.schemaName  + '.json')
-	});
+	if (config.catalog) {
+		catalog = new Catalog({ 
+			url: config.url, 
+			id: config.catalog.id 
+		});
+
+		if (config.schema) {
+		 	schema = new Schema({
+				url: config.url,
+				catalog: catalog,
+				schema: require(config.schema.path || './schema/' + config.schemaName  + '.json')
+			});
+		 }
+	}
 
 	var defer = Q.defer();
 
@@ -39,18 +74,16 @@ exports.setup = function(options) {
 		console.log("Valid session found");
 		return createCatalog(catalog);
 	}).then(function() {
-		return catalog.addACLs([{ name: "read_user", user: "*" }, { name: "content_read_user", user : "*"}]);
-	}).then(function() {
-		console.log("ACL's added to catalog");
 		return createSchema(schema);
 	}).then(function() {
 		return createTables(schema);
 	}).then(function() {
 		console.log("=======================Catalog imported with Id : " + catalog.id + "===========================");
-		defer.resolve({ catalogId: catalog.id, schema: schema });
+		if (!config.catalog) defer.resolve({ catalogId: 1, schema:  null });
+		else defer.resolve({ catalogId: catalog.id, schema: schema });
 	}, function(err) {
 		console.dir(err);
-		if (catalog.id) defer.reject({ catalogId: catalog.id });
+		if (catalog && catalog.id) defer.reject({ catalogId: catalog.id });
 		else defer.reject(err || {});
 	});
 
@@ -69,7 +102,9 @@ exports.tear = function(options) {
 	    json: true
 	});
 
-	if (!config.dataSetup.catalog.id) {
+	if (!config.dataSetup.catalog) {
+		defer.resolve();
+	} else if (!config.dataSetup.catalog.id) {
 		removeCatalog(defer, options.catalogId);
 	} else if (config.dataSetup.schema.createNew) {
 		removeSchema(defer, options.catalogId, config.dataSetup.schema)
@@ -138,12 +173,17 @@ var removeTables = function(defer, catalogId, schemaName) {
 var createCatalog = function(catalog) {
 	var defer = Q.defer();
 
-	if (catalog.id) {
+	if (!catalog) {
+		defer.resolve();
+	} else if (catalog.id) {
+		console.log("Catalog with id " + catalog.id + " already exists.");
 		defer.resolve();
 	} else {
 		catalog.create().then(function() {
 			console.log("Catalog created with id " + catalog.id);
-			defer.resolve()
+			defer.resolve();
+		}).then(function() {
+			return catalog.addACLs([{ name: "read_user", user: "*" }, { name: "content_read_user", user : "*"}]);
 		}, function(err) {
 			defer.reject(err);
 		});
@@ -154,8 +194,9 @@ var createCatalog = function(catalog) {
 
 var createSchema = function(schema) {
 	var defer = Q.defer();
-
-	if (config.schema.createNew) {
+	if (!schema) {
+		defer.resolve();
+	} else if (config.schema.createNew) {
 		schema.create().then(function() {	
 			console.log("Schema created with name " + schema.name);
 			defer.resolve();
@@ -179,35 +220,40 @@ var createSchema = function(schema) {
 var createTables = function(schema) {
 	var defer = Q.defer();
 
-	var promises = [], tables = {}, tableNames = [], index = 0;
-
-	// Populate tables from their json on basis of schema tables field and then create them
-	for (var k in schema.content.tables) {
-		var table = new Table({
-			url: config.url,
-			schema: schema,
-			table: schema.content.tables[k]
-		});
-		tables[k] = table;
-		tableNames.push(k);
-		if (!schema.content.tables[k].exists || (config.tables.newTables.indexOf(k) != -1)) promises.push(table.create(++index * 500));
-	}
-
-	Q.all(promises).then(function() {
-		console.log("Tables created ");
-		schema.tables = tables;
-		// Add foreign keys in the table
-		return createForeignKeys(schema);
-	}).then(function() {
-		console.log("Foreign Keys created");
-		// Import data for following tables in order for managing foreign key management
-		return importEntities(tableNames, tables, schema);
-	}).then(function() {
-		console.log("Data imported");
+	if (!schema) {
 		defer.resolve();
-	}, function(err) {
-		defer.reject(err);
-	});
+	} else {
+
+		var promises = [], tables = {}, tableNames = [], index = 0;
+
+		// Populate tables from their json on basis of schema tables field and then create them
+		for (var k in schema.content.tables) {
+			var table = new Table({
+				url: config.url,
+				schema: schema,
+				table: schema.content.tables[k]
+			});
+			tables[k] = table;
+			tableNames.push(k);
+			if (config.tables.createNew == true && (!schema.content.tables[k].exists || (config.tables.newTables.indexOf(k) != -1))) promises.push(table.create(++index * 500));
+		}
+
+		Q.all(promises).then(function() {
+			console.log("Tables created ");
+			schema.tables = tables;
+			// Add foreign keys in the table
+			return createForeignKeys(schema);
+		}).then(function() {
+			console.log("Foreign Keys created");
+			// Import data for following tables in order for managing foreign key management
+			return importEntities(tableNames, tables, schema);
+		}).then(function() {
+			console.log("Data imported");
+			defer.resolve();
+		}, function(err) {
+			defer.reject(err);
+		});
+	}
 
 	return defer.promise;
 };
@@ -223,32 +269,37 @@ var importEntities = function(tableNames, tables, schema) {
 	delete require.cache[require.resolve(config.schema.path)];
 	var association = new Association({ schema: require(config.schema.path) });
 
-	var cb = function() {
-		if (tableNames.length == 0) return defer.resolve();
-		var name = tableNames.shift();
-		var table = tables[name];
-		if (!table.exists || config.entities.newTables.indexOf(name) != -1) {
-			if (association.hasAReference(name, importedTables)) {
-				tableNames.push(name);
-				cb();
+	if (config.entities.createNew) {
+		console.log("Inside import entities");
+		var cb = function() {
+			if (tableNames.length == 0) return defer.resolve();
+			var name = tableNames.shift();
+			var table = tables[name];
+			if (!table.exists || config.entities.newTables.indexOf(name) != -1) {
+				if (association.hasAReference(name, importedTables)) {
+					tableNames.push(name);
+					cb();
+				} else {
+					var table = tables[name];
+					insertEntitiesForATable(table, schema.name).then(function() {
+						importedTables.push(name);
+						cb();
+					}, function(err) {
+						console.log(err);
+						importedTables.push(name);
+						cb();
+					});
+				}
 			} else {
-				var table = tables[name];
-				insertEntitiesForATable(table, schema.name).then(function() {
-					importedTables.push(name);
-					cb();
-				}, function(err) {
-					console.log(err);
-					importedTables.push(name);
-					cb();
-				});
+				importedTables.push(name);
+				cb();
 			}
-		} else {
-			importedTables.push(name);
-			cb();
-		}
-	};
+		};
 
-	cb();
+		cb();
+	} else {
+		defer.resolve();
+	}
 
 	return defer.promise;
 };
@@ -291,7 +342,7 @@ var createForeignKeys = function(schema) {
 	var promises = [];
 	for (var k in schema.tables) {
 		var table = schema.tables[k];
-		if (!schema.content.tables[k].exists || (config.tables.newTables.indexOf(k) != -1)) {
+		if (config.tables.createNew == true && (!schema.content.tables[k].exists || (config.tables.newTables.indexOf(k) != -1))) {
 			table.foreignKeys.forEach(function(fk) {
 				promises.push(table.addForeignKey(fk));
 			});

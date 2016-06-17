@@ -53,8 +53,10 @@ function moreFilter() {
         all(by.css('label[ng-class="sideBar.getMoreFieldValueClass(facet)"]:not(.toggler--is-active)')).first();
     };
     this.findFirstCheckedAttrCheckBox = function () {
-        return that.htmlElement.
-        all(by.css('label[ng-class="sideBar.getMoreFieldValueClass(facet)"]')).first();
+        return this.findAllCheckedAttrCheckbox().first();
+    };
+    this.findAllCheckedAttrCheckbox = function() {
+        return this.htmlElement.all(by.css('label[ng-class="sideBar.getMoreFieldValueClass(facet)"].toggler--is-active'));
     };
     this.findMorefilterAttrByName = function (attrName) {
         return that.htmlElement.element(by.cssContainingText('div.editvalue-container' +
@@ -106,7 +108,7 @@ function contentFilter() {
     this.findFilterWrapperByName = function (attrName) {
         return that.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
     };
-    this.findFitlerWrapperTitleByWrapperName = function (wrapperAttrName) {
+    this.findFilterWrapperTitleByWrapperName = function (wrapperAttrName) {
         var titleSpan = that.findFilterWrapperByName(wrapperAttrName)
             .$('span[ng-attr-title="{{facetResults.displayTitle(facet)}}"]');
         return titleSpan.getAttribute('title');
@@ -201,7 +203,7 @@ function chaisePage() {
     this.customExpect = {
         elementContainClass: function (ele, className) {
             expect(ele.getAttribute('class')).toContain(className);
-        },
+        }
     };
     this.getConfig = function(paths) {
         var suite = browser.params.configuration.tests;
@@ -215,7 +217,49 @@ function chaisePage() {
             return false;
         }
         return suite;
-    }
+    };
+    this.getCurrentContext = function() {
+
+        var deferred = protractor.promise.defer();
+        
+        browser.executeScript('return window.location.hash;').then(function(hash) {
+            var context = {};
+            
+            if (hash === undefined || hash == '' || hash.length == 1) {
+                return deferred.resolve(context);
+            }
+
+            var parts = hash.substring(1).split('/');
+            context.catalogID = parts[0];
+            if (parts[1]) {
+                var params = parts[1].split(':');
+                if (params.length > 1) {
+                    context.schemaName = decodeURIComponent(params[0]);
+                    context.tableName = decodeURIComponent(params[1]);
+                } else {
+                    context.tableName = decodeURIComponent(params[0]);
+                }
+            }
+
+            // If there are filters appended to the URL, add them to context.js
+            if (parts[2]) {
+                context.filters = {};
+                var filters = parts[2].split('&');
+                for (var i = 0, len = filters.length; i < len; i++) {
+                    var filter = filters[i].split('=');
+                    if (filter[0] && filter[1]) {
+                        context.filters[decodeURIComponent(filter[0])] = decodeURIComponent(filter[1]);
+                    }
+                }
+            }
+
+            deferred.resolve(context);
+        });
+
+        return deferred.promise;
+    };
+
+    this.dataUtils = new (require('./dataUtils.js'))();
 };
 
 module.exports = new chaisePage();
