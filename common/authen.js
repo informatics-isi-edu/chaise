@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.authen', [])
+    angular.module('chaise.authen', ['chaise.utils'])
 
     .factory('Session', ['$http', '$q', '$window', 'UriUtils', function ($http, $q, $window, UriUtils) {
 

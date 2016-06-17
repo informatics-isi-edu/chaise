@@ -3,7 +3,15 @@
 
     var client;
 
-    angular.module('chaise.viewer', ['ERMrest', 'ngSanitize', 'chaise.alerts', 'chaise.filters', 'ui.select', 'ui.bootstrap'])
+    angular.module('chaise.viewer', [
+        'ERMrest',
+        'ngSanitize',
+        'chaise.alerts',
+        'chaise.filters',
+        'chaise.authen',
+        'ui.select',
+        'ui.bootstrap'
+    ])
 
     // Configure the context info from the URI
     .config(['context', function configureContext(context) {
@@ -54,10 +62,9 @@
     }])
 
     // Set user info
-    .config(['userProvider', 'context', function configureUser(userProvider, context) {
+    .config(['userProvider', 'context', 'SessionProvider', function configureUser(userProvider, context, SessionProvider) {
 
-        client.session.get().then(function success(session) {
-            console.log('Session: ', session);
+        SessionProvider.$get().getSession().then(function success(session) {
             var groups = context.groups;
             // session.attributes is an array of objects that have a display_name and id
             // We MUST use the id field to check for role inclusion as it is the unique identifier

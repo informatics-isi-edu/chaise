@@ -171,6 +171,8 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/utils.js \
+	$(COMMON)/authen.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js
