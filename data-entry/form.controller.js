@@ -3,7 +3,7 @@
 
     angular.module('chaise.dataEntry')
 
-    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log) {
+    .controller('FormController', ['AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', function FormController(AlertsService, UriUtils, dataEntryModel, context, $window, $log) {
         var vm = this;
         vm.dataEntryModel = dataEntryModel;
         vm.server = context.server;

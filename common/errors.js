@@ -4,7 +4,7 @@
     angular.module('chaise.errors', ['chaise.utils', 'chaise.alerts'])
 
     // Factory for each error type
-    .factory('ErrorService', ['$log', '$uibModal', 'UriUtils', 'AlertsService', function ErrorService($log, $uibModal, UriUtils, AlertsService) {
+    .factory('ErrorService', ['$log', '$window', '$uibModal', 'UriUtils', 'AlertsService', function ErrorService($log, $window, $uibModal, UriUtils, AlertsService) {
 
         function errorPopup(message, errorCode) {
             var params = {
@@ -24,7 +24,7 @@
             });
 
             modalInstance.result.then(function () {
-                window.location = chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin;
+                $window.location = chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin;
             });
         }
 

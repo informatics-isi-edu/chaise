@@ -67,7 +67,7 @@
         try {
             var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
         } catch (exception) {
-            if (exception instanceof Errors.UnauthorizedError) {
+            if (exception instanceof ERMrest.UnauthorizedError) {
                 Session.login(window.location.href);
             }
             // TODO implement error hierarchy in ermrestJS
@@ -206,7 +206,7 @@
                 //
                 // ideally this would be used for Table/Schema not found instead of in general case
                 $log.info(exception);
-                if (exception instanceof Errors.NotFoundError) {
+                if (exception instanceof ERMrest.NotFoundError) {
                     ErrorService.errorPopup(exception.message, exception.code);
                 }
             }
