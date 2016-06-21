@@ -16,6 +16,8 @@
                 templateUrl: '../common/templates/errorDialog.html',
                 controller: 'ErrorDialogController',
                 controllerAs: 'ctrl',
+                backdrop: 'static',
+                keyboard: false,
                 resolve: {
                     params: function() {
                         return params;
