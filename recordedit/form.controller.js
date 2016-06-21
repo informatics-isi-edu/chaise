@@ -1,11 +1,11 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.dataEntry')
+    angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log) {
+    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, recordEditModel, context, $window, $log) {
         var vm = this;
-        vm.dataEntryModel = dataEntryModel;
+        vm.recordEditModel = recordEditModel;
         vm.server = context.server;
         vm.editMode = context.filters || false;
         vm.booleanValues = context.booleanValues;
@@ -39,7 +39,7 @@
 
         function redirectAfterSubmission(entities) {
             var form = vm.formContainer;
-            var model = vm.dataEntryModel;
+            var model = vm.recordEditModel;
             var rowset = model.rows;
             var redirectUrl = $window.location.origin;
             form.$setUntouched();
@@ -90,7 +90,7 @@
 
         function submit() {
             var form = vm.formContainer;
-            var model = vm.dataEntryModel;
+            var model = vm.recordEditModel;
             form.$setUntouched();
             form.$setPristine();
 
@@ -119,13 +119,13 @@
         }
 
         function addEmptyFormRow() {
-            vm.dataEntryModel.rows.push({});
+            vm.recordEditModel.rows.push({});
         }
 
         function copyLastFormRow() {
             // Check if the prototype row to copy has any invalid values. If it
             // does, display an error. Otherwise, copy the row.
-            var protoRowIndex = vm.dataEntryModel.rows.length - 1;
+            var protoRowIndex = vm.recordEditModel.rows.length - 1;
             var protoRowValidityStates = vm.formContainer.row[protoRowIndex];
             var validRow = true;
             angular.forEach(protoRowValidityStates, function(value, key) {
@@ -135,7 +135,7 @@
                 }
             });
             if (validRow) {
-                var rowset = vm.dataEntryModel.rows;
+                var rowset = vm.recordEditModel.rows;
                 var protoRow = rowset[protoRowIndex];
                 var newRow = angular.copy(protoRow);
                 rowset.push(angular.copy(protoRow));
@@ -143,14 +143,14 @@
         }
 
         function removeFormRow(index) {
-            vm.dataEntryModel.rows.splice(index, 1);
+            vm.recordEditModel.rows.splice(index, 1);
         }
 
         function getDefaults() {
             var defaults = [];
 
             try {
-                var columns = vm.dataEntryModel.table.columns.all();
+                var columns = vm.recordEditModel.table.columns.all();
                 var numColumns = columns.length;
                 for (var i = 0; i < numColumns; i++) {
                     var columnName = columns[i].name;
@@ -168,7 +168,7 @@
         function getKeyColumns() {
             var keys = [];
             try {
-                var _keys = vm.dataEntryModel.table.keys.all();
+                var _keys = vm.recordEditModel.table.keys.all();
                 var numKeys = _keys.length;
                 for (var i = 0; i < numKeys; i++) {
                     var columns = _keys[i].colset.columns;
@@ -229,7 +229,7 @@
         // In this case, columns of type serial* == auto-generated
         function isAutoGen(name) {
             try {
-                return (vm.dataEntryModel.table.columns.get(name).type.name.indexOf('serial') === 0);
+                return (vm.recordEditModel.table.columns.get(name).type.name.indexOf('serial') === 0);
             } catch (exception) {
                 // handle exception
                 $log.info(exception);
@@ -241,7 +241,7 @@
             // obj with the column name as keys and FK values as values. For now,
             // we can determine whether a column is a FK by checking whether domainValues
             // has a key of that column's name.
-            return vm.dataEntryModel.domainValues.hasOwnProperty(columnName);
+            return vm.recordEditModel.domainValues.hasOwnProperty(columnName);
         }
 
         // Returns true if a column type is found in the given array of types
