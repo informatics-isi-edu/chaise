@@ -10,6 +10,7 @@
         'chaise.alerts',
         'chaise.filters',
         'chaise.validators',
+        'ui.bootstrap',
         'ui.select',
         'rzModule',
         '720kb.datepicker',
@@ -73,6 +74,7 @@
             // if (exception instanceof Errors.serverNotFoundError) {
             //     ErrorService.serverNotFound();
             // }
+            ErrorService.errorPopup(response.message, response.code);
         }
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             try {
@@ -201,21 +203,22 @@
                 // } else if (exception instanceof Errors.SchemaNotFoundError) {
                 //     ErrorService.schemaNotFound(context.schemaName);
                 // }
-                AlertsService.addAlert({type: 'error', message: exception.message});
+                //
+                // ideally this would be used for Table/Schema not found instead of in general case
                 $log.info(exception);
+                if (exception instanceof Errors.NotFoundError) {
+                    ErrorService.errorPopup(exception.message, exception.code);
+                }
             }
 
         }, function error(response) { // error promise for server.catalogs.get()
-            // TODO verify this is handled via an interceptor by the function in the ErrorService
-            // If the interceptor handles this, do nothing here
-            // 401 should not be caught here.
             if (response.code == 401) {
                 UriUtils.getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
                 $log.info(response);
             }
 
-            // Not sure why this is getting an error promise instead of being caught by the try/catch
             if (response.code == 404) {
+                ErrorService.errorPopup(response.message, response.code);
                 ErrorService.catalogNotFound(context.catalogID, response);
             }
         });
