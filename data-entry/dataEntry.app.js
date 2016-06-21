@@ -218,7 +218,6 @@
             }
 
             // for not found and bad request
-            console.log(response instanceof ERMrest.BadRequestError);
             if (response instanceof ERMrest.NotFoundError || response instanceof ERMrest.BadRequestError) {
                 ErrorService.errorPopup(response.message, response.code);
                 ErrorService.catalogNotFound(context.catalogID, response);
