@@ -2,7 +2,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.dataEntry')
+    angular.module('chaise.recordEdit')
 
     .constant('context', {
         serviceURL: null,

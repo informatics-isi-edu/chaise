@@ -114,7 +114,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             }
 
             // Extract the first entity
-            var entity          = data[0];
+            var entity = {};
 
             // pattern interpretation (create _link entries for url linking)
             self.patternInterpretationForTable(schemaName, tableName, data);
@@ -126,41 +126,30 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
 
             // get actual columns
-            var actualColumns = Object.keys(entity);
+            var actualColumns = Object.keys(data[0]);
 
-            // remove hidden columns and update column display name
+            // add visible columns to entity and use display name
             for (var i = 0; i < actualColumns.length; i++) {
                 var col = actualColumns[i];
 
-                if (col.endsWith('_link')) {
+                if (col.endsWith('_link')) { // link of a column
                     var subCol = col.substring(0, col.length - 5); // col name without _link
 
-                    // if hidden, delete
-                    if (!displayColumns.hasOwnProperty(subCol)) {
-                        for (var j = 0; j < entity.length; j++) {
-                            delete entity[j][col];
+                    // if column is visible, add to entity
+                    if (displayColumns.hasOwnProperty(subCol)) {
+                        // if display name is different, change
+                        if (displayColumns[subCol] !== subCol){
+                            entity[displayColumns[subCol] + '_link'] = data[0][col];
+                        } else {
+                            entity[col] = data[0][col];
                         }
                     }
-                    // rename col_link if col display name is different
-                    else if (displayColumns[subCol] !== subCol) {
-                        // if display name is different from column name
-                        // update display name
-                        for (var j = 0; j < entity.length; j++) {
-                            entity[j][displayColumns[subCol] + '_link'] = entity[j][col];
-                            delete entity[j][col];
-                        }
-                    }
-                } else if (!displayColumns.hasOwnProperty(col)) {
-                    // if hidden column, delete
-                    for (var j = 0; j < entity.length; j++) {
-                        delete entity[j][col];
-                    }
-                } else if (displayColumns[col] !== col) {
-                    // if display name is different from column name
-                    // update display name
-                    for (var j = 0; j < entity.length; j++) {
-                        entity[j][displayColumns[col]] = entity[j][col];
-                        delete entity[j][col];
+                } else if (displayColumns.hasOwnProperty(col)) { // column that is visible
+                    // if column display name is different, change
+                    if (displayColumns[col] !== col) {
+                        entity[displayColumns[col]] = data[0][col];
+                    } else {
+                        entity[col] = data[0][col];
                     }
                 }
             }
