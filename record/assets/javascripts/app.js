@@ -1302,68 +1302,61 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                     }
                     $scope.entity = data;
                 });
+
+                // A record can be edited if:
+                // 1. The table or schema doesn't have an ignore annotation "entry" or "edit" context; AND
+                // 2. The catalog allows write access and the user is part of the
+                // catalog's content_write_users.
+                var ignoreRecord = false, editCatalog = false;
+                var ignoreURI = 'tag:isrd.isi.edu,2016:ignore';
+                var schema = data.schemas[schemaName];
+                var ignoreOnTable = schema.tables[tableName].annotations[ignoreURI];
+                var ignoreOnSchema = schema.annotations[ignoreURI];
+                var ignoreTable = (ignoreOnTable !== undefined && (ignoreOnTable === null || ignoreOnTable === true || ignoreOnTable.indexOf('edit') > -1 || ignoreOnTable.indexOf('entry') > -1));
+                var ignoreSchema = (ignoreOnSchema !== undefined && (ignoreOnSchema === null || ignoreOnSchema === true || ignoreOnSchema.indexOf('edit') > -1 || ignoreOnSchema.indexOf('entry') > -1));
+                if (ignoreTable || ignoreSchema) {
+                    ignoreRecord = true;
+                }
+
+                // Get this catalog's content_write_users
+                $http.get(configService.CR_BASE_URL + cid + '/meta/content_write_user').success(function(data, status, headers, config) {
+                    var writeUsers = [];
+                    for (var i = 0, len = data.length; i < len; i++) {
+                        if (data[i].v === '*') {
+                        // Wildcard value under 'content_write_user' == anybody can
+                        // write to catalog, so allow redirect.
+                            editCatalog = true;
+                        } else {
+                            writeUsers.push(data[i].v);
+                        }
+                    }
+                    if (writeUsers.length > 0) {
+                        // Get current user's session attributes
+                        var attrs = session.data.attributes;
+                        var attrIds = [];
+                        for (var j = 0, len = attrs.length; j < len; j++) {
+                            attrIds.push(attrs[j].id);
+                        }
+                        // Find intersection of user's session attrs and catalog's
+                        // content_write_users. To do this: Create an object, the
+                        // keys of which are the elements of one array. Then check
+                        // if the obj has a key that matches an element of the 2nd
+                        // array. Borrowed from: http://stackoverflow.com/a/1885766/3581097
+                        var obj = {};
+                        for (var k = 0, len = writeUsers.length; k < len; k++) {
+                            obj[writeUsers[k]] = true;
+                        }
+                        for (var l = 0, len = attrIds.length; l < len; l++) {
+                            if (obj[attrIds[l]]) {
+                            // A match has been found, allow redirect.
+                                editCatalog = true;
+                            }
+                        }
+                    }
+                    $scope.allowEdit = editCatalog && !ignoreRecord;
+                });
             });
         }
-
-        // A record is can be edited if:
-        // 1. The catalog allows write access and the user is part of the
-        // catalog's content_write_users; AND
-        // 2. The table doesn't have an ignore annotation "entry" or "edit" context
-
-        // Get this catalog's content_write_users
-        $http.get(configService.CR_BASE_URL + cid + '/meta/content_write_user').success(function(data, status, headers, config) {
-            var writeUsers = [];
-            var editCatalog = false;
-
-            for (var i = 0, len = data.length; i < len; i++) {
-                if (data[i].v === '*') {
-                // Wildcard value under 'content_write_user' == anybody can
-                // write to catalog, so allow redirect.
-                    editCatalog = true;
-                } else {
-                    writeUsers.push(data[i].v);
-                }
-            }
-
-            if (writeUsers.length > 0) {
-                // Get current user's session attributes
-                var attrs = session.data.attributes;
-                var attrIds = [];
-                for (var j = 0, len = attrs.length; j < len; j++) {
-                    attrIds.push(attrs[j].id);
-                }
-
-                // Find intersection of user's session attrs and catalog's
-                // content_write_users. To do this: Create an object/associative
-                // array, the keys of which are the elements of one
-                // array. Then check if the obj has a key that matches an element
-                // of the 2nd array.
-                // Borrowed from: http://stackoverflow.com/a/1885766/3581097
-                var obj = {};
-                for (var k = 0, len = writeUsers.length; k < len; k++) {
-                    obj[writeUsers[k]] = true;
-                }
-                for (var l = 0, len = attrIds.length; l < len; l++) {
-                    if (obj[attrIds[l]]) {
-                    // A match has been found, allow redirect.
-                        editCatalog = true;
-                    }
-                }
-            }
-
-            if (editCatalog) {
-                schemaService.initSchemas(cid, function(data) {
-                    // Get this table's annotations to see if table has ignore annotation
-                    var tableAnnotations = data.schemas[schemaName].tables[tableName].annotations;
-                    var ignore = tableAnnotations['tag:isrd.isi.edu,2016:ignore'];
-                    if (ignore && (ignore.indexOf('edit') || ignore.indexOf('entry') || ignore === [] || ignore === null)) {
-                        return $scope.allowEdit = false;
-                    }
-                    return $scope.allowEdit = true;
-                });
-            }
-            $scope.allowEdit = false;
-        });
 
         // Redirect user to data entry app to edit the entity
         $scope.editRecord = function(){
