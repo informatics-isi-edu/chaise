@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.dataEntry', [
+    angular.module('chaise.recordEdit', [
         'ERMrest',
         'ngSanitize',
         'chaise.utils',
@@ -61,7 +61,7 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', 'ErrorService', 'Session', '$log', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, ErrorService, Session, $log) {
+    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', '$log', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, $log) {
         // generic try/catch
         try {
             var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
@@ -80,7 +80,7 @@
                 var table = schema.tables.get(context.tableName); // caught by generic exception case
 
                 console.log('Table:', table);
-                dataEntryModel.table = table;
+                recordEditModel.table = table;
 
                 var foreignKeys = table.foreignKeys.all(); // caught by generic exception case
                 angular.forEach(foreignKeys, function(fkey) {
@@ -143,7 +143,7 @@
                         } finally {
                             (function(fkey) {
                                 ftable.entity.get(null, null, displayColumns).then(function success(rowset) {
-                                    var domainValues = dataEntryModel.domainValues[fkey.colset.columns[0].name] = [];
+                                    var domainValues = recordEditModel.domainValues[fkey.colset.columns[0].name] = [];
                                     var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
 
                                     angular.forEach(rowset.data, function(column) {
@@ -168,7 +168,7 @@
                     });
                     // TODO: Store filters in URI form in model to use later on form submission
                     var filterString = new ERMrest.Conjunction(filters);
-                    // dataEntryModel.filterUri = filterString.toUri();
+                    // recordEditModel.filterUri = filterString.toUri();
 
                     var path = path.filter(filterString);
                     path.entity.get().then(function success(entity) {
@@ -186,12 +186,12 @@
                                     // in an input of type "date" in the view
                                     value = new Date(value);
                                 }
-                                dataEntryModel.rows[dataEntryModel.rows.length - 1][colName] = value;
+                                recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
                             } catch (exception) { }
                         });
                     });
                 }
-                console.log('Model:',dataEntryModel);
+                console.log('Model:',recordEditModel);
 
             } catch (exception) { // handle generic catch
                 // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
