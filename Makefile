@@ -40,7 +40,7 @@ HTML=search/index.html \
 	 recordset/index.html \
 	 matrix/index.html \
 	 viewer/index.html \
-	 data-entry/index.html
+	 recordedit/index.html
 
 # ERMrestjs Deps
 ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
@@ -171,6 +171,8 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/utils.js \
+	$(COMMON)/authen.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js
@@ -205,9 +207,9 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
 # JavaScript and CSS source for Data Entry app
-DE_ASSETS=data-entry
+RE_ASSETS=recordedit
 
-DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
@@ -225,12 +227,12 @@ DE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/rzslider.js
 
 
-DE_JS_SOURCE=$(DE_ASSETS)/dataEntry.app.js \
-	$(DE_ASSETS)/context.js \
-	$(DE_ASSETS)/model.js \
-	$(DE_ASSETS)/form.controller.js
+RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
+	$(RE_ASSETS)/context.js \
+	$(RE_ASSETS)/model.js \
+	$(RE_ASSETS)/form.controller.js
 
-DE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
@@ -239,7 +241,7 @@ DE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/appheader.css \
 	$(COMMON)/styles/app.css
 
-DE_CSS_SOURCE=$(DE_ASSETS)/dataEntry.css
+RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
 
 # JavaScript and CSS source for RecordSet app
 RECSET_ASSETS=recordset
@@ -416,9 +418,9 @@ viewer/index.html: viewer/index.html.in .make-viewer-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
 		viewer/index.html.in > viewer/index.html
 
-data-entry/index.html: data-entry/index.html.in .make-de-asset-block
+recordedit/index.html: recordedit/index.html.in .make-de-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
-		data-entry/index.html.in > data-entry/index.html
+		recordedit/index.html.in > recordedit/index.html
 
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
@@ -502,22 +504,22 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 
-.make-de-asset-block: $(DE_SHARED_CSS_DEPS) $(DE_CSS_SOURCE) $(DE_SHARED_JS_DEPS) $(DE_JS_SOURCE) $(JS_CONFIG)
+.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_CSS_SOURCE) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG)
 	> .make-de-asset-block
-	for file in $(DE_SHARED_CSS_DEPS); do \
+	for file in $(RE_SHARED_CSS_DEPS); do \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-de-asset-block ; \
 	done
-	for file in $(DE_CSS_SOURCE); do \
+	for file in $(RE_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
-	for file in $(DE_SHARED_JS_DEPS); do \
+	for file in $(RE_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-de-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
 		echo "<script src='$$script'></script>" >> .make-de-asset-block ; \
 	done
-	for file in $(DE_JS_SOURCE) $(JS_CONFIG); do \
+	for file in $(RE_JS_SOURCE) $(JS_CONFIG); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done

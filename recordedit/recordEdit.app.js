@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.dataEntry', [
+    angular.module('chaise.recordEdit', [
         'ERMrest',
         'ngSanitize',
         'chaise.utils',
@@ -61,7 +61,7 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'dataEntryModel', 'AlertsService', 'ErrorService', 'Session', '$log', function runApp(context, ermrestServerFactory, dataEntryModel, AlertsService, ErrorService, Session, $log) {
+    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', '$log', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, $log) {
         // generic try/catch
         try {
             var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
@@ -80,7 +80,7 @@
                 var table = schema.tables.get(context.tableName); // caught by generic exception case
 
                 console.log('Table:', table);
-                dataEntryModel.table = table;
+                recordEditModel.table = table;
 
                 var foreignKeys = table.foreignKeys.all(); // caught by generic exception case
                 angular.forEach(foreignKeys, function(fkey) {
@@ -97,19 +97,13 @@
                         /* SECOND USE CASE: conditional if the table is tagged as a vocabulary */
 
                         try {
+                            var vocabAnnotationTag = "tag:misd.isi.edu,2015:vocabulary";
+                            var displayAnnotationTag = "tag:misd.isi.edu,2015:display";
 
-                            try {
-                                var vocabAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:vocabulary");
-                                // An error being caught means the `vocabulary` annotation is not defined and that's okay
-                            } catch (exception) { }
-
-                            try {
-                                var displayAnnotation = ftable.annotations.get("tag:misd.isi.edu,2015:display");
-                                // An error being caught means the `display` annotation is not defined and that's okay
-                            } catch (exception) { }
-
-
-                            if (vocabAnnotation) {
+                            if (ftable.annotations.contains(vocabAnnotationTag)) {
+                                // no need to catch this, using `.contains` verifies it exists or not
+                                // if an exception is thrown at this point it will be caught by generic exception case
+                                var vocabAnnotation = ftable.annotations.get(vocabAnnotationTag);
                                 if (vocabAnnotation.content.term) {
                                     var termColumn = ftable.columns.get(vocabAnnotation.content.term); // caught by generic exception case
                                     displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
@@ -132,7 +126,10 @@
                             }
                             /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
                             /* Git issue #358 */
-                            else if (displayAnnotation) {
+                            else if (ftable.annotations.contains(displayAnnotationTag)) {
+                                // no need to catch this, using `.contains` verifies it exists or not
+                                // if an exception is thrown at this point it will be caught by generic exception case
+                                var displayAnnotation = ftable.annotations.get(displayAnnotationTag);
                                 if (displayAnnotation.content.row_name) {
                                     // TODO
                                     // var array_of_col_names = REGEX THE array of column_name strings from “ … `{` column_name `}` …” patterns
@@ -146,7 +143,7 @@
                         } finally {
                             (function(fkey) {
                                 ftable.entity.get(null, null, displayColumns).then(function success(rowset) {
-                                    var domainValues = dataEntryModel.domainValues[fkey.colset.columns[0].name] = [];
+                                    var domainValues = recordEditModel.domainValues[fkey.colset.columns[0].name] = [];
                                     var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
 
                                     angular.forEach(rowset.data, function(column) {
@@ -171,7 +168,7 @@
                     });
                     // TODO: Store filters in URI form in model to use later on form submission
                     var filterString = new ERMrest.Conjunction(filters);
-                    // dataEntryModel.filterUri = filterString.toUri();
+                    // recordEditModel.filterUri = filterString.toUri();
 
                     var path = path.filter(filterString);
                     path.entity.get().then(function success(entity) {
@@ -189,12 +186,12 @@
                                     // in an input of type "date" in the view
                                     value = new Date(value);
                                 }
-                                dataEntryModel.rows[dataEntryModel.rows.length - 1][colName] = value;
+                                recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
                             } catch (exception) { }
                         });
                     });
                 }
-                console.log('Model:',dataEntryModel);
+                console.log('Model:',recordEditModel);
 
             } catch (exception) { // handle generic catch
                 // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
