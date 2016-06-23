@@ -674,13 +674,23 @@ p.backlink {
 }
 
 .nav.filteritems li.attr-slider, .nav.filteritems li.attr-text, .nav.filteritems li.attr-date  {
-  padding-top: 15px;
+  padding: 20px;
 }
 
 ul.filteritems {
 	/* padding-left: 15px; */
 }
 
+ul.filteritems input[type=text] {
+	padding: 10px;
+	margin: 10px;
+	width: 94%;
+}
+
+li.attr-date input[type=text] {
+	padding: 10px;
+	margin: 10px;	
+}
 /* Details page styles */
 
 #datacontent td {
