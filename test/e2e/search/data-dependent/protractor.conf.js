@@ -30,7 +30,7 @@ var config = {
 
 //Change this to your desired filed name and Comment below testConfiguration object declaration
 var configFileName = 'search.dev.json';
-var testConfiguration =  require('../data_setup/config/' + configFileName;
+var testConfiguration =  require('../../data_setup/config/' + configFileName);
 
 // Just in case if you plan on not giving a file for configuration, you can always specify a testConfiguration object 
 // Comment above 2 lines
