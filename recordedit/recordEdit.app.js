@@ -67,14 +67,7 @@
         try {
             var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
         } catch (exception) {
-            if (exception instanceof ERMrest.UnauthorizedError) {
-                Session.login(window.location.href);
-            }
-            // TODO implement error hierarchy in ermrestJS
-            // if (exception instanceof Errors.serverNotFoundError) {
-            //     ErrorService.serverNotFound();
-            // }
-            ErrorService.errorPopup(response.message, response.code);
+            ErrorService.catchAll(exception);
         }
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             try {
@@ -205,23 +198,22 @@
                 // }
                 //
                 // ideally this would be used for Table/Schema not found instead of in general case
-                $log.info(exception);
                 if (exception instanceof ERMrest.NotFoundError) {
-                    ErrorService.errorPopup(exception.message, exception.code);
+                    ErrorService.errorPopup(exception);
                 }
+
+                throw exception;
             }
 
         }, function error(response) { // error promise for server.catalogs.get()
-            if (response.code == 401) {
-                UriUtils.getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
-                $log.info(response);
-            }
-
             // for not found and bad request
             if (response instanceof ERMrest.NotFoundError || response instanceof ERMrest.BadRequestError) {
-                ErrorService.errorPopup(response.message, response.code);
-                ErrorService.catalogNotFound(context.catalogID, response);
+                ErrorService.errorPopup(response);
             }
+
+            throw response;
+        }).catch(function(exception) {
+            ErrorService.catchAll(exception);
         });
     }]);
 

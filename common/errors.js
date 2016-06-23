@@ -4,12 +4,14 @@
     angular.module('chaise.errors', ['chaise.utils', 'chaise.alerts'])
 
     // Factory for each error type
-    .factory('ErrorService', ['$log', '$window', '$uibModal', 'UriUtils', 'AlertsService', function ErrorService($log, $window, $uibModal, UriUtils, AlertsService) {
+    .factory('ErrorService', ['$log', '$window', '$uibModal', 'UriUtils', 'AlertsService', 'Session', function ErrorService($log, $window, $uibModal, UriUtils, AlertsService, Session) {
 
-        function errorPopup(message, errorCode) {
+        function errorPopup(exception) {
+            $log.info(exception);
+
             var params = {
-                message: message,
-                errorCode: errorCode
+                message: exception.message,
+                errorCode: exception.code
             }
 
             var modalInstance = $uibModal.open({
@@ -30,7 +32,13 @@
             });
         }
 
-
+        function catchAll(exception) {
+            $log.info(exception);
+            
+            if (exception instanceof ERMrest.UnauthorizedError) {
+                Session.login($window.location.href);
+            }
+        }
 
         // This may change, but figured each app would handle this similarly
         function catalogNotFound(catalogID, error) {
@@ -52,6 +60,7 @@
 
         return {
             errorPopup: errorPopup,
+            catchAll: catchAll,
             catalogNotFound: catalogNotFound,
             tableNotFound: tableNotFound,
             schemaNotFound: schemaNotFound
