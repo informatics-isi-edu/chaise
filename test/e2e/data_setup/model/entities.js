@@ -17,6 +17,12 @@ var Entities = function(options) {
 	this.catalog = this.table.catalog;
 };
 
+/**
+ @param {options} A json object which should contain a list of json entities { entities: [{ .. }] }.
+ * @returns {Promise} Returns a promise.
+ * @desc
+ * An asynchronous method that returns a promise. If fulfilled, it creates new entities.
+ */
 Entities.prototype.create = function(options) {
 	options = options || {};
 	var defer = Q.defer(), self  = this;
@@ -36,6 +42,11 @@ Entities.prototype.create = function(options) {
 	return defer.promise;
 };
 
+/**
+ *
+ * @desc
+ * Not yet implemented.
+ */
 Entities.prototype.remove = function(options) {
 	throw new Error("Not Implemented");
 };

@@ -1,4 +1,4 @@
-var chaisePage = require('../chaise.page.js');
+var chaisePage = require('../../chaise.page.js');
 
 describe('Search result detail page,', function () {
     var waitTimeAfterClickingEditFilter = 10000;

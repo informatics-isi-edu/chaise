@@ -32,8 +32,11 @@ function sidebar() {
     };
     this.sidebarHeader = this.htmlElement.$('#navcontainer h4');
     this.viewMoreBtn = this.htmlElement.element(by.cssContainingText('li a', 'View all attributes'));
+    this.findSidebarAttrVisibleByName = function(attrName) {
+        return that.htmlElement.element(by.cssContainingText('ul li.ng-scope:not(.ng-hide) a', attrName));
+    };
     this.findSidebarAttrByName = function (attrName) {
-        return that.htmlElement.element(by.cssContainingText('ul li a', attrName));
+        return that.htmlElement.element(by.cssContainingText('ul li.ng-scope a', attrName));
     };
     this.clickSidebarAttr = function (attrName) {
         that.findSidebarAttrByName(attrName).click();
@@ -129,12 +132,20 @@ function resultContent() {
     this.resultAllRows = element.all(by.repeater('row in FacetsData.ermrestData'));
     this.resultTally = element.all(by.css('#results_tally')).get(1);
     this.numOfRecords = this.resultTally.all(by.css('strong')).last();
+    this.currentRecordCount = this.resultTally.all(by.css('strong')).first();
+    this.getResultRowsByViewType = function(viewType) {
+        return element.all(by.css('[ng-show="FacetsData.view==\'list\'"]'));
+    };
+    this.permalink = element(by.css('#permalink'));
     this.filter = new contentFilter();
     this.getAllResultRows = function() {
         return element.all(by.repeater('row in FacetsData.ermrestData'));
     };
     this.getResultTally = function() {
         return element.all(by.css('#results_tally')).get(1);
+    };
+    this.getNumOfRecords = function() {
+        return this.resultTally.all(by.css('strong')).last();
     };
     //ele is element found using resultAllRows.get(idx);
     this.getResultTitleElement = function (ele) {
@@ -200,6 +211,8 @@ function chaisePage() {
     this.resultContent = new resultContent();
     this.recordPage = new recordPage();
     this.tools = new tools();
+    this.tourButton = element(by.css('.tour-start-btn'));
+    this.tourBox = element(by.css('.tour-DataBrowserTour'));
     this.setCookie = function() {
         if (browser.params.authCookie) browser.executeScript('document.cookie = "' + browser.params.authCookie + '"');
     };
@@ -262,7 +275,7 @@ function chaisePage() {
         return deferred.promise;
     };
 
-    this.dataUtils = new (require('./dataUtils.js'))();
+    this.dataUtils = new (require('./utils/page.utils.js'))();
 };
 
 module.exports = new chaisePage();

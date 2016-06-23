@@ -7,7 +7,7 @@
  *
  */
 
-var chaisePage = require('../chaise.page.js');
+var chaisePage = require('../../chaise.page.js');
 
 describe('Chaise initial sidebar,', function () {
 
@@ -77,8 +77,11 @@ describe('Chaise initial sidebar,', function () {
                 expect(sidebarAttributes.length).toBe(columns.length);
                 if (columns.length > 0) {
                     columns.forEach(function(c) {
-                        var displayedAttr = chaisePage.sidebar.findSidebarAttrByName(chaisePage.dataUtils.sidebar.getColumnDisplayName(c));
-                        expect(displayedAttr.isDisplayed()).toBe(true);
+                        var displayedAttr = chaisePage.sidebar.findSidebarAttrVisibleByName(chaisePage.dataUtils.sidebar.getColumnDisplayName(c));
+                        displayedAttr.isDisplayed().then(function(displayed) {
+                            if (!displayed) console.log(chaisePage.dataUtils.sidebar.getColumnDisplayName(c) + " not displayed");
+                            expect(displayed).toBe(true);
+                        });
                     });
                 }
             });
@@ -97,7 +100,10 @@ describe('Chaise initial sidebar,', function () {
             var columns = chaisePage.dataUtils.sidebar.getInvisibleSidebarColumns(browser.params.defaultSchema, browser.params.defaultTable);
             columns.forEach(function(column) {
                 var nonDisplayedAttr = chaisePage.sidebar.findSidebarAttrByName(chaisePage.dataUtils.sidebar.getColumnDisplayName(column));
-                expect(nonDisplayedAttr.isDisplayed()).toBe(false);
+                nonDisplayedAttr.isDisplayed().then(function(displayed) {
+                    if (displayed) console.log(chaisePage.dataUtils.sidebar.getColumnDisplayName(column) + " is displayed");
+                    expect(displayed).toBe(false);
+                });
             });
         });
 

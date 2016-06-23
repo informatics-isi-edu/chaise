@@ -89,7 +89,7 @@ Development dependencies include:
 * [Node](https://nodejs.org/)
 * Additional dependencies specified in [package.json](./package.json)
 
-### How to Build
+### How to Install
 
 Get the source and run `make`. See `make help` for information on alternative
 make targets.
@@ -97,17 +97,23 @@ make targets.
 ```sh
 git clone https://github.com/informatics-isi-edu/chaise.git
 cd chaise
-make all
+sudo make install
 ```
 
 Make will invoke `npm install` to download and install all additional
 dependencies under the local `node_modules` directory relative to the project
-directory. This does not require administrative (i.e., root) privileges in
-order to install the development dependencies.
+directory. 
 
-### How to Install
 
-After building (above), copy to your host (i.e., `/var/www/path/to/chaise`).
+### How to Deploy
+
+To generate HTML and minimal stuff to deploy Chaise you need to run
+
+```sh
+make all
+```
+
+After running (above), copy to your host (i.e., `/var/www/path/to/chaise`).
 
 ### How to Configure
 
@@ -117,7 +123,7 @@ See the [configuration guide](./doc/configuration.md).
 
 Point a modern web browser at `http://<hostname>/path/to/chaise/search`.
 
-### How to Test
+### How to run E2E (End to End) Test
 
 Before running the tests, you'll need a [Sauce Labs](https://saucelabs.com/)
 account (free for open source projects). Configure your Sauce Labs credentials
@@ -131,7 +137,34 @@ export SAUCE_ACCESS_KEY=YOUR_ACCESS_KEY
 Set a base URL for the Protractor tests (i.e. the path to your Chaise installation):
 
 ```sh
-export CHAISE_BASE_URL=http://<hostname>/path/to/chaise/search
+export CHAISE_BASE_URL=http://<hostname>/path/to/chaise
+```
+
+Set the authCookie used for generating data for testcases.
+
+```sh
+export AUTH_COOKIE=<YourERMRest_cookie>
 ```
 
 Then run `make test`.
+
+For more info on how to configure and run E2E Tests refere follwoing [link](https://github.com/informatics-isi-edu/chaise/blob/master/doc/protractor.md#)
+
+### How to run Unit Tests
+
+To run all unit test run following command from your terminal.
+
+```sh
+karma start
+``` 
+
+For more info on how to configure and run Unit Tests refere follwoing [link](https://github.com/informatics-isi-edu/chaise/blob/master/doc/karma.md#to-run-all-karma-tests)
+
+### How to run all tests
+
+To run E2E as well as Unit tests, invoke following make command
+
+```sh
+make testall
+``` 
+

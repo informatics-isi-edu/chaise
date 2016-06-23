@@ -37,7 +37,12 @@ Catalog.prototype.create = function() {
 	return defer.promise;
 };
 
-
+ /**
+ * @param {acls} An array of acl objects
+ * @returns {Promise} Returns a promise.
+ * @desc
+ * An asynchronous method that returns a promise. If fulfilled, it adds the acls for the catalog.
+ */
 Catalog.prototype.addACLs = function(acls) {
 	var defer = Q.defer(), self = this;
 	if (!this.id) return defer.reject("No Id set : addACL catalog function"), defer.promise;
@@ -58,7 +63,12 @@ Catalog.prototype.addACLs = function(acls) {
 	return defer.promise;
 }
 
-
+/**
+ * @param {acl} An acl object of the form { name: '', value: '' }
+ * @returns {Promise} Returns a promise.
+ * @desc
+ * An asynchronous method that returns a promise. If fulfilled, it adds the acl for the catalog.
+ */
 Catalog.prototype.addACL = function(acl) {
 	var defer = Q.defer(), self = this;
 	if (!this.id || !acl) return defer.reject("No Id or ACL set : addACL catalog function"), defer.promise;
@@ -91,6 +101,11 @@ Catalog.prototype.remove = function() {
 	return defer.promise;
 };
 
+/**
+ *
+ * @desc
+ * A synchronous method that sets the default schema on basis of current catalog schemas.
+ */
 Catalog.prototype.setDefaultSchema = function() {
 	var defaultSchema = null, schemas = this.content.schemas;	
 	

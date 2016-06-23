@@ -26,7 +26,7 @@ var Schema = function(options) {
  * @param {schemaName} Optional : Used if you didn't provide while creating the object
  * @returns {Promise} Returns a promise.
  * @desc
- * An asynchronous method that returns a promise. If fulfilled, it creates a new catalog.
+ * An asynchronous method that returns a promise. If fulfilled, it creates a new schema.
  */
 Schema.prototype.create = function(schemaName) {
 	var defer = Q.defer(), self = this;

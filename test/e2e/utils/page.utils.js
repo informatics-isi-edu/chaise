@@ -5,6 +5,7 @@ var Sidebar = function() {
 
 	this.getColumns = function(table, annotations, dataTypes) {
 		var columns = [], annotations = annotations || ["hidden"];
+		if (table.annotations && table.annotations[COMMENT_URI] && table.annotations[COMMENT_URI].contains('exclude')) return [];
 		var cDefs = table.column_definitions.slice(0);
 		cDefs.forEach(function(c) {
 			if (!dataTypes || dataTypes.contains(c.type.typename)) {
@@ -31,7 +32,7 @@ var Sidebar = function() {
 			for(var k in schema.content.tables) {
 				metadata = schema.content.tables[k];
 				if (k == referenceTable['table_name']) {
-					if (metadata['annotations'] != null && metadata['annotations'][COMMENT_URI] != null && metadata['annotations'][COMMENT_URI].contains('association')) {
+					if (metadata['annotations'] && metadata['annotations'][COMMENT_URI] && !metadata['annotations'][COMMENT_URI].contains('exclude') && metadata['annotations'][COMMENT_URI].contains('association')) {
 						var referredColumns = self.getColumns(schema.content.tables[referenceTable['table_name']], annotations, dataTypes);
 						referredColumns.forEach(function(rc) {
 							if (rc.name !== referenceTable.column_name) {
@@ -57,7 +58,11 @@ var Sidebar = function() {
 						for (var i=0 ; i<key['referenced_columns'].length; i++) {
 							if (key['referenced_columns'][i].table_name == table.table_name) {
 								var cols = self.getColumns(t, annotations, dataTypes);
-								columns = columns.concat(cols);
+								cols.forEach(function(rc) {
+									if (rc.name !== key['foreign_key_columns'][i].column_name) {
+										columns.push(rc);
+									}
+								});
 							}
 						}
 					}
@@ -83,14 +88,14 @@ var Sidebar = function() {
 
 	// Returns columns which don't have 'hidden', 'summary' and 'dataset' set in their comment annotation 
 	this.getAllSidebarColumns = function(schema, table, dataTypes) {
-		var annotation = ['hidden', 'summary', 'dataset', 'image', 'accommodation'];
+		var annotation = ['exclude', 'hidden', 'summary', 'image'];
 		return self.getColumns(table, annotation, dataTypes).concat(this.getAllReferenceColumnsForATable(schema, table, annotation, dataTypes));
 	};
 
 
 	// Returns columns which don't have 'hidden', 'summary', 'bottom' and 'dataset' set in their comment annotation 
 	this.getAllVisibleSidebarColumns = function(schema, table, dataTypes) {
-		var annotation = ['hidden', 'summary', 'bottom', 'dataset', 'image', 'accommodation'];
+		var annotation = ['exclude', 'hidden', 'summary', 'bottom', 'image'];
 		var columns =  self.getColumns(table, annotation, dataTypes).concat(this.getAllReferenceColumnsForATable(schema, table, annotation, dataTypes));
 		return getVisibleColumns(columns);
 	};
@@ -123,12 +128,12 @@ var Sidebar = function() {
 	};
 
 	this.getAllCheckableColumns = function(schema, table, dataTypes) {
-		var annotation = ['hidden', 'summary', 'text', 'dataset', 'image', 'accommodation'], dataTypes = dataTypes || ['text', 'boolean'];
+		var annotation = ['exclude', 'hidden', 'summary', 'text', 'dataset', 'image', 'accommodation'], dataTypes = dataTypes || ['text', 'boolean'];
 		return self.getColumns(table, annotation, dataTypes).concat(this.getAllReferenceColumnsForATable(schema, table, annotation, dataTypes));
 	};
 
 	this.getAllVisibleCheckableColumnsForATable = function(schema, table, dataTypes) {
-		var annotation = ['hidden', 'summary', 'text', 'bottom', 'dataset', 'image', 'accommodation'], dataTypes = dataTypes || ['text', 'boolean'];
+		var annotation = ['exclude', 'hidden', 'summary', 'text', 'bottom', 'dataset', 'image', 'accommodation'], dataTypes = dataTypes || ['text', 'boolean'];
 		var columns = self.getColumns(table, annotation, dataTypes).concat(this.getAllReferenceColumnsForATable(schema, table, annotation, dataTypes));
 		return getVisibleColumns(columns);
 	};

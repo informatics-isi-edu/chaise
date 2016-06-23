@@ -33,6 +33,12 @@ var Table = function(options) {
 	};
 };
 
+/**
+ * @param {timeout} Optional : Used to add a wait between creation of table to avoid conflicts
+ * @returns {Promise} Returns a promise.
+ * @desc
+ * An asynchronous method that returns a promise. If fulfilled, it creates a new table.
+ */
 Table.prototype.create = function(timeout) {
 	var defer = Q.defer(), self  = this;
 
@@ -57,6 +63,12 @@ Table.prototype.create = function(timeout) {
 	return defer.promise;
 };
 
+/**
+ *
+ * @returns {Promise} Returns a promise.
+ * @desc
+ * An asynchronous method that returns a promise. If fulfilled, it deletes the tables.
+ */
 Table.prototype.remove = function() {
 	var defer = Q.defer(), self = this;
 	if (!this.catalog.id || !this.schema.name || !this.name) return defer.reject("No catalog or schema or table name set : create table function"), defer.promise;
@@ -70,6 +82,12 @@ Table.prototype.remove = function() {
 	return defer.promise;
 };
 
+/**
+ * @param {foreignKey}: A foreignKey that will be created for this table
+ * @returns {Promise} Returns a promise.
+ * @desc
+ * An asynchronous method that returns a promise. If fulfilled, it creates a new foreignkey.
+ */
 Table.prototype.addForeignKey = function(foreignKey) {
 	var defer = Q.defer(), self = this;
 	

@@ -11,12 +11,19 @@ ermRest.configure(http, require('q'))
 
 var config = {};
 
+/**
+ * @desc
+ * Fetches the schemas for a catalog as well as tables for those schemas and sets 
+ * default schema and default table for a schema.
+ * @returns {Promise} Returns a promise.
+ * @param {options} A json Object which contains the url, optional authCookie and optional catalogId 
+ */
 exports.introspect = function(options) {
 	var defer = Q.defer();
 
 	config = options;
 	config.url = config.url || 'https://dev.isrd.isi.edu/ermrest/';
-	config.authCookie = config.authCookie || 'oauth2_auth_nonce=1464217155.1jyAUppOZlRPdOR-KGkZTK-dtN_Z0RtO24zkxdOg.; ermrest=C6KFIQn2JS37CGovofWnjKfu';
+	config.authCookie = config.authCookie;
 
 	http.setDefaults({
 	    headers: { 'Cookie': config.authCookie },
@@ -39,11 +46,40 @@ exports.introspect = function(options) {
     return defer.promise;
 };
 
+/**
+ * @desc
+ * Creates new catalog if catalogId is not provided in the Catalog object of dataSetup, 
+ * creates a new schema if createNew is true in the schema object of dataSetup and
+ * creates new tables and foreign keys if createNew is true in the tables object of dataSetup.
+ * Entities are also imported for specified tables if createNew is true in entities object of dataSetup.
+ * @returns {Promise} Returns a promise.
+ * @param {options} A json Object which contains the url, optional authCookie and dataSetup configuraion object
+ * 
+ 	"dataSetup": {
+	    "catalog": {
+	    	//"id": 1  //existing id of a catalog
+	    },
+	    "schema": {
+	        "name": "product",
+	        "createNew": true, // change this to false to avoid creating new schema
+	        "path": "./schema/product.json" // path of the schema json file in data_setup folder
+	    },
+	    "tables": {
+	    	"createNew": true, // Mention this to be true to allow creating new tables
+	    },
+	    "entities": {
+	    	"createNew": true, // Mention this to be true to allow creating new entities
+	        "path": "./data/product", // This is the path from where the json for the entities will be picked for import
+	    },
+	    "authCookie": ""
+	}
+ *
+ */
 exports.setup = function(options) {
 	config = options;
 	config.url = config.url || 'https://dev.isrd.isi.edu/ermrest/';
-	config.authCookie = config.authCookie || 'oauth2_auth_nonce=1464217155.1jyAUppOZlRPdOR-KGkZTK-dtN_Z0RtO24zkxdOg.; ermrest=C6KFIQn2JS37CGovofWnjKfu';
-	config.schemaName = config.schema.name || "legacy";
+	config.authCookie = config.authCookie;
+	config.schemaName = config.schema.name || "product";
 
 	http.setDefaults({
 	    headers: { 'Cookie': config.authCookie },
@@ -90,10 +126,46 @@ exports.setup = function(options) {
 	return defer.promise;
 };
 
+exports.importData = function(options) {
+	var testConfiguration = options.testConfiguration;
+	testConfiguration.url = options.url;
+	testConfiguration.authCookie = options.authCookie;
+	return exports.setup(testConfiguration);
+};
+
+/**
+ * @desc
+ * Tears/deletes new catalog if catalogId is not provided in the Catalog object of dataSetup, 
+ * deletes new schemas if createNew is true in the schema object of dataSetup and
+ * deletes new tables and foreign keys if createNew is true in the tables object of dataSetup.
+ * Entities are also removed for specified tables if createNew is true in entities object of dataSetup.
+ * @returns {Promise} Returns a promise.
+ * @param {options} A json Object which contains the url, optional authCookie and dataSetup configuraion object
+ * 
+ 	"dataSetup": {
+	    "catalog": {
+	    	//"id": 1  //existing id of a catalog
+	    },
+	    "schema": {
+	        "name": "product",
+	        "createNew": true, // change this to false to avoid creating new schema
+	        "path": "./schema/product.json" // path of the schema json file in data_setup folder
+	    },
+	    "tables": {
+	    	"createNew": true, // Mention this to be true to allow creating new tables
+	    },
+	    "entities": {
+	    	"createNew": true, // Mention this to be true to allow creating new entities
+	        "path": "./data/product", // This is the path from where the json for the entities will be picked for import
+	    },
+	    "authCookie": ""
+	}
+ *
+ */
 exports.tear = function(options) {
 	config = options;
 	config.url = config.url || 'https://dev.isrd.isi.edu/ermrest/';
-	config.authCookie = config.dataSetup.authCookie || 'oauth2_auth_nonce=1464217155.1jyAUppOZlRPdOR-KGkZTK-dtN_Z0RtO24zkxdOg.; ermrest=C6KFIQn2JS37CGovofWnjKfu';
+	config.authCookie = config.dataSetup.authCookie;
 
 	var defer = Q.defer();
 
@@ -117,6 +189,12 @@ exports.tear = function(options) {
 	return defer.promise;
 };
 
+/**
+ * @desc
+ * Deletes a catalog.
+ * @returns {null}
+ * @param {promise, Catalog}
+ */
 var removeCatalog = function(defer, catalogId) {
 	var catalog = new Catalog({ url: config.url, id: catalogId });
 	catalog.remove().then(function() {	
@@ -128,6 +206,12 @@ var removeCatalog = function(defer, catalogId) {
 	});
 };
 
+/**
+ * @desc
+ * Deletes a schema .
+ * @returns {null}
+ * @param {promise, catalogId, schemaName} 
+ */
 var removeSchema = function(defer, catalogId, schemaName) {
 	var catalog = new Catalog({ url: config.url, id: catalogId });
 	var schema = new Schema({
@@ -144,6 +228,12 @@ var removeSchema = function(defer, catalogId, schemaName) {
 	});
 };
 
+/**
+ * @desc
+ * Deletes tables that were created according to the configuration .
+ * @returns {null}
+ * @param {promise, catalogId, schemaName} 
+ */
 var removeTables = function(defer, catalogId, schemaName) {
 	var promises = [], catalog = new Catalog({ url: config.url, id: catalogId });
 	var schema = new Schema({
@@ -170,6 +260,12 @@ var removeTables = function(defer, catalogId, schemaName) {
 	});
 };
 
+/**
+ * @desc
+ * Creates a new catalog if catalog id is not specified.
+ * @returns {Promise}
+ * @param {catalog} 
+ */
 var createCatalog = function(catalog) {
 	var defer = Q.defer();
 
@@ -192,6 +288,12 @@ var createCatalog = function(catalog) {
 	return defer.promise;
 };
 
+/**
+ * @desc
+ * Creates a new schema for a catalog if createNew is true.
+ * @returns {Promise}
+ * @param {schema} 
+ */
 var createSchema = function(schema) {
 	var defer = Q.defer();
 	if (!schema) {

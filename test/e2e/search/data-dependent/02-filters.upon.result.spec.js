@@ -1,7 +1,7 @@
 /**
  * Created by shuai on 2/2/16.
  */
-var chaisePage = require('../chaise.page.js');
+var chaisePage = require('../../chaise.page.js');
 var filterObj = chaisePage.resultContent.filter;
 var config = chaisePage.getConfig(['Filters on top of the records,']);
 var filterCount = 0;
@@ -25,6 +25,7 @@ var testAttributes = function(attr, attrCount) {
         filterCount++;
         
         beforeAll(function() {
+
             clearAttributes.forEach(function(ca) {
                  filterObj.clickFilterWrapperCancelByName(config.attributes[ca].text); 
             });
@@ -92,14 +93,48 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
         it('should show ' + filter.content.length + ' edit filter in \'' + attr.text + '\' wrapper', function () {
             expect(chaisePage.resultContent.filter.findCheckedSubfiltersByName(attr.text).count()).toBe(filter.content.length);
         });
+       
 
-        it('should show ' + filter.entityCount + ' results for filters ' + filter.content.join(','), function () {
-            if (filter.entityCount != undefined) {
-                browser.sleep(3000);
+        if (filter.entityCount != undefined) {
+
+            it('should show ' + filter.entityCount + ' results for filters ' + filter.content.join(','), function () {
+                if (filter.entityCount != undefined) {
+                    browser.sleep(3000);
+                    var allResults = chaisePage.resultContent.getAllResultRows();
+                    expect(allResults.count()).toBe(filter.entityCount);
+                }
+            });
+
+
+            it('should display records according to the selected view option. Default is the table view. ', function() {
+                browser.executeScript('return window.CHAISE_DATA.view;').then(function(viewType) {
+                    var el = chaisePage.resultContent.currentRecordCount;
+                    el.getText().then(function(txt) {
+                        var recordCount = txt.split('-')[1];
+                        expect(chaisePage.resultContent.getResultRowsByViewType(viewType).count()).toBe(parseInt(recordCount));
+                    });
+                });
+            });
+
+            it('should have the number of items shown to be consistent with the numbers of rows shown.', function() {
                 var allResults = chaisePage.resultContent.getAllResultRows();
-                expect(allResults.count()).toBe(filter.entityCount);
-            }
-        });
+                allResults.count().then(function(count) {
+                    var el = chaisePage.resultContent.currentRecordCount;
+                    el.getText().then(function(txt) {
+                        var recordCount = txt.split('-')[1];
+                        expect(parseInt(recordCount)).toBe(count);
+                    });
+                });
+            });
+
+            it('should have the number of results shown to be consistent with the total numbers of rows satisying the search criteria.', function() {
+                var el = chaisePage.resultContent.numOfRecords
+                el.getText().then(function(txt) {
+                    expect(parseInt(txt)).toBe(filter.entityCount);
+                });
+            });
+
+        }
 
         it('should show \'' + filter.content.join(', ') + '\' in \'' + attr.text + '\' wrapper', function () {
             filterObj.findFilterWrapperTitleByWrapperName(attr.text).then(function(title) {
@@ -113,6 +148,25 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
         it('should show ' + filterLen + ' filter wrappers after \'' + filter.content.join(', ') + '\' in \'' + attr.text + '\' is checked', function () {
             // Displayed filters also contains the clear all filters so we need to add 1 more filter to take that in consideration
             expect(filterObj.displayedFilters.count()).toBe(filterLen + 1);
+        });
+
+
+
+        /*xit('the permalink should be same as the window url', function() {
+            browser.executeScript('return window.location.href;').then(function(currentUrl) {
+                chaisePage.resultContent.permalink.getAttribute('href').then(function(href) {
+                    console.log(href);
+                    expect(href).toBe(currentUrl);
+                });
+                
+            });
+        }); */
+
+        it('the column names and values should be escaped properly', function() {
+            browser.executeScript('return window.location.hash;').then(function(hash) {
+                var facets = hash.substring(hash.indexOf('facets=(') + 8, hash.indexOf(')'));
+                expect(/[!'()*]/.test(facets)).toBe(false);
+            });
         });
 
     });
@@ -184,8 +238,6 @@ var determineFiltersUnchecked = function(attr) {
     });
 };
 
-
-
 describe('Filters on top of the records,', function () {
     var EC = protractor.ExpectedConditions;
 
@@ -207,4 +259,19 @@ describe('Filters on top of the records,', function () {
     
     testResultContent();
     afterAttributeTestCompletion();
+
+    describe("tour execution, ", function() {
+        var tourButton = chaisePage.tourButton;
+
+        it('should show the tour button', function() {
+            expect(tourButton.isDisplayed()).toBe(true);
+        });
+
+        it('should click on tour button to start the tour', function() {
+            tourButton.click().then(function() {
+                browser.sleep(5000);
+                expect(chaisePage.tourBox.isDisplayed()).toBe(true);
+            });
+        });
+    });
 });

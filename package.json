@@ -43,15 +43,12 @@
     "karma-sinon-chai": "x",
     "phantomjs-prebuilt": "x",
     "protractor": "x",
-<<<<<<< HEAD
-=======
-    "testem": "x",
     "request": "x",
     "q": "x",
-    "chance": "x"
+    "chance": "x",
+    "webdriver-manager": "x"
   },
   "dependencies": {
     "jasmine-bail-fast": "0.0.1"
->>>>>>> Removed node_modules and legacy schema data from data_setup folder and added a new product schema data
   }
 }

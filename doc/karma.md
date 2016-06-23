@@ -15,7 +15,7 @@ Karma and Jasmine is a NodeJS application, and should be installed through npm.
 
 Run `"karma start"` from you command prompt.
 
-By Default Karma will look for *"karma.conf.js"*, and run the configuration mentioned in it. For more info on configuring you Karma tests you can refer (here)[http://karma-runner.github.io/0.13/config/configuration-file.html]
+By Default Karma will look for *"karma.conf.js"*, and run the configuration mentioned in it. For more info on configuring you Karma tests you can refer [here](http://karma-runner.github.io/0.13/config/configuration-file.html)
 
 ###To run specific Karma tests
 
