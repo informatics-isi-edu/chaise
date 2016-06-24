@@ -148,9 +148,15 @@ export AUTH_COOKIE=<YourERMRest_cookie>
 
 Then run `make test`.
 
-For more info on how to configure and run E2E Tests refere follwoing [link](https://github.com/informatics-isi-edu/chaise/blob/master/doc/protractor.md#)
+For more info on how to configure and run E2E Tests refere follwoing [link](https://github.com/informatics-isi-edu/chaise/blob/master/doc/protractor.md)
 
 ### How to run Unit Tests
+
+Chaise uses `Karma` to run Unit tests. To run these tests you'll need to install karma-cli globally. 
+
+```sh
+sudo npm install karma-cli -g
+```
 
 To run all unit test run following command from your terminal.
 
@@ -158,7 +164,7 @@ To run all unit test run following command from your terminal.
 karma start
 ``` 
 
-For more info on how to configure and run Unit Tests refere follwoing [link](https://github.com/informatics-isi-edu/chaise/blob/master/doc/karma.md#to-run-all-karma-tests)
+For more info on how to configure and run Unit Tests refer following [link](https://github.com/informatics-isi-edu/chaise/blob/master/doc/karma.md#to-run-all-karma-tests)
 
 ### How to run all tests
 

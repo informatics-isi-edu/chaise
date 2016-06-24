@@ -19,7 +19,8 @@ var config = {
   ],
   jasmineNodeOpts: {
     showColors: true,
-    defaultTimeoutInterval: 120000
+    defaultTimeoutInterval: 120000,
+    print: function() {}
   },
   // If ng-app attribute is in a descendant of <body>, tell Protractor where ng-app is
   rootElement: '#main-content',

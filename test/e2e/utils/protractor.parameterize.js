@@ -13,6 +13,11 @@ exports.parameterize = function(config, configParams) {
 
   // This method will be called before starting to execute the test suite
   config.onPrepare = function() {
+
+    var SpecReporter = require('jasmine-spec-reporter');
+    // add jasmine spec reporter
+    jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'all'}));
+
     browser.params.configuration = testConfiguration, defer = Q.defer();
 
     if (testConfiguration.dataSetup) {
