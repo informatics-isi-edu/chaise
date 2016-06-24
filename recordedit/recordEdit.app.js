@@ -189,14 +189,7 @@
                 console.log('Model:',recordEditModel);
 
             } catch (exception) { // handle generic catch
-                // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
 
-                // if (exception instanceof Errors.TableNotFoundError) {
-                //     ErrorService.tableNotFound(context.tableName);
-                // } else if (exception instanceof Errors.SchemaNotFoundError) {
-                //     ErrorService.schemaNotFound(context.schemaName);
-                // }
-                //
                 // ideally this would be used for Table/Schema not found instead of in general case
                 if (exception instanceof ERMrest.NotFoundError) {
                     ErrorService.errorPopup(exception);

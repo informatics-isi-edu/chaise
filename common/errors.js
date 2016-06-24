@@ -16,14 +16,12 @@
 
             var modalInstance = $uibModal.open({
                 templateUrl: '../common/templates/errorDialog.html',
-                controller: 'ErrorDialogController',
+                controller: 'ModalDialogController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
                 keyboard: false,
                 resolve: {
-                    params: function() {
-                        return params;
-                    }
+                    params: params
                 }
             });
 
@@ -32,9 +30,10 @@
             });
         }
 
+        // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function catchAll(exception) {
             $log.info(exception);
-            
+
             if (exception instanceof ERMrest.UnauthorizedError) {
                 Session.login($window.location.href);
             }

@@ -173,6 +173,8 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/modalDialog.controller.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js
@@ -220,7 +222,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
-	$(COMMON)/templates/errorDialog.controller.js \
+	$(COMMON)/modalDialog.controller.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \
