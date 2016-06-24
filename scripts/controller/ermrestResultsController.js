@@ -46,7 +46,8 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
         var predicates = [];
 
         for (var i = 0; i< keys.length; i++){
-            var key = keys[i];
+        	// the PRIMARY_KEY array has the keys already encoded, so decode them in order to extract the value from the row
+            var key = decodeURIComponent(keys[i]);
             var predicate = encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(entity[key]);
             predicates.push(predicate);
         }
@@ -493,8 +494,12 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	this.displayRange = function displayRange() {
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
 	};
-
-  this.hasSelectedFacets = function hasSelectedFacets() {
+	
+  this.showupResults = function showupResults() {
+	  return chaiseConfig['showUnfilteredResults'] === true || $scope.hasSelectedFacets();
+		  
+  }
+  this.hasSelectedFacets = $scope.hasSelectedFacets = function hasSelectedFacets() {
     var selectedFacets = false;
     $.each($scope.FacetsData.box, function(table, columns) {
       var colsDescr = $scope.FacetsData['colsDescr'][table];

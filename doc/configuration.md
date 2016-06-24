@@ -31,3 +31,4 @@ The below table explains the usage of the default parameters:
 | confirmDelete | A boolean | true | "confirmDelete":\<value\> | N/A | If `false`, the user will **not** be prompted by a modal when deleting an item |
 | hideSearchTextFacet | A boolean | false | "hideSearchTextFacet":\<value\> | N/A | Whether the search box for attributes names and values should be hidden |
 | maxColumns | An integer | 6 | "maxColumns":\<value\> | N/A | The maximum number of columns to be displayed in the search result table |
+| showUnfilteredResults | A boolean | false | "showUnfilteredResults":\<value\> | N/A | If present and equal **true**, data will be displayed in the search result table even if no filter was selected. |

@@ -3618,7 +3618,7 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 	if (searchBoxPresentation.contains(col_type) || checkBoxPresentation.contains(col_type)) {
 		if (data[0]['cnt_d'] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 			param['col_type'] = 'enum';
-			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/' +
+			var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options, table) + '/' +
 				getSortGroup(table, col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(table, col, 'rank')) + ')?limit=none';
 			ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successInitFacetGroups, errorErmrest, param);
 		} else {

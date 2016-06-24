@@ -1,11 +1,11 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.dataEntry')
+    angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'dataEntryModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, dataEntryModel, context, $window, $log) {
+    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, recordEditModel, context, $window, $log) {
         var vm = this;
-        vm.dataEntryModel = dataEntryModel;
+        vm.recordEditModel = recordEditModel;
         vm.server = context.server;
         vm.editMode = context.filters || false;
         vm.booleanValues = context.booleanValues;
@@ -38,7 +38,7 @@
 
         function redirectAfterSubmission(entities) {
             var form = vm.formContainer;
-            var model = vm.dataEntryModel;
+            var model = vm.recordEditModel;
             var rowset = model.rows;
             var redirectUrl = $window.location.origin;
             form.$setUntouched();
@@ -89,7 +89,7 @@
 
         function submit() {
             var form = vm.formContainer;
-            var model = vm.dataEntryModel;
+            var model = vm.recordEditModel;
             form.$setUntouched();
             form.$setPristine();
 
@@ -137,14 +137,14 @@
         }
 
         function removeFormRow(index) {
-            return vm.dataEntryModel.rows.splice(index, 1);
+            vm.recordEditModel.rows.splice(index, 1);
         }
 
         function getDefaults() {
             var defaults = [];
 
             try {
-                var columns = vm.dataEntryModel.table.columns.all();
+                var columns = vm.recordEditModel.table.columns.all();
                 var numColumns = columns.length;
                 for (var i = 0; i < numColumns; i++) {
                     var columnName = columns[i].name;
@@ -162,7 +162,7 @@
         function getKeyColumns() {
             var keys = [];
             try {
-                var _keys = vm.dataEntryModel.table.keys.all();
+                var _keys = vm.recordEditModel.table.keys.all();
                 var numKeys = _keys.length;
                 for (var i = 0; i < numKeys; i++) {
                     var columns = _keys[i].colset.columns;
@@ -223,7 +223,7 @@
         // In this case, columns of type serial* == auto-generated
         function isAutoGen(name) {
             try {
-                return (vm.dataEntryModel.table.columns.get(name).type.name.indexOf('serial') === 0);
+                return (vm.recordEditModel.table.columns.get(name).type.name.indexOf('serial') === 0);
             } catch (exception) {
                 // handle exception
                 $log.info(exception);
@@ -235,7 +235,7 @@
             // obj with the column name as keys and FK values as values. For now,
             // we can determine whether a column is a FK by checking whether domainValues
             // has a key of that column's name.
-            return vm.dataEntryModel.domainValues.hasOwnProperty(columnName);
+            return vm.recordEditModel.domainValues.hasOwnProperty(columnName);
         }
 
         // Returns true if a column type is found in the given array of types
@@ -253,11 +253,11 @@
             var ignoreAnnotation = 'tag:isrd.isi.edu,2016:ignore';
 
             try {
-                ignore = column.annotations.include(ignoreAnnotation);
+                ignore = column.annotations.contains(ignoreAnnotation);
                 if (ignore) {
                     ignoreCol = column.annotations.get(ignoreAnnotation); // still needs to be caught in case something gets out of sync
                 }
-                hidden = column.annotations.include('tag:misd.isi.edu,2015:hidden');
+                hidden = column.annotations.contains('tag:misd.isi.edu,2015:hidden');
 
             } finally {
                if ((ignore && (ignoreCol.content.length === 0 || ignoreCol.content === null || ignoreCol.content.indexOf('entry') !== -1)) || hidden) {

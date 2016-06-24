@@ -70,6 +70,7 @@ The below tables explains the meaning of the possible values for the two keys.
 | preview_url | The URL of the 3-D preview (view on load). | 
 | viewer_url | The URL of the 3-D viewer. | 
 | top_columns | An array containing the columns to be displayed in the summary table. | 
+| sortedBy | The default column by which the search results will be sorted ascending. | 
 
 - **facet** _key_ _values_
 
