@@ -17,8 +17,7 @@
         vm.submit = submit;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
-        vm.addEmptyFormRow = addEmptyFormRow;
-        vm.copyLastFormRow = copyLastFormRow;
+        vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
 
         vm.getDefaults = getDefaults;
@@ -84,7 +83,7 @@
         }
 
         function showSubmissionError(response) {
-            AlertsService.addAlert({type: 'error', message: response.data});
+            AlertsService.addAlert({type: 'error', message: response.message});
             console.log(response);
         }
 
@@ -118,26 +117,21 @@
             }
         }
 
-        function addEmptyFormRow() {
-            vm.recordEditModel.rows.push({});
-        }
-
-        function copyLastFormRow() {
+        function copyFormRow() {
             // Check if the prototype row to copy has any invalid values. If it
             // does, display an error. Otherwise, copy the row.
-            var protoRowIndex = vm.recordEditModel.rows.length - 1;
-            var protoRowValidityStates = vm.formContainer.row[protoRowIndex];
+            var index = vm.recordEditModel.rows.length - 1;
+            var protoRowValidityStates = vm.formContainer.row[index];
             var validRow = true;
             angular.forEach(protoRowValidityStates, function(value, key) {
-                if (value.$invalid) {
-                    AlertsService.addAlert({type: 'error', message: "Sorry, we couldn't copy the last record because it has invalid values in it. Please check the fields in the last record and try again."});
+                if (value.$dirty && value.$invalid) {
+                    AlertsService.addAlert({type: 'error', message: "Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again."});
                     validRow = false;
                 }
             });
             if (validRow) {
                 var rowset = vm.recordEditModel.rows;
-                var protoRow = rowset[protoRowIndex];
-                var newRow = angular.copy(protoRow);
+                var protoRow = rowset[index];
                 rowset.push(angular.copy(protoRow));
             }
         }

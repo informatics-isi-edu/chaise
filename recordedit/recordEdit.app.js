@@ -5,11 +5,15 @@
         'ERMrest',
         'ngSanitize',
         'chaise.utils',
+        'chaise.authen',
         'chaise.navbar',
         'chaise.errors',
         'chaise.alerts',
         'chaise.filters',
         'chaise.validators',
+        'chaise.delete',
+        'ui.bootstrap',
+        'chaise.modal',
         'ui.select',
         'rzModule',
         '720kb.datepicker',
@@ -26,7 +30,7 @@
         // Parse the url
         context.serviceURL = window.location.origin + '/ermrest';
         if (chaiseConfig.ermrestLocation) {
-            context.serviceURL = chaiseConfig.ermrestLocation + '/ermrest';
+            context.serviceURL = chaiseConfig.ermrestLocation;
         }
 
         var hash = window.location.hash;

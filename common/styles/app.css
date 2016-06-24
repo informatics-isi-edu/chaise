@@ -30,6 +30,13 @@ a:hover, a:focus{
     z-index: 10;
 }
 
+.glyphicon-trash {
+    color: #428bca;
+}
+
+button .glyphicon-trash {
+    color: #fff;
+}
 /****************** HEADER ******************/
 
 #header{
