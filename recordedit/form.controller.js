@@ -83,7 +83,7 @@
         }
 
         function showSubmissionError(response) {
-            AlertsService.addAlert({type: 'error', message: response.data});
+            AlertsService.addAlert({type: 'error', message: response.message});
             console.log(response);
         }
 
@@ -120,7 +120,7 @@
         function copyFormRow() {
             // Check if the prototype row to copy has any invalid values. If it
             // does, display an error. Otherwise, copy the row.
-            var index = vm.dataEntryModel.rows.length - 1;
+            var index = vm.recordEditModel.rows.length - 1;
             var protoRowValidityStates = vm.formContainer.row[index];
             var validRow = true;
             angular.forEach(protoRowValidityStates, function(value, key) {
@@ -130,7 +130,7 @@
                 }
             });
             if (validRow) {
-                var rowset = vm.dataEntryModel.rows;
+                var rowset = vm.recordEditModel.rows;
                 var protoRow = rowset[index];
                 rowset.push(angular.copy(protoRow));
             }
