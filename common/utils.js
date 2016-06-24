@@ -18,6 +18,14 @@
                     return '%' + c.charCodeAt(0).toString(16).toUpperCase();
                 })
             }
+
+            parseURLFragment: function (str) {
+
+            }
+
+            getOrigin: function () {
+                
+            }
         }
     }]);
 })();
