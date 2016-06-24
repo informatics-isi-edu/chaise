@@ -104,7 +104,7 @@
                             var vocabAnnotationTag = "tag:misd.isi.edu,2015:vocabulary";
                             var displayAnnotationTag = "tag:misd.isi.edu,2015:display";
 
-                            if (ftable.annotations.includes(vocabAnnotationTag)) {
+                            if (ftable.annotations.contains(vocabAnnotationTag)) {
                                 // no need to catch this, using `.includes` verifies it exists or not
                                 // if an exception is thrown at this point it will be caught by generic exception case
                                 var vocabAnnotation = ftable.annotations.get(vocabAnnotationTag);
@@ -130,7 +130,7 @@
                             }
                             /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
                             /* Git issue #358 */
-                            else if (ftable.annotations.includes(displayAnnotationTag)) {
+                            else if (ftable.annotations.contains(displayAnnotationTag)) {
                                 // no need to catch this, using `.includes` verifies it exists or not
                                 // if an exception is thrown at this point it will be caught by generic exception case
                                 var displayAnnotation = ftable.annotations.get(displayAnnotationTag);
