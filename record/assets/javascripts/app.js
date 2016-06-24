@@ -1296,6 +1296,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                 // 1. The table or schema doesn't have an ignore annotation "entry" or "edit" context; AND
                 // 2. The catalog allows write access and the user is part of the
                 // catalog's content_write_users.
+                // 3. chaiseConfig.editRecord == true
                 var ignoreRecord = false, editCatalog = false;
                 var ignoreURI = 'tag:isrd.isi.edu,2016:ignore';
                 var schema = data.schemas[schemaName];
@@ -1342,7 +1343,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                             }
                         }
                     }
-                    $scope.allowEdit = editCatalog && !ignoreRecord;
+                    $scope.allowEdit = chaiseConfig.editRecord && editCatalog && !ignoreRecord;
                 });
             });
         }
