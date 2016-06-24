@@ -55,6 +55,7 @@ REQUEST_METHODS.forEach(function(method) {
                 result.resolve({ data: body });
             }
         });
+        if (method == 'delete') method = 'del';
         this.raw[method].apply(this.raw, fArgs);
         return result.promise;
     };
