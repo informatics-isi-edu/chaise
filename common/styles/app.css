@@ -30,6 +30,13 @@ a:hover, a:focus{
     z-index: 10;
 }
 
+.glyphicon-trash {
+    color: #428bca;
+}
+
+button .glyphicon-trash {
+    color: #fff;
+}
 /****************** HEADER ******************/
 
 #header{
@@ -283,11 +290,15 @@ tbody{
 
 .slippry_box, #thumbnail-box{
     float: left;
-    margin: 10px 0 30px;
+    margin: 10px 30px 30px 0;
 }
 #thumbnail-box{
     max-height: 500px;
-    overflow: scroll;
+    overflow: auto;
+}
+
+#thumbnail-box ul.thumbs {
+  padding-left: 0;
 }
 
 .sy-pager li{
