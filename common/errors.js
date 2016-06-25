@@ -26,7 +26,7 @@
             });
 
             modalInstance.result.then(function () {
-                $window.location = chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin;
+                $window.location.replace(chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
             });
         }
 
