@@ -16,7 +16,7 @@
 
             var modalInstance = $uibModal.open({
                 templateUrl: '../common/templates/errorDialog.html',
-                controller: 'ModalDialogController',
+                controller: 'ErrorDialogController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
                 keyboard: false,
