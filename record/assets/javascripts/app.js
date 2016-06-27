@@ -1350,7 +1350,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
 
         // Redirect user to data entry app to edit the entity
         $scope.editRecord = function(){
-            window.location.href = '../data-entry/' + window.location.hash;
+            window.location.href = '../recordedit/' + window.location.hash;
         }
 
         $scope.permanentLink = function(){
