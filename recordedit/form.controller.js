@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, recordEditModel, context, $window, $log) {
+    .controller('FormController', ['AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(AlertsService, UriUtils, recordEditModel, context, $window, $log) {
         var vm = this;
         vm.recordEditModel = recordEditModel;
         vm.server = context.server;
