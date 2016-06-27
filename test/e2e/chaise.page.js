@@ -53,7 +53,7 @@ function sidebar() {
                     }
 
                     if (++resolvedCount == elements.length) {
-                        defer.resolve(resolved);
+                        defer.fulfill(resolved);
                     };
                 });
             });
@@ -93,7 +93,7 @@ function moreFilter() {
             ' div[ng-repeat="facet in FacetsData.facets"] label', attrName));
     };
     this.clickMorefilterAttrByName = function(attrName) {
-        var defer = Q.defer();
+        var defer = protractor.promise.defer();
 
         return this.htmlElement.all(by.cssContainingText('div.editvalue-container' +
             ' div[ng-repeat="facet in FacetsData.facets"] label', attrName)).then(function(elements) {
@@ -103,7 +103,7 @@ function moreFilter() {
                         if (!resolved && txt.trim() == attrName) {
                             resolved = true;
                             e.click();
-                            defer.resolve();
+                            defer.fulfill();
                         }
                     });
                 });
@@ -288,7 +288,7 @@ function chaisePage() {
             var context = {};
             
             if (hash === undefined || hash == '' || hash.length == 1) {
-                return deferred.resolve(context);
+                return deferred.fulfill(context);
             }
 
             var parts = hash.substring(1).split('/');
@@ -315,7 +315,7 @@ function chaisePage() {
                 }
             }
 
-            deferred.resolve(context);
+            deferred.fulfill(context);
         });
 
         return deferred.promise;

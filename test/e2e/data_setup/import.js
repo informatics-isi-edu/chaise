@@ -371,7 +371,7 @@ var importEntities = function(tableNames, tables, schema) {
 	delete require.cache[require.resolve(config.schema.path)];
 	var association = new Association({ schema: require(config.schema.path) });
 
-	if (config.entities.createNew) {
+	if (config.entities && config.entities.createNew) {
 		console.log("Inside import entities");
 		var cb = function() {
 			if (tableNames.length == 0) return defer.resolve();

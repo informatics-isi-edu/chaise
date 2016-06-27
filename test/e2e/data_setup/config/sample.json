@@ -13,5 +13,9 @@
             "createNew": true,
             "path": "./data/product"  
         }
+    },
+    "cleanup": true,
+    "tests": {
+        
     }
 }
