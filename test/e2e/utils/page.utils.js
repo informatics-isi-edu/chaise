@@ -8,21 +8,30 @@ var Sidebar = function() {
 		if (table.annotations && table.annotations[COMMENT_URI] && table.annotations[COMMENT_URI].contains('exclude')) return [];
 		var cDefs = table.column_definitions.slice(0);
 		cDefs.forEach(function(c) {
-			if (!dataTypes || dataTypes.contains(c.type.typename)) {
-				if ( c['annotations'] == null || c['annotations'][COMMENT_URI] == null || !c['annotations'][COMMENT_URI].intersect(annotations).length) {
-					c.table_name = table.table_name;
-					columns.push(c);
-				} 
+			if (!isColumnHidden(c, annotations, dataTypes)) {
+				c.table_name = table.table_name;
+				columns.push(c);
 			}
 		});
 		return columns.slice(0);
+	};
+
+	var isColumnHidden = function(c, annotations, dataTypes) {
+		if (!dataTypes || dataTypes.contains(c.type.typename)) {
+			if ( c['annotations'] == null || c['annotations'][COMMENT_URI] == null || !c['annotations'][COMMENT_URI].intersect(annotations).length) {
+				return false;
+			} 
+		}
+		return true;
 	};
 
 	this.getAllReferenceColumnsForATable = function(schema, table, annotations, dataTypes) {
 		var columns = [], referenceTables = [];
 		table['foreign_keys'].forEach(function(key) {
 			if (key['referenced_columns'] != null) {
+				var i = 0
 				key['referenced_columns'].forEach(function(refCol) {
+					refCol.foreign_column_name = key['foreign_key_columns'][i++].column_name;
 					referenceTables.push(refCol);
 				});
 			}
@@ -30,12 +39,14 @@ var Sidebar = function() {
 
 		referenceTables.forEach(function(referenceTable) {
 			for(var k in schema.content.tables) {
+				var column = table.column_definitions.find(function(c) { return c.name == referenceTable.foreign_column_name });
+				var isHidden = isColumnHidden(column, annotations, dataTypes); 
 				metadata = schema.content.tables[k];
 				if (k == referenceTable['table_name']) {
 					if (metadata['annotations'] && metadata['annotations'][COMMENT_URI] && !metadata['annotations'][COMMENT_URI].contains('exclude') && metadata['annotations'][COMMENT_URI].contains('association')) {
 						var referredColumns = self.getColumns(schema.content.tables[referenceTable['table_name']], annotations, dataTypes);
 						referredColumns.forEach(function(rc) {
-							if (rc.name !== referenceTable.column_name) {
+							if (rc.name !== referenceTable.column_name || isHidden) {
 								columns.push(rc);
 							}
 						});
@@ -72,13 +83,16 @@ var Sidebar = function() {
 		return columns;
 	};
 
-	var getVisibleColumns = function(columns) {
+	var getVisibleColumns = function(columns, baseName) {
 		var visibleColumns = [];
 		columns.forEach(function(c) {
-			if (c['annotations'] != null && 
-				((c['annotations'][COMMENT_URI] != null && c['annotations'][COMMENT_URI].contains('top'))
+
+			if (c['annotations'] != null && (
+										(c.table_name == baseName && !c['annotations'][COMMENT_URI])
+			 											||
+				(c['annotations'][COMMENT_URI] != null && c['annotations'][COMMENT_URI].contains('top'))
 														||
-				(c['annotations'][FACETORDER_URI] != null && c['annotations'][FACETORDER_URI].length))) 
+				(c['annotations'][FACETORDER_URI] != null && c['annotations'][FACETORDER_URI].length)))
 			{
 				visibleColumns.push(c);
 			}
@@ -97,7 +111,7 @@ var Sidebar = function() {
 	this.getAllVisibleSidebarColumns = function(schema, table, dataTypes) {
 		var annotation = ['exclude', 'hidden', 'summary', 'bottom', 'image'];
 		var columns =  self.getColumns(table, annotation, dataTypes).concat(this.getAllReferenceColumnsForATable(schema, table, annotation, dataTypes));
-		return getVisibleColumns(columns);
+		return getVisibleColumns(columns, table.table_name);
 	};
 
 
@@ -135,7 +149,7 @@ var Sidebar = function() {
 	this.getAllVisibleCheckableColumnsForATable = function(schema, table, dataTypes) {
 		var annotation = ['exclude', 'hidden', 'summary', 'text', 'bottom', 'dataset', 'image', 'accommodation'], dataTypes = dataTypes || ['text', 'boolean'];
 		var columns = self.getColumns(table, annotation, dataTypes).concat(this.getAllReferenceColumnsForATable(schema, table, annotation, dataTypes));
-		return getVisibleColumns(columns);
+		return getVisibleColumns(columns, table.table_name);
 	};
 
 	this.getAllInvisibleCheckableSidebarColumns = function(schema, table, dataTypes) {
@@ -158,7 +172,7 @@ var Sidebar = function() {
 
 	this.getVisibleNumbericSidebarColumns = function(schema, table) {
 		var columns = this.getAllVisibleSidebarColumns(schema, table, ['int4', 'int8', 'float4', 'float8', 'serial4', 'serial8']);
-		return getVisibleColumns(columns);
+		return getVisibleColumns(columns, table.table_name);
 	};
 
 	this.getAllInvisibleNumericSidebarColumns = function() {
@@ -171,7 +185,7 @@ var Sidebar = function() {
 
 	this.getVisibleDateSidebarColumns = function(schema, table) {
 		var columns = this.getAllVisibleSidebarColumns(schema, table, ['date', 'timestamptz']);
-		return getVisibleColumns(columns);
+		return getVisibleColumns(columns, table.table_name);
 	};
 
 	this.getAllInvisibleDateSidebarColumns = function(schema, table) {

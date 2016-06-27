@@ -6,6 +6,8 @@
  *
  */
 
+var Q = require('q');
+
 function tools() {
     this.getRandomInt = function (min, max) {
         //include min and max
@@ -38,8 +40,33 @@ function sidebar() {
     this.findSidebarAttrByName = function (attrName) {
         return that.htmlElement.element(by.cssContainingText('ul li.ng-scope a', attrName));
     };
+    this.isSidebarAttrDisplayed = function (attrName) {
+        var defer = Q.defer(), resolved = false;
+        that.htmlElement.all(by.cssContainingText('ul li.ng-scope:not(.ng-hide) a', attrName)).then(function(elements) {
+            var resolvedCount = 0;
+            elements.forEach(function(e) {
+                e.getText().then(function(txt) {
+                    if (!resolved) {
+                        if (txt.trim() == attrName) {
+                            resolved = true;
+                        }
+                    }
+
+                    if (++resolvedCount == elements.length) {
+                        defer.resolve(resolved);
+                    };
+                });
+            });
+        }, function(err) {
+            throw err;
+        });
+
+        return defer.promise;
+    };
     this.clickSidebarAttr = function (attrName) {
-        that.findSidebarAttrByName(attrName).click();
+        that.findSidebarAttrsByName(attrName).then(function(elements) {
+            if(element.getText() == attrName) element.click();
+        });
     };
 };
 
@@ -62,8 +89,27 @@ function moreFilter() {
         return this.htmlElement.all(by.css('label[ng-class="sideBar.getMoreFieldValueClass(facet)"].toggler--is-active'));
     };
     this.findMorefilterAttrByName = function (attrName) {
-        return that.htmlElement.element(by.cssContainingText('div.editvalue-container' +
+        return this.htmlElement.element(by.cssContainingText('div.editvalue-container' +
             ' div[ng-repeat="facet in FacetsData.facets"] label', attrName));
+    };
+    this.clickMorefilterAttrByName = function(attrName) {
+        var defer = Q.defer();
+
+        return this.htmlElement.all(by.cssContainingText('div.editvalue-container' +
+            ' div[ng-repeat="facet in FacetsData.facets"] label', attrName)).then(function(elements) {
+                var resolved = false;
+                elements.forEach(function(e) {
+                    e.getText().then(function(txt) {
+                        if (!resolved && txt.trim() == attrName) {
+                            resolved = true;
+                            e.click();
+                            defer.resolve();
+                        }
+                    });
+                });
+        });
+
+        return defer.promise;
     };
     this.goBackToSidebar = function () {
         that.sidebarHeader.click();

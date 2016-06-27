@@ -43,7 +43,7 @@ exports.parameterize = function(config, configParams) {
         // Visit the default page and set the authorization cookie if required
         browser.get("");
         browser.sleep(3000);
-        if (testConfiguration.authCookie)  browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + 'path=/;secure;"');
+        if (testConfiguration.authCookie)  browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;secure;"');
         
         // set the url for testcases to stat using the catalogId and schema that was mentioned in the configuration
         browser.params.url = browser.baseUrl + "/#" + catalogId + "/schema/" + data.schema.name;
@@ -55,11 +55,27 @@ exports.parameterize = function(config, configParams) {
       });
     } else {
       console.log("Fetching schemas");
-      return pImport.fetchSchemas(testConfiguration).then(function(data) {
+      pImport.fetchSchemas(testConfiguration).then(function(data) {
         // Set schema returned in browser params for refering it in test cases
         browser.params.schema = data.defaultSchema;
         browser.params.defaultSchema = data.defaultSchema;
         browser.params.defaultTable = data.defaultTable;
+
+
+        // Visit the default page and set the authorization cookie if required
+        if (testConfiguration.authCookie) {
+          browser.get(process.env.CHAISE_BASE_URL + "/login");
+          browser.sleep(3000);
+          browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;secure;"');
+        }
+
+        // Set the base url to the page that we are running the tests for
+        browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
+
+        browser.get("");
+        browser.params.url = browser.baseUrl;
+
+        defer.resolve();
       }, function(err) {
         catalogId = err.catalogId;
         throw err;

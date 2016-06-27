@@ -86,21 +86,11 @@ describe('Chaise initial sidebar,', function () {
                 }
             });
         });
-
-        it('should show attributes with facetOrder annotation first and then the top ones', function () {
-            var columns = chaisePage.dataUtils.sidebar.getVisibleSidebarColumnOrder(browser.params.defaultSchema, browser.params.defaultTable);
-            chaisePage.sidebar.getSidebarAttrsDisplayed().then(function(sidebarAttributes) {
-                for (var i=0; i <sidebarAttributes.length; i++) {
-                    expect(sidebarAttributes[i].getText()).toBe(chaisePage.dataUtils.sidebar.getColumnDisplayName(columns[i]));
-                }
-            });
-        });
        
         it('should not show attributes with bottom', function () {
             var columns = chaisePage.dataUtils.sidebar.getInvisibleSidebarColumns(browser.params.defaultSchema, browser.params.defaultTable);
             columns.forEach(function(column) {
-                var nonDisplayedAttr = chaisePage.sidebar.findSidebarAttrByName(chaisePage.dataUtils.sidebar.getColumnDisplayName(column));
-                nonDisplayedAttr.isDisplayed().then(function(displayed) {
+                chaisePage.sidebar.isSidebarAttrDisplayed(chaisePage.dataUtils.sidebar.getColumnDisplayName(column)).then(function(displayed) {
                     if (displayed) console.log(chaisePage.dataUtils.sidebar.getColumnDisplayName(column) + " is displayed");
                     expect(displayed).toBe(false);
                 });
@@ -123,12 +113,13 @@ describe('Chaise initial sidebar,', function () {
                 expect(chaisePage.moreFilter.sidebarHeader.getText()).toContain('ALL ATTRIBUTES');
             });
 
-            it('attributes with "top" and "facetOrder" annotations should only be checked with proper ordering', function() {
+            it('attributes with "top" and "facetOrder" annotations should only be checked', function() {
                 var columns = chaisePage.dataUtils.sidebar.getAllVisibleSidebarColumns(browser.params.defaultSchema, browser.params.defaultTable);
                 chaisePage.moreFilter.findAllCheckedAttrCheckbox().then(function(checkedAttrs) {
                     expect(checkedAttrs.length).toBe(columns.length);
                     for (var i=0; i < checkedAttrs.length; i++) {
-                        checkedAttrs[i].getText().then(function(txt) {
+                        browser.executeScript('return arguments[0].innerHTML;', checkedAttrs[i].getWebElement()).then(function(txt) {
+                            txt = txt.trim();
                             var found = columns.find(function(c) {
                                 return chaisePage.dataUtils.sidebar.getColumnDisplayName(c) == txt;
                             }) ? true : false; 
@@ -164,29 +155,37 @@ describe('Chaise initial sidebar,', function () {
             });
 
             it('should show previously checked attribute', function () {
-                previousCheckedAttr = chaisePage.sidebar.findSidebarAttrByName(previousCheckedText);
-                expect(previousCheckedAttr.isDisplayed()).toBe(true);
+                chaisePage.sidebar.isSidebarAttrDisplayed(previousCheckedText).then(function(displayed) {
+                    if (!displayed) console.log(previousCheckedText + " is not displayed");
+                    expect(displayed).toBe(true);
+                });
             });
 
             it('should not show previously unchecked attribute', function () {
-                previousUncheckedAttr = chaisePage.sidebar.findSidebarAttrByName(previousUncheckedText);
-                expect(previousUncheckedAttr.isDisplayed()).toBe(false);
+                chaisePage.sidebar.isSidebarAttrDisplayed(previousUncheckedText).then(function(displayed) {
+                    if (displayed) console.log(previousUncheckedText + " is displayed");
+                    expect(displayed).toBe(false);
+                });
             });
             
-            it('should entering \'View All Attributes\', check previously unchecked and uncheck' +
+            it('should entering \'View All Attributes\', check previously unchecked and uncheck ' +
                 'previously checked', function () {
                 viewAll.click();
-                chaisePage.moreFilter.findMorefilterAttrByName(previousCheckedText).click();
-                chaisePage.moreFilter.findMorefilterAttrByName(previousUncheckedText).click();
+                chaisePage.moreFilter.clickMorefilterAttrByName(previousCheckedText);
+                chaisePage.moreFilter.clickMorefilterAttrByName(previousUncheckedText);
+                browser.sleep(100);
                 chaisePage.moreFilter.goBackToSidebar();
             });
             it('should show previously unchecked attribute', function () {
-                previousCheckedAttr = chaisePage.sidebar.findSidebarAttrByName(previousCheckedText);
-                expect(previousCheckedAttr.isDisplayed()).toBe(false);
+                chaisePage.sidebar.isSidebarAttrDisplayed(previousCheckedText).then(function(displayed) {
+                    if (displayed) console.log(previousCheckedText + " is displayed");
+                    expect(displayed).toBe(false);
+                });
             });
             it('should not show previously checked attribute', function () {
-                previousUncheckedAttr = chaisePage.sidebar.findSidebarAttrByName(previousUncheckedText);
-                expect(previousUncheckedAttr.isDisplayed()).toBe(true);
+                chaisePage.sidebar.isSidebarAttrDisplayed(previousUncheckedText).then(function(displayed) {
+                    expect(displayed).toBe(true);
+                });
             });
 
         });
