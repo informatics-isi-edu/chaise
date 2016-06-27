@@ -38,13 +38,16 @@ The following are the config parameters that recordedit uses:
 
 ### Data Types
 * Text Types
+    * Text
     * Short text
     * Long text
 * Numeric Types
     * Integer 2
     * Integer 4
     * integer 8
-    * Float
+    * Float 4
+    * Float 8
+    * Numeric
 * Boolean
 * Date
 * Timestampz
