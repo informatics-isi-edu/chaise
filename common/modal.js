@@ -15,5 +15,14 @@
         function cancel() {
             $uibModalInstance.dismiss('cancel');
         }
+    }])
+    .controller('ErrorDialogController', ['$uibModalInstance', 'params', function ErrorDeleteController($uibModalInstance, params) {
+        var vm = this;
+        vm.params = params;
+        vm.ok = ok;
+
+        function ok() {
+            $uibModalInstance.close();
+        }
     }]);
 })();
