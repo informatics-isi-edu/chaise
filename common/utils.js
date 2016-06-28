@@ -19,5 +19,21 @@
                 })
             }
         }
-    }]);
+    }])
+
+    // if a view value is empty string (''), change it to null before submitting to the database
+    .directive('emptyToNull', function () {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, elem, attrs, ctrl) {
+                ctrl.$parsers.push(function(viewValue) {
+                    if(viewValue === "") {
+                        return null;
+                    }
+                    return viewValue;
+                });
+            }
+        };
+    });
 })();
