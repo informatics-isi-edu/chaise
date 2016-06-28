@@ -195,7 +195,7 @@
             if (!hasComments(annotation)) {
                 if (chaiseConfig.confirmDelete == undefined || chaiseConfig.confirmDelete){
                     var modalInstance = $uibModal.open({
-                        templateUrl: 'annotations/confirm_delete.html',
+                        templateUrl: '../common/templates/delete-link/confirm_delete.modal.html',
                         controller: 'ConfirmDeleteController',
                         controllerAs: 'ctrl',
                         size: 'sm'

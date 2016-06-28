@@ -5,11 +5,15 @@
         'ERMrest',
         'ngSanitize',
         'chaise.utils',
+        'chaise.authen',
         'chaise.navbar',
         'chaise.errors',
         'chaise.alerts',
         'chaise.filters',
         'chaise.validators',
+        'chaise.delete',
+        'ui.bootstrap',
+        'chaise.modal',
         'ui.select',
         'rzModule',
         '720kb.datepicker',
@@ -26,7 +30,7 @@
         // Parse the url
         context.serviceURL = window.location.origin + '/ermrest';
         if (chaiseConfig.ermrestLocation) {
-            context.serviceURL = chaiseConfig.ermrestLocation + '/ermrest';
+            context.serviceURL = chaiseConfig.ermrestLocation;
         }
 
         var hash = window.location.hash;
@@ -66,13 +70,7 @@
         try {
             var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
         } catch (exception) {
-            if (exception instanceof Errors.UnauthorizedError) {
-                Session.login(window.location.href);
-            }
-            // TODO implement error hierarchy in ermrestJS
-            // if (exception instanceof Errors.serverNotFoundError) {
-            //     ErrorService.serverNotFound();
-            // }
+            ErrorService.catchAll(exception);
         }
         server.catalogs.get(context.catalogID).then(function success(catalog) {
             try {
@@ -194,30 +192,24 @@
                 console.log('Model:',recordEditModel);
 
             } catch (exception) { // handle generic catch
-                // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
 
-                // if (exception instanceof Errors.TableNotFoundError) {
-                //     ErrorService.tableNotFound(context.tableName);
-                // } else if (exception instanceof Errors.SchemaNotFoundError) {
-                //     ErrorService.schemaNotFound(context.schemaName);
-                // }
-                AlertsService.addAlert({type: 'error', message: exception.message});
-                $log.info(exception);
+                // ideally this would be used for Table/Schema not found instead of in general case
+                if (exception instanceof ERMrest.NotFoundError) {
+                    ErrorService.errorPopup(exception);
+                }
+
+                throw exception;
             }
 
         }, function error(response) { // error promise for server.catalogs.get()
-            // TODO verify this is handled via an interceptor by the function in the ErrorService
-            // If the interceptor handles this, do nothing here
-            // 401 should not be caught here.
-            if (response.code == 401) {
-                UriUtils.getGoauth(UriUtils.fixedEncodeURIComponent(window.location.href));
-                $log.info(response);
+            // for not found and bad request
+            if (response instanceof ERMrest.NotFoundError || response instanceof ERMrest.BadRequestError) {
+                ErrorService.errorPopup(response);
             }
 
-            // Not sure why this is getting an error promise instead of being caught by the try/catch
-            if (response.code == 404) {
-                ErrorService.catalogNotFound(context.catalogID, response);
-            }
+            throw response;
+        }).catch(function(exception) {
+            ErrorService.catchAll(exception);
         });
     }]);
 
