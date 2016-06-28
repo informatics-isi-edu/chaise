@@ -9,6 +9,9 @@
         'chaise.alerts',
         'chaise.filters',
         'chaise.authen',
+        'chaise.errors',
+        'chaise.delete',
+        'chaise.modal',
         'ui.select',
         'ui.bootstrap'
     ])

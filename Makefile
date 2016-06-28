@@ -173,6 +173,9 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/modal.js \
+	$(COMMON)/delete-link.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js
@@ -190,7 +193,6 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
 	$(VIEWER_ASSETS)/annotations/comments.service.js \
 	$(VIEWER_ASSETS)/annotations/annotations.controller.js \
 	$(VIEWER_ASSETS)/annotations/comments.controller.js \
-	$(VIEWER_ASSETS)/annotations/confirm_delete.controller.js \
 	$(VIEWER_ASSETS)/osd/osd.controller.js \
 	$(VIEWER_ASSETS)/image-metadata/vocabs.js \
 	$(VIEWER_ASSETS)/image-metadata/statuses.js \

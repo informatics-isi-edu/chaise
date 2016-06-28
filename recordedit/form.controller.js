@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['ErrorService', 'AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(ErrorService, AlertsService, UriUtils, recordEditModel, context, $window, $log) {
+    .controller('FormController', ['AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(AlertsService, UriUtils, recordEditModel, context, $window, $log) {
         var vm = this;
         vm.recordEditModel = recordEditModel;
         vm.server = context.server;
@@ -44,6 +44,19 @@
             form.$setUntouched();
             form.$setPristine();
 
+            if (entities.length === 0) {
+            // 1. var entities = the data returned from ERMrest after POST or PUT operation.
+            // 2. var rowset = this app's representation of the submitted data.
+            // 3. If entities === [], that means the user submitted no new changes
+            // to the record, which means we can use rowset to build the redirect
+            // url later.
+            // Why not just use rowset the whole time? Because after user submits
+            // data, ERMrest might have modified that data, so we should use the
+            // returned data from ERMrest instead of assuming rowset and entities
+            // are always the same.
+                entities = rowset;
+            }
+
             if (rowset.length == 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
                 // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
@@ -61,10 +74,7 @@
                     // Build the redirect url with key cols and entity's values
                     for (var c = 0, len = shortestKey.length; c < len; c++) {
                         var colName = shortestKey[c].name;
-                        var separator = null;
-                        if (rowset.length == 1) {
-                            redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
-                        }
+                        redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
                     }
                 } catch (exception) { // catches model.table.keys.all()
                     // handle exception
@@ -84,7 +94,7 @@
 
         function showSubmissionError(response) {
             AlertsService.addAlert({type: 'error', message: response.message});
-            console.log(response);
+            $log.info(response);
         }
 
         function submit() {
