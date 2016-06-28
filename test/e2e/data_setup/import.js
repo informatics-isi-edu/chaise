@@ -36,8 +36,8 @@ exports.introspect = function(options) {
 	});
 
 	// introspect
-	catalog.get().then(function(schema, catalog) {
-        defer.resolve(schema, catalog);
+	catalog.get().then(function(schema) {
+		defer.resolve(schema);
     }, function(err) {
         console.dir(err);
         defer.reject(err);

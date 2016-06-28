@@ -9,30 +9,12 @@
           "comment": null,
           "annotations": {},
           "unique_columns": [
-            "file_id",
-            "project_id"
+            "project_id",
+            "file_id"
           ]
         }
       ],
       "foreign_keys": [
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "project_protocol_document",
-              "schema_name": "legacy",
-              "column_name": "project_id"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "project",
-              "schema_name": "legacy",
-              "column_name": "id"
-            }
-          ]
-        },
         {
           "comment": null,
           "foreign_key_columns": [
@@ -46,6 +28,24 @@
           "referenced_columns": [
             {
               "table_name": "file",
+              "schema_name": "legacy",
+              "column_name": "id"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "project_protocol_document",
+              "schema_name": "legacy",
+              "column_name": "project_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "project",
               "schema_name": "legacy",
               "column_name": "id"
             }
@@ -135,24 +135,6 @@
             {
               "table_name": "dataset_experiment_type",
               "schema_name": "legacy",
-              "column_name": "experiment_type"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "experiment_type",
-              "schema_name": "legacy",
-              "column_name": "term"
-            }
-          ]
-        },
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset_experiment_type",
-              "schema_name": "legacy",
               "column_name": "dataset_id"
             }
           ],
@@ -162,6 +144,24 @@
               "table_name": "dataset",
               "schema_name": "legacy",
               "column_name": "id"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset_experiment_type",
+              "schema_name": "legacy",
+              "column_name": "experiment_type"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "experiment_type",
+              "schema_name": "legacy",
+              "column_name": "term"
             }
           ]
         }
@@ -208,8 +208,8 @@
           "comment": null,
           "annotations": {},
           "unique_columns": [
-            "dataset_id",
-            "somite_count"
+            "somite_count",
+            "dataset_id"
           ]
         }
       ],
@@ -291,6 +291,24 @@
             {
               "table_name": "dataset",
               "schema_name": "legacy",
+              "column_name": "owner"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "person",
+              "schema_name": "legacy",
+              "column_name": "username"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset",
+              "schema_name": "legacy",
               "column_name": "thumbnail"
             }
           ],
@@ -322,24 +340,6 @@
               "table_name": "project",
               "schema_name": "legacy",
               "column_name": "id"
-            }
-          ]
-        },
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset",
-              "schema_name": "legacy",
-              "column_name": "owner"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "person",
-              "schema_name": "legacy",
-              "column_name": "username"
             }
           ]
         }
@@ -832,30 +832,12 @@
           "comment": null,
           "annotations": {},
           "unique_columns": [
-            "dataset_id",
-            "data_type"
+            "data_type",
+            "dataset_id"
           ]
         }
       ],
       "foreign_keys": [
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset_data_type",
-              "schema_name": "legacy",
-              "column_name": "data_type"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "data_type",
-              "schema_name": "legacy",
-              "column_name": "term"
-            }
-          ]
-        },
         {
           "comment": null,
           "foreign_key_columns": [
@@ -871,6 +853,24 @@
               "table_name": "dataset",
               "schema_name": "legacy",
               "column_name": "id"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset_data_type",
+              "schema_name": "legacy",
+              "column_name": "data_type"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "data_type",
+              "schema_name": "legacy",
+              "column_name": "term"
             }
           ]
         }
@@ -1376,24 +1376,6 @@
             {
               "table_name": "dataset_mouse_mutation",
               "schema_name": "legacy",
-              "column_name": "mouse_mutation"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "mouse_mutation",
-              "schema_name": "legacy",
-              "column_name": "term"
-            }
-          ]
-        },
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset_mouse_mutation",
-              "schema_name": "legacy",
               "column_name": "dataset_id"
             }
           ],
@@ -1403,6 +1385,24 @@
               "table_name": "dataset",
               "schema_name": "legacy",
               "column_name": "id"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset_mouse_mutation",
+              "schema_name": "legacy",
+              "column_name": "mouse_mutation"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "mouse_mutation",
+              "schema_name": "legacy",
+              "column_name": "term"
             }
           ]
         }
@@ -1745,24 +1745,6 @@
             {
               "table_name": "dataset_mouse_genotype",
               "schema_name": "legacy",
-              "column_name": "mouse_genotype"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "mouse_genotype",
-              "schema_name": "legacy",
-              "column_name": "term"
-            }
-          ]
-        },
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset_mouse_genotype",
-              "schema_name": "legacy",
               "column_name": "dataset_id"
             }
           ],
@@ -1772,6 +1754,24 @@
               "table_name": "dataset",
               "schema_name": "legacy",
               "column_name": "id"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset_mouse_genotype",
+              "schema_name": "legacy",
+              "column_name": "mouse_genotype"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "mouse_genotype",
+              "schema_name": "legacy",
+              "column_name": "term"
             }
           ]
         }
@@ -2277,24 +2277,6 @@
             {
               "table_name": "dataset_mouse_enhancer",
               "schema_name": "legacy",
-              "column_name": "mouse_enhancer"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "mouse_enhancer",
-              "schema_name": "legacy",
-              "column_name": "term"
-            }
-          ]
-        },
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset_mouse_enhancer",
-              "schema_name": "legacy",
               "column_name": "dataset_id"
             }
           ],
@@ -2304,6 +2286,24 @@
               "table_name": "dataset",
               "schema_name": "legacy",
               "column_name": "id"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset_mouse_enhancer",
+              "schema_name": "legacy",
+              "column_name": "mouse_enhancer"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "mouse_enhancer",
+              "schema_name": "legacy",
+              "column_name": "term"
             }
           ]
         }
@@ -2429,24 +2429,6 @@
             {
               "table_name": "dataset_zebrafish_anatomic_source",
               "schema_name": "legacy",
-              "column_name": "dataset_id"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "dataset",
-              "schema_name": "legacy",
-              "column_name": "id"
-            }
-          ]
-        },
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset_zebrafish_anatomic_source",
-              "schema_name": "legacy",
               "column_name": "zebrafish_anatomic_source"
             }
           ],
@@ -2456,6 +2438,24 @@
               "table_name": "zebrafish_anatomic_source",
               "schema_name": "legacy",
               "column_name": "term"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset_zebrafish_anatomic_source",
+              "schema_name": "legacy",
+              "column_name": "dataset_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "dataset",
+              "schema_name": "legacy",
+              "column_name": "id"
             }
           ]
         }
@@ -2730,8 +2730,8 @@
           "annotations": {},
           "unique_columns": [
             "chromosome",
-            "end_position",
             "dataset_id",
+            "end_position",
             "start_position"
           ]
         }
@@ -2826,30 +2826,12 @@
           "comment": null,
           "annotations": {},
           "unique_columns": [
-            "dataset_id",
-            "file_id"
+            "file_id",
+            "dataset_id"
           ]
         }
       ],
       "foreign_keys": [
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset_file",
-              "schema_name": "legacy",
-              "column_name": "file_id"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "file",
-              "schema_name": "legacy",
-              "column_name": "id"
-            }
-          ]
-        },
         {
           "comment": "vocabulary",
           "foreign_key_columns": [
@@ -2863,6 +2845,24 @@
           "referenced_columns": [
             {
               "table_name": "dataset",
+              "schema_name": "legacy",
+              "column_name": "id"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset_file",
+              "schema_name": "legacy",
+              "column_name": "file_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "file",
               "schema_name": "legacy",
               "column_name": "id"
             }
@@ -3196,24 +3196,6 @@
             {
               "table_name": "dataset_zebrafish_age_stage",
               "schema_name": "legacy",
-              "column_name": "dataset_id"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "dataset",
-              "schema_name": "legacy",
-              "column_name": "id"
-            }
-          ]
-        },
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset_zebrafish_age_stage",
-              "schema_name": "legacy",
               "column_name": "zebrafish_age_stage"
             }
           ],
@@ -3223,6 +3205,24 @@
               "table_name": "zebrafish_age_stage",
               "schema_name": "legacy",
               "column_name": "term"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset_zebrafish_age_stage",
+              "schema_name": "legacy",
+              "column_name": "dataset_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "dataset",
+              "schema_name": "legacy",
+              "column_name": "id"
             }
           ]
         }
@@ -3685,24 +3685,6 @@
             {
               "table_name": "dataset_mouse_anatomic_source",
               "schema_name": "legacy",
-              "column_name": "dataset_id"
-            }
-          ],
-          "annotations": {},
-          "referenced_columns": [
-            {
-              "table_name": "dataset",
-              "schema_name": "legacy",
-              "column_name": "id"
-            }
-          ]
-        },
-        {
-          "comment": null,
-          "foreign_key_columns": [
-            {
-              "table_name": "dataset_mouse_anatomic_source",
-              "schema_name": "legacy",
               "column_name": "mouse_anatomic_source"
             }
           ],
@@ -3712,6 +3694,24 @@
               "table_name": "mouse_anatomic_source",
               "schema_name": "legacy",
               "column_name": "term"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "dataset_mouse_anatomic_source",
+              "schema_name": "legacy",
+              "column_name": "dataset_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "dataset",
+              "schema_name": "legacy",
+              "column_name": "id"
             }
           ]
         }

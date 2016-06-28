@@ -44,7 +44,11 @@ dataImport.importData(configuration).then(function(data) {
 });
 ```
 
-If you don't plan on writing your own script then you can always use the [importUsageSample.js](/test/e2e/data_setup/importUsageSample.js) and replace the configuration with your values.
+If you don't plan on writing your own script then you can always use the [importUsageSample.js](/test/e2e/data_setup/importUsageSample.js) and replace the configuration with your values. Then just run the file using node.js
+
+```sh
+node test/e2e/data_setup/importUsageSample.js
+```
 
 ### Export
 
@@ -55,6 +59,8 @@ var dataExport = require('./export.js');
 
 dataExport.download({
 	catalogId: 1,          // Mandatory
+	url: "https://dev.isrd.isi.edu/ermrest/", // Ermrest API Url from where you want to download data
+	authCookie: "ermrest_cookie;", // Ermrest Authentication cookie to download data
 	schemaName: "legacy",   // Optional: Will download the defailt catalog if not provided
 	folderName: "export01"  // Optional: To specify an explicit folder name inside the schema and data folder where the content will be 
 							// exported to avoid conflicts with existing names
@@ -65,3 +71,11 @@ dataExport.download({
 	console.dir(err);
 });
 ```
+
+If you don't plan on writing your own script then you can always use the [exportUsageSample.js]() and replace the *catalogId*, *schemaName* and *folderName* parameters. Then just run the file using node.js
+
+```sh
+node test/e2e/data_setup/exportUsageSample.js
+```
+
+``` 

@@ -6,8 +6,7 @@ var configuration = {
 
 var dataImport = require('./import.js');
 
-dataImport.importData({
-	).then(function(data) {
+dataImport.importData(configuration).then(function(data) {
 	console.log("Data imported with catalogId " + data.catalogId);
 }, function(err) {
 	console.log("Unable to import data");

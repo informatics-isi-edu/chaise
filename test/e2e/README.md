@@ -2,13 +2,17 @@
 
 Protractor is an end to end test framework for AngularJS applications built on top of [WebDriverJS](https://github.com/SeleniumHQ/selenium/wiki/WebDriverJs). Protractor runs tests against your application running in a real browser, interacting with it as a user would.
 
+### Configuration
+
+For more information on how to setup Chiase Protractor environment and configuration please refer [Protractor Chaise Configuration](/doc/protractor.md)
+
+### Useful Links
+
 Protractor uses [Jasmine](http://jasmine.github.io/) for its test syntax. As in unit testing, a test file is comprised of one or more `it` blocks that describe the requirements of your application. `it` blocks are made of *commands* and *expectations*. Commands tell Protractor to do something with the application such as navigate to a page or click on a button. Expectations tell Protractor to assert something about the application's state, such as the value of a field or the current URL.
 
 Check out the [Angular Docs](https://docs.angularjs.org/guide/e2e-testing) for more on testing your Angular app with Protractor. See the [Protractor docs](https://angular.github.io/protractor/#/tutorial) for more information on Protractor as well.
 
 There is also an [Angular testing cheat sheet](https://spagettikoodi.wordpress.com/2015/01/14/angular-testing-cheat-sheet/) that will help you get around the syntax for assertions.
-
-For more information on how to setup Chiase Protractor environment and configuration please refer [Protractor Chaise Configuration](/doc/protractor.md)
 
 There're tons of features that Protractor supports but here we are going to discuss one which allows for data creation utilities.
 
@@ -59,7 +63,7 @@ Once all this stuff is done, the control is transferred to Protractor to run the
 
 If you didn't have any data setup then there won't be any cleanup.
 
-### Setup and Teardown in testcases.
+### Setup and Teardown in Test Cases.
 
 Just in case if you need to create some data on the fly for a particular scenario in yout test case, and don't want it to be available for all other scenarios of a test spec, you can use the `beforeAll` and `afterAll` methods to do the same.
 

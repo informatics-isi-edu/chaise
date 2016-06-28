@@ -19,7 +19,7 @@ var fetchSchemas = function(testConfiguration, catalogId) {
         if (testConfiguration.dataSetup && testConfiguration.dataSetup.schema) {
             schema = catalog.schemas[testConfiguration.dataSetup.schema.name] || schema;
         }
-        catalog = catalog;
+        catalog = schema.catalog;
 		defaultSchema = schema;
 		defaultTable = schema.defaultTable;
 		// Set done to true to mention that the execution is over

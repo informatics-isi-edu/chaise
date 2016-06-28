@@ -48,8 +48,5 @@
     "q": "x",
     "request": "x",
     "webdriver-manager": "x"
-  },
-  "dependencies": {
-    "jasmine-bail-fast": "0.0.1"
   }
 }
