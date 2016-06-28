@@ -34,6 +34,7 @@ exports.parameterize = function(config, configParams) {
 
         // Set schema returned in browser params for refering it in test cases
         browser.params.schema = schema = data.schema;
+        browser.params.catalog = data.catalog;
         browser.params.defaultSchema = data.defaultSchema;
         browser.params.defaultTable = data.defaultTable;
 
@@ -58,6 +59,7 @@ exports.parameterize = function(config, configParams) {
       pImport.fetchSchemas(testConfiguration).then(function(data) {
         // Set schema returned in browser params for refering it in test cases
         browser.params.schema = data.defaultSchema;
+        browser.params.catalog = data.catalog;
         browser.params.defaultSchema = data.defaultSchema;
         browser.params.defaultTable = data.defaultTable;
 

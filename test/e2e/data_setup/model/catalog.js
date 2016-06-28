@@ -106,16 +106,20 @@ Catalog.prototype.remove = function() {
  * @desc
  * A synchronous method that sets the default schema on basis of current catalog schemas.
  */
-Catalog.prototype.setDefaultSchema = function() {
+Catalog.prototype.setSchemas = function() {
 	var defaultSchema = null, schemas = this.content.schemas;	
-	
+	this.schemas = {};
 	for (var k in schemas) {
+		var schema = new Schema({ schema: schemas[k], catalog: this, name: schemas[k].schema_name });		
 		var annotations = schemas[k].annotations; 
 
-		if (annotations != null && annotations['comment'] != null && annotations['comment'].contains('default')) {
-			defaultSchema = schemas[k];
-			break;
+		if (!defaultSchema && annotations != null && annotations['comment'] != null && annotations['comment'].contains('default')) {
+			defaultSchema = schema
 		}
+
+		schema.setDefaultTable();
+
+		this.schemas[schema.name] = schema;
 	}
 	
 	if (defaultSchema == null) {
@@ -124,7 +128,7 @@ Catalog.prototype.setDefaultSchema = function() {
 			for (var t in s.tables) {
 				var table = s.tables[t];
 				if (table['annotations'] != null && table['annotations']['comment'] != null && table['annotations']['comment'].contains('default')) {
-					defaultSchema = s;
+					defaultSchema = this.schemas[k];
 					break;
 				}
 			}
@@ -134,14 +138,13 @@ Catalog.prototype.setDefaultSchema = function() {
 		if (defaultSchema == null) {
 			// get the first schema from the catalog
 			for (var k in schemas) {
-				defaultSchema = schemas[k];
+				defaultSchema = this.schemas[k];
 				break;
 			}
 		}
 	}
-	var schema = new Schema({ schema: defaultSchema, catalog: this, name: defaultSchema.schema_name });				
-	this.defaultSchema = schema;
-	schema.setDefaultTable();
+
+	this.defaultSchema = defaultSchema;
 };
 
 /**
@@ -154,8 +157,8 @@ Catalog.prototype.get = function() {
 	if (!this.id) return defer.reject("No Id set : get catalog function"), defer.promise;
 	http.get(this.url + 'catalog/' + this.id + "/schema").then(function(response) {
 		self.content = response.data;
-		self.setDefaultSchema();
-		defer.resolve(self.defaultSchema);
+		self.setSchemas();
+		defer.resolve(self.defaultSchema, self);
 	}, function(err) {
 		console.log("some error");
 		defer.reject(err, self);

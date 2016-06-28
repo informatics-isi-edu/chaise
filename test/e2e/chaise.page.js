@@ -259,12 +259,18 @@ function chaisePage() {
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));
     this.tourBox = element(by.css('.tour-DataBrowserTour'));
-    this.setCookie = function() {
-        if (browser.params.authCookie) browser.executeScript('document.cookie = "' + browser.params.authCookie + '"');
-    };
+    
     this.customExpect = {
         elementContainClass: function (ele, className) {
             expect(ele.getAttribute('class')).toContain(className);
+        }
+    };
+    this.setAuthCookie = function(url, authCookie) {
+        if (url && authCookie) {
+            // Visit the default page and set the authorization cookie if required
+            browser.get(url);
+            browser.sleep(3000);
+            browser.driver.executeScript('document.cookie="' + authCookie + 'path=/;secure;"');
         }
     };
     this.getConfig = function(paths) {

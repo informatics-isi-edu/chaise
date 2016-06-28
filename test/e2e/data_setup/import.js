@@ -36,8 +36,8 @@ exports.introspect = function(options) {
 	});
 
 	// introspect
-	catalog.get().then(function(schema) {
-        defer.resolve(schema);
+	catalog.get().then(function(schema, catalog) {
+        defer.resolve(schema, catalog);
     }, function(err) {
         console.dir(err);
         defer.reject(err);
@@ -127,10 +127,10 @@ exports.setup = function(options) {
 };
 
 exports.importData = function(options) {
-	var testConfiguration = options.testConfiguration;
-	testConfiguration.url = options.url;
-	testConfiguration.authCookie = options.authCookie;
-	return exports.setup(testConfiguration);
+	var configuration = options.configuration;
+	configuration.url = options.url;
+	configuration.authCookie = options.authCookie;
+	return exports.setup(configuration);
 };
 
 /**

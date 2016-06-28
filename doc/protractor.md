@@ -60,7 +60,7 @@ These lines will set up credentials necessary to login SauceLabs and when detect
 When the code is pushed to ISI repo, the existence of .travis.yml will run "npm test" command in Travis CI, which will trigger the testing chain specified above.
 
 ###Configuration
-**Protractor.conf.js**: [the protractor.conf.js](https://github.com/informatics-isi-edu/chaise/blob/master/test/e2e/search/protractor.conf.js) file specifies which browser to use when executing tests using
+**Protractor.conf.js**:  specifies which browser to use when executing tests using
 ```sh
 capabilities: {
     //browserName: 'internet explorer',
@@ -115,7 +115,7 @@ var dataSetup = require('../../utils/protractor.parameterize.js');
 dataSetup.parameterize(config, { testConfiguration: testConfiguration , page: '/search' });
 
 exports.config = config;
-``
+```
 
 The `configFileName` which is "search.dev.json" here, specifies the file where the json for this suite exists. Apart from that everything is self-explanatory in the json.
 
@@ -137,8 +137,7 @@ The structure of the configuration is
         "entities": {
             "createNew": true, // Mention this to be true to allow creating new entities
             "path": "./data/product", // This is the path from where the json for the entities will be picked for import
-        },
-        "authCookie": ""
+        }
     },
     "cleanup": true, //Do you want to delete the created catalog/schema/tables/entities created in the setup phase
     "tests" : {
@@ -155,7 +154,7 @@ The `tests` object is mandatory for data-dependent testcases, as the test-cases 
     "tests" : {
         "Filters on top of the records," : {   // This is the name of describe which will used this data
 
-            // The internal data doesn't has a format, its just an object which can change accorsing to your test needs/ 
+            // The internal data doesn't has a format, its just an object which can change according to your test needs
             "data" : "testcase2Input2",
             "someMoreData" : "data"
             .

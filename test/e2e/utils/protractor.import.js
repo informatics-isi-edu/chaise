@@ -6,7 +6,7 @@ var Q = require('q');
 // Takes a callback function as an argument to be called on success
 var fetchSchemas = function(testConfiguration, catalogId) {
 	// Default to 1 if catalogId is undefined or null
-	var catalogId = catalogId || 1, defaultSchema, defaultTable, defer = Q.defer();
+	var catalogId = catalogId || 1, catalog, defaultSchema, defaultTable, defer = Q.defer();
 	var done = false;
 	  
 	// Fetches the schemas for the catalogId
@@ -15,7 +15,11 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 		url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/'),
 		catalogId: catalogId || 1,
 		authCookie: testConfiguration.authCookie
-	}).then(function(schema) {
+	}).then(function(schema, catalog) {
+        if (testConfiguration.dataSetup && testConfiguration.dataSetup.schema) {
+            schema = catalog.schemas[testConfiguration.dataSetup.schema.name] || schema;
+        }
+        catalog = catalog;
 		defaultSchema = schema;
 		defaultTable = schema.defaultTable;
 		// Set done to true to mention that the execution is over
@@ -28,7 +32,7 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 	browser.wait(function() {
 		return done;
 	}, 5000).then(function() {
-        defer.resolve({ catalogId: catalogId, defaultSchema: defaultSchema, defaultTable: defaultTable }); 
+        defer.resolve({ catalogId: catalogId, catalog: catalog, defaultSchema: defaultSchema, defaultTable: defaultTable }); 
 	}, function(err) {
         console.log("I timed out 3000");
         err.catalogId = catalogId;

@@ -13,12 +13,7 @@ var beforeTestRun = function(EC) {
 
             var url = process.env.CHAISE_BASE_URL + '/search';
 
-            if(testConfiguration.authCookie) {
-                // Visit the default page and set the authorization cookie if required
-                browser.get(url);
-                browser.sleep(3000);
-                browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + 'path=/;secure;"');
-            }
+            chaisePage.setAuthCookie(url, testConfiguration.authCookie);
             
             if (data.catalogId) {
 
