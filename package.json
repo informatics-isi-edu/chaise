@@ -47,6 +47,7 @@
     "protractor": "x",
     "q": "x",
     "request": "x",
-    "webdriver-manager": "x"
+    "webdriver-manager": "x",
+    "ermrest-data-utils": "x"
   }
 }

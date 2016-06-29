@@ -1,4 +1,4 @@
-var dataSetupCode = require("../data_setup/import.js");
+var dataSetupCode = require("ermrest-data-utils");
 var Q = require('q'); 
 
 // Fetches the schemas for the current catalog
@@ -17,7 +17,7 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 		authCookie: testConfiguration.authCookie
 	}).then(function(schema, catalog) {
         if (testConfiguration.dataSetup && testConfiguration.dataSetup.schema) {
-            schema = catalog.schemas[testConfiguration.dataSetup.schema.name] || schema;
+            schema = schema.catalog.schemas[testConfiguration.dataSetup.schema.name] || schema;
         }
         catalog = schema.catalog;
 		defaultSchema = schema;
@@ -34,7 +34,7 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 	}, 5000).then(function() {
         defer.resolve({ catalogId: catalogId, catalog: catalog, defaultSchema: defaultSchema, defaultTable: defaultTable }); 
 	}, function(err) {
-        console.log("I timed out 3000");
+        console.log("I timed out 5000");
         err.catalogId = catalogId;
 		defer.reject(err);
 	});

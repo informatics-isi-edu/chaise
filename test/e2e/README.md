@@ -38,14 +38,14 @@ There're several ways to achieve above target, out of which the `onPrepare` and 
         "schema": {
             "name": "product",
             "createNew": true, // change this to false to avoid creating new schema
-            "path": "./schema/product.json" // path of the schema json file in data_setup folder
+            "path": "test/e2e/schema/product.json" // path of the schema json file in data_setup folder
         },
         "tables": {
             "createNew": true, // Mention this to be true to allow creating new tables
         },
         "entities": {
             "createNew": true, // Mention this to be true to allow creating new entities
-            "path": "./data/product", // This is the path from where the json for the entities will be picked for import
+            "path": "test/e2e/data/product", // This is the path from where the json for the entities will be picked for import
         }
     },
     "cleanup": true, // Delete the created catalog/schema/tables/entities created in the setup phase

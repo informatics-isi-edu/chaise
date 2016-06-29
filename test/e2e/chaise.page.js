@@ -64,8 +64,20 @@ function sidebar() {
         return defer.promise;
     };
     this.clickSidebarAttr = function (attrName) {
-        that.findSidebarAttrsByName(attrName).then(function(elements) {
-            if(element.getText() == attrName) element.click();
+        that.htmlElement.all(by.cssContainingText('ul li.ng-scope:not(.ng-hide) a', attrName)).then(function(elements) {
+            var resolved = 0;
+            elements.forEach(function(e) {
+                e.getText().then(function(txt) {
+                    if (!resolved) {
+                        if (txt.trim() == attrName) {
+                            resolved = true;
+                            e.click();
+                        }
+                    }
+                });
+            });
+        }, function(err) {
+            throw err;
         });
     };
 };

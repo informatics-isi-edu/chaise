@@ -33,7 +33,7 @@ var config = {
 var testConfiguration = { };
 
 var dataSetup = require('../../utils/protractor.parameterize.js');
-dataSetup.parameterize(config, { testConfiguration: testConfiguration , page: '/record' });
+dataSetup.parameterize(config, { testConfiguration: testConfiguration , page: '/search' });
 
 exports.config = config;
 

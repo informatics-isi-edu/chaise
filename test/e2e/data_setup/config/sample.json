@@ -4,14 +4,14 @@
         "schema": {
             "name": "product",   
             "createNew": true,  
-            "path": "./schema/product.json"  
+            "path": "test/e2e/data_setup/schema/product.json"  
         },
         "tables": {
             "createNew": true
         },
         "entities": {
             "createNew": true,
-            "path": "./data/product"  
+            "path": "test/e2e/data_setup/data/product"  
         }
     },
     "cleanup": true,

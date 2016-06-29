@@ -246,6 +246,9 @@
             "typename": "timestamptz"
           },
           "annotations": {
+            "comment": [
+              "bottom"
+            ],
             "description": {
               "display": "Date since operational"
             }
