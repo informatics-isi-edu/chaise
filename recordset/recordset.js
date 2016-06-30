@@ -311,112 +311,98 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     // Get rowset data from ermrest
     var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
 
-    // authenticiation
-    Session.getSession().then(function(session) {
+    server.catalogs.get(context.catalogID).then(function(catalog) {
+        console.log(catalog);
 
-        $rootScope.user = session.client.display_name;
-        server.catalogs.get(context.catalogID).then(function(catalog) {
-            console.log(catalog);
+        try {
+            // get table definition
+            var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
+            console.log(table);
+            recordsetModel.table = table;
+            recordsetModel.tableDisplayName = table.displayname;
 
-            try {
-                // get table definition
-                var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
-                console.log(table);
-                recordsetModel.table = table;
-                recordsetModel.tableDisplayName = table.displayname;
+            // columns
+            var columns = table.columns.all();
+            for (var i = 0; i < columns.length; i++) {
+                var col = {name: columns[i].name, displayname: columns[i].displayname, hidden: columns[i].ignore};
+                recordsetModel.columns.push(col);
+            }
 
-                // columns
-                var columns = table.columns.all();
-                for (var i = 0; i < columns.length; i++) {
-                    var col = {name: columns[i].name, displayname: columns[i].displayname, hidden: columns[i].ignore};
-                    recordsetModel.columns.push(col);
+            // build up filters
+            var filter = null;
+            var len = context.filters.length;
+            if (len == 1) {
+                filter = new ERMrest.BinaryPredicate(
+                    table.columns.get(context.filters[0].name),
+                    context.filters[0].op,
+                    context.filters[0].value);
+            }
+            else if (len > 1) {
+                var filters = [];
+                for (var i = 0; i < len; i++) {
+                    filters.push(
+                        new ERMrest.BinaryPredicate(
+                            table.columns.get(context.filters[i].name),
+                            context.filters[i].op,
+                            context.filters[i].value)
+                    );
+                }
+                filter = new ERMrest.Conjunction(filters);
+            }
+            recordsetModel.filter = filter;
+
+            // Find shortest Key, used for paging and linking
+            var keys = table.keys.all().sort( function(a, b) {
+                return a.colset.length() - b.colset.length();
+            });
+            recordsetModel.keycols = keys[0].colset.columns;
+
+            // sorting
+            var sort = [];
+
+            // user selected column as the priority in sort
+            // followed by all the key columns
+            if (context.sort !== null) {
+                if (context.sort.endsWith("::desc::")) {
+                    recordsetModel.sortby = decodeURIComponent(
+                        context.sort.match(/(.*)::desc::/)[1]
+                    );
+                    recordsetModel.sortOrder = 'desc';
+                } else {
+                    recordsetModel.sortby = decodeURIComponent(context.sort);
+                    recordsetModel.sortOrder = 'asc';
                 }
 
-                // build up filters
-                var filter = null;
-                var len = context.filters.length;
-                if (len == 1) {
-                    filter = new ERMrest.BinaryPredicate(
-                        table.columns.get(context.filters[0].name),
-                        context.filters[0].op,
-                        context.filters[0].value);
+                // this will cause program to throw exception is sort column is not valid
+                table.columns.get(recordsetModel.sortby);
+
+                sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
+            }
+
+            for (i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
+                var col = recordsetModel.keycols[i].name;
+                if (col !== recordsetModel.sortby) {
+                    sort.push({"column": col, "order": "asc"});
                 }
-                else if (len > 1) {
-                    var filters = [];
-                    for (var i = 0; i < len; i++) {
-                        filters.push(
-                            new ERMrest.BinaryPredicate(
-                                table.columns.get(context.filters[i].name),
-                                context.filters[i].op,
-                                context.filters[i].value)
-                        );
-                    }
-                    filter = new ERMrest.Conjunction(filters);
-                }
-                recordsetModel.filter = filter;
+            }
 
-                // Find shortest Key, used for paging and linking
-                var keys = table.keys.all().sort( function(a, b) {
-                    return a.colset.length() - b.colset.length();
-                });
-                recordsetModel.keycols = keys[0].colset.columns;
+            // first get row count
+            table.entity.count(filter).then(function (count) {
+                recordsetModel.count = count;
 
-                // sorting
-                var sort = [];
+                // get rowset from table
+                table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
+                    console.log(rowset);
+                    recordsetModel.rowset = rowset;
 
-                // user selected column as the priority in sort
-                // followed by all the key columns
-                if (context.sort !== null) {
-                    if (context.sort.endsWith("::desc::")) {
-                        recordsetModel.sortby = decodeURIComponent(
-                            context.sort.match(/(.*)::desc::/)[1]
-                        );
-                        recordsetModel.sortOrder = 'desc';
-                    } else {
-                        recordsetModel.sortby = decodeURIComponent(context.sort);
-                        recordsetModel.sortOrder = 'asc';
-                    }
+                    pageInfo.loading = false;
+                    pageInfo.recordStart = 1;
+                    pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
+                    pageInfo.previousButtonDisabled = true;
+                    pageInfo.nextButtonDisabled = recordsetModel.count <= pageInfo.recordEnd;
 
-                    // this will cause program to throw exception is sort column is not valid
-                    table.columns.get(recordsetModel.sortby);
-
-                    sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
-                }
-
-                for (i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
-                    var col = recordsetModel.keycols[i].name;
-                    if (col !== recordsetModel.sortby) {
-                        sort.push({"column": col, "order": "asc"});
-                    }
-                }
-
-                // first get row count
-                table.entity.count(filter).then(function (count) {
-                    recordsetModel.count = count;
-
-                    // get rowset from table
-                    table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
-                        console.log(rowset);
-                        recordsetModel.rowset = rowset;
-
-                        pageInfo.loading = false;
-                        pageInfo.recordStart = 1;
-                        pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
-                        pageInfo.previousButtonDisabled = true;
-                        pageInfo.nextButtonDisabled = recordsetModel.count <= pageInfo.recordEnd;
-
-                    }, function (error) {
-                        console.log(error);
-                        pageInfo.loading = false;
-                        pageInfo.previousButtonDisabled = true;
-                        pageInfo.nextButtonDisabled = true;
-
-                        if (error instanceof ERMrest.UnauthorizedError) {
-                            // session has expired, login
-                            Session.login(window.location.href);
-                        }
-                    });
                 }, function (error) {
+                    console.log(error);
                     pageInfo.loading = false;
                     pageInfo.previousButtonDisabled = true;
                     pageInfo.nextButtonDisabled = true;
@@ -426,39 +412,41 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
                         Session.login(window.location.href);
                     }
                 });
-
-            } catch (error) {
+            }, function (error) {
                 pageInfo.loading = false;
-                if (error instanceof ERMrest.NotFoundError ||
-                    error instanceof ERMrest.InvalidFilterOperatorError) {
-                    $rootScope.errorMessage = error.message;
+                pageInfo.previousButtonDisabled = true;
+                pageInfo.nextButtonDisabled = true;
+
+                if (error instanceof ERMrest.UnauthorizedError) {
+                    // session has expired, login
+                    Session.login(window.location.href);
                 }
-            }
+            });
 
-        }, function(error) {
-
-            // get catalog error
-            console.log(error);
+        } catch (error) {
             pageInfo.loading = false;
-
-            // TODO
-            $rootScope.errorMessage = error.message;
-            if (error instanceof ERMrest.NotFoundError) {
-                // catalog not found
-            } else if (error instanceof ERMrest.ForbiddenError) {
-
-            } else if (error instanceof ERMrest.UnauthorizedError) {
-                Session.login(window.location.href);
+            if (error instanceof ERMrest.NotFoundError ||
+                error instanceof ERMrest.InvalidFilterOperatorError) {
+                $rootScope.errorMessage = error.message;
             }
-        });
+        }
 
     }, function(error) {
-        // not logged in, redirect to login
-        if (error instanceof Session.NotFoundError) {
+
+        // get catalog error
+        console.log(error);
+        pageInfo.loading = false;
+
+        // TODO
+        $rootScope.errorMessage = error.message;
+        if (error instanceof ERMrest.NotFoundError) {
+            // catalog not found
+        } else if (error instanceof ERMrest.ForbiddenError) {
+
+        } else if (error instanceof ERMrest.UnauthorizedError) {
             Session.login(window.location.href);
         }
     });
-
 
     window.onhashchange = function() {
         // when address bar changes by user
