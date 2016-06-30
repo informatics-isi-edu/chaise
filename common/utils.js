@@ -97,6 +97,7 @@
                     }
                 }
             }
+            return context;
         }
 
         // window.location.origin does not work in IE 11 (surprise, surprise)
