@@ -105,7 +105,7 @@
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin
         }
-    }]);
+    }])
 
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {
