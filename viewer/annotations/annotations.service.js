@@ -97,7 +97,11 @@
 
         function centerAnnotation(annotation) {
             iframe.postMessage({messageType: 'centerAnnotation', content: annotation}, origin);
-        };
+        }
+
+        function syncVisibility() {
+            iframe.postMessage({messageType: 'syncVisibility', content: annotations}, origin);
+        }
 
         return {
             drawAnnotation: drawAnnotation,
@@ -105,7 +109,8 @@
             cancelNewAnnotation: cancelNewAnnotation,
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
-            centerAnnotation: centerAnnotation
+            centerAnnotation: centerAnnotation,
+            syncVisibility: syncVisibility
         };
 
     }]);

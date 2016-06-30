@@ -16,6 +16,7 @@
         vm.resetSearch = resetSearch;
         vm.filterAnnotations = filterAnnotations;
         vm.sortSectionsFirst = sortSectionsFirst;
+        vm.setVisibility = setVisibility;
 
         vm.createMode = false;
         vm.newAnnotation = {config:{color: vm.defaultColor}};
@@ -93,7 +94,11 @@
         });
 
         function filterAnnotations(annotation) {
+            var typeIsVisible = vm.filterByType[annotation.type]; // boolean that answers "are annotations of a certain type visible?"
             if (!vm.filter) {
+                if (typeIsVisible) {
+                    annotation.config.visible = true;
+                }
                 return true;
             }
 
@@ -104,6 +109,9 @@
             var numProps = props.length;
             for (var i = 0; i < numProps; i++) {
                 if (props[i] && props[i].toLowerCase().indexOf(vm.filter) > -1) {
+                    if (typeIsVisible) {
+                        annotation.config.visible = true;
+                    }
                     return true;
                 }
             }
@@ -118,12 +126,15 @@
                     var numCommentProps = commentProps.length;
                     for (var p = 0; p < numCommentProps; p++) {
                         if (commentProps[p] && commentProps[p].toLowerCase().indexOf(vm.filter) > -1) {
+                            if (typeIsVisible) {
+                                annotation.config.visible = true;
+                            }
                             return true;
                         }
                     }
                 }
             }
-
+            annotation.config.visible = false;
             return false;
         }
 
@@ -276,44 +287,24 @@
 
         function submitSearch() {
             vm.filter = vm.query;
-
-        }
-
-        function setAnnotationVisibilityInOSD() {
-            // Get all the annotations
-            for (var i = 0; i < vm.annotations.length; i++) {
-                console.log(vm.annotations[i].id);
-
-                console.log(
-                    angular.element(
-                        document.getElementById(
-                            'annotation-' + vm.annotations[i].id
-                        )
-                    )
-                );
-
-                console.log(
-                    angular.element(
-                        document.getElementById(
-                            'annotation-' + vm.annotations[i].id
-                        )
-                    ).hasClass(
-                        'ng-hide'
-                    )
-                );
-
-                // if (angular.element(document.getElementById('annotation-'+vm.annotations[i].id)).hasClass('ng-hide')) {
-                //     console.log(vm.annotations[i].id + ' is hidden');
-                // }
-            }
-            // Send them to Annotorious via postmessage
-
-            // In Annotorious: in the event (toggleVisibility?), loop thru the array and run updateDisplayType2Style(convertedAnnotation, display type);
+            AnnotationsService.syncVisibility();
         }
 
         function resetSearch() {
             vm.query = '';
             vm.filter = '';
+        }
+
+        function setVisibility(annotationType) {
+            var annotations = vm.annotations;
+            var visibility = vm.filterByType[annotationType];
+            for (var i = 0, len = annotations.length; i < len; i++) {
+                var annotation = annotations[i];
+                if (annotation.type == annotationType) {
+                    annotation.config.visible = visibility;
+                }
+            }
+            AnnotationsService.syncVisibility();
         }
     }]);
 })();

@@ -170,6 +170,9 @@
                         for (var i = 0; i < length; i++) {
                             _annotations[i].table = annotationPath.context.table.name;
                             var annotation = _annotations[i];
+                            if (!annotation.config) {
+                                annotation.config = {};
+                            }
                             annotations.push(annotation);
                         }
                         chaiseReady = true;
