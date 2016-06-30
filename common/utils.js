@@ -17,7 +17,16 @@
             })
         }
 
+        /**
+         * @function
+         * @param {location} should be $window.location object
+         * @param {context} context object; can be null
+         * Parses the URL to create the context object
+         */
         function parseURLFragment(location, context) {
+            if (!context) {
+                var context = {};
+            }
             // First, configure the service URL, assuming its this origin plus the
             // typical deployment location for ermrest.
             context.serviceURL = location.origin + '/ermrest';
