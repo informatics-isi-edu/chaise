@@ -32,81 +32,20 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
 
 // Register configuration work to be performed on module loading.
-.config(['context', function(context) {
+.config(['context', 'UriUtilsProvider', function(context, UriUtilsProvider) {
     // Note that we do not like using angular's '$location' service because
     // it encodes and/or decodes the URL in ways that are incompatible with
     // our applications. We need control of the encoding of the URLs.
+    var utils = UriUtilsProvider.$get();
 
-    // First, configure the service URL, assuming its this origin plus the
-    // typical deployment location for ermrest.
-    context.serviceURL = window.location.origin + "/ermrest";
+    // parse the URL
+    utils.setOrigin();
+    utils.parseURLFragment(window.location, context);
 
-    // Then, parse the URL fragment id (aka, hash). Expected format:
-    //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-    var hash = window.location.hash;
-    if (hash === undefined || hash == '' || hash.length == 1) {
-        return;
-    }
-
-    context.chaiseURL = window.location.href.replace(hash, '');
+    context.chaiseURL = window.location.href.replace(window.location.hash, '');
     context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
-    console.log(context.chaiseURL);
 
-    // parse out @sort(...)
-    if (hash.indexOf("@sort(") !== -1) {
-        context.sort = hash.match(/@sort\((.*)\)/)[1];
-    }
-
-    // content before @sort
-    var parts = hash.split("@sort(")[0];
-    var fragment = parts.substring(1).split('/');
-    var len = fragment.length;
-    context.catalogID = fragment[0];
-    if (len > 1) {
-
-        // Parse the schema:table name
-        schemaTable = fragment[1].split(':');
-        if (schemaTable.length > 1) {
-            context.schemaName = decodeURIComponent(schemaTable[0]);
-            context.tableName = decodeURIComponent(schemaTable[1]);
-        }
-        else {
-            context.schemaName = '';
-            context.tableName = decodeURIComponent(schemaTable[0]);
-        }
-
-        // Parse the filters
-        if (len>2) {
-            // The '/' is also a valid separator for conjunctions but for
-            // simplicity we just support '&' at this point. Something for
-            // future discussion.
-            var conjunction = fragment[2].split('&');
-            for (var i in conjunction) {
-                var filter = conjunction[i].split("::");
-                if (filter.length != 3) {
-                    // Currently, this only supports binary predicates, skips others
-                    console.log("invalid filter string: " + filter);
-                    continue;
-                }
-
-                // Push filters as simple (name, op, value) triples
-                if (filter[1] === "eq") {
-                    context.filters.push({
-                        name: decodeURIComponent(filter[0]),
-                        op: "=",
-                        value: decodeURIComponent(filter[2])
-                    });
-                } else {
-                    context.filters.push({
-                        name: decodeURIComponent(filter[0]),
-                        op: "::"+filter[1]+"::",
-                        value: decodeURIComponent(filter[2])
-                    });
-                }
-            }
-            console.log(context.filters);
-        }
-    }
+    console.log("Context", context);
 }])
 
 // Register the 'recordsetModel' object, which can be accessed by other
@@ -512,7 +451,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
                 Session.login(window.location.href);
             }
         });
-        
+
     }, function(error) {
         // not logged in, redirect to login
         if (error instanceof Session.NotFoundError) {

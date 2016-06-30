@@ -21,47 +21,16 @@
     ])
 
     // Configure the context info from the URI
-    .config(['context', '$httpProvider', function configureContext(context, $httpProvider) {
+    .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
+        var utils = UriUtilsProvider.$get();
 
         if (chaiseConfig.headTitle !== undefined) {
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
+        // Parse the URL
+        utils.setOrigin();
+        utils.parseURLFragment(window.location, context);
 
-        // Parse the url
-        context.serviceURL = window.location.origin + '/ermrest';
-        if (chaiseConfig.ermrestLocation) {
-            context.serviceURL = chaiseConfig.ermrestLocation;
-        }
-
-        var hash = window.location.hash;
-
-        if (hash === undefined || hash == '' || hash.length == 1) {
-            return;
-        }
-
-        var parts = hash.substring(1).split('/');
-        context.catalogID = parts[0];
-        if (parts[1]) {
-            var params = parts[1].split(':');
-            if (params.length > 1) {
-                context.schemaName = decodeURIComponent(params[0]);
-                context.tableName = decodeURIComponent(params[1]);
-            } else {
-                context.tableName = decodeURIComponent(params[0]);
-            }
-        }
-
-        // If there are filters appended to the URL, add them to context.js
-        if (parts[2]) {
-            context.filters = {};
-            var filters = parts[2].split('&');
-            for (var i = 0, len = filters.length; i < len; i++) {
-                var filter = filters[i].split('=');
-                if (filter[0] && filter[1]) {
-                    context.filters[decodeURIComponent(filter[0])] = decodeURIComponent(filter[1]);
-                }
-            }
-        }
         console.log('Context:',context);
     }])
 
