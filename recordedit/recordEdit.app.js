@@ -29,7 +29,7 @@
         }
 
         // Parse the URL
-        context = utils.parseURLFragment(context);
+        utils.parseURLFragment(context);
 
         console.log('Context:',context);
     }])

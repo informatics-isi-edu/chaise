@@ -25,7 +25,7 @@
         }
 
         // Parse the URL
-        context = utils.parseURLFragment(context);
+        utils.parseURLFragment(context);
 
         // should we allow for improper URLs here?
         // what if there are 2 filters and the id filter is the second one.
