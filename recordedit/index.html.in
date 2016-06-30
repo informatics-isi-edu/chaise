@@ -119,10 +119,11 @@
                                                 </ui-select>
                                             </div>
                                             <!-- longtext/textarea input -->
-                                            <textarea ng-switch-when="longtext" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="form-control" ng-required="!column.nullok"></textarea>
+                                            <textarea ng-switch-when="longtext" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
+                                                name="{{::column.name}}" class="form-control" ng-required="!column.nullok" empty-to-null></textarea>
                                             <!-- shorttext/default text input -->
                                             <input ng-switch-default ng-model="form.recordEditModel.rows[rowIndex][column.name]"
-                                                name="{{::column.name}}" type="text" class="form-control" ng-required="!column.nullok">
+                                                name="{{::column.name}}" type="text" class="form-control" ng-required="!column.nullok" empty-to-null>
 
                                             <!-- Validation error messages to show when the form field is touched -->
                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert">

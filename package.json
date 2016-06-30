@@ -9,7 +9,6 @@
     "build": "make build",
     "pretest": "make build",
     "test": "make testall",
-    "test:testem": "make testem",
     "docs": "make doc"
   },
   "repository": {
@@ -23,7 +22,6 @@
   "devDependencies": {
     "angular-animate": "1.3.11",
     "angular-mocks": "^1.4.4",
-    "bower": "x",
     "chai": "x",
     "closurecompiler": "x",
     "jasmine-core": "^2.4.1",
@@ -43,9 +41,7 @@
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-safari-launcher": "^0.1.1",
     "karma-sinon-chai": "x",
-    "mocha": "^2.4.5",
     "phantomjs-prebuilt": "x",
     "protractor": "x",
-    "testem": "x"
   }
 }
