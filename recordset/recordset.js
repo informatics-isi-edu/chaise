@@ -39,7 +39,8 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     var utils = UriUtilsProvider.$get();
 
     // parse the URL
-    utils.parseURLFragment(context);
+    utils.setOrigin();
+    utils.parseURLFragment(window.location, context);
 
     context.chaiseURL = window.location.href.replace(window.location.hash, '');
     context.chaiseURL = context.chaiseURL.replace("/recordset/", '');

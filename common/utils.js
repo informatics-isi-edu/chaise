@@ -17,11 +17,10 @@
             })
         }
 
-        function parseURLFragment(context) {
-            setOrigin()
+        function parseURLFragment(location, context) {
             // First, configure the service URL, assuming its this origin plus the
             // typical deployment location for ermrest.
-            context.serviceURL = $window.location.origin + '/ermrest';
+            context.serviceURL = location.origin + '/ermrest';
 
             if (chaiseConfig.ermrestLocation) {
                 context.serviceURL = chaiseConfig.ermrestLocation;
@@ -29,7 +28,7 @@
 
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-            var hash = $window.location.hash;
+            var hash = location.hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return;
             }

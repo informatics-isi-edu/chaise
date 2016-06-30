@@ -27,9 +27,9 @@
         if (chaiseConfig.headTitle !== undefined) {
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
-
         // Parse the URL
-        utils.parseURLFragment(context);
+        utils.setOrigin();
+        utils.parseURLFragment(window.location, context);
 
         console.log('Context:',context);
     }])

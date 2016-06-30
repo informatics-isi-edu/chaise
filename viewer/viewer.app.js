@@ -25,7 +25,8 @@
         }
 
         // Parse the URL
-        utils.parseURLFragment(context);
+        utils.setOrigin();
+        utils.parseURLFragment(window.location, context);
 
         // should we allow for improper URLs here?
         // what if there are 2 filters and the id filter is the second one.
