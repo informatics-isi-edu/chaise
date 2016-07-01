@@ -52,30 +52,16 @@
                 var messageType = data.messageType;
 
                 switch (messageType) {
-                    case 'annotoriousReady':
-                        // annotoriousReady case handled in viewer.app.js.
-                        // Repeating the case here to avoid triggering default case
-                        break;
                     case 'annotationDrawn':
                         vm.newAnnotation.shape = data.content.shape;
                         $scope.$apply(function() {
                             vm.createMode = true;
                         });
                         break;
-                    case 'onHighlighted':
-                    // On-hover highlighting behavior no longer needed
-                    // OSD still sends this message out on hover though, so the
-                    // is case here to avoid triggering default case
-                        break;
-                    case 'onUnHighlighted':
-                    // On-hover highlighting behavior no longer needed
-                    // OSD still sends this message out on hover though, so the
-                    // is case here to avoid triggering default case
-                        break;
                     case 'onClickAnnotation':
                         var content = JSON.parse(data.content);
                         //TODO check data object
-                        var annotation = findAnnotation(content.data.shapes[0].geometry);
+                        var annotation = findAnnotation(content.shapes[0].geometry);
                         if (annotation) {
                             var annotationId = annotation.table + '-' + annotation.id;
                             $scope.$apply(function() {
@@ -84,6 +70,13 @@
                             });
                             vm.scrollIntoView(annotationId);
                         }
+                        break;
+                    // The following cases are already handled elsewhere or are
+                    // no longer needed but the case is repeated here to avoid
+                    // triggering the default case.
+                    case 'annotoriousReady': // handled in viewer.app.js.
+                    case 'onHighlighted':
+                    case 'onUnHighlighted':
                         break;
                     default:
                         console.log('Invalid event message type "' + messageType + '"');

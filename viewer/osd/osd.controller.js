@@ -12,6 +12,8 @@
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
+        vm.hideMode = false; // if true, then all annotations should be hidden in viewer
+        vm.toggleAnnotations = toggleAnnotations;
 
         function downloadView() {
             var filename = vm.image.entity.slide_id;
@@ -35,6 +37,12 @@
 
         function homeView() {
             iframe.postMessage({messageType: 'homeView'}, origin);
+        }
+
+        function toggleAnnotations() {
+            var messageType = vm.hideMode ? 'hideAllAnnotations' : 'showAllAnnotations';
+            iframe.postMessage({messageType: messageType}, origin);
+            vm.hideMode = !vm.hideMode;
         }
     }]);
 })();

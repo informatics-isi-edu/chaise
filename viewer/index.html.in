@@ -408,7 +408,7 @@
                                                     <span>{{annotation.anatomy || 'No Anatomy' | uppercase}}</span>
                                                 </strong></small>
                                             </div>
-                                            <!-- Annotation Edit/Delete Buttons -->
+                                            <!-- Annotation Edit/Delete/Zoom Buttons -->
                                             <div class="col-md-4">
                                                 <small class="pull-right">
                                                     <a ng-click="annotations.centerAnnotation(annotation);" title="Find this annotation in the viewer" class="cardlink"><span class="glyphicon glyphicon-eye-open"></span></a>
@@ -421,16 +421,14 @@
                                                 </small>
                                             </div>
                                         </div>
-                                        <br>
                                         <!-- Annotation Description -->
-                                        <div class="row">
+                                        <div ng-if="annotation.description" class="row">
                                             <div class="col-md-12">
                                                 <span class="h5 annotation-description">
-                                                    {{annotation.description}}
+                                                    {{annotation.description}}<br>
                                                 </span>
                                             </div>
                                         </div>
-                                        <br>
                                         <!-- Annotation Author, Date & Comment Icon -->
                                         <div class="row">
                                             <div class="col-md-8">
@@ -464,7 +462,7 @@
                                                             <small><a ng-click="comments.cancelEdit(comment);" class="cardlink delete pull-right">Cancel this edit</a></small>
                                                         </div>
                                                         <div ng-if="comments.editedComment != (comment.table + '-' + comment.id)">
-                                                            {{comment.comment}}<br>
+                                                            {{comment.comment}}
                                                             <div class="pull-right">
                                                                 <small ng-if="comments.allowEdit(comment);">
                                                                     <a ng-click="comments.editComment(comment);" class="cardlink edit" title="Edit this comment"><span class="glyphicon glyphicon-pencil"></span></a>
@@ -596,6 +594,10 @@
                     <div class="col-md-6">
                         <span class="glyphicon glyphicon-info-sign pull-right" data-toggle="tooltip" title="<p class='text-left'><strong>Recommended browsers:</strong> Firefox and Chrome<br><br><strong>Safari users:</strong> The screenshot will be saved as 'Unknown.jpg'.</p>"></span>
                         <div class="btn-group btn-group-sm pull-right" role="group">
+                            <button ng-click="osd.toggleAnnotations();" class="btn btn-success" type="button" role="button">
+                                <span class="glyphicon" ng-class="{'glyphicon-eye-open': !osd.hideMode, 'glyphicon-eye-close': osd.hideMode}"></span>
+                                <span ng-show="!osd.hideMode">Show</span><span ng-show="osd.hideMode">Hide</span>
+                            </button>
                             <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button">
                                 <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
                             </button>
