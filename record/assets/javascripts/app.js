@@ -1231,88 +1231,81 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
     // T: Table name
     // K: Key
 
-    $http.get(window.location.origin + "/ermrest/authn/session").then(function() {
-        // authorized
 
-        $scope.chaiseConfig = chaiseConfig;
+    $scope.chaiseConfig = chaiseConfig;
 
-        // Set up the parameters base on url
-        var params      = locationService.getHashParams();
-        // var params      = $location.search();  query parameters
-        var cid         = params['catalogueId'];
-        var tableName   = params['tableName'];
-        var schemaName  = params['schemaName'];
-        var keys        = params['keys'];
+    // Set up the parameters base on url
+    var params      = locationService.getHashParams();
+    // var params      = $location.search();  query parameters
+    var cid         = params['catalogueId'];
+    var tableName   = params['tableName'];
+    var schemaName  = params['schemaName'];
+    var keys        = params['keys'];
 
-        // cid
-        var cidRegex = /^[0-9]+$/;
-        var tableNameRegex = /^[\s0-9a-zA-z_-]+$/;
+    // cid
+    var cidRegex = /^[0-9]+$/;
+    var tableNameRegex = /^[\s0-9a-zA-z_-]+$/;
 
-        $scope.reloadPage = function(url){
-            setTimeout(function(){
-                location.reload();
-            }, 500);
-        };
+    $scope.reloadPage = function(url){
+        setTimeout(function(){
+            location.reload();
+        }, 500);
+    };
 
-        // Validation
-        if (cid == undefined){
-            notFoundService.show("Please provide a catalogue id");
+    // Validation
+    if (cid == undefined){
+        notFoundService.show("Please provide a catalogue id");
 
-        } else if (!cidRegex.test(cid)){
+    } else if (!cidRegex.test(cid)){
 
-            notFoundService.show("'" + cid + "' is an invalid catalogue id. Please try again!");
+        notFoundService.show("'" + cid + "' is an invalid catalogue id. Please try again!");
 
-        } else if (tableName == undefined){
+    } else if (tableName == undefined){
 
-            notFoundService.show("Please provide a table name");
+        notFoundService.show("Please provide a table name");
 
-        } else if (!tableNameRegex.test(tableName)){
+    } else if (!tableNameRegex.test(tableName)){
 
-            notFoundService.show("'" + tableName + "' is an invalid table name. Please try again!");
+        notFoundService.show("'" + tableName + "' is an invalid table name. Please try again!");
 
-        } else if (Object.keys(keys).length === 0){
+    } else if (Object.keys(keys).length === 0){
 
-            notFoundService.show("Please provide keys to search for an entity");
+        notFoundService.show("Please provide keys to search for an entity");
 
-        // Data is valid!
-        } else{
+    // Data is valid!
+    } else{
 
-            schemaService.initSchemas(cid, function(data) {
-                // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
-                ermrestService.getEntity(schemaName, tableName, keys, function(data){
-                    if (data['previews']) {
-                        var origin = window.location.protocol + "//" + window.location.hostname; // TBD: portno?
-                        for (var i = 0, len = data['previews'].length; i < len; i++) {
-                            preview = data['previews'][i];
-                            preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?url=' + preview.preview;
-                            preview.enlargeUrl = origin + '/_viewer/xtk/view.html?url=' + preview.preview;
-                            $sce.trustAsResourceUrl(preview.embedUrl);
-                        }
+        schemaService.initSchemas(cid, function(data) {
+            // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
+            ermrestService.getEntity(schemaName, tableName, keys, function(data){
+                if (data['previews']) {
+                    var origin = window.location.protocol + "//" + window.location.hostname; // TBD: portno?
+                    for (var i = 0, len = data['previews'].length; i < len; i++) {
+                        preview = data['previews'][i];
+                        preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?url=' + preview.preview;
+                        preview.enlargeUrl = origin + '/_viewer/xtk/view.html?url=' + preview.preview;
+                        $sce.trustAsResourceUrl(preview.embedUrl);
                     }
-                    $scope.entity = data;
-                });
+                }
+                $scope.entity = data;
             });
+        });
 
-        }
+    }
 
-        $scope.permanentLink = function(){
-            return window.location.href;
-        };
+    $scope.permanentLink = function(){
+        return window.location.href;
+    };
 
-        // When the accordion for foreign table is clicked
-        $scope.foreignTableToggle = function(index){
-            ermrestService.loadReferencesForEntity($scope.entity, index);
-        };
+    // When the accordion for foreign table is clicked
+    $scope.foreignTableToggle = function(index){
+        ermrestService.loadReferencesForEntity($scope.entity, index);
+    };
 
-        $scope.isExternalUrl = function(url) {
-            return (url.indexOf(window.location.origin) === -1);
-        }
+    $scope.isExternalUrl = function(url) {
+        return (url.indexOf(window.location.origin) === -1);
+    };
 
-    }, function() {
-        // session not found
-        var url = window.location.origin + '/ermrest/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href);
-        ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
-    });
 
 }]);
 
