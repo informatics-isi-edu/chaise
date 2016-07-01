@@ -19,7 +19,7 @@
         vm.setVisibility = setVisibility;
 
         vm.createMode = false;
-        vm.newAnnotation = {config:{color: vm.defaultColor}};
+        vm.newAnnotation = {config:{color: vm.defaultColor, visible: true}};
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;

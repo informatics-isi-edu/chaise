@@ -306,10 +306,14 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="input-group searchbar">
-                                    <input ng-model="annotations.query" class="form-control" type="search" placeholder="Search annotations...">
+                                    <input ng-model="annotations.query" ng-keyup="$event.keyCode == 13 && annotations.submitSearch();" class="form-control" type="search" placeholder="Search annotations...">
                                     <span class="input-group-btn">
-                                        <button ng-click="annotations.submitSearch();" class="btn btn-primary" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                                        <button ng-click="annotations.resetSearch();" class="btn btn-primary" type="button"><span class="glyphicon glyphicon-refresh"></span></button>
+                                        <button ng-click="annotations.submitSearch();" class="btn btn-success" type="button" role="button">
+                                            &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
+                                        </button>
+                                        <button ng-click="annotations.resetSearch();" class="btn btn-success" type="button" role="button">
+                                            Reset
+                                        </button>
                                     </span>
                                 </div>
                                 <div class="checkbox row">
