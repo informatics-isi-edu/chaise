@@ -1,0 +1,78 @@
+{
+    "setup": {
+        "catalog": {
+        },
+        "schema": {
+            "name": "product",
+            "createNew": true, 
+            "path": "test/e2e/data_setup/schema/product.json" 
+        },
+        "tables": {
+        	"createNew": true
+        },
+        "entities": {
+        	"createNew": true,
+            "path": "test/e2e/data_setup/data/product"
+        }
+    },
+    "cleanup" : true,
+    "tests" : {
+    	"Filters on top of the records," : {
+            "attributes" : [{
+    			"clearAllFilters": false,
+    			"clearPreviousFilters": false,
+    			"text": "Category",
+    			"filters": [{
+    				"content": ["Hotel"],
+    				"entityCount" : 2
+    			}, {
+    				"content": ["Hotel", "Motel"],
+    				"entityCount" : 3
+    			},	{
+    				"content": ["Motel", "Resort"],
+    				"entityCount" : 2
+    			},{
+    				"content": ["Hotel", "Motel", "Resort"],
+    				"entityCount" : 4
+    			}],
+    			"totalContentCount": 3,
+    			"totalEntityCount": 4
+    		}, {
+    			"clearAllFilters": false,
+    			"clearPreviousFilters": false,
+    			"text": "Luxurious",
+    			"filters": [{
+    				"content" : ["true"],
+    				"entityCount": 3
+    			}, {
+    				"content" : ["false"],
+    				"entityCount": 1
+    			}, {
+    				"content" : ["false", "true"],
+    				"entityCount": 4
+    			}],
+    			"totalContentCount": 2,
+    			"totalEntityCount": 4
+    		}, {
+    			"clearAllFilters": false,
+    			"clearPreviousFilters": [0],
+    			"text": "Name of Accommodation",
+    			"filters": [{
+    				"content": ["NH Munich Resort"],
+    				"entityCount" : 1
+    			}, {
+    				"content": ["Sherathon Hotel", "Super 8 North Hollywood Motel"],
+    				"entityCount" : 2
+    			},	{
+    				"content": ["Sherathon Hotel"],
+    				"entityCount" : 1
+    			}, {
+    				"content": ["Radisson Hotel", "Super 8 North Hollywood Motel", "NH Munich Resort"],
+    				"entityCount" : 3
+    			}],
+    			"totalContentCount": 4,
+    			"totalEntityCount": 3
+    		}]
+    	}
+    }
+}
