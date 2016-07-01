@@ -12,12 +12,12 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 	// Fetches the schemas for the catalogId
 	// and sets the defaultSchema and defaultTable in browser parameters
 	dataSetupCode.introspect({
-		url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/'),
+		url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest'),
 		catalogId: catalogId || 1,
 		authCookie: testConfiguration.authCookie
 	}).then(function(schema, catalog) {
-        if (testConfiguration.dataSetup && testConfiguration.dataSetup.schema) {
-            schema = schema.catalog.schemas[testConfiguration.dataSetup.schema.name] || schema;
+        if (testConfiguration.setup && testConfiguration.setup.schema) {
+            schema = schema.catalog.schemas[testConfiguration.setup.schema.name] || schema;
         }
         catalog = schema.catalog;
 		defaultSchema = schema;
@@ -47,13 +47,13 @@ exports.setup = function(testConfiguration) {
 
     var defer = Q.defer();
     
-	testConfiguration.dataSetup.url = process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/');        
-    testConfiguration.dataSetup.authCookie = testConfiguration.authCookie;
+	testConfiguration.setup.url = process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest');        
+    testConfiguration.setup.authCookie = testConfiguration.authCookie;
 
 	var setupDone = false, successful = false, catalogId, schema;
 
     // Call setup to import data for tests as specified in the configuration    
-    dataSetupCode.setup(testConfiguration.dataSetup).then(function(data) {
+    dataSetupCode.setup(testConfiguration.setup).then(function(data) {
 		
 		// Set catalogId in browser params for future reference to delete it if required
         catalogId = data.catalogId;
@@ -64,14 +64,14 @@ exports.setup = function(testConfiguration) {
         // Set successful to determine data import was done successfully
         successful = true;
 
-        // Set setupDone to true to specify that the dataSetup code has completed its execution
+        // Set setupDone to true to specify that the setup code has completed its execution
         setupDone = true;
     }, function(err) {
 
         // Set catalogId in browser params for future reference to delete if it required
         catalogId = err.catalogId || null; 
 
-        // Set setupDone to true to specify that the dataSetup code has completed its execution
+        // Set setupDone to true to specify that the setup code has completed its execution
         setupDone = true;
     });
 
@@ -105,12 +105,12 @@ exports.setup = function(testConfiguration) {
 exports.tear = function(testConfiguration, catalogId, defer) {
 	var cleanupDone = false, defer = Q.defer();
 
-	testConfiguration.dataSetup.url = process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/');        
+	testConfiguration.setup.url = process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest');        
 
     dataSetupCode.tear({
-      url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/'),
+      url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest'),
       catalogId: catalogId,
-      dataSetup: testConfiguration.dataSetup
+      setup: testConfiguration.setup
     }).done(function() {
       cleanupDone = true;
     });

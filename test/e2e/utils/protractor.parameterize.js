@@ -20,10 +20,10 @@ exports.parameterize = function(config, configParams) {
 
     browser.params.configuration = testConfiguration, defer = Q.defer();
 
-    if (testConfiguration.dataSetup) {
+    if (testConfiguration.setup) {
 
-      testConfiguration.dataSetup.url = process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest/');
-      testConfiguration.dataSetup.authCookie = testConfiguration.authCookie;
+      testConfiguration.setup.url = process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest');
+      testConfiguration.setup.authCookie = testConfiguration.authCookie;
 
       pImport.setup(testConfiguration).then(function(data) {
 
@@ -89,9 +89,9 @@ exports.parameterize = function(config, configParams) {
 
   // This method will be called after executing the test suite
   config.afterLaunch = function(exitCode) {
-    // If cleanup is true and dataSetup was also true in the configuration then
+    // If cleanup is true and setup was also true in the configuration then
     // call cleanup to remove the created schema/catalog/tables if catalogId is not null
-    if (testConfiguration.cleanup && testConfiguration.dataSetup && catalogId != null) return pImport.tear(testConfiguration, catalogId);
+    if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) return pImport.tear(testConfiguration, catalogId);
   };
 
   // If an uncaught exception is caught then simply call cleanup 
@@ -103,7 +103,7 @@ exports.parameterize = function(config, configParams) {
       process.exit(1)
     };
 
-    if (testConfiguration.cleanup && testConfiguration.dataSetup && catalogId != null)  pImport.tear(testConfiguration, catalogId).then(cb, cb);
+    if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null)  pImport.tear(testConfiguration, catalogId).then(cb, cb);
     else cb();
     
   });

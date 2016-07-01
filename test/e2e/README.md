@@ -31,7 +31,7 @@ There're several ways to achieve above target, out of which the `onPrepare` and 
 **Test Configuration File**
 ```javascript
 {
-    "dataSetup": {
+    "setup": {
         "catalog": {
             //"id": 1  //existing id of a catalog
         },
