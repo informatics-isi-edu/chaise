@@ -98,6 +98,7 @@
             if (!vm.filter) {
                 if (typeIsVisible) {
                     annotation.config.visible = true;
+                    AnnotationsService.syncVisibility();
                 }
                 return true;
             }
@@ -111,6 +112,7 @@
                 if (props[i] && props[i].toLowerCase().indexOf(vm.filter) > -1) {
                     if (typeIsVisible) {
                         annotation.config.visible = true;
+                        AnnotationsService.syncVisibility();
                     }
                     return true;
                 }
@@ -128,6 +130,7 @@
                         if (commentProps[p] && commentProps[p].toLowerCase().indexOf(vm.filter) > -1) {
                             if (typeIsVisible) {
                                 annotation.config.visible = true;
+                                AnnotationsService.syncVisibility();
                             }
                             return true;
                         }
@@ -135,6 +138,7 @@
                 }
             }
             annotation.config.visible = false;
+            AnnotationsService.syncVisibility();
             return false;
         }
 
@@ -287,7 +291,6 @@
 
         function submitSearch() {
             vm.filter = vm.query;
-            AnnotationsService.syncVisibility();
         }
 
         function resetSearch() {

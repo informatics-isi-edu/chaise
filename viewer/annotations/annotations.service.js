@@ -91,6 +91,10 @@
 
                 iframe.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
             }, function error(response) {
+                AlertsService.addAlert({
+                    type: 'error',
+                    message: response
+                });
                 console.log(response);
             });
         }
