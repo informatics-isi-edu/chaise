@@ -3,7 +3,7 @@
 
     angular.module('chaise.utils', [])
 
-    .factory('UriUtils', ['$injector', '$window', function($injector, $window) {
+    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', function($injector, $window, ParsedFilter) {
 
         /**
         * @function
@@ -19,7 +19,7 @@
 
         /**
          * @function
-         * @param {location} should be $window.location object
+         * @param {Object} location should be $window.location object
          * @param {context} context object; can be null
          * Parses the URL to create the context object
          */
@@ -66,37 +66,57 @@
                 }
             }
 
-            // If there are filters appended to the URL, add them to context.js
+            // parse filter
+            // convert filter string to ParsedFilter
             if (parts[2]) {
-                context.filters = [];
-                var filters = parts[2].split('&');
-                for (var i = 0, len = filters.length; i < len; i++) {
-                    //check for '=' or '::' to decide what split to use
-                    if (filters[i].indexOf("=") !== -1) {
-                        var filter = filters[i].split('=');
-                        if (filter[0] && filter[1]) {
-                            context.filters.push({
-                                name: decodeURIComponent(filter[0]),
-                                op: "=",
-                                value: decodeURIComponent(filter[1])
-                            });
-                        }
-                    } else {
-                        var filter = filters[i].split("::");
-                        if (filter.length != 3) {
-                            // Currently, this only supports binary predicates, skips others
-                            console.log("invalid filter string: " + filter);
-                            continue;
-                        } else {
-                            context.filters.push({
-                                name: decodeURIComponent(filter[0]),
-                                op: "::"+filter[1]+"::",
-                                value: decodeURIComponent(filter[2])
-                            });
+                // split by ';' and '&'
+                var regExp = new RegExp('(;|&|[^;&]+)', 'g');
+                var items = parts[2].match(regExp);
+
+                // if a single filter
+                if (items.length === 1) {
+                    context.filter = processSingleFilterString(items[0]);
+
+                } else {
+                    var filters = [];
+                    var type = null;
+                    for (var i = 0; i < items.length; i++) {
+                        // process anything that's inside () first
+                        if (items[i].startsWith("(")) {
+                            items[i] = items[i].replace("(", "");
+                            // collect all filters until reaches ")"
+                            var subfilters = [];
+                            while(true) {
+                                if (items[i].endsWith(")")) {
+                                    items[i] = items[i].replace(")", "");
+                                    subfilters.push(items[i]);
+                                    // get out of while loop
+                                    break;
+                                } else {
+                                    subfilters.push(items[i]);
+                                    i++;
+                                }
+                            }
+
+                            filters.push(processMultiFilterString(subfilters));
+
+                        } else if (type === null && items[i] === "&") {
+                            // first level filter type
+                            type = "Conjunction"
+                        } else if (type === null && items[i] === ";") {
+                            // first level filter type
+                            type = "Disjunction";
+                        } else if (items[i] !== "&" && items[i] !== ";") {
+                            // single filter on the first level
+                            var binaryFilter = processSingleFilterString(items[i]);
+                            filters.push(binaryFilter);
                         }
                     }
+
+                    context.filter = {type: type, filters: filters};
                 }
             }
+
             return context;
         }
 
@@ -107,11 +127,117 @@
             }
         }
 
+
+        /**
+         *
+         * @param filterString
+         * @returns {*}
+         * @desc converts a filter string to ParsedFilter
+         */
+        function processSingleFilterString(filterString) {
+            //check for '=' or '::' to decide what split to use
+            if (filterString.indexOf("=") !== -1) {
+                var f = filterString.split('=');
+                if (f[0] && f[1]) {
+                    var filter = new ParsedFilter("BinaryPredicate");
+                    filter.setBinaryPredicate(decodeURIComponent(f[0]), "=", decodeURIComponent(f[1]));
+                    return filter;
+                } else {
+                    // TODO throw invalid filter error
+                }
+            } else {
+                var f = filterString.split("::");
+                if (f.length === 3) {
+                    var filter = new ParsedFilter("BinaryPredicate");
+                    filter.setBinaryPredicate(decodeURIComponent(f[0]), "::"+f[1]+"::", decodeURIComponent(f[2]));
+                    return filter;
+                } else {
+                    // TODO throw invalid filter error
+                }
+            }
+        }
+
+        /**
+         *
+         * @param {[String]} filterStrings array representation of conjunction and disjunction of filters
+         *     without parenthesis. i.e., ['id=123', ';', 'id::gt::234', ';', 'id::le::345']
+         * @return {ParsedFilter} 
+         *
+         */
+        function processMultiFilterString(filterStrings) {
+            var filters = [];
+            var type = null;
+            for (var i = 0; i < filterStrings.length; i++) {
+                if (type === null && filterStrings[i] === "&") {
+                    // first level filter type
+                    type = "Conjunction"
+                } else if (type === null && filterStrings[i] === ";") {
+                    // first level filter type
+                    type = "Disjunction";
+                } else if (filterStrings[i] !== "&" && filterStrings[i] !== ";") {
+                    // single filter on the first level
+                    var binaryFilter = processSingleFilterString(filterStrings[i]);
+                    filters.push(binaryFilter);
+                }
+            }
+
+            var filter = new ParsedFilter(type);
+            filter.setFilters(filters);
+            return filter;
+            //return {type: type, filters: filters};
+        }
+
         return {
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin
         }
+    }])
+
+    /**
+     *
+     * A structure to store parsed filter
+     *
+     * { type: BinaryPredicate,
+     *   column: col_name,
+     *   operator: '=' or '::opr::'
+     *   value: value
+     * }
+     *
+     * or
+     *
+     * { type: Conjunction or Disjunction
+     *   filters: [array of BinaryPredicate]
+     * }
+     *
+     *
+     */
+    .factory("parsedFilter", [function() {
+        function ParsedFilter (type) {
+            this.type = type;
+        }
+
+        /**
+         *
+         * @param filters array of binary predicate
+         */
+        ParsedFilter.prototype.setFilters = function(filters) {
+            this.filters = filters;
+        };
+
+        /**
+         *
+         * @param colname
+         * @param operator '=', '::gt::', '::lt::', etc.
+         * @param value
+         */
+        ParsedFilter.prototype.setBinaryPredicate = function(colname, operator, value) {
+            this.column = colname;
+            this.operator = operator;
+            this.value = value;
+        };
+
+        return ParsedFilter;
     }])
 
     // if a view value is empty string (''), change it to null before submitting to the database

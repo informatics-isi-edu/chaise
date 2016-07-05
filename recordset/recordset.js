@@ -25,7 +25,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     catalogID: '',  // '1'
     schemaName: '', // 'isa'
     tableName: '',  // 'assay'
-    filters: [],
+    filter: {},     //
     sort: null,     // 'column::desc::' ::desc:: is option, ,only allow 1 column
     server: null
 })
@@ -328,28 +328,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
                 recordsetModel.columns.push(col);
             }
 
-            // build up filters
-            var filter = null;
-            var len = context.filters.length;
-            if (len == 1) {
-                filter = new ERMrest.BinaryPredicate(
-                    table.columns.get(context.filters[0].name),
-                    context.filters[0].op,
-                    context.filters[0].value);
-            }
-            else if (len > 1) {
-                var filters = [];
-                for (var i = 0; i < len; i++) {
-                    filters.push(
-                        new ERMrest.BinaryPredicate(
-                            table.columns.get(context.filters[i].name),
-                            context.filters[i].op,
-                            context.filters[i].value)
-                    );
-                }
-                filter = new ERMrest.Conjunction(filters);
-            }
-            recordsetModel.filter = filter;
+            recordsetModel.filter = parsedFilterToERMrestFilter(context.filter, table);
 
             // Find shortest Key, used for paging and linking
             var keys = table.keys.all().sort( function(a, b) {
@@ -387,11 +366,11 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
             }
 
             // first get row count
-            table.entity.count(filter).then(function (count) {
+            table.entity.count(recordsetModel.filter).then(function (count) {
                 recordsetModel.count = count;
 
                 // get rowset from table
-                table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
+                table.entity.get(recordsetModel.filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
                     console.log(rowset);
                     recordsetModel.rowset = rowset;
 
@@ -452,6 +431,30 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         // when address bar changes by user
         if (window.location.href !== $rootScope.location) {
             location.reload();
+        }
+    };
+
+    function parsedFilterToERMrestFilter(filter, table) {
+        if (filter.type === "BinaryPredicate") {
+            return new ERMrest.BinaryPredicate(
+                table.columns.get(filter.column),
+                filter.operator,
+                filter.value
+            );
+        } else {
+            // convert nested filter structure to Conjunction or Disjunction filter
+            var filters = [];
+            for (var i = 0; i < filter.filters.length; i++) {
+                var f = filter.filters[i];
+                var f1 = parsedFilterToERMrestFilter(f, table);
+                filters.push(f1);
+            }
+
+            if (filter.type === "Conjunction") {
+                return new ERMrest.Conjunction(filters);
+            } else {
+                return new ERMrest.Disjunction(filters);
+            }
         }
     }
 
