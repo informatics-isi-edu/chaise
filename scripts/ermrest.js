@@ -2195,7 +2195,7 @@ function getQueryPredicate(options, table) {
 		ret = 'A:=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(options['table']);
 	}
 
-	if (table != null) {
+	if (table != null && options['table'] != table) {
 		ret += '/$A/' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table);
 	}
 

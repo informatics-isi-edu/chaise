@@ -202,6 +202,8 @@
                     case 'date':
                         displayType = 'date';
                         break;
+                    case 'float4':
+                    case 'float8':
                     case 'numeric':
                         displayType = 'number';
                         break;
