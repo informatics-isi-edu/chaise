@@ -433,7 +433,7 @@
                                         <!-- Annotation Author, Date & Comment Icon -->
                                         <div class="row">
                                             <div class="col-md-8">
-                                                <small>{{annotations.authorName(annotation.author)}} &mdash; {{annotation.created | date:'MMM d, y'}}</small>
+                                                <small class="text-muted">{{annotations.authorName(annotation.author)}} &mdash; {{annotation.created | date:'MMM d, y'}}</small>
                                             </div>
                                             <div ng-if="annotation.type != 'section'" class="col-md-4">
                                                 <small class="pull-right">
