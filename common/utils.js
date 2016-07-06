@@ -106,6 +106,12 @@
                         } else if (type === null && items[i] === ";") {
                             // first level filter type
                             type = "Disjunction";
+                        } else if (type === "Conjunction" && items[i] === ";") {
+                            // using combination of ! and & without ()
+                            throw new Error("Invalid filter " + parts[2]);
+                        } else if (type === "Disjunction" && items[i] === "&") {
+                            // using combination of ! and & without ()
+                            throw new Error("Invalid filter " + parts[2]);
                         } else if (items[i] !== "&" && items[i] !== ";") {
                             // single filter on the first level
                             var binaryFilter = processSingleFilterString(items[i]);
@@ -143,7 +149,8 @@
                     filter.setBinaryPredicate(decodeURIComponent(f[0]), "=", decodeURIComponent(f[1]));
                     return filter;
                 } else {
-                    // TODO throw invalid filter error
+                    // invalid filter
+                    throw new Error("Invalid filter " + filterString);
                 }
             } else {
                 var f = filterString.split("::");
@@ -152,7 +159,8 @@
                     filter.setBinaryPredicate(decodeURIComponent(f[0]), "::"+f[1]+"::", decodeURIComponent(f[2]));
                     return filter;
                 } else {
-                    // TODO throw invalid filter error
+                    // invalid filter error
+                    throw new Error("Invalid filter " + filterString);
                 }
             }
         }
@@ -174,6 +182,12 @@
                 } else if (type === null && filterStrings[i] === ";") {
                     // first level filter type
                     type = "Disjunction";
+                } else if (type === "Conjunction" && filterStrings[i] === ";") {
+                    // TODO throw invalid filter error (using combination of ! and &)
+                    throw new Error("Invalid filter " + filterStrings);
+                } else if (type === "Disjunction" && filterStrings[i] === "&") {
+                    // TODO throw invalid filter error (using combination of ! and &)
+                    throw new Error("Invalid filter " + filterStrings);
                 } else if (filterStrings[i] !== "&" && filterStrings[i] !== ";") {
                     // single filter on the first level
                     var binaryFilter = processSingleFilterString(filterStrings[i]);
@@ -207,7 +221,7 @@
      * or
      *
      * { type: Conjunction or Disjunction
-     *   filters: [array of BinaryPredicate]
+     *   filters: [array of ParsedFilter]
      * }
      *
      *

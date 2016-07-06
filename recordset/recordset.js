@@ -30,24 +30,6 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     server: null
 })
 
-
-// Register configuration work to be performed on module loading.
-.config(['context', 'UriUtilsProvider', function(context, UriUtilsProvider) {
-    // Note that we do not like using angular's '$location' service because
-    // it encodes and/or decodes the URL in ways that are incompatible with
-    // our applications. We need control of the encoding of the URLs.
-    var utils = UriUtilsProvider.$get();
-
-    // parse the URL
-    utils.setOrigin();
-    utils.parseURLFragment(window.location, context);
-
-    context.chaiseURL = window.location.href.replace(window.location.hash, '');
-    context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
-
-    console.log("Context", context);
-}])
-
 // Register the 'recordsetModel' object, which can be accessed by other
 // services, but cannot be access by providers (and config, apparently).
 .value('recordsetModel', {
@@ -301,12 +283,25 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 }])
 
 // Register work to be performed after loading all modules
-.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session) {
+.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', 'UriUtils', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session, UriUtils) {
 
     $rootScope.location = window.location.href;
     pageInfo.loading = true;
     recordsetModel.tableName = context.tableName;
     $rootScope.errorMessage='';
+
+    try {
+
+        // parse the URL
+        UriUtils.parseURLFragment(window.location, context);
+
+        context.chaiseURL = window.location.href.replace(window.location.hash, '');
+        context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
+
+        console.log("Context", context);
+    } catch (error) {
+        $rootScope.errorMessage = error.message;
+    }
 
     // Get rowset data from ermrest
     var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
