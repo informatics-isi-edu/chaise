@@ -40,12 +40,9 @@ HTML=search/index.html \
 	 recordedit/index.html
 
 # ERMrestjs Deps
-ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
-			   ../../ermrestjs/js/ermrest.js \
-			   ../../ermrestjs/js/filters.js \
-			   ../../ermrestjs/js/ngermrest.js \
-			   ../../ermrestjs/js/utilities.js \
-			   ../../ermrestjs/js/errors.js
+ERMRESTJS_DIR=../../ermrestjs
+ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js \
+		$(ERMRESTJS_DIR)/ngermrest.js
 
 # CSS source
 CSS=styles
