@@ -201,10 +201,35 @@
             //return {type: type, filters: filters};
         }
 
+        function parsedFilterToERMrestFilter(filter, table) {
+            if (filter.type === "BinaryPredicate") {
+                return new ERMrest.BinaryPredicate(
+                    table.columns.get(filter.column),
+                    filter.operator,
+                    filter.value
+                );
+            } else {
+                // convert nested filter structure to Conjunction or Disjunction filter
+                var filters = [];
+                for (var i = 0; i < filter.filters.length; i++) {
+                    var f = filter.filters[i];
+                    var f1 = parsedFilterToERMrestFilter(f, table);
+                    filters.push(f1);
+                }
+
+                if (filter.type === "Conjunction") {
+                    return new ERMrest.Conjunction(filters);
+                } else {
+                    return new ERMrest.Disjunction(filters);
+                }
+            }
+        }
+
         return {
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             parseURLFragment: parseURLFragment,
-            setOrigin: setOrigin
+            setOrigin: setOrigin,
+            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter
         }
     }])
 
