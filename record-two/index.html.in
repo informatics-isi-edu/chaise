@@ -20,5 +20,6 @@
 </head>
 <body ng-controller="RecordController as ctrl">
     <navbar></navbar>
-    <record-display record="ctrl.record"></record-display>
+    <!-- defined on $rootScope in run function -->
+    <record-display record="record"></record-display>
 </body>

@@ -11,7 +11,7 @@
                 record: '='
             },
             templateUrl: '../common/templates/record.html',
-            link: function(scope, el, attrs) {
+            link: function(scope) {
                 scope.$watch('record', function(newVal, oldVal) {
                     if(newVal) {
                         scope.record = newVal;

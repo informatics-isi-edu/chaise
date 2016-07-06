@@ -25,7 +25,7 @@
         console.log("Context", context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'recordModel', 'ErrorService', '$log', function runApp(context, ermrestServerFactory, recordModel, ErrorService, $log) {
+    .run(['context', 'ermrestServerFactory', 'recordModel', 'ErrorService', '$log', '$rootScope', function runApp(context, ermrestServerFactory, recordModel, ErrorService, $log, $rootScope) {
         try {
             var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
             server.catalogs.get(context.catalogID).then(function success(catalog) {
@@ -39,7 +39,8 @@
 
                     recordPath.filter(recordFilter).entity.get().then(function success(record) {
                         recordModel.record = record[0];
-                        console.log(record[0]);
+                        // So the data can be passed through the directive and watched for changes
+                        $rootScope.record = record[0];
                     }, function error(response) {
 
                     });
