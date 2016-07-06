@@ -18,6 +18,7 @@
         </script>
     <![endif]-->
 </head>
-<body>
-    Hello World!
+<body ng-controller="RecordController as ctrl">
+    <navbar></navbar>
+    <record-display record="ctrl.record"></record-display>
 </body>

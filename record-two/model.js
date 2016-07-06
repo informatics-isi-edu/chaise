@@ -6,7 +6,6 @@
 
     .value('recordModel', {
         table: {},
-        rows: [{}], // rows of data in the form, not the table from ERMrest
-        domainValues: {}
+        record: {}
     });
 })();
