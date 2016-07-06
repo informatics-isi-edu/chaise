@@ -81,7 +81,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
     // login logout should be factored out into a common module
     $scope.login = function() {
-        Session.login(window.location.href);
+        Session.login($window.location.href);
     };
 
     $scope.logout = function() {
@@ -93,7 +93,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         // update the address bar
         // page does not reload
         location.replace($scope.permalink());
-        $rootScope.location = window.location.href;
+        $rootScope.location = $window.location.href;
 
         pageInfo.previousButtonDisabled = true;
         pageInfo.nextButtonDisabled = true;
@@ -130,7 +130,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
             if (error instanceof ERMrest.UnauthorizedError) {
                 // session has expired, login
-                Session.login(window.location.href);
+                Session.login($window.location.href);
             } else {
 
                 // TODO alert error
@@ -159,7 +159,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     };
 
     $scope.permalink = function() {
-        var url = window.location.href.replace(window.location.hash, ''); // everything before #
+        var url = $window.location.href.replace($window.location.hash, ''); // everything before #
         url = url + "#" + UriUtils.fixedEncodeURIComponent(context.catalogID) + "/" +
             (context.schemaName !== '' ? UriUtils.fixedEncodeURIComponent(context.schemaName) + ":" : "") +
             UriUtils.fixedEncodeURIComponent(context.tableName);
@@ -208,7 +208,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    Session.login(window.location.href);
+                    Session.login($window.location.href);
                 } else {
                     // enable buttons
                     pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
@@ -251,7 +251,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    Session.login(window.location.href);
+                    Session.login($window.location.href);
                 } else {
 
                     //enable buttons
@@ -283,9 +283,9 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 }])
 
 // Register work to be performed after loading all modules
-.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', 'UriUtils', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session, UriUtils) {
+.run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', 'UriUtils', function($window, pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session, UriUtils) {
 
-    $rootScope.location = window.location.href;
+    $rootScope.location = $window.location.href;
     pageInfo.loading = true;
     recordsetModel.tableName = context.tableName;
     $rootScope.errorMessage='';
@@ -293,9 +293,9 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     try {
 
         // parse the URL
-        UriUtils.parseURLFragment(window.location, context);
+        UriUtils.parseURLFragment($window.location, context);
 
-        context.chaiseURL = window.location.href.replace(window.location.hash, '');
+        context.chaiseURL = $window.location.href.replace($window.location.hash, '');
         context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
 
         console.log("Context", context);
@@ -383,7 +383,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                     if (error instanceof ERMrest.UnauthorizedError) {
                         // session has expired, login
-                        Session.login(window.location.href);
+                        Session.login($window.location.href);
                     }
                 });
             }, function (error) {
@@ -393,7 +393,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    Session.login(window.location.href);
+                    Session.login($window.location.href);
                 }
             });
 
@@ -418,13 +418,13 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         } else if (error instanceof ERMrest.ForbiddenError) {
 
         } else if (error instanceof ERMrest.UnauthorizedError) {
-            Session.login(window.location.href);
+            Session.login($window.location.href);
         }
     });
 
-    window.onhashchange = function() {
+    $window.onhashchange = function() {
         // when address bar changes by user
-        if (window.location.href !== $rootScope.location) {
+        if ($window.location.href !== $rootScope.location) {
             location.reload();
         }
     };
