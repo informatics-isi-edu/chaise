@@ -42,8 +42,7 @@ ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
 			   ../../ermrestjs/js/filters.js \
 			   ../../ermrestjs/js/ngermrest.js \
 			   ../../ermrestjs/js/utilities.js \
-			   ../../ermrestjs/errors/networkerrors.js \
-			   ../../ermrestjs/errors/validationerrors.js
+			   ../../ermrestjs/js/errors.js
 
 # CSS source
 CSS=styles
