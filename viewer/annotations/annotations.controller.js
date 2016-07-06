@@ -23,6 +23,7 @@
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
+        vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
 
         var originalAnnotation; // Holds the original contents of annotation in the event that a user cancels an edit
         resetEditedValues();
@@ -301,6 +302,11 @@
                 }
             }
             AnnotationsService.syncVisibility();
+        }
+
+        function getNumVisibleAnnotations() {
+            console.log(vm.annotations.length);
+            // return vm.annotations.length;
         }
     }]);
 })();

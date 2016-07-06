@@ -290,6 +290,7 @@
                 <!-- CONTROLLER: AnnotationsController-->
                 <div ng-show="sidebar.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
                     <div class="col-md-12">
+                        <!-- <a ng-click="annotations.getNumVisibleAnnotations();">Get Visible Annotations</a> -->
                         <div ng-if="annotations.allowCreate();" class="row">
                             <div class="btn-group col-md-12 new-annotation">
                                 <button type="button" role="button" class="btn btn-sm btn-success dropdown-toggle form-control" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -424,9 +425,9 @@
                                         <!-- Annotation Description -->
                                         <div ng-if="annotation.description" class="row">
                                             <div class="col-md-12">
-                                                <span class="h5 annotation-description">
-                                                    {{annotation.description}}<br>
-                                                </span>
+                                                <div class="h5 annotation-description">
+                                                    {{annotation.description}}
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- Annotation Author, Date & Comment Icon -->
