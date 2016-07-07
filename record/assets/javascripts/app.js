@@ -40,7 +40,7 @@ chaiseRecordApp.service('configService', function() {
     if (chaiseConfig['tableThreshold'] != null) {
         this.TABLE_THRESHOLD = chaiseConfig['tableThreshold'];
     }
-    
+
     // dynamic load the custom CSS file defined in chaise-config.js
     if (chaiseConfig['customCSS'] !== undefined) {
     	var fileref = document.createElement("link");
@@ -49,7 +49,7 @@ chaiseRecordApp.service('configService', function() {
     	fileref.setAttribute("href", chaiseConfig['customCSS']);
     	document.getElementsByTagName("head")[0].appendChild(fileref);
     }
-    	
+
 
     // set the navbar-header text
     if (chaiseConfig['navbarBrandText'] !== undefined) {
@@ -66,7 +66,7 @@ chaiseRecordApp.service('configService', function() {
         $($('.navbar-brand', $('#header'))[0]).attr('href', chaiseConfig['navbarBrand']);
     }
 
-	
+
 	if (chaiseConfig['headTitle'] !== undefined) {
 		var title = document.createElement("title");
 		title.innerHTML = chaiseConfig['headTitle'];
@@ -402,7 +402,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                     }).
                     error(function(data, status, headers, config) {
                         console.log("Error querying collections", data);
-                        notFoundService.show("We're sorry, we ran into an internal server error when querying for entity renferences");
+                        notFoundService.show("We're sorry, we ran into an internal server error when querying for entity references");
                         spinnerService.hide();
                     });
 
@@ -1226,7 +1226,7 @@ chaiseRecordApp.controller('HeaderCtrl', ['$rootScope', '$scope', function($root
 }]);
 
 // Detail controller
-chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http', 'spinnerService', 'ermrestService', 'schemaService', 'locationService', 'notFoundService', 'UriUtils', function($rootScope, $scope, $sce, $http, spinnerService, ermrestService, schemaService, locationService, notFoundService, UriUtils){
+chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http', 'spinnerService', 'ermrestService', 'configService', 'schemaService', 'locationService', 'notFoundService', 'UriUtils', function($rootScope, $scope, $sce, $http, spinnerService, ermrestService, configService, schemaService, locationService, notFoundService, UriUtils){
     // C: Catalogue id
     // T: Table name
     // K: Key
@@ -1255,26 +1255,16 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
     // Validation
     if (cid == undefined){
         notFoundService.show("Please provide a catalogue id");
-
     } else if (!cidRegex.test(cid)){
-
         notFoundService.show("'" + cid + "' is an invalid catalogue id. Please try again!");
-
     } else if (tableName == undefined){
-
         notFoundService.show("Please provide a table name");
-
     } else if (!tableNameRegex.test(tableName)){
-
         notFoundService.show("'" + tableName + "' is an invalid table name. Please try again!");
-
     } else if (Object.keys(keys).length === 0){
-
         notFoundService.show("Please provide keys to search for an entity");
-
     // Data is valid!
     } else{
-
         schemaService.initSchemas(cid, function(data) {
             // Call the ermrestService to get entity through catalogue id, tableName, and col=val parameters
             ermrestService.getEntity(schemaName, tableName, keys, function(data){
@@ -1289,9 +1279,70 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                 }
                 $scope.entity = data;
             });
-        });
+            // A record can be edited if:
+            // 1. The table or schema doesn't have an ignore annotation "entry" or "edit" context; AND
+            // 2. The catalog allows write access and the user is part of the
+            // catalog's content_write_users.
+            // 3. chaiseConfig.editRecord == true
+            var ignoreRecord = false, editCatalog = false;
+            var ignoreURI = 'tag:isrd.isi.edu,2016:ignore';
+            var schema = data.schemas[schemaName];
+            var ignoreOnTable = schema.tables[tableName].annotations[ignoreURI];
+            var ignoreOnSchema = schema.annotations[ignoreURI];
+            var ignoreTable = (ignoreOnTable !== undefined && (ignoreOnTable === null || ignoreOnTable === true || ignoreOnTable.indexOf('edit') > -1 || ignoreOnTable.indexOf('entry') > -1));
+            var ignoreSchema = (ignoreOnSchema !== undefined && (ignoreOnSchema === null || ignoreOnSchema === true || ignoreOnSchema.indexOf('edit') > -1 || ignoreOnSchema.indexOf('entry') > -1));
+            if (ignoreTable || ignoreSchema) {
+                ignoreRecord = true;
+            }
 
-    }
+            // Get this catalog's content_write_users
+            $http.get(configService.CR_BASE_URL + cid + '/meta/content_write_user').success(function(data, status, headers, config) {
+                var writeUsers = [];
+                for (var i = 0, len = data.length; i < len; i++) {
+                    if (data[i].v === '*') {
+                    // Wildcard value under 'content_write_user' == anybody can
+                    // write to catalog, so allow editing of record.
+                        editCatalog = true;
+                    } else {
+                        writeUsers.push(data[i].v);
+                    }
+                }
+                if (writeUsers.length > 0) {
+                    // Get current user's session attributes
+                    $http.get(window.location.origin + '/ermrest/authn/session').then(function success(session) {
+                        var attrs = session.data.attributes;
+                        var attrIds = [];
+                        for (var j = 0, len = attrs.length; j < len; j++) {
+                            attrIds.push(attrs[j].id);
+                        }
+                        // Find intersection of user's session attrs and catalog's
+                        // content_write_users. To do this: Create an object, the
+                        // keys of which are the elements of one array. Then check
+                        // if the obj has a key that matches an element of the 2nd
+                        // array. Borrowed from: http://stackoverflow.com/a/1885766/3581097
+                        var obj = {};
+                        for (var k = 0, len = writeUsers.length; k < len; k++) {
+                            obj[writeUsers[k]] = true;
+                        }
+                        for (var l = 0, len = attrIds.length; l < len; l++) {
+                            if (obj[attrIds[l]]) {
+                            // A match has been found, allow redirect.
+                                editCatalog = true;
+                            }
+                        }
+                        $scope.allowEdit = chaiseConfig.editRecord && editCatalog && !ignoreRecord;
+                    }, function error() {
+                        console.log('session not found');
+                    }); // $http.get session
+                }
+            }); // $http.get catalog metadata
+        }); // schemaService.initSchemas
+    } // else branch
+
+    // Redirect user to data entry app to edit the entity
+    $scope.editRecord = function(){
+        window.location.href = '../recordedit/' + window.location.hash;
+    };
 
     $scope.permanentLink = function(){
         return window.location.href;

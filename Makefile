@@ -215,6 +215,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(JS)/vendor/bootstrap.js \
