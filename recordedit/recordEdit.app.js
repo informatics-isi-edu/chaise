@@ -129,9 +129,9 @@
                 if (context.filters) {
                     var path = new ERMrest.DataPath(table);
                     var filters = [];
-                    angular.forEach(context.filters, function(value, key) {
-                        var column = path.context.columns.get(key); // caught by generic exception case
-                        filters.push(new ERMrest.BinaryPredicate(column, ERMrest.OPERATOR.EQUAL, value));
+                    angular.forEach(context.filters, function(filter) {
+                        var column = path.context.columns.get(filter.name); // caught by generic exception case
+                        filters.push(new ERMrest.BinaryPredicate(column, filter.op, filter.value));
                     });
                     // TODO: Store filters in URI form in model to use later on form submission
                     var filterString = new ERMrest.Conjunction(filters);
