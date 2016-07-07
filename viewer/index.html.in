@@ -290,7 +290,6 @@
                 <!-- CONTROLLER: AnnotationsController-->
                 <div ng-show="sidebar.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
                     <div class="col-md-12">
-                        {{annotations.getNumVisibleAnnotations();}}
                         <div ng-if="annotations.allowCreate();" class="row">
                             <div class="btn-group col-md-12 new-annotation">
                                 <button type="button" role="button" class="btn btn-sm btn-success dropdown-toggle form-control" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -306,17 +305,17 @@
                         <br>
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="input-group searchbar">
-                                    <input ng-model="annotations.query" ng-keyup="$event.keyCode == 13 && annotations.submitSearch();" class="form-control" type="search" placeholder="Search annotations...">
+                                <form class="input-group searchbar">
+                                    <input ng-model="annotations.query" ng-model-options="{updateOn: 'submit'}" class="form-control" type="search" placeholder="Search annotations...">
                                     <span class="input-group-btn">
-                                        <button ng-click="annotations.submitSearch();" class="btn btn-success" type="button" role="button">
+                                        <button class="btn btn-success" type="submit" role="button">
                                             &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                                         </button>
                                         <button ng-click="annotations.resetSearch();" class="btn btn-success" type="button" role="button">
                                             Reset
                                         </button>
                                     </span>
-                                </div>
+                                </form>
                                 <div class="checkbox row">
                                     <div class="col-md-2">
                                         <strong>Show:&nbsp;&nbsp;</strong>
@@ -393,6 +392,7 @@
                             </div>
                         </form>
                         <!-- Annotations List -->
+                        <div class="h5 text-muted text-center">{{annotations.numVisibleAnnotations}} annotation<span ng-show="annotations.numVisibleAnnotations > 1">s</span> found.</div>
                         <div id="annotations-list">
                             <div ng-repeat="annotation in annotations.annotations | orderBy:[annotations.sortSectionsFirst, 'anatomy', 'id'] | filter:annotations.filterAnnotations track by $index"
                             ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table + '-' + annotation.id), section: annotation.type == 'section'}"

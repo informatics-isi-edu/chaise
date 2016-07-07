@@ -12,7 +12,6 @@
         vm.annotationTypes = ['rectangle', 'arrow']; // 'section' excluded b/c once you set an annotation as a section, it can't be changed to other types
         vm.filterByType = {section: true, rectangle: true, arrow: true}; // show all annotation types by default
 
-        vm.submitSearch = submitSearch;
         vm.resetSearch = resetSearch;
         vm.filterAnnotations = filterAnnotations;
         vm.sortSectionsFirst = sortSectionsFirst;
@@ -89,21 +88,19 @@
 
         function filterAnnotations(annotation) {
             var typeIsVisible = vm.filterByType[annotation.type]; // boolean that answers "are annotations of a certain type visible?"
-            if (!vm.filter) {
+            if (!vm.query) {
                 if (typeIsVisible) {
                     annotation.config.visible = true;
                     AnnotationsService.syncVisibility();
                 }
                 return true;
             }
-
-            vm.filter = vm.filter.toLowerCase();
-
+            vm.query = vm.query.toLowerCase();
             var author = annotation.author;
             var props = [annotation.anatomy, annotation.description, author.display_name, author.full_name, author.email, annotation.created];
             var numProps = props.length;
             for (var i = 0; i < numProps; i++) {
-                if (props[i] && props[i].toLowerCase().indexOf(vm.filter) > -1) {
+                if (props[i] && props[i].toLowerCase().indexOf(vm.query) > -1) {
                     if (typeIsVisible) {
                         annotation.config.visible = true;
                         AnnotationsService.syncVisibility();
@@ -111,7 +108,6 @@
                     return true;
                 }
             }
-
             var commentsArr = comments[annotation.id];
             if (commentsArr) {
                 var numComments = commentsArr.length;
@@ -121,7 +117,7 @@
                     var commentProps = [comment.comment, comment.created, commentAuthor.display_name, commentAuthor.full_name, commentAuthor.email];
                     var numCommentProps = commentProps.length;
                     for (var p = 0; p < numCommentProps; p++) {
-                        if (commentProps[p] && commentProps[p].toLowerCase().indexOf(vm.filter) > -1) {
+                        if (commentProps[p] && commentProps[p].toLowerCase().indexOf(vm.query) > -1) {
                             if (typeIsVisible) {
                                 annotation.config.visible = true;
                                 AnnotationsService.syncVisibility();
@@ -283,13 +279,8 @@
             }
         }
 
-        function submitSearch() {
-            vm.filter = vm.query;
-        }
-
         function resetSearch() {
             vm.query = '';
-            vm.filter = '';
         }
 
         function setVisibility(annotationType) {
@@ -311,7 +302,11 @@
                     counter++;
                 }
             }
-            return counter;
+            return vm.numVisibleAnnotations = counter;
         }
+
+        $scope.$watch(function() {
+            return vm.annotations;
+        }, getNumVisibleAnnotations, true);
     }]);
 })();
