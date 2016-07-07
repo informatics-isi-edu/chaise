@@ -3,10 +3,12 @@
 * The navbar directive can be used as an element tag (<navbar></navbar>)
 * or an attribute (<div navbar></div>). It accepts the following attributes:
 * @param {String} brand-image [#] - A URL to an image (e.g. consortium logo).
-* If unspecified, no image is displayed
+* If unspecified, navbarBrandImage in chaise-config.js will be displayed otherwise no image is displayed.
 * @param {String} brand-text ["Chaise"] - A string of text (e.g. consortium name).
-* Default text is 'Chaise'.
-* @example <navbar brand-image="/path/to/img.png" brand-text="FaceBase"></navbar>
+* If unspecified, headTitle in chaise-config.js will be used. Default text is 'Chaise'.
+* @param {String} brand-url ["/"] - A URL to homepage (e.g. '/').
+* If unspecified, navbarBrand in chaise-config.js will be used. Default url is '/'. 
+* @example <navbar brand-image="/path/to/img.png" brand-text="FaceBase" brand-url='/home/'></navbar>
 */
 
 (function() {
@@ -17,10 +19,15 @@
             restrict: 'EA',
             scope: {
                 brandImage: '@',
-                brandText: '@'
+                brandText: '@',
+                brandURL: "@"
             },
             templateUrl: '../common/templates/navbar.html',
             link: function(scope) {
+                scope.brandImage = chaiseConfig.navbarBrandImage; 
+                scope.brandText = chaiseConfig.headTitle;
+                 scope.brandURL = chaiseConfig.navbarBrand;
+
                 Session.getSession().then(function(session) {
                     var user = session.client;
                     scope.user = user.display_name || user.full_name || user.email || user;
