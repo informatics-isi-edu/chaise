@@ -17,6 +17,7 @@
         vm.sortSectionsFirst = sortSectionsFirst;
         vm.setVisibility = setVisibility;
         vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
+        vm.numVisibleAnnotations = 0;
 
         vm.createMode = false;
         vm.newAnnotation = {config:{color: vm.defaultColor, visible: true}};
@@ -92,6 +93,7 @@
                 if (typeIsVisible) {
                     annotation.config.visible = true;
                     AnnotationsService.syncVisibility();
+                    vm.getNumVisibleAnnotations();
                 }
                 return true;
             }
@@ -104,6 +106,7 @@
                     if (typeIsVisible) {
                         annotation.config.visible = true;
                         AnnotationsService.syncVisibility();
+                        vm.getNumVisibleAnnotations();
                     }
                     return true;
                 }
@@ -121,6 +124,7 @@
                             if (typeIsVisible) {
                                 annotation.config.visible = true;
                                 AnnotationsService.syncVisibility();
+                                vm.getNumVisibleAnnotations();
                             }
                             return true;
                         }
@@ -129,6 +133,7 @@
             }
             annotation.config.visible = false;
             AnnotationsService.syncVisibility();
+            vm.getNumVisibleAnnotations();
             return false;
         }
 
@@ -293,6 +298,7 @@
                 }
             }
             AnnotationsService.syncVisibility();
+            vm.getNumVisibleAnnotations();
         }
 
         function getNumVisibleAnnotations() {
@@ -304,9 +310,5 @@
             }
             return vm.numVisibleAnnotations = counter;
         }
-
-        $scope.$watch(function() {
-            return vm.annotations;
-        }, getNumVisibleAnnotations, true);
     }]);
 })();

@@ -392,7 +392,7 @@
                             </div>
                         </form>
                         <!-- Annotations List -->
-                        <div class="h5 text-muted text-center">{{annotations.numVisibleAnnotations}} annotation<span ng-show="annotations.numVisibleAnnotations > 1">s</span> found.</div>
+                        <div class="h5 text-muted text-center">{{annotations.numVisibleAnnotations}} annotation<span ng-show="annotations.numVisibleAnnotations != 1">s</span> found.</div>
                         <div id="annotations-list">
                             <div ng-repeat="annotation in annotations.annotations | orderBy:[annotations.sortSectionsFirst, 'anatomy', 'id'] | filter:annotations.filterAnnotations track by $index"
                             ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table + '-' + annotation.id), section: annotation.type == 'section'}"
