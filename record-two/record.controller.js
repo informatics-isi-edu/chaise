@@ -5,6 +5,8 @@
 
     .controller('RecordController', ['recordModel', function FormController(recordModel) {
         var vm = this;
-        vm.record = recordModel.record;
+        vm.recordModel = recordModel;
+
+        console.log(recordModel);
     }]);
 })();

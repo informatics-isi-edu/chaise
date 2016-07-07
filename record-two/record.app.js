@@ -11,22 +11,13 @@
         'ui.bootstrap'
     ])
 
-    // configure the context
-    .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
-        var utils = UriUtilsProvider.$get();
-
-        if (chaiseConfig.headTitle !== undefined) {
-            document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
-        }
-
-        utils.setOrigin();
-        utils.parseURLFragment(window.location, context);
-
-        console.log("Context", context);
-    }])
-
-    .run(['context', 'ermrestServerFactory', 'recordModel', 'ErrorService', '$log', '$rootScope', function runApp(context, ermrestServerFactory, recordModel, ErrorService, $log, $rootScope) {
+    // Config is no
+    .run(['ermrestServerFactory', 'recordModel', 'UriUtils', 'ErrorService', '$log', '$rootScope', function runApp(ermrestServerFactory, recordModel, UriUtils, ErrorService, $log, $rootScope) {
         try {
+            UriUtils.setOrigin();
+            // The context object won't change unless the app is reloaded
+            var context = $rootScope.context = UriUtils.parseURLFragment(window.location);
+
             var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
             server.catalogs.get(context.catalogID).then(function success(catalog) {
                 var schema = catalog.schemas.get(context.schemaName);
@@ -42,7 +33,7 @@
                         // So the data can be passed through the directive and watched for changes
                         $rootScope.record = record[0];
                     }, function error(response) {
-
+                        throw reponse;
                     });
                 }
             }, function error(response) {
@@ -51,7 +42,7 @@
                 ErrorService.catchAll(exception);
             });
         } catch (exception) { // Catches server get
-            $log.info(exception);
+            ErrorService.catchAll(exception);
         }
     }]);
 })();
