@@ -1310,7 +1310,6 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                 if (writeUsers.length > 0) {
                     // Get current user's session attributes
                     $http.get(window.location.origin + '/ermrest/authn/session').then(function success(session) {
-                        console.log('Session', session);
                         var attrs = session.data.attributes;
                         var attrIds = [];
                         for (var j = 0, len = attrs.length; j < len; j++) {
