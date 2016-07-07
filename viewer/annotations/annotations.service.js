@@ -105,17 +105,6 @@
 
         function syncVisibility() {
             iframe.postMessage({messageType: 'syncVisibility', content: annotations}, origin);
-            return getNumVisibleAnnotations();
-        }
-
-        function getNumVisibleAnnotations() {
-            var counter = 0;
-            for (var i = 0, len = annotations.length; i < len; i++) {
-                if (annotations[i].visible) {
-                    counter++;
-                }
-            }
-            return counter;
         }
 
         return {

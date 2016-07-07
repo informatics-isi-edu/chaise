@@ -17,13 +17,13 @@
         vm.filterAnnotations = filterAnnotations;
         vm.sortSectionsFirst = sortSectionsFirst;
         vm.setVisibility = setVisibility;
+        vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
 
         vm.createMode = false;
         vm.newAnnotation = {config:{color: vm.defaultColor, visible: true}};
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
-        vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
 
         var originalAnnotation; // Holds the original contents of annotation in the event that a user cancels an edit
         resetEditedValues();
@@ -305,8 +305,13 @@
         }
 
         function getNumVisibleAnnotations() {
-            console.log(vm.annotations.length);
-            // return vm.annotations.length;
+            var counter = 0;
+            for (var i = 0, len = annotations.length; i < len; i++) {
+                if (annotations[i].config.visible) {
+                    counter++;
+                }
+            }
+            return counter;
         }
     }]);
 })();
