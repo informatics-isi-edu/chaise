@@ -285,11 +285,6 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 // Register work to be performed after loading all modules
 .run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', 'UriUtils', function($window, pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session, UriUtils) {
 
-    $rootScope.location = $window.location.href;
-    pageInfo.loading = true;
-    recordsetModel.tableName = context.tableName;
-    $rootScope.errorMessage='';
-
     try {
 
         // parse the URL
@@ -298,7 +293,11 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         context.chaiseURL = $window.location.href.replace($window.location.hash, '');
         context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
 
-        console.log("Context", context);
+        $rootScope.location = $window.location.href;
+        pageInfo.loading = true;
+        recordsetModel.tableName = context.tableName;
+        $rootScope.errorMessage='';
+        
     } catch (error) {
         $rootScope.errorMessage = error.message;
     }
