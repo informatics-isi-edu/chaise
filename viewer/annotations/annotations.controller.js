@@ -15,7 +15,7 @@
         vm.resetSearch = resetSearch;
         vm.filterAnnotations = filterAnnotations;
         vm.sortSectionsFirst = sortSectionsFirst;
-        vm.setVisibility = setVisibility;
+        vm.setTypeVisibility = setTypeVisibility;
         vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
         vm.numVisibleAnnotations = 0;
 
@@ -89,12 +89,19 @@
 
         function filterAnnotations(annotation) {
             var typeIsVisible = vm.filterByType[annotation.type]; // boolean that answers "are annotations of a certain type visible?"
-            if (!vm.query) {
-                if (typeIsVisible) {
-                    annotation.config.visible = true;
-                    AnnotationsService.syncVisibility();
-                    vm.getNumVisibleAnnotations();
+
+            function updateAnnotationVisibility(annotation, visibility) {
+                if (visibility && typeIsVisible) {
+                // If we wish to set annotation visibility to true, check that its type is true beforehand
+                    annotation.config.visible = visibility;
                 }
+                annotation.config.visible = visibility;
+                AnnotationsService.syncVisibility();
+                vm.getNumVisibleAnnotations();
+            }
+
+            if (!vm.query) {
+                updateAnnotationVisibility(annotation, true);
                 return true;
             }
             vm.query = vm.query.toLowerCase();
@@ -103,11 +110,7 @@
             var numProps = props.length;
             for (var i = 0; i < numProps; i++) {
                 if (props[i] && props[i].toLowerCase().indexOf(vm.query) > -1) {
-                    if (typeIsVisible) {
-                        annotation.config.visible = true;
-                        AnnotationsService.syncVisibility();
-                        vm.getNumVisibleAnnotations();
-                    }
+                    updateAnnotationVisibility(annotation, true);
                     return true;
                 }
             }
@@ -121,19 +124,13 @@
                     var numCommentProps = commentProps.length;
                     for (var p = 0; p < numCommentProps; p++) {
                         if (commentProps[p] && commentProps[p].toLowerCase().indexOf(vm.query) > -1) {
-                            if (typeIsVisible) {
-                                annotation.config.visible = true;
-                                AnnotationsService.syncVisibility();
-                                vm.getNumVisibleAnnotations();
-                            }
+                            updateAnnotationVisibility(annotation, true);
                             return true;
                         }
                     }
                 }
             }
-            annotation.config.visible = false;
-            AnnotationsService.syncVisibility();
-            vm.getNumVisibleAnnotations();
+            updateAnnotationVisibility(annotation, false);
             return false;
         }
 
@@ -266,10 +263,7 @@
         function scrollIntoView(elementId) {
             // Using native JS b/c angular.element returns a jQuery/jqLite object,
             // which is incompatible with .scrollIntoView()
-            document.getElementById(elementId).scrollIntoView({
-                block: 'start',
-                behavior: 'smooth'
-            });
+            document.getElementById(elementId).scrollIntoView({block: 'start', behavior: 'smooth'});
         }
 
         // Used to set the author based on the info object from the user object (user.info) that is set on every annotation
@@ -288,7 +282,8 @@
             vm.query = '';
         }
 
-        function setVisibility(annotationType) {
+        // Sets all annotations of a certain type (i.e. section|rectangle|arrow) to true/false
+        function setTypeVisibility(annotationType) {
             var annotations = vm.annotations;
             var visibility = vm.filterByType[annotationType];
             for (var i = 0, len = annotations.length; i < len; i++) {

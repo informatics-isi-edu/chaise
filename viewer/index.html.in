@@ -324,13 +324,13 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <label for="showSections">
-                                                    <input ng-model="annotations.filterByType.section" ng-change="annotations.setVisibility('section');" id="showSections" type="checkbox">Sections&nbsp;&nbsp;
+                                                    <input ng-model="annotations.filterByType.section" ng-change="annotations.setTypeVisibility('section');" id="showSections" type="checkbox">Sections&nbsp;&nbsp;
                                                 </label>
                                                 <label for="showRectangles">
-                                                    <input ng-model="annotations.filterByType.rectangle" ng-change="annotations.setVisibility('rectangle');" id="showRectangles" type="checkbox">Rectangles&nbsp;&nbsp;
+                                                    <input ng-model="annotations.filterByType.rectangle" ng-change="annotations.setTypeVisibility('rectangle');" id="showRectangles" type="checkbox">Rectangles&nbsp;&nbsp;
                                                 </label>
                                                 <label for="showArrows">
-                                                    <input ng-model="annotations.filterByType.arrow" ng-change="annotations.setVisibility('arrow');" id="showArrows" type="checkbox">Arrows&nbsp;&nbsp;
+                                                    <input ng-model="annotations.filterByType.arrow" ng-change="annotations.setTypeVisibility('arrow');" id="showArrows" type="checkbox">Arrows&nbsp;&nbsp;
                                                 </label>
                                             </div>
                                         </div>
