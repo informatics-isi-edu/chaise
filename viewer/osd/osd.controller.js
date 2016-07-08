@@ -12,7 +12,7 @@
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
-        vm.hideMode = false; // if true, then all annotations should be hidden in viewer
+        vm.annotationsAreHidden = false;
         vm.toggleAnnotations = toggleAnnotations;
 
         function downloadView() {
@@ -40,9 +40,9 @@
         }
 
         function toggleAnnotations() {
-            var messageType = vm.hideMode ? 'hideAllAnnotations' : 'showAllAnnotations';
+            var messageType = vm.annotationsAreHidden ? 'showAllAnnotations' : 'hideAllAnnotations';
             iframe.postMessage({messageType: messageType}, origin);
-            vm.hideMode = !vm.hideMode;
+            vm.annotationsAreHidden = !vm.annotationsAreHidden;
         }
     }]);
 })();

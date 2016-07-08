@@ -596,8 +596,8 @@
                         <span class="glyphicon glyphicon-info-sign pull-right" data-toggle="tooltip" title="<p class='text-left'><strong>Recommended browsers:</strong> Firefox and Chrome<br><br><strong>Safari users:</strong> The screenshot will be saved as 'Unknown.jpg'.</p>"></span>
                         <div class="btn-group btn-group-sm pull-right" role="group">
                             <button ng-click="osd.toggleAnnotations();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon" ng-class="{'glyphicon-eye-open': !osd.hideMode, 'glyphicon-eye-close': osd.hideMode}"></span>
-                                <span ng-show="!osd.hideMode">Show</span><span ng-show="osd.hideMode">Hide</span>
+                                <span class="glyphicon" ng-class="{'glyphicon-eye-open': osd.annotationsAreHidden, 'glyphicon-eye-close': !osd.annotationsAreHidden}"></span>
+                                <span ng-show="osd.annotationsAreHidden">Show</span><span ng-show="!osd.annotationsAreHidden">Hide</span>
                             </button>
                             <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button">
                                 <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
