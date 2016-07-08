@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordDisplay', [])
 
-    .directive('recordDisplay', [ function() {
+    .directive('recordDisplay', ['ErrorService', function(ErrorService) {
         return {
             restrict: 'E',
             transclude: true,
@@ -22,7 +22,11 @@
                 scope.$watch('table', function(newVal, oldVal) {
                     if(newVal) {
                         scope.table = newVal;
-                        scope.columns = scope.table.columns.all();
+                        try {
+                            scope.columns = scope.table.columns.all();
+                        } catch (exception) {
+                            ErrorService.catchAll(exception);
+                        }
                     }
                 });
             }
