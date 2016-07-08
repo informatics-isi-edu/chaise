@@ -1,5 +1,5 @@
 (function() {
-    'use strict';
+    // 'use strict';
 
     angular.module('chaise.viewer')
 
@@ -18,6 +18,7 @@
         vm.setTypeVisibility = setTypeVisibility;
         vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
         vm.numVisibleAnnotations = 0;
+        vm.updateAnnotationVisibility = updateAnnotationVisibility;
 
         vm.createMode = false;
         vm.newAnnotation = {config:{color: vm.defaultColor, visible: true}};
@@ -87,21 +88,16 @@
             }
         });
 
-        function filterAnnotations(annotation) {
-            var typeIsVisible = vm.filterByType[annotation.type]; // boolean that answers "are annotations of a certain type visible?"
-
-            function updateAnnotationVisibility(annotation, visibility) {
-                if (visibility && typeIsVisible) {
-                // If we wish to set annotation visibility to true, check that its type is true beforehand
-                    annotation.config.visible = visibility;
-                }
-                annotation.config.visible = visibility;
+        function updateAnnotationVisibility(annotation) {
+            if (vm.filterByType[annotation.type]) {
+                annotation.config.visible = true;
                 AnnotationsService.syncVisibility();
                 vm.getNumVisibleAnnotations();
             }
-
+        }
+        function filterAnnotations(annotation) {
             if (!vm.query) {
-                updateAnnotationVisibility(annotation, true);
+                vm.updateAnnotationVisibility(annotation);
                 return true;
             }
             vm.query = vm.query.toLowerCase();
@@ -110,7 +106,7 @@
             var numProps = props.length;
             for (var i = 0; i < numProps; i++) {
                 if (props[i] && props[i].toLowerCase().indexOf(vm.query) > -1) {
-                    updateAnnotationVisibility(annotation, true);
+                    vm.updateAnnotationVisibility(annotation);
                     return true;
                 }
             }
@@ -124,13 +120,15 @@
                     var numCommentProps = commentProps.length;
                     for (var p = 0; p < numCommentProps; p++) {
                         if (commentProps[p] && commentProps[p].toLowerCase().indexOf(vm.query) > -1) {
-                            updateAnnotationVisibility(annotation, true);
+                            vm.updateAnnotationVisibility(annotation);
                             return true;
                         }
                     }
                 }
             }
-            updateAnnotationVisibility(annotation, false);
+            annotation.config.visible = false;
+            AnnotationsService.syncVisibility();
+            vm.getNumVisibleAnnotations();
             return false;
         }
 
@@ -290,14 +288,15 @@
                 var annotation = annotations[i];
                 if (annotation.type == annotationType) {
                     annotation.config.visible = visibility;
+                    AnnotationsService.syncVisibility();
+                    vm.getNumVisibleAnnotations();
                 }
             }
-            AnnotationsService.syncVisibility();
-            vm.getNumVisibleAnnotations();
         }
 
         function getNumVisibleAnnotations() {
             var counter = 0;
+            var annotations = vm.annotations;
             for (var i = 0, len = annotations.length; i < len; i++) {
                 if (annotations[i].config.visible) {
                     counter++;
