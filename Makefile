@@ -3,6 +3,9 @@
 # Disable built-in rules
 .SUFFIXES:
 
+# Install directory
+INSTALLDIR=/var/www/html/chaise
+
 # Project name
 PROJ=chaise
 
@@ -37,13 +40,9 @@ HTML=search/index.html \
 	 recordedit/index.html
 
 # ERMrestjs Deps
-ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
-			   ../../ermrestjs/js/ermrest.js \
-			   ../../ermrestjs/js/filters.js \
-			   ../../ermrestjs/js/ngermrest.js \
-			   ../../ermrestjs/js/utilities.js \
-			   ../../ermrestjs/errors/networkerrors.js \
-			   ../../ermrestjs/errors/validationerrors.js
+ERMRESTJS_DIR=../../ermrestjs
+ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js \
+		$(ERMRESTJS_DIR)/ngermrest.js
 
 # CSS source
 CSS=styles
@@ -240,6 +239,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(JS)/vendor/bootstrap.js \
@@ -579,12 +579,19 @@ $(JS_CONFIG): chaise-config-sample.js
 	done
 
 
+# Rule for installing
+.PHONY: install
+install: $(HTML)
+	mkdir -p $(INSTALLDIR)
+	rsync -a --delete --exclude='.*' --exclude=chaise-config.js ./. $(INSTALLDIR)/
+
 # Rules for help/usage
 .PHONY: help usage
 help: usage
 usage:
 	@echo "Available 'make' targets:"
 	@echo "    all       - an alias for build"
+	@echo "    install   - installs the package (INSTALLDIR=dir)"
 	@echo "    deps      - local install of node dependencies"
 	@echo "    updeps    - update local dependencies"
 	@echo "    lint      - lint the source"

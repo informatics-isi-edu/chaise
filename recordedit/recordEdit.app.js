@@ -15,6 +15,7 @@
         'ui.bootstrap',
         'chaise.modal',
         'ui.select',
+        'ui.bootstrap',
         'rzModule',
         '720kb.datepicker',
         'ngMessages'
@@ -34,7 +35,27 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', '$log', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, $log) {
+    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', '$log', '$uibModal', '$window', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, $log, $uibModal, $window) {
+        if (!chaiseConfig.editRecord) {
+            var modalInstance = $uibModal.open({
+                controller: 'ErrorDialogController',
+                controllerAs: 'ctrl',
+                size: 'sm',
+                templateUrl: '../common/templates/errorDialog.html',
+                backdrop: 'static',
+                keyboard: false,
+                resolve: {
+                    params: {
+                        title: 'Record Editing Disabled',
+                        message: 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.'
+                    }
+                }
+            });
+
+            modalInstance.result.then(function() {
+                $window.location.href = chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin;
+            });
+        }
         // generic try/catch
         try {
             var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
@@ -129,9 +150,9 @@
                 if (context.filters) {
                     var path = new ERMrest.DataPath(table);
                     var filters = [];
-                    angular.forEach(context.filters, function(value, key) {
-                        var column = path.context.columns.get(key); // caught by generic exception case
-                        filters.push(new ERMrest.BinaryPredicate(column, ERMrest.OPERATOR.EQUAL, value));
+                    angular.forEach(context.filters, function(filter) {
+                        var column = path.context.columns.get(filter.name); // caught by generic exception case
+                        filters.push(new ERMrest.BinaryPredicate(column, filter.op, filter.value));
                     });
                     // TODO: Store filters in URI form in model to use later on form submission
                     var filterString = new ERMrest.Conjunction(filters);
