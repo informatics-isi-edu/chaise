@@ -3,10 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['recordModel', function FormController(recordModel) {
-        var vm = this;
-        vm.recordModel = recordModel;
-
-        console.log(recordModel);
+    .controller('RecordController', ['$rootScope', function FormController($rootScope) {
+        // made this for manipulating code in html for record app
+        
     }]);
 })();

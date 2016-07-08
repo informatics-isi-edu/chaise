@@ -18,11 +18,11 @@
         </script>
     <![endif]-->
 </head>
-<body ng-controller="RecordController as ctrl">
+<body>
     <navbar></navbar>
 
-    <div id="entity-title">{{ ctrl.recordModel.table.displayname }}</div>
+    <div id="entity-title">{{ table.displayname }}</div>
 
     <!-- defined on $rootScope in run function -->
-    <record-display record="record"></record-display>
+    <record-display record="record" table="table"></record-display>
 </body>

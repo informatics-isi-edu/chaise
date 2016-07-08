@@ -174,8 +174,6 @@ RECORDTWO_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
 RECORDTWO_JS_SOURCE=$(RECORDTWO_ASSETS)/record.app.js \
-	$(RECORDTWO_ASSETS)/context.js \
-	$(RECORDTWO_ASSETS)/model.js \
 	$(RECORDTWO_ASSETS)/record.controller.js
 
 RECORDTWO_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \

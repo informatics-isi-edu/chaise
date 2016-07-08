@@ -8,7 +8,8 @@
             restrict: 'E',
             transclude: true,
             scope: {
-                record: '='
+                record: '=',
+                table: '='
             },
             templateUrl: '../common/templates/record.html',
             link: function(scope) {
@@ -17,6 +18,13 @@
                         scope.record = newVal;
                     }
                 }, true);
+
+                scope.$watch('table', function(newVal, oldVal) {
+                    if(newVal) {
+                        scope.table = newVal;
+                        scope.columns = scope.table.columns.all();
+                    }
+                });
             }
         };
     }]);

@@ -12,7 +12,7 @@
     ])
 
     // Config is no
-    .run(['ermrestServerFactory', 'recordModel', 'UriUtils', 'ErrorService', '$log', '$rootScope', function runApp(ermrestServerFactory, recordModel, UriUtils, ErrorService, $log, $rootScope) {
+    .run(['ermrestServerFactory', 'UriUtils', 'ErrorService', '$log', '$rootScope', function runApp(ermrestServerFactory, UriUtils, ErrorService, $log, $rootScope) {
         try {
             UriUtils.setOrigin();
             // The context object won't change unless the app is reloaded
@@ -21,7 +21,7 @@
             var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
             server.catalogs.get(context.catalogID).then(function success(catalog) {
                 var schema = catalog.schemas.get(context.schemaName);
-                var table = recordModel.table = schema.tables.get(context.tableName);
+                var table = $rootScope.table = schema.tables.get(context.tableName);
 
                 if (context.filters.length == 1) {
                     var filter = context.filters[0];
@@ -29,7 +29,6 @@
                     var recordFilter = new ERMrest.BinaryPredicate(table.columns.get(filter.name), filter.op, filter.value);
 
                     recordPath.filter(recordFilter).entity.get().then(function success(record) {
-                        recordModel.record = record[0];
                         // So the data can be passed through the directive and watched for changes
                         $rootScope.record = record[0];
                     }, function error(response) {
