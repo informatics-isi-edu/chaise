@@ -77,7 +77,11 @@ Chaise depends on the following server- and client-side software.
 - **Client-side JavaScript Libraries**: [AngularJS] and other client-side
   JavaScript runtime dependencies are bundled in `scripts/vendors` in this
   repository.
+- **ERMrestJS**: [ermrestjs] is a client library for [ERMrest]. It must be
+  deployed to the same base directory as Chaise. If Chaise is deployed to
+  `/path/to/chaise` then ermrestjs must be installed in `/path/to/ermrestjs`.
 
+[ermrestjs]: https://github.com/informatics-isi-edu/ermrestjs
 [AngularJS]: https://angularjs.org
 [CORS]: https://en.wikipedia.org/wiki/Cross-origin_resource_sharing "Cross-origin resource sharing"
 
