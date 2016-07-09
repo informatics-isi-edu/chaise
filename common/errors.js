@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.errors', ['chaise.utils', 'chaise.alerts'])
+    angular.module('chaise.errors', ['chaise.alerts', 'chaise.authen', 'chaise.modal', 'chaise.utils'])
 
     // Factory for each error type
     .factory('ErrorService', ['$log', '$window', '$uibModal', 'UriUtils', 'AlertsService', 'Session', function ErrorService($log, $window, $uibModal, UriUtils, AlertsService, Session) {
