@@ -38,16 +38,23 @@ exports.parameterize = function(config, configParams) {
         browser.params.defaultSchema = data.defaultSchema;
         browser.params.defaultTable = data.defaultTable;
 
-        // Set the base url to the page that we are running the tests for
-        browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
-
-        // Visit the default page and set the authorization cookie if required
-        browser.get("");
-        browser.sleep(3000);
-        if (testConfiguration.authCookie)  browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;secure;"');
-        
         // set the url for testcases to stat using the catalogId and schema that was mentioned in the configuration
-        browser.params.url = browser.baseUrl + "/#" + catalogId + "/schema/" + data.schema.name;
+        if (typeof configParams.setBaseUrl == 'function') {
+          var baseUrl = configParams.setBaseUrl(browser, data);
+          if (baseUrl) browser.baseUrl = baseUrl;
+          else  browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
+        } else {
+           // Set the base url to the page that we are running the tests for
+          browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
+          browser.params.url = browser.baseUrl + "/#" + catalogId + "/schema/" + data.schema.name;
+        } 
+        
+        // Visit the default page and set the authorization cookie if required
+        if (testConfiguration.authCookie) {
+          browser.get(process.env.CHAISE_BASE_URL + "/login");
+          browser.sleep(3000);
+          browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;secure;"');
+        }
 
         defer.resolve();
       }, function(err) {
@@ -62,7 +69,7 @@ exports.parameterize = function(config, configParams) {
         browser.params.catalog = data.catalog;
         browser.params.defaultSchema = data.defaultSchema;
         browser.params.defaultTable = data.defaultTable;
-
+        browser.params.catalogId = data.catalogId;
 
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
@@ -71,11 +78,13 @@ exports.parameterize = function(config, configParams) {
           browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;secure;"');
         }
 
+
         // Set the base url to the page that we are running the tests for
         browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
-
-        browser.get("");
-        browser.params.url = browser.baseUrl;
+        
+        // set the url for testcases to stat using the catalogId and schema that was mentioned in the configuration
+        if (typeof configParams.setBaseUrl == 'function') configParams.setBaseUrl(browser, data);
+        else browser.params.url = browser.baseUrl + "/#" + data.catalogId + "/schema/" + data.defaultSchema.name;
 
         defer.resolve();
       }, function(err) {

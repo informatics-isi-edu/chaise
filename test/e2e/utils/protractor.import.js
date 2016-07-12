@@ -15,7 +15,7 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 		url: process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest'),
 		catalogId: catalogId || 1,
 		authCookie: testConfiguration.authCookie
-	}).then(function(schema, catalog) {
+	}).then(function(schema) {
         if (testConfiguration.setup && testConfiguration.setup.schema) {
             schema = schema.catalog.schemas[testConfiguration.setup.schema.name] || schema;
         }
@@ -25,16 +25,17 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 		// Set done to true to mention that the execution is over
 		done = true;
 	}, function(err) {
-		throw new Error("Unable to fetch schemas");
+        console.log("Unable to fetch schemas");
+        defer.reject(err);
 	});
 
 	// Wait until the value of done is true
 	browser.wait(function() {
 		return done;
 	}, 5000).then(function() {
-        defer.resolve({ catalogId: catalogId, catalog: catalog, defaultSchema: defaultSchema, defaultTable: defaultTable }); 
+        defer.resolve({ schema: defaultSchema, catalogId: catalogId, catalog: catalog, defaultSchema: defaultSchema, defaultTable: defaultTable }); 
 	}, function(err) {
-        console.log("I timed out 5000");
+        console.log("Import out 5000");
         err.catalogId = catalogId;
 		defer.reject(err);
 	});

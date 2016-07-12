@@ -74,13 +74,14 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
             }); 
         }
         
-        it('should check ' + filter.content.join(', ') + ' filters for an attribute' + attr.text, function() {
+        it('should check ' + filter.content.join(', ') + ' filters for an attribute ' + attr.text, function() {
             filter.content.forEach(function(c) {
                 chaisePage.editFilter.clickEditFilter(c);
             });
         });
 
         it('should show the \'Clear All Filters\' button', function () {
+            browser.sleep(2000);
             var clearAllBtn = filterObj.clearAllBtn;
             expect(clearAllBtn.isDisplayed()).toBe(true);
         });
@@ -99,7 +100,6 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
 
             it('should show ' + filter.entityCount + ' results for filters ' + filter.content.join(','), function () {
                 if (filter.entityCount != undefined) {
-                    browser.sleep(3000);
                     var allResults = chaisePage.resultContent.getAllResultRows();
                     expect(allResults.count()).toBe(filter.entityCount);
                 }

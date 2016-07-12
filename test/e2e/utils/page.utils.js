@@ -1,6 +1,6 @@
-
+var COMMENT_URI = "comment", FACET_URI = "facet", FACETORDER_URI = "facetOrder", DESCRIPTION_URI = "description";
+	
 var Sidebar = function() {
-	var COMMENT_URI = "comment", FACET_URI = "facet", FACETORDER_URI = "facetOrder", DESCRIPTION_URI = "description";
 	var self = this;
 
 	this.getColumns = function(table, annotations, dataTypes) {
@@ -225,10 +225,156 @@ var Sidebar = function() {
 
 		return orderedColumns.concat(topColumns);
 	};
-}
+};
+
+var EditInputs = function(sidebar) {
+	this.sidebar = sidebar;
+	var that = this;
+
+	this.isColumnHidden = function(c, annotations) {
+		var isHidden = false;
+		if (c['annotations']) {
+			annotations.forEach(function(a) {
+				if (c['annotations'].hasOwnProperty(a)) {
+					isHidden = true;
+				}
+			});
+		} 
+		return isHidden;
+	};
+
+	this.getForeignKey = function(column, table) {
+		var foreignKey = null;
+		
+		table.foreign_keys.forEach(function(fk) {
+			var index = 0;
+			fk.foreign_key_columns.forEach(function(col) {
+				if (col.column_name == column.name) {
+					column.referencedColumn = fk.referenced_columns[index++];
+					foreignKey = column;
+				}
+			});
+		});
+
+		return foreignKey;
+	};
+
+	this.getDisplayName = function(column, property, pascalCase) {
+		var annotation = column.annotations;
+		property = property || 'name';
+		// If display name found in annotation then return it else
+		// compute the display name replacing undercores with space and 
+		// changing the case of first letter of each word to uppercase
+		if (annotation && annotation['tag:misd.isi.edu,2015:display'] && annotation['tag:misd.isi.edu,2015:display']['name']) 
+			return annotation['tag:misd.isi.edu,2015:display']['name'];
+		if (pascalCase) return column[property].charAt(0).toUpperCase() + column[property].slice(1);
+		
+		return column[property];
+	};
+
+	this.getVisibleColumns = function(table, annotations) {
+		var columns = [], annotations = annotations;
+		if (table.annotations && table.annotations[COMMENT_URI] && table.annotations[COMMENT_URI].contains('exclude')) return [];
+		var cDefs = table.column_definitions.slice(0);
+		cDefs.forEach(function(c) {
+			if (!that.isColumnHidden(c, annotations)) {
+				c.table_name = table.table_name;
+				c.displayName = that.getDisplayName(c);
+				columns.push(c);
+			}
+		});
+		return columns.slice(0);
+	};
+
+	this.getColumnsWithComment = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if (c['comment']) columns.push(c);
+		});
+		return columns;
+	};
+
+	this.getColumnsWithRequired = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if (!c.nullok) columns.push(c);
+		});
+		return columns;
+	};
+
+	this.getSerialDataTypeColumns = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if (c.type.typename.startsWith('serial') && !that.getForeignKey(c, table)) {
+				columns.push(c);
+			}
+		});
+		return columns;
+	};
+
+	this.getLongTextDataTypeColumns = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if (c.type.typename == 'longtext' && !that.getForeignKey(c, table)) {
+				columns.push(c);
+			}
+		});
+		return columns;
+	};
+
+	this.getBooleanDataTypeColumns = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if (c.type.typename == 'boolean' && !that.getForeignKey(c, table)) {
+				columns.push(c);
+			}
+		});
+		return columns;
+	};
+
+	this.getForeignKeyColumns = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			var fk = that.getForeignKey(c, table);
+			if (fk) columns.push(fk);
+		});
+		return columns;
+	};
+
+	this.getDateTypeColumns = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if ((c.type.typename == 'date' || c.type.typename == 'timestamptz') && !that.getForeignKey(c, table)) {
+				columns.push(c);
+			}
+		});
+		return columns;
+	};
+
+	this.getIntegerDataTypeColumns = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if (c.type.typename.startsWith('int') && !that.getForeignKey(c, table)) {
+				columns.push(c);
+			}
+		});
+		return columns;
+	};
+
+	this.getFloatDataTypeColumns = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if ((c.type.typename.startsWith('float') || c.type.typename == "numeric") && !that.getForeignKey(c, table)) {
+				columns.push(c);
+			}
+		});
+		return columns;
+	};
+};
 
 var DataUtils = function() {
 	this.sidebar = new Sidebar();
+	this.editInputs = new EditInputs(this.sidebar); 
 };
 
 module.exports = DataUtils;

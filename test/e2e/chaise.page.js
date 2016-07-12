@@ -262,16 +262,93 @@ function recordPage() {
     };
 };
 
+
+var recordEditPage = function() {
+    var that = this;
+    this.getEntityTitle = function() {
+        return browser.executeScript("return $('#entity-title').text();");
+    };
+
+    this.getAllColumnCaptions = function() {
+        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"]');");
+    };
+
+    this.getColumnsWithUnderline = function() {
+        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"].coltooltiplabel');");
+    };
+
+    this.getColumnWithAsterick = function(el) {
+        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"!column.nullok\"].text-danger')[0];", el);
+    };
+
+    this.getColumnComment = function(el) {
+        return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
+    };
+
+    this.getInputForAColumn = function(el) {
+        return browser.executeScript("return $(arguments[0]).parents('tr').find('input.form-control')[0];", el);
+    };
+
+    this.getTextareForAcolumn = function(name) {
+        return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[0];");
+    };
+
+    this.getDropdown = function(el) {
+        return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container')[0];", el);
+    };
+
+    this.getDateInputForAColumn = function(name) {
+        return browser.executeScript("return $('td.entity-value input[type=\"date\"][name=\"" + name + "\"]')[0];");
+    };
+
+    this.getDatePicker = function(el) {
+        return browser.executeScript("return $(arguments[0]).parent().find('.ng-scope._720kb-datepicker-open')[0];", el);
+    };
+
+    this.getIntegerInputForAColumn = function(name) {
+        return browser.executeScript("return $('td.entity-value input[type=\"number\"][integer][name=\"" + name + "\"]')[0];");
+    };
+
+    this.getFloatInputForAColumn = function(name) {
+        return browser.executeScript("return $('td.entity-value input[type=\"number\"][float][name=\"" + name + "\"]')[0];");
+    };
+
+    this.submitForm = function() {
+        return browser.executeScript("$('button[type=\"submit\"]').click();");
+    };
+
+    this.getInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
+    /**
+     * Returns a random number between min (inclusive) and max (exclusive)
+     */
+    this.getRandomArbitrary = function(min, max) {
+        return Math.random() * (max - min) + min;
+    };
+
+    /**
+     * Returns a random integer between min (inclusive) and max (inclusive)
+     * Using Math.round() will give you a non-uniform distribution!
+     */
+    this.getRandomInt = function(min, max) {
+        min = min || -32768;
+        max = max || 32767;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+};
+
 function chaisePage() {
     this.sidebar = new sidebar();
     this.moreFilter = new moreFilter();
     this.editFilter = new editFilter();
     this.resultContent = new resultContent();
     this.recordPage = new recordPage();
+    this.recordEditPage = new recordEditPage();
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));
     this.tourBox = element(by.css('.tour-DataBrowserTour'));
-    
     this.customExpect = {
         elementContainClass: function (ele, className) {
             expect(ele.getAttribute('class')).toContain(className);

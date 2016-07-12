@@ -89,7 +89,7 @@
           "default": null,
           "nullok": false,
           "type": {
-            "typename": "int4"
+            "typename": "serial4"
           },
           "annotations": {
             "comment": [
@@ -120,7 +120,7 @@
           }
         },
         {
-          "comment": null,
+          "comment": "A valid url of the accommodation",
           "name": "website",
           "default": null,
           "nullok": true,
@@ -133,11 +133,14 @@
             ],
             "description": {
               "display": "Website"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Website"
             }
           }
         },
         {
-          "comment": null,
+          "comment": "Type of accommodation ('Resort/Hotel/Motel')",
           "name": "category",
           "default": null,
           "nullok": false,
@@ -151,7 +154,10 @@
             },
             "facetOrder": [
               "2"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Category"
+            }
           }
         },
         {
@@ -169,7 +175,10 @@
             },
             "facetOrder": [
               "3"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "User Rating"
+            }
           }
         },
         {
@@ -195,7 +204,7 @@
           "default": null,
           "nullok": true,
           "type": {
-            "typename": "text"
+            "typename": "longtext"
           },
           "annotations": {
             "comment": [
@@ -204,6 +213,21 @@
               "html",
               "hidden"
             ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "no_of_rooms",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment" : ["top"],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Number of Rooms"
+            }
           }
         },
         {
@@ -234,7 +258,10 @@
             },
             "comment": [
               "hidden"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Cover Image"
+            }
           }
         },
         {
@@ -251,6 +278,9 @@
             ],
             "description": {
               "display": "Date since operational"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Operational Since"
             }
           }
         },
@@ -266,6 +296,9 @@
             "comment": ["top"],
             "description": {
               "display": "Luxurious"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Is Luxurious"
             }
           }
         }
