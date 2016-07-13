@@ -313,15 +313,8 @@ var recordEditPage = function() {
                 browser.sleep(100);
                 browser.executeScript("return $(arguments[0]).find('.select2-result-single li');", el).then(function(items) {
                     if (value != undefined) {
-                        browser.executeScript("$(arguments[0]).click();", el);
-                            
-                        if (value == "") {
-                            browser.executeScript("$(arguments[0]).find('.select2-chosen.ng-binding').removeClass('ng-hide').parent().addClass('select2-default');", el);
-                            browser.executeScript("$(arguments[0]).find('.select2-chosen > .ng-binding').text(\"\").parent().addClass('ng-hide');", el); 
-                        } else {
-                            browser.executeScript("$(arguments[0]).find('.select2-chosen > .ng-binding').text(\"" + value + "\").parent().removeClass('ng-hide');", el);
-                            browser.executeScript("$(arguments[0]).find('.select2-chosen.ng-binding').addClass('ng-hide').parent().removeClass('select2-default');", el);
-                        }
+                        if (value == "")  browser.executeScript("$(arguments[0]).data().$uiSelectController.select('');", el);
+                        else browser.executeScript("$(arguments[0]).data().$uiSelectController.select(" + value + ");", el);
                         defer.resolve(value);
                     } else {
                         var index = that.getRandomInt(0, items.length - 1);

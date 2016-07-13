@@ -213,7 +213,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 								dropdown.column = pc.column;
 
 								if (dropdown.column._value != undefined) {
-									expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(dropdown.column._value.length == 0 ? 'Select a value' : dropdown.column._value);
+									expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(dropdown.column._value.length == 0 ? 'Select a value' : (dropdown.column._value + ""));
 								}
 
 								dropdowns.push(dropdown);
@@ -239,14 +239,14 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 				it("should select an option (true, false, none)", function() {
 					dropdowns.forEach(function(dropdown) {
-						var value = chance.bool() + "";
+						var value = chance.bool();
 						if (dropdown.column.nullok == true) {
 							if (chance.bool()) value = "";
 						} 
 						dropdown.column._value = value;
 						chaisePage.recordEditPage.selectDropdownValue(dropdown, value).then(function() {
 							browser.sleep(10);
-							expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(value.length == 0 ? 'Select a value' : value);
+							expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(value.length == 0 ? 'Select a value' : (value + ""));
 						});
 					});
 				});
