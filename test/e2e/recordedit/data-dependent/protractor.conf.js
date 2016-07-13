@@ -25,7 +25,7 @@ var config = {
 };
 
 //Change this to your desired filed name and Comment below testConfiguration object declaration
-var configFileName = 'recordadd.dev.json';
+var configFileName = 'recordeadd.dev.json';
 var testConfiguration =  require('../../data_setup/config/' + configFileName);
 
 // Just in case if you plan on not giving a file for configuration, you can always specify a testConfiguration object 

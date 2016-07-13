@@ -17,11 +17,14 @@
     },
     "cleanup" : true,
     "tests" : { 
-        "params": {
+        "params" : {
             "tables" : [{
                 "table_name" : "accommodation",
-                "keys" : [{ "name": "id", "value": "2002", "operator" : "="}]
-            }]
+                "records": 3
+            }, {
+                "table_name" : "booking",
+                "records": 1
+            }] 
         }
     }
 }

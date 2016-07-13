@@ -234,7 +234,7 @@
           "comment": null,
           "name": "thumbnail",
           "default": null,
-          "nullok": true,
+          "nullok": false,
           "type": {
             "typename": "int4"
           },
@@ -268,7 +268,7 @@
           "comment": null,
           "name": "opened_on",
           "default": null,
-          "nullok": true,
+          "nullok": false,
           "type": {
             "typename": "timestamptz"
           },

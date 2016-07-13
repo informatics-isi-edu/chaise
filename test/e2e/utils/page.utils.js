@@ -322,6 +322,16 @@ var EditInputs = function(sidebar) {
 		return columns;
 	};
 
+	this.getTextDataTypeColumns = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if ((c.type.typename == 'shorttext' || c.type.typename == 'text') && !that.getForeignKey(c, table)) {
+				columns.push(c);
+			}
+		});
+		return columns;
+	};
+
 	this.getBooleanDataTypeColumns = function(table, annotations) {
 		var columns = [];
 		this.getVisibleColumns(table, annotations).forEach(function(c) {
@@ -369,6 +379,19 @@ var EditInputs = function(sidebar) {
 			}
 		});
 		return columns;
+	};
+
+	this.isKey = function(name, keys) {
+		if (!keys) return false;
+
+		return keys.find(function(k) {
+			return k.name == name;
+		});
+	};
+
+	this.isUrl = function(column) {
+		if (column.annotations && column.annotations[COMMENT_URI] && column.annotations[COMMENT_URI].contains('url')) return true;
+		return false;
 	};
 };
 

@@ -1,0 +1,76 @@
+var chaisePage = require('../../chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
+var recordEditHelpers = require('../helpers.js');
+
+describe('Record Add', function() {  
+
+    var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+    
+    for (var i=0; i< testParams.tables.length; i++) {
+    	
+    	(function(tableParams, index) {
+    		var table;
+
+    		describe("======================================================================= \n    " 
+    			+ testParams.tables[index].records + " record(s) for table " + tableParams.table_name + ",", function() {
+
+				beforeAll(function () {
+					browser.ignoreSyncronization = true;
+					browser.get(browser.params.url + ":" + tableParams.table_name);
+					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
+					browser.sleep(2000);
+			        browser.executeScript("chaiseConfig.editRecord = true;");
+			        browser.executeScript("$('.modal').remove();$('.modal-backdrop').remove();$('body').removeClass('modal-open')");
+			    });
+
+				describe("Presentation and validation,", function() {
+					var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
+				});
+
+				describe("delete record, ", function() {
+
+					if (tableParams.records > 1) { 
+
+						it(tableParams.records + " buttons should be visible and enabled", function() {
+							chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
+								expect(buttons.length).toBe(tableParams.records + 1);
+								buttons.forEach(function(btn) {
+									expect(btn.isDisplayed()).toBe(true);
+									expect(btn.isEnabled()).toBe(true);
+								});
+							});
+						});
+
+						var randomNo = chaisePage.recordEditPage.getRandomInt(0, tableParams.records - 1);
+
+						it("click any delete button", function() {
+							chaisePage.recordEditPage.getDeleteRowButton(randomNo).then(function(button)	 {
+								chaisePage.clickButton(button);
+								browser.sleep(50);
+								chaisePage.recordEditPage.getDeleteModalButton().then(function(modalBtn) {
+									chaisePage.clickButton(modalBtn);
+									browser.sleep(50);
+									chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
+										expect(buttons.length).toBe(tableParams.records);
+									});
+								});
+							});
+						});
+					} else {
+						it("zero delete buttons should be visible", function() {
+							chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
+								expect(buttons.length).toBe(1);
+								buttons.forEach(function(btn) {
+									expect(btn.isDisplayed()).toBe(false);
+								});
+							});
+						});
+					}
+				})
+
+    		});
+
+    	})(testParams.tables[i], i);
+
+    }
+
+});

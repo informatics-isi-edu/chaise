@@ -285,32 +285,80 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
     };
 
-    this.getInputForAColumn = function(el) {
+    this.getInputForAPageColumn = function(el, index) {
+        index = index || 0;
         return browser.executeScript("return $(arguments[0]).parents('tr').find('input.form-control')[0];", el);
     };
 
-    this.getTextareForAcolumn = function(name) {
-        return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[0];");
+    this.getInputForAColumn = function(name, index) {
+        index = index || 0;
+        return browser.executeScript("return $('td.entity-value input[name=\"" + name + "\"]')[" + index + "];");
     };
 
-    this.getDropdown = function(el) {
-        return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container')[0];", el);
+    this.getTextAreaForAcolumn = function(name, index) {
+        index = index || 0;
+        return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
     };
 
-    this.getDateInputForAColumn = function(name) {
-        return browser.executeScript("return $('td.entity-value input[type=\"date\"][name=\"" + name + "\"]')[0];");
+    this.getDropdown = function(el, index) {
+        index = index || 0;
+        return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container')[" + index + "];", el);
     };
 
-    this.getDatePicker = function(el) {
+    this.selectDropdownValue = function(el, value) {
+        return this.getDropdownText(el).then(function(txt) {
+            var defer = Q.defer();
+            if (txt.trim() !== value) {
+                browser.executeScript(" $(arguments[0]).find('.select2-choice').click();", el);
+                browser.sleep(100);
+                browser.executeScript("return $(arguments[0]).find('.select2-result-single li');", el).then(function(items) {
+                    if (value != undefined) {
+                        browser.executeScript("$(arguments[0]).click();", el);
+                            
+                        if (value == "") {
+                            browser.executeScript("$(arguments[0]).find('.select2-chosen.ng-binding').removeClass('ng-hide').parent().addClass('select2-default');", el);
+                            browser.executeScript("$(arguments[0]).find('.select2-chosen > .ng-binding').text(\"\").parent().addClass('ng-hide');", el); 
+                        } else {
+                            browser.executeScript("$(arguments[0]).find('.select2-chosen > .ng-binding').text(\"" + value + "\").parent().removeClass('ng-hide');", el);
+                            browser.executeScript("$(arguments[0]).find('.select2-chosen.ng-binding').addClass('ng-hide').parent().removeClass('select2-default');", el);
+                        }
+                        defer.resolve(value);
+                    } else {
+                        var index = that.getRandomInt(0, items.length - 1);
+                        try {
+                             items[index].click();
+                        } catch(e) {}
+                        defer.resolve();
+                    }
+                });
+            } else {
+                defer.resolve(txt);
+            }
+            return defer.promise;
+        });
+    };
+
+    this.getDropdownText = function(el) {
+        return browser.executeScript("return $(arguments[0]).find('.select2-chosen:not(\".ng-hide\")').text().trim();", el);
+    };
+
+    this.getDateInputForAColumn = function(name, index) {
+        index = index || 0;
+        return browser.executeScript("return $('td.entity-value input[type=\"date\"][name=\"" + name + "\"]')[" + index + "];");
+    };
+
+    this.getDatePickerForAnInput = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().find('.ng-scope._720kb-datepicker-open')[0];", el);
     };
 
-    this.getIntegerInputForAColumn = function(name) {
-        return browser.executeScript("return $('td.entity-value input[type=\"number\"][integer][name=\"" + name + "\"]')[0];");
+    this.getIntegerInputForAColumn = function(name, index) {
+        index = index || 0
+        return browser.executeScript("return $('td.entity-value input[type=\"number\"][integer][name=\"" + name + "\"]')[" + index + "];");
     };
 
-    this.getFloatInputForAColumn = function(name) {
-        return browser.executeScript("return $('td.entity-value input[type=\"number\"][float][name=\"" + name + "\"]')[0];");
+    this.getFloatInputForAColumn = function(name, index) {
+        index = index || 0;
+        return browser.executeScript("return $('td.entity-value input[type=\"number\"][float][name=\"" + name + "\"]')[" + index + "];");
     };
 
     this.submitForm = function() {
@@ -321,10 +369,44 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
+    this.getDateInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).parent().siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
+    this.clearInput = function(el) {
+        return el.getAttribute('value').then(function(value) {
+            el.sendKeys(Array(value.length + 1).join(protractor.Key.BACK_SPACE));
+            browser.sleep(10);
+        });
+    };
+
+    this.getAddRowButton = function() {
+        return browser.executeScript("return $('#copy-record-btn')[0];");
+    };
+
+    this.getDeleteRowButton = function(index) {
+        index = index || 0;
+        return browser.executeScript("return $('delete-link button')[" + index  + "];");
+    };
+
+    this.getAllDeleteRowButtons = function() {
+        return browser.executeScript("return $('delete-link button');");
+    };
+
+    this.getDeleteModalButton = function() {
+        return browser.executeScript("return $('.modal .btn-danger')[0]");
+    };
+
+    this.getDayButtonsForDatePicker = function(dp) {
+        return browser.executeScript("return $(arguments[0]).find('._720kb-datepicker-calendar-day:not(._720kb-datepicker-disabled)');", dp);
+    };
+
     /**
      * Returns a random number between min (inclusive) and max (exclusive)
      */
     this.getRandomArbitrary = function(min, max) {
+        min = min || -32768;
+        max = max || 32767;
         return Math.random() * (max - min) + min;
     };
 
@@ -333,8 +415,8 @@ var recordEditPage = function() {
      * Using Math.round() will give you a non-uniform distribution!
      */
     this.getRandomInt = function(min, max) {
-        min = min || -32768;
-        max = max || 32767;
+        min = (min == undefined || min == null) ? -32768 : min;
+        max = (max == undefined || max == null) ? 32767 : max;
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 };
@@ -349,6 +431,9 @@ function chaisePage() {
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));
     this.tourBox = element(by.css('.tour-DataBrowserTour'));
+    this.clickButton = function(button) {
+        return browser.executeScript("$(arguments[0]).click();", button);
+    };
     this.customExpect = {
         elementContainClass: function (ele, className) {
             expect(ele.getAttribute('class')).toContain(className);
