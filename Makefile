@@ -17,6 +17,7 @@ E2EDIsearch=test/e2e/search/data-independent/protractor.conf.js
 E2EDsearch=test/e2e/search/data-dependent/protractor.conf.js
 E2EDrecord=test/e2e/record/data-dependent/protractor.conf.js
 E2EDIrecordEdit=test/e2e/recordedit/data-independent/protractor.conf.js
+E2EDrecordEdit=test/e2e/recordedit/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/login/protractor.conf.js
 
 # Rule to determine MD5 utility
@@ -358,35 +359,38 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test: 
-	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEdit) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
-karma: $(karma)
-
-$(karma): 
+karma: 
 	$(BIN)/karma start
 
 # Rule to run tests
 .PHONY: testall
 testall:
-	$(karma) $(test)
+	$(BIN)/karma start
+	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEdit) && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run search app tests
 .PHONY: testsearch
-testsearch: 
+testsearch:
 	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)
 
 #Rule to run record app tests
 .PHONY: testrecord
-testrecord: 
+testrecord:
 	$(BIN)/protractor $(E2EDrecord)
 
 #Rule to run record add app tests
 .PHONY: testrecordadd
-testrecordadd: 
+testrecordadd:
 	$(BIN)/protractor $(E2EDIrecordEdit)
 
+#Rule to run record edit app tests
+.PHONY: testrecordedit
+testrecordedit:
+	$(BIN)/protractor $(E2EDrecordEdit)
 
 # Rule to make html
 .PHONY: html
