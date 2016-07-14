@@ -136,7 +136,8 @@ RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
     $(RECORD_ASSETS)/lib/ui-grid.js \
     $(RECORD_ASSETS)/lib/csv.js \
     $(RECORD_ASSETS)/lib/pdfmake.min.js \
-    $(RECORD_ASSETS)/lib/vfs_fonts.js
+    $(RECORD_ASSETS)/lib/vfs_fonts.js \
+    $(RECORD_ASSETS)/lib/marked.min.js
 
 RECORD_JS_SOURCE= $(JS)/respond.js \
 	$(JS)/variables.js \

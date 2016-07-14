@@ -124,6 +124,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             // where hidden columns are omitted
             var displayColumns = schemaService.getDisplayColumns(schemaName, tableName);
 
+            // get column values
+            // if type is markdown, converts it to html
+            var columnValues = schemaService.getColumnValues(schemaName, tableName, data[0]);
 
             // get actual columns
             var actualColumns = Object.keys(data[0]);
@@ -139,17 +142,17 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                     if (displayColumns.hasOwnProperty(subCol)) {
                         // if display name is different, change
                         if (displayColumns[subCol] !== subCol){
-                            entity[displayColumns[subCol] + '_link'] = data[0][col];
+                            entity[displayColumns[subCol] + '_link'] = columnValues[col];
                         } else {
-                            entity[col] = data[0][col];
+                            entity[col] = columnValues[col];
                         }
                     }
                 } else if (displayColumns.hasOwnProperty(col)) { // column that is visible
                     // if column display name is different, change
                     if (displayColumns[col] !== col) {
-                        entity[displayColumns[col]] = data[0][col];
+                        entity[displayColumns[col]] = columnValues[col];
                     } else {
-                        entity[col] = data[0][col];
+                        entity[col] = columnValues[col];
                     }
                 }
             }
@@ -1085,6 +1088,24 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         }
 
         return columns;
+    };
+
+    // returns the computed column values.
+    // For now, it only converts markdown to html.
+    this.getColumnValues = function(schemaName, tableName, columnValues){
+        var columnDefinitions = this.schemas[schemaName].tables[tableName].column_definitions;
+        for( var i=0; i < columnDefinitions.length; i++){
+            var cd = columnDefinitions[i];
+
+            // convert markdown to html
+            if(columnValues.hasOwnProperty(cd.name) && cd.type && cd.type.typename && cd.type.typename == "markdown"){
+                try{
+                    columnValues[cd.name] = marked(columnValues[cd.name]);
+                }catch(exception){}
+
+            }
+        }
+        return columnValues;
     };
 
     // returns a set of <col_name, {uri_pattern, caption_pattern}>
