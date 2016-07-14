@@ -582,6 +582,7 @@ $(JS_CONFIG): chaise-config-sample.js
 # Rule for installing
 .PHONY: install
 install: $(HTML)
+	mkdir $(CHAISEDIR)
 	rsync -a --exclude='.*' --exclude=chaise-config.js ./. $(CHAISEDIR)/
 
 # Rules for help/usage
