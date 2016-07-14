@@ -59,7 +59,7 @@ exports.parameterize = function(config, configParams) {
         defer.resolve();
       }, function(err) {
         catalogId = err.catalogId;
-        throw "Unable to import data";
+        defer.reject(new Error("Unable to import data"));
       });
     } else {
       console.log("Fetching schemas");
@@ -78,7 +78,6 @@ exports.parameterize = function(config, configParams) {
           browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;secure;"');
         }
 
-
         // Set the base url to the page that we are running the tests for
         browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
         
@@ -89,7 +88,7 @@ exports.parameterize = function(config, configParams) {
         defer.resolve();
       }, function(err) {
         catalogId = err.catalogId;
-        throw err;
+        defer.reject(new Error(err));
       });
     }
 
@@ -106,12 +105,12 @@ exports.parameterize = function(config, configParams) {
   // If an uncaught exception is caught then simply call cleanup 
   // to remove the created schema/catalog/tables if catalogId is not null
   process.on('uncaughtException', function (err) {
+    console.log("in error");
     var cb = function() {
       console.error((new Date).toUTCString() + ' uncaughtException:', err.message);
       console.error(err.stack);
       process.exit(1)
     };
-
     if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null)  pImport.tear(testConfiguration, catalogId).then(cb, cb);
     else cb();
     

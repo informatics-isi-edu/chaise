@@ -12,7 +12,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	if (tableParams.keys) {
 		it("should have edit record title", function() {
 			chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
-				expect(txt).toBe("Edit " + chaisePage.dataUtils.editInputs.getDisplayName(table, 'table_name', false) + " Record");
+				expect(txt).toBe("Edit " + chaisePage.dataUtils.editInputs.getDisplayName(table, 'table_name', false) + " Records");
 			});
 		});
 

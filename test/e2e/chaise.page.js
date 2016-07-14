@@ -414,11 +414,14 @@ var recordEditPage = function() {
 
     this.recordBookmark = function() {
         return element(by.id('record-bookmark-container'));
-        //return browser.executeScript("return $('#record-bookmark-container');");
     };
 
     this.getAlertError = function() {
         return browser.executeScript("return $('.alert-danger:visible')[0];");
+    };
+
+    this.getRecordModelRows = function() {
+        return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
     };
 };
 

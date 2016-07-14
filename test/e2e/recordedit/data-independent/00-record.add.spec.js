@@ -91,9 +91,9 @@ describe('Record Add', function() {
 							browser.sleep(2000);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        if (testParams.records > 1) {
-						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset")).toBe(true);
+						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset/")).toBe(true);
 						        } else {
-						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record")).toBe(true);
+						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
 						        }
 						    });
 						}
