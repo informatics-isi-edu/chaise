@@ -313,8 +313,7 @@ var recordEditPage = function() {
                 browser.sleep(100);
                 browser.executeScript("return $(arguments[0]).find('.select2-result-single li');", el).then(function(items) {
                     if (value != undefined) {
-                        if (value == "")  browser.executeScript("$(arguments[0]).data().$uiSelectController.select('');", el);
-                        else browser.executeScript("$(arguments[0]).data().$uiSelectController.select(" + value + ");", el);
+                        browser.executeScript("$(arguments[0]).data().$uiSelectController.select('" + value + "');", el);
                         defer.resolve(value);
                     } else {
                         var index = that.getRandomInt(0, items.length - 1);
@@ -355,7 +354,7 @@ var recordEditPage = function() {
     };
 
     this.submitForm = function() {
-        return browser.executeScript("$('button[type=\"submit\"]').click();");
+        return browser.executeScript("$('.alert-danger button').click(), $('button[type=\"submit\"]').click();");
     };
 
     this.getInputErrorMessage = function(el, type) {
@@ -411,6 +410,15 @@ var recordEditPage = function() {
         min = (min == undefined || min == null) ? -32768 : min;
         max = (max == undefined || max == null) ? 32767 : max;
         return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+
+    this.recordBookmark = function() {
+        return element(by.id('record-bookmark-container'));
+        //return browser.executeScript("return $('#record-bookmark-container');");
+    };
+
+    this.getAlertError = function() {
+        return browser.executeScript("return $('.alert-danger:visible')[0];");
     };
 };
 

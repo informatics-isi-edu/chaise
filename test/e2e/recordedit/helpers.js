@@ -240,9 +240,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				it("should select an option (true, false, none)", function() {
 					dropdowns.forEach(function(dropdown) {
 						var value = chance.bool();
-						if (dropdown.column.nullok == true) {
+						/*if (dropdown.column.nullok == true) {
 							if (chance.bool()) value = "";
-						} 
+						} */
 						dropdown.column._value = value;
 						chaisePage.recordEditPage.selectDropdownValue(dropdown, value).then(function() {
 							browser.sleep(10);

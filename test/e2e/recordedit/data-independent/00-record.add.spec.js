@@ -11,7 +11,7 @@ describe('Record Add', function() {
     		var table;
 
     		describe("======================================================================= \n    " 
-    			+ testParams.tables[index].records + " record(s) for table " + tableParams.table_name + ",", function() {
+    			+ tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
 
 				beforeAll(function () {
 					browser.ignoreSyncronization = true;
@@ -65,7 +65,41 @@ describe('Record Add', function() {
 							});
 						});
 					}
-				})
+				});
+
+				describe("Submit " + tableParams.records + " records", function() {
+					beforeAll(function() {
+						// Submit the form
+						chaisePage.recordEditPage.submitForm();
+					});
+
+					var hasErrors = false;
+
+					it("should have no errors, and should be redirected", function() {
+						chaisePage.recordEditPage.getAlertError().then(function(err) {
+							if (err) {
+								expect("Page has errors").toBe("No errors");
+								hasErrors = true;
+							} else {
+								expect(true).toBe(true);
+							}
+						});	
+					});
+
+					it("should be redirected to record page", function() {
+						if (!hasErrors) {
+							browser.sleep(2000);
+							browser.driver.getCurrentUrl().then(function(url) {
+						        if (testParams.records > 1) {
+						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset")).toBe(true);
+						        } else {
+						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record")).toBe(true);
+						        }
+						    });
+						}
+					});
+
+				});
 
     		});
 
