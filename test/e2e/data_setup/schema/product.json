@@ -9,8 +9,7 @@
           "comment": null,
           "annotations": {},
           "unique_columns": [
-            "title",
-             "id"
+            "id"
           ]
         }
       ],
