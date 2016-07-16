@@ -12,36 +12,29 @@
     ])
 
     // Config is no
-    .run(['ermrestServerFactory', 'UriUtils', 'ErrorService', '$log', '$rootScope', function runApp(ermrestServerFactory, UriUtils, ErrorService, $log, $rootScope) {
-        try {
-            UriUtils.setOrigin();
-            // The context object won't change unless the app is reloaded
-            var context = $rootScope.context = UriUtils.parseURLFragment(window.location);
+    .run(['ermrestServerFactory', 'UriUtils', 'ErrorService', '$log', '$rootScope', '$window', function runApp(ermrestServerFactory, UriUtils, ErrorService, $log, $rootScope, $window) {
 
-            var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
-            server.catalogs.get(context.catalogID).then(function success(catalog) {
-                var schema = catalog.schemas.get(context.schemaName);
-                var table = $rootScope.table = schema.tables.get(context.tableName);
+        UriUtils.setOrigin();
 
-                if (context.filters.length == 1) {
-                    var filter = context.filters[0];
-                    var recordPath = new ERMrest.DataPath(table);
-                    var recordFilter = new ERMrest.BinaryPredicate(table.columns.get(filter.name), filter.op, filter.value);
+        ermrestServerFactory.resolve($window.location).then(function success(reference) {
+            console.log(reference);
 
-                    recordPath.filter(recordFilter).entity.get().then(function success(record) {
-                        // So the data can be passed through the directive and watched for changes
-                        $rootScope.record = record[0];
-                    }, function error(response) {
-                        throw reponse;
-                    });
-                }
-            }, function error(response) {
-                throw response;
-            }).catch(function genericCatch(exception) { // can't throw an exception to outer try catch for some reason
-                ErrorService.catchAll(exception);
-            });
-        } catch (exception) { // Catches server get
+            if (reference.filter) {
+                var recordPath = new ERMrest.DataPath(reference.table);
+                var recordFilter = UriUtils.parsedFilterToERMrestFilter(reference.filter, reference.table);
+
+                recordPath.filter(recordFilter).entity.get().then(function success(record) {
+                    console.log(record);
+                    // So the data can be passed through the directive and watched for changes
+                    $rootScope.record = record[0];
+                }, function error(response) {
+                    throw reponse;
+                });
+            }
+        }, function error() {
+
+        }).catch(function genericCatch(exception) {
             ErrorService.catchAll(exception);
-        }
+        });
     }]);
 })();
