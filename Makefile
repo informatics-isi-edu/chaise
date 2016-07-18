@@ -359,7 +359,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test: 
-	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEdit) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -370,7 +370,7 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEdit) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run search app tests
 .PHONY: testsearch
@@ -383,14 +383,9 @@ testrecord:
 	$(BIN)/protractor $(E2EDrecord)
 
 #Rule to run record add app tests
-.PHONY: testrecordadd
+.PHONY: testrecordedit
 testrecordadd:
 	$(BIN)/protractor $(E2EDIrecordEdit)
-
-#Rule to run record edit app tests
-.PHONY: testrecordedit
-testrecordedit:
-	$(BIN)/protractor $(E2EDrecordEdit)
 
 # Rule to make html
 .PHONY: html
