@@ -14,27 +14,25 @@
     // Config is no
     .run(['ermrestServerFactory', 'UriUtils', 'ErrorService', '$log', '$rootScope', '$window', 'Session', function runApp(ermrestServerFactory, UriUtils, ErrorService, $log, $rootScope, $window, Session) {
 
-        Session.getSession().then(function getSession(session) {
-            UriUtils.setOrigin();
-            return ermrestServerFactory.resolve($window.location);
-        }).then(function getReference(reference) {
-            $log.info(reference);
+        UriUtils.setOrigin();
+
+        ermrestServerFactory.resolve($window.location).then(function getReference(reference) {
+            $log.info("Reference:", reference);
 
             if (reference.filter && reference.table) {
                 $rootScope.table = reference.table;
                 var recordPath = new ERMrest.DataPath(reference.table);
                 var recordFilter = UriUtils.parsedFilterToERMrestFilter(reference.filter, reference.table);
 
-                recordPath.filter(recordFilter).entity.get().then(function success(record) {
-                    $log.info(record);
-                    // So the data can be passed through the directive and watched for changes
-                    $rootScope.record = record[0];
-                }, function error(response) {
-                    throw reponse;
-                });
+                return recordPath.filter(recordFilter).entity.get();
             }
+        }).then(function getRecord(record) {
+            $log.info("Record:", record[0]);
+            // So the data can be passed through the directive and watched for
+            $rootScope.record = record[0];
         }, function error(response) {
             $log.warn(response);
+            throw response;
         }).catch(function genericCatch(exception) {
             ErrorService.catchAll(exception);
         });
