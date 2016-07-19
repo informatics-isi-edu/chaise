@@ -6,11 +6,32 @@
     .factory('UriUtils', ['$injector', '$window', function($injector, $window) {
 
         /**
-        * @function
-        * @param {String} str string to be encoded.
-        * @desc
-        * converts a string to an URI encoded string
-        */
+         * @function
+         * @param {Object} location - location Object from the $window resource
+         * @desc
+         * Converts a chaise URI to an ermrest resource URI object
+         */
+        function chaiseURItoErmrestURI(location) {
+            var ermrestUri = {};
+
+            // pull off the catalog ID
+            // location.hash in the form of '#<catalog-id>/<schema-name>:<table-name>/<filters>'
+            var catalogId = location.hash.substring(1).split('/')[0];
+
+            // grab the end of the hash from: '.../<schema-name>...'
+            var hash = location.hash.substring(location.hash.indexOf('/'));
+            ermrestUri.baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
+            ermrestUri.hash = '/catalog/' + catalogId + '/entity' + hash;
+
+            return ermrestUri;
+        }
+
+        /**
+         * @function
+         * @param {String} str string to be encoded.
+         * @desc
+         * converts a string to an URI encoded string
+         */
         function fixedEncodeURIComponent(str) {
             return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
                 return '%' + c.charCodeAt(0).toString(16).toUpperCase();
@@ -132,6 +153,7 @@
         }
 
         return {
+            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,

@@ -15,8 +15,9 @@
     .run(['ermrestServerFactory', 'UriUtils', 'ErrorService', '$log', '$rootScope', '$window', 'Session', function runApp(ermrestServerFactory, UriUtils, ErrorService, $log, $rootScope, $window, Session) {
 
         UriUtils.setOrigin();
+        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-        ermrestServerFactory.resolve($window.location).then(function getReference(reference) {
+        ermrestServerFactory.resolve(ermrestUri).then(function getReference(reference) {
             $log.info("Reference:", reference);
 
             if (reference.filter && reference.table) {
