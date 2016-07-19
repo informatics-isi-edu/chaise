@@ -5,6 +5,7 @@
     angular.module('chaise.viewer')
 
     .constant('context', {
+        appName: 'viewer',
         serviceURL: null,
         catalogID: null,
         schemaName: null,

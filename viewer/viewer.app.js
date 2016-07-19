@@ -47,7 +47,7 @@
     // in a .config block, you append 'Provider' to the dependency name and call
     // .$get() on it. This returns a Provider instance of the factory/service.
     .config(['ermrestServerFactoryProvider', 'context', function configureClient(ermrestServerFactoryProvider, context) {
-        client = ermrestServerFactoryProvider.$get().getServer(context.serviceURL);
+        client = ermrestServerFactoryProvider.$get().getServer(context.serviceURL, {cid: context.appName});
     }])
 
     // Set user info

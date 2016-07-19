@@ -5,6 +5,7 @@
     angular.module('chaise.recordEdit')
 
     .constant('context', {
+        appName: 'recordedit',
         serviceURL: null,
         catalogID: null,
         schemaName: null,
