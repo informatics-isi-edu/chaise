@@ -31,11 +31,11 @@
         // should we allow for improper URLs here?
         // what if there are 2 filters and the id filter is the second one.
         // Is that improper or should it be parsed and ignore the other filter?
-        angular.forEach(context.filters, function(filter) {
-            if(filter.name.toLowerCase() === "id") {
-                context.imageID = filter.value;
-            }
-        });
+        if (context.filter.type === "BinaryPredicate" &&
+            context.filter.operator === "=" &&
+            context.filter.column.toLowerCase() === "id") {
+            context.imageID = context.filter.value;
+        }
 
         console.log('Context', context);
         // TODO: Check if context has everything it needs before proceeding. If not, Bad Request

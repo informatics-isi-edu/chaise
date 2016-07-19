@@ -35,7 +35,7 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', '$log', '$uibModal', '$window', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, $log, $uibModal, $window) {
+    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
         if (!chaiseConfig.editRecord) {
             var modalInstance = $uibModal.open({
                 controller: 'ErrorDialogController',
@@ -147,22 +147,17 @@
                 });
 
                 // If there are filters, populate the model with existing records' column values
-                if (context.filters) {
+                if (context.filter && (context.filter.type === "BinaryPredicate" || context.filter.type === "Conjunction")) {
                     var path = new ERMrest.DataPath(table);
-                    var filters = [];
-                    angular.forEach(context.filters, function(filter) {
-                        var column = path.context.columns.get(filter.name); // caught by generic exception case
-                        filters.push(new ERMrest.BinaryPredicate(column, filter.op, filter.value));
-                    });
                     // TODO: Store filters in URI form in model to use later on form submission
-                    var filterString = new ERMrest.Conjunction(filters);
+                    var filterString = UriUtils.parsedFilterToERMrestFilter(context.filter, table);
                     // recordEditModel.filterUri = filterString.toUri();
 
                     var path = path.filter(filterString);
                     path.entity.get().then(function success(entity) {
                         if (entity.length === 0) {
                             AlertsService.addAlert({type: 'error', message: 'Sorry, the requested record was not found. Please check the URL and refresh the page.' });
-                            console.log('The requested record in schema ' + context.schemaName + ', table ' + context.tableName + ' with the following attributes: ' + context.filters + ' was not found.');
+                            console.log('The requested record in schema ' + context.schemaName + ', table ' + context.tableName + ' with the following attributes: ' + context.filter + ' was not found.');
                         }
 
                         angular.forEach(entity[0], function(value, colName) {

@@ -7,7 +7,7 @@
         var vm = this;
         vm.recordEditModel = recordEditModel;
         vm.server = context.server;
-        vm.editMode = context.filters || false;
+        vm.editMode = context.filter || false;
         vm.booleanValues = context.booleanValues;
         vm.getAutoGenValue = getAutoGenValue;
 
