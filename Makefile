@@ -37,7 +37,8 @@ HTML=search/index.html \
 	 recordset/index.html \
 	 matrix/index.html \
 	 viewer/index.html \
-	 recordedit/index.html
+	 recordedit/index.html \
+	 record-two/index.html
 
 # ERMrestjs Deps
 ERMRESTJS_DIR=../../ermrestjs
