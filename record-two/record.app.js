@@ -18,7 +18,7 @@
         UriUtils.setOrigin();
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-        ERMrest.resolve(ermrestUri).then(function getReference(reference) {
+        ERMrest.resolve(ermrestUri, {cid: 'record-two'}).then(function getReference(reference) {
             $log.info("Reference:", reference);
             $rootScope.reference = reference;
 
