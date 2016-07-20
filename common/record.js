@@ -9,12 +9,7 @@
             transclude: true, // Tranclusion makes the parent scope directly available to the directive. There's no reason to isolate the scope, so no reason to define a new one.
             templateUrl: '../common/templates/record.html',
             link: function(scope) {
-
-                try {
-                    scope.columns = scope.table.columns.all();
-                } catch (exception) {
-                    ErrorService.catchAll(exception);
-                }
+                console.log(scope.recordValues);
             }
         };
     }]);
