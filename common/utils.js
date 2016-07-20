@@ -20,10 +20,10 @@
 
             // grab the end of the hash from: '.../<schema-name>...'
             var hash = location.hash.substring(location.hash.indexOf('/'));
-            ermrestUri.baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
-            ermrestUri.hash = '/catalog/' + catalogId + '/entity' + hash;
+            var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
+            var path = '/catalog/' + catalogId + '/entity' + hash;
 
-            return ermrestUri;
+            return baseUri + path;
         }
 
         /**

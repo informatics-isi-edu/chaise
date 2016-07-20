@@ -17,6 +17,7 @@
         ERMrest.configure($http, $q);
         UriUtils.setOrigin();
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+        console.log(ermrestUri);
 
         ERMrest.resolve(ermrestUri, {cid: 'record-two'}).then(function getReference(reference) {
             $log.info("Reference:", reference);
