@@ -58,7 +58,7 @@
         }
         // generic try/catch
         try {
-            var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
+            var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
         } catch (exception) {
             ErrorService.catchAll(exception);
         }

@@ -17,8 +17,9 @@
             UriUtils.setOrigin();
             // The context object won't change unless the app is reloaded
             var context = $rootScope.context = UriUtils.parseURLFragment(window.location);
+            context.appName = 'record-two';
 
-            var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
+            var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
             server.catalogs.get(context.catalogID).then(function success(catalog) {
                 var schema = catalog.schemas.get(context.schemaName);
                 var table = $rootScope.table = schema.tables.get(context.tableName);
