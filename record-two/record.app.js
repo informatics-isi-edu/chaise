@@ -11,15 +11,18 @@
         'ui.bootstrap'
     ])
 
-    // Config is no
     .run(['UriUtils', 'ErrorService', '$http', '$q', '$log', '$rootScope', '$window', function runApp(UriUtils, ErrorService, $http, $q, $log, $rootScope, $window) {
 
         ERMrest.configure($http, $q);
         UriUtils.setOrigin();
-        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
-        console.log(ermrestUri);
 
-        ERMrest.resolve(ermrestUri, {cid: 'record-two'}).then(function getReference(reference) {
+        // The context object won't change unless the app is reloaded
+        var context = $rootScope.context = UriUtils.parseURLFragment(window.location);
+        context.appName = 'record-two';
+
+        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+
+        ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
             $log.info("Reference:", reference);
             $rootScope.reference = reference;
 

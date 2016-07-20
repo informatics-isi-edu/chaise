@@ -20,6 +20,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 // Register the 'context' object which can be accessed by config and other
 // services.
 .constant('context', {
+    appName: 'recordset',
     chaiseURL: '',  // 'https://www.example.org/chaise
     serviceURL: '', // 'https://www.example.org/ermrest'
     catalogID: '',  // '1'
@@ -309,7 +310,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     $rootScope.errorMessage='';
 
     // Get rowset data from ermrest
-    var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
+    var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
 
     server.catalogs.get(context.catalogID).then(function(catalog) {
         console.log(catalog);
