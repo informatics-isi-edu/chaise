@@ -443,7 +443,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         if (error instanceof ERMrest.NotFoundError) {
             // catalog not found
         } else if (error instanceof ERMrest.ForbiddenError) {
-
+            $rootScope.errorMessage = error.message;
         } else if (error instanceof ERMrest.UnauthorizedError) {
             Session.login(window.location.href);
         }
