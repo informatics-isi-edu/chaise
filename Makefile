@@ -42,8 +42,7 @@ HTML=search/index.html \
 
 # ERMrestjs Deps
 ERMRESTJS_DIR=../../ermrestjs
-ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js \
-		$(ERMRESTJS_DIR)/ngermrest.js
+ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js
 
 # CSS source
 CSS=styles
