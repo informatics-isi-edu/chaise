@@ -7,17 +7,16 @@
         'chaise.navbar',
         'chaise.recordDisplay',
         'chaise.utils',
-        'ERMrest',
+        'ermrestjs',
         'ui.bootstrap'
     ])
 
-    .run(['UriUtils', 'ErrorService', '$http', '$q', '$log', '$rootScope', '$window', function runApp(UriUtils, ErrorService, $http, $q, $log, $rootScope, $window) {
+    .run(['ERMrest', 'UriUtils', 'ErrorService', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, $log, $rootScope, $window) {
 
-        ERMrest.configure($http, $q);
         UriUtils.setOrigin();
 
         // The context object won't change unless the app is reloaded
-        var context = $rootScope.context = UriUtils.parseURLFragment(window.location);
+        var context = $rootScope.context = UriUtils.parseURLFragment($window.location);
         context.appName = 'record-two';
 
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
