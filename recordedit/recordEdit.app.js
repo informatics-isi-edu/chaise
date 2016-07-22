@@ -36,7 +36,7 @@
     }])
 
     .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
-        if (!chaiseConfig.editRecord) {
+        if (!chaiseConfig.editRecord  && chaiseConfig.editRecord !== undefined) {
             var modalInstance = $uibModal.open({
                 controller: 'ErrorDialogController',
                 controllerAs: 'ctrl',
