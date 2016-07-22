@@ -31,10 +31,11 @@
         // should we allow for improper URLs here?
         // what if there are 2 filters and the id filter is the second one.
         // Is that improper or should it be parsed and ignore the other filter?
-        if (context.filter.type === "BinaryPredicate" &&
-            context.filter.operator === "=" &&
-            context.filter.column.toLowerCase() === "id") {
-            context.imageID = context.filter.value;
+        var filter = context.filter;
+        if (filter.type === "BinaryPredicate" &&
+            filter.operator === "=" &&
+            filter.column.toLowerCase() === "id") {
+            context.imageID = filter.value;
         }
 
         console.log('Context', context);
