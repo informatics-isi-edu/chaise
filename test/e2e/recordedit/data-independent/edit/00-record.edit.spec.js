@@ -1,5 +1,5 @@
-var chaisePage = require('../../chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
-var recordEditHelpers = require('../helpers.js');
+var chaisePage = require('../../../chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
+var recordEditHelpers = require('../../helpers.js');
 
 describe('Edit existing record,', function() {  
 
@@ -21,10 +21,14 @@ describe('Edit existing record,', function() {
 					});
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					browser.sleep(2000);
-			        browser.executeScript("chaiseConfig.editRecord = true;");
-			        browser.executeScript("$('.modal').remove();$('.modal-backdrop').remove();$('body').removeClass('modal-open')");
-
+					
+					if (process.env.TRAVIS) {
+						browser.sleep(10000);
+					} else {
+						browser.sleep(3000);
+						browser.executeScript("$('.modal').remove();$('.modal-backdrop').remove();$('body').removeClass('modal-open')");
+					}
+				
 			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {
@@ -37,6 +41,7 @@ describe('Edit existing record,', function() {
 			        });
 			        browser.sleep(100);
 			    });
+
 
 				describe("Presentation and validation,", function() {
 					var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
@@ -63,7 +68,7 @@ describe('Edit existing record,', function() {
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
-							browser.sleep(2000);
+							browser.sleep(3000);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
 						        console.log(url);

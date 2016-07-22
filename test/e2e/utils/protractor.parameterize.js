@@ -1,3 +1,4 @@
+
 exports.parameterize = function(config, configParams) {
 
   if ((typeof configParams != 'object') || (!configParams.page)) {
@@ -11,18 +12,19 @@ exports.parameterize = function(config, configParams) {
 
   var catalogId = null, Q = require('q'); 
 
-  // This method will be called before starting to execute the test suite
-  config.onPrepare = function() {
+  if (process.env.TRAVIS) {
+    console.log("In TRAVIS");
+    config.sauceUser = process.env.SAUCE_USERNAME
+    config.sauceKey = process.env.SAUCE_ACCESS_KEY
+    config.capabilities['tunnel-identifier'] =  process.env.TRAVIS_JOB_NUMBER;
+    config.capabilities['build'] = process.env.TRAVIS_BUILD_NUMBER;
+    config.capabilities['name'] = "chaise #" + process.env.TRAVIS_BUILD_NUMBER;
+  }
 
-    var SpecReporter = require('jasmine-spec-reporter');
-    // add jasmine spec reporter
-    jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'all'}));
-
-    browser.params.configuration = testConfiguration, defer = Q.defer();
-
+  var onErmrestLogin = function(defer) {
     if (testConfiguration.setup) {
 
-      testConfiguration.setup.url = process.env.CHAISE_BASE_URL.replace('chaise', 'ermrest');
+      testConfiguration.setup.url = process.env.ERMREST_URL;
       testConfiguration.setup.authCookie = testConfiguration.authCookie;
 
       pImport.setup(testConfiguration).then(function(data) {
@@ -49,16 +51,18 @@ exports.parameterize = function(config, configParams) {
           browser.params.url = browser.baseUrl + "/#" + catalogId + "/schema/" + data.schema.name;
         } 
         
+
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
-          browser.get(process.env.CHAISE_BASE_URL + "/login");
+          browser.get(process.env.CHAISE_BASE_URL + "/login/");
           browser.sleep(3000);
-          browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;secure;"');
+          browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"'));
         }
 
         defer.resolve();
       }, function(err) {
         catalogId = err.catalogId;
+        console.log(err);
         defer.reject(new Error("Unable to import data"));
       });
     } else {
@@ -73,9 +77,11 @@ exports.parameterize = function(config, configParams) {
 
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
-          browser.get(process.env.CHAISE_BASE_URL + "/login");
+          console.log("setting up cookie");
+          browser.get(process.env.CHAISE_BASE_URL + "/login/");
           browser.sleep(3000);
-          browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;secure;"');
+          browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"'));
+          browser.sleep(100);
         }
 
         // Set the base url to the page that we are running the tests for
@@ -85,11 +91,46 @@ exports.parameterize = function(config, configParams) {
         if (typeof configParams.setBaseUrl == 'function') configParams.setBaseUrl(browser, data);
         else browser.params.url = browser.baseUrl + "/#" + data.catalogId + "/schema/" + data.defaultSchema.name;
 
+        console.log(browser.params.baseUrl);
+
         defer.resolve();
       }, function(err) {
         catalogId = err.catalogId;
         defer.reject(new Error(err));
       });
+    }
+
+  };
+
+  // This method will be called before starting to execute the test suite
+  config.onPrepare = function() {
+
+    var SpecReporter = require('jasmine-spec-reporter');
+    // add jasmine spec reporter
+    jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'all'}));
+
+    browser.params.configuration = testConfiguration, defer = Q.defer();
+
+    if (process.env.TRAVIS) {
+      require('request')({
+          url:  process.env.ERMREST_URL.replace('ermrest', 'authn') + '/session',
+          method: 'POST',
+          body: 'username=test1&password=dummypassword'
+      }, function(error, response, body) {
+          if (!error && response.statusCode == 200) {
+            var cookies = require('set-cookie-parser').parse(response); 
+            cookies.forEach(function(c) {
+              if (c.name == "webauthn") testConfiguration.authCookie = c.name + "=" + c.value + ";";
+            });
+            if (testConfiguration.authCookie) onErmrestLogin(defer);
+            else defer.reject(error);
+          } else {
+            console.dir(error);
+            defer.reject(error);
+          }
+      });
+    } else {
+      onErmrestLogin(defer);
     }
 
     return defer.promise;
@@ -105,7 +146,7 @@ exports.parameterize = function(config, configParams) {
   // If an uncaught exception is caught then simply call cleanup 
   // to remove the created schema/catalog/tables if catalogId is not null
   process.on('uncaughtException', function (err) {
-    console.log("in error");
+    console.log("in error : catalogId " + catalogId);
     var cb = function() {
       console.error((new Date).toUTCString() + ' uncaughtException:', err.message);
       console.error(err.stack);

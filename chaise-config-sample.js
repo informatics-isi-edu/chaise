@@ -28,3 +28,7 @@ var chaiseConfig = {
       chosenValue: "Expression microarray - gene"
     }
 };
+
+if (typeof module === 'object' && module.exports && typeof require === 'function') {
+    exports.config = chaiseConfig;
+}

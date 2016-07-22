@@ -1,6 +1,11 @@
 language: node_js
 node_js:
 - stable
+addons:
+  sauce_connect: true
+  postgresq: '9.4'
+python:
+- 2.7
 notifications:
   email:
     on_success: change
@@ -9,9 +14,62 @@ cache:
   directories:
   - node_modules
   - scripts/vendor
+before_install:
+  - sudo apt-get update
+  - sudo service postgresql stop
+  - sudo apt-get purge postgresql-9.1 postgresql-9.2 postgresql-9.3
+  - sudo service postgresql start 9.4
+  - sudo apt-get -y install libpq-dev postgresql-server-dev-9.4 python-dev
+  - sudo apt-get -y install chkconfig apache2 ssl-cert libapache2-mod-wsgi python python-dateutil
+    python-ply python-tz
+  - sudo apt-get purge python-psycopg2
+  - sudo pip install web.py
+  - sudo pip install psycopg2
+  - sudo a2enmod ssl
+  - sudo a2ensite default-ssl
+  - chkconfig apache2 on
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/webauthn.git
+  - cd webauthn
+  - sudo make testvars
+  - sudo make install
+  - sudo make deploy
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/ermrest.git
+  - cd ermrest
+  - sudo make install PLATFORM=ubuntu1204
+  - sudo make deploy PLATFORM=ubuntu1204
+  - cd ..
+  - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  - sudo apt-get install -y nodejs
+  - git clone https://github.com/informatics-isi-edu/ermrestjs.git
+  - cd ermrestjs
+  - sudo npm install
+  - sudo make build
+  - sudo make installTravis
+  - cd ../chaise
+  - sudo npm install
+
+install:
+  - sudo make build
+  - sudo make installTravis
+  - sudo service apache2 restart
+  - sudo ls -l /etc/apache2/conf.d
+  - sudo ls -lR /var/run/apache2
+  - sudo cat /var/www/chaise/chaise-config.js
+
+before_script:
+  - sudo -H -u webauthn webauthn2-manage adduser test1
+  - sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
+  - sudo -H -u webauthn webauthn2-manage addattr admin
+  - sudo -H -u webauthn webauthn2-manage assign test1 admin
+  
 env:
   global:
-  - secure: KKPijZEdaQ7wyubNojHcJi/pgqwemhOzD8lHBV9c521+iybrHJRyR8fJE22OoMrn9UVPlk2pYgljpF1Vjubms10Kga4GT3vxjZ7kbadkgs09vIzo4SUQDi7XBrm3NbWIgYgcLhE8ZqhZo75idtkFMJCQclwLQ7vn5P5xSzNI3CUVxoQJ+uB6ZgVDn0b2ldfmqCBM5B52ocOBF1c4yLTmJwCkSRNdM2aVj4scf+S0h3InGCitHNyuu0WUYNvrIVIFhjCi7VuadCtJ7fy7Z2uFksHIxkT5Lx9WkdZX1M522ckvKhlFrOOB8ejIl//JsPsvy7cPAs7R9w+8LwiE3lmU376fxO9cKCrY7vnW78zHhbs3q6iFO2hhAiPILlcK3H626zbblHms8wsqUHkXlFx19FyTU8pqW86/4LKr6sdVRPyutokMdrFtgjFC1KevseK7GUWzOepOBJazXCc0WvQvUOUIWET5auRztLPEt0P9fh0hNamKWqYUiaW/nl0cUGAL/70PWSQBwIAHAry9mI9xVsBVVl0JhF5ljzqGmzFxRik7ylaYSZh1nTrjwjZDmBEOvycNsDqZBmU6Vc0KXtHaWF/AbCj1Lyng72YCe5jks058DGzv4nKonphNsG0bn3sb1oNHzFoHMncx8FxjZACsmuVzvzXtWTcv9O/iu+rbYxg=
-  - secure: hSGHl2cRYx9gmE2lrjRWu3H45ogd8hIiI9QlLZpvXonROZJSw8VqQWpLe/7m+95L8UDhOpnCXKct/V9+qUDsQM2kDpEP+9bNCf3skg7MFLkpr1te+y1mCkO0xu2vhoqrzJKtvXGIenZ/aEY1nQrnIYuF/5MaOzNRliHQ+7rmhigW7M4LSFqDQdj7CvqXsyk3cfNMbIeUI9H8/SrG9mxYfAa61H1zJtPmdDegvjFNcQeeT57lgYyoArOw4lcGm9KHQp2Hn4EtXv1L65DS7eogFit0CnS/1QHEinU2ibpgfb/vnAnRun5OAmjsiPAURLb6AuhevzDHeyMZrTPIGUHiIyuzG8qP264sWq1ukyjolyarwcwJoifJAdGWhVPT41XAlgAy+xgfN4xSKNp+tGPo9+iJqVGgccbpKAYqMQKvWSXO6DVQEqPHtpFuXsqNBBwvzCBAS+VdHFoKOy9bv2AEIpVOZJszIkuaNAQVqG/iD0pXQT9rEsZ4Ghm0N/RQf7qhGA4Ot1u5yOko1zgm15ATzpacy6qEzqQQwG3qilO2hUNK8xehqU52a4KQu79yGOG8zFkyvcUS3H/e4NQVeBFQ8GIrfcjg1vD5PXzdnun3iiLwwSXSk9CMHMW0B2z34qvg0q4++LWP2UMHkrx+yf/MzABoYuiZ6LshCvobftU7zmQ=
-  - CHAISE_BASE_URL: https://dev.isrd.isi.edu/chaise
-  - secure: GClLEXw75m6GSnlnad/15RSveo4+KXuutmTIXsWH0+hsbcj2Lfmmi79byONM+oqsLYogD2y2FIY7d7hlKQ6j3Nt+Vbjtsws009rDS3598/CQQ0y9AbJjFguzJrfNgdA89FMuZVdrPDoPe7t18K+K/EAF2TGEXRz12UGS/ZSTBcEL1+2OdvkPWDyFrmYbaAWTvxlE1khJulqCsukNuWc504CeMQqpnOdEUDpsANPQ6UYeUKj48sDbHBArUwycby4ytAJFyf3LNC7cBfcxZ9EWTfr/ePkAOh/eJXkDV5no07OVHo7iJ7MFov7sq2XBZHIYOaOIPLn2CT7DuyVzcJFkV1GoCUgKq/A4ltXYnzzsSBQaGsGX3U2oy/1sfQ3OVlVBgyhQ+sSZQp4/b2NdKlUBTMlMuRx7f9rhrFoymTrLJVEGDntjodTycgusPk8F3XuRZIsTDPDT+5OjS8DsMvqMnnYn2gZLta/NoMdKBZwEw5N41FfLkkPSSCP7skR2axBkklPEsCk80lvTY1qZOJqFkGwpjxd20Ra3a8YWLcsjIoMJyfMmbqjdKXkGxEFrDz70OS8vA7Z2jxq2fvhumh4Uu85elENzDOICH/r2nL/fKd6h2fHobp2K35MWVCdUjZC/ZwzDXScheM8cgKazNoFDm0TS+pmWCDdgv9W1qItO7Hg=
+  - COOKIES: ~/cookies
+  - VERBOSE: brief
+  - HTTPD_ERROR_LOG: /var/log/apache2/error.log
+  - CHAISE_BASE_URL: http://localhost/chaise
+  - ERMREST_URL: http://localhost/ermrest
+  - secure: lTRJNmSQjXTp4uBrBTBnbrjVgHYH5G7NICEv+zOJ496Z0y7SXKYDvDYn5jQWMZthB2UXz7xEUmPLWv73QY2UOEHXkQb3jtZtG6mwHsU1GBKcVsxGYBJURMto1g//xPbPwWG1oGMwDnrw3RjgCZoiVgaDEvDaOypbXC9Kof5c+NNuXpYGLMDI3FiZJCL9LzJM38YrKmXW6ksU/8NgXfpiKTjuOkr2FwxQFigpjxtLbnb8SnDSbDMpm8qJY8zPQ76f+ahIXY/22+3tFmoLCfbLqcCqvL3+6DV6HOjk9LAdIevF707goZpUDYHqDmIXFCUzCEywV+teU1XXYUngeRxM4UrWnZ8SNZ8h84U+spQ+IJzl1KAZR1ApxlGMvf2YjmyPKJY0EV4McG1mf1MGOz7hSrbT/ksFFLQiXYssK7U3b5tC77cEFIvXnTzg56L0fd/iN/bKoeafbkG6feA4XOhCUaH+lxLqkqMuiCp0oJGZ8gu1PXFRuPWJQ3Y97Pw8JQ/joNmlCmiDVLYAw1R2z1X2ZAoGH4bpkrt6FFii0rOHJyxcyaXQEnD3zPhkG/Tj8NcH/LFICm/9K3Z5K78xeBoSJamv8HvKFZy7evb0TGyvMmZU3phvPQaHRoLL69FAKiLc8l7yxhjh7MIoaaOlx6MI9Ssepc05eiMmeheo/wHjNh0=
+  - secure: nb1ovleOgN3DhF/rxxmTeNG887tO/m6jrmA7rtygvo5Q/PwMiY/OdtBSAAZP144nIwUMc9pG/1TKm7HeoZUnCBuChn17HMD/fLtlpi/+A+6dTPgkK4S/JuvtuS288VJWzt7Jo7NAB5n1vjkSkCGrKwk6jirqRKSnOGKA1e1Pp+V0a3TQRM2wCV1XYjHMQcHB+c6jdPeen9sCHVjnOtPBUM4NhiKgrpVzOMh19B7TeEl78wbwBhYHvGWbXvJ+Qvzv2OvJtXDC7cVoogbS5JAkL9pq9r7koHqgHHss6mPsWJekny35zNHO3DqiSNxsrDZyucX8HcHtTmg9Pv7Bd9RedhS2V2GwQ0Rqa2qB0gZNx3yBuCHuC5sONGytycDHZrDhWji7wjZI1tD/atKgC+bekaOrqaKusJM+tYbCrkuYo5AfOjkFODMXzN6ykPM4SYBGnxGylHNkVnPQTLrxiu4X/j1hsx4iwkH11xlQ7fIQNEh3PFnx778v1gSzdgVSI4U9p2np8SKPbPRCNJ7pkv9CjvQ1PkFfe3dM8PsRRr0qY2gwE6csTWQC7q3bcIkSQyl1yiRcSX7nmpoJjtYrW5+tq94kWZnp9LZqlu2plLZDZOb//ITIjCoRTLYgjBFP/5asDeO7GjzT4NHU6RPyYLz0oBbifGgV0sAVESB+N/z+o0c=

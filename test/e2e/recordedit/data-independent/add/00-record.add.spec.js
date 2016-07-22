@@ -1,5 +1,5 @@
-var chaisePage = require('../../chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
-var recordEditHelpers = require('../helpers.js');
+var chaisePage = require('../../../chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
+var recordEditHelpers = require('../../helpers.js');
 
 describe('Record Add', function() {  
 
@@ -13,13 +13,16 @@ describe('Record Add', function() {
     		describe("======================================================================= \n    " 
     			+ tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
 
-				beforeAll(function () {
+				beforeAll(function (done) {
 					browser.ignoreSyncronization = true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					browser.sleep(2000);
-			        browser.executeScript("chaiseConfig.editRecord = true;");
-			        browser.executeScript("$('.modal').remove();$('.modal-backdrop').remove();$('body').removeClass('modal-open')");
+					if (process.env.TRAVIS) {
+						browser.sleep(10000);
+					} else {
+						browser.sleep(3000);
+						browser.executeScript("$('.modal').remove();$('.modal-backdrop').remove();$('body').removeClass('modal-open')");
+					}
 			    });
 
 				describe("Presentation and validation,", function() {
@@ -88,9 +91,10 @@ describe('Record Add', function() {
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
-							browser.sleep(2000);
+							browser.sleep(3000);
 							browser.driver.getCurrentUrl().then(function(url) {
-						        if (testParams.records > 1) {
+								console.log(url);
+						        if (tableParams.records > 1) {
 						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset/")).toBe(true);
 						        } else {
 						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);

@@ -31,6 +31,7 @@
     "jsdoc-to-markdown": "x",
     "jshint": "x",
     "karma": "^0.13.9",
+    "mocha": "x",
     "karma-browserify": "^4.4.0",
     "karma-chai-plugins": "^0.7.0",
     "karma-chrome-launcher": "^0.2.0",
@@ -48,6 +49,8 @@
     "q": "x",
     "request": "x",
     "webdriver-manager": "x",
-    "ermrest-data-utils": "x"
+    "ermrest-data-utils": "x",
+    "set-cookie-parser": "x",
+    "jsonfile": "x"
   }
 }

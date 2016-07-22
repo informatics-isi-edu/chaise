@@ -3,6 +3,12 @@
 # Disable built-in rules
 .SUFFIXES:
 
+# Install directory on dev.isrd
+CHAISEDIR==/var/www/html/chaise
+
+# Install directory on travis
+CHAISETRAVISDIR=/var/www/chaise
+
 # Project name
 PROJ=chaise
 
@@ -16,8 +22,8 @@ BIN=$(MODULES)/.bin
 E2EDIsearch=test/e2e/search/data-independent/protractor.conf.js
 E2EDsearch=test/e2e/search/data-dependent/protractor.conf.js
 E2EDrecord=test/e2e/record/data-dependent/protractor.conf.js
-E2EDIrecordEdit=test/e2e/recordedit/data-independent/protractor.conf.js
-E2EDrecordEdit=test/e2e/recordedit/data-dependent/protractor.conf.js
+E2EDIrecordAdd=test/e2e/recordedit/data-independent/add/protractor.conf.js
+E2EDIrecordEdit=test/e2e/recordedit/data-independent/edit/protractor.conf.js
 E2Elogin=test/e2e/login/protractor.conf.js
 
 # Rule to determine MD5 utility
@@ -40,13 +46,9 @@ HTML=search/index.html \
 	 recordedit/index.html
 
 # ERMrestjs Deps
-ERMRESTJS_DEPS=../../ermrestjs/js/datapath.js \
-			   ../../ermrestjs/js/ermrest.js \
-			   ../../ermrestjs/js/filters.js \
-			   ../../ermrestjs/js/ngermrest.js \
-			   ../../ermrestjs/js/utilities.js \
-			   ../../ermrestjs/errors/networkerrors.js \
-			   ../../ermrestjs/errors/validationerrors.js
+ERMRESTJS_DIR=../../ermrestjs
+ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js \
+		$(ERMRESTJS_DIR)/ngermrest.js
 
 # CSS source
 CSS=styles
@@ -288,9 +290,6 @@ LINT=.make-lint
 # all should just do the minimal needed to deploy chaise
 all: $(HTML)
 
-.PHONY: install
-install: $(PKG) $(MIN) $(HTML)
-
 .PHONY: build
 build: $(PKG) $(MIN) $(HTML)
 
@@ -329,12 +328,10 @@ $(JSDOC): $(JS_SOURCE) $(BIN)
 # Rule to ensure Node bin scripts are present
 $(BIN): $(MODULES)
 	node_modules/.bin/webdriver-manager update --standalone
-	@touch $(BIN)
 
 # Rule to install Node modules locally
 $(MODULES): package.json
 	npm install --force
-	@touch $(MODULES)
 
 .PHONY: deps
 deps: $(BIN)
@@ -359,7 +356,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test: 
-	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit)  && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -370,7 +367,7 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit)  && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run search app tests
 .PHONY: testsearch
@@ -385,7 +382,11 @@ testrecord:
 #Rule to run record add app tests
 .PHONY: testrecordedit
 testrecordadd:
-	$(BIN)/protractor $(E2EDIrecordEdit)
+	$(BIN)/protractor $(E2EDIrecordAdd)
+
+.PHONY: testrecordedit
+testrecordedit:
+	$(BIN)/protractor $(E2EDIrecordEdit) 
 
 # Rule to make html
 .PHONY: html
@@ -550,6 +551,17 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 
+# Rule for installing on dev.isrd
+.PHONY: install
+install: $(HTML)
+	test -d $(dir $(CHAISEDIR)) && mkdir -p $(CHAISEDIR)
+	rsync -a --exclude='.*' --exclude=chaise-config.js ./. $(CHAISEDIR)/
+	
+# Rule for installing on Travis
+.PHONY: installTravis
+installTravis: $(HTML)
+	test -d $(dir $(CHAISETRAVISDIR)) && mkdir -p $(CHAISETRAVISDIR)
+	rsync -a --exclude='.*' ./. $(CHAISETRAVISDIR)/
 
 # Rules for help/usage
 .PHONY: help usage
@@ -557,7 +569,8 @@ help: usage
 usage:
 	@echo "Available 'make' targets:"
 	@echo "    all       		- an alias for build"
-	@echo "	   install   		- installs all dependencies for node and buils the code"
+	@echo "    install          - installs the client (CHAISEDIR=$(CHAISEDIR))"
+	@echo "    installTravis    - installs the client (CHAISETRAVISDIR=$(CHAISETRAVISDIR))"
 	@echo "    deps      		- local install of node dependencies"
 	@echo "    updeps    		- update local dependencies"
 	@echo "    lint      		- lint the source"
@@ -571,5 +584,6 @@ usage:
 	@echo "    distclean 		- cleans the dist dir and the dependencies"
 	@echo "    testsearch 		- runs search app e2e tests"
 	@echo "    testrecord 		- runs record app e2e tests"
-	@echo "    testrecordadd 	- runs record edit e2e tests"
+	@echo "    testrecordadd 	- runs data entry add e2e tests"
+	@echo "    testrecordedit 	- runs date entry edit e2e tests"
 
