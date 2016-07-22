@@ -24,16 +24,15 @@
                 var schema = catalog.schemas.get(context.schemaName);
                 var table = $rootScope.table = schema.tables.get(context.tableName);
 
-                if (context.filters.length == 1) {
-                    var filter = context.filters[0];
+                if (context.filter.type === "BinaryPredicate" && context.filter.operator === "=") {
                     var recordPath = new ERMrest.DataPath(table);
-                    var recordFilter = new ERMrest.BinaryPredicate(table.columns.get(filter.name), filter.op, filter.value);
+                    var recordFilter = UriUtils.parsedFilterToERMrestFilter(context.filter, table);
 
                     recordPath.filter(recordFilter).entity.get().then(function success(record) {
                         // So the data can be passed through the directive and watched for changes
                         $rootScope.record = record[0];
                     }, function error(response) {
-                        throw reponse;
+                        throw response;
                     });
                 }
             }, function error(response) {

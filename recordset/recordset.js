@@ -26,28 +26,10 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     catalogID: '',  // '1'
     schemaName: '', // 'isa'
     tableName: '',  // 'assay'
-    filters: [],
+    filter: {},     //
     sort: null,     // 'column::desc::' ::desc:: is option, ,only allow 1 column
     server: null
 })
-
-
-// Register configuration work to be performed on module loading.
-.config(['context', 'UriUtilsProvider', function(context, UriUtilsProvider) {
-    // Note that we do not like using angular's '$location' service because
-    // it encodes and/or decodes the URL in ways that are incompatible with
-    // our applications. We need control of the encoding of the URLs.
-    var utils = UriUtilsProvider.$get();
-
-    // parse the URL
-    utils.setOrigin();
-    utils.parseURLFragment(window.location, context);
-
-    context.chaiseURL = window.location.href.replace(window.location.hash, '');
-    context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
-
-    console.log("Context", context);
-}])
 
 // Register the 'recordsetModel' object, which can be accessed by other
 // services, but cannot be access by providers (and config, apparently).
@@ -100,7 +82,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
     // login logout should be factored out into a common module
     $scope.login = function() {
-        Session.login(window.location.href);
+        Session.login($window.location.href);
     };
 
     $scope.logout = function() {
@@ -112,7 +94,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         // update the address bar
         // page does not reload
         location.replace($scope.permalink());
-        $rootScope.location = window.location.href;
+        $rootScope.location = $window.location.href;
 
         pageInfo.previousButtonDisabled = true;
         pageInfo.nextButtonDisabled = true;
@@ -149,7 +131,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
             if (error instanceof ERMrest.UnauthorizedError) {
                 // session has expired, login
-                Session.login(window.location.href);
+                Session.login($window.location.href);
             } else {
 
                 // TODO alert error
@@ -178,7 +160,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     };
 
     $scope.permalink = function() {
-        var url = window.location.href.replace(window.location.hash, ''); // everything before #
+        var url = $window.location.href.replace($window.location.hash, ''); // everything before #
         url = url + "#" + UriUtils.fixedEncodeURIComponent(context.catalogID) + "/" +
             (context.schemaName !== '' ? UriUtils.fixedEncodeURIComponent(context.schemaName) + ":" : "") +
             UriUtils.fixedEncodeURIComponent(context.tableName);
@@ -227,7 +209,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    Session.login(window.location.href);
+                    Session.login($window.location.href);
                 } else {
                     // enable buttons
                     pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
@@ -270,7 +252,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    Session.login(window.location.href);
+                    Session.login($window.location.href);
                 } else {
 
                     //enable buttons
@@ -302,12 +284,24 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 }])
 
 // Register work to be performed after loading all modules
-.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session) {
+.run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', 'UriUtils', function($window, pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session, UriUtils) {
 
-    $rootScope.location = window.location.href;
-    pageInfo.loading = true;
-    recordsetModel.tableName = context.tableName;
-    $rootScope.errorMessage='';
+    try {
+
+        // parse the URL
+        UriUtils.parseURLFragment($window.location, context);
+
+        context.chaiseURL = $window.location.href.replace($window.location.hash, '');
+        context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
+
+        $rootScope.location = $window.location.href;
+        pageInfo.loading = true;
+        recordsetModel.tableName = context.tableName;
+        $rootScope.errorMessage='';
+        
+    } catch (error) {
+        $rootScope.errorMessage = error.message;
+    }
 
     // Get rowset data from ermrest
     var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
@@ -329,28 +323,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
                 recordsetModel.columns.push(col);
             }
 
-            // build up filters
-            var filter = null;
-            var len = context.filters.length;
-            if (len == 1) {
-                filter = new ERMrest.BinaryPredicate(
-                    table.columns.get(context.filters[0].name),
-                    context.filters[0].op,
-                    context.filters[0].value);
-            }
-            else if (len > 1) {
-                var filters = [];
-                for (var i = 0; i < len; i++) {
-                    filters.push(
-                        new ERMrest.BinaryPredicate(
-                            table.columns.get(context.filters[i].name),
-                            context.filters[i].op,
-                            context.filters[i].value)
-                    );
-                }
-                filter = new ERMrest.Conjunction(filters);
-            }
-            recordsetModel.filter = filter;
+            recordsetModel.filter = UriUtils.parsedFilterToERMrestFilter(context.filter, table);
 
             // Find shortest Key, used for paging and linking
             var keys = table.keys.all().sort( function(a, b) {
@@ -388,11 +361,11 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
             }
 
             // first get row count
-            table.entity.count(filter).then(function (count) {
+            table.entity.count(recordsetModel.filter).then(function (count) {
                 recordsetModel.count = count;
 
                 // get rowset from table
-                table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
+                table.entity.get(recordsetModel.filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
                     console.log(rowset);
                     recordsetModel.rowset = rowset;
 
@@ -410,7 +383,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                     if (error instanceof ERMrest.UnauthorizedError) {
                         // session has expired, login
-                        Session.login(window.location.href);
+                        Session.login($window.location.href);
                     }
                 });
             }, function (error) {
@@ -420,7 +393,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    Session.login(window.location.href);
+                    Session.login($window.location.href);
                 }
             });
 
@@ -445,16 +418,16 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         } else if (error instanceof ERMrest.ForbiddenError) {
             $rootScope.errorMessage = error.message;
         } else if (error instanceof ERMrest.UnauthorizedError) {
-            Session.login(window.location.href);
+            Session.login($window.location.href);
         }
     });
 
-    window.onhashchange = function() {
+    $window.onhashchange = function() {
         // when address bar changes by user
-        if (window.location.href !== $rootScope.location) {
+        if ($window.location.href !== $rootScope.location) {
             location.reload();
         }
-    }
+    };
 
 }])
 
