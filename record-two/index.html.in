@@ -24,7 +24,7 @@
     <div id="entity-title">{{ table.displayname }}</div>
 
     <!-- defined on $rootScope in run function -->
-    <div ng-if="record && table">
+    <div ng-if="recordValues && columns">
         <record-display></record-display>
     </div>
 </body>
