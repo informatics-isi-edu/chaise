@@ -21,7 +21,7 @@
 <body>
     <navbar></navbar>
 
-    <div id="entity-title">{{ table.displayname }}</div>
+    <div id="entity-title">{{ reference.displayname }}</div>
 
     <!-- defined on $rootScope in run function -->
     <div ng-if="recordValues && columns">

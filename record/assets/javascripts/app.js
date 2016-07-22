@@ -1330,7 +1330,7 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                                 editCatalog = true;
                             }
                         }
-                        $scope.allowEdit = chaiseConfig.editRecord && editCatalog && !ignoreRecord;
+                        $scope.allowEdit = (chaiseConfig.editRecord || chaiseConfig.editRecord === undefined) && editCatalog && !ignoreRecord;
                     }, function error() {
                         console.log('session not found');
                     }); // $http.get session
