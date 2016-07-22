@@ -17,41 +17,28 @@
     ])
 
     // Configure the context info from the URI
-    .config(['context', function configureContext(context) {
+    .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
+        var utils = UriUtilsProvider.$get();
+
         if (chaiseConfig.headTitle !== undefined) {
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
-        context.serviceURL = window.location.origin + '/ermrest';
+        // Parse the URL
+        utils.setOrigin();
+        utils.parseURLFragment(window.location, context);
 
-        if (chaiseConfig.ermrestLocation) {
-            context.serviceURL = chaiseConfig.ermrestLocation;
+        // should we allow for improper URLs here?
+        // what if there are 2 filters and the id filter is the second one.
+        // Is that improper or should it be parsed and ignore the other filter?
+        var filter = context.filter;
+        if (filter.type === "BinaryPredicate" &&
+            filter.operator === "=" &&
+            filter.column.toLowerCase() === "id") {
+            context.imageID = filter.value;
         }
 
-        var hash = window.location.hash;
-
-        if (hash === undefined || hash == '' || hash.length == 1) {
-            return;
-        }
-
-        var parts = hash.substring(1).split('/');
-        context.catalogID = parts[0];
-        if (parts[1]) {
-            var params = parts[1].split(':');
-            if (params.length > 1) {
-                context.schemaName = decodeURIComponent(params[0]);
-                context.tableName = decodeURIComponent(params[1]);
-            } else {
-                context.tableName = decodeURIComponent(params[0]);
-            }
-        }
-        if (parts[2]) {
-            params = parts[2].split('=');
-            if (params.length > 1) {
-                context.imageID = decodeURIComponent(params[1]);
-            }
-        }
-
+        console.log('Context', context);
         // TODO: Check if context has everything it needs before proceeding. If not, Bad Request
     }])
 
@@ -61,7 +48,7 @@
     // in a .config block, you append 'Provider' to the dependency name and call
     // .$get() on it. This returns a Provider instance of the factory/service.
     .config(['ermrestServerFactoryProvider', 'context', function configureClient(ermrestServerFactoryProvider, context) {
-        client = ermrestServerFactoryProvider.$get().getServer(context.serviceURL);
+        client = ermrestServerFactoryProvider.$get().getServer(context.serviceURL, {cid: context.appName});
     }])
 
     // Set user info
@@ -170,6 +157,9 @@
                         for (var i = 0; i < length; i++) {
                             _annotations[i].table = annotationPath.context.table.name;
                             var annotation = _annotations[i];
+                            if (!annotation.config) {
+                                annotation.config = {};
+                            }
                             annotations.push(annotation);
                         }
                         chaiseReady = true;

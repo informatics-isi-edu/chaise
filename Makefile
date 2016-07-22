@@ -4,7 +4,7 @@
 .SUFFIXES:
 
 # Install directory on dev.isrd
-CHAISEDIR==/var/www/html/chaise
+CHAISEDIR=/var/www/html/chaise
 
 # Install directory on travis
 CHAISETRAVISDIR=/var/www/chaise
@@ -43,12 +43,12 @@ HTML=search/index.html \
 	 recordset/index.html \
 	 matrix/index.html \
 	 viewer/index.html \
-	 recordedit/index.html
+	 recordedit/index.html \
+	 record-two/index.html
 
 # ERMrestjs Deps
 ERMRESTJS_DIR=../../ermrestjs
-ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js \
-		$(ERMRESTJS_DIR)/ngermrest.js
+ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js
 
 # CSS source
 CSS=styles
@@ -161,6 +161,30 @@ RECORD_CSS_DEPS=$(RECORD_ASSETS)/lib/slippry/slippry.css \
 
 RECORD_CSS_SOURCE=$(COMMON)/styles/app.css
 
+# JavaScript and CSS source for Record(2) app
+RECORDTWO_ASSETS=record-two
+
+RECORDTWO_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-messages.min.js \
+	$(JS)/vendor/angular-sanitize.js \
+	$(COMMON)/alerts.js \
+	$(COMMON)/authen.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/modal.js \
+	$(COMMON)/navbar.js \
+	$(COMMON)/record.js \
+	$(COMMON)/utils.js \
+	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/ui-bootstrap-tpls.js
+
+RECORDTWO_JS_SOURCE=$(RECORDTWO_ASSETS)/record.app.js \
+	$(RECORDTWO_ASSETS)/record.controller.js
+
+RECORDTWO_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(COMMON)/styles/app.css
+
+RECORDTWO_CSS_SOURCE=$(RECORDTWO_ASSETS)/record.css
 
 # JavaScript and CSS source for Viewer app
 VIEWER_ASSETS=viewer
@@ -221,6 +245,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(JS)/vendor/bootstrap.js \
@@ -411,6 +436,10 @@ record/index.html: record/index.html.in .make-record-asset-block .make-record-te
 		-e '/%TEMPLATES%/ {' -e 'r .make-record-template-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
 
+record-two/index.html: record-two/index.html.in .make-recordtwo-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-recordtwo-asset-block' -e 'd' -e '}' \
+		record-two/index.html.in > record-two/index.html
+
 recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
@@ -550,6 +579,27 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
+
+.make-recordtwo-asset-block: $(RECORDTWO_SHARED_CSS_DEPS) $(RECORDTWO_CSS_SOURCE) $(RECORDTWO_SHARED_JS_DEPS) $(RECORDTWO_JS_SOURCE) $(JS_CONFIG)
+	> .make-recordtwo-asset-block
+	for file in $(RECORDTWO_SHARED_CSS_DEPS); do \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-recordtwo-asset-block ; \
+	done
+	for file in $(RECORDTWO_CSS_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-recordtwo-asset-block ; \
+	done
+	for file in $(RECORDTWO_SHARED_JS_DEPS); do \
+		echo "<script src='../$$file'></script>" >> .make-recordtwo-asset-block ; \
+	done
+	for script in $(ERMRESTJS_DEPS); do \
+		echo "<script src='$$script'></script>" >> .make-recordtwo-asset-block ; \
+	done
+	for file in $(RECORDTWO_JS_SOURCE) $(JS_CONFIG); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-recordtwo-asset-block ; \
+	done
+
 
 # Rule for installing on dev.isrd
 .PHONY: install

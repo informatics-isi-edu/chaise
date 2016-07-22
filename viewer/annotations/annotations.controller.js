@@ -1,5 +1,5 @@
 (function() {
-    'use strict';
+    // 'use strict';
 
     angular.module('chaise.viewer')
 
@@ -12,11 +12,16 @@
         vm.annotationTypes = ['rectangle', 'arrow']; // 'section' excluded b/c once you set an annotation as a section, it can't be changed to other types
         vm.filterByType = {section: true, rectangle: true, arrow: true}; // show all annotation types by default
 
+        vm.resetSearch = resetSearch;
         vm.filterAnnotations = filterAnnotations;
         vm.sortSectionsFirst = sortSectionsFirst;
+        vm.setTypeVisibility = setTypeVisibility;
+        vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
+        vm.numVisibleAnnotations = 0;
+        vm.updateAnnotationVisibility = updateAnnotationVisibility;
 
         vm.createMode = false;
-        vm.newAnnotation = {config:{color: vm.defaultColor}};
+        vm.newAnnotation = {config:{color: vm.defaultColor, visible: true}};
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
@@ -49,30 +54,16 @@
                 var messageType = data.messageType;
 
                 switch (messageType) {
-                    case 'annotoriousReady':
-                        // annotoriousReady case handled in viewer.app.js.
-                        // Repeating the case here to avoid triggering default case
-                        break;
                     case 'annotationDrawn':
                         vm.newAnnotation.shape = data.content.shape;
                         $scope.$apply(function() {
                             vm.createMode = true;
                         });
                         break;
-                    case 'onHighlighted':
-                    // On-hover highlighting behavior no longer needed
-                    // OSD still sends this message out on hover though, so the
-                    // is case here to avoid triggering default case
-                        break;
-                    case 'onUnHighlighted':
-                    // On-hover highlighting behavior no longer needed
-                    // OSD still sends this message out on hover though, so the
-                    // is case here to avoid triggering default case
-                        break;
                     case 'onClickAnnotation':
                         var content = JSON.parse(data.content);
                         //TODO check data object
-                        var annotation = findAnnotation(content.data.shapes[0].geometry);
+                        var annotation = findAnnotation(content.shapes[0].geometry);
                         if (annotation) {
                             var annotationId = annotation.table + '-' + annotation.id;
                             $scope.$apply(function() {
@@ -82,6 +73,13 @@
                             vm.scrollIntoView(annotationId);
                         }
                         break;
+                    // The following cases are already handled elsewhere or are
+                    // no longer needed but the case is repeated here to avoid
+                    // triggering the default case.
+                    case 'annotoriousReady': // handled in viewer.app.js.
+                    case 'onHighlighted':
+                    case 'onUnHighlighted':
+                        break;
                     default:
                         console.log('Invalid event message type "' + messageType + '"');
                 }
@@ -90,22 +88,28 @@
             }
         });
 
+        function updateAnnotationVisibility(annotation) {
+            if (vm.filterByType[annotation.type]) {
+                annotation.config.visible = true;
+                AnnotationsService.syncVisibility();
+                vm.getNumVisibleAnnotations();
+            }
+        }
         function filterAnnotations(annotation) {
             if (!vm.query) {
+                vm.updateAnnotationVisibility(annotation);
                 return true;
             }
-
             vm.query = vm.query.toLowerCase();
-
             var author = annotation.author;
             var props = [annotation.anatomy, annotation.description, author.display_name, author.full_name, author.email, annotation.created];
             var numProps = props.length;
             for (var i = 0; i < numProps; i++) {
                 if (props[i] && props[i].toLowerCase().indexOf(vm.query) > -1) {
+                    vm.updateAnnotationVisibility(annotation);
                     return true;
                 }
             }
-
             var commentsArr = comments[annotation.id];
             if (commentsArr) {
                 var numComments = commentsArr.length;
@@ -116,12 +120,15 @@
                     var numCommentProps = commentProps.length;
                     for (var p = 0; p < numCommentProps; p++) {
                         if (commentProps[p] && commentProps[p].toLowerCase().indexOf(vm.query) > -1) {
+                            vm.updateAnnotationVisibility(annotation);
                             return true;
                         }
                     }
                 }
             }
-
+            annotation.config.visible = false;
+            AnnotationsService.syncVisibility();
+            vm.getNumVisibleAnnotations();
             return false;
         }
 
@@ -254,10 +261,7 @@
         function scrollIntoView(elementId) {
             // Using native JS b/c angular.element returns a jQuery/jqLite object,
             // which is incompatible with .scrollIntoView()
-            document.getElementById(elementId).scrollIntoView({
-                block: 'start',
-                behavior: 'smooth'
-            });
+            document.getElementById(elementId).scrollIntoView({block: 'start', behavior: 'smooth'});
         }
 
         // Used to set the author based on the info object from the user object (user.info) that is set on every annotation
@@ -270,6 +274,35 @@
             if (annotation.type == 'section') {
                 return 0;
             }
+        }
+
+        function resetSearch() {
+            vm.query = '';
+        }
+
+        // Sets all annotations of a certain type (i.e. section|rectangle|arrow) to true/false
+        function setTypeVisibility(annotationType) {
+            var annotations = vm.annotations;
+            var visibility = vm.filterByType[annotationType];
+            for (var i = 0, len = annotations.length; i < len; i++) {
+                var annotation = annotations[i];
+                if (annotation.type == annotationType) {
+                    annotation.config.visible = visibility;
+                    AnnotationsService.syncVisibility();
+                    vm.getNumVisibleAnnotations();
+                }
+            }
+        }
+
+        function getNumVisibleAnnotations() {
+            var counter = 0;
+            var annotations = vm.annotations;
+            for (var i = 0, len = annotations.length; i < len; i++) {
+                if (annotations[i].config.visible) {
+                    counter++;
+                }
+            }
+            return vm.numVisibleAnnotations = counter;
         }
     }]);
 })();

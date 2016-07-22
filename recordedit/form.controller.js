@@ -7,7 +7,7 @@
         var vm = this;
         vm.recordEditModel = recordEditModel;
         vm.server = context.server;
-        vm.editMode = context.filters || false;
+        vm.editMode = context.filter || false;
         vm.booleanValues = context.booleanValues;
         vm.getAutoGenValue = getAutoGenValue;
 
@@ -40,16 +40,29 @@
             var form = vm.formContainer;
             var model = vm.recordEditModel;
             var rowset = model.rows;
-            var redirectUrl = $window.location.origin;
+            var redirectUrl = '../';
             form.$setUntouched();
             form.$setPristine();
+
+            if (entities.length === 0) {
+            // 1. var entities = the data returned from ERMrest after POST or PUT operation.
+            // 2. var rowset = this app's representation of the submitted data.
+            // 3. If entities === [], that means the user submitted no new changes
+            // to the record, which means we can use rowset to build the redirect
+            // url later.
+            // Why not just use rowset the whole time? Because after user submits
+            // data, ERMrest might have modified that data, so we should use the
+            // returned data from ERMrest instead of assuming rowset and entities
+            // are always the same.
+                entities = rowset;
+            }
 
             if (rowset.length == 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
                 // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
                 // TODO: Postpone using datapath api to build redirect url until
                 // datapath is redeveloped to only use aliases when necessary
-                redirectUrl += '/chaise/record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
+                redirectUrl += 'record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
 
                 try {
                     // Find the shortest "primary key" for use in redirect url
@@ -61,10 +74,7 @@
                     // Build the redirect url with key cols and entity's values
                     for (var c = 0, len = shortestKey.length; c < len; c++) {
                         var colName = shortestKey[c].name;
-                        var separator = null;
-                        if (rowset.length == 1) {
-                            redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
-                        }
+                        redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
                     }
                 } catch (exception) { // catches model.table.keys.all()
                     // handle exception
@@ -73,7 +83,7 @@
             } else if (rowset.length > 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record set...'});
                 // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
-                redirectUrl += '/chaise/recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
+                redirectUrl += 'recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
             } else {
                 return AlertsService.addAlert({type: 'error', message: 'Sorry, there is no data to submit. You must have at least 1 set of data for submission.'});
             }
@@ -84,7 +94,7 @@
 
         function showSubmissionError(response) {
             AlertsService.addAlert({type: 'error', message: response.message});
-            console.log(response);
+            $log.info(response);
         }
 
         function submit() {

@@ -15,60 +15,50 @@
         'ui.bootstrap',
         'chaise.modal',
         'ui.select',
-        //'rzModule',
+        'ui.bootstrap',
+        'rzModule',
         '720kb.datepicker',
         'ngMessages'
     ])
 
     // Configure the context info from the URI
-    .config(['context', '$httpProvider', function configureContext(context, $httpProvider) {
+    .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
+        var utils = UriUtilsProvider.$get();
 
         if (chaiseConfig.headTitle !== undefined) {
             document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
+        // Parse the URL
+        utils.setOrigin();
+        utils.parseURLFragment(window.location, context);
 
-        // Parse the url
-        context.serviceURL = window.location.origin + '/ermrest';
-        if (chaiseConfig.ermrestLocation) {
-            context.serviceURL = chaiseConfig.ermrestLocation;
-        }
-
-        var hash = window.location.hash;
-
-        if (hash === undefined || hash == '' || hash.length == 1) {
-            return;
-        }
-
-        var parts = hash.substring(1).split('/');
-        context.catalogID = parts[0];
-        if (parts[1]) {
-            var params = parts[1].split(':');
-            if (params.length > 1) {
-                context.schemaName = decodeURIComponent(params[0]);
-                context.tableName = decodeURIComponent(params[1]);
-            } else {
-                context.tableName = decodeURIComponent(params[0]);
-            }
-        }
-
-        // If there are filters appended to the URL, add them to context.js
-        if (parts[2]) {
-            context.filters = {};
-            var filters = parts[2].split('&');
-            for (var i = 0, len = filters.length; i < len; i++) {
-                var filter = filters[i].split('=');
-                if (filter[0] && filter[1]) {
-                    context.filters[decodeURIComponent(filter[0])] = decodeURIComponent(filter[1]);
-                }
-            }
-        }
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', '$log', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, $log) {
+    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
+        if (!chaiseConfig.editRecord) {
+            var modalInstance = $uibModal.open({
+                controller: 'ErrorDialogController',
+                controllerAs: 'ctrl',
+                size: 'sm',
+                templateUrl: '../common/templates/errorDialog.html',
+                backdrop: 'static',
+                keyboard: false,
+                resolve: {
+                    params: {
+                        title: 'Record Editing Disabled',
+                        message: 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.'
+                    }
+                }
+            });
+
+            modalInstance.result.then(function() {
+                $window.location.href = chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin;
+            });
+        }
         // generic try/catch
         try {
-            var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
+            var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
         } catch (exception) {
             ErrorService.catchAll(exception);
         }
@@ -157,22 +147,17 @@
                 });
 
                 // If there are filters, populate the model with existing records' column values
-                if (context.filters) {
+                if (context.filter && (context.filter.type === "BinaryPredicate" || context.filter.type === "Conjunction")) {
                     var path = new ERMrest.DataPath(table);
-                    var filters = [];
-                    angular.forEach(context.filters, function(value, key) {
-                        var column = path.context.columns.get(key); // caught by generic exception case
-                        filters.push(new ERMrest.BinaryPredicate(column, ERMrest.OPERATOR.EQUAL, value));
-                    });
                     // TODO: Store filters in URI form in model to use later on form submission
-                    var filterString = new ERMrest.Conjunction(filters);
+                    var filterString = UriUtils.parsedFilterToERMrestFilter(context.filter, table);
                     // recordEditModel.filterUri = filterString.toUri();
 
                     var path = path.filter(filterString);
                     path.entity.get().then(function success(entity) {
                         if (entity.length === 0) {
                             AlertsService.addAlert({type: 'error', message: 'Sorry, the requested record was not found. Please check the URL and refresh the page.' });
-                            console.log('The requested record in schema ' + context.schemaName + ', table ' + context.tableName + ' with the following attributes: ' + context.filters + ' was not found.');
+                            console.log('The requested record in schema ' + context.schemaName + ', table ' + context.tableName + ' with the following attributes: ' + context.filter + ' was not found.');
                         }
 
                         angular.forEach(entity[0], function(value, colName) {

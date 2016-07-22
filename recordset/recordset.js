@@ -20,94 +20,16 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 // Register the 'context' object which can be accessed by config and other
 // services.
 .constant('context', {
+    appName: 'recordset',
     chaiseURL: '',  // 'https://www.example.org/chaise
     serviceURL: '', // 'https://www.example.org/ermrest'
     catalogID: '',  // '1'
     schemaName: '', // 'isa'
     tableName: '',  // 'assay'
-    filters: [],
+    filter: {},     //
     sort: null,     // 'column::desc::' ::desc:: is option, ,only allow 1 column
     server: null
 })
-
-
-// Register configuration work to be performed on module loading.
-.config(['context', function(context) {
-    // Note that we do not like using angular's '$location' service because
-    // it encodes and/or decodes the URL in ways that are incompatible with
-    // our applications. We need control of the encoding of the URLs.
-
-    // First, configure the service URL, assuming its this origin plus the
-    // typical deployment location for ermrest.
-    context.serviceURL = window.location.origin + "/ermrest";
-
-    // Then, parse the URL fragment id (aka, hash). Expected format:
-    //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-    var hash = window.location.hash;
-    if (hash === undefined || hash == '' || hash.length == 1) {
-        return;
-    }
-
-    context.chaiseURL = window.location.href.replace(hash, '');
-    context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
-    console.log(context.chaiseURL);
-
-    // parse out @sort(...)
-    if (hash.indexOf("@sort(") !== -1) {
-        context.sort = hash.match(/@sort\((.*)\)/)[1];
-    }
-
-    // content before @sort
-    var parts = hash.split("@sort(")[0];
-    var fragment = parts.substring(1).split('/');
-    var len = fragment.length;
-    context.catalogID = fragment[0];
-    if (len > 1) {
-
-        // Parse the schema:table name
-        schemaTable = fragment[1].split(':');
-        if (schemaTable.length > 1) {
-            context.schemaName = decodeURIComponent(schemaTable[0]);
-            context.tableName = decodeURIComponent(schemaTable[1]);
-        }
-        else {
-            context.schemaName = '';
-            context.tableName = decodeURIComponent(schemaTable[0]);
-        }
-
-        // Parse the filters
-        if (len>2) {
-            // The '/' is also a valid separator for conjunctions but for
-            // simplicity we just support '&' at this point. Something for
-            // future discussion.
-            var conjunction = fragment[2].split('&');
-            for (var i in conjunction) {
-                var filter = conjunction[i].split("::");
-                if (filter.length != 3) {
-                    // Currently, this only supports binary predicates, skips others
-                    console.log("invalid filter string: " + filter);
-                    continue;
-                }
-
-                // Push filters as simple (name, op, value) triples
-                if (filter[1] === "eq") {
-                    context.filters.push({
-                        name: decodeURIComponent(filter[0]),
-                        op: "=",
-                        value: decodeURIComponent(filter[2])
-                    });
-                } else {
-                    context.filters.push({
-                        name: decodeURIComponent(filter[0]),
-                        op: "::"+filter[1]+"::",
-                        value: decodeURIComponent(filter[2])
-                    });
-                }
-            }
-            console.log(context.filters);
-        }
-    }
-}])
 
 // Register the 'recordsetModel' object, which can be accessed by other
 // services, but cannot be access by providers (and config, apparently).
@@ -160,7 +82,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
     // login logout should be factored out into a common module
     $scope.login = function() {
-        Session.login(window.location.href);
+        Session.login($window.location.href);
     };
 
     $scope.logout = function() {
@@ -172,7 +94,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         // update the address bar
         // page does not reload
         location.replace($scope.permalink());
-        $rootScope.location = window.location.href;
+        $rootScope.location = $window.location.href;
 
         pageInfo.previousButtonDisabled = true;
         pageInfo.nextButtonDisabled = true;
@@ -209,7 +131,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
             if (error instanceof ERMrest.UnauthorizedError) {
                 // session has expired, login
-                Session.login(window.location.href);
+                Session.login($window.location.href);
             } else {
 
                 // TODO alert error
@@ -238,7 +160,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
     };
 
     $scope.permalink = function() {
-        var url = window.location.href.replace(window.location.hash, ''); // everything before #
+        var url = $window.location.href.replace($window.location.hash, ''); // everything before #
         url = url + "#" + UriUtils.fixedEncodeURIComponent(context.catalogID) + "/" +
             (context.schemaName !== '' ? UriUtils.fixedEncodeURIComponent(context.schemaName) + ":" : "") +
             UriUtils.fixedEncodeURIComponent(context.tableName);
@@ -287,7 +209,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    Session.login(window.location.href);
+                    Session.login($window.location.href);
                 } else {
                     // enable buttons
                     pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
@@ -330,7 +252,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 
                 if (error instanceof ERMrest.UnauthorizedError) {
                     // session has expired, login
-                    Session.login(window.location.href);
+                    Session.login($window.location.href);
                 } else {
 
                     //enable buttons
@@ -362,171 +284,150 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 }])
 
 // Register work to be performed after loading all modules
-.run(['pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', function(pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session) {
+.run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', 'UriUtils', function($window, pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session, UriUtils) {
 
-    $rootScope.location = window.location.href;
-    pageInfo.loading = true;
-    recordsetModel.tableName = context.tableName;
-    $rootScope.errorMessage='';
+    try {
+
+        // parse the URL
+        UriUtils.parseURLFragment($window.location, context);
+
+        context.chaiseURL = $window.location.href.replace($window.location.hash, '');
+        context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
+
+        $rootScope.location = $window.location.href;
+        pageInfo.loading = true;
+        recordsetModel.tableName = context.tableName;
+        $rootScope.errorMessage='';
+        
+    } catch (error) {
+        $rootScope.errorMessage = error.message;
+    }
 
     // Get rowset data from ermrest
-    var server = context.server = ermrestServerFactory.getServer(context.serviceURL);
+    var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
 
-    // authenticiation
-    Session.getSession().then(function(session) {
+    server.catalogs.get(context.catalogID).then(function(catalog) {
+        console.log(catalog);
 
-        $rootScope.user = session.client.display_name;
-        server.catalogs.get(context.catalogID).then(function(catalog) {
-            console.log(catalog);
+        try {
+            // get table definition
+            var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
+            console.log(table);
+            recordsetModel.table = table;
+            recordsetModel.tableDisplayName = table.displayname;
 
-            try {
-                // get table definition
-                var table = catalog.schemas.get(context.schemaName).tables.get(context.tableName);
-                console.log(table);
-                recordsetModel.table = table;
-                recordsetModel.tableDisplayName = table.displayname;
+            // columns
+            var columns = table.columns.all();
+            for (var i = 0; i < columns.length; i++) {
+                var col = {name: columns[i].name, displayname: columns[i].displayname, hidden: columns[i].ignore};
+                recordsetModel.columns.push(col);
+            }
 
-                // columns
-                var columns = table.columns.all();
-                for (var i = 0; i < columns.length; i++) {
-                    var col = {name: columns[i].name, displayname: columns[i].displayname, hidden: columns[i].ignore};
-                    recordsetModel.columns.push(col);
+            recordsetModel.filter = UriUtils.parsedFilterToERMrestFilter(context.filter, table);
+
+            // Find shortest Key, used for paging and linking
+            var keys = table.keys.all().sort( function(a, b) {
+                return a.colset.length() - b.colset.length();
+            });
+            recordsetModel.keycols = keys[0].colset.columns;
+
+            // sorting
+            var sort = [];
+
+            // user selected column as the priority in sort
+            // followed by all the key columns
+            if (context.sort !== null) {
+                if (context.sort.endsWith("::desc::")) {
+                    recordsetModel.sortby = decodeURIComponent(
+                        context.sort.match(/(.*)::desc::/)[1]
+                    );
+                    recordsetModel.sortOrder = 'desc';
+                } else {
+                    recordsetModel.sortby = decodeURIComponent(context.sort);
+                    recordsetModel.sortOrder = 'asc';
                 }
 
-                // build up filters
-                var filter = null;
-                var len = context.filters.length;
-                if (len == 1) {
-                    filter = new ERMrest.BinaryPredicate(
-                        table.columns.get(context.filters[0].name),
-                        context.filters[0].op,
-                        context.filters[0].value);
+                // this will cause program to throw exception is sort column is not valid
+                table.columns.get(recordsetModel.sortby);
+
+                sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
+            }
+
+            for (i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
+                var col = recordsetModel.keycols[i].name;
+                if (col !== recordsetModel.sortby) {
+                    sort.push({"column": col, "order": "asc"});
                 }
-                else if (len > 1) {
-                    var filters = [];
-                    for (var i = 0; i < len; i++) {
-                        filters.push(
-                            new ERMrest.BinaryPredicate(
-                                table.columns.get(context.filters[i].name),
-                                context.filters[i].op,
-                                context.filters[i].value)
-                        );
-                    }
-                    filter = new ERMrest.Conjunction(filters);
-                }
-                recordsetModel.filter = filter;
+            }
 
-                // Find shortest Key, used for paging and linking
-                var keys = table.keys.all().sort( function(a, b) {
-                    return a.colset.length() - b.colset.length();
-                });
-                recordsetModel.keycols = keys[0].colset.columns;
+            // first get row count
+            table.entity.count(recordsetModel.filter).then(function (count) {
+                recordsetModel.count = count;
 
-                // sorting
-                var sort = [];
+                // get rowset from table
+                table.entity.get(recordsetModel.filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
+                    console.log(rowset);
+                    recordsetModel.rowset = rowset;
 
-                // user selected column as the priority in sort
-                // followed by all the key columns
-                if (context.sort !== null) {
-                    if (context.sort.endsWith("::desc::")) {
-                        recordsetModel.sortby = decodeURIComponent(
-                            context.sort.match(/(.*)::desc::/)[1]
-                        );
-                        recordsetModel.sortOrder = 'desc';
-                    } else {
-                        recordsetModel.sortby = decodeURIComponent(context.sort);
-                        recordsetModel.sortOrder = 'asc';
-                    }
+                    pageInfo.loading = false;
+                    pageInfo.recordStart = 1;
+                    pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
+                    pageInfo.previousButtonDisabled = true;
+                    pageInfo.nextButtonDisabled = recordsetModel.count <= pageInfo.recordEnd;
 
-                    // this will cause program to throw exception is sort column is not valid
-                    table.columns.get(recordsetModel.sortby);
-
-                    sort.push({"column": recordsetModel.sortby, "order": recordsetModel.sortOrder});
-                }
-
-                for (i = 0; i < recordsetModel.keycols.length; i++) { // all the key columns
-                    var col = recordsetModel.keycols[i].name;
-                    if (col !== recordsetModel.sortby) {
-                        sort.push({"column": col, "order": "asc"});
-                    }
-                }
-
-                // first get row count
-                table.entity.count(filter).then(function (count) {
-                    recordsetModel.count = count;
-
-                    // get rowset from table
-                    table.entity.get(filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
-                        console.log(rowset);
-                        recordsetModel.rowset = rowset;
-
-                        pageInfo.loading = false;
-                        pageInfo.recordStart = 1;
-                        pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
-                        pageInfo.previousButtonDisabled = true;
-                        pageInfo.nextButtonDisabled = recordsetModel.count <= pageInfo.recordEnd;
-
-                    }, function (error) {
-                        console.log(error);
-                        pageInfo.loading = false;
-                        pageInfo.previousButtonDisabled = true;
-                        pageInfo.nextButtonDisabled = true;
-
-                        if (error instanceof ERMrest.UnauthorizedError) {
-                            // session has expired, login
-                            Session.login(window.location.href);
-                        }
-                    });
                 }, function (error) {
+                    console.log(error);
                     pageInfo.loading = false;
                     pageInfo.previousButtonDisabled = true;
                     pageInfo.nextButtonDisabled = true;
 
                     if (error instanceof ERMrest.UnauthorizedError) {
                         // session has expired, login
-                        Session.login(window.location.href);
+                        Session.login($window.location.href);
                     }
                 });
-
-            } catch (error) {
+            }, function (error) {
                 pageInfo.loading = false;
-                if (error instanceof ERMrest.NotFoundError ||
-                    error instanceof ERMrest.InvalidFilterOperatorError) {
-                    $rootScope.errorMessage = error.message;
+                pageInfo.previousButtonDisabled = true;
+                pageInfo.nextButtonDisabled = true;
+
+                if (error instanceof ERMrest.UnauthorizedError) {
+                    // session has expired, login
+                    Session.login($window.location.href);
                 }
-            }
+            });
 
-        }, function(error) {
-
-            // get catalog error
-            console.log(error);
+        } catch (error) {
             pageInfo.loading = false;
-
-            // TODO
-            $rootScope.errorMessage = error.message;
-            if (error instanceof ERMrest.NotFoundError) {
-                // catalog not found
-            } else if (error instanceof ERMrest.ForbiddenError) {
-
-            } else if (error instanceof ERMrest.UnauthorizedError) {
-                Session.login(window.location.href);
+            if (error instanceof ERMrest.NotFoundError ||
+                error instanceof ERMrest.InvalidFilterOperatorError) {
+                $rootScope.errorMessage = error.message;
             }
-        });
-        
+        }
+
     }, function(error) {
-        // not logged in, redirect to login
-        if (error instanceof Session.NotFoundError) {
-            Session.login(window.location.href);
+
+        // get catalog error
+        console.log(error);
+        pageInfo.loading = false;
+
+        // TODO
+        $rootScope.errorMessage = error.message;
+        if (error instanceof ERMrest.NotFoundError) {
+            // catalog not found
+        } else if (error instanceof ERMrest.ForbiddenError) {
+            $rootScope.errorMessage = error.message;
+        } else if (error instanceof ERMrest.UnauthorizedError) {
+            Session.login($window.location.href);
         }
     });
 
-
-    window.onhashchange = function() {
+    $window.onhashchange = function() {
         // when address bar changes by user
-        if (window.location.href !== $rootScope.location) {
+        if ($window.location.href !== $rootScope.location) {
             location.reload();
         }
-    }
+    };
 
 }])
 
