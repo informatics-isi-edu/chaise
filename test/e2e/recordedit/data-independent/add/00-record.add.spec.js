@@ -13,7 +13,7 @@ describe('Record Add', function() {
     		describe("======================================================================= \n    " 
     			+ tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
 
-				beforeAll(function (done) {
+				beforeAll(function () {
 					browser.ignoreSyncronization = true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
