@@ -18,6 +18,7 @@ var chaiseConfig = {
     recordUiGridEnabled: false,
     recordUiGridExportCSVEnabled: true,
     recordUiGridExportPDFEnabled: true,
+    editRecord: true,
     tour: {
       pickRandom: false,
       searchInputAttribute: "Data",
