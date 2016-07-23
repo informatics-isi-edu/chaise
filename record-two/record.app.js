@@ -7,41 +7,36 @@
         'chaise.navbar',
         'chaise.recordDisplay',
         'chaise.utils',
-        'ERMrest',
+        'ermrestjs',
         'ui.bootstrap'
     ])
 
-    // Config is no
-    .run(['ermrestServerFactory', 'UriUtils', 'ErrorService', '$log', '$rootScope', function runApp(ermrestServerFactory, UriUtils, ErrorService, $log, $rootScope) {
-        try {
-            UriUtils.setOrigin();
-            // The context object won't change unless the app is reloaded
-            var context = $rootScope.context = UriUtils.parseURLFragment(window.location);
-            context.appName = 'record-two';
+    .run(['ERMrest', 'UriUtils', 'ErrorService', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, $log, $rootScope, $window) {
 
-            var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
-            server.catalogs.get(context.catalogID).then(function success(catalog) {
-                var schema = catalog.schemas.get(context.schemaName);
-                var table = $rootScope.table = schema.tables.get(context.tableName);
+        UriUtils.setOrigin();
 
-                if (context.filter.type === "BinaryPredicate" && context.filter.operator === "=") {
-                    var recordPath = new ERMrest.DataPath(table);
-                    var recordFilter = UriUtils.parsedFilterToERMrestFilter(context.filter, table);
+        // The context object won't change unless the app is reloaded
+        var context = $rootScope.context = UriUtils.parseURLFragment($window.location);
+        context.appName = 'record-two';
 
-                    recordPath.filter(recordFilter).entity.get().then(function success(record) {
-                        // So the data can be passed through the directive and watched for changes
-                        $rootScope.record = record[0];
-                    }, function error(response) {
-                        throw response;
-                    });
-                }
-            }, function error(response) {
-                throw response;
-            }).catch(function genericCatch(exception) { // can't throw an exception to outer try catch for some reason
-                ErrorService.catchAll(exception);
-            });
-        } catch (exception) { // Catches server get
+        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+
+        ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+            $log.info("Reference:", reference);
+            $rootScope.reference = reference;
+
+            return reference.read(1);
+        }).then(function getPage(page) {
+            var tuple = page.tuples[0];
+
+            $rootScope.recordValues = tuple.values;
+            $rootScope.columns = $rootScope.reference.columns;
+
+        }, function error(response) {
+            $log.warn(response);
+            throw response;
+        }).catch(function genericCatch(exception) {
             ErrorService.catchAll(exception);
-        }
+        });
     }]);
 })();

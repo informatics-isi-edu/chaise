@@ -32,3 +32,4 @@ The below table explains the usage of the default parameters:
 | hideSearchTextFacet | A boolean | false | "hideSearchTextFacet":\<value\> | N/A | Whether the search box for attributes names and values should be hidden |
 | maxColumns | An integer | 6 | "maxColumns":\<value\> | N/A | The maximum number of columns to be displayed in the search result table |
 | showUnfilteredResults | A boolean | false | "showUnfilteredResults":\<value\> | N/A | If present and equal **true**, data will be displayed in the search result table even if no filter was selected. |
+| editRecord | A boolean | false | "editRecord":\<value\> | N/A | If not present or equal to **true**, the recordedit page allows for inserting records and editing records. The record page will have an edit button for both of these cases as well. If equal to **false**, a dialog appears on recordedit that disallows use of the app and the edit button does not appear in the record app |

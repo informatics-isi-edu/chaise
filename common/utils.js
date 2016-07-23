@@ -6,11 +6,32 @@
     .factory('UriUtils', ['$injector', '$window', 'parsedFilter', function($injector, $window, ParsedFilter) {
 
         /**
-        * @function
-        * @param {String} str string to be encoded.
-        * @desc
-        * converts a string to an URI encoded string
-        */
+         * @function
+         * @param {Object} location - location Object from the $window resource
+         * @desc
+         * Converts a chaise URI to an ermrest resource URI object
+         */
+        function chaiseURItoErmrestURI(location) {
+            var ermrestUri = {};
+
+            // pull off the catalog ID
+            // location.hash in the form of '#<catalog-id>/<schema-name>:<table-name>/<filters>'
+            var catalogId = location.hash.substring(1).split('/')[0];
+
+            // grab the end of the hash from: '.../<schema-name>...'
+            var hash = location.hash.substring(location.hash.indexOf('/'));
+            var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
+            var path = '/catalog/' + catalogId + '/entity' + hash;
+
+            return baseUri + path;
+        }
+
+        /**
+         * @function
+         * @param {String} str string to be encoded.
+         * @desc
+         * converts a string to an URI encoded string
+         */
         function fixedEncodeURIComponent(str) {
             return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
                 return '%' + c.charCodeAt(0).toString(16).toUpperCase();
@@ -133,7 +154,6 @@
             }
         }
 
-
         /**
          *
          * @param filterString
@@ -169,7 +189,7 @@
          *
          * @param {[String]} filterStrings array representation of conjunction and disjunction of filters
          *     without parenthesis. i.e., ['id=123', ';', 'id::gt::234', ';', 'id::le::345']
-         * @return {ParsedFilter} 
+         * @return {ParsedFilter}
          *
          */
         function processMultiFilterString(filterStrings) {
@@ -226,7 +246,9 @@
         }
 
         return {
+            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
+            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter

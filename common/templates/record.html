@@ -5,7 +5,7 @@
             <span ng-if="column.comment" class="coltooltiptext">{{::column.comment}}</span>
         </td>
         <td class="entity-value col-xs-10">
-            <span>{{record[column.name]}}</span>
+            <span>{{recordValues[$index]}}</span>
         </td>
     </tr>
 </table>
