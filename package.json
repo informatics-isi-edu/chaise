@@ -8,7 +8,7 @@
   "scripts": {
     "build": "make build",
     "pretest": "make build",
-    "test": "make testall",
+    "test": "make testrecordadd",
     "docs": "make doc"
   },
   "repository": {

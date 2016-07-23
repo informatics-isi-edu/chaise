@@ -405,7 +405,7 @@ testrecord:
 	$(BIN)/protractor $(E2EDrecord)
 
 #Rule to run record add app tests
-.PHONY: testrecordedit
+.PHONY: testrecordadd
 testrecordadd:
 	$(BIN)/protractor $(E2EDIrecordAdd)
 
