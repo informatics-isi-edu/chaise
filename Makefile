@@ -19,12 +19,12 @@ MODULES=node_modules
 BIN=$(MODULES)/.bin
 
 # Protractor scripts
-E2EDIsearch=test/e2e/search/data-independent/protractor.conf.js
-E2EDsearch=test/e2e/search/data-dependent/protractor.conf.js
-E2EDrecord=test/e2e/record/data-dependent/protractor.conf.js
-E2EDIrecordAdd=test/e2e/recordedit/data-independent/add/protractor.conf.js
-E2EDIrecordEdit=test/e2e/recordedit/data-independent/edit/protractor.conf.js
-E2Elogin=test/e2e/login/protractor.conf.js
+E2EDIsearch=test/e2e/specs/search/data-independent/protractor.conf.js
+E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
+E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
+E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
+E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
+E2Elogin=test/e2e/specs/login/protractor.conf.js
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)

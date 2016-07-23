@@ -1,10 +1,10 @@
 
-var chaisePage = require('../chaise.page.js');
+var chaisePage = require('../../utils/chaise.page.js');
 
-var testConfiguration = require('../data_setup/config/search.dev.json');
+var testConfiguration = require('../../data_setup/config/search.dev.json');
 testConfiguration.authCookie = process.env.AUTH_COOKIE;
 
-var pImport = require('../utils/protractor.import.js'), catalogId;
+var pImport = require('../../utils/protractor.import.js'), catalogId;
 
 var beforeTestRun = function(EC) {
     beforeAll(function (done) {

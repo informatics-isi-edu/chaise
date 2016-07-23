@@ -2,7 +2,7 @@
  * Created by shuai on 2/2/16.
  */
 
-var chaisePage = require('../../chaise.page.js');
+var chaisePage = require('../../../utils/chaise.page.js');
 
 describe('Sidebar top search input,', function () {
     var EC = protractor.ExpectedConditions;

@@ -1,4 +1,4 @@
-var chaisePage = require('../../chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
+var chaisePage = require('../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
 var recordEditHelpers = require('../helpers.js');
 
 describe('Edit existing record,', function() {  

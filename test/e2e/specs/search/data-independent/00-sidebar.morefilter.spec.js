@@ -7,7 +7,7 @@
  *
  */
 
-var chaisePage = require('../../chaise.page.js');
+var chaisePage = require('../../../utils/chaise.page.js');
 
 describe('Chaise initial sidebar,', function () {
 

@@ -32,7 +32,7 @@ var config = {
 // Empty configuration will run test cases against catalog 1 and default schema
 var testConfiguration = { };
 
-var dataSetup = require('../../utils/protractor.parameterize.js');
+var dataSetup = require('../../../utils/protractor.parameterize.js');
 dataSetup.parameterize(config, { testConfiguration: testConfiguration , page: '/search' });
 
 exports.config = config;

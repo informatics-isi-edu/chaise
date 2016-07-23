@@ -1,7 +1,7 @@
 /**
  * Created by shuai on 2/2/16.
  */
-var chaisePage = require('../../chaise.page.js');
+var chaisePage = require('../../../utils/chaise.page.js');
 var filterObj = chaisePage.resultContent.filter;
 var config = chaisePage.getConfig(['Filters on top of the records,']);
 var filterCount = 0;

@@ -505,7 +505,7 @@ function chaisePage() {
         return deferred.promise;
     };
 
-    this.dataUtils = new (require('./utils/page.utils.js'))();
+    this.dataUtils = new (require('./page.utils.js'))();
 };
 
 module.exports = new chaisePage();
