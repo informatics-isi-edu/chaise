@@ -1,319 +1,215 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.utils', [])
+    angular.module('chaise.recordEdit', [
+        'ERMrest',
+        'ngSanitize',
+        'chaise.utils',
+        'chaise.authen',
+        'chaise.navbar',
+        'chaise.errors',
+        'chaise.alerts',
+        'chaise.filters',
+        'chaise.validators',
+        'chaise.delete',
+        'ui.bootstrap',
+        'chaise.modal',
+        'ui.select',
+        'ui.bootstrap',
+        'rzModule',
+        '720kb.datepicker',
+        'ngMessages'
+    ])
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', function($injector, $window, ParsedFilter) {
+    // Configure the context info from the URI
+    .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
+        var utils = UriUtilsProvider.$get();
 
-        /**
-         * @function
-         * @param {Object} location - location Object from the $window resource
-         * @desc
-         * Converts a chaise URI to an ermrest resource URI object
-         */
-        function chaiseURItoErmrestURI(location) {
-            var ermrestUri = {};
-
-            // pull off the catalog ID
-            // location.hash in the form of '#<catalog-id>/<schema-name>:<table-name>/<filters>'
-            var catalogId = location.hash.substring(1).split('/')[0];
-
-            // grab the end of the hash from: '.../<schema-name>...'
-            var hash = location.hash.substring(location.hash.indexOf('/'));
-            var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
-            var path = '/catalog/' + catalogId + '/entity' + hash;
-
-            return baseUri + path;
+        if (chaiseConfig.headTitle !== undefined) {
+            document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
+        // Parse the URL
+        utils.setOrigin();
+        utils.parseURLFragment(window.location, context);
 
-        /**
-         * @function
-         * @param {String} str string to be encoded.
-         * @desc
-         * converts a string to an URI encoded string
-         */
-        function fixedEncodeURIComponent(str) {
-            return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
-                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            })
-        }
+        console.log('Context:',context);
+    }])
 
-        /**
-         * @function
-         * @param {Object} location should be $window.location object
-         * @param {context} context object; can be null
-         * Parses the URL to create the context object
-         */
-        function parseURLFragment(location, context) {
-            if (!context) {
-                var context = {};
-            }
-            // First, configure the service URL, assuming its this origin plus the
-            // typical deployment location for ermrest.
-            context.serviceURL = location.origin + '/ermrest';
-
-            if (chaiseConfig.ermrestLocation) {
-                context.serviceURL = chaiseConfig.ermrestLocation;
-            }
-
-            // Then, parse the URL fragment id (aka, hash). Expected format:
-            //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-            var hash = location.hash;
-            if (hash === undefined || hash == '' || hash.length == 1) {
-                return;
-            }
-
-            // parse out @sort(...)
-            if (hash.indexOf("@sort(") !== -1) {
-                context.sort = hash.match(/@sort\((.*)\)/)[1];
-                hash = hash.split("@sort(")[0];
-            }
-
-            // start extracting values after '#' symbol
-            var parts = hash.substring(1).split('/');
-
-            // parts[0] should be the catalog id only
-            context.catalogID = parts[0];
-
-            // parts[1] should be <schema-name>:<table-name>
-            if (parts[1]) {
-                var params = parts[1].split(':');
-                if (params.length > 1) {
-                    context.schemaName = decodeURIComponent(params[0]);
-                    context.tableName = decodeURIComponent(params[1]);
-                } else {
-                    context.schemaName = '';
-                    context.tableName = decodeURIComponent(params[0]);
+    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
+        if (!chaiseConfig.editRecord) {
+            var modalInstance = $uibModal.open({
+                controller: 'ErrorDialogController',
+                controllerAs: 'ctrl',
+                size: 'sm',
+                templateUrl: '../common/templates/errorDialog.html',
+                backdrop: 'static',
+                keyboard: false,
+                resolve: {
+                    params: {
+                        title: 'Record Editing Disabled',
+                        message: 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.'
+                    }
                 }
-            }
+            });
 
-            // parse filter
-            // convert filter string to ParsedFilter
-            if (parts[2]) {
-                // split by ';' and '&'
-                var regExp = new RegExp('(;|&|[^;&]+)', 'g');
-                var items = parts[2].match(regExp);
+            modalInstance.result.then(function() {
+                $window.location.href = chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin;
+            });
+        }
+        // generic try/catch
+        try {
+            var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
+        } catch (exception) {
+            ErrorService.catchAll(exception);
+        }
+        server.catalogs.get(context.catalogID).then(function success(catalog) {
+            try {
+                var schema = catalog.schemas.get(context.schemaName); // caught by generic exception case
+                var table = schema.tables.get(context.tableName); // caught by generic exception case
 
-                // if a single filter
-                if (items.length === 1) {
-                    context.filter = processSingleFilterString(items[0]);
+                console.log('Table:', table);
+                recordEditModel.table = table;
 
-                } else {
-                    var filters = [];
-                    var type = null;
-                    for (var i = 0; i < items.length; i++) {
-                        // process anything that's inside () first
-                        if (items[i].startsWith("(")) {
-                            items[i] = items[i].replace("(", "");
-                            // collect all filters until reaches ")"
-                            var subfilters = [];
-                            while(true) {
-                                if (items[i].endsWith(")")) {
-                                    items[i] = items[i].replace(")", "");
-                                    subfilters.push(items[i]);
-                                    // get out of while loop
-                                    break;
-                                } else {
-                                    subfilters.push(items[i]);
-                                    i++;
+                var foreignKeys = table.foreignKeys.all(); // caught by generic exception case
+                angular.forEach(foreignKeys, function(fkey) {
+                    // simple implies one column
+                    if (fkey.simple) {
+                        var ftable = fkey.key.table;
+                        var keyColumn = fkey.key.colset.columns[0];
+
+                        /* FIRST USE CASE: covered by default; display = key column */
+
+                        var pattern = "{" + keyColumn.name + "}";
+                        var displayColumns = [keyColumn];
+
+                        /* SECOND USE CASE: conditional if the table is tagged as a vocabulary */
+
+                        try {
+                            var vocabAnnotationTag = "tag:misd.isi.edu,2015:vocabulary";
+                            var displayAnnotationTag = "tag:misd.isi.edu,2015:display";
+
+                            if (ftable.annotations.contains(vocabAnnotationTag)) {
+                                // no need to catch this, using `.contains` verifies it exists or not
+                                // if an exception is thrown at this point it will be caught by generic exception case
+                                var vocabAnnotation = ftable.annotations.get(vocabAnnotationTag);
+                                if (vocabAnnotation.content.term) {
+                                    var termColumn = ftable.columns.get(vocabAnnotation.content.term); // caught by generic exception case
+                                    displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
+                                }
+                                // vocabulary term is undefined
+                                else {
+                                    var ftableColumns = ftable.columns.all(); // caught by generic exception case
+                                    for (var i = 0, length = ftableColumns.length; i < length; i++) {
+                                        var uppColumnName = ftableColumns[i].name.toUpperCase();
+                                        if (uppColumnName == 'TERM' || uppColumnName == 'NAME') {
+                                            displayColumns.push(ftableColumns[i]);
+                                            break;
+                                        }
+                                    } /* term undefined */
+                                }
+                                if (displayColumns.length > 1) {
+                                    pattern = "{" + displayColumns[1].name + "}";
+                                }
+                                /* END USE CASE 2 */
+                            }
+                            /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
+                            /* Git issue #358 */
+                            else if (ftable.annotations.contains(displayAnnotationTag)) {
+                                // no need to catch this, using `.contains` verifies it exists or not
+                                // if an exception is thrown at this point it will be caught by generic exception case
+                                var displayAnnotation = ftable.annotations.get(displayAnnotationTag);
+                                if (displayAnnotation.content.row_name) {
+                                    // TODO
+                                    // var array_of_col_names = REGEX THE array of column_name strings from “ … `{` column_name `}` …” patterns
+                                    // angular.forEach(array_of_col_names, function(column_name) {
+                                    //     displayColumns.push(table.columns.get(column_name));
+                                    // });
+                                    //
+                                    // pattern = displayAnnotation.row_name;
                                 }
                             }
+                        } finally {
+                            (function(fkey) {
+                                ftable.entity.get(null, null, displayColumns).then(function success(rowset) {
+                                    var domainValues = recordEditModel.domainValues[fkey.colset.columns[0].name] = [];
+                                    var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
 
-                            filters.push(processMultiFilterString(subfilters));
-
-                        } else if (type === null && items[i] === "&") {
-                            // first level filter type
-                            type = "Conjunction"
-                        } else if (type === null && items[i] === ";") {
-                            // first level filter type
-                            type = "Disjunction";
-                        } else if (type === "Conjunction" && items[i] === ";") {
-                            // using combination of ! and & without ()
-                            throw new Error("Invalid filter " + parts[2]);
-                        } else if (type === "Disjunction" && items[i] === "&") {
-                            // using combination of ! and & without ()
-                            throw new Error("Invalid filter " + parts[2]);
-                        } else if (items[i] !== "&" && items[i] !== ";") {
-                            // single filter on the first level
-                            var binaryFilter = processSingleFilterString(items[i]);
-                            filters.push(binaryFilter);
+                                    angular.forEach(rowset.data, function(column) {
+                                        domainValues.push( {key: column[keyColumn.name], display: column[displayColumnName]/*Util.patternExpansion( pattern, column.data )*/} );
+                                    });
+                                }, function error(response) {
+                                    // shouldn't error out
+                                    $log.info(response);
+                                });
+                            })(fkey);
                         }
                     }
-
-                    context.filter = {type: type, filters: filters};
-                }
-            }
-
-            return context;
-        }
-
-        // window.location.origin does not work in IE 11 (surprise, surprise)
-        function setOrigin() {
-            if (!$window.location.origin) {
-                $window.location.origin = $window.location.protocol + "//" + $window.location.hostname + ($window.location.port ? ':' + $window.location.port : '');
-            }
-        }
-
-        /**
-         *
-         * @param filterString
-         * @returns {*}
-         * @desc converts a filter string to ParsedFilter
-         */
-        function processSingleFilterString(filterString) {
-            //check for '=' or '::' to decide what split to use
-            if (filterString.indexOf("=") !== -1) {
-                var f = filterString.split('=');
-                if (f[0] && f[1]) {
-                    var filter = new ParsedFilter("BinaryPredicate");
-                    filter.setBinaryPredicate(decodeURIComponent(f[0]), "=", decodeURIComponent(f[1]));
-                    return filter;
-                } else {
-                    // invalid filter
-                    throw new Error("Invalid filter " + filterString);
-                }
-            } else {
-                var f = filterString.split("::");
-                if (f.length === 3) {
-                    var filter = new ParsedFilter("BinaryPredicate");
-                    filter.setBinaryPredicate(decodeURIComponent(f[0]), "::"+f[1]+"::", decodeURIComponent(f[2]));
-                    return filter;
-                } else {
-                    // invalid filter error
-                    throw new Error("Invalid filter " + filterString);
-                }
-            }
-        }
-
-        /**
-         *
-         * @param {[String]} filterStrings array representation of conjunction and disjunction of filters
-         *     without parenthesis. i.e., ['id=123', ';', 'id::gt::234', ';', 'id::le::345']
-         * @return {ParsedFilter}
-         *
-         */
-        function processMultiFilterString(filterStrings) {
-            var filters = [];
-            var type = null;
-            for (var i = 0; i < filterStrings.length; i++) {
-                if (type === null && filterStrings[i] === "&") {
-                    // first level filter type
-                    type = "Conjunction"
-                } else if (type === null && filterStrings[i] === ";") {
-                    // first level filter type
-                    type = "Disjunction";
-                } else if (type === "Conjunction" && filterStrings[i] === ";") {
-                    // TODO throw invalid filter error (using combination of ! and &)
-                    throw new Error("Invalid filter " + filterStrings);
-                } else if (type === "Disjunction" && filterStrings[i] === "&") {
-                    // TODO throw invalid filter error (using combination of ! and &)
-                    throw new Error("Invalid filter " + filterStrings);
-                } else if (filterStrings[i] !== "&" && filterStrings[i] !== ";") {
-                    // single filter on the first level
-                    var binaryFilter = processSingleFilterString(filterStrings[i]);
-                    filters.push(binaryFilter);
-                }
-            }
-
-            var filter = new ParsedFilter(type);
-            filter.setFilters(filters);
-            return filter;
-            //return {type: type, filters: filters};
-        }
-
-        function parsedFilterToERMrestFilter(filter, table) {
-            if (filter.type === "BinaryPredicate") {
-                return new ERMrest.BinaryPredicate(
-                    table.columns.get(filter.column),
-                    filter.operator,
-                    filter.value
-                );
-            } else {
-                // convert nested filter structure to Conjunction or Disjunction filter
-                var filters = [];
-                for (var i = 0; i < filter.filters.length; i++) {
-                    var f = filter.filters[i];
-                    var f1 = parsedFilterToERMrestFilter(f, table);
-                    filters.push(f1);
-                }
-
-                if (filter.type === "Conjunction") {
-                    return new ERMrest.Conjunction(filters);
-                } else {
-                    return new ERMrest.Disjunction(filters);
-                }
-            }
-        }
-
-        return {
-            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
-            fixedEncodeURIComponent: fixedEncodeURIComponent,
-            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
-            parseURLFragment: parseURLFragment,
-            setOrigin: setOrigin,
-            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter
-        }
-    }])
-
-    /**
-     *
-     * A structure to store parsed filter
-     *
-     * { type: BinaryPredicate,
-     *   column: col_name,
-     *   operator: '=' or '::opr::'
-     *   value: value
-     * }
-     *
-     * or
-     *
-     * { type: Conjunction or Disjunction
-     *   filters: [array of ParsedFilter]
-     * }
-     *
-     *
-     */
-    .factory("parsedFilter", [function() {
-        function ParsedFilter (type) {
-            this.type = type;
-        }
-
-        /**
-         *
-         * @param filters array of binary predicate
-         */
-        ParsedFilter.prototype.setFilters = function(filters) {
-            this.filters = filters;
-        };
-
-        /**
-         *
-         * @param colname
-         * @param operator '=', '::gt::', '::lt::', etc.
-         * @param value
-         */
-        ParsedFilter.prototype.setBinaryPredicate = function(colname, operator, value) {
-            this.column = colname;
-            this.operator = operator;
-            this.value = value;
-        };
-
-        return ParsedFilter;
-    }])
-
-    // if a view value is empty string (''), change it to null before submitting to the database
-    .directive('emptyToNull', function () {
-        return {
-            restrict: 'A',
-            require: 'ngModel',
-            link: function (scope, elem, attrs, ctrl) {
-                ctrl.$parsers.push(function(viewValue) {
-                    if(viewValue === "") {
-                        return null;
-                    }
-                    return viewValue;
                 });
+
+                // If there are filters, populate the model with existing records' column values
+                if (context.filter && (context.filter.type === "BinaryPredicate" || context.filter.type === "Conjunction")) {
+                    var path = new ERMrest.DataPath(table);
+                    // TODO: Store filters in URI form in model to use later on form submission
+                    var filterString = UriUtils.parsedFilterToERMrestFilter(context.filter, table);
+                    // recordEditModel.filterUri = filterString.toUri();
+
+                    var path = path.filter(filterString);
+                    path.entity.get().then(function success(entity) {
+                        if (entity.length === 0) {
+                            AlertsService.addAlert({type: 'error', message: 'Sorry, the requested record was not found. Please check the URL and refresh the page.' });
+                            console.log('The requested record in schema ' + context.schemaName + ', table ' + context.tableName + ' with the following attributes: ' + context.filter + ' was not found.');
+                        }
+
+                        angular.forEach(entity[0], function(value, colName) {
+                            try {
+                                var pathColumnType = path.context.columns.get(colName).column.type.name;
+                                if (pathColumnType == 'date' || pathColumnType == 'timestamptz') {
+                                    // Must transform the value into a Date so that
+                                    // Angular won't complain when putting the value
+                                    // in an input of type "date" in the view
+                                    value = new Date(value);
+                                }
+                                recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
+                            } catch (exception) { }
+                        });
+                    });
+                }
+                console.log('Model:',recordEditModel);
+
+            } catch (exception) { // handle generic catch
+
+                // ideally this would be used for Table/Schema not found instead of in general case
+                if (exception instanceof ERMrest.NotFoundError) {
+                    ErrorService.errorPopup(exception);
+                }
+
+                throw exception;
             }
-        };
-    });
+
+        }, function error(response) { // error promise for server.catalogs.get()
+            // for not found and bad request
+            if (response instanceof ERMrest.NotFoundError || response instanceof ERMrest.BadRequestError) {
+                ErrorService.errorPopup(response);
+            }
+
+            throw response;
+        }).catch(function(exception) {
+            ErrorService.catchAll(exception);
+        });
+    }]);
+
+    // Refresh the page when the window's hash changes. Needed because Angular
+    // normally doesn't refresh page when hash changes.
+    window.onhashchange = function() {
+        if (window.location.hash != '#undefined') {
+            location.reload();
+        } else {
+            history.replaceState("", document.title, window.location.pathname);
+            location.reload();
+        }
+        function goBack() {
+            window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
+            window.location.lasthash.pop();
+        }
+    }
 })();
