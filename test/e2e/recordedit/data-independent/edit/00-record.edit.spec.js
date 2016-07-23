@@ -22,13 +22,8 @@ describe('Edit existing record,', function() {
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 					
-					if (process.env.TRAVIS) {
-						browser.sleep(10000);
-					} else {
-						browser.sleep(3000);
-						browser.executeScript("$('.modal').remove();$('.modal-backdrop').remove();$('body').removeClass('modal-open')");
-					}
-				
+					browser.sleep(3000);
+					
 			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {

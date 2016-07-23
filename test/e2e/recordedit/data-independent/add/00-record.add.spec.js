@@ -17,12 +17,7 @@ describe('Record Add', function() {
 					browser.ignoreSyncronization = true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					if (process.env.TRAVIS) {
-						browser.sleep(10000);
-					} else {
-						browser.sleep(3000);
-						browser.executeScript("$('.modal').remove();$('.modal-backdrop').remove();$('body').removeClass('modal-open')");
-					}
+					browser.sleep(3000);
 			    });
 
 				describe("Presentation and validation,", function() {
