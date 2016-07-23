@@ -24,9 +24,9 @@
             },
             templateUrl: '../common/templates/navbar.html',
             link: function(scope) {
-                scope.brandImage = chaiseConfig.navbarBrandImage; 
+                scope.brandURL = chaiseConfig.navbarBrand;
                 scope.brandText = chaiseConfig.headTitle;
-                 scope.brandURL = chaiseConfig.navbarBrand;
+                scope.brandImage = chaiseConfig.navbarBrandImage;
 
                 Session.getSession().then(function(session) {
                     var user = session.client;

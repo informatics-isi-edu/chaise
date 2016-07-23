@@ -216,7 +216,11 @@ function throttle(func, wait, options) {
      *
      * @type {boolean}
      */
-    this.showTicks = attributes.rzSliderShowTicks || attributes.rzSliderShowTicksValue;
+    if(attributes.rzSliderShowTicks) {
+      this.showTicks = attributes.rzSliderShowTicks
+    } else {
+      this.showTicks = attributes.rzSliderShowTicksValue;
+    }
 
     /**
      * Display the value on each tick.
