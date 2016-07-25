@@ -5,6 +5,7 @@
 
     .factory('UriUtils', ['$injector', '$window', 'parsedFilter', function($injector, $window, ParsedFilter) {
 
+
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
@@ -25,13 +26,13 @@
 
             return baseUri + path;
         }
-
+        
         /**
-         * @function
-         * @param {String} str string to be encoded.
-         * @desc
-         * converts a string to an URI encoded string
-         */
+        * @function
+        * @param {String} str string to be encoded.
+        * @desc
+        * converts a string to an URI encoded string
+        */
         function fixedEncodeURIComponent(str) {
             return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
                 return '%' + c.charCodeAt(0).toString(16).toUpperCase();
@@ -154,6 +155,7 @@
             }
         }
 
+
         /**
          *
          * @param filterString
@@ -189,7 +191,7 @@
          *
          * @param {[String]} filterStrings array representation of conjunction and disjunction of filters
          *     without parenthesis. i.e., ['id=123', ';', 'id::gt::234', ';', 'id::le::345']
-         * @return {ParsedFilter}
+         * @return {ParsedFilter} 
          *
          */
         function processMultiFilterString(filterStrings) {
@@ -248,7 +250,6 @@
         return {
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
-            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter
