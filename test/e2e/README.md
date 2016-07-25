@@ -133,5 +133,5 @@ describe('Sidebar top search input,', function () {
 
 ```
 
-Please refer following [sample folder](/test/e2e/sample) to understand the intest data creation and cleanup and its configuration. 
+Please refer following [sample folder](/test/e2e/specs/sample) to understand the intest data creation and cleanup and its configuration. 
 

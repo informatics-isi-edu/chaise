@@ -11,27 +11,35 @@ For now, we only have E2E tests in Chaise. E2E tests are automation tests that s
 - **Makefile**: to invoke NPM to install packages necessary for running tests and invoke Protractor (which will run the tests).
 
 ###File structure
-```js
-/chaise
-    /node_modules
-    ...
-    /test
-        /e2e
-            /login
-            /search //(where the e2e tests files are)
-                /data-independent //(Ones which are not dependent on data, they introspect the existing schema)
-                    00-sidebar.morefilter.spec.js //(the tests specs)
-                    01-sidebar.input.spec.js
-                    protractor.conf.js //(The configuration file that mentions which tests to run and where to run them)
-                                       //(This is the place where you need to specify the test configuration data
-                /data-dependent //(These tests require some static data and won't run if we don't provide a test data configuration)
-                    02-filters.upon.result.spec
-                    protractor.conf.js
-            /record
-            chaise.page.js //(page object for testing, google "page object pattern" for details)
-    Makefile //(to conf Makefile)
-    package.json //(conf file for NodeJS project, "test" command is specified here)
-    .travis.yml //(conf file for Travis CI)
+
+```
+chaise/
+`-- test/
+    |-- unit
+    `-- e2e
+        |-- data_setup                       
+        |   |-- config                       # test configuration files 
+        |   |   `-- CONFIG_NAME.json
+        |   |-- data                         # Data
+        |   |   `-- SCHEMA_NAME
+        |   |       `-- TABLE_NAME.json      # Table entites json
+        |   `-- schema
+        |       `-- SCHEMA_NAME.json         # Schema Definition json
+        |-- specs
+        |   |-- SPEC_NAME
+        |   |   |-- data-dependent           # All the possible test cases that are dependent on some static data should be in this folder
+        |   |   |   |-- 01.TEST_NAME1.js 
+        |   |   |   |-- 02.TEST_NAME3.js                 
+        |   |   |   `-- protractor.conf.js  
+        |   |   |-- data-independent         # All the possible test cases that are independent of data for a spec should be in this folder  
+        |   |   |   |                        # They introspect the existing schema to run the cases*/
+        |   |   |   |-- 01.TEST_NAME1.js 
+        |   |   |   |-- 02.TEST_NAME3.js     
+        |   |   |   `-- protractor.conf.js   # change this to specify your test configuration             
+        `-- utils
+            |-- chaise.page.js               # To declare Page Objects, google "page object pattern" for details
+            |-- page.utils.js                # Utilities for Page pbjects
+        
 ```
 
 ###Testing workflow
@@ -60,7 +68,7 @@ These lines will set up credentials necessary to login SauceLabs and when detect
 When the code is pushed to ISI repo, the existence of .travis.yml will run "npm test" command in Travis CI, which will trigger the testing chain specified above.
 
 ###Configuration
-**Protractor.conf.js**:  specifies which browser to use when executing tests using
+**Protractor.conf.js**: [the protractor.conf.js](https://github.com/informatics-isi-edu/chaise/blob/master/test/e2e/search/protractor.conf.js) file specifies which browser to use when executing tests using
 ```sh
 capabilities: {
     //browserName: 'internet explorer',
@@ -137,7 +145,8 @@ The structure of the configuration is
         "entities": {
             "createNew": true, // Mention this to be true to allow creating new entities
             "path": "./data/product", // This is the path from where the json for the entities will be picked for import
-        }
+        },
+        "authCookie": ""
     },
     "cleanup": true, //Do you want to delete the created catalog/schema/tables/entities created in the setup phase
     "tests" : {
@@ -154,7 +163,7 @@ The `tests` object is mandatory for data-dependent testcases, as the test-cases 
     "tests" : {
         "Filters on top of the records," : {   // This is the name of describe which will used this data
 
-            // The internal data doesn't has a format, its just an object which can change according to your test needs
+            // The internal data doesn't has a format, its just an object which can change accorsing to your test needs/ 
             "data" : "testcase2Input2",
             "someMoreData" : "data"
             .
@@ -175,10 +184,11 @@ env:
         - secure: hSGHl2cRYx9gmE2lrjRWu3H45ogd8hIiI9QlLZpvXonROZJSw8VqQWpLe/7m+95L8UDhOpnCXKct/V9+qUDsQM2kDpEP+9bNCf3skg7MFLkpr1te+y1mCkO0xu2vhoqrzJKtvXGIenZ/aEY1nQrnIYuF/5MaOzNRliHQ+7rmhigW7M4LSFqDQdj7CvqXsyk3cfNMbIeUI9H8/SrG9mxYfAa61H1zJtPmdDegvjFNcQeeT57lgYyoArOw4lcGm9KHQp2Hn4EtXv1L65DS7eogFit0CnS/1QHEinU2ibpgfb/vnAnRun5OAmjsiPAURLb6AuhevzDHeyMZrTPIGUHiIyuzG8qP264sWq1ukyjolyarwcwJoifJAdGWhVPT41XAlgAy+xgfN4xSKNp+tGPo9+iJqVGgccbpKAYqMQKvWSXO6DVQEqPHtpFuXsqNBBwvzCBAS+VdHFoKOy9bv2AEIpVOZJszIkuaNAQVqG/iD0pXQT9rEsZ4Ghm0N/RQf7qhGA4Ot1u5yOko1zgm15ATzpacy6qEzqQQwG3qilO2hUNK8xehqU52a4KQu79yGOG8zFkyvcUS3H/e4NQVeBFQ8GIrfcjg1vD5PXzdnun3iiLwwSXSk9CMHMW0B2z34qvg0q4++LWP2UMHkrx+yf/MzABoYuiZ6LshCvobftU7zmQ=
         - secure: WPuh2X6utxz2mqmQwYbo4HlGXZ4aYnuBAfAW/MuYSW5E1dMNgi5uTI40TY0AOxTpeau+UkWMJG9umux9om3yVBNheImmZt3X1bPO73i3nWrg0W38a3DLjBnrbI+a8lnHa1s1hwiiIgW1Djj7OWjyJWd/zZ00QSU8Jq78m4WwSqYZNGclBQmVxri+EVUYuyHpuli3S4wu7ZjngsiyEmzXtmmgTiIdgdQxxgcPrE/35EbosHqJtxyvMHY2S4/7tbNU7ja//iAaWLQrq+c1IP2sfqmGZkrypnjR8qMZrt7s0dv9qh2+7KZ/+f/v+E0XO3UtqKvuOEWnCx/JLhlpbdItJfM6z/taLeCkj4N0kwvtLX02LrxEzu86oOyXUnE158KDUTqrb1XmnEj1uuW7X1u0RDubdH0e0m1hI1dieOKNzYoBA58yKJUZnp3KPnVa3PsgWD1lIKlVkvdqo3djv4zdnTp9D3q63WlhnfutilZOAr4hEI1nTQ9SAA/ayP2tgIhIheX2hihGAsi1LqKF7PXxihpbC6lQiqBCN8A1wDS0qi3+BrgY5DvIfKtE1eG81OtOn5Xm3L+UUehahAfBQNjMxhDpHkE6BMt0p1LIy/IUvsEkFWvkvlChIyBqwbOs+VRmZ/orag5xuhRLwyN1V9mAUCPSNdl0lUu0ZRwCmed+JiA=
         - CHAISE_BASE_URL: http://dev.isrd.isi.edu/chaise
+        - ERMREST_URL: http://dev.isrd.isi.edu/ermrest
 ```
 The three "secure"s above set up the SauceLabs username and password and the ERMRest authCookie, and encrypt them. The last line set up env variable "CHAISE_BASE_URL" without encryption. More details about it, take a look at Travis CI official website.
 
-###Page Object Pattern
+###Page Object Pattern (chaise.page.js)
 To write the tests, usually one has to first find the DOM elements on the page, then perform some actions on the elements, finally expect (assert) the correct result will show up. There are two logics here, DOM finding and expectation. To separate concerns, most DOM finding logic is put into a **Page Object** file "chaise.page.js". So in ".spec.js" files where the tests (expectations) are written, more effort can be focused on the expectation logic.
 
 ###Unsolved problems
