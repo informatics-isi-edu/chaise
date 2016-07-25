@@ -306,6 +306,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                                         var downloadPatterns = (anno.url.constructor === Array ? anno.url : [anno.url]);
                                         var captionPatterns = (anno.caption.constructor === Array ? anno.caption : [anno.caption]);
 
+                                        entity.embedTables[ft.title] = entity.embedTables[ft.title] || [];
                                         // for each table row
                                         for (e = 0; e < elements.length; e++) {
                                             element = elements[e];
@@ -326,6 +327,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
                                                 files.push({"url": $sce.trustAsResourceUrl(downloadPattern), "caption": captionPattern});
                                             }
+                                            entity.embedTables[ft.title][e] = element;
 
                                             // each row (iFrame)'s files
                                             entity.embedTables[ft.title][e].files = files;
