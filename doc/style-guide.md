@@ -2,17 +2,90 @@
 
 This guide defines the styles, icons, fonts and general UI control that should be used for any user interface we code. This creates a consistent look and feel - and saves time. 
 
-which bootstrap container should we use -- i.e., use container vs container-fluid - layout classes. 
-
-table classes 
-
-font-family, etc and for fonts etc, i think that bootstrap mostly determines the basic font, we might just need some decisions about special cases where we deviate from the default font and which one to use.
-
 secondly, i would say we should define our style guide in terms of the css classes to use and for those that need to extend bootstrap, our style guide should basically be a reference to the classes in our own custom chaise.css (or whatever).
 
 and thirdly, then we need to pick a set of **non-bootstrap 3rd party ui components**, such as which dropdown control to use (e.g., angular-ui-selector or whatever its called).
 
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Interface Style Guide](#interface-style-guide)
+	- [Doctype](#doctype)
+	- [Framework](#framework)
+	- [Custom Styles/css](#custom-stylescss)
+	- [Normalize.css](#normalizecss)
+	- [Basic example](#basic-example)
+	- [Layout](#layout)
+		- [Containers](#containers)
+		- [Grid System](#grid-system)
+		- [Grid Layout example](#grid-layout-example)
+	- [Typography](#typography)
+		- [Fonts](#fonts)
+		- [Headings](#headings)
+		- [Body copy](#body-copy)
+			- [Lead class](#lead-class)
+		- [Inline text elements](#inline-text-elements)
+		- [Alignment classes](#alignment-classes)
+		- [Code](#code)
+	- [Tables](#tables)
+	- [Style](#style)
+		- [Colors](#colors)
+		- [Icons](#icons)
+			- [App bar](#app-bar)
+			- [System bars](#system-bars)
+		- [Side nav / Filters sidebar](#side-nav-filters-sidebar)
+			- [Navigation controls for filters sidebar](#navigation-controls-for-filters-sidebar)
+		- [Responsive UI](#responsive-ui)
+			- [Breakpoints](#breakpoints)
+	- [Components](#components)
+		- [Buttons](#buttons)
+			- [Button types](#button-types)
+			- [Usage](#usage)
+			- [Button styles](#button-styles)
+			- [Dropdown Buttons](#dropdown-buttons)
+			- [Toggle Buttons](#toggle-buttons)
+		- [Chiclets](#chiclets)
+		- [Dialogs](#dialogs)
+		- [Lists](#lists)
+		- [Lists controls](#lists-controls)
+		- [Menus](#menus)
+		- [Pickers](#pickers)
+		- [Progress indicators](#progress-indicators)
+		- [Selection controls](#selection-controls)
+		- [Sliders](#sliders)
+		- [Subheaders](#subheaders)
+		- [Tabs](#tabs)
+		- [Text fields](#text-fields)
+			- [Input](#input)
+			- [Labels](#labels)
+			- [Style](#style)
+			- [Single-line text field](#single-line-text-field)
+			- [Multi-line text field](#multi-line-text-field)
+			- [Full-width text field](#full-width-text-field)
+			- [Character counter](#character-counter)
+			- [Auto-complete text field](#auto-complete-text-field)
+			- [Search filter](#search-filter)
+			- [Required fields](#required-fields)
+			- [Password input](#password-input)
+		- [Toolbars](#toolbars)
+		- [Tooltips](#tooltips)
+	- [Patterns](#patterns)
+		- [Date Formats](#date-formats)
+		- [Empty states](#empty-states)
+		- [Errors](#errors)
+		- [Launch screens / Landing pages](#launch-screens-landing-pages)
+		- [Navigation](#navigation)
+		- [Navigation Drawer (ie Filter sidebar)](#navigation-drawer-ie-filter-sidebar)
+		- [Navigational Transitions](#navigational-transitions)
+		- [Scrolling techniques](#scrolling-techniques)
+		- [Search](#search)
+		- [Settings](#settings)
+	- [Usability and Accessibility](#usability-and-accessibility)
+		- [Color and contrast](#color-and-contrast)
+		- [Motion](#motion)
+		- [Layout](#layout)
+		- [Writing](#writing)
+		- [Hierarchy and focus](#hierarchy-and-focus)
+		- [Implementation](#implementation)
 
 <!-- /TOC -->
 
@@ -29,7 +102,7 @@ Include the HTML5 doctype at the beginning of all your projects.
 
 ## Framework
 
-The underlying framework for our interfaces if <a href="http://getbootstrap.com">Bootstrap</a>. We are currently using version 3.
+The underlying framework for our interfaces is <a href="http://getbootstrap.com">Bootstrap</a>. We are currently using version 3.
 
 To add Bootstrap to your project:
 
@@ -104,7 +177,7 @@ The following is a basic example of an HTML page using Bootstrap (without a grid
 
 Bootstrap uses two kinds of containing elements - one for fixed width and one for full-width.
 
-In general, we use the full-width "container-fluid" tag:
+In general, we use the full-width "container-fluid" tag so that the app takes the full width of the browser window:
 
 ~~~~
 <div class="container-fluid">
@@ -116,9 +189,9 @@ In general, we use the full-width "container-fluid" tag:
 
 Container tags contain rows (divs using the `row` class) and then the appropriate column classes. 
 
-In general, a row is made up of 12 possible columns. To make your grid, you 'chunk' the columns together to get the width you want. 
+In general, a row is made up of 12 possible columns. To make your grid, you 'chunk' the columns together to get the widths you want. 
 
-Further, the column classes use size terms to indicate breakpoints (points where a columns will stack vertically instead of going all the way across horizontally) for different size viewports (phone, tablet, laptop, etc). There will be more discussion in the "Responsive" section but for now we'll use the medium version for examples in this document (col-md-#).
+Further, the column classes use size terms to indicate breakpoints (points where columns will stack vertically instead of going all the way across horizontally) for different size viewports (phone, tablet, laptop, etc). There will be more discussion in the "Responsive" section but for now we'll use the medium version for examples in this document (col-md-#).
 
 For example:
 - If you you want two columns of equal width, you would use two divs with the class `col-md-6`
@@ -149,11 +222,12 @@ Note that rows/columns can be nested as needed.
 
 ## Typography
 
-### Font
+### Fonts
 
-Our preferred font is 
+Our preferred font is "Helvetica Neue".
 
 Add it to the `font-family` CSS rule for the `body` tag as follows to allow graceful degradation if that font is not available:
+
 ~~~~
 body {
 	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -163,6 +237,7 @@ body {
 ### Headings
 
 Use `<h1>` through `<h6>` in a hierarchical manner as appropriate. You can also include a secondary header within the heading tags using the `<small>` tag:
+
 ~~~~
 <h1>h1. Bootstrap heading <small>Secondary text</small></h1>
 <h2>h2. Bootstrap heading <small>Secondary text</small></h2>
@@ -297,42 +372,151 @@ Also use:
 
 ### Colors 
 
+For the default ("vanilla") application, we keep colors as neutral as possible. The default colors for the current chaise application are:
+
+- The navbar is very dark gray (#4D4D4D), as set in chaise's custom css file, appheader.css:
+
+    ~~~~
+    .navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
+        border-color: #4D4D4D;
+    }
+    ~~~~
+    
+- Branding text (Chaise) is white, also set in appheader.css:
+
+    ~~~~
+    .navbar-inverse .navbar-brand {
+      color: #FFFFFF;
+    }
+    ~~~~
+
+- Links and other elements use the default Bootstrap styles
+
 ### Icons
 
+Bootstrap includes icons (glyphicons), which is a decent collection of commonly used icons. You can find the available options and details on how to use them here.
 
+These are font icons, which means you can use CSS to change their color, size, etc.
 
+Here's the cheatsheet for icons used in chaise. It basically uses specific classes on an empty code or i tag:
 
+~~~~
 
+  question mark (Help): <span class="glyphicon glyphicon-question-sign"></span>
+  
+  bookmark (Permalink): <span class="glyphicon glyphicon-bookmark"></span>
+  
+  left arrow (Go Back): <span class="glyphicon glyphicon-chevron-left"></span>
+  
+  magnifying glass (Search): <span class="glyphicon glyphicon-search"></span>
+~~~~
 
-I haven't thought about this much and some of the following headers might not make sense right now - but I'm going to flesh this out because one of our issues is how to space things out nicely and these types of guidelines should help.
+You can also adjust the size of a glyphicon 
+TBD
 
-### Principles
+Inconsistency alert - Material Design:
 
-### Units and Measurements
+We sometimes use Material Design icons if we can't find what we want with glyphicons. These use i tags and the prefix "md".
 
-### Metrics and keylines
+You can also adjust the size using classes "md-lg", ""
 
-### Structure
-
-#### UI Regions
-
-#### Toolbar
+~~~~
+  red circle with x (Close filter): <i class="md-cancel md-lg"></i>
+~~~~
 
 #### App bar
 
+Difference between toolbar and app bar?
+
 #### System bars
 
-#### Side nav
+?
 
-#### Whiteframes (?)
+### Side nav / Filters sidebar
+
+Hacked from http://codepen.io/zavoloklom/pen/dIgco and then integrated into Angular. The HTML and CSS could use some cleaning up.
+
+The basic idea for the sidebar is that it's a fixed div that was originally designed to slide in and out. It always looks open, but the additional stages (ie, when you click on a top-level choice and see the options) are actually another sidebar overlaying the first one. We decided not to slide them in and out and the "swoop" aspect is irrelevent now.
+
+There are actually 4 sidebars (in <aside> tags) that represent:
+
+- "sidebar" - the top-level facets
+- "morefilters" - shows all available facets
+- "editfilter" - shows options of a facet that may be selected/de-selected
+- "collectionsTree" - shows available Chaise collections
+
+#### Navigation controls for filters sidebar 
+
+Hovering shows gray background
+
+Components for selecting options include:
+
+- Checkboxes (most common)
+- Slider (used for number/date ranges) - built on rzslider, a Slider directive for AngularJS: https://github.com/angular-slider/angularjs-slider
+- Text field (searching attributes)
 
 ### Responsive UI
 
+Responsive design basically creates a design that displays appropriately and is functional on various sizes, layouts and resolutions. The Bootstrap framework is inherently responsive - but you do need to consider the type of size classes you use (col-sm-, col-md-, col-lg, will collapse at different breakpoints.) See the <a href="http://getbootstrap.com/css/#grid">Grid section</a> of the Bootstrap site for more details.
+
+For FaceBase chaise, we also needed to add a third-party style for extra wide columns so the layout used more real estate on larger, high resolution displays. At the end of the FB custom.css file, we appended the XL classes from https://github.com/marcvannieuwenhuijzen/BootstrapXL/blob/master/BootstrapXL.css within a media query that affects displays of 1600px and greater. 
+
+~~~~
+  @media (min-width: 1600px) {
+      .container {
+          width: 1570px;
+      }
+      
+      <add -xl- classes >
+  }
+~~~~
+
+We also use some javascript to change which XL class is being used for certain breakpoints as the defaults weren't quite working for the layout:
+
+~~~~
+    <script>
+    $(function(){
+      var content = $("#main-content");
+      $(window).resize(function() {
+          checkWidth(content);
+      });
+
+      checkWidth(content);
+    });
+
+    function checkWidth(content){
+      var viewportWidth = $(window).width();
+
+      if(viewportWidth >= 1696){
+          if( content.hasClass("col-xl-9") ){
+              content.removeClass("col-xl-9").addClass("col-xl-10");
+          }
+      }else{
+          if( content.hasClass("col-xl-10")){
+              content.removeClass("col-xl-10").addClass("col-xl-9");
+          }
+      }
+    }
+    </script>
+~~~~
+
 #### Breakpoints
 
-#### Grid
+The default breakpoints for Bootstrap 3 are:
 
-#### Surface Behaviors
+~~~~
+  /* Extra small devices (phones, less than 768px) */
+  /* No media query since this is the default in Bootstrap */
+
+  /* Small devices (tablets, 768px and up) */
+  @media (min-width: @screen-sm-min) { ... }
+
+  /* Medium devices (desktops, 992px and up) */
+  @media (min-width: @screen-md-min) { ... }
+
+  /* Large devices (large desktops, 1200px and up) */
+  @media (min-width: @screen-lg-min) { ... }
+~~~~
 
 ## Components
 
@@ -342,8 +526,8 @@ Buttons indicate a user can take an action and are made up of text, image or bot
 
 #### Button types
 
-Raised Button
-Flat Button 
+Terms buttons
+Chiclets
 
 Describe each type and then how to choose
 
@@ -358,26 +542,6 @@ Typography (ie, capitalized or initial caps)
 Accessibility - to ease reading: button height 27 px
 
 Density - measurements between text and background: text size, button height, text left and right padding
-
-#### Flat buttons 
-
-More details about this style - where to use them  
-
-Specs
-
-Behavior (what happens onclick/hover etc)
-
-Code  
-
-#### Raised buttons
-
-More details and where to use them - when you need to emphasize a function on a busy or wide space.
-
-Specs
-
-Behavior
-
-Code  
 
 #### Dropdown Buttons 
 
@@ -403,37 +567,11 @@ code
 
 ### Chiclets
 
-#### Usage
-
-#### Behavior  
-
 Editing value
 
 Deleting
 
-### Data Tables
-
-To display raw data in tabular fashion (not used for layout).
-
-#### Structure
-
-#### Interaction
-
-Row hover
-Row selection
-Sorted columns
-Column name
-Long header titles
-Inline menus (we don't do this but it could be useful)
-Alternative headers
-
-#### Specs
-
 ### Dialogs
-
-### Dividers
-
-### Grid lists 
 
 ### Lists
 
@@ -448,10 +586,6 @@ Alternative headers
 ### Selection controls
 
 ### Sliders
-
-### Steppers 
-
-(another interesting UI control we don't use yet but could)
 
 ### Subheaders
 
@@ -495,23 +629,11 @@ Alternative headers
 
 ### Launch screens / Landing pages
 
-### Loading Images
-
 ### Navigation
-
-#### Usage
-#### Defining your navigation
-#### Hierarchy
-#### Patterns
-#### Combined patterns
 
 ### Navigation Drawer (ie Filter sidebar)
 
 ### Navigational Transitions
-
-### Notifications
-
-### Permissions
 
 ### Scrolling techniques
 
@@ -520,8 +642,6 @@ Alternative headers
 ### Settings
 
 ## Usability and Accessibility
-
-### Principles
 
 ### Color and contrast
 
