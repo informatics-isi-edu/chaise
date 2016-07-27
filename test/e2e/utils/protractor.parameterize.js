@@ -147,6 +147,7 @@ exports.parameterize = function(config, configParams) {
   // to remove the created schema/catalog/tables if catalogId is not null
   process.on('uncaughtException', function (err) {
     console.log("in error : catalogId " + catalogId);
+    console.dir(err);
     var cb = function() {
       console.error((new Date).toUTCString() + ' uncaughtException:', err.message);
       console.error(err.stack);
