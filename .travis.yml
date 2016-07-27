@@ -1,33 +1,40 @@
 language: node_js
 node_js:
 - stable
+
+sudo: required
+dist: trusty
+
 addons:
   sauce_connect: true
   postgresq: '9.4'
+
 python:
 - 2.7
+
 notifications:
   email:
     on_success: change
     on_failure: always
+
 cache:
   directories:
   - node_modules
   - scripts/vendor
+
 before_install:
-  - sudo apt-get update
+  - sudo apt-get -y update
   - sudo service postgresql stop
-  - sudo apt-get purge postgresql-9.1 postgresql-9.2 postgresql-9.3
+  - sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3
   - sudo service postgresql start 9.4
   - sudo apt-get -y install libpq-dev postgresql-server-dev-9.4 python-dev
-  - sudo apt-get -y install chkconfig apache2 ssl-cert libapache2-mod-wsgi python python-dateutil
-    python-ply python-tz
-  - sudo apt-get purge python-psycopg2
+  - sudo apt-get -y install apache2 apache2-dev libjson-c-dev ssl-cert libapache2-mod-wsgi python python-dateutil python-ply python-tz
+  - sudo apt-get -y purge python-psycopg2
   - sudo pip install web.py
   - sudo pip install psycopg2
+  - sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
   - sudo a2enmod ssl
   - sudo a2ensite default-ssl
-  - chkconfig apache2 on
   - cd ..
   - git clone https://github.com/informatics-isi-edu/webauthn.git
   - cd webauthn
@@ -42,7 +49,6 @@ before_install:
   - cd ..
   - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
   - sudo apt-get install -y nodejs
-  - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
   - sudo npm install
   - sudo make build
@@ -54,8 +60,6 @@ install:
   - sudo make build
   - sudo make installTravis
   - sudo service apache2 restart
-  - sudo ls -l /etc/apache2/conf.d
-  - sudo ls -lR /var/run/apache2
   - sudo cat /var/www/chaise/chaise-config.js
 
 before_script:
@@ -63,7 +67,14 @@ before_script:
   - sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
   - sudo -H -u webauthn webauthn2-manage addattr admin
   - sudo -H -u webauthn webauthn2-manage assign test1 admin
-  
+
+after_failure:
+  - sudo ls -lR /etc/apache2
+  - sudo ls -lR /var/run/apache2
+  - sudo cat /etc/apache2/conf.d/wsgi_webauthn2.conf
+  - sudo cat /etc/apache2/conf.d/wsgi_ermrest.conf
+  - sudo cat ${HTTPD_ERROR_LOG}
+
 env:
   global:
   - COOKIES: ~/cookies
