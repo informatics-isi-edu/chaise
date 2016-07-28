@@ -62,6 +62,7 @@ install:
   - sudo make installTravis
   - sudo service apache2 restart
   - sudo cat /var/www/chaise/chaise-config.js
+  - sudo cat /var/www/chaise/login/index.html
 
 before_script:
   - sudo -H -u webauthn webauthn2-manage adduser test1

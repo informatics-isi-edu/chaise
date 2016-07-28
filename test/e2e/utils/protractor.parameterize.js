@@ -55,8 +55,11 @@ exports.parameterize = function(config, configParams) {
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
           browser.get(process.env.CHAISE_BASE_URL + "/login/");
+          browser.ignoreSynchronization = true;
           browser.sleep(3000);
           browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"'));
+          browser.sleep(100);
+          browser.ignoreSynchronization = false;
         }
 
         defer.resolve();
@@ -77,7 +80,6 @@ exports.parameterize = function(config, configParams) {
 
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
-          console.log("setting up cookie");
           browser.get(process.env.CHAISE_BASE_URL + "/login/");
           browser.ignoreSynchronization = true;
           browser.sleep(3000);
