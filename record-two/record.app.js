@@ -24,6 +24,7 @@
         ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
             $log.info("Reference:", reference);
             $rootScope.reference = reference;
+            var recordReference = reference.contextualize.record;
 
             return reference.read(1);
         }).then(function getPage(page) {
