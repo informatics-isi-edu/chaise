@@ -124,6 +124,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
             // where hidden columns are omitted
             var displayColumns = schemaService.getDisplayColumns(schemaName, tableName);
 
+            // get column values
+            // if type is markdown, converts it to html
+            var columnValues = schemaService.getColumnValues(schemaName, tableName, data[0]);
 
             // get actual columns
             var actualColumns = Object.keys(data[0]);
@@ -139,17 +142,17 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                     if (displayColumns.hasOwnProperty(subCol)) {
                         // if display name is different, change
                         if (displayColumns[subCol] !== subCol){
-                            entity[displayColumns[subCol] + '_link'] = data[0][col];
+                            entity[displayColumns[subCol] + '_link'] = columnValues[col];
                         } else {
-                            entity[col] = data[0][col];
+                            entity[col] = columnValues[col];
                         }
                     }
                 } else if (displayColumns.hasOwnProperty(col)) { // column that is visible
                     // if column display name is different, change
                     if (displayColumns[col] !== col) {
-                        entity[displayColumns[col]] = data[0][col];
+                        entity[displayColumns[col]] = columnValues[col];
                     } else {
-                        entity[col] = data[0][col];
+                        entity[col] = columnValues[col];
                     }
                 }
             }
@@ -303,6 +306,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                                         var downloadPatterns = (anno.url.constructor === Array ? anno.url : [anno.url]);
                                         var captionPatterns = (anno.caption.constructor === Array ? anno.caption : [anno.caption]);
 
+                                        entity.embedTables[ft.title] = entity.embedTables[ft.title] || [];
                                         // for each table row
                                         for (e = 0; e < elements.length; e++) {
                                             element = elements[e];
@@ -323,6 +327,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
                                                 files.push({"url": $sce.trustAsResourceUrl(downloadPattern), "caption": captionPattern});
                                             }
+                                            entity.embedTables[ft.title][e] = element;
 
                                             // each row (iFrame)'s files
                                             entity.embedTables[ft.title][e].files = files;
@@ -1085,6 +1090,24 @@ chaiseRecordApp.service('schemaService', ['$http',  '$rootScope', 'spinnerServic
         }
 
         return columns;
+    };
+
+    // returns the computed column values.
+    // For now, it only converts markdown to html.
+    this.getColumnValues = function(schemaName, tableName, columnValues){
+        var columnDefinitions = this.schemas[schemaName].tables[tableName].column_definitions;
+        for( var i=0; i < columnDefinitions.length; i++){
+            var cd = columnDefinitions[i];
+
+            // convert markdown to html
+            if(columnValues.hasOwnProperty(cd.name) && cd.type && cd.type.typename && cd.type.typename == "markdown"){
+                try{
+                    columnValues[cd.name] = marked(columnValues[cd.name]);
+                }catch(exception){}
+
+            }
+        }
+        return columnValues;
     };
 
     // returns a set of <col_name, {uri_pattern, caption_pattern}>
