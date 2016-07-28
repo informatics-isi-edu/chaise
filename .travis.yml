@@ -53,7 +53,7 @@ before_install:
   - cd ermrestjs
   - sudo npm install
   - sudo make build
-  - sudo make installTravis
+  - sudo make install
   - cd ../chaise
   - sudo npm install
 

@@ -7,7 +7,7 @@
 CHAISEDIR=/var/www/html/chaise
 
 # Install directory on travis
-CHAISETRAVISDIR=/var/www/chaise
+CHAISETRAVISDIR=/var/www/html/chaise
 
 # Project name
 PROJ=chaise
