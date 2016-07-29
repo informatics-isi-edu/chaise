@@ -15,7 +15,7 @@
  */
 
 // The Chaise RecordSet module
-angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise.authen'])
+angular.module('recordset', ['ermrestjs', 'chaise.navbar', 'chaise.utils', 'chaise.authen'])
 
 // Register the 'context' object which can be accessed by config and other
 // services.
@@ -59,7 +59,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 }])
 
 // Register the recordset controller
-.controller('recordsetController', ['$scope', '$rootScope', 'ermrestServerFactory', 'pageInfo', '$window', 'recordsetModel', 'context', 'UriUtils', 'Session', function($scope, $rootScope, ermrestServerFactory, pageInfo, $window, recordsetModel, context, UriUtils, Session) {
+.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'context', 'UriUtils', 'Session', function($scope, $rootScope, pageInfo, $window, recordsetModel, context, UriUtils, Session) {
 
     $scope.vm = recordsetModel;
 
@@ -284,7 +284,7 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
 }])
 
 // Register work to be performed after loading all modules
-.run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ermrestServerFactory', '$rootScope', 'Session', 'UriUtils', function($window, pageInfo, context, recordsetModel, ermrestServerFactory, $rootScope, Session, UriUtils) {
+.run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', function($window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils) {
 
     try {
 
@@ -298,13 +298,13 @@ angular.module('recordset', ['ERMrest', 'chaise.navbar', 'chaise.utils', 'chaise
         pageInfo.loading = true;
         recordsetModel.tableName = context.tableName;
         $rootScope.errorMessage='';
-        
+
     } catch (error) {
         $rootScope.errorMessage = error.message;
     }
 
     // Get rowset data from ermrest
-    var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
+    var server = context.server = ERMrest.ermrestFactory.getServer(context.serviceURL, {cid: context.appName});
 
     server.catalogs.get(context.catalogID).then(function(catalog) {
         console.log(catalog);

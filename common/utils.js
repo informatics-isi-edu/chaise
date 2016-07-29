@@ -234,7 +234,7 @@
                 // convert nested filter structure to Conjunction or Disjunction filter
                 var filters = [];
 
-                if (filters.filters) {
+                if (filter.filters) {
                     for (var i = 0; i < filter.filters.length; i++) {
                         var f = filter.filters[i];
                         var f1 = parsedFilterToERMrestFilter(f, table);

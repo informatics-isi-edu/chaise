@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module('chaise.recordEdit', [
-        'ERMrest',
+        'ermrestjs',
         'ngSanitize',
         'chaise.utils',
         'chaise.authen',
@@ -35,8 +35,8 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ermrestServerFactory', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(context, ermrestServerFactory, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
-        if (!chaiseConfig.editRecord) {
+    .run(['context', 'ERMrest', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(context, ERMrest, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
+        if (!chaiseConfig.editRecord  && chaiseConfig.editRecord !== undefined) {
             var modalInstance = $uibModal.open({
                 controller: 'ErrorDialogController',
                 controllerAs: 'ctrl',
@@ -58,7 +58,7 @@
         }
         // generic try/catch
         try {
-            var server = context.server = ermrestServerFactory.getServer(context.serviceURL, {cid: context.appName});
+            var server = context.server = ERMrest.ermrestFactory.getServer(context.serviceURL, {cid: context.appName});
         } catch (exception) {
             ErrorService.catchAll(exception);
         }
