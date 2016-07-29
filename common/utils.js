@@ -26,7 +26,7 @@
 
             return baseUri + path;
         }
-        
+
         /**
         * @function
         * @param {String} str string to be encoded.
@@ -191,7 +191,7 @@
          *
          * @param {[String]} filterStrings array representation of conjunction and disjunction of filters
          *     without parenthesis. i.e., ['id=123', ';', 'id::gt::234', ';', 'id::le::345']
-         * @return {ParsedFilter} 
+         * @return {ParsedFilter}
          *
          */
         function processMultiFilterString(filterStrings) {
@@ -251,6 +251,7 @@
         }
 
         return {
+            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin,
