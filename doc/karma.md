@@ -8,20 +8,29 @@ Karma and Jasmine is a NodeJS application, and should be installed through npm.
 
 ###To install Karma and Jasmine on your system follow these steps
 
-1. Delete folder "node_modules" from your application directory if present.
-2. Run "sudo npm install --force" from you command prompt, to install all node.js dependencies.
+1. Run "sudo npm install --force" from you command prompt, to install all node.js dependencies.
 
 ###To run all Karma tests
 
-Run `"karma start"` from you command prompt.
+```sh
+./node_modules/karma/bin/karma start
+```
 
-By Default Karma will look for *"karma.conf.js"*, and run the configuration mentioned in it. For more info on configuring you Karma tests you can refer (here)[http://karma-runner.github.io/0.13/config/configuration-file.html]
+Typing `./node_modules/karma/bin/karma start` sucks and so you might find it useful to install karma-cli globally. You will need to do this if you want to run Karma from the command line.
+
+```sh
+sudo npm install karma-cli -g
+```
+Then, you can run Karma simply by `karma start` from anywhere and it will always run the local version.
+
+
+By Default Karma will look for *"karma.conf.js"* in the folder from where it was invoked, and run the configuration mentioned in it. For more information on configuring your Karma tests you can refer [here](http://karma-runner.github.io/0.13/config/configuration-file.html)
 
 ###To run specific Karma tests
 
 You can create you own test configuration file to avoid running all Unit tests. To create one simply copy the existing `karma-sample.conf.js` in folder `karma-test-config` and give it a different name [KarmaNewTestconfigname.js]. Now you just need to change `test/unit/*.js` to `test/unit/yourtest.spec.js', to test specific file.
 
-Run `"node_modules/.bin/karma start karma-test-config/[KarmaNewTestconfigname].js"` from your command prompt.
+Run `"karma start karma-test-config/[KarmaNewTestconfigname].js"` from your command prompt.
 
 
 

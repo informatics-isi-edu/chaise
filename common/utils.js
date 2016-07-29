@@ -233,6 +233,7 @@
             } else {
                 // convert nested filter structure to Conjunction or Disjunction filter
                 var filters = [];
+
                 if (filter.filters) {
                     for (var i = 0; i < filter.filters.length; i++) {
                         var f = filter.filters[i];
@@ -250,7 +251,6 @@
         }
 
         return {
-            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin,

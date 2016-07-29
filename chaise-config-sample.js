@@ -18,6 +18,7 @@ var chaiseConfig = {
     recordUiGridEnabled: false,
     recordUiGridExportCSVEnabled: true,
     recordUiGridExportPDFEnabled: true,
+    editRecord: true,
     tour: {
       pickRandom: false,
       searchInputAttribute: "Data",
@@ -28,3 +29,7 @@ var chaiseConfig = {
       chosenValue: "Expression microarray - gene"
     }
 };
+
+if (typeof module === 'object' && module.exports && typeof require === 'function') {
+    exports.config = chaiseConfig;
+}

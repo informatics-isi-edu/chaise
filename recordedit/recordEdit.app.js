@@ -16,7 +16,7 @@
         'chaise.modal',
         'ui.select',
         'ui.bootstrap',
-        'rzModule',
+        //'rzModule',
         '720kb.datepicker',
         'ngMessages'
     ])
