@@ -4,7 +4,7 @@
     var client;
 
     angular.module('chaise.viewer', [
-        'ERMrest',
+        'ermrestjs',
         'ngSanitize',
         'chaise.alerts',
         'chaise.filters',
@@ -47,8 +47,8 @@
     // if you want to use a factory or service (e.g. $window or your custom one)
     // in a .config block, you append 'Provider' to the dependency name and call
     // .$get() on it. This returns a Provider instance of the factory/service.
-    .config(['ermrestServerFactoryProvider', 'context', function configureClient(ermrestServerFactoryProvider, context) {
-        client = ermrestServerFactoryProvider.$get().getServer(context.serviceURL, {cid: context.appName});
+    .config(['ERMrestProvider', 'context', function configureClient(ERMrestProvider, context) {
+        client = ERMrestProvider.$get().ermrestFactory.getServer(context.serviceURL, {cid: context.appName});
     }])
 
     // Set user info
