@@ -57,6 +57,13 @@
                 entities = rowset;
             }
 
+            // Find the shortest "primary key" for use in redirect url
+            var keys = model.table.keys.all().sort(function(a, b) {
+                return a.colset.length() - b.colset.length();
+            });
+            var shortestKey = keys[0].colset.columns;
+
+
             if (rowset.length == 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
                 // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
@@ -64,28 +71,28 @@
                 // datapath is redeveloped to only use aliases when necessary
                 redirectUrl += 'record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
 
-                try {
-                    // Find the shortest "primary key" for use in redirect url
-                    var keys = model.table.keys.all().sort(function(a, b) {
-                        return a.colset.length() - b.colset.length();
-                    });
-                    var shortestKey = keys[0].colset.columns;
-
-                    // Build the redirect url with key cols and entity's values
-                    for (var c = 0, len = shortestKey.length; c < len; c++) {
-                        var colName = shortestKey[c].name;
-                        redirectUrl += '/' + UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[0][colName]);
-                    }
-                } catch (exception) { // catches model.table.keys.all()
-                    // handle exception
-                    $log.info(exception);
-                }
             } else if (rowset.length > 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record set...'});
                 // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
                 redirectUrl += 'recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
             } else {
                 return AlertsService.addAlert({type: 'error', message: 'Sorry, there is no data to submit. You must have at least 1 set of data for submission.'});
+            }
+
+            // finish building the url with entity filters
+            for (var e = 0; e < entities.length; e++) {
+                redirectUrl += (e === 0? "/" : ";");
+
+                // entity keys
+                for (var c = 0, len = shortestKey.length; c < len; c++) {
+                    redirectUrl += (c === 0 && len > 1 ? "(" : "");
+                    redirectUrl += (c > 0 ? "&" : "");
+
+                    var colName = shortestKey[c].name;
+                    redirectUrl += UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[e][colName]);
+                }
+
+                redirectUrl += (len > 1 ? ")" : "");
             }
 
             // Redirect to record or recordset app..
