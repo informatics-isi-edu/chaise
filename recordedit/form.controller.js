@@ -57,17 +57,12 @@
                 entities = rowset;
             }
 
-            try {
-                // Find the shortest "primary key" for use in redirect url
-                var keys = model.table.keys.all().sort(function(a, b) {
-                    return a.colset.length() - b.colset.length();
-                });
-                var shortestKey = keys[0].colset.columns;
+            // Find the shortest "primary key" for use in redirect url
+            var keys = model.table.keys.all().sort(function(a, b) {
+                return a.colset.length() - b.colset.length();
+            });
+            var shortestKey = keys[0].colset.columns;
 
-            } catch (exception) { // catches model.table.keys.all()
-                // handle exception
-                $log.info(exception);
-            }
 
             if (rowset.length == 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
