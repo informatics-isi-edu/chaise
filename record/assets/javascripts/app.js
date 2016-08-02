@@ -159,8 +159,9 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
             entity.sequences = []; // array of sequence columns
             entity.colTooltips = {}; // column tool tips
+            entity.colDataTypes = {}; // column types
 
-            // apply sequence formatting & get column tooltips
+            // apply sequence formatting & get column tooltips & get column types
             var columnDefinitions = schema.tables[tableName].column_definitions;
             for (var i = 0; i < columnDefinitions.length; i++) {
                 var cdAnnotation = columnDefinitions[i].annotations;
@@ -187,6 +188,11 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
                 // tooltips
                 if (columnDefinitions[i].comment != null) {
                     entity.colTooltips[columnDefinitions[i].name] = columnDefinitions[i].comment;
+                }
+
+                // column types
+                if (columnDefinitions[i].type && columnDefinitions[i].type.typename) {
+                    entity.colDataTypes[columnDefinitions[i].name] = columnDefinitions[i].type.typename;
                 }
             }
 
@@ -1766,7 +1772,7 @@ chaiseRecordApp.filter('filteredEntity', ['schemaService', function(schemaServic
             if (value !== null &&
                 (!Array.isArray(value) || (Array.isArray(value) && value.length > 0 && typeof(value[0]) != 'object')) &&
                 key != 'internal' && key != 'embedTables' && !key.match(".*_link") &&
-                key != 'colTooltips' && key != 'sequences'){
+                key != 'colTooltips' && key != 'sequences' && key != 'colDataTypes'){
 
                 // Only include column (key) if column is not hidden
                 if (!schemaService.isHiddenColumn(entity.internal.schemaName, entity.internal.tableName, key)){
