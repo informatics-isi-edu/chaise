@@ -26,5 +26,10 @@
     <!-- defined on $rootScope in run function -->
     <div ng-if="recordValues && columns">
         <record-display></record-display>
+
+        <!-- defined on $rootScope in run function -->
+        <record-table page-info="pageInfo"></record-table>
     </div>
+
+
 </body>

@@ -5,14 +5,27 @@
         'chaise.errors',
         'chaise.modal',
         'chaise.navbar',
-        'chaise.recordDisplay',
+        'chaise.record.display',
+        'chaise.record.table',
         'chaise.utils',
         'ermrestjs',
         'ui.bootstrap'
     ])
 
-    .run(['ERMrest', 'UriUtils', 'ErrorService', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, $log, $rootScope, $window) {
+    // The page info object passed to the table directive
+    .factory('pageInfo', [function() {
+        return {
+            loading: true,
+            previousButtonDisabled: true,
+            nextButtonDisabled: true,
+            pageLimit: 5,
+            recordStart: 1,
+            recordEnd: this.pageLimit
+        };
+    }])
 
+    .run(['ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
+        $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
 
         // The context object won't change unless the app is reloaded
@@ -30,6 +43,7 @@
         }).then(function getPage(page) {
             var tuple = page.tuples[0];
 
+            // Used directly in the record-display directive
             $rootScope.recordValues = tuple.values;
             $rootScope.columns = $rootScope.reference.columns;
 
