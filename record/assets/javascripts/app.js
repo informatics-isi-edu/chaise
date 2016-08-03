@@ -187,13 +187,11 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
                 // tooltips
                 if (columnDefinitions[i].comment != null) {
-                    entity.colTooltips[columnDefinitions[i].name] = columnDefinitions[i].comment;
+                    entity.colTooltips[displayColumns[columnDefinitions[i].name] || columnDefinitions[i].name] = columnDefinitions[i].comment;
                 }
 
                 // column types
-                if (columnDefinitions[i].type && columnDefinitions[i].type.typename) {
-                    entity.colDataTypes[columnDefinitions[i].name] = columnDefinitions[i].type.typename;
-                }
+                entity.colDataTypes[displayColumns[columnDefinitions[i].name] || columnDefinitions[i].name] = columnDefinitions[i].type.typename;
             }
 
 
