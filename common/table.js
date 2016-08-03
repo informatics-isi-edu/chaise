@@ -3,9 +3,8 @@
 
     angular.module('chaise.record.table', [])
 
-    .directive('recordTable', ['UriUtils', '$rootScope', '$window', function(UriUtils, $rootScope, $window) {
+    .directive('recordTable', ['UriUtils', '$rootScope', '$window', '$filter', function(UriUtils, $rootScope, $window, $filter) {
         var postLink = function(scope) {
-            console.log(scope);
             var context = $rootScope.context;
 
             scope.tableModel = {
@@ -22,10 +21,11 @@
 
             scope.pageInfo = $rootScope.pageInfo;
 
-            // Watch these
-            scope.tableModel.columns = $rootScope.columns;
-            scope.tableModel.rowset = [];
-            scope.tableModel.rowset.push($rootScope.recordValues);
+            // fetched from directive input
+            scope.tableModel.columns = scope.columns;
+            scope.tableModel.rowset = scope.data;
+
+            // TODO: Read the context for the reference and set defaults based on that
 
             scope.sort = function () {
 
@@ -51,36 +51,34 @@
 
                 pageInfo.loading = true;
 
-                // scope.tableModel.table.entity.get(scope.tableModel.filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
-                //     pageInfo.loading = false;
-                //     console.log(rowset);
-                //     scope.tableModel.rowset = rowset;
-                //
-                //     // enable buttons
-                //     pageInfo.recordStart = 1;
-                //     pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
-                //     pageInfo.previousButtonDisabled = true; // on page 1
-                //     pageInfo.nextButtonDisabled = (scope.tableModel.count <= pageInfo.recordEnd);
-                // }, function (error) {
-                //     console.log("Error getting entities: ");
-                //     console.log(error);
-                //
-                //     pageInfo.loading = false;
-                //
-                //     if (error instanceof ERMrest.UnauthorizedError) {
-                //         // session has expired, login
-                //         Session.login($window.location.href);
-                //     } else {
-                //
-                //         // TODO alert error
-                //
-                //         // enable buttons
-                //         pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
-                //         pageInfo.nextButtonDisabled = (scope.tableModel.count <= pageInfo.recordEnd);
-                //     }
-                //
-                //
-                // })
+                scope.tableModel.table.entity.get(scope.tableModel.filter, pageInfo.pageLimit, null, sort).then(function (rowset) {
+                    pageInfo.loading = false;
+                    console.log(rowset);
+                    scope.tableModel.rowset = rowset;
+
+                    // enable buttons
+                    pageInfo.recordStart = 1;
+                    pageInfo.recordEnd = pageInfo.recordStart + rowset.length() - 1;
+                    pageInfo.previousButtonDisabled = true; // on page 1
+                    pageInfo.nextButtonDisabled = (scope.tableModel.count <= pageInfo.recordEnd);
+                }, function (error) {
+                    console.log("Error getting entities: ");
+                    console.log(error);
+
+                    pageInfo.loading = false;
+
+                    if (error instanceof ERMrest.UnauthorizedError) {
+                        // session has expired, login
+                        Session.login($window.location.href);
+                    } else {
+
+                        // TODO alert error
+
+                        // enable buttons
+                        pageInfo.previousButtonDisabled = (pageInfo.recordStart === 1); // on page 1
+                        pageInfo.nextButtonDisabled = (scope.tableModel.count <= pageInfo.recordEnd);
+                    }
+                });
             };
 
             // function to determine if the clicked column should be sorted
@@ -121,6 +119,11 @@
         return {
             restrict: 'E',
             templateUrl: '../common/templates/table.html',
+            scope: {
+                displayname: '=',
+                columns: '=',
+                data: '='
+            },
             link: postLink
         };
     }]);

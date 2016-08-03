@@ -21,15 +21,21 @@
 <body>
     <navbar></navbar>
 
-    <div id="entity-title">{{ reference.displayname }}</div>
+    <!-- Body of the docment-->
+    <div class="body">
+        <div id="entity-title">{{ reference.displayname }}</div>
+        <div id="table-title">{{ context.tableName | uppercase }}</div>
 
-    <!-- defined on $rootScope in run function -->
-    <div ng-if="recordValues && columns">
-        <record-display></record-display>
+        <!-- prevents initialization of the directive until the data is available -->
+        <div ng-if="recordValues && columns">
+            <record-display></record-display>
+        </div>
 
-        <!-- defined on $rootScope in run function -->
-        <record-table page-info="pageInfo"></record-table>
+        <!-- prevents initialization of the directive until the data is available -->
+        <div ng-if="relatedReferences">
+            <div ng-repeat="relatedRef in relatedReferences">
+                <record-table displayname="relatedRef.displayname" columns="relatedRef.columns" data="relatedRef.data"></record-table>
+            </div>
+        </div>
     </div>
-
-
 </body>
