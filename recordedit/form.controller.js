@@ -115,11 +115,8 @@
                 try {
                     var column = model.table.columns.get(k);
                     switch (column.type.name) {
-                        case 'boolean': if (row[k] === '') row[k] = null;
-                                        break;
-                        case 'date':
-                        case 'timestamptz': if (row[k] === '') row[k] = null;
-                                            break;
+                        default: if (row[k] === '') row[k] = null;
+                                 break;               
                     }
                 } catch(e) {}
             }
