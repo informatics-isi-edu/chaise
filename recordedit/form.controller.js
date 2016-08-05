@@ -104,6 +104,25 @@
             $log.info(response);
         }
 
+
+        /*
+         * Allow to tranform some form values depending on their types
+         * Boolean: If the value is empty ('') then set it as null
+         */
+        function transformRowValues(model) {
+            model.rows.forEach(function(row) {
+                for (var k in row) {
+                    try {
+                        var column = model.table.columns.get(k);
+                        switch (column.type.name) {
+                            case 'boolean': if (row[k] == '') row[k] = null;
+                                            break;
+                        }
+                    } catch(e) {}
+                }
+            });
+        }
+
         function submit() {
             var form = vm.formContainer;
             var model = vm.recordEditModel;
@@ -115,6 +134,8 @@
                 form.$setSubmitted();
                 return;
             }
+
+            transformRowValues(model);
 
             if (vm.editMode) {
                 model.table.entity.put(model.rows).then(function success(entities) {
