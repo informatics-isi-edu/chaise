@@ -59,10 +59,10 @@ before_install:
 
 install:
   - sudo make build
-  - sudo sh git_version_info.sh
   - sudo make installTravis
   - sudo service apache2 restart
   - sudo cat /var/www/html/chaise/chaise-config.js
+  - sudo cat /var/www/html/chaise/version.txt
 
 before_script:
   - sudo -H -u webauthn webauthn2-manage adduser test1
