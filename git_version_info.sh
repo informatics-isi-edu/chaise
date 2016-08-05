@@ -20,15 +20,20 @@ DATE=$(date)
 
 TITLE="**************************CHAISE BUILD INFO******************************\n\nBUILD DATE : "$DATE
 
-CHAISECOMMIT=$(parse_git_branch)"\n"$(parse_git_hash)
+CHAISECOMMIT="\n\nCHAISE : $(parse_git_branch)"\n"$(parse_git_hash)"
 
 cd ../ermrestjs
 
-ERMRESTJSCOMMIT=$(parse_git_branch)"\n"$(parse_git_hash)
+ERMRESTJSCOMMIT="\n\nEMRESTJS : $(parse_git_branch)"\n"$(parse_git_hash)"
 
+
+if [ -n "$TRAVIS"]
+then
 cd ../ermrest
-
-ERMRESTCOMMIT=$(parse_git_branch)"\n"$(parse_git_hash)
+ERMRESTCOMMIT="\n\nEMREST : $(parse_git_branch)"\n"$(parse_git_hash)"
+else
+ERMRESTCOMMIT=""
+fi
 
 cd ../chaise
-echo "${TITLE}\n\nCHAISE : ${CHAISECOMMIT}\n\nEMRESTJS : ${ERMRESTJSCOMMIT}\n\nEMREST : ${ERMRESTCOMMIT}" > $VERSION
+echo "${TITLE}${CHAISECOMMIT}${ERMRESTJSCOMMIT}${ERMRESTCOMMIT}" > $VERSION
