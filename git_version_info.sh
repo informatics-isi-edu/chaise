@@ -1,17 +1,17 @@
 #!/bin/sh
 
 # checks if branch has something pending
-function parse_git_dirty() {
+parse_git_dirty() {
   git diff --quiet --ignore-submodules HEAD 2>/dev/null; [ $? -eq 1 ] && echo "*"
 }
 
 # gets the current git branch
-function parse_git_branch() {
+parse_git_branch() {
   git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
 }
 
 # get last commit message with author and date
-function parse_git_hash() {
+parse_git_hash() {
   git log -1
 }
 
