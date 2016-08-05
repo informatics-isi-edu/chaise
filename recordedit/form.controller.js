@@ -117,6 +117,9 @@
                         switch (column.type.name) {
                             case 'boolean': if (row[k] == '') row[k] = null;
                                             break;
+                            case 'date':
+                            case 'timestamptz': if (row[k] == '') row[k] = null;
+                                                break;
                         }
                     } catch(e) {}
                 }
