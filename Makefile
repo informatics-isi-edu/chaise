@@ -605,12 +605,14 @@ $(JS_CONFIG): chaise-config-sample.js
 # Rule for installing on dev.isrd
 .PHONY: install
 install: $(HTML)
+	sudo sh ./git_version_info.sh
 	test -d $(dir $(CHAISEDIR)) && mkdir -p $(CHAISEDIR)
 	rsync -a --exclude='.*' --exclude=chaise-config.js ./. $(CHAISEDIR)/
 	
 # Rule for installing on Travis
 .PHONY: installTravis
 installTravis: $(HTML)
+	sudo sh ./git_version_info.sh
 	test -d $(dir $(CHAISETRAVISDIR)) && mkdir -p $(CHAISETRAVISDIR)
 	rsync -a --exclude='.*' ./. $(CHAISETRAVISDIR)/
 

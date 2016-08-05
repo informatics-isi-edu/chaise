@@ -52,6 +52,7 @@ before_install:
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
   - sudo npm install
+  - bower install
   - sudo make build
   - sudo make install
   - cd ../chaise
@@ -62,6 +63,7 @@ install:
   - sudo make installTravis
   - sudo service apache2 restart
   - sudo cat /var/www/html/chaise/chaise-config.js
+  - sudo cat /var/www/html/chaise/version.txt
 
 before_script:
   - sudo -H -u webauthn webauthn2-manage adduser test1
