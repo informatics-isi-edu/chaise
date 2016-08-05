@@ -31,4 +31,4 @@ cd ../ermrest
 ERMRESTCOMMIT=$(parse_git_branch)"\n"$(parse_git_hash)
 
 cd ../chaise
-echo $TITLE"\n\nCHAISE : "$CHAISECOMMIT"\n\nEMRESTJS : "$ERMRESTJSCOMMIT"\n\nEMREST : "$ERMRESTCOMMIT> $VERSION
+echo "${TITLE}\n\nCHAISE : ${CHAISECOMMIT}\n\nEMRESTJS : ${ERMRESTJSCOMMIT}\n\nEMREST : ${ERMRESTCOMMIT}" > $VERSION
