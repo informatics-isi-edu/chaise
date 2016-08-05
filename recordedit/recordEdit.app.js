@@ -167,8 +167,7 @@
                                     // Must transform the value into a Date so that
                                     // Angular won't complain when putting the value
                                     // in an input of type "date" in the view
-                                    if (value) value = new Date(value);
-                                    else value = "";
+                                    value = (value) ? new Date(value) : "";
                                 }
                                 recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
                             } catch (exception) { }
