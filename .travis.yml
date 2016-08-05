@@ -52,6 +52,7 @@ before_install:
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
   - sudo npm install
+  - bower install
   - sudo make build
   - sudo make install
   - cd ../chaise
