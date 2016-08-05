@@ -605,7 +605,7 @@ $(JS_CONFIG): chaise-config-sample.js
 # Rule for installing on dev.isrd
 .PHONY: install
 install: $(HTML)
-	sh git_version_info.sh
+	sudo sh ./git_version_info.sh
 	test -d $(dir $(CHAISEDIR)) && mkdir -p $(CHAISEDIR)
 	rsync -a --exclude='.*' --exclude=chaise-config.js ./. $(CHAISEDIR)/
 	
