@@ -106,8 +106,9 @@
 
 
         /*
-         * Allow to tranform some form values depending on their types
+         * Allows to tranform some form values depending on their types
          * Boolean: If the value is empty ('') then set it as null
+         * Date/Timestamptz: If the value is empty ('') then set it as null
          */
         function transformRowValues(model) {
             model.rows.forEach(function(row) {
