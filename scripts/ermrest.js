@@ -60,7 +60,7 @@ var viewer3dFileTypes = ['image/x.nifti'];
 
 var sliderPresentation = [ 'numeric', 'float4', 'int8', 'int4', 'int2', 'float8', 'serial4', 'serial8' ];
 
-var searchBoxPresentation = [ 'text', 'varchar', 'jsonb' ];
+var searchBoxPresentation = [ 'text', 'varchar', 'jsonb', 'markdown' ];
 var checkBoxPresentation = [ 'boolean' ];
 
 var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
@@ -2080,7 +2080,7 @@ function setCollectionsReferences(tree) {
 	tree.push(node);
 	$.each(CATALOG_METADATA, function(schema, metadata) {
 		if (schema != SCHEMA) {
-			return true;
+			//return true;
 		}
 		var tables = [];
 		$.each(metadata, function(i, table) {

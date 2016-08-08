@@ -138,10 +138,11 @@ export SAUCE_USERNAME=YOUR_USERNAME
 export SAUCE_ACCESS_KEY=YOUR_ACCESS_KEY
 ```
 
-Set a base URL for the Protractor tests (i.e. the path to your Chaise installation):
+Set a base URL for the Protractor tests (i.e. the path to your Chaise and Ermrest installation):
 
 ```sh
 export CHAISE_BASE_URL=http://<hostname>/path/to/chaise
+export ERMREST_URL=https://<hostname>/path/to/ermrest
 ```
 
 Set the authCookie used for generating data for testcases.
@@ -152,7 +153,7 @@ export AUTH_COOKIE=<YourERMRest_cookie>
 
 Then run `make test`.
 
-For more info on how to configure and run E2E Tests refere follwoing [link](https://github.com/informatics-isi-edu/chaise/blob/master/doc/protractor.md)
+For more info on how to configure and run E2E Tests refere following [link](https://github.com/informatics-isi-edu/chaise/wiki/E2E-tests-guide)
 
 ### How to run Unit Tests
 
@@ -168,7 +169,7 @@ To run all unit test run following command from your terminal.
 karma start
 ``` 
 
-For more info on how to configure and run Unit Tests refer following [link](https://github.com/informatics-isi-edu/chaise/blob/master/doc/karma.md#to-run-all-karma-tests)
+For more info on how to configure and run Unit Tests refer following [link](https://github.com/informatics-isi-edu/chaise/wiki/Unit-Test-Guide)
 
 ### How to run all tests
 
