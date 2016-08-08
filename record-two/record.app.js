@@ -25,7 +25,6 @@
             $log.info("Reference:", reference);
             $rootScope.reference = reference;
             var recordReference = reference.contextualize.record;
-
             return reference.read(1);
         }).then(function getPage(page) {
             var tuple = page.tuples[0];
