@@ -29,10 +29,9 @@
             return reference.read(1);
         }).then(function getPage(page) {
             var tuple = page.tuples[0];
-
+            $rootScope.displayname = tuple.displayname;
             $rootScope.recordValues = tuple.values;
             $rootScope.columns = $rootScope.reference.columns;
-
         }, function error(response) {
             $log.warn(response);
             throw response;
