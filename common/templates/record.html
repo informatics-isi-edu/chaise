@@ -4,8 +4,9 @@
             <span ng-class="{'coltooltiplabel': column.comment}">{{::column.displayname}}</span>
             <span ng-if="column.comment" class="coltooltiptext">{{::column.comment}}</span>
         </td>
-        <td class="entity-value col-xs-10">
-            <span>{{recordValues[$index]}}</span>
+        <td class="entity-value col-xs-10" ng-switch="column.type.name">
+            <span ng-switch-when="markdown" ng-bind-html="recordValues[$index]"></span>
+            <span ng-switch-default>{{recordValues[$index]}}</span>
         </td>
     </tr>
 </table>

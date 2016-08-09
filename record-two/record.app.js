@@ -2,6 +2,7 @@
     'use strict';
 
     angular.module('chaise.record', [
+        'ngSanitize',
         'chaise.errors',
         'chaise.modal',
         'chaise.navbar',
@@ -29,7 +30,7 @@
         }).then(function getPage(page) {
             var tuple = page.tuples[0];
             $rootScope.displayname = tuple.displayname;
-            $rootScope.recordValues = tuple.values;
+            $rootScope.recordValues = tuple.values; // already pretty printed
             $rootScope.columns = $rootScope.reference.columns;
         }, function error(response) {
             $log.warn(response);
