@@ -1,4 +1,7 @@
 /****************** GLOBAL ******************/
+body {
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
 
 li{
     list-style-type: none;
@@ -56,10 +59,10 @@ button .glyphicon-trash {
 #entity-title, .entity-title{
     clear: both;
     padding-top: 10px;
-    /* color: rgb(126, 126, 126);
+     /*color: rgb(126, 126, 126);
     font-size: 26px;
     font-weight: 300;
-    letter-spacing: 2px; */
+    letter-spacing: 2px;*/
 }
 #entity-subtitle{
     text-transform: uppercase;

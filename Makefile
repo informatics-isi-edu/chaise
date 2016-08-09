@@ -381,12 +381,12 @@ distclean: clean
 
 # Rule to run tests
 .PHONY: test
-test: 
+test:
 	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit)  && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
-karma: 
+karma:
 	$(BIN)/karma start
 
 # Rule to run tests
@@ -412,7 +412,7 @@ testrecordadd:
 
 .PHONY: testrecordedit
 testrecordedit:
-	$(BIN)/protractor $(E2EDIrecordEdit) 
+	$(BIN)/protractor $(E2EDIrecordEdit)
 
 # Rule to make html
 .PHONY: html
@@ -607,7 +607,7 @@ $(JS_CONFIG): chaise-config-sample.js
 install: $(HTML)
 	test -d $(dir $(CHAISEDIR)) && mkdir -p $(CHAISEDIR)
 	rsync -a --exclude='.*' --exclude=chaise-config.js ./. $(CHAISEDIR)/
-	
+
 # Rule for installing on Travis
 .PHONY: installTravis
 installTravis: $(HTML)
@@ -638,4 +638,3 @@ usage:
 	@echo "    testrecord 		- runs record app e2e tests"
 	@echo "    testrecordadd 	- runs data entry add e2e tests"
 	@echo "    testrecordedit 	- runs date entry edit e2e tests"
-

@@ -7,11 +7,11 @@
 </head>
 <body>
     <navbar></navbar>
-
-    <div id="entity-title">{{ displayname }}</div>
-
-    <!-- defined on $rootScope in run function -->
-    <div ng-if="recordValues && columns">
-        <record-display></record-display>
+    <div class="container">
+        <div id="entity-title">{{ displayname }}</div>
+        <!-- defined on $rootScope in run function -->
+        <div ng-if="recordValues && columns">
+            <record-display></record-display>
+        </div>
     </div>
 </body>
