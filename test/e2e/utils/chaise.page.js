@@ -425,6 +425,19 @@ var recordEditPage = function() {
     };
 };
 
+var record2Page = function() {
+    var that = this;
+    this.getEntityTitle = function() {
+        return browser.executeScript("return $('#entity-title').text();");
+    };
+
+    this.getColumns = function() {
+        return browser.executeScript("return $('tr[ng-repeat=\"column in columns\"]')");
+    };
+
+    
+};
+
 function chaisePage() {
     this.sidebar = new sidebar();
     this.moreFilter = new moreFilter();
@@ -432,6 +445,7 @@ function chaisePage() {
     this.resultContent = new resultContent();
     this.recordPage = new recordPage();
     this.recordEditPage = new recordEditPage();
+    this.record2Page = new record2Page();
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));
     this.tourBox = element(by.css('.tour-DataBrowserTour'));

@@ -107,6 +107,9 @@
             "description": {
               "display": "Name of Accommodation"
             },
+            "tag:misd.isi.edu,2015:display" : {
+              "name" : "Name of Accommodation"
+            },
             "facetOrder": [
               "1"
             ]
@@ -180,7 +183,7 @@
           "default": null,
           "nullok": false,
           "type": {
-            "typename": "text"
+            "typename": "longtext"
           },
           "annotations": {
             "comment": [
@@ -197,7 +200,7 @@
           "default": null,
           "nullok": true,
           "type": {
-            "typename": "longtext"
+            "typename": "markdown"
           },
           "annotations": {
             "comment": [
