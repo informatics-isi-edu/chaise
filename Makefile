@@ -612,6 +612,7 @@ install: $(HTML)
 # Rule for installing on Travis
 .PHONY: installTravis
 installTravis: $(HTML)
+	sudo sh ./git_version_info.sh
 	test -d $(dir $(CHAISETRAVISDIR)) && mkdir -p $(CHAISETRAVISDIR)
 	rsync -a --exclude='.*' ./. $(CHAISETRAVISDIR)/
 

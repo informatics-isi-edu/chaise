@@ -104,6 +104,24 @@
             $log.info(response);
         }
 
+
+        /*
+         * Allows to tranform some form values depending on their types
+         * Boolean: If the value is empty ('') then set it as null
+         * Date/Timestamptz: If the value is empty ('') then set it as null
+         */
+        function transformRowValues(row, model) {
+            for (var k in row) {
+                try {
+                    var column = model.table.columns.get(k);
+                    switch (column.type.name) {
+                        default: if (row[k] === '') row[k] = null;
+                                 break;               
+                    }
+                } catch(e) {}
+            }
+        }
+
         function submit() {
             var form = vm.formContainer;
             var model = vm.recordEditModel;
@@ -115,6 +133,10 @@
                 form.$setSubmitted();
                 return;
             }
+
+            model.rows.forEach(function(row) {
+                transformRowValues(row, model);
+            });
 
             if (vm.editMode) {
                 model.table.entity.put(model.rows).then(function success(entities) {
@@ -149,7 +171,13 @@
             if (validRow) {
                 var rowset = vm.recordEditModel.rows;
                 var protoRow = rowset[index];
-                rowset.push(angular.copy(protoRow));
+                var row = angular.copy(protoRow);
+                
+                // transform row values to avoid parsing issues with null values
+                transformRowValues(row, vm.recordEditModel);
+                
+                rowset.push(row);
+
             }
         }
 

@@ -526,3 +526,14 @@ tbody{
     -moz-box-shadow:    0 0 5px black;
     box-shadow:         0 0 5px black;
 }
+
+/************ Markdown **************/
+.markdown-container li {
+    list-style-type: inherit;
+}
+.markdown-container ul {
+    list-style-type: disc;
+}
+.markdown-container ol {
+    list-style-type: decimal;
+}

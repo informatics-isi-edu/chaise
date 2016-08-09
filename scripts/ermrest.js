@@ -2080,7 +2080,7 @@ function setCollectionsReferences(tree) {
 	tree.push(node);
 	$.each(CATALOG_METADATA, function(schema, metadata) {
 		if (schema != SCHEMA) {
-			return true;
+			//return true;
 		}
 		var tables = [];
 		$.each(metadata, function(i, table) {
