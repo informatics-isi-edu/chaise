@@ -59,48 +59,7 @@
                     $rootScope.dataArray.push(page.tuples);
                 });
             });
-
-            //TODO: remove this after related works. faked data for showing the related table
-            // // ==================================================
-            // var data1 = [];
-            // var recordValues = $rootScope.recordValues;
-            // $rootScope.relatedReferences = [];
-            //
-            // data1.push(recordValues);
-            //
-            // // table with 1 row
-            // var tempObj = {
-            //     displayname: "Related Table",
-            //     columns: $rootScope.columns,
-            //     data: data1
-            // }
-            //
-            // var data2 = [];
-            // data2.push(recordValues);
-            //
-            // var newValues = angular.copy(recordValues);
-            // newValues[0] = "36";
-            // data2.push(newValues);
-            //
-            // newValues = angular.copy(recordValues);
-            // newValues[0] = "9007";
-            // data2.push(newValues);
-            //
-            // newValues = angular.copy(recordValues);
-            // newValues[0] = "9002";
-            // data2.push(newValues);
-            //
-            // // table with 4 rows
-            // var tempObj2 = {
-            //     displayname: "Related Table2",
-            //     columns: $rootScope.columns,
-            //     data: data2
-            // }
-            //
-            // $rootScope.relatedReferences.push(tempObj2);
-            // $rootScope.relatedReferences.push(tempObj);
-            // ==================================================
-
+            
         }, function error(response) {
             $log.warn(response);
             throw response;
