@@ -33,9 +33,12 @@
 
         <!-- prevents initialization of the directive until the data is available | wait until all data values have been fetched -->
         <div ng-if="relatedReferences.length == dataArray.length">
-            <div ng-repeat="relatedRef in relatedReferences track by $index">
-                <record-table displayname="relatedRef.displayname" columns="relatedRef.columns" data="dataArray[$index]"></record-table>
-            </div>
+            <uib-accordion close-others="false">
+                <div uib-accordion-group heading="{{relatedRef.displayname}} ({{dataArray[$index].length}})" ng-repeat="relatedRef in relatedReferences track by $index">
+                    <div class="related-ref-displayname"></div>
+                    <record-table columns="relatedRef.columns" data="dataArray[$index]"></record-table>
+                </div>
+            </uib-accordion>
         </div>
     </div>
 </body>

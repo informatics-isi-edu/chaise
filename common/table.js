@@ -121,7 +121,6 @@
             restrict: 'E',
             templateUrl: '../common/templates/table.html',
             scope: {
-                displayname: '=',
                 columns: '=',
                 data: '='
             },

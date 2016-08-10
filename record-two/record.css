@@ -1,4 +1,7 @@
 /* Where I would put styling, if I had any */
 .body {
-    padding: 10px 10px 10px 10px
+    padding: 10px 10px 10px 10px;
+}
+.related-ref-displayname {
+    font-size: 18px;
 }
