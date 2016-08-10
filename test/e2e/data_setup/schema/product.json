@@ -130,6 +130,9 @@
             "description": {
               "display": "Website"
             },
+            "tag:misd.isi.edu,2015:url" : {
+              "url" : "{cname}"
+            },
             "tag:misd.isi.edu,2015:display": {
               "name": "Website"
             }
@@ -191,7 +194,10 @@
               "unsortable",
               "summary",
               "hidden"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Summary"
+            }
           }
         },
         {
@@ -208,7 +214,10 @@
               "unsortable",
               "html",
               "hidden"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Description"
+            }
           }
         },
         {
@@ -238,6 +247,9 @@
             "comment": [
               "hidden"
             ]
+          },
+          "tag:misd.isi.edu,2015:display": {
+            "name": "Thumbnail"
           }
         },
         {
@@ -273,7 +285,7 @@
               "bottom"
             ],
             "description": {
-              "display": "Date since operational"
+              "display": "Operational Since"
             },
             "tag:misd.isi.edu,2015:display": {
               "name": "Operational Since"
@@ -295,7 +307,8 @@
             },
             "tag:misd.isi.edu,2015:display": {
               "name": "Is Luxurious"
-            }
+            },
+            "tag:isrd.isi.edu,2016:ignore" : ["record"]
           }
         }
       ],
@@ -309,6 +322,9 @@
         "description": {
           "display": "Accommodations",
           "top_columns": ["title", "rating", "category", "opened_on"]
+        },
+        "tag:isrd.isi.edu,2016:visible-columns" : {
+          "record" : ["title", "category", "website", "rating", "summary", "description", "thumbnail", "opened_on"]
         }
       }
     },

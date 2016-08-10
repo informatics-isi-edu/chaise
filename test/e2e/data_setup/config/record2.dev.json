@@ -21,7 +21,7 @@
             "tables" : [{
                 "table_name" : "accommodation",
                 "keys" : [{ "name": "id", "value": "2002", "operator" : "="}],
-                "title": "Accommodations",
+                "title": "Sherathon Hotel",
                 "columns" : [
                     { "title" : "Id", "value": "", "type": ""}, 
                     { "title" : "Title", "value": "", "type": ""},
