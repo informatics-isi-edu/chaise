@@ -23,6 +23,7 @@
 
             // fetched from directive input
             scope.tableModel.columns = scope.columns;
+            console.log(scope.data);
             scope.tableModel.rowset = scope.data;
 
             // TODO: Read the context for the reference and set defaults based on that

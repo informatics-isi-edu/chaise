@@ -31,10 +31,10 @@
             <record-display></record-display>
         </div>
 
-        <!-- prevents initialization of the directive until the data is available -->
-        <div ng-if="relatedReferences">
-            <div ng-repeat="relatedRef in relatedReferences">
-                <record-table displayname="relatedRef.displayname" columns="relatedRef.columns" data="relatedRef.data"></record-table>
+        <!-- prevents initialization of the directive until the data is available | wait until all data values have been fetched -->
+        <div ng-if="relatedReferences.length == dataArray.length">
+            <div ng-repeat="relatedRef in relatedReferences track by $index">
+                <record-table displayname="relatedRef.displayname" columns="relatedRef.columns" data="dataArray[$index]"></record-table>
             </div>
         </div>
     </div>

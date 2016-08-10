@@ -16,7 +16,7 @@
 
         <!-- rows -->
         <tr ng-repeat="row in tableModel.rowset track by $index">
-            <td ng-repeat="col in tableModel.columns">{{row[$index]}}</td>
+            <td ng-repeat="col in tableModel.columns">{{row.values[$index]}}</td>
         </tr>
     </table>
 </div>

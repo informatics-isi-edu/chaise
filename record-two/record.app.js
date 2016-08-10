@@ -41,6 +41,7 @@
 
             $rootScope.relatedReferences = reference.related;
 
+            // There should only ever be one entity related to this reference
             return reference.read(1);
         }).then(function getPage(page) {
             var tuple = page.tuples[0];
@@ -48,6 +49,16 @@
             // Used directly in the record-display directive
             $rootScope.recordValues = tuple.values;
             $rootScope.columns = $rootScope.reference.columns;
+
+            $rootScope.dataArray = [];
+
+            angular.forEach($rootScope.relatedReferences, function(ref){
+                // We want to limit the number of values shown by default
+                // Maybe have a chaise config option
+                ref.read(5).then(function (page) {
+                    $rootScope.dataArray.push(page.tuples);
+                });
+            });
 
             //TODO: remove this after related works. faked data for showing the related table
             // // ==================================================
