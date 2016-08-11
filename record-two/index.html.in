@@ -12,7 +12,7 @@
         <div id="entity-subtitle">{{ reference.displayname }}</div>
         <!-- defined on $rootScope in run function -->
         <div ng-if="recordValues && columns">
-            <record-display></record-display>
+            <record-display columns="columns" values="recordValues"></record-display>
         </div>
     </div>
 </body>

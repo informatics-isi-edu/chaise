@@ -5,8 +5,8 @@
             <span ng-if="column.comment" class="coltooltiptext">{{::column.comment}}</span>
         </td>
         <td class="entity-value col-xs-10" ng-switch="column.type.name">
-            <span ng-switch-when="markdown" ng-bind-html="recordValues[$index]"></span>
-            <span ng-switch-default>{{recordValues[$index]}}</span>
+            <span ng-switch-when="markdown" ng-bind-html="values[$index]"></span>
+            <span ng-switch-default>{{values[$index]}}</span>
         </td>
     </tr>
 </table>

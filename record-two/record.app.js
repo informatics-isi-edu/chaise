@@ -23,13 +23,12 @@
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
         ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
-            $log.info("Reference:", reference);
-            $rootScope.reference = reference;
-            var recordReference = reference.contextualize.record;
-            return reference.read(1);
+            $rootScope.reference = reference.contextualize.record;
+            $log.info("Reference:", $rootScope.reference);
+            return $rootScope.reference.read(1);
         }).then(function getPage(page) {
             var tuple = page.tuples[0];
-            $rootScope.displayname = tuple.displayname;
+            $rootScope.recordDisplayname = tuple.displayname;
             $rootScope.recordValues = tuple.values;
             $rootScope.columns = $rootScope.reference.columns;
         }, function error(response) {
