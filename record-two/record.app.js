@@ -2,6 +2,7 @@
     'use strict';
 
     angular.module('chaise.record', [
+        'ngSanitize',
         'chaise.errors',
         'chaise.modal',
         'chaise.navbar',
@@ -59,7 +60,7 @@
                     $rootScope.dataArray.push(page.tuples);
                 });
             });
-            
+
         }, function error(response) {
             $log.warn(response);
             throw response;

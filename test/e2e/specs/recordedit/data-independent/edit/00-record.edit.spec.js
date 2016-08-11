@@ -14,7 +14,6 @@ describe('Edit existing record,', function() {
     			var table, record;
 
 				beforeAll(function () {
-					browser.ignoreSyncronization = true;
 					var keys = [];
 					tableParams.keys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);

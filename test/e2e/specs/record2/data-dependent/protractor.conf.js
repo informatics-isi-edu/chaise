@@ -25,7 +25,7 @@ var config = {
 };
 
 //Change this to your desired filed name and Comment below testConfiguration object declaration
-var configFileName = 'recordedit.dev.json';
+var configFileName = 'record2.dev.json';
 var testConfiguration =  require('../../../data_setup/config/' + configFileName);
 
 // Just in case if you plan on not giving a file for configuration, you can always specify a testConfiguration object 
@@ -38,7 +38,7 @@ dataSetup.parameterize(config, {
   testConfiguration: testConfiguration, 
   page: '/recordedit', 
   setBaseUrl: function(browser, data) {
-    browser.params.url = process.env.CHAISE_BASE_URL + "/recordedit" + "/#" + data.catalogId + "/" + data.schema.name;
+    browser.params.url = process.env.CHAISE_BASE_URL + "/record-two" + "/#" + data.catalogId + "/" + data.schema.name;
     return browser.params.url;
   } 
 });

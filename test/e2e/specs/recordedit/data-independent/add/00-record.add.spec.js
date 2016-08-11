@@ -14,7 +14,6 @@ describe('Record Add', function() {
     			+ tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
 
 				beforeAll(function () {
-					browser.ignoreSyncronization = true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 					browser.sleep(3000);
