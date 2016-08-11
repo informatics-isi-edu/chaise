@@ -277,7 +277,7 @@ var recordEditPage = function() {
         return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"].coltooltiplabel');");
     };
 
-    this.getColumnWithAsterick = function(el) {
+    this.getColumnWithAsterisk = function(el) {
         return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"!column.nullok\"].text-danger')[0];", el);
     };
 
@@ -447,7 +447,7 @@ var record2Page = function() {
         return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"].coltooltiplabel');");
     };
 
-    this.getColumnWithAsterick = function(el) {
+    this.getColumnWithAsterisk = function(el) {
         return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"!column.nullok\"].text-danger')[0];", el);
     };
 
