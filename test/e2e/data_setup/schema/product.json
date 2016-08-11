@@ -87,7 +87,10 @@
           "annotations": {
             "comment": [
               "hidden"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display" : {
+              "name" : "Id"
+            }
           }
         },
         {
@@ -239,7 +242,7 @@
           "comment": null,
           "name": "thumbnail",
           "default": null,
-          "nullok": false,
+          "nullok": true,
           "type": {
             "typename": "int4"
           },
@@ -324,7 +327,7 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "record" : ["title", "category", "website", "rating", "summary", "description", "thumbnail", "opened_on"]
+          "record" : ["id", "category", "website", "rating", "summary", "description", "thumbnail", "opened_on", "luxurious"]
         }
       }
     },

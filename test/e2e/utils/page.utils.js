@@ -236,7 +236,9 @@ var EditInputs = function(sidebar) {
 		if (c['annotations']) {
 			annotations.forEach(function(a) {
 				if (c['annotations'].hasOwnProperty(a)) {
-					isHidden = true;
+					if (Array.isArray(c['annotations'][a]) && c['annotations'][a].contains("entry")) {
+						isHidden = true;
+					}
 				}
 			});
 		} 

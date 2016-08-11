@@ -5,32 +5,31 @@ describe('View existing record,', function() {
 
 	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
     
-    for (var i=0; i< testParams.tables.length; i++) {
+    for (var i=0; i< testParams.tuples.length; i++) {
     	
-    	(function(tableParams, index) {
+    	(function(tupleParams, index) {
 
-    		describe("For table " + table.table_name + ",", function() {
+    		describe("For table " + tupleParams.table_name + ",", function() {
 
     			var table, record;
 
 				beforeAll(function () {
-					browser.ignoreSyncronization = true;
 					var keys = [];
-					tableParams.keys.forEach(function(key) {
+					tupleParams.keys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
 					});
-					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
-					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
+					browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
+					table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
 					browser.sleep(2000);
 			    });
 
 				describe("Presentation ,", function() {
-					var params = record2Helpers.testPresentation(tableParams);
+					var params = record2Helpers.testPresentation(tupleParams);
 				});
 
     		});
 
-    	})(testParams.tables[i], i);
+    	})(testParams.tuples[i], i);
 
 
     }

@@ -431,6 +431,10 @@ var record2Page = function() {
         return browser.executeScript("return $('#entity-title').text();");
     };
 
+    this.getEntitySubTitle = function() {
+        return browser.executeScript("return $('#entity-subtitle').text()");
+    };
+
     this.getColumns = function() {
         return browser.executeScript("return $('tr[ng-repeat=\"column in columns\"]')");
     };
@@ -449,6 +453,10 @@ var record2Page = function() {
 
     this.getColumnComment = function(el) {
         return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
+    };
+
+    this.getColumnValueElements = function() {
+        return browser.executeScript("return $('.entity-value > span.ng-binding.ng-scope');");
     };
     
 };
