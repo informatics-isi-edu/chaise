@@ -277,7 +277,7 @@ var recordEditPage = function() {
         return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"].coltooltiplabel');");
     };
 
-    this.getColumnWithAsterick = function(el) {
+    this.getColumnWithAsterisk = function(el) {
         return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"!column.nullok\"].text-danger')[0];", el);
     };
 
@@ -425,6 +425,42 @@ var recordEditPage = function() {
     };
 };
 
+var record2Page = function() {
+    var that = this;
+    this.getEntityTitle = function() {
+        return browser.executeScript("return $('#entity-title').text();");
+    };
+
+    this.getEntitySubTitle = function() {
+        return browser.executeScript("return $('#entity-subtitle').text()");
+    };
+
+    this.getColumns = function() {
+        return browser.executeScript("return $('tr[ng-repeat=\"column in columns\"]')");
+    };
+
+    this.getAllColumnCaptions = function() {
+        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"]');");
+    };
+
+    this.getColumnsWithUnderline = function() {
+        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"].coltooltiplabel');");
+    };
+
+    this.getColumnWithAsterisk = function(el) {
+        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"!column.nullok\"].text-danger')[0];", el);
+    };
+
+    this.getColumnComment = function(el) {
+        return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
+    };
+
+    this.getColumnValueElements = function() {
+        return browser.executeScript("return $('.entity-value > span.ng-binding.ng-scope');");
+    };
+    
+};
+
 function chaisePage() {
     this.sidebar = new sidebar();
     this.moreFilter = new moreFilter();
@@ -432,6 +468,7 @@ function chaisePage() {
     this.resultContent = new resultContent();
     this.recordPage = new recordPage();
     this.recordEditPage = new recordEditPage();
+    this.record2Page = new record2Page();
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));
     this.tourBox = element(by.css('.tour-DataBrowserTour'));

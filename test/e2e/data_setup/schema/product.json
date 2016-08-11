@@ -87,7 +87,10 @@
           "annotations": {
             "comment": [
               "hidden"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display" : {
+              "name" : "Id"
+            }
           }
         },
         {
@@ -106,6 +109,9 @@
             ],
             "description": {
               "display": "Name of Accommodation"
+            },
+            "tag:misd.isi.edu,2015:display" : {
+              "name" : "Name of Accommodation"
             },
             "facetOrder": [
               "1"
@@ -126,6 +132,9 @@
             ],
             "description": {
               "display": "Website"
+            },
+            "tag:misd.isi.edu,2015:url" : {
+              "url" : "{cname}"
             },
             "tag:misd.isi.edu,2015:display": {
               "name": "Website"
@@ -180,7 +189,7 @@
           "default": null,
           "nullok": false,
           "type": {
-            "typename": "text"
+            "typename": "longtext"
           },
           "annotations": {
             "comment": [
@@ -188,7 +197,10 @@
               "unsortable",
               "summary",
               "hidden"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Summary"
+            }
           }
         },
         {
@@ -197,7 +209,7 @@
           "default": null,
           "nullok": true,
           "type": {
-            "typename": "longtext"
+            "typename": "markdown"
           },
           "annotations": {
             "comment": [
@@ -205,7 +217,10 @@
               "unsortable",
               "html",
               "hidden"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Description"
+            }
           }
         },
         {
@@ -227,14 +242,17 @@
           "comment": null,
           "name": "thumbnail",
           "default": null,
-          "nullok": false,
+          "nullok": true,
           "type": {
             "typename": "int4"
           },
           "annotations": {
             "comment": [
               "hidden"
-            ]
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Thumbnail"
+            }
           }
         },
         {
@@ -270,7 +288,7 @@
               "bottom"
             ],
             "description": {
-              "display": "Date since operational"
+              "display": "Operational Since"
             },
             "tag:misd.isi.edu,2015:display": {
               "name": "Operational Since"
@@ -292,7 +310,8 @@
             },
             "tag:misd.isi.edu,2015:display": {
               "name": "Is Luxurious"
-            }
+            },
+            "tag:isrd.isi.edu,2016:ignore" : ["record"]
           }
         }
       ],
@@ -306,6 +325,9 @@
         "description": {
           "display": "Accommodations",
           "top_columns": ["title", "rating", "category", "opened_on"]
+        },
+        "tag:isrd.isi.edu,2016:visible-columns" : {
+          "record" : ["id", "category", "website", "rating", "summary", "description", "thumbnail", "opened_on", "luxurious"]
         }
       }
     },
