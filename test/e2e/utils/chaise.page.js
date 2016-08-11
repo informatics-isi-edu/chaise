@@ -496,7 +496,6 @@ function chaisePage() {
         }
 
         if (!suite || suite == 'ignore') {
-            expect(true).toBe(true);
             return false;
         }
         return suite;
