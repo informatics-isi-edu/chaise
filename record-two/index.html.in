@@ -7,8 +7,9 @@
 </head>
 <body>
     <navbar></navbar>
-    <div class="container">
-        <div id="entity-title">{{ displayname }}</div>
+    <div class="container-fluid">
+        <div id="entity-title">{{ recordDisplayname }}</div>
+        <div id="entity-subtitle">{{ reference.displayname }}</div>
         <!-- defined on $rootScope in run function -->
         <div ng-if="recordValues && columns">
             <record-display></record-display>
