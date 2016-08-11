@@ -23,18 +23,14 @@
                 "keys" : [{ "name": "id", "value": "2002", "operator" : "="}],
                 "title": "Sherathon Hotel",
                 "columns" : [
-                    { "title" : "Id", "value": "", "type": ""}, 
-                    { "title" : "Title", "value": "", "type": ""},
-                    { "title" : "Website", "value": "", "type": ""},
-                    { "title" : "Category", "value": "", "type": ""},
-                    { "title" : "Rating", "value": "", "type": ""},
-                    { "title" : "Summary", "value": "", "type": ""},
-                    { "title" : "Description", "value": "", "type": ""},
-                    { "title" : "Thumbnail", "value": "", "type": ""},
-                    { "title" : "Number of Rooms", "value": "", "type": ""},
-                    { "title" : "Cover", "value": "", "type": ""},
-                    { "title" : "Opened_on", "value": "", "type": ""},
-                    { "title" : "Luxurious", "value": "", "type": ""}]
+                    { "title" : "Name of Accommodation", "value": "", "type": "text"},
+                    { "title" : "Category", "value": "", "type": "text", "comment" : "Type of accommodation ('Resort/Hotel/Motel')"},
+                    { "title" : "Website", "value": "", "type": "text", "comment" : "A valid url of the accommodation"},
+                    { "title" : "User Rating", "value": "", "type": "float4"},
+                    { "title" : "Summary", "value": "", "type": "longtext"},
+                    { "title" : "Description", "value": "", "type": "markdown"},
+                    { "title" : "Thumbnail", "value": "", "type": "int4"},
+                    { "title" : "Operational Since", "value": "", "type": "timestamptz" }]
             }]
         }
     }

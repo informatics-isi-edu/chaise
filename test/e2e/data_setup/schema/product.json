@@ -246,10 +246,10 @@
           "annotations": {
             "comment": [
               "hidden"
-            ]
-          },
-          "tag:misd.isi.edu,2015:display": {
-            "name": "Thumbnail"
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Thumbnail"
+            }
           }
         },
         {
