@@ -15,7 +15,7 @@ var config = pConfig.getConfig({
 
     page: 'record-two',
     setBaseUrl: function(browser, data) {
-      browser.params.url = process.env.CHAISE_BASE_URL + "/record-two" + "/#" + data.catalogId;
+      browser.params.url = process.env.CHAISE_BASE_URL + "/record-two" + "/#" + data.catalogId + "/" + data.schema.name;
       return browser.params.url;
     } 
 });
