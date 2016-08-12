@@ -8,14 +8,13 @@
 <body>
     <navbar></navbar>
 
-    <!-- Body of the docment-->
-    <div class="body">
-        <div id="entity-title">{{ reference.displayname }}</div>
-        <div id="table-title">{{ context.tableName | uppercase }}</div>
+    <div class="container-fluid">
+        <div id="entity-title">{{ recordDisplayname }}</div>
+        <div id="entity-subtitle">{{ reference.displayname }}</div>
+        <!-- defined on $rootScope in run function -->
 
-        <!-- prevents initialization of the directive until the data is available -->
         <div ng-if="recordValues && columns">
-            <record-display></record-display>
+            <record-display columns="columns" values="recordValues"></record-display>
         </div>
 
         <!-- prevents initialization of the directive until the data is available | wait until all data values have been fetched -->

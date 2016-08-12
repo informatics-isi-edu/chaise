@@ -37,17 +37,17 @@
 
         ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
             $log.info("Reference:", reference);
-            $rootScope.reference = reference;
-            var recordReference = reference.contextualize.record;
+            $rootScope.reference = reference.contextualize.record;
 
             $rootScope.relatedReferences = reference.related;
 
             // There should only ever be one entity related to this reference
-            return reference.read(1);
+            return $rootscope.reference.read(1);
         }).then(function getPage(page) {
             var tuple = page.tuples[0];
 
             // Used directly in the record-display directive
+            $rootScope.recordDisplayname = tuple.displayname;
             $rootScope.recordValues = tuple.values;
             $rootScope.columns = $rootScope.reference.columns;
 
