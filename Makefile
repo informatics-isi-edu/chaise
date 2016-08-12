@@ -24,6 +24,7 @@ E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
 E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
 E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
+E2EDrecord2=test/e2e/specs/record2/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/specs/login/protractor.conf.js
 
 # Rule to determine MD5 utility
@@ -382,18 +383,18 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test: 
-	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit)  && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
-karma: 
+karma:
 	$(BIN)/karma start
 
 # Rule to run tests
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit)  && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run search app tests
 .PHONY: testsearch
@@ -412,7 +413,7 @@ testrecordadd:
 
 .PHONY: testrecordedit
 testrecordedit:
-	$(BIN)/protractor $(E2EDIrecordEdit) 
+	$(BIN)/protractor $(E2EDIrecordEdit)
 
 # Rule to make html
 .PHONY: html
@@ -607,7 +608,7 @@ $(JS_CONFIG): chaise-config-sample.js
 install: $(HTML)
 	test -d $(dir $(CHAISEDIR)) && mkdir -p $(CHAISEDIR)
 	rsync -a --exclude='.*' --exclude=chaise-config.js ./. $(CHAISEDIR)/
-	
+
 # Rule for installing on Travis
 .PHONY: installTravis
 installTravis: $(HTML)
@@ -638,4 +639,3 @@ usage:
 	@echo "    testrecord 		- runs record app e2e tests"
 	@echo "    testrecordadd 	- runs data entry add e2e tests"
 	@echo "    testrecordedit 	- runs date entry edit e2e tests"
-

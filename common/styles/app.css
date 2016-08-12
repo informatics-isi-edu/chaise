@@ -1,4 +1,7 @@
 /****************** GLOBAL ******************/
+body {
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
 
 li{
     list-style-type: none;
@@ -56,10 +59,10 @@ button .glyphicon-trash {
 #entity-title, .entity-title{
     clear: both;
     padding-top: 10px;
-    /* color: rgb(126, 126, 126);
+     /*color: rgb(126, 126, 126);
     font-size: 26px;
     font-weight: 300;
-    letter-spacing: 2px; */
+    letter-spacing: 2px;*/
 }
 #entity-subtitle{
     text-transform: uppercase;
@@ -68,13 +71,6 @@ button .glyphicon-trash {
     /* font-weight: 300;
     letter-spacing: 1.5px; */
     margin: 0px 0 12px 0;
-}
-
-.entity-key{
-    /*font-weight: bold;
-    color: rgb(118, 118, 118);
-    font-size: 14px; */
-    text-transform: capitalize;
 }
 
 .entity-value{
@@ -441,10 +437,6 @@ tbody{
     font-size: 1.7em;
     font-weight: 500;
     color: #333;
-}
-
-#entity-subtitle {
-
 }
 
 .entity-key {

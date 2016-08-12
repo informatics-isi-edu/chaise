@@ -76,14 +76,14 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 		});
 	});
 
-	it("should show red asterick (*) before for fields which are required", function() {
+	it("should show red asterisk (*) before for fields which are required", function() {
 		var columns = chaisePage.dataUtils.editInputs.getColumnsWithRequired(table, [IGNORE, HIDDEN]);
 		columns.forEach(function(c) {
 			var el = visibleFields.find(function(v) { return v.column.name == c.name });
-			chaisePage.recordEditPage.getColumnWithAsterick(el).then(function(el) {
+			chaisePage.recordEditPage.getColumnWithAsterisk(el).then(function(el) {
 				console.log("         ->" + c.name);
 				if (el) expect(true).toBeDefined();
-				else expect(undefined).toBe("Asterick");
+				else expect(undefined).toBe("Asterisk");
 			});
 		});
 	});
