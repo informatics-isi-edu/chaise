@@ -42,7 +42,7 @@
             $rootScope.relatedReferences = reference.related;
 
             // There should only ever be one entity related to this reference
-            return $rootscope.reference.read(1);
+            return $rootScope.reference.read(1);
         }).then(function getPage(page) {
             var tuple = page.tuples[0];
 
