@@ -24,7 +24,6 @@
 
         <!-- pagination -->
         <div style="margin-bottom: 10px;">
-            <span>{{ pageInfo.recordStart }} to {{ pageInfo.recordEnd }} of {{ vm.count }} Items</span>
             <span class="dropdown" style="margin-left: 5px">
                 <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
                     <span class="caret"></span></button>
@@ -70,7 +69,7 @@
                 <!-- sortable column header -->
                 <thead>
                 <tr>
-                    <th nowrap ng-repeat="col in vm.columns | filter: {hidden: false}">
+                    <th nowrap ng-repeat="col in vm.columns">
                         <span ng-click="sortby(col.name)">{{col.displayname}}</span>
                         <span ng-show="vm.sortby==col.name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-asc" ng-style="{'cursor': 'pointer'}"></span>
                         <span ng-show="vm.sortby==col.name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-desc" ng-style="{'cursor': 'pointer'}"></span>
@@ -80,8 +79,8 @@
                 </thead>
 
                 <!-- rows -->
-                <tr ng-repeat="row in vm.rowset.data" ng-click="gotoRowLink($index)" ng-style="{'cursor': 'pointer'}">
-                    <td ng-repeat="col in vm.columns | filter: {hidden: false}">{{row[col.name]}}</td>
+                <tr ng-repeat="row in vm.rowValues" ng-click="gotoRowLink($index)" ng-style="{'cursor': 'pointer'}">
+                    <td ng-repeat="val in row track by $index">{{val}}</td>
                 </tr>
             </table>
         </div>
@@ -91,7 +90,6 @@
             <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="pageInfo.previousButtonDisabled">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </button>
-            <span>{{ pageInfo.recordStart }} to {{ pageInfo.recordEnd }} of {{ vm.count }} Items</span>
             <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="pageInfo.nextButtonDisabled">
                 <span class="glyphicon glyphicon-chevron-right"></span>
             </button>

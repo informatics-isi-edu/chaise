@@ -281,7 +281,11 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
     $(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(RECORD_ASSETS)/lib/angular-animate.min.js \
+	$(COMMON)/alerts.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js
 
 RECSET_JS_SOURCE=$(COMMON)/authen.js \
