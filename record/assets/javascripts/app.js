@@ -331,7 +331,7 @@ chaiseRecordApp.service('ermrestService', ['$http', '$rootScope', '$sce', 'schem
 
                                                 files.push({"url": $sce.trustAsResourceUrl(downloadPattern), "caption": captionPattern});
                                             }
-                                            entity.embedTables[ft.title][e] = element;
+                                            entity.embedTables[ft.title][e] = entity.embedTables[ft.title][e] || element;
 
                                             // each row (iFrame)'s files
                                             entity.embedTables[ft.title][e].files = files;
