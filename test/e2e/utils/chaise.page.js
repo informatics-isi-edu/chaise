@@ -467,12 +467,12 @@ var record2Page = function() {
         return element.all(by.css(".related-table-heading"));
     };
 
-    this.getRelatedTableColumnNamesByTable = function(id) {
-        return element(by.id("rt-" + id)).all(by.css(".table-column-displayname"));
+    this.getRelatedTableColumnNamesByTable = function(displayName) {
+        return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname"));
     };
 
-    this.getRelatedTableRows = function(id) {
-        return element(by.id("rt-" + id)).all(by.css(".table-row"));
+    this.getRelatedTableRows = function(displayName) {
+        return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
     };
 };
 

@@ -82,17 +82,18 @@ exports.testPresentation = function (tableParams) {
                 // need a closure to preserve i through each iteration
                 (function(i) {
                     chaisePage.record2Page.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
-                        expect(headings[i].includes(relatedTables[i].title)).toBe(true);
+                        var displayName = relatedTables[i].title;
+                        expect(headings[i].includes(displayName)).toBe(true);
 
                         // verify all columns are present
-                        chaisePage.record2Page.getRelatedTableColumnNamesByTable(i).getInnerHtml().then(function(columnNames) {
+                        chaisePage.record2Page.getRelatedTableColumnNamesByTable(displayName).getInnerHtml().then(function(columnNames) {
                             for (var j = 0; j < columnNames.length; j++) {
                                 expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
                             }
                         });
 
                         // verify all rows are present
-                        chaisePage.record2Page.getRelatedTableRows(i).count().then(function(count) {
+                        chaisePage.record2Page.getRelatedTableRows(displayName).count().then(function(count) {
                             expect(count).toBe(relatedTables[i].data.length);
                         });
                     });
