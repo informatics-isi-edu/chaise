@@ -5,8 +5,8 @@
             },
             "schema": {
                 "name": "product",
-                "createNew": true, 
-                "path": "test/e2e/data_setup/schema/product.json" 
+                "createNew": true,
+                "path": "test/e2e/data_setup/schema/product.json"
             },
             "tables": {
                 "createNew": true
@@ -19,13 +19,44 @@
         "schema": "product"
     },
     "cleanup" : true,
-    "tests" : { 
+    "tests" : {
         "params": {
             "tuples" : [{
                 "table_name" : "accommodation",
                 "keys" : [{ "name": "id", "value": "2002", "operator" : "="}],
                 "title": "Sherathon Hotel",
                 "subTitle" : "Accommodations",
+                "relatedTables" : [
+                    {
+                        "title" : "accommodation_image",
+                        "columns" : [ "image_id" ],
+                        "data" : [{
+                            "image_id" : 3005
+                        },
+                        {
+                            "image_id" : 3006
+                        },
+                        {
+                            "image_id" : 3008
+                        },
+                        {
+                            "image_id" : 30007
+                        }]
+                    },
+                    {
+                        "title" : "booking",
+                        "columns" : [ "id", "price", "booking_date" ],
+                        "data" : [{
+                            "id" : 3,
+                            "price" : 200.00,
+                            "booking_date" : "5/31/2016, 12:00:00 AM"
+                        },
+                        {
+                            "id" : 4,
+                            "price" : 350.00,
+                            "booking_date" : "4/18/2016, 12:00:00 AM"
+                        }]
+                    }],
                 "columns" : [
                     { "title" : "Id", "value": "2002", "type": "serial4"},
                     { "title" : "Category", "value": "Hotel", "type": "text", "comment" : "Type of accommodation ('Resort/Hotel/Motel')"},

@@ -244,7 +244,7 @@ function recordPage() {
     };
     this.findEntityValueByName = function (entityName) {
         var entityKey = that.findEntityKeyByName(entityName);
-        var parentEl = entityKey.element(by.xpath('..')); 
+        var parentEl = entityKey.element(by.xpath('..'));
         return toolkit.getSiblingByCss(parentEl, 'td');
     };
     this.findAssociationKeyByName = function (associateName) {
@@ -432,7 +432,7 @@ var record2Page = function() {
     };
 
     this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#entity-subtitle').text()");
+        return browser.executeScript("return $('#entity-subtitle').text();");
     };
 
     this.getColumns = function() {
@@ -458,7 +458,22 @@ var record2Page = function() {
     this.getColumnValueElements = function() {
         return browser.executeScript("return $('.entity-value > span.ng-binding.ng-scope');");
     };
-    
+
+    this.getRelatedTables = function() {
+        return element.all(by.css(".related-table"));
+    }
+
+    this.getRelatedTableHeadings = function() {
+        return element.all(by.css(".related-table-heading"));
+    };
+
+    this.getRelatedTableColumnNamesByTable = function(id) {
+        return element(by.id("rt-" + id)).all(by.css(".table-column-displayname"));
+    };
+
+    this.getRelatedTableRows = function(id) {
+        return element(by.id("rt-" + id)).all(by.css(".table-row"));
+    };
 };
 
 function chaisePage() {
@@ -503,10 +518,10 @@ function chaisePage() {
     this.getCurrentContext = function() {
 
         var deferred = protractor.promise.defer();
-        
+
         browser.executeScript('return window.location.hash;').then(function(hash) {
             var context = {};
-            
+
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return deferred.fulfill(context);
             }
