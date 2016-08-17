@@ -251,7 +251,10 @@
               "hidden"
             ],
             "tag:misd.isi.edu,2015:display": {
-              "name": "Thumbnail"
+              "name": "Thumbnail",
+              "show_nulls": {
+                  "detailed": false
+              }
             }
           }
         },
@@ -580,7 +583,7 @@
       "kind": "table",
       "keys": [
         {
-          "comment": "vocabulary", 
+          "comment": "vocabulary",
           "annotations": {},
           "unique_columns": [
             "image_id",

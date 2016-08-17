@@ -20,8 +20,6 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
-
-
 	it("should render columns which are specified to be visible and in order", function() {
 		var columns = tableParams.columns;
 		chaisePage.record2Page.getAllColumnCaptions().then(function(pageColumns) {
@@ -61,15 +59,15 @@ exports.testPresentation = function (tableParams) {
 	it("should validate the values of each column", function() {
 		var columns = tableParams.columns;
 		chaisePage.record2Page.getColumnValueElements().then(function(columnEls) {
-			expect(columnEls.length).toBe(columns.length);
 			var index = 0;
 			columnEls.forEach(function(el) {
 				var column = columns[index++];
-				if (column.value != 'undefined') {
+				if (column.value != null) {
 					expect(el.getInnerHtml()).toBe(column.value);
 				}
+                // Columns with null values shouldn't be displayed.
+                expect(el.getInnerHtml()).not.toBe(null);
 			});
 		});
-	})
-
+	});
 };
