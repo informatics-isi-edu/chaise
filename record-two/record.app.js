@@ -53,13 +53,15 @@
 
             $rootScope.dataArray = [];
 
-            angular.forEach($rootScope.relatedReferences, function(ref){
+            for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                 // We want to limit the number of values shown by default
                 // Maybe have a chaise config option
-                ref.read(5).then(function (page) {
-                    $rootScope.dataArray.push(page.tuples);
-                });
-            });
+                (function(i) {
+                    $rootScope.relatedReferences[i].read(5).then(function (page) {
+                        $rootScope.dataArray[i] = page.tuples;
+                    });
+                })(i);
+            };
 
         }, function error(response) {
             $log.warn(response);
