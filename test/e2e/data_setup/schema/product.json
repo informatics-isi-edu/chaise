@@ -332,8 +332,8 @@
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
           "*" : [
-              ["product", "fk_accommodation_image"],
-              ["product", "fk_booking_accommodation"]
+              ["product", "fk_booking_accommodation"],
+              ["product", "fk_accommodation_image"]
           ]
         }
       }

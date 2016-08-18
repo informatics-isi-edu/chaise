@@ -26,8 +26,16 @@
                 "keys" : [{ "name": "id", "value": "2002", "operator" : "="}],
                 "title": "Sherathon Hotel",
                 "subTitle" : "Accommodations",
-                "tables_order" : ["accommodation_image (4)", "booking (2)"],
+                "tables_order" : ["booking (2)", "accommodation_image (4)"],
                 "related_tables" : [
+                    {
+                        "title" : "booking",
+                        "columns" : [ "id", "price", "booking_date" ],
+                        "data" : [
+                            { "id" : 3, "price" : 200.00, "booking_date" : "5/31/2016, 12:00:00 AM" },
+                            { "id" : 4, "price" : 350.00, "booking_date" : "4/18/2016, 12:00:00 AM" }
+                        ]
+                    },
                     {
                         "title" : "accommodation_image",
                         "columns" : [ "image_id" ],
@@ -36,14 +44,6 @@
                             { "image_id" : 3006 },
                             { "image_id" : 3008 },
                             { "image_id" : 30007 }
-                        ]
-                    },
-                    {
-                        "title" : "booking",
-                        "columns" : [ "id", "price", "booking_date" ],
-                        "data" : [
-                            { "id" : 3, "price" : 200.00, "booking_date" : "5/31/2016, 12:00:00 AM" },
-                            { "id" : 4, "price" : 350.00, "booking_date" : "4/18/2016, 12:00:00 AM" }
                         ]
                     }],
                 "columns" : [
