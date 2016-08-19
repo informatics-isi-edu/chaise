@@ -4,7 +4,7 @@
         <thead>
             <tr>
                 <th nowrap ng-repeat="col in tableModel.columns">
-                    <span class="table-column-displayname" ng-click="sortby(col.name)">{{col.displayname}}</span>
+                    <span class="table-column-displayname" ng-click="sortBy(col.name)">{{col.displayname}}</span>
                     <span ng-show="tableModel.sortedBy==col.name && tableModel.sortOrder=='asc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-asc" ng-style="{'cursor': 'pointer'}"></span>
                     <span ng-show="tableModel.sortedBy==col.name && tableModel.sortOrder=='desc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-desc" ng-style="{'cursor': 'pointer'}"></span>
                     <span ng-show="tableModel.sortedBy!==col.name" class="fa fa-fw fa-sort" ng-click="sortby(col.name)" ng-style="{'cursor': 'pointer'}"></span>
