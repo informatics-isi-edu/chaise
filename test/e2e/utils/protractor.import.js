@@ -1,4 +1,4 @@
-var dataSetupCode = require("ermrest-data-utils");
+var ermrestUtils = require("ermrest-data-utils");
 var Q = require('q'); 
 
 // Fetches the schemas for the current catalog
@@ -11,13 +11,13 @@ var fetchSchemas = function(testConfiguration, catalogId) {
       
     // Fetches the schemas for the catalogId
     // and sets the defaultSchema and defaultTable in browser parameters
-    dataSetupCode.introspect({
+    ermrestUtils.introspect({
         url: process.env.ERMREST_URL,
         catalogId: catalogId || 1,
         authCookie: testConfiguration.authCookie
     }).then(function(schema) {
         if (testConfiguration.setup && testConfiguration.setup.schema) {
-            schema = schema.catalog.schemas[testConfiguration.setup.schema.name] || schema;
+            schema = schema.catalog.schemas[testConfiguration.setup.schema] || schema;
         }
         catalog = schema.catalog;
         defaultSchema = schema;
@@ -44,24 +44,58 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 };
 exports.fetchSchemas = fetchSchemas;
 
+var importSchemas = function(configs, defer, authCookie, catalogId) {
+    
+    if (configs.length == 0) {
+        defer.resolve(catalogId);
+        return;
+    }
+
+    var config = configs.shift();
+
+    if (catalogId) config.catalog.id = catalogId;
+    else delete config.catalog.id;
+    
+    ermrestUtils.importData({
+        setup: config,
+        url: process.env.ERMREST_URL,
+        authCookie: authCookie
+    }).then(function (data) {
+        process.env.catalogId = data.catalogId;
+        importSchemas(configs, defer, authCookie, data.catalogId);
+    }, function (err) {
+        defer.reject(err);
+    }).catch(function(err) {
+        console.log(err);
+        defer.reject(err);
+    });
+};
+
+exports.importSchemas = function(schemaConfigurations, catalogId) {
+    var defer = q.defer();
+    importSchemas(schemaConfigurations.slice(0), defer, catalogId);
+    return defer.promise;
+};
+
 exports.setup = function(testConfiguration) {
 
     var defer = Q.defer();
-    
-    testConfiguration.setup.url = process.env.ERMREST_URL;        
-    testConfiguration.setup.authCookie = testConfiguration.authCookie;
 
-    var setupDone = false, successful = false, catalogId, schema;
+    var schemaConfigurations = testConfiguration.setup.schemaConfigurations;
 
+    if (!schemaConfigurations || schemaConfigurations.length == 0) throw new Error("No schemaConfiguration provided in testConfiguration.setup.");
+
+    var setupDone = false, successful = false, catalogId;
+
+    var defer1 = Q.defer();
     // Call setup to import data for tests as specified in the configuration    
-    dataSetupCode.setup(testConfiguration.setup).then(function(data) {
-        
+    importSchemas(schemaConfigurations.slice(0), defer1, testConfiguration.authCookie);
+    
+    defer1.promise.then(function(catId) {
+    
         // Set catalogId in browser params for future reference to delete it if required
-        catalogId = data.catalogId;
+        catalogId = catId;
 
-        // Set schema returned in browser params for refering it in test cases
-        schema = data.schema;
-        
         // Set successful to determine data import was done successfully
         successful = true;
 
@@ -80,12 +114,10 @@ exports.setup = function(testConfiguration) {
     browser.wait(function() {
         return setupDone;
     }, 120000).then(function() {
-        
         // If data import was successful then fetch the schema definitions for the catalog
         // and set the default Schema and default Table in browser parameters
         if (successful) {
             exports.fetchSchemas(testConfiguration, catalogId).then(function(data) {
-                data.schema = schema;
                 defer.resolve(data);
             }, function(err) {
                 defer.reject({ catalogId: catalogId });
@@ -108,10 +140,10 @@ exports.tear = function(testConfiguration, catalogId, defer) {
 
     testConfiguration.setup.url = process.env.ERMREST_URL;        
 
-    dataSetupCode.tear({
+    ermrestUtils.tear({
       url: process.env.ERMREST_URL,
       catalogId: catalogId,
-      setup: testConfiguration.setup
+      setup: testConfiguration.setup.schemaConfigurations[0]
     }).done(function() {
       cleanupDone = true;
     });

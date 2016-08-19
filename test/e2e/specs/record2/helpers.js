@@ -70,6 +70,40 @@ exports.testPresentation = function (tableParams) {
 				}
 			});
 		});
-	})
+	});
+
+    it("should show related table names and their tables", function() {
+        var displayName,
+            relatedTables = tableParams.related_tables;
+        chaisePage.record2Page.getRelatedTables().count().then(function(tableCount) {
+            expect(tableCount).toBe(relatedTables.length);
+
+            // check the headings have the right name and in the right order
+            chaisePage.record2Page.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
+                // tables should be in order based on annotation for visible foreign_keys
+                expect(headings).toEqual(tableParams.tables_order);
+
+                // rely on the UI data for looping, not expectation data
+                for (var i = 0; i < tableCount; i++) {
+                    displayName = relatedTables[i].title;
+
+                    // verify all columns are present
+                    (function(i, displayName) {
+                        chaisePage.record2Page.getRelatedTableColumnNamesByTable(displayName).getInnerHtml().then(function(columnNames) {
+                            for (var j = 0; j < columnNames.length; j++) {
+                                expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
+                            }
+                        });
+
+                        // verify all rows are present
+                        chaisePage.record2Page.getRelatedTableRows(displayName).count().then(function(rowCount) {
+                            expect(rowCount).toBe(relatedTables[i].data.length);
+                            expect(headings[i]).toBe(displayName + " (" + rowCount + ")");
+                        });
+                    })(i, displayName);
+                }
+            });
+        });
+    });
 
 };
