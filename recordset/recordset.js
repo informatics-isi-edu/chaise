@@ -19,10 +19,11 @@ angular.module('recordset', [
     'ermrestjs',
     'chaise.navbar',
     'chaise.utils',
+    'chaise.filters',
     'chaise.authen',
     'chaise.errors',
     'chaise.modal',
-        'ui.bootstrap'])
+    'ui.bootstrap'])
 
 // Register the 'context' object which can be accessed by config and other
 // services.
@@ -127,7 +128,10 @@ angular.module('recordset', [
 
             throw response;
         }).catch(function genericCatch(exception) {
-            ErrorService.catchAll(exception);
+            if (exception instanceof ERMrest.UnauthorizedError)
+                ErrorService.catchAll(exception);
+            else
+                AlertsService.addAlert({type:'error', message:exception.message});
         });
     };
 
@@ -199,7 +203,10 @@ angular.module('recordset', [
 
                 throw response;
             }).catch(function genericCatch(exception) {
-                ErrorService.catchAll(exception);
+                if (exception instanceof ERMrest.UnauthorizedError)
+                    ErrorService.catchAll(exception);
+                else
+                    AlertsService.addAlert({type:'error', message:exception.message});
             });
 
         }
@@ -250,7 +257,10 @@ angular.module('recordset', [
 
                 throw response;
             }).catch(function genericCatch(exception) {
-                ErrorService.catchAll(exception);
+                if (exception instanceof ERMrest.UnauthorizedError)
+                    ErrorService.catchAll(exception);
+                else
+                    AlertsService.addAlert({type:'error', message:exception.message});
             });
         }
 
@@ -269,10 +279,13 @@ angular.module('recordset', [
 }])
 
 // Register work to be performed after loading all modules
-.run(['$window', 'pageInfo', 'appName', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService',
-    function($window, pageInfo, appName, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService) {
+.run(['$window', 'pageInfo', 'appName', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService',
+    function($window, pageInfo, appName, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService) {
 
     try {
+
+        recordsetModel.alerts = AlertsService.alerts;
+        recordsetModel.closeAlert = AlertsService.deleteAlert;
 
         UriUtils.setOrigin();
         $rootScope.chaiseURL = $window.location.href.replace($window.location.hash, '');
@@ -282,8 +295,6 @@ angular.module('recordset', [
         var context = UriUtils.parseURLFragment($window.location);
 
         $rootScope.location = $window.location.href;
-        $rootScope.errorMessage='';
-
         pageInfo.loading = true;
         if (context.limit)
             pageInfo.pageLimit = context.limit;
@@ -306,7 +317,7 @@ angular.module('recordset', [
 
 
     } catch (error) {
-        $rootScope.errorMessage = error.message;
+        AlertsService.addAlert({type:'error', message:error.message});
     }
 
     var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
@@ -339,7 +350,11 @@ angular.module('recordset', [
 
         throw response;
     }).catch(function genericCatch(exception) {
-        ErrorService.catchAll(exception);
+
+        if (exception instanceof ERMrest.UnauthorizedError)
+            ErrorService.catchAll(exception);
+        else
+            AlertsService.addAlert({type:'error', message:exception.message});
     });
 
 

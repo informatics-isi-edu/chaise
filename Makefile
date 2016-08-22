@@ -284,6 +284,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(RECORD_ASSETS)/lib/angular-animate.min.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/filters.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js
