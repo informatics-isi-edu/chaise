@@ -1,12 +1,12 @@
 <table class="table">
-    <tr ng-repeat="column in columns">
+    <tr ng-repeat="column in columns" ng-if="::values[$index] != null" id="{{'row-' + column.name}}">
         <td class="entity-key col-xs-2" ng-class="{'coltooltip': column.comment}">
             <span ng-class="{'coltooltiplabel': column.comment}">{{::column.displayname}}</span>
             <span ng-if="column.comment" class="coltooltiptext">{{::column.comment}}</span>
         </td>
         <td class="entity-value col-xs-10" ng-switch="column.type.name">
-            <span ng-switch-when="markdown" ng-bind-html="values[$index]"></span>
-            <span ng-switch-default>{{values[$index]}}</span>
+            <span ng-switch-when="markdown" ng-bind-html="::values[$index]"></span>
+            <span ng-switch-default>{{::values[$index]}}</span>
         </td>
     </tr>
 </table>

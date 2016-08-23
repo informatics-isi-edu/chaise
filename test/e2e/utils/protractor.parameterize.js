@@ -100,10 +100,10 @@ exports.parameterize = function(config, configParams) {
       });
     }
 
-  };
+};
 
-  // This method will be called before starting to execute the test suite
-  config.onPrepare = function() {
+// This method will be called before starting to execute the test suite
+config.onPrepare = function() {
 
     var SpecReporter = require('jasmine-spec-reporter');
     // add jasmine spec reporter
@@ -134,28 +134,40 @@ exports.parameterize = function(config, configParams) {
     }
 
     return defer.promise;
-  };
+};
 
-  // This method will be called after executing the test suite
-  config.afterLaunch = function(exitCode) {
-    // If cleanup is true and setup was also true in the configuration then
-    // call cleanup to remove the created schema/catalog/tables if catalogId is not null
-    if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) return pImport.tear(testConfiguration, catalogId);
-  };
+// This method will be called after executing the test suite
+config.afterLaunch = function(exitCode) {
+  // If cleanup is true and setup was also true in the configuration then
+  // call cleanup to remove the created schema/catalog/tables if catalogId is not null
+  if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) return pImport.tear(testConfiguration, catalogId);
+};
 
-  // If an uncaught exception is caught then simply call cleanup 
-  // to remove the created schema/catalog/tables if catalogId is not null
-  process.on('uncaughtException', function (err) {
-    console.log("in error : catalogId " + catalogId);
-    console.dir(err);
-    var cb = function() {
-      console.error((new Date).toUTCString() + ' uncaughtException:', err.message);
-      console.error(err.stack);
-      process.exit(1)
-    };
-    if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null)  pImport.tear(testConfiguration, catalogId).then(cb, cb);
-    else cb();
-    
-  });
+// If an uncaught exception is caught then simply call cleanup 
+// to remove the created schema/catalog/tables if catalogId is not null
+process.on('uncaughtException', function (err) {
+  console.log("in error : catalogId " + catalogId);
+  console.dir(err);
+  var cb = function() {
+    console.error((new Date).toUTCString() + ' uncaughtException:', err.message);
+    console.error(err.stack);
+    process.exit(1)
+  };
+  if (!process.catalogDeleted && testConfiguration.cleanup && testConfiguration.setup && catalogId != null)  pImport.tear(testConfiguration, catalogId).then(cb, cb);
+  else cb();
+  
+});
+
+process.on('SIGINT', function(code) {
+  if (!process.catalogDeleted) {
+      process.catalogDeleted = true;
+      console.log('About to exit because of SIGINT (ctrl + c)');
+      pImport.tear(testConfiguration, catalogId).done(function() {
+        process.exit(1);
+      });
+  } else {
+    process.exit(1);
+  }
+});
 
 };
