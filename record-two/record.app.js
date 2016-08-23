@@ -41,7 +41,12 @@
             if (!context.filter) {
                 // change the path and redirect to search because no id was supplied
                 var modifiedPath = $window.location.pathname.replace(context.appName, 'search');
-                $window.location.replace($window.location.origin + modifiedPath + $window.location.hash);
+                // If default catalog/table are not defined, ...chaiseURItoErmrestURI would have caught that error
+                var catalogId = (context.catalogID ? context.catalogID : chaiseConfig.defaultCatalog);
+                var tableConfig = chaiseConfig.defaultTables[catalogId];
+                var schemaTableName = ( (context.schemaName && context.tableName) ? context.schemaName + ':' + context.tableName : tableConfig.schema + ':' + tableConfig.table );
+                var modifiedHash = "#" + catalogId + '/' + schemaTableName;
+                $window.location.replace($window.location.origin + modifiedPath + modifiedHash);
             }
 
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
