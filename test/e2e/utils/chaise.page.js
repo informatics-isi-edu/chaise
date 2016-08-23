@@ -432,7 +432,7 @@ var record2Page = function() {
     };
 
     this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#entity-subtitle').text()");
+        return browser.executeScript("return $('#entity-subtitle').text();");
     };
 
     this.getColumns = function() {
@@ -459,6 +459,21 @@ var record2Page = function() {
         return browser.executeScript("return $('.entity-value > span.ng-binding.ng-scope');");
     };
 
+    this.getRelatedTables = function() {
+        return element.all(by.css(".related-table"));
+    }
+
+    this.getRelatedTableHeadings = function() {
+        return element.all(by.css(".related-table-heading"));
+    };
+
+    this.getRelatedTableColumnNamesByTable = function(displayName) {
+        return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname"));
+    };
+
+    this.getRelatedTableRows = function(displayName) {
+        return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
+    };
 };
 
 function chaisePage() {
@@ -496,7 +511,6 @@ function chaisePage() {
         }
 
         if (!suite || suite == 'ignore') {
-            expect(true).toBe(true);
             return false;
         }
         return suite;

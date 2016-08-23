@@ -1,9 +1,9 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.recordDisplay', [])
+    angular.module('chaise.record.display', [])
 
-    .directive('recordDisplay', ['ErrorService', function(ErrorService) {
+    .directive('recordDisplay', [function() {
         return {
             restrict: 'E',
             scope: {

@@ -241,8 +241,9 @@ tbody{
     background: #F1F1F1;
 }
 
-
-
+.outer-table{
+    overflow-x: scroll;    
+}
 
 .table-reference .entity-key{
     font-size: 14px;

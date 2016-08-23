@@ -176,6 +176,7 @@ RECORDTWO_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/record.js \
+	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
@@ -382,7 +383,7 @@ distclean: clean
 
 # Rule to run tests
 .PHONY: test
-test: 
+test:
 	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma

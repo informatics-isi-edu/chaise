@@ -1,19 +1,22 @@
 {
     "setup": {
-        "catalog": {
-        },
-        "schema": {
-            "name": "product",
-            "createNew": true,
-            "path": "test/e2e/data_setup/schema/product.json"
-        },
-        "tables": {
-        	"createNew": true
-        },
-        "entities": {
-        	"createNew": true,
-            "path": "test/e2e/data_setup/data/product"
-        }
+        "schemaConfigurations": [{
+            "catalog": {
+            },
+            "schema": {
+                "name": "product",
+                "createNew": true,
+                "path": "test/e2e/data_setup/schema/product.json"
+            },
+            "tables": {
+                "createNew": true
+            },
+            "entities": {
+                "createNew": true,
+                "path": "test/e2e/data_setup/data/product"
+            }
+        }],
+        "schema": "product"
     },
     "cleanup" : true,
     "tests" : {
@@ -23,6 +26,26 @@
                 "keys" : [{ "name": "id", "value": "2002", "operator" : "="}],
                 "title": "Sherathon Hotel",
                 "subTitle" : "Accommodations",
+                "tables_order" : ["booking (2)", "accommodation_image (4)"],
+                "related_tables" : [
+                    {
+                        "title" : "booking",
+                        "columns" : [ "id", "price", "booking_date" ],
+                        "data" : [
+                            { "id" : 3, "price" : 200.00, "booking_date" : "5/31/2016, 12:00:00 AM" },
+                            { "id" : 4, "price" : 350.00, "booking_date" : "4/18/2016, 12:00:00 AM" }
+                        ]
+                    },
+                    {
+                        "title" : "accommodation_image",
+                        "columns" : [ "image_id" ],
+                        "data" : [
+                            { "image_id" : 3005 },
+                            { "image_id" : 3006 },
+                            { "image_id" : 3008 },
+                            { "image_id" : 30007 }
+                        ]
+                    }],
                 "columns" : [
                     { "title" : "Id", "value": "2002", "type": "serial4"},
                     { "title" : "Name of Accommodation", "value": "Sherathon Hotel", "type": "text"},
