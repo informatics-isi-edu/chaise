@@ -13,17 +13,16 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
-	it("should show " + tableParams.columns.length + " columns only", function() {
-		chaisePage.record2Page.getColumns().then(function(columns) {
+	it("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
+        var columns = tableParams.columns.filter(function(c) {return c.value != null;});
+		chaisePage.record2Page.getColumns().then(function(els) {
 			// Check no of columns are same as needed
-			expect(columns.length).toBe(tableParams.columns.length);
+			expect(els.length).toBe(columns.length);
 		});
 	});
 
-
-
 	it("should render columns which are specified to be visible and in order", function() {
-		var columns = tableParams.columns;
+		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.record2Page.getAllColumnCaptions().then(function(pageColumns) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
@@ -41,7 +40,9 @@ exports.testPresentation = function (tableParams) {
 	});
 
 	it("should show line under columns which have a comment and inspect the comment value too", function() {
-		var columns = tableParams.columns.filter(function(c) { return (typeof c.comment == 'string'); });
+		var columns = tableParams.columns.filter(function(c) {
+            return (c.value != null && typeof c.comment == 'string');
+        });
 		chaisePage.record2Page.getColumnsWithUnderline().then(function(pageColumns) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
@@ -59,18 +60,26 @@ exports.testPresentation = function (tableParams) {
 	});
 
 	it("should validate the values of each column", function() {
-		var columns = tableParams.columns;
+		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.record2Page.getColumnValueElements().then(function(columnEls) {
-			expect(columnEls.length).toBe(columns.length);
+            expect(columnEls.length).toBe(columns.length);
 			var index = 0;
 			columnEls.forEach(function(el) {
 				var column = columns[index++];
-				if (column.value != 'undefined') {
-					expect(el.getInnerHtml()).toBe(column.value);
-				}
+				expect(el.getInnerHtml()).toBe(column.value);
 			});
 		});
 	});
+
+    it('should not show any columns with null value', function() {
+        var columns = tableParams.columns;
+        columns.forEach(function(column) {
+            var elem = element(by.id('row-' + column.title.toLowerCase()));
+            if (column.value === null) {
+                expect(elem.isPresent()).toBe(false);
+            }
+        });
+    });
 
     it("should show related table names and their tables", function() {
         var displayName,
@@ -105,5 +114,4 @@ exports.testPresentation = function (tableParams) {
             });
         });
     });
-
 };
