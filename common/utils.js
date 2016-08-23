@@ -76,7 +76,7 @@
                 hash = hash.split("?limit=")[0]; // remove modifiers from uri
             }
 
-            context.fixedUri = hash; // uri without modifiers
+            context.mainURI = hash; // uri without modifiers
             var modifierPath = uri.split(hash)[1];
 
             if (modifierPath) {

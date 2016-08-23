@@ -27,19 +27,24 @@ angular.module('recordset', [
 
 // Register the 'context' object which can be accessed by config and other
 // services.
-.constant('appName', 'recordset')
+.constant('context', {
+    appName:'recordset',
+    chaiseURL: null,
+    mainURI: null,  // the main URL portion up to filters (without modifiers)
+    catalogID: null,
+    schemaName: null,
+    tableName: null
+})
 
 // Register the 'recordsetModel' object, which can be accessed by other
 // services, but cannot be access by providers (and config, apparently).
 .value('recordsetModel', {
-    uri: null,        // uri without modifiers
-    tableName: null,  // table name
     tableDisplayName: null,
     columns: [],      // [{name, displayname, hidden}, ...]
     sortby: null,     // column name, user selected or null
     sortOrder: null,  // asc (default) or desc
-    tuples:null       // rows of data
-
+    page: null,        // current page
+    rowValues: []      // array of rows values
 })
 
 .factory('pageInfo', [function() {
@@ -53,8 +58,8 @@ angular.module('recordset', [
 }])
 
 // Register the recordset controller
-.controller('recordsetController', ['$scope', '$rootScope', 'pageInfo', '$window', 'recordsetModel', 'UriUtils', 'Session', '$log', 'ErrorService',
-    function($scope, $rootScope, pageInfo, $window, recordsetModel, UriUtils, Session, $log, ErrorService) {
+.controller('recordsetController', ['$scope', '$rootScope', 'context', 'pageInfo', '$window', 'recordsetModel', 'UriUtils', 'Session', '$log', 'ErrorService',
+    function($scope, $rootScope, context, pageInfo, $window, recordsetModel, UriUtils, Session, $log, ErrorService) {
 
     $scope.vm = recordsetModel;
 
@@ -103,7 +108,6 @@ angular.module('recordset', [
             $window.scrollTo(0, 0);
 
             recordsetModel.page = page;
-            recordsetModel.tuples = page.tuples;
             recordsetModel.rowValues = page.tuples.map(function (tuple, index, array) {
                 return tuple.values;
             });
@@ -140,7 +144,7 @@ angular.module('recordset', [
             return $window.location.href;
         }
 
-        var url = recordsetModel.fixedUri;
+        var url = context.mainURI;
 
         // add sort modifier
         if ($rootScope.reference.location.sort)
@@ -177,7 +181,6 @@ angular.module('recordset', [
                 $window.scrollTo(0, 0);
 
                 recordsetModel.page = page;
-                recordsetModel.tuples = page.tuples;
                 recordsetModel.rowValues = page.tuples.map(function (tuple, index, array) {
                     return tuple.values;
                 });
@@ -231,7 +234,6 @@ angular.module('recordset', [
                 $window.scrollTo(0, 0);
 
                 recordsetModel.page = page;
-                recordsetModel.tuples = page.tuples;
                 recordsetModel.rowValues = page.tuples.map(function (tuple, index, array) {
                     return tuple.values;
                 });
@@ -242,7 +244,7 @@ angular.module('recordset', [
 
                 // update the address bar
                 // page does not reload
-                location.replace($scope.permalink());
+                $window.location.replace($scope.permalink());
                 $rootScope.location = $window.location.href;
 
             }, function error(response) {
@@ -265,9 +267,9 @@ angular.module('recordset', [
 
 
     $scope.gotoRowLink = function(index) {
-        var tuple = recordsetModel.tuples[index];
+        var tuple = recordsetModel.page.tuples[index];
         var t_path = tuple.reference.location.compactPath;
-        var path = $rootScope.chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(recordsetModel.catalogID) + "/" + t_path;
+        var path = context.chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(context.catalogID) + "/" + t_path;
 
         location.assign(path);
     }
@@ -276,41 +278,41 @@ angular.module('recordset', [
 }])
 
 // Register work to be performed after loading all modules
-.run(['$window', 'pageInfo', 'appName', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService',
-    function($window, pageInfo, appName, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService) {
+.run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService',
+    function($window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService) {
 
     try {
 
-        recordsetModel.alerts = AlertsService.alerts;
-        recordsetModel.closeAlert = AlertsService.deleteAlert;
+        $rootScope.alerts = AlertsService.alerts;
+        $rootScope.closeAlert = AlertsService.deleteAlert;
 
         UriUtils.setOrigin();
-        $rootScope.chaiseURL = $window.location.href.replace($window.location.hash, '');
-        $rootScope.chaiseURL = $rootScope.chaiseURL.replace("/recordset/", '');
+        context.chaiseURL = $window.location.href.replace($window.location.hash, '');
+        context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
 
         // parse the URL
-        var context = UriUtils.parseURLFragment($window.location);
+        var p_context = UriUtils.parseURLFragment($window.location);
 
         $rootScope.location = $window.location.href;
         pageInfo.loading = true;
-        if (context.limit)
-            pageInfo.pageLimit = context.limit;
+        if (p_context.limit)
+            pageInfo.pageLimit = p_context.limit;
         else
             pageInfo.pageLimit = 10;
         pageInfo.previousButtonDisabled = true;
         pageInfo.nextButtonDisabled = true;
 
-        recordsetModel.fixedUri = context.fixedUri;
+        context.mainURI = p_context.mainURI;
 
         // only allowing single column sort here
-        if (context.sort) {
-            recordsetModel.sortby = context.sort[0].column;
-            recordsetModel.sortOrder = (context.sort[0].descending ? "desc" : "asc");
+        if (p_context.sort) {
+            recordsetModel.sortby = p_context.sort[0].column;
+            recordsetModel.sortOrder = (p_context.sort[0].descending ? "desc" : "asc");
         }
 
-        recordsetModel.catalogID = context.catalogID;
-        recordsetModel.schemaName = context.schemaName;
-        recordsetModel.tableName = context.tableName;
+        context.catalogID = p_context.catalogID;
+        context.schemaName = p_context.schemaName;
+        context.tableName = p_context.tableName;
 
 
     } catch (error) {
@@ -318,7 +320,7 @@ angular.module('recordset', [
     }
 
     var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
-    ERMrest.resolve(ermrestUri, {cid: appName}).then(function getReference(reference) {
+    ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
         $rootScope.reference = reference; // TODO contextualize for recordset
         $log.info("Reference:", $rootScope.reference);
 
@@ -330,7 +332,6 @@ angular.module('recordset', [
         return $rootScope.reference.read(pageInfo.pageLimit);
     }).then(function getPage(page) {
         recordsetModel.page = page;
-        recordsetModel.tuples = page.tuples;
         recordsetModel.rowValues = page.tuples.map(function(tuple, index, array) {
             return tuple.values;
         });
@@ -354,7 +355,14 @@ angular.module('recordset', [
             AlertsService.addAlert({type:'error', message:exception.message});
     });
 
+    $window.onhashchange = function() {
+        // when address bar changes by user
+        if ($window.location.href !== $rootScope.location) {
+            location.reload();
+        }
+    };
 
-}])
+
+    }])
 
 /* end recordset */;
