@@ -1,27 +1,28 @@
 var chaisePage = require('../../utils/chaise.page.js');
 
 exports.testPresentation = function (tableParams) {
-	it("should have '" + tableParams.title +  "' as title", function() {
+	xit("should have '" + tableParams.title +  "' as title", function() {
 		chaisePage.record2Page.getEntityTitle().then(function(txt) {
 			expect(txt).toBe(tableParams.title);
 		});
 	});
 
-	it("should have '" + tableParams.subTitle +"' as subTitle", function() {
+	xit("should have '" + tableParams.subTitle +"' as subTitle", function() {
 		chaisePage.record2Page.getEntitySubTitle().then(function(txt) {
 			expect(txt).toBe(tableParams.subTitle);
 		});
 	});
 
-	it("should show " + tableParams.columns.length + " columns only", function() {
-		chaisePage.record2Page.getColumns().then(function(columns) {
+	xit("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
+        var columns = tableParams.columns.filter(function(c) {return c.value != null;});
+		chaisePage.record2Page.getColumns().then(function(els) {
 			// Check no of columns are same as needed
-			expect(columns.length).toBe(tableParams.columns.length);
+			expect(els.length).toBe(columns.length);
 		});
 	});
 
-	it("should render columns which are specified to be visible and in order", function() {
-		var columns = tableParams.columns;
+	xit("should render columns which are specified to be visible and in order", function() {
+		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.record2Page.getAllColumnCaptions().then(function(pageColumns) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
@@ -38,8 +39,10 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
-	it("should show line under columns which have a comment and inspect the comment value too", function() {
-		var columns = tableParams.columns.filter(function(c) { return (typeof c.comment == 'string'); });
+	xit("should show line under columns which have a comment and inspect the comment value too", function() {
+		var columns = tableParams.columns.filter(function(c) {
+            return (c.value != null && typeof c.comment == 'string');
+        });
 		chaisePage.record2Page.getColumnsWithUnderline().then(function(pageColumns) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
@@ -56,18 +59,25 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
-	it("should validate the values of each column", function() {
-		var columns = tableParams.columns;
+	xit("should validate the values of each column", function() {
+		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.record2Page.getColumnValueElements().then(function(columnEls) {
+            expect(columnEls.length).toBe(columns.length);
 			var index = 0;
 			columnEls.forEach(function(el) {
 				var column = columns[index++];
-				if (column.value != null) {
-					expect(el.getInnerHtml()).toBe(column.value);
-				}
-                // Columns with null values shouldn't be displayed.
-                expect(el.getInnerHtml()).not.toBe(null);
+				expect(el.getInnerHtml()).toBe(column.value);
 			});
 		});
 	});
+
+    it('should not show any columns with null value', function() {
+        var columns = tableParams.columns;
+        columns.forEach(function(column) {
+            var elem = element(by.id('row-' + column.title.toLowerCase()));
+            if (column.value === null) {
+                expect(elem.isPresent()).toBe(false);
+            }
+        });
+    });
 };

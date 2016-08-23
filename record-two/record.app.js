@@ -31,6 +31,7 @@
             $rootScope.recordDisplayname = tuple.displayname;
             $rootScope.recordValues = tuple.values;
             $rootScope.columns = $rootScope.reference.columns;
+            console.log(tuple.values);
         }, function error(response) {
             $log.warn(response);
             throw response;

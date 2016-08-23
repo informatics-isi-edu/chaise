@@ -251,10 +251,7 @@
               "hidden"
             ],
             "tag:misd.isi.edu,2015:display": {
-              "name": "Thumbnail",
-              "show_nulls": {
-                  "detailed": false
-              }
+              "name": "Thumbnail"
             }
           }
         },
