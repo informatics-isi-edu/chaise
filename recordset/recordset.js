@@ -62,7 +62,7 @@ angular.module('recordset', [
 
     $scope.pageLimit = function(limit) {
         pageInfo.pageLimit = limit;
-        $scope.sort();
+        $scope.read();
     };
 
     $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
@@ -81,21 +81,19 @@ angular.module('recordset', [
         if (recordsetModel.sortby !== column) {
             recordsetModel.sortby = column;
             recordsetModel.sortOrder = "asc";
-            $scope.sort();
+            $rootScope.reference = $rootScope.reference.sort([{"column":recordsetModel.sortby, "descending":(recordsetModel.sortOrder === "desc")}]);
+            $scope.read();
         }
 
     };
 
     $scope.toggleSortOrder = function () {
         recordsetModel.sortOrder = (recordsetModel.sortOrder === 'asc' ? recordsetModel.sortOrder = 'desc' : recordsetModel.sortOrder = 'asc');
-        $scope.sort();
+        $rootScope.reference = $rootScope.reference.sort([{"column":recordsetModel.sortby, "descending":(recordsetModel.sortOrder === "desc")}]);
+        $scope.read();
     };
 
-    $scope.sort = function () {
-
-        // get new reference with new sort
-        if (recordsetModel.sortby)
-            $rootScope.reference = $rootScope.reference.sort([{"column":recordsetModel.sortby, "descending":(recordsetModel.sortOrder === "desc")}]);
+    $scope.read = function() {
 
         pageInfo.previousButtonDisabled = true;
         pageInfo.nextButtonDisabled = true;
@@ -134,7 +132,6 @@ angular.module('recordset', [
                 AlertsService.addAlert({type:'error', message:exception.message});
         });
     };
-
 
     $scope.permalink = function() {
 
