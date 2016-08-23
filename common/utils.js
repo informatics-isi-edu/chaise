@@ -21,7 +21,7 @@
 
 
             // If the hash is empty, check for defaults
-            if (hash === '' || hash === undefined || hash === null) {
+            if (hash == '' || hash === undefined || hash.length == 1) {
                 if (chaiseConfig.defaultCatalog) {
                     if (chaiseConfig.defaultTables) {
                         catalogId = chaiseConfig.defaultCatalog;
@@ -107,7 +107,7 @@
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
             var hash = location.hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
-                return;
+                return context;
             }
 
             // parse out @sort(...)

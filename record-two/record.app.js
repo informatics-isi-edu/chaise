@@ -26,19 +26,23 @@
     }])
 
     .run(['ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
+        var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
-
-        var context = $rootScope.context = UriUtils.parseURLFragment($window.location);
-        if (!context) {
-            var context = $rootScope.context = {};
-        }
 
         try {
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
+            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
+
             // The context object won't change unless the app is reloaded
             context.appName = 'record-two';
+
+            if (!context.filter) {
+                // change the path and redirect to search because no id was supplied
+                var modifiedPath = $window.location.pathname.replace(context.appName, 'search');
+                $window.location.replace($window.location.origin + modifiedPath + $window.location.hash);
+            }
 
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                 $log.info("Reference:", reference);
