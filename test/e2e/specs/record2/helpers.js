@@ -75,6 +75,7 @@ exports.testPresentation = function (tableParams) {
     it("should show related table names and their tables", function() {
         var displayName,
             relatedTables = tableParams.related_tables;
+
         chaisePage.record2Page.getRelatedTables().count().then(function(tableCount) {
             expect(tableCount).toBe(relatedTables.length);
 

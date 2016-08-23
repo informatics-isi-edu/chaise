@@ -26,7 +26,7 @@
                 "keys" : [{ "name": "id", "value": "2002", "operator" : "="}],
                 "title": "Sherathon Hotel",
                 "subTitle" : "Accommodations",
-                "tables_order" : ["booking (2)", "accommodation_image (4)"],
+                "tables_order" : ["booking (2)", "file (4)"],
                 "related_tables" : [
                     {
                         "title" : "booking",
@@ -37,13 +37,13 @@
                         ]
                     },
                     {
-                        "title" : "accommodation_image",
-                        "columns" : [ "image_id" ],
+                        "title" : "file",
+                        "columns" : [ "id", "filename", "uri", "content_type", "bytes", "timestamp", "image_width", "image_height", "preview" ],
                         "data" : [
-                            { "image_id" : 3005 },
-                            { "image_id" : 3006 },
-                            { "image_id" : 3008 },
-                            { "image_id" : 30007 }
+                            { "id" : 3005, "filename" : "Four Points Sherathon 1", "uri" : "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_190_z.jpg", "content_type" : "image/jpeg", "bytes" : 0, "timestamp" : "2016-01-18T00:00:00-08:00", "image_width" : null, "image_height" : null, "preview" : null },
+                            { "id" : 3006, "filename" : "Four Points Sherathon 2", "uri" : "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_190_z.jpg", "content_type" : "image/jpeg", "bytes" : 0, "timestamp" : "2016-06-05T00:00:00-07:00", "image_width" : null, "image_height" : null, "preview" : null },
+                            { "id" : 3008, "filename" : "Four Points Sherathon 4", "uri" : "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_193_z.jpg", "content_type" : "image/jpeg", "bytes" : 0, "timestamp" : "2016-01-03T00:00:00-08:00", "image_width" : null, "image_height" : null, "preview" : null },
+                            { "id" : 30007, "filename" : "Four Points Sherathon 3", "uri" : "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg", "content_type" : "image/jpeg", "bytes" : 0, "timestamp" : "2016-06-05T00:00:00-07:00", "image_width" : null, "image_height" : null, "preview" : null }
                         ]
                     }],
                 "columns" : [
