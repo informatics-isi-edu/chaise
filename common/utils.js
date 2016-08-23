@@ -5,7 +5,6 @@
 
     .factory('UriUtils', ['$injector', '$window', 'parsedFilter', function($injector, $window, ParsedFilter) {
 
-
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
@@ -13,14 +12,61 @@
          * Converts a chaise URI to an ermrest resource URI object
          */
         function chaiseURItoErmrestURI(location) {
-            var ermrestUri = {};
+            var tableMissing = "No table specified in the form of 'schema-name:table-name' and no Default is set.",
+                catalogMissing = "No catalog specified and no Default is set.";
 
-            // pull off the catalog ID
-            // location.hash in the form of '#<catalog-id>/<schema-name>:<table-name>/<filters>'
-            var catalogId = location.hash.substring(1).split('/')[0];
+            var hash = location.hash,
+                ermrestUri = {},
+                catalogId;
 
-            // grab the end of the hash from: '.../<schema-name>...'
-            var hash = location.hash.substring(location.hash.indexOf('/'));
+
+            // If the hash is empty, check for defaults
+            if (hash === '' || hash === undefined || hash === null) {
+                if (chaiseConfig.defaultCatalog) {
+                    if (chaiseConfig.defaultTables) {
+                        catalogId = chaiseConfig.defaultCatalog;
+
+                        var tableConfig = chaiseConfig.defaultTables[catalogId];
+                        hash = '/' + tableConfig.schema + ':' + tableConfig.table;
+                    } else {
+                        // no defined or default schema:table
+                        throw new Error(tableMissing);
+                    }
+                } else {
+                    // no defined or default catalog
+                    throw new Error(catalogMissing);
+                }
+            } else {
+                // pull off the catalog ID
+                // location.hash in the form of '#<catalog-id>/<schema-name>:<table-name>/<filters>'
+                catalogId = hash.substring(1).split('/')[0];
+
+                // if no catalog id for some reason
+                if (catalogId === '' || catalogId === undefined || catalogId === null) {
+                    if (chaiseConfig.defaultCatalog) {
+                        catalogId = chaiseConfig.defaultCatalog;
+                    } else {
+                        // no defined or default catalog
+                        throw new Error(catalogMissing);
+                    }
+                }
+
+                // there is no '/' character (only a catalog id) or a trailing '/' after the id
+                if (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1) {
+                    // check for default Table
+                    if (chaiseConfig.defaultTables) {
+                        var tableConfig = chaiseConfig.defaultTables[catalogId];
+                        hash = '/' + tableConfig.schema + ':' + tableConfig.table;
+                    } else {
+                        // no defined or default schema:table
+                        throw new Error(tableMissing);
+                    }
+                } else {
+                    // grab the end of the hash from: '.../<schema-name>...'
+                    hash = hash.substring(hash.indexOf('/'));
+                }
+            }
+
             var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
             var path = '/catalog/' + catalogId + '/entity' + hash;
 
