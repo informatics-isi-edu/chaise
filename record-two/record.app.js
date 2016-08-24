@@ -26,7 +26,8 @@
     }])
 
     .run(['ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
-        var context = {};
+        var redirectLink,
+            context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
 
@@ -38,7 +39,9 @@
             // The context object won't change unless the app is reloaded
             context.appName = 'record-two';
 
-            if (!context.filter) {
+            try {
+                if (!context.filter) throw new Error("No filter was defined. Cannot find a record without a filter.");
+            } catch (exception) {
                 // change the path and redirect to search because no id was supplied
                 var modifiedPath = $window.location.pathname.replace(context.appName, 'search');
                 // If default catalog/table are not defined, ...chaiseURItoErmrestURI would have caught that error
@@ -46,7 +49,9 @@
                 var tableConfig = chaiseConfig.defaultTables[catalogId];
                 var schemaTableName = ( (context.schemaName && context.tableName) ? context.schemaName + ':' + context.tableName : tableConfig.schema + ':' + tableConfig.table );
                 var modifiedHash = "#" + catalogId + '/' + schemaTableName;
-                $window.location.replace($window.location.origin + modifiedPath + modifiedHash);
+
+                redirectLink = $window.location.origin + modifiedPath + modifiedHash;
+                ErrorService.errorPopup(exception.message, exception.code, 'search page', redirectLink);
             }
 
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
@@ -84,7 +89,8 @@
                 ErrorService.catchAll(exception);
             });
         } catch (exception) {
-            ErrorService.errorPopup(exception);
+            redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+            ErrorService.errorPopup(exception.message, exception.code, 'home page', redirectLink);
         }
     }]);
 })();
