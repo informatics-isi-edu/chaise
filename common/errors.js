@@ -7,6 +7,8 @@
     .factory('ErrorService', ['$log', '$window', '$uibModal', 'UriUtils', 'AlertsService', 'Session', function ErrorService($log, $window, $uibModal, UriUtils, AlertsService, Session) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
+            // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
+            if (!redirectLink) var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
 
             var params = {
                 message: message,

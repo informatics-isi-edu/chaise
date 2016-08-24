@@ -36,7 +36,6 @@
     }])
 
     .run(['context', 'ERMrest', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(context, ERMrest, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
-        var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
 
         if (!chaiseConfig.editRecord  && chaiseConfig.editRecord !== undefined) {
             var modalInstance = $uibModal.open({
@@ -183,7 +182,7 @@
                 // ideally this would be used for Table/Schema not found instead of in general case
                 if (exception instanceof ERMrest.NotFoundError) {
                     $log.info(exception);
-                    ErrorService.errorPopup(exception.message, exception.code, "home page", redirectLink);
+                    ErrorService.errorPopup(exception.message, exception.code, "home page");
                 }
 
                 throw exception;
@@ -193,7 +192,7 @@
             // for not found and bad request
             if (response instanceof ERMrest.NotFoundError || response instanceof ERMrest.BadRequestError) {
                 $log.info(exception);
-                ErrorService.errorPopup(response.message, response.code, "home page", redirectLink);
+                ErrorService.errorPopup(response.message, response.code, "home page");
             }
 
             throw response;
