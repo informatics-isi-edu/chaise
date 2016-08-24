@@ -92,6 +92,7 @@
          * Parses the URL to create the context object
          */
         function parseURLFragment(location, context) {
+            var i, row, value;
             if (!context) {
                 var context = {};
             }
@@ -106,15 +107,83 @@
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
             var hash = location.hash;
+            var uri = hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return context;
             }
 
-            // parse out @sort(...)
-            if (hash.indexOf("@sort(") !== -1) {
-                context.sort = hash.match(/@sort\((.*)\)/)[1];
-                hash = hash.split("@sort(")[0];
+            // parse out modifiers, expects in order of sort, paging and limit
+            var modifiers = ["@sort(", "@before(", "@after", "?limit="];
+            for (i = 0; i < modifiers.length; i++) {
+                if (hash.indexOf(modifiers[i]) !== -1) {
+                    hash = hash.split(modifiers[i])[0]; // remove modifiers from uri
+                    break;
+                }
             }
+
+            context.mainURI = hash; // uri without modifiers
+            var modifierPath = uri.split(hash)[1];
+
+            if (modifierPath) {
+
+                // extract @sort
+                if (modifierPath.indexOf("@sort(") !== -1) {
+                    var sorts = modifierPath.match(/@sort\(([^\)]*)\)/)[1].split(",");
+
+                    context.sort = [];
+                    for (var s = 0; s < sorts.length; s++) {
+                        var sort = sorts[s];
+                        var column = (sort.endsWith("::desc::") ?
+                            decodeURIComponent(sort.match(/(.*)::desc::/)[1]) : decodeURIComponent(sort));
+                        context.sort.push({"column": column, "descending": sort.endsWith("::desc::")});
+                    }
+                }
+
+                // extract @before
+                if (modifierPath.indexOf("@before(") !== -1) {
+                    // requires @sort
+                    if (context.sort) {
+                        context.paging = {};
+                        context.paging.before = true;
+                        context.paging.row = {};
+                        row = modifierPath.match(/@before\(([^\)]*)\)/)[1].split(",");
+                        for (i = 0; i < context.sort.length; i++) {
+                            // ::null:: to null, empty string to "", otherwise decode value
+                            value = (row[i] === "::null::" ? null : (row[i] === "" ? "" : decodeURIComponent(row[i])));
+                            context.paging.row[context.sort[i].column] = value;
+                        }
+                    } else {
+                        throw new Error("Invalid URL. Paging modifier requires @sort");
+                    }
+
+                }
+
+                // extract @after
+                if (modifierPath.indexOf("@after(") !== -1) {
+                    if (context.paging)
+                        throw new Error("Invalid URL. Only one paging modifier allowed");
+                    if (context.sort) {
+                        context.paging = {};
+                        context.paging.before = false;
+                        context.paging.row = {};
+                        row = modifierPath.match(/@after\(([^\)]*)\)/)[1].split(",");
+                        for (i = 0; i < context.sort.length; i++) {
+                            // ::null:: to null, empty string to "", otherwise decode value
+                             value = (row[i] === "::null::" ? null : (row[i] === "" ? "" : decodeURIComponent(row[i])));
+                            context.paging.row[context.sort[i].column] = value;
+                        }
+                    } else {
+                        throw new Error("Invalid URL. Paging modifier requires @sort");
+                    }
+                }
+
+                // extract ?limit
+                if (modifierPath.indexOf("?limit=") !== -1) {
+                    context.limit = parseInt(modifierPath.match(/\?limit=([0-9]*)/)[1]);
+                }
+            }
+
+            // TODO With Reference API, we don't need the code below? 
 
             // start extracting values after '#' symbol
             var parts = hash.substring(1).split('/');
