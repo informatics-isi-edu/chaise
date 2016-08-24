@@ -6,12 +6,14 @@
     // Factory for each error type
     .factory('ErrorService', ['$log', '$window', '$uibModal', 'UriUtils', 'AlertsService', 'Session', function ErrorService($log, $window, $uibModal, UriUtils, AlertsService, Session) {
 
-        function errorPopup(exception) {
-            $log.info(exception);
+        function errorPopup(message, errorCode, pageName, redirectLink) {
+            // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
+            if (!redirectLink) var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
 
             var params = {
-                message: exception.message,
-                errorCode: exception.code
+                message: message,
+                errorCode: errorCode,
+                pageName: pageName
             }
 
             var modalInstance = $uibModal.open({
@@ -26,7 +28,7 @@
             });
 
             modalInstance.result.then(function () {
-                $window.location.replace(chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+                $window.location.replace(redirectLink);
             });
         }
 

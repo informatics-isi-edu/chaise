@@ -26,48 +26,72 @@
     }])
 
     .run(['ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
+        var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
 
-        // The context object won't change unless the app is reloaded
-        var context = $rootScope.context = UriUtils.parseURLFragment($window.location);
-        context.appName = 'record-two';
+        try {
+            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
 
-        ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
-            $log.info("Reference:", reference);
-            $rootScope.reference = reference.contextualize.record;
+            // The context object won't change unless the app is reloaded
+            context.appName = "record-two";
 
-            $rootScope.relatedReferences = reference.related;
+            if (context.filter) {
+                ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                    $log.info("Reference: ", reference);
+                    $rootScope.reference = reference.contextualize.record;
 
-            // There should only ever be one entity related to this reference
-            return $rootScope.reference.read(1);
-        }).then(function getPage(page) {
-            var tuple = page.tuples[0];
+                    $rootScope.relatedReferences = reference.related;
 
-            // Used directly in the record-display directive
-            $rootScope.recordDisplayname = tuple.displayname;
-            $rootScope.recordValues = tuple.values;
-            $rootScope.columns = $rootScope.reference.columns;
+                    // There should only ever be one entity related to this reference
+                    return $rootScope.reference.read(1);
+                }).then(function getPage(page) {
+                    var tuple = page.tuples[0];
 
-            $rootScope.dataArray = [];
+                    // Used directly in the record-display directive
+                    $rootScope.recordDisplayname = tuple.displayname;
+                    $rootScope.recordValues = tuple.values;
+                    $rootScope.columns = $rootScope.reference.columns;
 
-            for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                // We want to limit the number of values shown by default
-                // Maybe have a chaise config option
-                (function(i) {
-                    $rootScope.relatedReferences[i].read(5).then(function (page) {
-                        $rootScope.dataArray[i] = page.tuples;
-                    });
-                })(i);
-            };
+                    $rootScope.dataArray = [];
 
-        }, function error(response) {
-            $log.warn(response);
-            throw response;
-        }).catch(function genericCatch(exception) {
-            ErrorService.catchAll(exception);
-        });
+                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+                        // We want to limit the number of values shown by default
+                        // Maybe have a chaise config option
+                        (function(i) {
+                            $rootScope.relatedReferences[i].read(5).then(function (page) {
+                                $rootScope.dataArray[i] = page.tuples;
+                            });
+                        })(i);
+                    };
+
+                }, function error(response) {
+                    $log.warn(response);
+                    throw response;
+                }).catch(function genericCatch(exception) {
+                    ErrorService.catchAll(exception);
+                });
+            // No filter defined, redirect to search
+            } else {
+                // change the path and redirect to search because no id was supplied
+                var modifiedPath = $window.location.pathname.replace(context.appName, "search");
+                // If default catalog/table are not defined, ...chaiseURItoErmrestURI would have caught that error
+                var catalogId = (context.catalogID ? context.catalogID : chaiseConfig.defaultCatalog);
+                if (chaiseConfig.defaultTables) {
+                    var tableConfig = chaiseConfig.defaultTables[catalogId];
+                }
+                var schemaTableName = ( (context.schemaName && context.tableName) ? context.schemaName + ':' + context.tableName : tableConfig.schema + ':' + tableConfig.table );
+                var modifiedHash = '#' + catalogId + '/' + schemaTableName;
+
+                var message = "No filter was defined. Cannot find a record without a filter.";
+                var redirectLink = $window.location.origin + modifiedPath + modifiedHash;
+                ErrorService.errorPopup(message, '', "search page", redirectLink);
+            }
+        // no catalog or schema:table defined, no defaults either, redirect to home page
+        } catch (exception) {
+            ErrorService.errorPopup(exception.message, exception.code, "home page");
+        }
     }]);
 })();
