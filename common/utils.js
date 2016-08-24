@@ -46,6 +46,7 @@
          * Parses the URL to create the context object
          */
         function parseURLFragment(location, context) {
+            var i, row, value;
             if (!context) {
                 var context = {};
             }
@@ -65,15 +66,13 @@
                 return;
             }
 
-            // parse out modifiers
-            if (hash.indexOf("@sort(") !== -1) {
-                hash = hash.split("@sort(")[0]; // remove modifiers from uri
-            } else if (hash.indexOf("@before(") !== -1) {
-                hash = hash.split("@before(")[0]; // remove modifiers from uri
-            } else if (hash.indexOf("@after(") !== -1) {
-                hash = hash.split("@after(")[0]; // remove modifiers from uri
-            } else if (hash.indexOf("?limit=") !== -1) {
-                hash = hash.split("?limit=")[0]; // remove modifiers from uri
+            // parse out modifiers, expects in order of sort, paging and limit
+            var modifiers = ["@sort(", "@before(", "@after", "?limit="];
+            for (i = 0; i < modifiers.length; i++) {
+                if (hash.indexOf(modifiers[i]) !== -1) {
+                    hash = hash.split(modifiers[i])[0]; // remove modifiers from uri
+                    break;
+                }
             }
 
             context.mainURI = hash; // uri without modifiers
@@ -101,10 +100,10 @@
                         context.paging = {};
                         context.paging.before = true;
                         context.paging.row = {};
-                        var row = modifierPath.match(/@before\(([^\)]*)\)/)[1].split(",");
-                        for (var i = 0; i < context.sort.length; i++) {
+                        row = modifierPath.match(/@before\(([^\)]*)\)/)[1].split(",");
+                        for (i = 0; i < context.sort.length; i++) {
                             // ::null:: to null, empty string to "", otherwise decode value
-                            var value = (row[i] === "::null::" ? null : (row[i] === "" ? "" : decodeURIComponent(row[i])));
+                            value = (row[i] === "::null::" ? null : (row[i] === "" ? "" : decodeURIComponent(row[i])));
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
@@ -121,10 +120,10 @@
                         context.paging = {};
                         context.paging.before = false;
                         context.paging.row = {};
-                        var row = modifierPath.match(/@after\(([^\)]*)\)/)[1].split(",");
-                        for (var i = 0; i < context.sort.length; i++) {
+                        row = modifierPath.match(/@after\(([^\)]*)\)/)[1].split(",");
+                        for (i = 0; i < context.sort.length; i++) {
                             // ::null:: to null, empty string to "", otherwise decode value
-                            var value = (row[i] === "::null::" ? null : (row[i] === "" ? "" : decodeURIComponent(row[i])));
+                             value = (row[i] === "::null::" ? null : (row[i] === "" ? "" : decodeURIComponent(row[i])));
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
