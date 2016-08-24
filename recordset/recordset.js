@@ -23,6 +23,7 @@ angular.module('recordset', [
     'chaise.authen',
     'chaise.errors',
     'chaise.modal',
+    'chaise.record.table',
     'ui.bootstrap'])
 
 // Register the 'context' object which can be accessed by config and other
@@ -40,7 +41,7 @@ angular.module('recordset', [
 // services, but cannot be access by providers (and config, apparently).
 .value('recordsetModel', {
     tableDisplayName: null,
-    columns: [],      // [{name, displayname, hidden}, ...]
+    columns: [],
     sortby: null,     // column name, user selected or null
     sortOrder: null,  // asc (default) or desc
     page: null,        // current page
@@ -173,10 +174,6 @@ angular.module('recordset', [
             $rootScope.reference = previous; // TODO contextualize for recordset
             $log.info("Reference:", $rootScope.reference);
 
-            recordsetModel.columns = $rootScope.reference.columns.map(function (column, index, array) {
-                return {"name": column.name, "displayname": column.displayname};
-            });
-
             $rootScope.reference.read(pageInfo.pageLimit).then(function getPage(page) {
                 $window.scrollTo(0, 0);
 
@@ -225,10 +222,6 @@ angular.module('recordset', [
 
             $rootScope.reference = next; // TODO contextualize for recordset
             $log.info("Reference:", $rootScope.reference);
-
-            recordsetModel.columns = $rootScope.reference.columns.map(function (column, index, array) {
-                return {"name": column.name, "displayname": column.displayname};
-            });
 
             $rootScope.reference.read(pageInfo.pageLimit).then(function getPage(page) {
                 $window.scrollTo(0, 0);
