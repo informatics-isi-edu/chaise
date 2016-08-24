@@ -314,12 +314,12 @@ angular.module('recordset', [
         context.schemaName = p_context.schemaName;
         context.tableName = p_context.tableName;
 
+        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
     } catch (error) {
         AlertsService.addAlert({type:'error', message:error.message});
     }
 
-    var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
     ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
         $rootScope.reference = reference; // TODO contextualize for recordset
         $log.info("Reference:", $rootScope.reference);
