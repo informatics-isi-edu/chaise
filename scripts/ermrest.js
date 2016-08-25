@@ -742,8 +742,8 @@ function initModels(options, successCallback) {
 			} else if (searchBoxPresentation.contains(value['type'])) {
 				box[col]['value'] = '';
 			} else if (datepickerPresentation.contains(value['type'])) {
-				box[col]['min'] = box[col]['floor'] = getDateString(value['min']);
-				box[col]['max'] = box[col]['ceil'] = getDateString(value['max']);
+				box[col]['min'] = box[col]['floor'] = getDateString(value['min'], 'min');
+				box[col]['max'] = box[col]['ceil'] = getDateString(value['max'], 'max');
 				sentRequests = true;
 			} else if (sliderPresentation.contains(value['type'])) {
 				box[col]['min'] = box[col]['floor'] = value['min'];
@@ -782,8 +782,8 @@ function initModels(options, successCallback) {
 				} else if (searchBoxPresentation.contains(value['type'])) {
 					box[col]['value'] = '';
 				} else if (datepickerPresentation.contains(value['type'])) {
-					box[col]['min'] = box[col]['floor'] = getDateString(value['min']);
-					box[col]['max'] = box[col]['ceil'] = getDateString(value['max']);
+					box[col]['min'] = box[col]['floor'] = getDateString(value['min'], 'min');
+					box[col]['max'] = box[col]['ceil'] = getDateString(value['max'], 'max');
 					sentRequests = true;
 				} else if (sliderPresentation.contains(value['type'])) {
 					box[col]['min'] = box[col]['floor'] = value['min'];
@@ -1159,13 +1159,13 @@ function successUpdateSliders(data, textStatus, jqXHR, param) {
 			if (!box[col]['left']) {
 				box[col]['min'] = data[0]['min_' + encodeSafeURIComponent(col)];
 				if (datepickerPresentation.contains(colType)) {
-					box[col]['min'] = getDateString(box[col]['min']);
+					box[col]['min'] = getDateString(box[col]['min'], 'min');
 				}
 			}
 			if (!box[col]['right']) {
 				box[col]['max'] = data[0]['max_' + encodeSafeURIComponent(col)];
 				if (datepickerPresentation.contains(colType)) {
-					box[col]['max'] = getDateString(box[col]['max']);
+					box[col]['max'] = getDateString(box[col]['max'], 'max');
 				}
 			}
 			if (box[col]['right'] && box[col]['max'] == box[col]['ceil']) {
@@ -1332,8 +1332,8 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			entity[col]['max'] = data[0]['max_' + col];
 		} else if (datepickerPresentation.contains(entity[col]['type'])) {
 			entity[col]['ready'] = true;
-			entity[col]['min'] = getDateString(data[0]['min_' + col]);
-			entity[col]['max'] = getDateString(data[0]['max_' + col]);
+			entity[col]['min'] = getDateString(data[0]['min_' + col], 'min');
+			entity[col]['max'] = getDateString(data[0]['max_' + col], 'max');
 		}
 	});
 	var ready = true;
@@ -2560,8 +2560,8 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 		entity[col]['max'] = data[0]['max'];
 	} else if (datepickerPresentation.contains(entity[col]['type'])) {
 		entity[col]['ready'] = true;
-		entity[col]['min'] = getDateString(data[0]['min']);
-		entity[col]['max'] = getDateString(data[0]['max']);
+		entity[col]['min'] = getDateString(data[0]['min'], 'min');
+		entity[col]['max'] = getDateString(data[0]['max'], 'max');
 	} else {
 		console.log('No match found for column type ', entity[col]['type']);
 	}
@@ -3638,8 +3638,8 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 		options['box'][table][col]['values'] = {};
 	} else if (datepickerPresentation.contains(col_type)) {
 		ready = true;
-		options['colsDescr'][table][col]['min'] = options['box'][table][col]['min'] = options['box'][table][col]['floor'] = getDateString(data[0]['min']);
-		options['colsDescr'][table][col]['max'] = options['box'][table][col]['max'] = options['box'][table][col]['ceil'] = getDateString(data[0]['max']);
+		options['colsDescr'][table][col]['min'] = options['box'][table][col]['min'] = options['box'][table][col]['floor'] = getDateString(data[0]['min'], 'min');
+		options['colsDescr'][table][col]['max'] = options['box'][table][col]['max'] = options['box'][table][col]['ceil'] = getDateString(data[0]['max'], 'max');
 		options['box'][table][col]['values'] = {};
 	} else if (sliderPresentation.contains(col_type)) {
 		ready = true;
@@ -4028,8 +4028,14 @@ function getSortGroup(table_name, column_name, annotation) {
 	return ret.join(',');
 }
 
-function getDateString(value) {
+function getDateString(value, position) {
 	var ret = (value != null ? value.slice(0,10) : null);
+	if (ret != null && ret != value && position == 'max') {
+		// add a day such you don't loose the timestamps values for that day
+		ret = new Date(ret);
+		ret.setUTCDate(ret.getUTCDate() + 1);
+		ret = ret.getUTCFullYear() + '-' + ('0' + (ret.getUTCMonth() + 1)).slice(-2) + '-' + ('0' + ret.getUTCDate()).slice(-2);
+	}
 	return ret;
 }
 
