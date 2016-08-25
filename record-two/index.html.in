@@ -21,7 +21,7 @@
         <div ng-if="relatedReferences.length == tableModels.length">
             <uib-accordion close-others="false">
                 <div uib-accordion-group class="related-table-heading" heading="{{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" ng-repeat="relatedRef in relatedReferences track by $index">
-                    <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]" toggle-sort-order="toggleSortOrder()" sortby="sortby(colname)" goto-row-link="gotoRowLink(index)"></record-table>
+                    <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
                 </div>
             </uib-accordion>
         </div>
