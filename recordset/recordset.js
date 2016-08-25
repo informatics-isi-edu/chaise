@@ -318,9 +318,7 @@ angular.module('recordset', [
         $log.info("Reference:", $rootScope.reference);
 
         recordsetModel.tableDisplayName = reference.displayname;
-        recordsetModel.columns = reference.columns.map(function(column, index, array) {
-           return {"name": column.name, "displayname": column.displayname};
-        });
+        recordsetModel.columns = reference.columns;
 
         return $rootScope.reference.read(pageInfo.pageLimit);
     }).then(function getPage(page) {

@@ -63,13 +63,11 @@
                         (function(i) {
                             $rootScope.relatedReferences[i].read(5).then(function (page) {
                                 var model = {
+                                    columns: $rootScope.relatedReferences[i].columns,
                                     sortby: null,     // column name, user selected or null
                                     sortOrder: null,  // asc (default) or desc
                                     rowValues: []      // array of rows values
                                 };
-                                model.columns = $rootScope.relatedReferences[i].columns.map(function(column, index, array) {
-                                    return {"name": column.name, "displayname": column.displayname};
-                                });
                                 model.rowValues = page.tuples.map(function (tuple, index, array) {
                                     return tuple.values;
                                 });
