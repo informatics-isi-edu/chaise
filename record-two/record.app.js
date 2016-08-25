@@ -41,7 +41,7 @@
             if (context.filter) {
                 ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                     $log.info("Reference: ", reference);
-                    $rootScope.reference = reference.contextualize.record;
+                    $rootScope.reference = reference.contextualize.detailed;
 
                     $rootScope.relatedReferences = reference.related;
 
@@ -49,10 +49,21 @@
                     return $rootScope.reference.read(1);
                 }).then(function getPage(page) {
                     var tuple = page.tuples[0];
-
                     // Used directly in the record-display directive
                     $rootScope.recordDisplayname = tuple.displayname;
-                    $rootScope.recordValues = tuple.values;
+
+                    // Collate tuple.isHTML and tuple.values into an array of objects
+                    // i.e. {isHTML: false, value: 'sample'}
+                    $rootScope.recordValues = [];
+                    tuple.values.forEach(function(value, index) {
+                        $rootScope.recordValues.push({
+                            isHTML: tuple.isHTML[index],
+                            value: value
+                        });
+                    });
+
+                    console.log($rootScope.recordValues);
+
                     $rootScope.columns = $rootScope.reference.columns;
 
                     $rootScope.dataArray = [];
