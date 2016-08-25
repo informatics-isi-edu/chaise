@@ -40,7 +40,7 @@
 
             if (context.filter) {
                 ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
-                    $log.info("Reference: ", $rootScope.reference);
+                    $log.info("Reference: ", reference);
                     $rootScope.reference = reference.contextualize.detailed;
                     $rootScope.relatedReferences = reference.related;
 
