@@ -63,17 +63,26 @@
 
                     $rootScope.columns = $rootScope.reference.columns;
 
-                    $rootScope.dataArray = [];
+                    $rootScope.tableModels = [];
 
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                         // We want to limit the number of values shown by default
                         // Maybe have a chaise config option
                         (function(i) {
                             $rootScope.relatedReferences[i].read(5).then(function (page) {
-                                $rootScope.dataArray[i] = page.tuples;
+                                var model = {
+                                    columns: $rootScope.relatedReferences[i].columns,
+                                    sortby: null,     // column name, user selected or null
+                                    sortOrder: null,  // asc (default) or desc
+                                    rowValues: []      // array of rows values
+                                };
+                                model.rowValues = page.tuples.map(function (tuple, index, array) {
+                                    return tuple.values;
+                                });
+                                $rootScope.tableModels.push(model);
                             });
                         })(i);
-                    };
+                    }
 
                 }, function error(response) {
                     $log.warn(response);
