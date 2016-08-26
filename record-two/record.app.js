@@ -41,8 +41,7 @@
             if (context.filter) {
                 ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                     $log.info("Reference: ", reference);
-                    $rootScope.reference = reference.contextualize.record;
-
+                    $rootScope.reference = reference.contextualize.detailed;
                     $rootScope.relatedReferences = reference.related;
 
                     // There should only ever be one entity related to this reference
