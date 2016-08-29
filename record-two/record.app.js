@@ -25,7 +25,7 @@
         };
     }])
 
-    .run(['ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
+    .run(['ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', '$sce', function runApp(ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, $sce) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
@@ -81,8 +81,15 @@
                                     sortOrder: null,    // asc (default) or desc
                                     rowValues: []       // array of rows values
                                 };
-                                model.rowValues = page.tuples.map(function (tuple, index, array) {
-                                    return tuple.values;
+                                model.rowValues = page.tuples.map(function(tuple, index, array) {
+                                    var row = [];
+                                    tuple.values.forEach(function(value, index) {
+                                        row.push({
+                                            isHTML: tuple.isHTML[index],
+                                            value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                                        });
+                                    });
+                                    return row;
                                 });
                                 $rootScope.tableModels[i] = model;
                             });

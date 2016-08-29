@@ -27,7 +27,8 @@
         'chaise.errors',
         'chaise.modal',
         'chaise.record.table',
-        'ui.bootstrap'])
+        'ui.bootstrap',
+        'ngSanitize'])
 
     // Register the 'context' object which can be accessed by config and other
     // services.
@@ -48,7 +49,7 @@
         sortby: null,     // column name, user selected or null
         sortOrder: null,  // asc (default) or desc
         page: null,        // current page
-        rowValues: []      // array of rows values
+        rowValues: []      // array of rows values, each value has this structure {isHTML:boolean, value:value}
     })
 
     .factory('pageInfo', [function() {
@@ -62,8 +63,8 @@
     }])
 
     // Register the recordset controller
-    .controller('recordsetController', ['$scope', '$rootScope', 'context', 'pageInfo', '$window', 'recordsetModel', 'UriUtils', 'Session', '$log', 'ErrorService',
-        function($scope, $rootScope, context, pageInfo, $window, recordsetModel, UriUtils, Session, $log, ErrorService) {
+    .controller('recordsetController', ['$scope', '$rootScope', 'context', 'pageInfo', '$window', 'recordsetModel', 'UriUtils', 'Session', '$log', 'ErrorService', '$sce',
+        function($scope, $rootScope, context, pageInfo, $window, recordsetModel, UriUtils, Session, $log, ErrorService, $sce) {
 
         $scope.vm = recordsetModel;
 
@@ -112,8 +113,15 @@
                 $window.scrollTo(0, 0);
 
                 recordsetModel.page = page;
-                recordsetModel.rowValues = page.tuples.map(function (tuple, index, array) {
-                    return tuple.values;
+                recordsetModel.rowValues = page.tuples.map(function(tuple, index, array) {
+                    var row = [];
+                    tuple.values.forEach(function(value, index) {
+                        row.push({
+                            isHTML: tuple.isHTML[index],
+                            value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                        });
+                    });
+                    return row;
                 });
 
                 pageInfo.loading = false;
@@ -181,8 +189,15 @@
                     $window.scrollTo(0, 0);
 
                     recordsetModel.page = page;
-                    recordsetModel.rowValues = page.tuples.map(function (tuple, index, array) {
-                        return tuple.values;
+                    recordsetModel.rowValues = page.tuples.map(function(tuple, index, array) {
+                        var row = [];
+                        tuple.values.forEach(function(value, index) {
+                            row.push({
+                                isHTML: tuple.isHTML[index],
+                                value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                            });
+                        });
+                        return row;
                     });
 
                     pageInfo.loading = false;
@@ -230,8 +245,15 @@
                     $window.scrollTo(0, 0);
 
                     recordsetModel.page = page;
-                    recordsetModel.rowValues = page.tuples.map(function (tuple, index, array) {
-                        return tuple.values;
+                    recordsetModel.rowValues = page.tuples.map(function(tuple, index, array) {
+                        var row = [];
+                        tuple.values.forEach(function(value, index) {
+                            row.push({
+                                isHTML: tuple.isHTML[index],
+                                value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                            });
+                        });
+                        return row;
                     });
 
                     pageInfo.loading = false;
@@ -274,8 +296,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService',
-        function($window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService) {
+    .run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService', '$sce',
+        function($window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService, $sce) {
 
         try {
 
@@ -317,7 +339,7 @@
         }
 
         ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
-            $rootScope.reference = reference; // TODO contextualize for recordset
+            $rootScope.reference = reference.contextualize.compact;
             $log.info("Reference:", $rootScope.reference);
 
             recordsetModel.tableDisplayName = reference.displayname;
@@ -327,7 +349,14 @@
         }).then(function getPage(page) {
             recordsetModel.page = page;
             recordsetModel.rowValues = page.tuples.map(function(tuple, index, array) {
-                return tuple.values;
+                var row = [];
+                tuple.values.forEach(function(value, index) {
+                    row.push({
+                        isHTML: tuple.isHTML[index],
+                        value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                    });
+                });
+                return row;
             });
 
             pageInfo.loading = false;
