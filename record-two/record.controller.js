@@ -3,8 +3,11 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['$rootScope', function RecordController($rootScope) {
-        // made this for manipulating code in html for record app
-
+    .controller('RecordController', ['$window', function RecordController($window) {
+        var vm = this;
+        
+        vm.editRecord = function editRecord() {
+            $window.location.href = '../recordedit/' + $window.location.hash;
+        }
     }]);
 })();

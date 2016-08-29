@@ -9,10 +9,10 @@
     <navbar></navbar>
 
     <div class="container-fluid">
-        <div id="record-bookmark-container" class="col-xs-12 meta-icons">
-            <!-- <a ng-if="reference.canUpdate" title="Click here to edit this record" ng-click="editRecord()">
+        <div id="record2-bookmark-container" class="col-xs-12 meta-icons" ng-controller="RecordController as ctrl">
+            <a ng-if="reference.canUpdate" title="Click here to edit this record" ng-click="ctrl.editRecord()">
                 <span class="glyphicon glyphicon-pencil"></span> <strong>Edit Record</strong>
-            </a> -->
+            </a>
         </div>
 
         <div id="entity-title">{{ recordDisplayname }}</div>
