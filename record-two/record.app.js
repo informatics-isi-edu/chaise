@@ -30,8 +30,6 @@
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
 
-        console.log($rootScope);
-
         try {
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
@@ -42,7 +40,7 @@
 
             if (context.filter) {
                 ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
-                    // $rootScope.referene != reference after this function
+                    // $rootScope.reference != reference after contextualization
                     $rootScope.reference = reference.contextualize.detailed;
                     $rootScope.reference.session = $rootScope.session;
 

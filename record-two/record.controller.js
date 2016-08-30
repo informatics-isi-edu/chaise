@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['$window', '$rootScope', function RecordController($window, $rootScope) {
+    .controller('RecordController', ['$window', function RecordController($window) {
         var vm = this;
 
         vm.editRecord = chaiseConfig.editRecord;
