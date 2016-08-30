@@ -6,6 +6,8 @@
     .controller('RecordController', ['$window', '$rootScope', function RecordController($window, $rootScope) {
         var vm = this;
 
+        vm.editRecord = chaiseConfig.editRecord;
+
         vm.createRecord = function() {
             var hash = $window.location.hash;
             // Should I substring based on the position of id or should I split on '/' and piece back together parts 0,1?

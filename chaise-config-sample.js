@@ -1,6 +1,7 @@
 // Configure deployment-specific data here
 
 var chaiseConfig = {
+    editRecord: true,
     layout: 'list',
     confirmDelete: true,
     headTitle: 'Chaise',

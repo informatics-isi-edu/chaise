@@ -2,6 +2,10 @@
     "setup": {
         "schemaConfigurations": [{
             "catalog": {
+                "acls": [
+                    {"name": "content_write_user", "user": "*" },
+                    {"name": "content_read_user", "user": "*" }
+                ]
             },
             "schema": {
                 "name": "product",
