@@ -23,8 +23,8 @@ describe('View existing record,', function() {
 					browser.sleep(2000);
 			    });
 
-				describe("Presentation ,", function() {
-					var params = record2Helpers.testPresentation(tupleParams);
+                describe("Click the edit record button ,", function() {
+					var params = record2Helpers.testEditButton(tupleParams);
 				});
 
     		});

@@ -21,6 +21,16 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
+    it("should show the action buttons properly", function() {
+        chaisePage.record2Page.getEditRecordButton().isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+
+        chaisePage.record2Page.getCreateRecordButton().isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+    });
+
 	it("should render columns which are specified to be visible and in order", function() {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.record2Page.getAllColumnCaptions().then(function(pageColumns) {
@@ -112,6 +122,26 @@ exports.testPresentation = function (tableParams) {
                         });
                     })(i, displayName);
                 }
+            });
+        });
+    });
+};
+
+exports.testEditButton = function () {
+    it("should redirect to recordedit app", function() {
+        chaisePage.record2Page.getEditRecordButton().click().then(function() {
+            browser.driver.getCurrentUrl().then(function(url) {
+                expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
+            });
+        });
+    });
+};
+
+exports.testCreateButton = function () {
+    it("should redirect to recordedit app", function() {
+        chaisePage.record2Page.getCreateRecordButton().click().then(function() {
+            browser.driver.getCurrentUrl().then(function(url) {
+                expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
             });
         });
     });
