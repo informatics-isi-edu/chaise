@@ -10,7 +10,7 @@
 
     <div class="container-fluid">
         <div id="record2-bookmark-container" class="col-xs-12 meta-icons" ng-controller="RecordController as ctrl">
-            <a title="This link stores your search criteria as a URL. Right click and save." ng-href="{{ctrl.permalink()}}">
+            <a id="permalink" title="This link stores your search criteria as a URL. Right click and save." ng-href="{{ctrl.permalink()}}">
                 <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
             </a>
         </div>

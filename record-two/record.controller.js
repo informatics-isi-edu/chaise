@@ -10,9 +10,7 @@
             if (!$rootScope.reference) {
                 return $window.location.href;
             }
-
             return $rootScope.context.mainURI;
         };
-
     }]);
 })();
