@@ -49,28 +49,45 @@
                     $log.info("Reference: ", $rootScope.reference);
 
                     $rootScope.relatedReferences = $rootScope.reference.related;
-
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
                 }).then(function getPage(page) {
                     var tuple = page.tuples[0];
-
                     // Used directly in the record-display directive
                     $rootScope.recordDisplayname = tuple.displayname;
-                    $rootScope.recordValues = tuple.values;
+
+                    // Collate tuple.isHTML and tuple.values into an array of objects
+                    // i.e. {isHTML: false, value: 'sample'}
+                    $rootScope.recordValues = [];
+                    tuple.values.forEach(function(value, index) {
+                        $rootScope.recordValues.push({
+                            isHTML: tuple.isHTML[index],
+                            value: value
+                        });
+                    });
+
                     $rootScope.columns = $rootScope.reference.columns;
 
-                    $rootScope.dataArray = [];
+                    $rootScope.tableModels = [];
 
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                         // We want to limit the number of values shown by default
                         // Maybe have a chaise config option
                         (function(i) {
                             $rootScope.relatedReferences[i].read(5).then(function (page) {
-                                $rootScope.dataArray[i] = page.tuples;
+                                var model = {
+                                    columns: $rootScope.relatedReferences[i].columns,
+                                    sortby: null,     // column name, user selected or null
+                                    sortOrder: null,  // asc (default) or desc
+                                    rowValues: []      // array of rows values
+                                };
+                                model.rowValues = page.tuples.map(function (tuple, index, array) {
+                                    return tuple.values;
+                                });
+                                $rootScope.tableModels.push(model);
                             });
                         })(i);
-                    };
+                    }
 
                 }, function error(response) {
                     $log.warn(response);
