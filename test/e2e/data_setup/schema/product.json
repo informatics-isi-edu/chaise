@@ -137,7 +137,9 @@
               "url" : "{cname}"
             },
             "tag:isrd.isi.edu,2016:column-display" : {
-              "markdown_pattern" : "[Link to Website]({{website}})"
+              "*": {
+                "markdown_pattern" : "[Link to Website]({{website}})"
+              }
             },
             "tag:misd.isi.edu,2015:display": {
               "name": "Website"
