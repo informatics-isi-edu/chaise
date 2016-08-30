@@ -9,20 +9,45 @@
                     MENU
                 </button>
                 <a class="navbar-brand" ng-href="{{brandURL || '/' }}">
-                    <img ng-if="brandImage" ng-src="{{brandImage}}" height="40px">
+                    <img ng-if="brandImage" ng-src="{{brandImage}}">
                     <span ng-bind="brandText || 'Chaise'"></span>
                 </a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
-                <p class="navbar-text pull-right">
-                    <a ng-show="user === null" ng-click="login()">Log In</a>
-                    <span ng-show="user !== null">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown toplevel">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search</span><span class="caret"></span></a>
+                        <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+                            <li><a href="../search/#1/experiments:Experiment" target="_blank">Experiments</a></li>
+                            <li><a href="../search/#1/experiments:Sample" target="_blank">Samples</a></li>
+                            <li><a href="../search/#1/experiments:Detergent" target="_blank">Detergent</a></li>
+                            <li><a href="../search/#1/experiments:Ligand" target="_blank">Ligand</a></li>
+                            <li><a href="../search/#1/experiments:Purification" target="_blank">Purification</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown toplevel">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Create<span class="caret"></span></a>
+                        <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+                            <li><a href="../recordedit/#1/experiments:SOP" target="_blank">Standard Operating Procedure (SOP)</a></li>
+                            <li><a href="../recordedit/#1/experiments:Purification" target="_blank">Purification Process</a></li>
+                            <li><a href="../recordedit/#1/experiments:Experiment_Type" target="_blank">Experiment Type</a></li>
+                            <li><a href="../recordedit/#1/experiments:Experiment" target="_blank">Experiment</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav pull-right">
+                    <li ng-show="user === null">
+                        <a ng-click="login()">Log In</a>
+                    </li>
+                    <li ng-show="user !== null">
                         <a style="color: yellow;" href="https://www.globus.org/app/account" ng-bind="user"></a>
+                    </li>
+                    <li ng-show="user !== null">
                         <a ng-click="logout()">Log Out</a>
-                    </span>
-                </p>
+                    </li>
+                </ul>
             </div><!-- /.navbar-collapse -->
         </div>
     </nav>
