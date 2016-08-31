@@ -6,7 +6,7 @@
     .controller('RecordController', ['$window', '$rootScope', function RecordController($window, $rootScope) {
         var vm = this;
 
-        vm.editRecord = chaiseConfig.editRecord;
+        vm.modifyRecord = chaiseConfig.editRecord;
 
         vm.createRecord = function() {
             var parts = $rootScope.reference.location.compactPath.split('/');
@@ -17,5 +17,12 @@
         vm.editRecord = function() {
             $window.location.href = "../recordedit/#" + $rootScope.reference.location.catalog + '/' + $rootScope.reference.location.compactPath;
         }
+
+        vm.permalink = function getPermalink() {
+            if (!$rootScope.reference) {
+                return $window.location.href;
+            }
+            return $rootScope.context.mainURI;
+        };
     }]);
 })();
