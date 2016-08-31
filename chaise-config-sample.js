@@ -7,7 +7,7 @@ var chaiseConfig = {
     headTitle: 'Chaise',
     customCSS: '/assets/css/chaise.css',
     navbarBrand: '/',
-    navbarBrandImage: '/bdds/assets/images/bdds_logo_final.png',
+    navbarBrandImage: null,
     logoutURL: '/image-annotation',
     dataBrowser: '/',
     maxColumns: 6,
