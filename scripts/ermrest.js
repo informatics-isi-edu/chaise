@@ -177,19 +177,15 @@ function setNavbarBrand() {
 		if (chaiseConfig['navbarBrand'] !== undefined) {
 			$($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
 		}
-		$.getJSON('../navbar_menu.json')
-			.done(function(data) {
-				var ul = $('#navbar_menu');
-				$.each(data, function(i, menu) {
-					appendMenu(ul, menu);
-				});
-			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
-				if (jqXHR.status != 404) {
-					console.log(textStatus);
-					console.log(errorThrown);
-				}
+		try {
+			var data = navbar_menu;
+			var ul = $('#navbar_menu_ul');
+			$.each(data, function(i, menu) {
+				appendMenu(ul, menu);
 			});
+		} catch(err) {
+			//console.log(err);
+		}
 	}
 }
 
