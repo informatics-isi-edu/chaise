@@ -1,5 +1,9 @@
-
 .container-fluid {
     padding-right: 50px;
     padding-left: 50px;
+}
+
+#record2-bookmark-container {
+    text-align: right;
+    top: 20px;
 }

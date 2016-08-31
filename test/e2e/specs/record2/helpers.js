@@ -81,6 +81,16 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+	it('should display a permalink of the record', function() {
+		var key = tableParams.keys[0];
+		var expectedURL = browser.params.url + ':' + tableParams.table_name + '/' + key.name + key.operator + key.value;
+		var actualURL = element(by.id('permalink'));
+		expect(actualURL.isDisplayed()).toBe(true);
+		actualURL.getAttribute('href').then(function(url) {
+			expect(url).toBe(expectedURL);
+		});
+	});
+
     it("should show related table names and their tables", function() {
         var displayName,
             relatedTables = tableParams.related_tables;

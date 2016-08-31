@@ -9,6 +9,12 @@
     <navbar></navbar>
 
     <div class="container-fluid">
+        <div id="record2-bookmark-container" class="col-xs-12 meta-icons" ng-controller="RecordController as ctrl">
+            <a id="permalink" title="This link stores your search criteria as a URL. Right click and save." ng-href="{{ctrl.permalink()}}">
+                <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
+            </a>
+        </div>
+
         <div id="entity-title">{{ recordDisplayname }}</div>
         <div id="entity-subtitle">{{ reference.displayname }}</div>
         <!-- defined on $rootScope in run function -->
