@@ -14,7 +14,7 @@
 (function() {
     'use strict';
     angular.module('chaise.navbar', ['chaise.utils', 'chaise.authen'])
-    .directive('navbar', ['$window', 'Session', function($window, Session) {
+    .directive('navbar', ['$window', '$rootScope', 'Session', function($window, $rootScope, Session) {
         return {
             restrict: 'EA',
             scope: {
@@ -29,6 +29,8 @@
                 scope.brandImage = chaiseConfig.navbarBrandImage;
 
                 Session.getSession().then(function(session) {
+                    $rootScope.session = session;
+                    
                     var user = session.client;
                     scope.user = user.display_name || user.full_name || user.email || user;
                 }, function(error) {

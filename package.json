@@ -25,7 +25,7 @@
     "chai": "x",
     "chance": "x",
     "closurecompiler": "x",
-    "jasmine-core": "^2.4.1",
+    "jasmine-core": "2.4.1",
     "jasmine-spec-reporter": "^2.5.0",
     "jsdoc": "x",
     "jsdoc-to-markdown": "x",
