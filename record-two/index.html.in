@@ -10,10 +10,10 @@
 
     <div class="container-fluid">
         <div id="record2-bookmark-container" class="col-xs-12 meta-icons" ng-controller="RecordController as ctrl">
-            <a id="create-record" ng-if="reference.canCreate && ctrl.modifyRecord" title="Click here to create a record" ng-click="ctrl.createRecord()">
+            <a id="create-record" ng-if="reference && reference.canCreate && ctrl.modifyRecord" title="Click here to create a record" ng-click="::ctrl.createRecord()">
                 <span class="glyphicon glyphicon-plus"></span> <strong>Create Record</strong>
             </a>&nbsp;&nbsp;
-            <a id="edit-record" ng-if="reference.canUpdate && ctrl.modifyRecord" title="Click here to edit this record" ng-click="ctrl.editRecord()">
+            <a id="edit-record" ng-if="reference && reference.canUpdate && ctrl.modifyRecord" title="Click here to edit this record" ng-click="::ctrl.editRecord()">
                 <span class="glyphicon glyphicon-pencil"></span> <strong>Edit Record</strong>
             </a>&nbsp;&nbsp;
             <a id="permalink" title="This link stores your search criteria as a URL. Right click and save." ng-href="{{ctrl.permalink()}}">
