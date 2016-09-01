@@ -139,7 +139,12 @@ exports.testPresentation = function (tableParams) {
 
 exports.testEditButton = function () {
     it("should redirect to recordedit app", function() {
-        chaisePage.record2Page.getEditRecordButton().click().then(function() {
+        var EC = protractor.ExpectedConditions,
+            editButton = chaisePage.record2Page.getEditRecordButton();
+
+        browser.wait(EC.elementToBeClickable(editButton), 5000);
+
+        editButton.click().then(function() {
             browser.driver.getCurrentUrl().then(function(url) {
                 expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
             });
@@ -149,7 +154,12 @@ exports.testEditButton = function () {
 
 exports.testCreateButton = function () {
     it("should redirect to recordedit app", function() {
-        chaisePage.record2Page.getCreateRecordButton().click().then(function() {
+        var EC = protractor.ExpectedConditions,
+            createButton = chaisePage.record2Page.getCreateRecordButton();
+
+        browser.wait(EC.elementToBeClickable(createButton), 5000);
+
+        createButton.click().then(function() {
             browser.driver.getCurrentUrl().then(function(url) {
                 expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
             });
