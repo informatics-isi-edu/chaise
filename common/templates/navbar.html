@@ -21,7 +21,7 @@
                         <a ng-click="login()">Log In</a>
                     </li>
                     <li ng-show="user !== null">
-                        <a style="color: yellow;" href="https://www.globus.org/app/account" ng-bind="user"></a>
+                        <a href="https://www.globus.org/app/account" ng-bind="user"></a>
                     </li>
                     <li ng-show="user !== null">
                         <a ng-click="logout()">Log Out</a>
@@ -29,45 +29,13 @@
                 </ul>
                 <ul class="nav navbar-nav">
                     <li ng-repeat="item in menu">
-                        <a ng-if="!item.children" ng-href="{{item.url}}">{{item.name}}</a>
+                        <a ng-if="!item.children" ng-href="{{'/' + item.url}}">{{item.name}}</a>
                         <a ng-if="item.children" href="#" class="dropdown-toggle" data-toggle="dropdown">{{item.name}} <span class="caret"></span></a>
                         <ul ng-if="item.children" class="dropdown-menu">
                             <li ng-repeat="childItem in item.children" ng-class="{'dropdown-submenu': childItem.children}">
-                                <a ng-if="!childItem.children" ng-href="{{childItem.url}}">{{childItem.name}}</a>
+                                <a ng-if="!childItem.children" ng-href="{{'/' + childItem.url}}">{{childItem.name}}</a>
                                 <a ng-if="childItem.children" class="dropdown-toggle" data-toggle="dropdown" href="#">{{childItem.name}}</a>
                                 <ul ng-if="childItem.children" navbar-menu menu="childItem.children" class="dropdown-menu"></ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Home</a></li>
-                    <li>
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Menu 1 <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Action</a></li>
-                            <li class="dropdown-submenu">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret caret-right"></span></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="#">Action</a></li>
-                                    <li class="dropdown-submenu">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret caret-right"></span></a>
-                                        <ul class="dropdown-menu">
-                                            <li class="dropdown-submenu">
-                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret caret-right"></span></a>
-                                                <ul class="dropdown-menu">
-                                                    <li><a href="#">Action</a></li>
-                                                    <li><a href="#">Another action</a></li>
-                                                    <li><a href="#">Something else here</a></li>
-                                                    <li class="divider"></li>
-                                                    <li><a href="#">Separated link</a></li>
-                                                    <li class="divider"></li>
-                                                    <li><a href="#">One more separated link</a></li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
                             </li>
                         </ul>
                     </li>
@@ -77,17 +45,25 @@
     </nav>
 </header>
 
-<script>
+<!-- <script>
 $(document).ready(function() {
+    console.log('fire1');
     $('.navbar a.dropdown-toggle').on('click', function(e) {
+        console.log('fire2');
         var elmnt = $(this).parent().parent();
         if (!elmnt.hasClass('nav')) {
+            console.log('fire3');
             var li = $(this).parent();
             var heightParent = parseInt(elmnt.css('height').replace('px', '')) / 2;
             var widthParent = parseInt(elmnt.css('width').replace('px', '')) - 10;
 
-            if(!li.hasClass('open')) li.addClass('open')
-            else li.removeClass('open');
+            if(!li.hasClass('open')) {
+                console.log('fire4');
+                li.addClass('open');
+            } else {
+                console.log('fire5');
+                li.removeClass('open');
+            }
             $(this).next().css('top', heightParent + 'px');
             $(this).next().css('left', widthParent + 'px');
 
@@ -95,4 +71,4 @@ $(document).ready(function() {
         }
     });
 });
-</script>
+</script> -->

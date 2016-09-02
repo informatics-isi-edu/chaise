@@ -44,6 +44,25 @@
                 scope.logout = function logout() {
                     Session.logout();
                 };
+
+                // TODO: What's the heuristic for determining whether a menu item is "active"?
+                // scope.isActiveMenuItem = function isActiveMenuItem(item) {
+                //     var currentUrl = $window.location.href;
+                //     if (item.children) {
+                //         for (var i = 0; i < item.children.length; i++) {
+                //             if (item.children.url && currentUrl.indexOf(item.children.url) > -1) {
+                //                 console.log('active!');
+                //                 return true;
+                //             }
+                //         }
+                //     }
+                //
+                //     if (currentUrl.indexOf(item.url) > -1) {
+                //         console.log('active!');
+                //         return true;
+                //     }
+                //     return false;
+                // }
             }
         };
     }])
