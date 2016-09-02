@@ -2,14 +2,14 @@
     <!-- If No children, so just display a plain link-->
     <a ng-if="!item.children" ng-href="{{item.url}}">{{item.name}}</a>
     <!-- If Has children, so display the link with dropdown classes and its accompanying ul to display on click -->
-    <a ng-if="item.children" href="#" class="dropdown-toggle" data-toggle="dropdown">{{item.name}} <span class="caret caret-right"></span></a>
+    <a ng-if="item.children" href="#" class="dropdown-toggle" data-toggle="dropdown">{{item.name}}</a>
     <!-- the accompanying ul -->
     <ul ng-if="item.children" class="dropdown-menu">
         <!-- each of these li will be displayed according to whether it has children -->
         <li ng-repeat="childItem in item.children" ng-class="{'dropdown-submenu': childItem.children}">
             <!-- this li has no children, display it as normal anchor link -->
             <a ng-if="!childItem.children" ng-href="{{childItem.url}}">{{childItem.name}}</a>
-            <a ng-if="childItem.children" class="dropdown-toggle" data-toggle="dropdown" href="#">{{childItem.name}} <span class="caret caret-right"></span></a>
+            <a ng-if="childItem.children" class="dropdown-toggle" data-toggle="dropdown" href="#">{{childItem.name}}</a>
             <ul ng-if="childItem.children" navbar-menu menu="childItem.children" class="dropdown-menu"></ul>
         </li>
     </ul>
