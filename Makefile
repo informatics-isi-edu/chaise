@@ -291,6 +291,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
+	$(COMMON)/table.js \
 	$(COMMON)/navbar.js
 
 RECSET_JS_SOURCE=$(COMMON)/authen.js \

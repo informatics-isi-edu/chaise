@@ -9,6 +9,18 @@
     <navbar></navbar>
 
     <div class="container-fluid">
+        <div id="record2-bookmark-container" class="col-xs-12 meta-icons" ng-controller="RecordController as ctrl">
+            <a id="create-record" ng-if="reference && reference.canCreate && ctrl.modifyRecord" title="Click here to create a record" ng-click="::ctrl.createRecord()">
+                <span class="glyphicon glyphicon-plus"></span> <strong>Create Record</strong>
+            </a>&nbsp;&nbsp;
+            <a id="edit-record" ng-if="reference && reference.canUpdate && ctrl.modifyRecord" title="Click here to edit this record" ng-click="::ctrl.editRecord()">
+                <span class="glyphicon glyphicon-pencil"></span> <strong>Edit Record</strong>
+            </a>&nbsp;&nbsp;
+            <a id="permalink" title="This link stores your search criteria as a URL. Right click and save." ng-href="{{ctrl.permalink()}}">
+                <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
+            </a>
+        </div>
+
         <div id="entity-title">{{ recordDisplayname }}</div>
         <div id="entity-subtitle">{{ reference.displayname }}</div>
         <!-- defined on $rootScope in run function -->
@@ -18,10 +30,10 @@
         </div>
 
         <!-- prevents initialization of the directive until the data is available | wait until all data values have been fetched -->
-        <div ng-if="relatedReferences.length == dataArray.length">
+        <div ng-if="relatedReferences.length == tableModels.length">
             <uib-accordion close-others="false">
-                <div uib-accordion-group class="related-table-heading" heading="{{relatedRef.displayname}} ({{dataArray[$index].length}})" ng-repeat="relatedRef in relatedReferences track by $index">
-                    <record-table class="related-table" id="rt-{{relatedRef.displayname}}" columns="relatedRef.columns" data="dataArray[$index]"></record-table>
+                <div uib-accordion-group class="related-table-heading" heading="{{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" ng-repeat="relatedRef in relatedReferences track by $index">
+                    <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
                 </div>
             </uib-accordion>
         </div>

@@ -474,6 +474,14 @@ var record2Page = function() {
     this.getRelatedTableRows = function(displayName) {
         return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
     };
+
+    this.getCreateRecordButton = function() {
+        return element(by.id("create-record"));
+    }
+
+    this.getEditRecordButton = function() {
+        return element(by.id("edit-record"));
+    }
 };
 
 function chaisePage() {

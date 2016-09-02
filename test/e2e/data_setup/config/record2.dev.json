@@ -2,6 +2,10 @@
     "setup": {
         "schemaConfigurations": [{
             "catalog": {
+                "acls": [
+                    {"name": "content_write_user", "user": "*" },
+                    {"name": "content_read_user", "user": "*" }
+                ]
             },
             "schema": {
                 "name": "product",
@@ -49,7 +53,7 @@
                 "columns" : [
                     { "title" : "Id", "value": "2002", "type": "serial4"},
                     { "title" : "Name of Accommodation", "value": "Sherathon Hotel", "type": "text"},
-                    { "title" : "Website", "value": "http://www.starwoodhotels.com/sheraton/index.html", "type": "text", "comment" : "A valid url of the accommodation"},
+                    { "title" : "Website", "value": "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>\n", "type": "text", "comment" : "A valid url of the accommodation"},
                     { "title" : "Category", "value": "Hotel", "type": "text", "comment": "Type of accommodation ('Resort/Hotel/Motel')"},
                     { "title" : "User Rating", "value": "4.30", "type": "float4"},
                     { "title" : "Summary", "value": "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", "type": "longtext"},

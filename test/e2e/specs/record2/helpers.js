@@ -21,6 +21,16 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
+    it("should show the action buttons properly", function() {
+        chaisePage.record2Page.getEditRecordButton().isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+
+        chaisePage.record2Page.getCreateRecordButton().isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+    });
+
 	it("should render columns which are specified to be visible and in order", function() {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.record2Page.getAllColumnCaptions().then(function(pageColumns) {
@@ -81,6 +91,16 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+	it('should display a permalink of the record', function() {
+		var key = tableParams.keys[0];
+		var expectedURL = browser.params.url + ':' + tableParams.table_name + '/' + key.name + key.operator + key.value;
+		var actualURL = element(by.id('permalink'));
+		expect(actualURL.isDisplayed()).toBe(true);
+		actualURL.getAttribute('href').then(function(url) {
+			expect(url).toBe(expectedURL);
+		});
+	});
+
     it("should show related table names and their tables", function() {
         var displayName,
             relatedTables = tableParams.related_tables;
@@ -112,6 +132,36 @@ exports.testPresentation = function (tableParams) {
                         });
                     })(i, displayName);
                 }
+            });
+        });
+    });
+};
+
+exports.testEditButton = function () {
+    it("should redirect to recordedit app", function() {
+        var EC = protractor.ExpectedConditions,
+            editButton = chaisePage.record2Page.getEditRecordButton();
+
+        browser.wait(EC.elementToBeClickable(editButton), 5000);
+
+        editButton.click().then(function() {
+            browser.driver.getCurrentUrl().then(function(url) {
+                expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
+            });
+        });
+    });
+};
+
+exports.testCreateButton = function () {
+    it("should redirect to recordedit app", function() {
+        var EC = protractor.ExpectedConditions,
+            createButton = chaisePage.record2Page.getCreateRecordButton();
+
+        browser.wait(EC.elementToBeClickable(createButton), 5000);
+
+        createButton.click().then(function() {
+            browser.driver.getCurrentUrl().then(function(url) {
+                expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
             });
         });
     });
