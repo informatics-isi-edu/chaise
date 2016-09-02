@@ -21,10 +21,12 @@
             </a>
         </div>
 
-        <div id="entity-title">{{ recordDisplayname }}</div>
-        <div id="entity-subtitle">{{ reference.displayname }}</div>
-        <!-- defined on $rootScope in run function -->
+        <div ng-if="reference">
+            <div id="entity-title">{{ recordDisplayname }}</div>
+            <div id="entity-subtitle">{{ reference.displayname }}</div>
+        </div>
 
+        <!-- defined on $rootScope in run function -->
         <div ng-if="recordValues && columns">
             <record-display columns="columns" values="recordValues"></record-display>
         </div>
@@ -32,7 +34,8 @@
         <!-- prevents initialization of the directive until the data is available | wait until all data values have been fetched -->
         <div ng-if="relatedReferences.length == tableModels.length">
             <uib-accordion close-others="false">
-                <div uib-accordion-group class="related-table-heading" heading="{{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" ng-repeat="relatedRef in relatedReferences track by $index">
+                <div uib-accordion-group class="related-table-heading" id="rt-heading-{{relatedRef.displayname}}" ng-repeat="relatedRef in relatedReferences track by $index"
+                    heading="{{tableModels[$index].open ? '-' : '+'}} {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" ng-init="tableModels[$index].open = true" is-open="tableModels[$index].open">
                     <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
                 </div>
             </uib-accordion>
