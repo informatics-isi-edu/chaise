@@ -49,7 +49,7 @@
 $(document).ready(function() {
     console.log('fire1');
     $('.navbar a.dropdown-toggle').on('click', function(e) {
-        console.log('fire2');
+        alert('fire2');
         var elmnt = $(this).parent().parent();
         if (!elmnt.hasClass('nav')) {
             console.log('fire3');

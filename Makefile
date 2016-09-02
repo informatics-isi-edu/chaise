@@ -129,7 +129,10 @@ RECORD_ASSETS=record/assets
 RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-sanitize.js
+	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/bootstrap.js \
+	$(COMMON)/authen.js \
+	$(COMMON)/navbar.js
 
 RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
 	$(RECORD_ASSETS)/lib/angular-resource.min.js \
