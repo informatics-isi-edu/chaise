@@ -1,0 +1,11 @@
+<ul class="dropdown-menu">
+    <li ng-repeat="item in menu">
+        <a ng-if="!item.children" ng-href="{{item.url}}">{{item.name}}</a>
+        <a ng-if="item.children" href="#" class="dropdown-toggle" data-toggle="dropdown">{{item.name}} <span class="caret caret-right"></span></a>
+        <ul ng-if="item.children" navbar-menu menu="item.children">
+            <!-- <li navbar-menu menu="item.children">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{item.children.name}} <span class="caret caret-right"></span></a>
+            </li> -->
+        </ul>
+    </li>
+</ul>

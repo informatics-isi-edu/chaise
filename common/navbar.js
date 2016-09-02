@@ -27,6 +27,7 @@
                 scope.brandURL = chaiseConfig.navbarBrand;
                 scope.brandText = chaiseConfig.headTitle;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
+                scope.menu = navbar_menu;
 
                 Session.getSession().then(function(session) {
                     var user = session.client;
@@ -46,4 +47,27 @@
             }
         };
     }]);
+
+    // .directive('navbarMenu', ['$compile', function($compile) {
+    //     return {
+    //         restrict: 'EA',
+    //         replace: true,
+    //         scope: {
+    //             menu: '='
+    //         },
+    //         templateUrl: '../common/templates/navbarMenu.html',
+    //         compile: function(el) {
+    //             var contents = el.contents().remove();
+    //             var compiled;
+    //             return function(scope, el) {
+    //                 if (!compiled) {
+    //                     compiled = $compile(contents);
+    //                 }
+    //                 compiled(scope, function(clone) {
+    //                     el.append(clone);
+    //                 });
+    //             };
+    //         }
+    //     };
+    // }]);
 })();
