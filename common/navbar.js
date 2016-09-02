@@ -46,28 +46,28 @@
                 };
             }
         };
-    }]);
+    }])
 
-    // .directive('navbarMenu', ['$compile', function($compile) {
-    //     return {
-    //         restrict: 'EA',
-    //         replace: true,
-    //         scope: {
-    //             menu: '='
-    //         },
-    //         templateUrl: '../common/templates/navbarMenu.html',
-    //         compile: function(el) {
-    //             var contents = el.contents().remove();
-    //             var compiled;
-    //             return function(scope, el) {
-    //                 if (!compiled) {
-    //                     compiled = $compile(contents);
-    //                 }
-    //                 compiled(scope, function(clone) {
-    //                     el.append(clone);
-    //                 });
-    //             };
-    //         }
-    //     };
-    // }]);
+    .directive('navbarMenu', ['$compile', function($compile) {
+        return {
+            restrict: 'EA',
+            replace: false,
+            scope: {
+                menu: '='
+            },
+            templateUrl: '../common/templates/navbarMenu.html',
+            compile: function(el) {
+                var contents = el.contents().remove();
+                var compiled;
+                return function(scope, el) {
+                    if (!compiled) {
+                        compiled = $compile(contents);
+                    }
+                    compiled(scope, function(clone) {
+                        el.append(clone);
+                    });
+                };
+            }
+        };
+    }]);
 })();
