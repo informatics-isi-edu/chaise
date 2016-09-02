@@ -1,4 +1,4 @@
-<li ng-repeat="item in menu">
+<li ng-repeat="item in menu" ng-class="{'dropdown-submenu': item.children}"> <!-- apply class if it has children and if its parent ul isn't nav navbar-nav
     <!-- If No children, so just display a plain link-->
     <a ng-if="!item.children" ng-href="{{item.url}}">{{item.name}}</a>
     <!-- If Has children, so display the link with dropdown classes and its accompanying ul to display on click -->
