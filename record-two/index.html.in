@@ -35,7 +35,7 @@
         <div ng-if="relatedReferences.length == tableModels.length">
             <uib-accordion close-others="false">
                 <div uib-accordion-group class="related-table-heading" id="rt-heading-{{relatedRef.displayname}}" ng-repeat="relatedRef in relatedReferences track by $index"
-                    heading="{{tableModels[$index].open ? '-' : '+'}} {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" ng-init="tableModels[$index].open = true" is-open="tableModels[$index].open">
+                    heading="{{tableModels[$index].open ? '-' : '+'}} {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" is-open="tableModels[$index].open">
                     <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
                 </div>
             </uib-accordion>
