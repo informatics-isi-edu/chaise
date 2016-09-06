@@ -143,8 +143,7 @@ exports.testPresentation = function (tableParams) {
     });
 
     it("clicking the related table heading should change the heading and hide the table.", function() {
-        var relatedTable = tableParams.related_tables[0],
-            EC = protractor.ExpectedConditions;
+        var relatedTable = tableParams.related_tables[0];
         var displayName = relatedTable.title;
         var tableHeading = chaisePage.record2Page.getRelatedTableHeading(displayName),
             tableElement = chaisePage.record2Page.getRelatedTable(displayName);
