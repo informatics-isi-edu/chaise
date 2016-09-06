@@ -8,6 +8,9 @@
 
         vm.modifyRecord = chaiseConfig.editRecord;
 
+        // TODO: Remove this after testing chaoseCOnfig availability
+        $('body').prepend("<p><pre>" + JSON.stringify(chaiseConfig, undefined, 2) + "</pre></p>");
+
         vm.createRecord = function() {
             var parts = $rootScope.reference.location.compactPath.split('/');
             // Should I substring based on the position of id or should I split on '/' and piece back together parts 0,1?
