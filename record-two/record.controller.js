@@ -6,10 +6,7 @@
     .controller('RecordController', ['$window', '$rootScope', function RecordController($window, $rootScope) {
         var vm = this;
 
-        vm.modifyRecord = chaiseConfig.editRecord;
-
-        // TODO: Remove this after testing chaoseCOnfig availability
-        $('body').prepend("<p><br><br><br><pre>" + JSON.stringify(chaiseConfig, undefined, 2) + "</pre></p>");
+        vm.modifyRecord = chaiseConfig.editRecord === false ? false : true;
 
         vm.createRecord = function() {
             var parts = $rootScope.reference.location.compactPath.split('/');
