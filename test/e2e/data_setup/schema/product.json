@@ -303,7 +303,7 @@
         {
           "comment": null,
           "name": "luxurious",
-          "default": null,
+          "default": false,
           "nullok": true,
           "type": {
             "typename": "boolean"
