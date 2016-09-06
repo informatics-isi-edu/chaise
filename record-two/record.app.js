@@ -82,7 +82,7 @@
                                 model.rowValues = page.tuples.map(function (tuple, index, array) {
                                     return tuple.values;
                                 });
-                                $rootScope.tableModels.push(model);
+                                $rootScope.tableModels[i] = model;
                             });
                         })(i);
                     }
