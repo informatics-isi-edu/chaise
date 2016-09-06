@@ -18,22 +18,22 @@
             <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li ng-show="user === null">
-                        <a ng-click="login()">Log In</a>
+                        <a href="#" ng-click="login()">Log In</a>
                     </li>
                     <li ng-show="user !== null">
                         <a href="https://www.globus.org/app/account" ng-bind="user"></a>
                     </li>
                     <li ng-show="user !== null">
-                        <a ng-click="logout()">Log Out</a>
+                        <a href="#" ng-click="logout()">Log Out</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav">
                     <li ng-repeat="item in menu">
-                        <a ng-if="!item.children" ng-href="{{'/' + item.url}}">{{item.name}}</a>
+                        <a ng-if="!item.children" ng-href="{{'/' + item.url}}" target="_blank">{{item.name}}</a>
                         <a ng-if="item.children" href="#" class="dropdown-toggle" data-toggle="dropdown">{{item.name}} <span class="caret"></span></a>
                         <ul ng-if="item.children" class="dropdown-menu">
                             <li ng-repeat="childItem in item.children" ng-class="{'dropdown-submenu': childItem.children}">
-                                <a ng-if="!childItem.children" ng-href="{{'/' + childItem.url}}">{{childItem.name}}</a>
+                                <a ng-if="!childItem.children" ng-href="{{'/' + childItem.url}}" target="_blank">{{childItem.name}}</a>
                                 <a ng-if="childItem.children" class="dropdown-toggle" data-toggle="dropdown" href="#">{{childItem.name}}</a>
                                 <ul ng-if="childItem.children" navbar-menu menu="childItem.children" class="dropdown-menu"></ul>
                             </li>
@@ -44,31 +44,3 @@
         </div>
     </nav>
 </header>
-
-<!-- <script>
-$(document).ready(function() {
-    console.log('fire1');
-    $('.navbar a.dropdown-toggle').on('click', function(e) {
-        alert('fire2');
-        var elmnt = $(this).parent().parent();
-        if (!elmnt.hasClass('nav')) {
-            console.log('fire3');
-            var li = $(this).parent();
-            var heightParent = parseInt(elmnt.css('height').replace('px', '')) / 2;
-            var widthParent = parseInt(elmnt.css('width').replace('px', '')) - 10;
-
-            if(!li.hasClass('open')) {
-                console.log('fire4');
-                li.addClass('open');
-            } else {
-                console.log('fire5');
-                li.removeClass('open');
-            }
-            $(this).next().css('top', heightParent + 'px');
-            $(this).next().css('left', widthParent + 'px');
-
-            return false;
-        }
-    });
-});
-</script> -->

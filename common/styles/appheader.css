@@ -10,7 +10,6 @@ body {
 body > .container {
 	min-height: 100%;
 	position: relative;
-	padding-top: 70px;
 }
 
 .content {
@@ -30,6 +29,10 @@ body > .container {
 
 .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav.navbar-right > li > a{
    color: #59C4FF;
+}
+
+.navbar-inverse .navbar-nav.navbar-right > li > a:hover{
+   color: #FFF;
 }
 
 .navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
@@ -96,4 +99,3 @@ body > .container {
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
 }
-

@@ -107,7 +107,10 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestTourController.js \
 	$(JS)/controller/ermrestMatrixController.js \
 	$(JS)/tour.js \
-	$(JS)/matrix.js
+	$(JS)/matrix.js \
+	$(COMMON)/utils.js \
+	$(COMMON)/authen.js \
+	$(COMMON)/navbar.js
 
 # HTML templates
 TEMPLATES=views
