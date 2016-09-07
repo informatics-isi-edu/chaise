@@ -20,7 +20,7 @@ describe('Chaise initial sidebar,', function () {
             browser.get(browser.params.url || "");
         });
 
-        it('should show the spinner', function () {
+        it('d', function () {
             //so icon can be tested before everything settles down(settling down means img is no longer there)
             expect(spinner.isDisplayed()).toBe(true);
         });
@@ -35,7 +35,7 @@ describe('Chaise initial sidebar,', function () {
                 expect(sidebar.isDisplayed()).toBe(true);
             });
         });
-        
+
         it('should have > 1 visible attributes to choose from', function () {
             chaisePage.sidebar.sidebarAttrsDisplayed.count().then(function (num) {
                 numOfAttrs = num;
@@ -52,7 +52,7 @@ describe('Chaise initial sidebar,', function () {
             });
 
             var expectedAttr;
-           
+
             var sidebarAttrTitle = chaisePage.editFilter.sidebarHeader;
 
             it('should change correctly when one attribute is chosen', function () {
@@ -86,7 +86,7 @@ describe('Chaise initial sidebar,', function () {
                 }
             });
         });
-       
+
         it('should not show attributes with bottom', function () {
             var columns = chaisePage.dataUtils.sidebar.getInvisibleSidebarColumns(browser.params.defaultSchema, browser.params.defaultTable);
             columns.forEach(function(column) {
@@ -122,7 +122,7 @@ describe('Chaise initial sidebar,', function () {
                             txt = txt.trim();
                             var found = columns.find(function(c) {
                                 return chaisePage.dataUtils.sidebar.getColumnDisplayName(c) == txt;
-                            }) ? true : false; 
+                            }) ? true : false;
                             expect(found).toBe(true);
                         });
                     }
@@ -167,7 +167,7 @@ describe('Chaise initial sidebar,', function () {
                     expect(displayed).toBe(false);
                 });
             });
-            
+
             it('should entering \'View All Attributes\', check previously unchecked and uncheck ' +
                 'previously checked', function () {
                 viewAll.click();

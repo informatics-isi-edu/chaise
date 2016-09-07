@@ -75,6 +75,7 @@
                             $rootScope.relatedReferences[i].read(5).then(function (page) {
                                 var model = {
                                     columns: $rootScope.relatedReferences[i].columns,
+                                    hasLoaded: true,     // used to determine if the current table and next table should be rendered
                                     open: true,         // to define if the accordion is open or closed
                                     sortby: null,       // column name, user selected or null
                                     sortOrder: null,    // asc (default) or desc

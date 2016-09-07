@@ -8,8 +8,8 @@
 <body>
     <navbar></navbar>
 
-    <div class="container-fluid">
-        <div id="record2-bookmark-container" class="col-xs-12 meta-icons" ng-controller="RecordController as ctrl">
+    <div class="container-fluid" ng-controller="RecordController as ctrl">
+        <div id="record2-bookmark-container" class="col-xs-12 meta-icons">
             <a id="create-record" ng-if="reference && reference.canCreate && ctrl.modifyRecord" title="Click here to create a record" ng-click="::ctrl.createRecord()">
                 <span class="glyphicon glyphicon-plus"></span> <strong>Create Record</strong>
             </a>&nbsp;&nbsp;
@@ -31,14 +31,12 @@
             <record-display columns="columns" values="recordValues"></record-display>
         </div>
 
-        <!-- prevents initialization of the directive until the data is available | wait until all data values have been fetched -->
-        <div ng-if="relatedReferences.length == tableModels.length">
-            <uib-accordion close-others="false">
-                <div uib-accordion-group class="related-table-heading" id="rt-heading-{{relatedRef.displayname}}" ng-repeat="relatedRef in relatedReferences track by $index" ng-if="tableModels[$index].rowValues.length > 0"
-                    heading="{{tableModels[$index].open ? '-' : '+'}} {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" is-open="tableModels[$index].open">
-                    <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
-                </div>
-            </uib-accordion>
-        </div>
+        <uib-accordion close-others="false">
+            <div uib-accordion-group class="related-table-heading" id="rt-heading-{{relatedRef.displayname}}" ng-repeat="relatedRef in relatedReferences track by $index"
+                ng-if="($index === 0 || tableModels[$index-1].hasLoaded) && tableModels[$index].rowValues.length > 0"
+                heading="{{tableModels[$index].open ? '-' : '+'}} {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" is-open="tableModels[$index].open">
+                <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
+            </div>
+        </uib-accordion>
     </div>
 </body>
