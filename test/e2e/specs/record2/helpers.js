@@ -26,8 +26,8 @@ exports.testPresentation = function (tableParams) {
             editButton = chaisePage.record2Page.getEditRecordButton(),
             createButton = chaisePage.record2Page.getCreateRecordButton();
 
-        browser.wait(EC.elementToBeClickable(editButton), 5000);
-        browser.wait(EC.elementToBeClickable(createButton), 5000);
+        browser.wait(EC.elementToBeClickable(editButton), 10000);
+        browser.wait(EC.elementToBeClickable(createButton), 10000);
 
         editButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -149,6 +149,11 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
+    it("should not show a related table with zero values.", function() {
+        expect(chaisePage.record2Page.getRelatedTable("media").isPresent()).toBeFalsy();
+    });
+
     it("clicking the related table heading should change the heading and hide the table.", function() {
         var relatedTable = tableParams.related_tables[0];
         var displayName = relatedTable.title;
@@ -182,7 +187,7 @@ exports.testEditButton = function () {
         var EC = protractor.ExpectedConditions,
             editButton = chaisePage.record2Page.getEditRecordButton();
 
-        browser.wait(EC.elementToBeClickable(editButton), 5000);
+        browser.wait(EC.elementToBeClickable(editButton), 10000);
 
         editButton.click().then(function() {
             browser.driver.getCurrentUrl().then(function(url) {
@@ -197,7 +202,7 @@ exports.testCreateButton = function () {
         var EC = protractor.ExpectedConditions,
             createButton = chaisePage.record2Page.getCreateRecordButton();
 
-        browser.wait(EC.elementToBeClickable(createButton), 5000);
+        browser.wait(EC.elementToBeClickable(createButton), 10000);
 
         createButton.click().then(function() {
             browser.driver.getCurrentUrl().then(function(url) {
