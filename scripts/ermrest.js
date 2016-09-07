@@ -80,124 +80,18 @@ function initApplicationHeader(tables) {
 	// overwritten by the application
 }
 
-function loadApplicationHeaderAndFooter() {
-	// $( "#ermrestHeader" ).load( "../views/ermheader.html" );
+function loadApplicationFooter() {
 	$( "#ermrestFooter" ).load( "../views/ermfooter.html" );
-}
-
-// function appendSubmenu(ul, menu) {
-// 	var li = $('<li>');
-// 	ul.append(li);
-// 	var a = $('<a tabindex="-1" >');
-// 	li.append(a);
-// 	a.html(menu['name']);
-// 	var children = menu['children'];
-// 	if (children !== undefined) {
-// 		var child_ul = $('<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">');
-// 		li.append(child_ul);
-// 		$.each(children, function(i, child) {
-// 			if (child['url'] != undefined) {
-// 				var child_li = $('<li>');
-// 				child_ul.append(child_li);
-// 				var child_a = $('<a target="">');
-// 				child_li.append(child_a);
-// 				child_a.html(child['name']);
-// 				child_a.attr('href', child['url']);
-// 			} else if (child['children'] != undefined) {
-// 				var child_li = $('<li class="dropdown-submenu">');
-// 				child_ul.append(child_li);
-// 				var child_a = $('<a>');
-// 				child_li.append(child_a);
-// 				child_a.html(child['name']);
-// 				var subchild_ul = $('<ul class="dropdown-menu">')
-// 				child_li.append(subchild_ul);
-// 				$.each(child['children'], function(j, subchild) {
-// 					appendSubmenu(subchild_ul, subchild);
-// 				});
-// 			}
-// 		});
-// 	} else if (menu['url'] !== undefined) {
-// 		a.attr('href', menu['url']);
-// 	}
-// }
-//
-// function appendMenu(ul, menu) {
-// 	var li = $('<li class="dropdown toplevel">');
-// 	ul.append(li);
-// 	var a = $('<a class="dropdown-toggle" data-toggle="dropdown">');
-// 	li.append(a);
-// 	a.html(menu['name']);
-// 	var span = $('<span class="caret"></span>');
-// 	a.append(span);
-// 	var children = menu['children'];
-// 	if (children !== undefined) {
-// 		var child_ul = $('<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">');
-// 		li.append(child_ul);
-// 		$.each(children, function(i, child) {
-// 			if (child['url'] !== undefined) {
-// 				var child_li = $('<li>');
-// 				child_ul.append(child_li);
-// 				var child_a = $('<a target="">');
-// 				child_li.append(child_a);
-// 				child_a.html(child['name']);
-// 				child_a.attr('href', child['url']);
-// 			} else if (child['children'] !== undefined) {
-// 				var child_li = $('<li class="dropdown-submenu">');
-// 				child_ul.append(child_li);
-// 				var child_a = $('<a>');
-// 				child_li.append(child_a);
-// 				child_a.html(child['name']);
-// 				var subchild_ul = $('<ul class="dropdown-menu">')
-// 				child_li.append(subchild_ul);
-// 				$.each(child['children'], function(j, subchild) {
-// 					appendSubmenu(subchild_ul, subchild);
-// 				});
-// 			}
-// 		});
-// 	} else if (menu['url'] !== undefined) {
-// 		a.attr('href', menu['url']);
-// 	}
-// }
-//
-function setNavbarBrand() {
-	if (document.getElementById('navbarBrandText') == null) {
-		setTimeout(setNavbarBrand, 1);
-	} else {
-		// set the navbar-header text
-		if (chaiseConfig['navbarBrandText'] !== undefined) {
-			document.getElementById('navbarBrandText').innerHTML = chaiseConfig['navbarBrandText'];
-		} else {
-			document.getElementById('navbarBrandText').innerHTML= 'Chaise';
-		}
-		// set the navbar-header image
-		if (chaiseConfig['navbarBrandImage'] !== undefined) {
-			document.getElementById('navbarBrandImage').setAttribute('src',chaiseConfig['navbarBrandImage']);
-		}
-		// set the navbar-header link
-		if (chaiseConfig['navbarBrand'] !== undefined) {
-			$($('.navbar-brand', $('#ermrestHeader'))[0]).attr('href', chaiseConfig['navbarBrand']);
-		}
-		try {
-			var data = navbar_menu;
-			var ul = $('#navbar_menu_ul');
-			$.each(data, function(i, menu) {
-				appendMenu(ul, menu);
-			});
-		} catch(err) {
-			console.log(err);
-		}
-	}
 }
 
 function initApplication(chaise_data, errorCallback) {
 	CHAISE_DATA = chaise_data;
 	DISPLAY_ERROR = errorCallback;
-	loadApplicationHeaderAndFooter();
+	loadApplicationFooter();
 	initLocation();
 	ERMREST_DATA_HOME = HOME + ERMREST_CATALOG_PATH + CATALOG;
 	getSchemas();
 	getSession();
-	setNavbarBrand();
 	//alert(JSON.stringify(DATASET_COLUMNS, null, 4));
 }
 

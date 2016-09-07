@@ -10,7 +10,7 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 
 	$scope.status = 0;
 	$scope.errorMessage = null;
-	
+
 	if (chaiseConfig['customCSS'] !== undefined) {
 		var fileref = document.createElement("link");
 		fileref.setAttribute("rel", "stylesheet");
@@ -21,7 +21,7 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 	if (chaiseConfig['headTitle'] !== undefined) {
 		document.getElementsByTagName("head")[0].getElementsByTagName("title")[0].innerHTML = chaiseConfig['headTitle'];
 	}
-	
+
 	$('footer').hide();
 
 	$('.panel-collapse').on('hide.bs.collapse', function () {
@@ -104,13 +104,12 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 			}
 		}, 1);
 	};
-	
+
 	if (searchQuery['facets'] != null) {
 		try {
 			$scope.FacetsData.filter = decodeFilter(searchQuery['facets']);
 		} catch(err) {
-			loadApplicationHeaderAndFooter();
-			setNavbarBrand();
+			loadApplicationFooter();
 			$scope.errorMessage = err.message + '<br/>facets=' + searchQuery['facets'];
 			$scope.displayError('', $scope.errorMessage);
 		}
@@ -145,11 +144,11 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 		//return !$scope.FacetsData.progress;
 		return true;
 	};
-	
+
 	this.showSpinner = function showSpinner() {
 		return $scope.FacetsData.progress && !$scope.FacetsData.error;
 	};
-	
+
 	this.showError = function showError() {
 		return $scope.FacetsData.error;
 	};

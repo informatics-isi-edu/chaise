@@ -20,7 +20,7 @@ ermLogoutController.controller('LogoutCtrl', ['$scope',
 		document.getElementsByTagName("head")[0].appendChild(title);
 		$scope.webApp = 'of ' + chaiseConfig['headTitle'];
 	}
-	loadApplicationHeaderAndFooter();
+	loadApplicationFooter();
 }]);
 
 

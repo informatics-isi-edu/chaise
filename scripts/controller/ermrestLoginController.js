@@ -10,7 +10,7 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest',
 	if (HOME == null) {
 		initLocation();
 	}
-	
+
 	if (chaiseConfig['customCSS'] !== undefined) {
 		var fileref = document.createElement("link");
 		fileref.setAttribute("rel", "stylesheet");
@@ -23,8 +23,7 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest',
 		title.innerHTML = chaiseConfig['headTitle'];
 		document.getElementsByTagName("head")[0].appendChild(title);
 	}
-	loadApplicationHeaderAndFooter();
-	setNavbarBrand();
+	loadApplicationFooter();
 
 	this.html = function (errorMessage) {
 		return errorMessage != null ? $sce.trustAsHtml(errorMessage.replace(/\n/g, '<br/>')) : '';
@@ -41,7 +40,7 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest',
 			$scope.$apply();
 		}
 	};
-	
+
 	this.login = function login() {
 		var params = $scope.getParameters();
 		//console.log(JSON.stringify(params, null, 4));
@@ -58,7 +57,7 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest',
 	this.disableLoginButton = function disableLoginButton() {
 		return (!$scope.username || !$scope.password);
 	};
-	
+
 	$scope.getReferrer = function getReferrer() {
 		var referrer = null;
 		var query = decodeURIComponent(window.location.search);
@@ -75,7 +74,7 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest',
 		});
 		return referrer;
 	};
-	
+
 	$scope.getParameters = function getParameters() {
 		var result = {};
 		//var query = decodeURIComponent(window.location.search);
@@ -100,7 +99,6 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest',
 		});
 		return result;
 	};
-	
+
 	DISPLAY_ERROR = $scope.displayError;
 }]);
-
