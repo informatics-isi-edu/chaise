@@ -8,7 +8,7 @@ var filterCount = 0;
 
 
 var testAttributes = function(attr, attrCount) {
-    describe("for attribute " + attr.text, function() {     
+    describe("for attribute " + attr.text, function() {
         var clearAttributes = [];
         if (!attr.clearAllFilters && attr.clearPreviousFilters) {
             if (attr.clearPreviousFilters.length > 0) {
@@ -23,14 +23,14 @@ var testAttributes = function(attr, attrCount) {
         var contentCount = 0;
         filterCount = filterCount - clearAttributes.length;
         filterCount++;
-        
+
         beforeAll(function() {
 
             clearAttributes.forEach(function(ca) {
-                 filterObj.clickFilterWrapperCancelByName(config.attributes[ca].text); 
+                 filterObj.clickFilterWrapperCancelByName(config.attributes[ca].text);
             });
         });
-        
+
         attr.filters.forEach(function(filter) {
             testFilters(attr, filter, attrCount, filterCount, contentCount);
             contentCount++;
@@ -42,7 +42,7 @@ var testAttributes = function(attr, attrCount) {
             }
         });
 
-        
+
         it('should show ' + attr.totalEntityCount + ' results in all for attribute ' + attr.text, function () {
             if (attr.totalEntityCount != undefined) {
                 browser.sleep(1000);
@@ -61,7 +61,7 @@ var testAttributes = function(attr, attrCount) {
 
 var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
     describe('after checking ' + filter.content.length + ' edit filter(s) (\'' + filter.content.join(', ') + '\') in \'' + attr.text + '\',', function () {
-        
+
         if (contentCount > 0) {
             it("should uncheck edit filters when cancel is clicked", function() {
                 filterObj.clickFilterWrapperCancelByName(attr.text);
@@ -71,9 +71,9 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
         } else {
             it('should click the attr ' + attr.text + ' in sidebar', function() {
                 chaisePage.sidebar.clickSidebarAttr(attr.text);
-            }); 
+            });
         }
-        
+
         it('should check ' + filter.content.join(', ') + ' filters for an attribute ' + attr.text, function() {
             filter.content.forEach(function(c) {
                 chaisePage.editFilter.clickEditFilter(c);
@@ -94,7 +94,7 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
         it('should show ' + filter.content.length + ' edit filter in \'' + attr.text + '\' wrapper', function () {
             expect(chaisePage.resultContent.filter.findCheckedSubfiltersByName(attr.text).count()).toBe(filter.content.length);
         });
-       
+
 
         if (filter.entityCount != undefined) {
 
@@ -158,7 +158,7 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
                     console.log(href);
                     expect(href).toBe(currentUrl);
                 });
-                
+
             });
         }); */
 
@@ -202,7 +202,7 @@ var testResultContent = function() {
             var imgEle = chaisePage.resultContent.getResultImgElement(randResult);
             expect(imgEle.isDisplayed()).toBe(true);
         });
-        
+
     });
 };
 
@@ -229,6 +229,11 @@ var determineFiltersUnchecked = function(attr) {
     var filter = attr.filters[attr.filters.length - 1];
 
     it('should have unchecked \'' + filter.content.length + '\' edit filter in \'' + attr.text + '\'', function () {
+        var EC = protractor.ExpectedConditions,
+            sidebar = element(by.id("sidebar"));
+
+        browser.wait(EC.visibilityOf(sidebar), 10000);
+
         chaisePage.sidebar.clickSidebarAttr(attr.text);
         filter.content.forEach(function(c) {
             var el = chaisePage.editFilter.findCheckStatusDivByName(c);
@@ -256,7 +261,7 @@ describe('Filters on top of the records,', function () {
         testAttributes(attr, attrCount);
         attrCount++;
     });
-    
+
     testResultContent();
     afterAttributeTestCompletion();
 
