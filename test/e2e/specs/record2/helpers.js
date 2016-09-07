@@ -22,11 +22,23 @@ exports.testPresentation = function (tableParams) {
 	});
 
     it("should show the action buttons properly", function() {
-        chaisePage.record2Page.getEditRecordButton().isDisplayed().then(function (bool) {
+        var EC = protractor.ExpectedConditions,
+            editButton = chaisePage.record2Page.getEditRecordButton(),
+            createButton = chaisePage.record2Page.getCreateRecordButton();
+
+        browser.wait(EC.elementToBeClickable(editButton), 5000);
+        browser.wait(EC.elementToBeClickable(createButton), 5000);
+
+        editButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
         });
 
-        chaisePage.record2Page.getCreateRecordButton().isDisplayed().then(function (bool) {
+        createButton.isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+
+
+        chaisePage.record2Page.getPermalinkButton().isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
         });
     });
@@ -111,6 +123,7 @@ exports.testPresentation = function (tableParams) {
             // check the headings have the right name and in the right order
             chaisePage.record2Page.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
                 // tables should be in order based on annotation for visible foreign_keys
+                // Headings have a '-' when page loads, and a count after them
                 expect(headings).toEqual(tableParams.tables_order);
 
                 // rely on the UI data for looping, not expectation data
@@ -128,11 +141,38 @@ exports.testPresentation = function (tableParams) {
                         // verify all rows are present
                         chaisePage.record2Page.getRelatedTableRows(displayName).count().then(function(rowCount) {
                             expect(rowCount).toBe(relatedTables[i].data.length);
-                            expect(headings[i]).toBe(displayName + " (" + rowCount + ")");
+                            expect(headings[i]).toBe("- " + displayName + " (" + rowCount + ")");
                         });
                     })(i, displayName);
                 }
             });
+        });
+    });
+
+    it("clicking the related table heading should change the heading and hide the table.", function() {
+        var relatedTable = tableParams.related_tables[0];
+        var displayName = relatedTable.title;
+        var tableHeading = chaisePage.record2Page.getRelatedTableHeading(displayName),
+            tableElement = chaisePage.record2Page.getRelatedTable(displayName);
+
+        tableHeading.getAttribute("heading").then(function(heading) {
+            // related table should be open by default
+            expect(heading.indexOf('-')).toBeGreaterThan(-1);
+
+            return tableHeading.getAttribute("class");
+        }).then(function(attribute) {
+            expect(attribute).toMatch("panel-open");
+
+            return tableHeading.element(by.css(".accordion-toggle")).click();
+        }).then(function() {
+            return tableHeading.getAttribute("heading");
+        }).then(function(heading) {
+            // related table should be closed now and a '+' should be shown instead of a '-'
+            expect(heading.indexOf('+')).toBeGreaterThan(-1);
+
+            return tableHeading.getAttribute("class");
+        }).then(function(attribute) {
+            expect(attribute).not.toMatch("panel-open");
         });
     });
 };
