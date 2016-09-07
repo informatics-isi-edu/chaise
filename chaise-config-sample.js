@@ -33,8 +33,8 @@ var chaiseConfig = {
 // Specify the layout of the navigation menu at the top of all Chaise apps
 var navbar_menu = [
     // {
-    //     // This "Search" menu item has 2 nested dropdowns
-    //     // Use the "name" key to label your menu item
+    //     // This "Search" menu item has 2 nested dropdowns.
+    //     // Use the "name" key to label a menu item.
     //     // Use the "children" key to specify dropdowns; you can nest as many dropdowns as you need.
     //     name: "Search",
     //     children: [
@@ -51,7 +51,7 @@ var navbar_menu = [
     // },
     // {
     //     // This "Create" menu item doesn't have any dropdowns.
-    //     // Use the "url" key to specify that this menu item's url and to signal that it doesn't have any chiilren.
+    //     // Use the "url" key to specify this menu item's url and to signal that it doesn't have any children.
     //     // URLs can be absolute or relative to the document root.
     //     name: "Create",
     //     url: "/chaise/recordedit/#1/YOUR_CATALOG:YOUR_SCHEMA"
