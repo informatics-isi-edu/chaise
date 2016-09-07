@@ -26,8 +26,8 @@ exports.testPresentation = function (tableParams) {
             editButton = chaisePage.record2Page.getEditRecordButton(),
             createButton = chaisePage.record2Page.getCreateRecordButton();
 
-        browser.wait(EC.elementToBeClickable(editButton), 5000);
-        browser.wait(EC.elementToBeClickable(createButton), 5000);
+        browser.wait(EC.elementToBeClickable(editButton), 10000);
+        browser.wait(EC.elementToBeClickable(createButton), 10000);
 
         editButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -187,7 +187,7 @@ exports.testEditButton = function () {
         var EC = protractor.ExpectedConditions,
             editButton = chaisePage.record2Page.getEditRecordButton();
 
-        browser.wait(EC.elementToBeClickable(editButton), 5000);
+        browser.wait(EC.elementToBeClickable(editButton), 10000);
 
         editButton.click().then(function() {
             browser.driver.getCurrentUrl().then(function(url) {
@@ -202,7 +202,7 @@ exports.testCreateButton = function () {
         var EC = protractor.ExpectedConditions,
             createButton = chaisePage.record2Page.getCreateRecordButton();
 
-        browser.wait(EC.elementToBeClickable(createButton), 5000);
+        browser.wait(EC.elementToBeClickable(createButton), 10000);
 
         createButton.click().then(function() {
             browser.driver.getCurrentUrl().then(function(url) {
