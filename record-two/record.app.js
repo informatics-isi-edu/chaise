@@ -75,9 +75,10 @@
                             $rootScope.relatedReferences[i].read(5).then(function (page) {
                                 var model = {
                                     columns: $rootScope.relatedReferences[i].columns,
-                                    sortby: null,     // column name, user selected or null
-                                    sortOrder: null,  // asc (default) or desc
-                                    rowValues: []      // array of rows values
+                                    open: true,         // to define if the accordion is open or closed
+                                    sortby: null,       // column name, user selected or null
+                                    sortOrder: null,    // asc (default) or desc
+                                    rowValues: []       // array of rows values
                                 };
                                 model.rowValues = page.tuples.map(function (tuple, index, array) {
                                     return tuple.values;
