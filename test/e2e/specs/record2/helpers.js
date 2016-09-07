@@ -149,6 +149,11 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
+    it("should not show a related table with zero values.", function() {
+        expect(chaisePage.record2Page.getRelatedTable("media").isPresent()).toBeFalsy();
+    });
+
     it("clicking the related table heading should change the heading and hide the table.", function() {
         var relatedTable = tableParams.related_tables[0];
         var displayName = relatedTable.title;
