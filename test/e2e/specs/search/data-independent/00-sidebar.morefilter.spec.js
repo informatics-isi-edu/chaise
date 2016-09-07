@@ -20,7 +20,7 @@ describe('Chaise initial sidebar,', function () {
             browser.get(browser.params.url || "");
         });
 
-        it('d', function () {
+        it('should show the spinner', function () {
             //so icon can be tested before everything settles down(settling down means img is no longer there)
             expect(spinner.isDisplayed()).toBe(true);
         });
