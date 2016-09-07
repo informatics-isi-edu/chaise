@@ -170,7 +170,7 @@
         {
           "comment": null,
           "name": "rating",
-          "default": 3,
+          "default": null,
           "nullok": false,
           "type": {
             "typename": "float4"
@@ -303,7 +303,7 @@
         {
           "comment": null,
           "name": "luxurious",
-          "default": false,
+          "default": null,
           "nullok": true,
           "type": {
             "typename": "boolean"

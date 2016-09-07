@@ -6,7 +6,7 @@
     .controller('RecordController', ['$window', '$rootScope', function RecordController($window, $rootScope) {
         var vm = this;
 
-        vm.modifyRecord = chaiseConfig.editRecord;
+        vm.modifyRecord = chaiseConfig.editRecord === false ? false : true;
 
         vm.createRecord = function() {
             var parts = $rootScope.reference.location.compactPath.split('/');

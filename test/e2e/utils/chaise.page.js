@@ -463,8 +463,16 @@ var record2Page = function() {
         return element.all(by.css(".related-table"));
     }
 
+    this.getRelatedTable = function(displayName) {
+        return element(by.id("rt-" + displayName));
+    };
+
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-heading"));
+    };
+
+    this.getRelatedTableHeading = function(displayName) {
+        return element(by.id("rt-heading-" + displayName));
     };
 
     this.getRelatedTableColumnNamesByTable = function(displayName) {
@@ -477,11 +485,15 @@ var record2Page = function() {
 
     this.getCreateRecordButton = function() {
         return element(by.id("create-record"));
-    }
+    };
 
     this.getEditRecordButton = function() {
         return element(by.id("edit-record"));
-    }
+    };
+
+    this.getPermalinkButton = function() {
+        return element(by.id('permalink'));
+    };
 };
 
 function chaisePage() {
