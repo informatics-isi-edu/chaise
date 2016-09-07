@@ -1326,12 +1326,12 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
             $http.get(configService.CR_BASE_URL + cid + '/meta/content_write_user').success(function(data, status, headers, config) {
                 var writeUsers = [];
                 for (var i = 0, len = data.length; i < len; i++) {
-                    if (data[i].v === '*') {
+                    if (data[i] === '*') {
                     // Wildcard value under 'content_write_user' == anybody can
                     // write to catalog, so allow editing of record.
                         editCatalog = true;
                     } else {
-                        writeUsers.push(data[i].v);
+                        writeUsers.push(data[i]);
                     }
                 }
                 if (writeUsers.length > 0) {
