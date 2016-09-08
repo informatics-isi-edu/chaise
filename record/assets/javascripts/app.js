@@ -1,6 +1,6 @@
 // Chaise Record App
 
-var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ui.bootstrap','ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.grid.selection', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.grouping', 'ui.grid.infiniteScroll', 'ngCookies', 'ngSanitize', 'chaise.utils']);
+var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ui.bootstrap','ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.grid.selection', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.grouping', 'ui.grid.infiniteScroll', 'ngCookies', 'ngSanitize', 'chaise.utils', 'chaise.navbar']);
 
 // Refreshes page when fragment identifier changes
 setTimeout(function(){
@@ -49,23 +49,6 @@ chaiseRecordApp.service('configService', function() {
     	fileref.setAttribute("href", chaiseConfig['customCSS']);
     	document.getElementsByTagName("head")[0].appendChild(fileref);
     }
-
-
-    // set the navbar-header text
-    if (chaiseConfig['navbarBrandText'] !== undefined) {
-        document.getElementById('navbarBrandText').innerHTML = chaiseConfig['navbarBrandText'];
-    } else {
-        document.getElementById('navbarBrandText').innerHTML= 'Chaise';
-    }
-    // set the navbar-header image
-    if (chaiseConfig['navbarBrandImage'] !== undefined) {
-        document.getElementById('navbarBrandImage').setAttribute('src',chaiseConfig['navbarBrandImage']);
-    }
-    // set the navbar-header link
-    if (chaiseConfig['navbarBrand'] !== undefined) {
-        $($('.navbar-brand', $('#header'))[0]).attr('href', chaiseConfig['navbarBrand']);
-    }
-
 
 	if (chaiseConfig['headTitle'] !== undefined) {
 		var title = document.createElement("title");

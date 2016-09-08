@@ -1,0 +1,11 @@
+<li ng-repeat="item in menu" ng-class="{'dropdown-submenu': item.children}">
+    <a ng-if="!item.children" ng-href="{{item.url}}" target="_blank">{{item.name}}</a>
+    <a ng-if="item.children" href="#" class="dropdown-toggle" data-toggle="dropdown">{{item.name}}</a>
+    <ul ng-if="item.children" class="dropdown-menu">
+        <li ng-repeat="childItem in item.children" ng-class="{'dropdown-submenu': childItem.children}">
+            <a ng-if="!childItem.children" ng-href="{{childItem.url}}" target="_blank">{{childItem.name}}</a>
+            <a ng-if="childItem.children" class="dropdown-toggle" data-toggle="dropdown" href="#">{{childItem.name}}</a>
+            <ul ng-if="childItem.children" navbar-menu menu="childItem.children" class="dropdown-menu"></ul>
+        </li>
+    </ul>
+</li>

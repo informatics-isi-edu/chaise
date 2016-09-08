@@ -2,10 +2,9 @@
 
 **Chaise** is using a set of default configuration parameters. You can overwrite them through the _chaise-config.js_ file and/or the search parameters in the URL. The URL search parameters take precedence over the _chaise-config.js_ parameters, which at their turn take precedence over the default ones.
 
-
-
-
 The below table explains the usage of the default parameters:
+
+### [Chaise App Settings](#Chaise-App-Settings) ###
 
 | Parameter | Values | Default Value | chaise-config.js | URL | Remarks |
 |-----------|--------|---------------|------------------|-----|---------|
@@ -35,3 +34,8 @@ The below table explains the usage of the default parameters:
 | editRecord | A boolean | false | "editRecord":\<value\> | N/A | If not present or equal to **true**, the recordedit page allows for inserting records and editing records. The record page will have an edit button for both of these cases as well. If equal to **false**, a dialog appears on recordedit that disallows use of the app and the edit button does not appear in the record app |
 | defaultCatalog | A catalog id | N/A | "defaultCatalog":\<id\> | N/A | The catalog id has a numeric value. Use this parameter to specify which catalog Chaise shows by default. |
 | defaultTables | An object that specifies a catalog's the default schema and table | N/A | "defaultTables": {N: {"schema": S, "table": T}, ...} | N/A | Use this parameter to specify for each catalog `N`, which table `T` Chaise shows by default. |
+
+### [Navigation Menu Settings](#Navigation-Menu-Settings) ###
+To customize the menu items displayed in the navigation bar at the top of all Chaise apps, fill in the `navbar_menu` section of the _chaise-config.js_ file with your links and/or dropdown menus. Consult the _chaise-config.js_ file for a sample menu tree.
+
+Note that only the menu items displayed between the title and username can be customized here. To change the title and logo, see [Chaise App Settings](#Chaise-App-Settings).

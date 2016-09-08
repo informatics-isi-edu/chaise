@@ -51,6 +51,9 @@ HTML=search/index.html \
 ERMRESTJS_DIR=../../ermrestjs
 ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js
 
+# Shared utilities
+COMMON=common
+
 # CSS source
 CSS=styles
 
@@ -67,12 +70,9 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/ermrest.css \
 	$(CSS)/app.css \
-	$(CSS)/appheader.css \
+	$(COMMON)/styles/appheader.css \
 	$(CSS)/matrix.css \
 	$(CSS)/tour.css
-
-# Shared utilities
-COMMON=common
 
 # JavaScript source and test specs
 JS=scripts
@@ -107,7 +107,10 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestTourController.js \
 	$(JS)/controller/ermrestMatrixController.js \
 	$(JS)/tour.js \
-	$(JS)/matrix.js
+	$(JS)/matrix.js \
+	$(COMMON)/utils.js \
+	$(COMMON)/authen.js \
+	$(COMMON)/navbar.js
 
 # HTML templates
 TEMPLATES=views
@@ -129,7 +132,10 @@ RECORD_ASSETS=record/assets
 RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-sanitize.js
+	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/bootstrap.js \
+	$(COMMON)/authen.js \
+	$(COMMON)/navbar.js
 
 RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
 	$(RECORD_ASSETS)/lib/angular-resource.min.js \
@@ -155,7 +161,7 @@ RECORD_JS_SOURCE= $(JS)/respond.js \
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/appheader.css
+	$(COMMON)/styles/appheader.css
 
 RECORD_CSS_DEPS=$(RECORD_ASSETS)/lib/slippry/slippry.css \
 	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css \
@@ -185,7 +191,8 @@ RECORDTWO_JS_SOURCE=$(RECORDTWO_ASSETS)/record.app.js \
 	$(RECORDTWO_ASSETS)/record.controller.js
 
 RECORDTWO_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(COMMON)/styles/app.css
+	$(COMMON)/styles/app.css \
+	$(COMMON)/styles/appheader.css
 
 RECORDTWO_CSS_SOURCE=$(RECORDTWO_ASSETS)/record.css
 
@@ -229,8 +236,8 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
-	$(CSS)/appheader.css \
-	$(COMMON)/styles/app.css
+	$(COMMON)/styles/app.css \
+	$(COMMON)/styles/appheader.css
 
 VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
@@ -269,8 +276,8 @@ RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/select2.css \
 	$(CSS)/vendor/angular-datepicker.css \
 	$(CSS)/vendor/rzslider.css \
-	$(CSS)/appheader.css \
-	$(COMMON)/styles/app.css
+	$(COMMON)/styles/app.css \
+	$(COMMON)/styles/appheader.css
 
 RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
 
@@ -300,7 +307,7 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 
 RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css \
     $(COMMON)/styles/app.css \
-    $(CSS)/appheader.css
+    $(COMMON)/styles/appheader.css
 
 # Config file
 JS_CONFIG=chaise-config.js

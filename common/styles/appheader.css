@@ -4,13 +4,12 @@ html,body {
 }
 
 body {
-	background-color: #fff;
+	background-color: #FFF;
 }
 
 body > .container {
 	min-height: 100%;
 	position: relative;
-	padding-top: 70px;
 }
 
 .content {
@@ -19,18 +18,21 @@ body > .container {
 	padding-top: 70px;
 }
 
-.navbar-inverse .navbar-brand {
-   color: #FFFFFF;
-}
-
 .navbar-inverse {
-    background-color: #4D4D4D;
-    border-color: #4D4D4D;
-    font-size: 1.2em;
+    background-color: #000;
+    border-color: #000;
 }
 
 .navbar-inverse .navbar-nav > li > a {
-   /* color: #999; */
+   color: #C1C1C1;
+}
+
+.navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav.navbar-right > li > a{
+   color: #59C4FF;
+}
+
+.navbar-inverse .navbar-nav.navbar-right > li > a:hover{
+   color: #FFF;
 }
 
 .navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
@@ -97,4 +99,3 @@ body > .container {
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
 }
-

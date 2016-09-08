@@ -9,13 +9,10 @@
 <body>
 	<!-- Overlay for fixed sidebar -->
 	<div class="sidebar-overlay"></div>
-	<div class="container-fluid">
-		<!-- Row 1: Logo and Main navigation -->
-		<div id="ermrestHeader"></div>
-	</div>
 	<div class="container">
 		<!-- Row 1: Logo and Main navigation -->
 		<div id="loginApp" ng-app="ermrestApp">
+            <navbar></navbar>
 			<div ng-include="'../views/ermlogin.html'"></div>
 		</div>
 	</div>
