@@ -242,7 +242,7 @@ tbody{
 }
 
 .outer-table{
-    overflow-x: scroll;    
+    overflow-x: auto;    
 }
 
 .table-reference .entity-key{
