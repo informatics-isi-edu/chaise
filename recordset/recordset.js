@@ -342,8 +342,8 @@
             $rootScope.reference = reference.contextualize.compact;
             $log.info("Reference:", $rootScope.reference);
 
-            recordsetModel.tableDisplayName = reference.displayname;
-            recordsetModel.columns = reference.columns;
+            recordsetModel.tableDisplayName = $rootScope.reference.displayname;
+            recordsetModel.columns = $rootScope.reference.columns;
 
             return $rootScope.reference.read(pageInfo.pageLimit);
         }).then(function getPage(page) {
