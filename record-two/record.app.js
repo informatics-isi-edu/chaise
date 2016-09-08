@@ -69,7 +69,7 @@
                     $rootScope.tableModels = [];
 
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        // $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
+                        $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
                         // We want to limit the number of values shown by default
                         // Maybe have a chaise config option
                         (function(i) {
@@ -78,7 +78,7 @@
                                     reference: $rootScope.relatedReferences[i],
                                     columns: $rootScope.relatedReferences[i].columns,
                                     appName: context.appName,   // used to decide the context that the table is displayed in
-                                    hasNextPage: true,          // used to determine if a link to more data should be present
+                                    hasNextPage: page.hasNext,  // used to determine if a link to more data should be present
                                     hasLoaded: true,            // used to determine if the current table and next table should be rendered
                                     open: true,                 // to define if the accordion is open or closed
                                     sortby: null,               // column name, user selected or null
