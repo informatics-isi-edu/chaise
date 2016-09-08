@@ -1,9 +1,8 @@
 var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
-
   // Change this to your desired filed name and Comment below testConfiguration object declaration
-    configFileName: 'search.dev.json',
+    configFileName: 'record2.dev.json',
 
   /* Just in case if you plan on not giving a file for configuration, you can always specify a testConfiguration object
    * Comment above 2 lines
@@ -13,11 +12,14 @@ var config = pConfig.getConfig({
     },
   */
 
-    page: '/search'
-});
+    page: 'record-two',
+    setBaseUrl: function(browser, data) {
+      browser.params.url = process.env.CHAISE_BASE_URL + "/record-two" + "/#" + data.catalogId + "/" + data.schema.name;
+      return browser.params.url;
+    },
 
-// If ng-app attribute is in a descendant of <body>, tell Protractor where ng-app is
-config.rootElement = '#main-content';
-config.baseUrl = process.env.CHAISE_BASE_URL + '/search';
+	// Specify chaiseConfigPath
+    chaiseConfigFilePath: '/test/e2e/specs/navbar/data-dependent/chaise-config.js'
+});
 
 exports.config = config;

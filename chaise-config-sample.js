@@ -60,4 +60,5 @@ var navbar_menu = [
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {
     exports.config = chaiseConfig;
+    exports.navbarMenu = navbar_menu;
 }

@@ -52,5 +52,8 @@
     "ermrest-data-utils": "x",
     "set-cookie-parser": "x",
     "jsonfile": "x"
+  },
+  "dependencies": {
+    "fs-extra": "^0.30.0"
   }
 }
