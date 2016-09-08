@@ -245,6 +245,11 @@ tbody{
     overflow-x: auto;
 }
 
+.table-heading{
+    background-color: rgb(116, 116, 116);
+    color: #fff;
+}
+
 .table-reference .entity-key{
     font-size: 14px;
     text-transform: capitalize;

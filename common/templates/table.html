@@ -1,7 +1,7 @@
 <div class="outer-table">
     <table class="table table-striped table-bordered table-hover">
         <!-- sortable column header -->
-        <thead>
+        <thead class="table-heading">
             <tr>
                 <th nowrap ng-repeat="col in vm.columns track by $index">
                     <span class="table-column-displayname" ng-click="sortby({colname: col.name})">{{col.displayname}}</span>
