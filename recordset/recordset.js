@@ -131,7 +131,7 @@
                 // update the address bar
                 // page does not reload
                 $window.location.replace($scope.permalink());
-                $rootScope.location = $window.location.href;
+                //$rootScope.location = $window.location.href;
 
             }, function error(response) {
                 $log.warn(response);
@@ -182,7 +182,7 @@
                 pageInfo.previousButtonDisabled = true;
                 pageInfo.nextButtonDisabled = true;
 
-                $rootScope.reference = previous; // TODO contextualize for recordset
+                $rootScope.reference = previous;
                 $log.info("Reference:", $rootScope.reference);
 
                 $rootScope.reference.read(pageInfo.pageLimit).then(function getPage(page) {
@@ -204,10 +204,10 @@
                     pageInfo.previousButtonDisabled = !page.hasPrevious;
                     pageInfo.nextButtonDisabled = !page.hasNext;
 
-                    // update the address bar without adding to history staick
+                    // update the address bar without adding to history stack
                     // page does not reload
                     $window.location.replace($scope.permalink());
-                    $rootScope.location = $window.location.href;
+                    //$rootScope.location = $window.location.href;
 
                 }, function error(response) {
                     $log.warn(response);
@@ -238,7 +238,7 @@
                 pageInfo.previousButtonDisabled = true;
                 pageInfo.nextButtonDisabled = true;
 
-                $rootScope.reference = next; // TODO contextualize for recordset
+                $rootScope.reference = next;
                 $log.info("Reference:", $rootScope.reference);
 
                 $rootScope.reference.read(pageInfo.pageLimit).then(function getPage(page) {
@@ -263,7 +263,7 @@
                     // update the address bar
                     // page does not reload
                     $window.location.replace($scope.permalink());
-                    $rootScope.location = $window.location.href;
+                    //$rootScope.location = $window.location.href;
 
                 }, function error(response) {
                     $log.warn(response);
@@ -311,7 +311,7 @@
             // parse the URL
             var p_context = UriUtils.parseURLFragment($window.location);
 
-            $rootScope.location = $window.location.href;
+            //$rootScope.location = $window.location.href;
             pageInfo.loading = true;
             if (p_context.limit)
                 pageInfo.pageLimit = p_context.limit;
@@ -378,16 +378,34 @@
                 AlertsService.addAlert({type:'error', message:exception.message});
         });
 
-        $window.onhashchange = function() {
-            // when address bar changes by user
-            if ($window.location.href !== $rootScope.location) {
-                location.reload();
-            }
-        };
+        /**
+         * Do Not Delete
+         *
+         * This code handles address bar changes
+         * Normally when user changes the url in the address bar,
+         * nothing happens.
+         *
+         * This code listens when address bar is changes outside the code,
+         * and redirects to the new location.
+         *
+         * Whenever recordset updates the url (no reloading and no history stack),
+         * it saves the location in $rootScope.location.
+         * When address bar is changed, this code compares the address bar location
+         * with the last save recordset location. If it's the same, the change of url was
+         * done internally, do not refresh page. If not, the change was done manually
+         * outside recordset, refresh page.
+         *
+         */
+        //$window.onhashchange = function() {
+        //    // when address bar changes by user
+        //    if ($window.location.href !== $rootScope.location) {
+        //        location.reload();
+        //    }
+        //};
 
 
     }]);
 
-/* end recordset */;
+/* end recordset */
 
 })();
