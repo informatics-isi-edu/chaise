@@ -16,7 +16,7 @@
             <a id="permalink" class="pull-right" ng-href="{{ permalink() }}">
                 <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
 
-            <h2>Records for {{ vm.tableDisplayName }}</h2>
+            <h2 id="page-title">Records for {{ vm.tableDisplayName }}</h2>
 
         </div>
 
@@ -67,8 +67,8 @@
         </div>
 
         <!-- record table -->
-        <div>
-            <record-table id="rs-{{vm.displayname}}" vm="vm" toggle-sort-order="toggleSortOrder()" sortby="sortby(colname)" goto-row-link="gotoRowLink(index)"></record-table>
+        <div ng-if="vm.rowValues.length > 0">
+            <record-table id="rs-{{vm.tableDisplayName}}" vm="vm" toggle-sort-order="toggleSortOrder()" sortby="sortby(colname)" goto-row-link="gotoRowLink(index)"></record-table>
         </div>
 
             <!-- bottom pagination -->
