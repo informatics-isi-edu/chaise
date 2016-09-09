@@ -44,7 +44,7 @@
                     <!-- ng-switch-when="table" is also the default case -->
                     <div ng-switch-default>
                         <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
-                        <a ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">Click here to access more records</a>
+                        <a ng-if="page.hasNext" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">Click here to access more records</a>
                     </div>
                 </div>
             </div>

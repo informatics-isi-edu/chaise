@@ -1,0 +1,34 @@
+{
+    "setup": {
+        "schemaConfigurations": [{
+            "catalog": {
+                "acls": [
+                    {"name": "content_write_user", "user": "*" },
+                    {"name": "content_read_user", "user": "*" }
+                ]
+            },
+            "schema": {
+                "name": "product",
+                "createNew": true,
+                "path": "test/e2e/data_setup/schema/product-record.json"
+            },
+            "tables": {
+                "createNew": true
+            },
+            "entities": {
+                "createNew": true,
+                "path": "test/e2e/data_setup/data/product"
+            }
+        }],
+        "schema": "product"
+    },
+    "cleanup" : true,
+    "tests" : {
+        "params": {
+            "tuples" : [{
+                "table_name" : "accommodation",
+                "keys" : [{ "name": "id", "value": "2004", "operator" : "="}],
+            }]
+        }
+    }
+}

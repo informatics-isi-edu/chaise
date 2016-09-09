@@ -6,4 +6,8 @@
  {"accommodation_id":2003,"price":240,"booking_date":"2016-01-25T00:00:00-08:00"},
  {"accommodation_id":2003,"price":280,"booking_date":"2016-03-07T00:00:00-08:00"},
  {"accommodation_id":2004,"price":100,"booking_date":"2016-06-01T00:00:00-07:00"},
- {"accommodation_id":2004,"price":120,"booking_date":"2015-11-10T00:00:00-08:00"}]
+ {"accommodation_id":2004,"price":120,"booking_date":"2015-11-10T00:00:00-08:00"},
+ {"accommodation_id":2004,"price":125,"booking_date":"2016-03-12T00:00:00-08:00"},
+ {"accommodation_id":2004,"price":110,"booking_date":"2016-05-19T00:00:00-08:00"},
+ {"accommodation_id":2004,"price":80,"booking_date":"2016-01-01T00:00:00-08:00"},
+ {"accommodation_id":2004,"price":180,"booking_date":"2016-09-04T00:00:00-08:00"}]
