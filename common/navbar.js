@@ -8,7 +8,7 @@
             templateUrl: '../common/templates/navbar.html',
             link: function(scope) {
                 scope.brandURL = chaiseConfig.navbarBrand;
-                scope.brandText = chaiseConfig.headTitle;
+                scope.brandText = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
                 scope.menu = navbar_menu;
 
