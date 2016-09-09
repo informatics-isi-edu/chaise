@@ -57,7 +57,7 @@
             loading: true,
             previousButtonDisabled: true,
             nextButtonDisabled: true,
-            pageLimit: 10
+            pageLimit: 25
         };
 
     }])
@@ -289,7 +289,7 @@
             if (p_context.limit)
                 pageInfo.pageLimit = p_context.limit;
             else
-                pageInfo.pageLimit = 10;
+                pageInfo.pageLimit = 25;
             pageInfo.previousButtonDisabled = true;
             pageInfo.nextButtonDisabled = true;
 
