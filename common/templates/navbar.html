@@ -27,7 +27,7 @@
                         <a href="#" ng-click="logout()">Log Out</a>
                     </li>
                 </ul>
-                <ul class="nav navbar-nav">
+                <ul id="navbar-menu" class="nav navbar-nav">
                     <li ng-repeat="item in menu">
                         <a ng-if="!item.children" ng-href="{{item.url}}" target="_blank">{{item.name}}</a>
                         <a ng-if="item.children" href="#" class="dropdown-toggle" data-toggle="dropdown">{{item.name}} <span class="caret"></span></a>
