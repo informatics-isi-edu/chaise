@@ -12,11 +12,6 @@
             </tr>
         </thead>
 
-        <!-- footer -->
-        <tfoot>
-            <tr ng-if="vm.appName && vm.hasNextPage"><td class="text-right" colspan="100%"><a ng-click="toRecordSet()">Click here to access more records</a></td></tr>
-        </tfoot>
-
         <!-- rows -->
         <tbody>
             <tr class="table-row" ng-repeat="row in vm.rowValues track by $index" ng-click="gotoRowLink({index : $index})" ng-style="{'cursor': 'pointer'}">

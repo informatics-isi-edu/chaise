@@ -50,6 +50,7 @@
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
                 }).then(function getPage(page) {
+                    $rootScope.page = page;
                     var tuple = page.tuples[0];
                     // Used directly in the record-display directive
                     $rootScope.recordDisplayname = tuple.displayname;
@@ -69,7 +70,7 @@
                     $rootScope.tableModels = [];
 
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
+                        // $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
                         // We want to limit the number of values shown by default
                         // Maybe have a chaise config option
                         (function(i) {
@@ -77,8 +78,6 @@
                                 var model = {
                                     reference: $rootScope.relatedReferences[i],
                                     columns: $rootScope.relatedReferences[i].columns,
-                                    appName: context.appName,   // used to decide the context that the table is displayed in
-                                    hasNextPage: page.hasNext,  // used to determine if a link to more data should be present
                                     hasLoaded: true,            // used to determine if the current table and next table should be rendered
                                     open: true,                 // to define if the accordion is open or closed
                                     sortby: null,               // column name, user selected or null
