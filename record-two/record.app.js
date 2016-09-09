@@ -25,7 +25,7 @@
         };
     }])
 
-    .run(['ERMrest', 'UriUtils', 'DataUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', '$sce', function runApp(ERMrest, UriUtils, DataUtils, ErrorService, pageInfo, $log, $rootScope, $window, $sce) {
+    .run(['ERMrest', 'UriUtils', 'DataUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, DataUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();

@@ -63,8 +63,8 @@
     }])
 
     // Register the recordset controller
-    .controller('recordsetController', ['$scope', '$rootScope', 'context', 'pageInfo', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService', '$sce',
-        function($scope, $rootScope, context, pageInfo, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService, $sce) {
+    .controller('recordsetController', ['$scope', '$rootScope', 'context', 'pageInfo', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService',
+        function($scope, $rootScope, context, pageInfo, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService) {
 
         $scope.vm = recordsetModel;
 
@@ -269,8 +269,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', 'DataUtils', '$log', 'ErrorService', 'AlertsService', '$sce',
-        function($window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, DataUtils, $log, ErrorService, AlertsService, $sce) {
+    .run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', 'DataUtils', '$log', 'ErrorService', 'AlertsService',
+        function($window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, DataUtils, $log, ErrorService, AlertsService) {
 
         try {
 
