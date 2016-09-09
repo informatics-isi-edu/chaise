@@ -314,7 +314,8 @@
         ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
             $rootScope.reference = reference.contextualize.compact;
             $log.info("Reference:", $rootScope.reference);
-
+            if ($rootScope.reference.display.defaultPageSize)
+                pageInfo.pageLimit = $rootScope.reference.display.defaultPageSize;
             recordsetModel.tableDisplayName = $rootScope.reference.displayname;
             recordsetModel.columns = $rootScope.reference.columns;
 

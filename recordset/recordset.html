@@ -32,6 +32,17 @@
                 <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
                     <span class="caret"></span></button>
                 <ul class="dropdown-menu">
+                    <li ng-if="pageInfo.pageLimit !== 10 &&
+                        pageInfo.pageLimit !== 10 &&
+                        pageInfo.pageLimit !== 25 &&
+                        pageInfo.pageLimit !== 50 &&
+                        pageInfo.pageLimit !== 75 &&
+                        pageInfo.pageLimit !== 100 &&
+                        pageInfo.pageLimit !== 200"><a href ng-click="pageLimit(pageInfo.pageLimit)">
+                        <span ng-show="true" class="glyphicon glyphicon-ok"></span>
+                        <span ng-show="false" class="glyphicon glyphicon-invisible"></span>
+                        {{ pageInfo.pageLimit }} (Custom)</a>
+                    </li>
                     <li><a href ng-click="pageLimit(10)">
                         <span ng-show="pageInfo.pageLimit === 10" class="glyphicon glyphicon-ok"></span>
                         <span ng-show="pageInfo.pageLimit !== 10" class="glyphicon glyphicon-invisible"></span>
