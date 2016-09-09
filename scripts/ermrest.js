@@ -3420,7 +3420,9 @@ function setFilterValue(facet, separator, result) {
 	if (separator == '::ciregexp::') {
 		result[table][column]['value'] = decodeURIComponent(facet[1]);
 	} else if (separator == '::eq::') {
-		result[table][column]['values'] = {};
+		if (result[table][column]['values'] == null) {
+			result[table][column]['values'] = {};
+		}
 		var values = facet[1].split(';');
 		$.each(values, function(i, value) {
 			result[table][column]['values'][decodeURIComponent(value)] = true;
@@ -4043,3 +4045,57 @@ function getTableAnnotationValue(table_name, annotation) {
 	});
 	return ret;
 }
+
+function isRecordFilter(url) {
+	var ret = false;
+	var index = url.indexOf('#');
+	if (index != -1) {
+		var query = url.substring(index+1);
+		var parts = query.split('/');
+		if (parts.length >= 3 && query.indexOf('?') == -1) {
+			ret = true;
+		}
+	}
+	return ret;
+}
+
+function convertFilter(url) {
+	var index = url.indexOf('#');
+	var prefix = url.substring(0, index+1);
+	var parts = url.substring(index+1).split('/');
+	if (parts.length != 3) {
+		throw new Error('Invalid URL');
+	}
+	var catalog = parts[0];
+	var entity = parts[1];
+	var schema = entity.split(':')[0];
+	var table = entity.split(':')[1];
+	var newUrl = prefix + catalog + '/' + entity + '?facets=(';
+	var predicate = [];
+	for (var i=2; i<parts.length; i++) {
+		var orParts = parts[i].split(';');
+		var columns = [];
+		var values = [];
+		for (var j=0; j<orParts.length; j++) {
+			var term = orParts[j].split('=');
+			if (term.length != 2) {
+				throw  new Error('Invalid value: ' + orParts[j]);
+			}
+			var column = term[0];
+			if (column.split(':').length != 1) {
+				throw  new Error('Invalid value: ' + column);
+			}
+			if (columns.length == 0) {
+				columns.push(column);
+			}
+			if (column != columns[0]) {
+				throw  new Error('Invalid value: ' + orParts[j]);
+			}
+			values.push(term[1]);
+		}
+		predicate.push(table + ':' + column + '::eq::' + values.join(';'));
+	}
+	newUrl += predicate.join('/') + ')&layout=table&page=1';
+	return newUrl;
+}
+
