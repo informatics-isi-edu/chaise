@@ -63,8 +63,8 @@
     }])
 
     // Register the recordset controller
-    .controller('recordsetController', ['$scope', '$rootScope', 'context', 'pageInfo', '$window', 'recordsetModel', 'UriUtils', 'Session', '$log', 'ErrorService', '$sce',
-        function($scope, $rootScope, context, pageInfo, $window, recordsetModel, UriUtils, Session, $log, ErrorService, $sce) {
+    .controller('recordsetController', ['$scope', '$rootScope', 'context', 'pageInfo', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService', '$sce',
+        function($scope, $rootScope, context, pageInfo, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService, $sce) {
 
         $scope.vm = recordsetModel;
 
@@ -113,16 +113,7 @@
                 $window.scrollTo(0, 0);
 
                 recordsetModel.page = page;
-                recordsetModel.rowValues = page.tuples.map(function(tuple, index, array) {
-                    var row = [];
-                    tuple.values.forEach(function(value, index) {
-                        row.push({
-                            isHTML: tuple.isHTML[index],
-                            value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
-                        });
-                    });
-                    return row;
-                });
+                recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
 
                 pageInfo.loading = false;
                 pageInfo.previousButtonDisabled = !page.hasPrevious;
@@ -189,16 +180,7 @@
                     $window.scrollTo(0, 0);
 
                     recordsetModel.page = page;
-                    recordsetModel.rowValues = page.tuples.map(function(tuple, index, array) {
-                        var row = [];
-                        tuple.values.forEach(function(value, index) {
-                            row.push({
-                                isHTML: tuple.isHTML[index],
-                                value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
-                            });
-                        });
-                        return row;
-                    });
+                    recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
 
                     pageInfo.loading = false;
                     pageInfo.previousButtonDisabled = !page.hasPrevious;
@@ -245,16 +227,7 @@
                     $window.scrollTo(0, 0);
 
                     recordsetModel.page = page;
-                    recordsetModel.rowValues = page.tuples.map(function(tuple, index, array) {
-                        var row = [];
-                        tuple.values.forEach(function(value, index) {
-                            row.push({
-                                isHTML: tuple.isHTML[index],
-                                value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
-                            });
-                        });
-                        return row;
-                    });
+                    recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
 
                     pageInfo.loading = false;
                     pageInfo.previousButtonDisabled = !page.hasPrevious;
@@ -296,8 +269,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService', '$sce',
-        function($window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService, $sce) {
+    .run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', 'DataUtils', '$log', 'ErrorService', 'AlertsService', '$sce',
+        function($window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, DataUtils, $log, ErrorService, AlertsService, $sce) {
 
         try {
 
@@ -348,16 +321,7 @@
             return $rootScope.reference.read(pageInfo.pageLimit);
         }).then(function getPage(page) {
             recordsetModel.page = page;
-            recordsetModel.rowValues = page.tuples.map(function(tuple, index, array) {
-                var row = [];
-                tuple.values.forEach(function(value, index) {
-                    row.push({
-                        isHTML: tuple.isHTML[index],
-                        value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
-                    });
-                });
-                return row;
-            });
+            recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
 
             pageInfo.loading = false;
             pageInfo.previousButtonDisabled = !page.hasPrevious;
