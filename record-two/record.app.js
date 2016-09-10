@@ -25,10 +25,12 @@
         };
     }])
 
-    .run(['ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
+    .run(['headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
+        headInjector.addTitle();
+        headInjector.addCustomCSS();
 
         try {
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);

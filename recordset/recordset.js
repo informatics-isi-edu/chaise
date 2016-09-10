@@ -274,11 +274,12 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService',
-        function($window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService) {
+    .run(['headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService',
+        function(headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService) {
 
         try {
-
+            headInjector.addTitle();
+            headInjector.addCustomCSS();
             $rootScope.alerts = AlertsService.alerts;
             $rootScope.closeAlert = AlertsService.deleteAlert;
 
