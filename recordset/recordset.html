@@ -38,7 +38,7 @@
                         pageInfo.pageLimit !== 50 &&
                         pageInfo.pageLimit !== 75 &&
                         pageInfo.pageLimit !== 100 &&
-                        pageInfo.pageLimit !== 200"><a href ng-click="pageLimit(pageInfo.pageLimit)">
+                        pageInfo.pageLimit !== 200"><a id="custom-page-size" href ng-click="pageLimit(pageInfo.pageLimit)">
                         <span ng-show="true" class="glyphicon glyphicon-ok"></span>
                         <span ng-show="false" class="glyphicon glyphicon-invisible"></span>
                         {{ pageInfo.pageLimit }} (Custom)</a>

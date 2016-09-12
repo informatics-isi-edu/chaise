@@ -8,6 +8,12 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
+	it("should use annotated page size", function() {
+		chaisePage.recordsetPage.getCustomPageSize().then(function(text) {
+			expect(text).toBe("15 (Custom)");
+		})
+	});
+
 	it("should show correct table rows", function() {
 		chaisePage.recordsetPage.getRows().then(function(rows) {
 			expect(rows.length).toBe(3);

@@ -501,6 +501,10 @@ var recordsetPage = function() {
         return browser.executeScript("return $('#page-title').text();");
     };
 
+    this.getCustomPageSize = function() {
+        return browser.executeScript("return $('#custom-page-size').text().trim();");
+    };
+
     this.getColumns = function() {
         return element.all(by.css(".table-column-displayname"));
     };
