@@ -47,6 +47,35 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
     }
 	});
 
+	$scope.FacetsData = FacetsData;
+
+	$scope.displayError = function displayError(status, errorMessage) {
+		$scope.status = status;
+		$scope.errorMessage = errorMessage;
+		$scope.FacetsData.error = true;
+		$scope.FacetsData.progress = false;
+		if (!$scope.$$phase) {
+			$scope.$apply();
+		}
+		setTimeout(function() {
+			$scope.FacetsData.error = true;
+			$scope.FacetsData.progress = false;
+			if (!$scope.$$phase) {
+				$scope.$apply();
+			}
+		}, 1);
+	};
+
+	if (isRecordFilter(window.location.href)) {
+		try {
+			var newUrl = convertFilter(window.location.href);
+			window.location.assign(newUrl);
+		} catch(err) {
+			loadApplicationFooter();
+			$scope.errorMessage = err.message + '<br/>' + window.location.href;
+			$scope.displayError('', $scope.errorMessage);
+		}
+	}
 	var searchQuery = getSearchQuery(window.location.href);
 	if (searchQuery['entity'] != null) {
 		var values = searchQuery['entity'].split(':');
@@ -72,8 +101,6 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 		facetPolicy = chaiseConfig['facetPolicy'];
 	}
 
-	$scope.FacetsData = FacetsData;
-
 	FacetsService.initTable();
 
 	if (searchQuery['table'] != null) {
@@ -87,23 +114,6 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 	} else {
 		$scope.FacetsData.bookmarkPage = null;
 	}
-
-	$scope.displayError = function displayError(status, errorMessage) {
-		$scope.status = status;
-		$scope.errorMessage = errorMessage;
-		$scope.FacetsData.error = true;
-		$scope.FacetsData.progress = false;
-		if (!$scope.$$phase) {
-			$scope.$apply();
-		}
-		setTimeout(function() {
-			$scope.FacetsData.error = true;
-			$scope.FacetsData.progress = false;
-			if (!$scope.$$phase) {
-				$scope.$apply();
-			}
-		}, 1);
-	};
 
 	if (searchQuery['facets'] != null) {
 		try {
