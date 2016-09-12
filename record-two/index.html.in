@@ -39,13 +39,12 @@
                 <div ng-switch on="relatedRef.display.type">
                     <div ng-switch-when="markdown">
                         <span ng-bind-html="page.content"></span>
-                        <span ng-if="page.hasNext" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">Click here to access more records</span>
                     </div>
                     <!-- ng-switch-when="table" is also the default case -->
                     <div ng-switch-default>
                         <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
-                        <a ng-if="page.hasNext" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">Click here to access more records</a>
                     </div>
+                    <a ng-if="page.hasNext" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">Click here to access more records</a>
                 </div>
             </div>
         </uib-accordion>
