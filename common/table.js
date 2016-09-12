@@ -9,6 +9,12 @@
             restrict: 'E',
             templateUrl: '../common/templates/table.html',
             scope: {
+                // vm is the table model, should have this format
+                // { columns: array of Column objects,
+                //   sortby: column name/null,
+                //   sortOrder: asc, dsc or null,
+                //   rowValues: array of rows values, each value has this structure {isHTML:boolean, value:value
+                // }
                 vm: '=',
                 toggleSortOrder: '&',
                 sortby: '&',
