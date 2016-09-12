@@ -25,7 +25,7 @@
         };
     }])
 
-    .run(['ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
+    .run(['ERMrest', 'UriUtils', 'DataUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, DataUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
@@ -84,9 +84,7 @@
                                     sortOrder: null,            // asc (default) or desc
                                     rowValues: []               // array of rows values
                                 };
-                                model.rowValues = page.tuples.map(function (tuple, index, array) {
-                                    return tuple.values;
-                                });
+                                model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 $rootScope.tableModels[i] = model;
                             });
                         })(i);
