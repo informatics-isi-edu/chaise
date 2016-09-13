@@ -57,7 +57,7 @@
             loading: true,
             previousButtonDisabled: true,
             nextButtonDisabled: true,
-            pageLimit: 10
+            pageLimit: 25
         };
 
     }])
@@ -69,6 +69,8 @@
         $scope.vm = recordsetModel;
 
         $scope.pageInfo = pageInfo;
+
+        $scope.pageLimits = [10, 25, 50, 75, 100, 200];
 
         $scope.pageLimit = function(limit) {
             pageInfo.pageLimit = limit;
@@ -286,10 +288,6 @@
 
             //$rootScope.location = $window.location.href;
             pageInfo.loading = true;
-            if (p_context.limit)
-                pageInfo.pageLimit = p_context.limit;
-            else
-                pageInfo.pageLimit = 10;
             pageInfo.previousButtonDisabled = true;
             pageInfo.nextButtonDisabled = true;
 
@@ -314,7 +312,12 @@
         ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
             $rootScope.reference = reference.contextualize.compact;
             $log.info("Reference:", $rootScope.reference);
-
+            if (p_context.limit)
+                pageInfo.pageLimit = p_context.limit;
+            else if ($rootScope.reference.display.defaultPageSize)
+                pageInfo.pageLimit = $rootScope.reference.display.defaultPageSize;
+            else
+                pageInfo.pageLimit = 25;
             recordsetModel.tableDisplayName = $rootScope.reference.displayname;
             recordsetModel.columns = $rootScope.reference.columns;
 
