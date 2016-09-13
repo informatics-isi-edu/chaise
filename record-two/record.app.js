@@ -69,7 +69,7 @@
                     $rootScope.tableModels = [];
 
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        // $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
+                        $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
                         // We want to limit the number of values shown by default
                         // Maybe have a chaise config option
                         (function(i) {
