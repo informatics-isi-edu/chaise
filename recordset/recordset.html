@@ -33,13 +33,11 @@
                     <span class="caret"></span></button>
                 <ul class="dropdown-menu">
                     <li ng-if="pageLimits.indexOf(pageInfo.pageLimit) === -1"><a id="custom-page-size" href ng-click="pageLimit(pageInfo.pageLimit)">
-                        <span ng-show="true" class="glyphicon glyphicon-ok"></span>
-                        <span ng-show="false" class="glyphicon glyphicon-invisible"></span>
+                        <span class="glyphicon glyphicon-ok"></span>
                         {{ pageInfo.pageLimit }} (Custom)</a>
                     </li>
                     <li ng-repeat="limit in pageLimits"><a href ng-click="pageLimit(limit)">
-                        <span ng-show="pageInfo.pageLimit === limit" class="glyphicon glyphicon-ok"></span>
-                        <span ng-show="pageInfo.pageLimit !== limit" class="glyphicon glyphicon-invisible"></span>
+                        <span class="glyphicon" ng-class="pageInfo.pageLimit === limit ? glyphicon-ok : glyphicon-invisible"></span>
                         {{ limit }}</a>
                     </li>
                 </ul>
