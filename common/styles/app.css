@@ -217,6 +217,9 @@ button .glyphicon-trash {
 .table.nested .panel-body{
     /*overflow-x: scroll;*/
 }
+.table{
+    margin-bottom: 5px;
+}
 tbody{
         display: table-row-group;
     vertical-align: middle;

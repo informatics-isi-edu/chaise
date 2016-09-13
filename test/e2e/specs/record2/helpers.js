@@ -211,3 +211,46 @@ exports.testCreateButton = function () {
         });
     });
 };
+
+exports.relatedTablesDefaultOrder = function (tableParams) {
+    it("should have the tables in default order.", function() {
+        chaisePage.record2Page.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
+            // tables should be in order based on the default order because no visible foreign keys annotation is defined
+            // Headings have a '-' when page loads, and a count after them
+            expect(headings).toEqual(tableParams.tables_order);
+        });
+    });
+};
+
+exports.relatedTableLinks = function (tableParams) {
+    it("should create a functional link for table rows with links in them.", function() {
+        var relatedTableName = tableParams.related_table_name_with_link_in_table;
+        chaisePage.record2Page.getRelatedTableRows(relatedTableName).then(function(rows) {
+            return rows[0].all(by.tagName("td"));
+        }).then(function(cells) {
+            return cells[2].getInnerHtml();
+        }).then(function(cell) {
+            // check that an element was created inside the td with an href attribute
+            expect(cell.indexOf("href")).toBeGreaterThan(-1);
+        });
+    });
+
+    it("should have a link if more than 5 values are present for an entity and redirect to recordset.", function() {
+        var EC = protractor.ExpectedConditions,
+            relatedTableName = tableParams.related_table_name_with_more_results,
+            relatedTableLink = chaisePage.record2Page.getMoreResultsLink(relatedTableName);
+
+        browser.wait(EC.elementToBeClickable(relatedTableLink), 10000);
+
+        chaisePage.record2Page.getRelatedTableRows(relatedTableName).count().then(function(count) {
+            expect(count).toBe(5);
+
+            expect(relatedTableLink.isDisplayed()).toBeTruthy();
+            return relatedTableLink.click();
+        }).then(function() {
+            return browser.driver.getCurrentUrl();
+        }).then(function(url) {
+            expect(url.indexOf('recordset')).toBeGreaterThan(-1);
+        });
+    });
+};

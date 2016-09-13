@@ -69,17 +69,21 @@
                     $rootScope.tableModels = [];
 
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+                        $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
                         // We want to limit the number of values shown by default
                         // Maybe have a chaise config option
                         (function(i) {
                             $rootScope.relatedReferences[i].read(5).then(function (page) {
+
                                 var model = {
+                                    reference: $rootScope.relatedReferences[i],
                                     columns: $rootScope.relatedReferences[i].columns,
-                                    hasLoaded: true,     // used to determine if the current table and next table should be rendered
-                                    open: true,         // to define if the accordion is open or closed
-                                    sortby: null,       // column name, user selected or null
-                                    sortOrder: null,    // asc (default) or desc
-                                    rowValues: []       // array of rows values
+                                    hasNext: page.hasNext,      // used to determine if a link should be shown
+                                    hasLoaded: true,            // used to determine if the current table and next table should be rendered
+                                    open: true,                 // to define if the accordion is open or closed
+                                    sortby: null,               // column name, user selected or null
+                                    sortOrder: null,            // asc (default) or desc
+                                    rowValues: []               // array of rows values
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 $rootScope.tableModels[i] = model;

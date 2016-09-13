@@ -483,6 +483,15 @@ var record2Page = function() {
         return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
     };
 
+    this.getMoreResultsLink = function(displayName) {
+        // the link is not a child of the table, rather one of the accordion group
+        return element(by.id("rt-heading-" + displayName)).element(by.css(".more-results-link"));
+    };
+
+    this.getRelatedTableRowValues = function(displayName) {
+        return that.getRelatedTableRows(displayName).all(by.tagName("td"));    
+    };
+
     this.getCreateRecordButton = function() {
         return element(by.id("create-record"));
     };
