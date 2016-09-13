@@ -44,7 +44,7 @@
                     <div ng-switch-default>
                         <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
                     </div>
-                    <a ng-if="page.hasNext" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">Click here to access more records</a>
+                    <a ng-if="tableModels[$index].hasNext" class="more-results-link" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">Click here to access more records</a>
                 </div>
             </div>
         </uib-accordion>

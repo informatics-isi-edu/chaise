@@ -50,7 +50,6 @@
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
                 }).then(function getPage(page) {
-                    $rootScope.page = page;
                     var tuple = page.tuples[0];
                     // Used directly in the record-display directive
                     $rootScope.recordDisplayname = tuple.displayname;
@@ -75,9 +74,11 @@
                         // Maybe have a chaise config option
                         (function(i) {
                             $rootScope.relatedReferences[i].read(5).then(function (page) {
+
                                 var model = {
                                     reference: $rootScope.relatedReferences[i],
                                     columns: $rootScope.relatedReferences[i].columns,
+                                    hasNext: page.hasNext,      // used to determine if a link should be shown
                                     hasLoaded: true,            // used to determine if the current table and next table should be rendered
                                     open: true,                 // to define if the accordion is open or closed
                                     sortby: null,               // column name, user selected or null

@@ -10,7 +10,7 @@
             "schema": {
                 "name": "product",
                 "createNew": true,
-                "path": "test/e2e/data_setup/schema/product-record.json"
+                "path": "test/e2e/data_setup/schema/product-unordered-related-tables.json"
             },
             "tables": {
                 "createNew": true
@@ -27,7 +27,10 @@
         "params": {
             "tuples" : [{
                 "table_name" : "accommodation",
-                "keys" : [{ "name": "id", "value": "2004", "operator" : "="}],
+                "related_table_name_with_more_results" : "booking",
+                "related_table_name_with_link_in_table" : "file",
+                "keys" : [{ "name": "id", "value": "2004", "operator": "=" }],
+                "tables_order" : ["- booking (5)", "- file (3)", "- media (1)"]
             }]
         }
     }
