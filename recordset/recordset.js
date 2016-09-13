@@ -70,6 +70,8 @@
 
         $scope.pageInfo = pageInfo;
 
+        $scope.pageLimits = [10, 25, 50, 75, 100, 200];
+
         $scope.pageLimit = function(limit) {
             pageInfo.pageLimit = limit;
             $scope.read();
@@ -286,10 +288,6 @@
 
             //$rootScope.location = $window.location.href;
             pageInfo.loading = true;
-            if (p_context.limit)
-                pageInfo.pageLimit = p_context.limit;
-            else
-                pageInfo.pageLimit = 25;
             pageInfo.previousButtonDisabled = true;
             pageInfo.nextButtonDisabled = true;
 
@@ -314,8 +312,12 @@
         ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
             $rootScope.reference = reference.contextualize.compact;
             $log.info("Reference:", $rootScope.reference);
-            if ($rootScope.reference.display.defaultPageSize)
+            if (p_context.limit)
+                pageInfo.pageLimit = p_context.limit;
+            else if ($rootScope.reference.display.defaultPageSize)
                 pageInfo.pageLimit = $rootScope.reference.display.defaultPageSize;
+            else
+                pageInfo.pageLimit = 25;
             recordsetModel.tableDisplayName = $rootScope.reference.displayname;
             recordsetModel.columns = $rootScope.reference.columns;
 
