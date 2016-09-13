@@ -8,6 +8,15 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
+	it("should use annotated page size", function() {
+		var EC = protractor.ExpectedConditions;
+		var e = element(by.id('custom-page-size'));
+		browser.wait(EC.presenceOf(e), 2000);
+		chaisePage.recordsetPage.getCustomPageSize().then(function(text) {
+			expect(text).toBe("15 (Custom)");
+		})
+	});
+
 	it("should show correct table rows", function() {
 		chaisePage.recordsetPage.getRows().then(function(rows) {
 			expect(rows.length).toBe(3);

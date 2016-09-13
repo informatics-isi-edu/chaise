@@ -32,35 +32,13 @@
                 <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
                     <span class="caret"></span></button>
                 <ul class="dropdown-menu">
-                    <li><a href ng-click="pageLimit(10)">
-                        <span ng-show="pageInfo.pageLimit === 10" class="glyphicon glyphicon-ok"></span>
-                        <span ng-show="pageInfo.pageLimit !== 10" class="glyphicon glyphicon-invisible"></span>
-                        10</a>
+                    <li ng-if="pageLimits.indexOf(pageInfo.pageLimit) === -1"><a id="custom-page-size" href ng-click="pageLimit(pageInfo.pageLimit)">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        {{ pageInfo.pageLimit }} (Custom)</a>
                     </li>
-                    <li><a href ng-click="pageLimit(25)">
-                        <span ng-show="pageInfo.pageLimit === 25" class="glyphicon glyphicon-ok"></span>
-                        <span ng-show="pageInfo.pageLimit !== 25" class="glyphicon glyphicon-invisible"></span>
-                        25</a>
-                    </li>
-                    <li><a href ng-click="pageLimit(50)">
-                        <span ng-show="pageInfo.pageLimit === 50" class="glyphicon glyphicon-ok"></span>
-                        <span ng-show="pageInfo.pageLimit !== 50" class="glyphicon glyphicon-invisible"></span>
-                        50</a>
-                    </li>
-                    <li><a href ng-click="pageLimit(75)">
-                        <span ng-show="pageInfo.pageLimit === 75" class="glyphicon glyphicon-ok"></span>
-                        <span ng-show="pageInfo.pageLimit !== 75" class="glyphicon glyphicon-invisible"></span>
-                        75</a>
-                    </li>
-                    <li><a href ng-click="pageLimit(100)">
-                        <span ng-show="pageInfo.pageLimit === 100" class="glyphicon glyphicon-ok"></span>
-                        <span ng-show="pageInfo.pageLimit !== 100" class="glyphicon glyphicon-invisible"></span>
-                        100</a>
-                    </li>
-                    <li><a href ng-click="pageLimit(200)">
-                        <span ng-show="pageInfo.pageLimit === 200" class="glyphicon glyphicon-ok"></span>
-                        <span ng-show="pageInfo.pageLimit !== 200" class="glyphicon glyphicon-invisible"></span>
-                        200</a>
+                    <li ng-repeat="limit in pageLimits"><a href ng-click="pageLimit(limit)">
+                        <span class="glyphicon" ng-class="pageInfo.pageLimit === limit ? glyphicon-ok : glyphicon-invisible"></span>
+                        {{ limit }}</a>
                     </li>
                 </ul>
             </span>
