@@ -37,7 +37,7 @@
                         {{ pageInfo.pageLimit }} (Custom)</a>
                     </li>
                     <li ng-repeat="limit in pageLimits"><a href ng-click="pageLimit(limit)">
-                        <span class="glyphicon" ng-class="pageInfo.pageLimit === limit ? glyphicon-ok : glyphicon-invisible"></span>
+                        <span class="glyphicon" ng-class="pageInfo.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
                         {{ limit }}</a>
                     </li>
                 </ul>
