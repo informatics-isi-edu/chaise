@@ -64,12 +64,12 @@ See the [heuristics guide](./doc/heuristics.md) for more information.
 
 ## Chaise Apps and their Contexts
 
-|            | compact | compact/brief | detailed | entry | entry/edit | entry/create | filter | name | * |
-|------------|---------|---------------|----------|-------|------------|--------------|--------|------|---|
-| [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)  | X       | -             | -        | -     | -          | -            | -      | -    | - |
-| [record-two](https://github.com/informatics-isi-edu/chaise/blob/master/record-two/readme.md) | -       | X             | X        | -     | -          | -            | -      | -    | - |
-| [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md) | -       | -             | -        | X     | X          | X            | -      | -    | - |
-| [viewer](https://github.com/informatics-isi-edu/chaise/blob/master/viewer/readme.md)     | -       | -             | -        | -     | -          | -            | -      | -    | - |
+|              | compact | compact/brief | detailed | entry | entry/edit | entry/create | filter | name | * |
+|--------------|---------|---------------|----------|-------|------------|--------------|--------|------|---|
+| [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)    | X       | -             | -        | -     | -          | -            | -      | -    | - |
+| [record-two](https://github.com/informatics-isi-edu/chaise/blob/master/record-two/readme.md)   | -       | X             | X        | -     | -          | -            | -      | -    | - |
+| [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md)   | -       | -             | -        | X     | X          | X            | -      | -    | - |
+| [viewer](https://github.com/informatics-isi-edu/chaise/blob/master/viewer/readme.md)       | -       | -             | -        | -     | -          | -            | -      | -    | - |
 
 More information about what each context does for each app can be found in that app's readme.md file.
 
