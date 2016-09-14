@@ -67,7 +67,7 @@ See the [heuristics guide](./doc/heuristics.md) for more information.
 |              | compact | compact/brief | detailed | entry | entry/edit | entry/create | filter | name | * |
 |--------------|---------|---------------|----------|-------|------------|--------------|--------|------|---|
 | [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)    | X       | -             | -        | -     | -          | -            | -      | -    | - |
-| [record-two](https://github.com/informatics-isi-edu/chaise/blob/master/record-two/readme.md)   | -       | X             | X        | -     | -          | -            | -      | -    | - |
+| [record2](https://github.com/informatics-isi-edu/chaise/blob/master/record-two/readme.md)   | -       | X             | X        | -     | -          | -            | -      | -    | - |
 | [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md)   | -       | -             | -        | X     | X          | X            | -      | -    | - |
 | [viewer](https://github.com/informatics-isi-edu/chaise/blob/master/viewer/readme.md)       | -       | -             | -        | -     | -          | -            | -      | -    | - |
 
