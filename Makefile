@@ -25,6 +25,8 @@ E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
 E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
 E2EDrecord2=test/e2e/specs/record2/data-dependent/protractor.conf.js
+E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
+E2EDviewer=test/e2e/specs/viewer/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/specs/login/protractor.conf.js
 
 # Rule to determine MD5 utility
@@ -288,6 +290,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
     $(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(RECORD_ASSETS)/lib/angular-animate.min.js \
 	$(COMMON)/alerts.js \
@@ -397,7 +400,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -406,9 +409,9 @@ karma:
 
 # Rule to run tests
 .PHONY: testall
-testall: 
+testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run search app tests
 .PHONY: testsearch
@@ -487,10 +490,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
 	done
-	for file in $(JS_DEPS); do \
+	for file in $(JS_CONFIG) $(JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-asset-block ; \
 	done
-	for file in $(JS_SOURCE) $(JS_CONFIG); do \
+	for file in $(JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
@@ -504,10 +507,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
-	for file in $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_DEPS); do \
+	for file in $(JS_CONFIG) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-record-asset-block ; \
 	done
-	for file in $(RECORD_JS_SOURCE) $(JS_CONFIG); do \
+	for file in $(RECORD_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
@@ -545,13 +548,13 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
 	done
-	for file in $(VIEWER_SHARED_JS_DEPS); do \
+	for file in $(JS_CONFIG) $(VIEWER_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-viewer-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
 		echo "<script src='$$script'></script>" >> .make-viewer-asset-block ; \
 	done
-	for file in $(VIEWER_JS_SOURCE) $(JS_CONFIG); do \
+	for file in $(VIEWER_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
@@ -565,13 +568,13 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
-	for file in $(RE_SHARED_JS_DEPS); do \
+	for file in $(JS_CONFIG) $(RE_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-de-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
 		echo "<script src='$$script'></script>" >> .make-de-asset-block ; \
 	done
-	for file in $(RE_JS_SOURCE) $(JS_CONFIG); do \
+	for file in $(RE_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
@@ -585,13 +588,13 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
 	done
-	for file in $(RECSET_SHARED_JS_DEPS); do \
+	for file in $(JS_CONFIG) $(RECSET_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-rs-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
 		echo "<script src='$$script'></script>" >> .make-rs-asset-block ; \
 	done
-	for file in $(RECSET_JS_SOURCE) $(JS_CONFIG); do \
+	for file in $(RECSET_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
@@ -605,13 +608,13 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-recordtwo-asset-block ; \
 	done
-	for file in $(RECORDTWO_SHARED_JS_DEPS); do \
+	for file in $(JS_CONFIG) $(RECORDTWO_SHARED_JS_DEPS); do \
 		echo "<script src='../$$file'></script>" >> .make-recordtwo-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
 		echo "<script src='$$script'></script>" >> .make-recordtwo-asset-block ; \
 	done
-	for file in $(RECORDTWO_JS_SOURCE) $(JS_CONFIG); do \
+	for file in $(RECORDTWO_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-recordtwo-asset-block ; \
 	done

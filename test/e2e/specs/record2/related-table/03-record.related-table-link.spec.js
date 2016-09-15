@@ -1,4 +1,4 @@
-var chaisePage = require('../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
+var chaisePage = require('../../../utils/chaise.page.js');
 var record2Helpers = require('../helpers.js');
 
 describe('View existing record,', function() {
@@ -23,8 +23,9 @@ describe('View existing record,', function() {
 					browser.sleep(2000);
 			    });
 
-				describe("Presentation ,", function() {
-					var params = record2Helpers.testPresentation(tupleParams);
+                describe("Show the related entity tables,", function() {
+					var params = record2Helpers.relatedTablesDefaultOrder(tupleParams);
+					var params = record2Helpers.relatedTableLinks(tupleParams);
 				});
 
     		});
@@ -34,15 +35,4 @@ describe('View existing record,', function() {
 
     }
 
-    it('should load custom CSS and document title defined in chaise-config.js', function() {
-        var chaiseConfig = browser.executeScript('return chaiseConfig');
-        if (chaiseConfig.customCSS) {
-            expect($("link[href='" + chaiseConfig.customCSS + "']").length).toBeTruthy();
-        }
-        if (chaiseConfig.headTitle) {
-            browser.getTitle().then(function(title) {
-                expect(title).toEqual(chaiseConfig.headTitle);
-            });
-        }
-    });
 });

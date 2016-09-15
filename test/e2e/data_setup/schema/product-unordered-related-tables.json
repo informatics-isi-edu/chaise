@@ -332,20 +332,7 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "record" : ["id", "category", "website", "rating", "summary", "description", "thumbnail", "opened_on", "luxurious"],
-          "compact" : ["title", "website", "rating", "summary", "opened_on", "luxurious"]
-        },
-
-        "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
-          "*" : [
-              ["product", "fk_booking_accommodation"],
-              ["product", "fk_accommodation_image"]
-          ]
-        },
-        "tag:isrd.isi.edu,2016:table-display": {
-          "compact": {
-            "page_size": 15
-          }
+          "record" : ["id", "category", "website", "rating", "summary", "description", "thumbnail", "opened_on", "luxurious"]
         }
       }
     },
@@ -508,7 +495,12 @@
             "comment": [
               "thumbnail",
               "download"
-            ]
+            ],
+            "tag:isrd.isi.edu,2016:column-display" : {
+              "*": {
+                "markdown_pattern" : "[{{uri}}]({{uri}})"
+              }
+            }
           }
         },
         {
@@ -750,6 +742,78 @@
           "display": "Categories"
         }
       }
+    },
+    "media": {
+      "comment": null,
+      "kind": "table",
+      "entityCount": 0,
+      "keys": [
+        {
+          "comment": null,
+          "annotations": {},
+          "unique_columns": [
+            "id",
+            "accommodation_id"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names" : [["product", "fk_media_accommodation"]],
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "media",
+              "schema_name": "product",
+              "column_name": "accommodation_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "table_name": "media",
+      "schema_name": "product",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "serial4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        },
+        {
+          "comment": null,
+          "name": "accommodation_id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        }
+      ],
+      "annotations": {
+        "comment": [
+          "association"
+        ],
+        "description": {
+          "display": "Media"
+        }
+      }
     }
   },
   "table_names": [
@@ -757,7 +821,8 @@
     "file",
     "accommodation",
     "accommodation_image",
-    "booking"
+    "booking",
+    "media"
   ],
   "comment": null,
   "annotations": {

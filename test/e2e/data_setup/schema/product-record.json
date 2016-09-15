@@ -503,7 +503,12 @@
             "comment": [
               "thumbnail",
               "download"
-            ]
+            ],
+            "tag:isrd.isi.edu,2016:column-display" : {
+              "*": {
+                "markdown_pattern" : "[{{uri}}]({{uri}})"
+              }
+            }
           }
         },
         {

@@ -483,6 +483,15 @@ var record2Page = function() {
         return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
     };
 
+    this.getMoreResultsLink = function(displayName) {
+        // the link is not a child of the table, rather one of the accordion group
+        return element(by.id("rt-heading-" + displayName)).element(by.css(".more-results-link"));
+    };
+
+    this.getRelatedTableRowValues = function(displayName) {
+        return that.getRelatedTableRows(displayName).all(by.tagName("td"));    
+    };
+
     this.getCreateRecordButton = function() {
         return element(by.id("create-record"));
     };
@@ -496,6 +505,25 @@ var record2Page = function() {
     };
 };
 
+var recordsetPage = function() {
+    this.getPageTitle = function() {
+        return browser.executeScript("return $('#page-title').text();");
+    };
+
+    this.getCustomPageSize = function() {
+        return browser.executeScript("return $('#custom-page-size').text().trim();");
+    };
+
+    this.getColumns = function() {
+        return element.all(by.css(".table-column-displayname"));
+    };
+
+    this.getRows = function() {
+        return element.all(by.css('.table-row'));
+    };
+
+};
+
 function chaisePage() {
     this.sidebar = new sidebar();
     this.moreFilter = new moreFilter();
@@ -504,6 +532,7 @@ function chaisePage() {
     this.recordPage = new recordPage();
     this.recordEditPage = new recordEditPage();
     this.record2Page = new record2Page();
+    this.recordsetPage = new recordsetPage();
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));
     this.tourBox = element(by.css('.tour-DataBrowserTour'));
