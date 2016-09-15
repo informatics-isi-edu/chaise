@@ -62,6 +62,17 @@ and rows flipped).
 
 See the [heuristics guide](./doc/heuristics.md) for more information.
 
+## Chaise Apps and their Contexts
+
+|              | compact | compact/brief | detailed | entry | entry/edit | entry/create | filter | name | * |
+|--------------|---------|---------------|----------|-------|------------|--------------|--------|------|---|
+| [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)    | X       | -             | -        | -     | -          | -            | -      | -    | - |
+| [record2](https://github.com/informatics-isi-edu/chaise/blob/master/record-two/readme.md)   | -       | X             | X        | -     | -          | -            | -      | -    | - |
+| [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md)   | -       | -             | -        | X     | X          | X            | -      | -    | - |
+| [viewer](https://github.com/informatics-isi-edu/chaise/blob/master/viewer/readme.md)       | -       | -             | -        | -     | -          | -            | -      | -    | - |
+
+More information about what each context does for each app can be found in that app's readme.md file.
+
 ## Quick Start Guide
 ### Runtime Dependencies
 
@@ -106,7 +117,7 @@ sudo make install
 
 Make will invoke `npm install` to download and install all additional
 dependencies under the local `node_modules` directory relative to the project
-directory. 
+directory.
 
 
 ### How to Deploy
@@ -157,7 +168,7 @@ For more info on how to configure and run E2E Tests refere following [link](http
 
 ### How to run Unit Tests
 
-Chaise uses `Karma` to run Unit tests. To run these tests you'll need to install karma-cli globally. 
+Chaise uses `Karma` to run Unit tests. To run these tests you'll need to install karma-cli globally.
 
 ```sh
 sudo npm install karma-cli -g
@@ -167,7 +178,7 @@ To run all unit test run following command from your terminal.
 
 ```sh
 karma start
-``` 
+```
 
 For more info on how to configure and run Unit Tests refer following [link](https://github.com/informatics-isi-edu/chaise/wiki/Unit-Test-Guide)
 
@@ -177,5 +188,4 @@ To run E2E as well as Unit tests, invoke following make command
 
 ```sh
 make testall
-``` 
-
+```
