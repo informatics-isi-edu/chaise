@@ -29,8 +29,10 @@
                 "table_name" : "accommodation",
                 "related_table_name_with_more_results" : "booking",
                 "related_table_name_with_link_in_table" : "file",
+                "related_table_name_with_page_size_annotation" : "file",
                 "keys" : [{ "name": "id", "value": "2004", "operator": "=" }],
-                "tables_order" : ["- booking (5)", "- file (3)", "- media (1)"]
+                "tables_order" : ["- booking (5)", "- file (2)", "- media (1)"],
+                "page_size" : 2
             }]
         }
     }

@@ -70,10 +70,12 @@
 
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                         $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
-                        // We want to limit the number of values shown by default
-                        // Maybe have a chaise config option
+
+                        if ($rootScope.relatedReferences[i].display.defaultPageSize) {
+                            pageInfo.pageLimit = $rootScope.relatedReferences[i].display.defaultPageSize;
+                        }
                         (function(i) {
-                            $rootScope.relatedReferences[i].read(5).then(function (page) {
+                            $rootScope.relatedReferences[i].read(pageInfo.pageLimit).then(function (page) {
 
                                 var model = {
                                     reference: $rootScope.relatedReferences[i],
@@ -90,6 +92,7 @@
                             });
                         })(i);
                     }
+                    console.log("Related Refs: ", $rootScope.relatedReferences);
 
                 }, function error(response) {
                     $log.warn(response);

@@ -25,6 +25,7 @@ E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
 E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
 E2EDrecord2=test/e2e/specs/record2/data-dependent/protractor.conf.js
+E2EDrecord2RelatedTable=test/e2e/specs/record2/related-table/protractor.conf.js
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/specs/login/protractor.conf.js
 
@@ -399,7 +400,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecord2RelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -408,9 +409,9 @@ karma:
 
 # Rule to run tests
 .PHONY: testall
-testall: 
+testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecord2RelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run search app tests
 .PHONY: testsearch
@@ -421,6 +422,11 @@ testsearch:
 .PHONY: testrecord
 testrecord:
 	$(BIN)/protractor $(E2EDrecord)
+
+#Rule to run record-two app tests
+.PHONY: testrecord2
+testrecord2:
+	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecord2RelatedTable)
 
 #Rule to run record add app tests
 .PHONY: testrecordadd

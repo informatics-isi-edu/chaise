@@ -114,44 +114,54 @@ exports.testPresentation = function (tableParams) {
 	});
 
     it("should show related table names and their tables", function() {
-        var displayName,
+        var displayName, tableCount,
             relatedTables = tableParams.related_tables;
 
-        chaisePage.record2Page.getRelatedTables().count().then(function(tableCount) {
-            expect(tableCount).toBe(relatedTables.length);
+        chaisePage.record2Page.getRelatedTables().count().then(function(count) {
+            expect(count).toBe(relatedTables.length);
+            tableCount = count;
 
             // check the headings have the right name and in the right order
-            chaisePage.record2Page.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
-                // tables should be in order based on annotation for visible foreign_keys
-                // Headings have a '-' when page loads, and a count after them
-                expect(headings).toEqual(tableParams.tables_order);
+            return chaisePage.record2Page.getRelatedTableHeadings().getAttribute("heading");
+        }).then(function(headings) {
+            // tables should be in order based on annotation for visible foreign_keys
+            // Headings have a '-' when page loads, and a count after them
+            expect(headings).toEqual(tableParams.tables_order);
 
-                // rely on the UI data for looping, not expectation data
-                for (var i = 0; i < tableCount; i++) {
-                    displayName = relatedTables[i].title;
+            // rely on the UI data for looping, not expectation data
+            for (var i = 0; i < tableCount; i++) {
+                displayName = relatedTables[i].title;
 
-                    // verify all columns are present
-                    (function(i, displayName) {
-                        chaisePage.record2Page.getRelatedTableColumnNamesByTable(displayName).getInnerHtml().then(function(columnNames) {
-                            for (var j = 0; j < columnNames.length; j++) {
-                                expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
-                            }
-                        });
+                // verify all columns are present
+                (function(i, displayName) {
+                    chaisePage.record2Page.getRelatedTableColumnNamesByTable(displayName).getInnerHtml().then(function(columnNames) {
+                        for (var j = 0; j < columnNames.length; j++) {
+                            expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
+                        }
+                    });
 
-                        // verify all rows are present
-                        chaisePage.record2Page.getRelatedTableRows(displayName).count().then(function(rowCount) {
-                            expect(rowCount).toBe(relatedTables[i].data.length);
-                            expect(headings[i]).toBe("- " + displayName + " (" + rowCount + ")");
-                        });
-                    })(i, displayName);
-                }
-            });
+                    // verify all rows are present
+                    chaisePage.record2Page.getRelatedTableRows(displayName).count().then(function(rowCount) {
+                        expect(rowCount).toBe(relatedTables[i].data.length);
+                        expect(headings[i]).toBe("- " + displayName + " (" + rowCount + ")");
+                    });
+                })(i, displayName);
+            }
         });
     });
 
     // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
     it("should not show a related table with zero values.", function() {
         expect(chaisePage.record2Page.getRelatedTable("media").isPresent()).toBeFalsy();
+    });
+
+    // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
+    it("should honor the page_size annotation for the table, file, in the compact context based on inheritance.", function() {
+        var relatedTableName = tableParams.related_table_name_with_page_size_annotation;
+
+        chaisePage.record2Page.getRelatedTableRows(relatedTableName).count().then(function(count) {
+            expect(count).toBe(tableParams.page_size);
+        });
     });
 
     it("clicking the related table heading should change the heading and hide the table.", function() {
@@ -190,9 +200,9 @@ exports.testEditButton = function () {
         browser.wait(EC.elementToBeClickable(editButton), 10000);
 
         editButton.click().then(function() {
-            browser.driver.getCurrentUrl().then(function(url) {
-                expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
-            });
+            return browser.driver.getCurrentUrl();
+        }).then(function(url) {
+            expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
         });
     });
 };
@@ -205,9 +215,9 @@ exports.testCreateButton = function () {
         browser.wait(EC.elementToBeClickable(createButton), 10000);
 
         createButton.click().then(function() {
-            browser.driver.getCurrentUrl().then(function(url) {
-                expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
-            });
+            return browser.driver.getCurrentUrl();
+        }).then(function(url) {
+            expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
         });
     });
 };
@@ -220,11 +230,21 @@ exports.relatedTablesDefaultOrder = function (tableParams) {
             expect(headings).toEqual(tableParams.tables_order);
         });
     });
+
+    // Page size is set to 2 for the file table so that only 2 entries should be present with a link
+    it("should honor the page_size annotation for the table, file, in the compact/brief context.", function() {
+        var relatedTableName = tableParams.related_table_name_with_page_size_annotation;
+
+        chaisePage.record2Page.getRelatedTableRows(relatedTableName).count().then(function(count) {
+            expect(count).toBe(tableParams.page_size);
+        });
+    });
 };
 
 exports.relatedTableLinks = function (tableParams) {
     it("should create a functional link for table rows with links in them.", function() {
         var relatedTableName = tableParams.related_table_name_with_link_in_table;
+
         chaisePage.record2Page.getRelatedTableRows(relatedTableName).then(function(rows) {
             return rows[0].all(by.tagName("td"));
         }).then(function(cells) {
@@ -241,7 +261,7 @@ exports.relatedTableLinks = function (tableParams) {
             relatedTableLink = chaisePage.record2Page.getMoreResultsLink(relatedTableName);
 
         browser.wait(EC.elementToBeClickable(relatedTableLink), 10000);
-
+        
         chaisePage.record2Page.getRelatedTableRows(relatedTableName).count().then(function(count) {
             expect(count).toBe(5);
 
