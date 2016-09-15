@@ -67,7 +67,7 @@ See the [heuristics guide](./doc/heuristics.md) for more information.
 |              | compact | compact/brief | detailed | entry | entry/edit | entry/create | filter | name | * |
 |--------------|---------|---------------|----------|-------|------------|--------------|--------|------|---|
 | [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)    | X       | -             | -        | -     | -          | -            | -      | -    | - |
-| [record2](https://github.com/informatics-isi-edu/chaise/blob/master/record-two/readme.md)   | -       | X             | X        | -     | -          | -            | -      | -    | - |
+| [record2](https://github.com/informatics-isi-edu/chaise/blob/master/record-two/readme.md)   | Pertains to the data inside the related tables that are loaded after the record.       | Inherits from compact if not defined.             | Pertains to the record itself and the way that the record data will be displayed on the page.         | -     | -          | -            | -      | -    | - |
 | [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md)   | -       | -             | -        | X     | X          | X            | -      | -    | - |
 | [viewer](https://github.com/informatics-isi-edu/chaise/blob/master/viewer/readme.md)       | -       | -             | -        | -     | -          | -            | -      | -    | - |
 
