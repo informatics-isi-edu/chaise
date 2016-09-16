@@ -186,6 +186,7 @@ RECORDTWO_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/record.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
+	$(COMMON)/bindHtmlUnsafe.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
@@ -298,7 +299,8 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/table.js \
-	$(COMMON)/navbar.js
+	$(COMMON)/navbar.js \
+	$(COMMON)/bindHtmlUnsafe.js
 
 RECSET_JS_SOURCE=$(COMMON)/authen.js \
     $(COMMON)/utils.js \
