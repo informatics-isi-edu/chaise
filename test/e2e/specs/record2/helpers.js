@@ -263,7 +263,7 @@ exports.relatedTableLinks = function (tableParams) {
         browser.wait(EC.elementToBeClickable(relatedTableLink), 10000);
 
         chaisePage.record2Page.getRelatedTableRows(relatedTableName).count().then(function(count) {
-            expect(count).toBe(5);
+            expect(count).toBe(tableParams.booking_count);
 
             expect(relatedTableLink.isDisplayed()).toBeTruthy();
             return relatedTableLink.click();

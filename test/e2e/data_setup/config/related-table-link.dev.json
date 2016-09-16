@@ -32,6 +32,7 @@
                 "related_table_name_with_page_size_annotation" : "file",
                 "keys" : [{ "name": "id", "value": "2004", "operator": "=" }],
                 "tables_order" : ["- booking (6)", "- file (2)", "- media (1)"],
+                "booking_count" : 6,
                 "page_size" : 2
             }]
         }
