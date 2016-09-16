@@ -52,6 +52,7 @@
     "ermrest-data-utils": "x",
     "set-cookie-parser": "x",
     "jsonfile": "x",
-    "execSync": "x"
+    "execSync": "x",
+    "fs-extra": "x"
   }
 }
