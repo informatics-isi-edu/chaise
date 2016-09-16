@@ -456,7 +456,7 @@ var record2Page = function() {
     };
 
     this.getColumnValueElements = function() {
-        return browser.executeScript("return $('.entity-value > span.ng-binding.ng-scope');");
+        return browser.executeScript("return $('.entity-value > span.ng-scope');");
     };
 
     this.getRelatedTables = function() {
@@ -609,3 +609,4 @@ function chaisePage() {
 };
 
 module.exports = new chaisePage();
+isePage();
