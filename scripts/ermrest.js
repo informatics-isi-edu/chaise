@@ -596,7 +596,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 		if (tablePredicate.length > 0) {
 			if (table != options['table'] && association_tables[table] != null) {
 				predicate.push('$A');
-				predicate.push(association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table));
+				predicate.push(association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table));
 				if (aliases != null) {
 					aliases.push(association_tables[table]['alias']);
 				}
@@ -821,7 +821,7 @@ function updateCount(options, successCallback) {
 					var aliasDef = '';
 					if (association_tables_names.contains(table)) {
 						if (!aliases.contains(association_tables[table]['alias'])) {
-							aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+							aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 						}
 					}
 					var tableRef = (association_tables_names.contains(table)
@@ -858,7 +858,7 @@ function updateCount(options, successCallback) {
 		var aliasDef = '';
 		if (association_tables_names.contains(table)) {
 			if (!aliases.contains(association_tables[table]['alias'])) {
-				aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+				aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 			}
 		}
 		var tableRef = (association_tables_names.contains(table)
@@ -943,7 +943,7 @@ function updateGroups(options, successCallback) {
 					var aliasDef = '';
 					if (association_tables_names.contains(table)) {
 						if (!aliases.contains(association_tables[table]['alias'])) {
-							aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+							aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 						}
 					}
 					var tableRef = (association_tables_names.contains(table)
@@ -1059,7 +1059,7 @@ function updateSliders(options, successCallback) {
 						var aliasDef = '';
 						if (association_tables_names.contains(table)) {
 							if (!aliases.contains(association_tables[table]['alias'])) {
-								aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+								aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 							}
 						}
 						var tableRef = (association_tables_names.contains(table)
@@ -1094,7 +1094,7 @@ function updateSliders(options, successCallback) {
 		var aliasDef = '';
 		if (association_tables_names.contains(table)) {
 			if (!aliases.contains(association_tables[table]['alias'])) {
-				aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+				aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 			}
 		}
 		var tableRef = (association_tables_names.contains(table)
@@ -1604,7 +1604,7 @@ function getTableColumnsUniques(options, successCallback) {
 		if (metadata != null && !hasTableFacetsHidden(table)) {
 			var column_definitions = metadata['column_definitions'];
 			var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/';
-			url += (table == options['table'] ? '' : '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias'] + '/');
+			url += (table == options['table'] ? '' : '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias'] + '/');
 			var cnt = [];
 			$.each(column_definitions, function(i, col) {
 				if (!hasColumnFacetHidden(table, col['name'])) {
@@ -1673,7 +1673,7 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 			if (!hasTableFacetsHidden(table)) {
 				var metadata = (table == options['table'] ? options['metadata'] : association_tables[table]['metadata']);
 				var column_definitions = metadata['column_definitions'];
-				var tableURL = (table == options['table'] ? '' : '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias'] + '/');
+				var tableURL = (table == options['table'] ? '' : '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias'] + '/');
 				$.each(column_definitions, function(i,col) {
 					if (hasAnnotation(table, col['name'], 'dataset')) {
 						return true;
@@ -3663,7 +3663,7 @@ function updateFacetCount(options, facet, successCallback) {
 				}
 				var aliasDef = '';
 				if (association_tables_names.contains(table)) {
-					aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+					aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 				}
 				var tableRef = (association_tables_names.contains(table)
 					? aliasDef + '$A/$' + association_tables[table]['alias']
@@ -3705,7 +3705,7 @@ function updateFacetGroups(options, facet, successCallback) {
 	var predicate = getPredicate(options, col, table, null, []);
 	var aliasDef = '';
 	if (association_tables_names.contains(table)) {
-		aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+		aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 	}
 	var tableRef = (association_tables_names.contains(table)
 		? aliasDef + '$A/$' + association_tables[table]['alias']
@@ -3762,7 +3762,7 @@ function updateFacetSlider(options, facet, successCallback) {
 	var predicate = getPredicate(options, values['left'] || values['right'] ? null : col, table, null, []);
 	var aliasDef = '';
 	if (association_tables_names.contains(table)) {
-		aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+		aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 	}
 	var tableRef = (association_tables_names.contains(table)
 		? aliasDef + '$A/$' + association_tables[table]['alias']

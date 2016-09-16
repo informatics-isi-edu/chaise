@@ -26,6 +26,7 @@
         'chaise.authen',
         'chaise.errors',
         'chaise.modal',
+        'chaise.html',
         'chaise.record.table',
         'ui.bootstrap',
         'ngSanitize'])
