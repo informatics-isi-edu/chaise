@@ -37,6 +37,7 @@
                 heading="{{tableModels[$index].open ? '-' : '+'}} {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" is-open="tableModels[$index].open">
                 <!-- for different elements inside the accordion -->
                 <div ng-switch on="relatedRef.display.type">
+                    <a class="more-results-link text-right" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">View All Records</a>
                     <div ng-switch-when="markdown">
                         <span ng-bind-html="page.content"></span>
                     </div>
@@ -44,7 +45,6 @@
                     <div ng-switch-default>
                         <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
                     </div>
-                    <a ng-if="tableModels[$index].hasNext" class="more-results-link" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">Click here to access more records</a>
                 </div>
             </div>
         </uib-accordion>
