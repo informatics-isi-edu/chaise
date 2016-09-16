@@ -7,3 +7,10 @@
     text-align: right;
     top: 20px;
 }
+
+.more-results-link {
+    display: block;
+    width: inherit;
+    max-width: inherit;
+    padding-bottom: 5px;
+}
