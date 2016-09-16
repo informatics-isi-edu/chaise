@@ -1281,14 +1281,28 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                 if (data['previews']) {
                     var origin = window.location.protocol + "//" + window.location.hostname; // TBD: portno?
                     for (var i = 0, len = data['previews'].length; i < len; i++) {
-                        preview = data['previews'][i];
-                        preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?url=' + preview.preview;
-                        preview.enlargeUrl = origin + '/_viewer/xtk/view.html?url=' + preview.preview;
+                        var preview = data['previews'][i];
+                        var preview_params = '';
+                        if (preview.preview.indexOf('{') === 0) {
+                            var preview_obj = JSON.parse(preview.preview);
+                            var preview_urls = preview_obj['preview_urls'];
+                            for (var p = 0; p < preview_urls.length; p++) {
+                                if (p > 0) {
+                                    preview_params += '&'
+                                }
+                                preview_params += 'url=' + preview_urls[p];
+                            }
+                        } else {
+                            preview_params = 'url=' + preview.preview;
+                        }
+                        preview.embedUrl = origin + '/_viewer/xtk/view_on_load.html?' + preview_params;
+                        preview.enlargeUrl = origin + '/_viewer/xtk/view.html?' + preview_params;
                         $sce.trustAsResourceUrl(preview.embedUrl);
                     }
                 }
                 $scope.entity = data;
             });
+
             // A record can be edited if:
             // 1. The table or schema doesn't have an ignore annotation "entry" or "edit" context; AND
             // 2. The catalog allows write access and the user is part of the
