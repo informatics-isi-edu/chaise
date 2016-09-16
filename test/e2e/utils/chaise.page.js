@@ -609,4 +609,3 @@ function chaisePage() {
 };
 
 module.exports = new chaisePage();
-isePage();
