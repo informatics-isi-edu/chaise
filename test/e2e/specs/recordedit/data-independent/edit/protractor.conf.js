@@ -17,7 +17,10 @@ var config = pConfig.getConfig({
     setBaseUrl: function(browser, data) {
       browser.params.url = process.env.CHAISE_BASE_URL + "/recordedit" + "/#" + data.catalogId  + "/" + data.schema.name;;
       return browser.params.url;
-    } 
+    },
+
+    // Specify chaiseConfigPath
+    chaiseConfigFilePath: 'test/e2e/specs/recordedit/data-independent/edit/chaise-config.js'
 });
 
 exports.config = config;
