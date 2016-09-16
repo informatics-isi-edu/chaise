@@ -19,9 +19,7 @@
             loading: true,
             previousButtonDisabled: true,
             nextButtonDisabled: true,
-            pageLimit: 5,
-            recordStart: 1,
-            recordEnd: 5
+            pageLimit: 25
         };
     }])
 
