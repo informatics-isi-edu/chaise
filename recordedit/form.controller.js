@@ -116,7 +116,7 @@
                     var column = model.table.columns.get(k);
                     switch (column.type.name) {
                         default: if (row[k] === '') row[k] = null;
-                                 break;               
+                                 break;
                     }
                 } catch(e) {}
             }
@@ -172,10 +172,10 @@
                 var rowset = vm.recordEditModel.rows;
                 var protoRow = rowset[index];
                 var row = angular.copy(protoRow);
-                
+
                 // transform row values to avoid parsing issues with null values
                 transformRowValues(row, vm.recordEditModel);
-                
+
                 rowset.push(row);
 
             }
@@ -254,6 +254,7 @@
                     case 'boolean':
                         displayType = 'boolean';
                         break;
+                    case 'markdown':
                     case 'longtext':
                         displayType = 'longtext';
                         break;
