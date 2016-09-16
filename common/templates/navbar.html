@@ -17,8 +17,9 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li ng-show="user !== null">
-                        <a href="#" ng-bind="user"></a>
+                    <li>
+                        <a ng-if="user === null && signUpLink" ng-href="{{signUpLink}}">Sign Up</a>
+                        <p ng-if="user !== null" class="navbar-text" ng-bind="user"></p>
                     </li>
                     <li>
                         <a ng-if="user === null" href="#" ng-click="login()">Log In</a>
