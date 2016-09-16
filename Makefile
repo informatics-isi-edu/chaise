@@ -111,7 +111,8 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/matrix.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/authen.js \
-	$(COMMON)/navbar.js
+	$(COMMON)/navbar.js \
+	$(COMMON)/bindHtmlUnsafe.js
 
 # HTML templates
 TEMPLATES=views

@@ -39,7 +39,7 @@
                 <div ng-switch on="relatedRef.display.type">
                     <a class="more-results-link text-right" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">View All Records</a>
                     <div ng-switch-when="markdown">
-                        <span ng-bind-html="tableModels[$index].page.content"></span>
+                        <span bind-html-unsafe="tableModels[$index].page.content"></span>
                     </div>
                     <!-- ng-switch-when="table" is also the default case -->
                     <div ng-switch-default>
