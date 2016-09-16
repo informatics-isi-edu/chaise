@@ -44,7 +44,8 @@
                 scope.brandText = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
                 scope.menu = chaiseConfig.navbarMenu.children || [];
-                scope.signUpLink = chaiseConfig.signUpLink;
+                scope.signUpURL = chaiseConfig.signUpURL;
+                scope.profileURL = chaiseConfig.profileURL;
 
                 Session.getSession().then(function(session) {
                     $rootScope.session = session;
