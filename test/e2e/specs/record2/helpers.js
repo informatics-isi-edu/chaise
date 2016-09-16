@@ -261,7 +261,7 @@ exports.relatedTableLinks = function (tableParams) {
             relatedTableLink = chaisePage.record2Page.getMoreResultsLink(relatedTableName);
 
         browser.wait(EC.elementToBeClickable(relatedTableLink), 10000);
-        
+
         chaisePage.record2Page.getRelatedTableRows(relatedTableName).count().then(function(count) {
             expect(count).toBe(5);
 

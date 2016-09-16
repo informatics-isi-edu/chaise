@@ -92,7 +92,6 @@
                             });
                         })(i);
                     }
-                    console.log("Related Refs: ", $rootScope.relatedReferences);
 
                 }, function error(response) {
                     $log.warn(response);
