@@ -38,7 +38,11 @@ The following annotations are used to affect how information is displayed:
   * The `visible-foreign-keys` annotation is used to determine the order of the related entities and their visibility.
   ```
     "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
-      "detailed" : [ [<schema-name>, <foreign-key-name1>], [<schema-name>, <foreign-key-name2>], ... ]
+      "detailed" : [ 
+        [<schema-name>, <foreign-key-name1>], 
+        [<schema-name>, <foreign-key-name2>], 
+        ... 
+      ]
     }
   ```
 
