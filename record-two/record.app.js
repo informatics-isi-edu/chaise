@@ -8,7 +8,7 @@
         'chaise.navbar',
         'chaise.record.display',
         'chaise.record.table',
-        'chaise.html'
+        'chaise.html',
         'chaise.utils',
         'ermrestjs',
         'ui.bootstrap'
