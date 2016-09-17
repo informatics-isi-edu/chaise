@@ -65,7 +65,7 @@ describe('Search result detail page,', function () {
                             randResultTitle.click();
                             browser.rootEl = "#recordApp";
                             browser.ignoreSynchronization = true;
-                            var newPageTitleEle = element(by.id('record-bookmark-container'));
+                            var newPageTitleEle = element(by.id('detailed-bookmark-container'));
                             browser.wait(EC.visibilityOf(newPageTitleEle), 5000).then(function () {
                                 done();
                             });
@@ -79,14 +79,14 @@ describe('Search result detail page,', function () {
                     });
 
                     it('should have the same title as previous record column', function () {
-                        var entityTitle = chaisePage.recordPage.getEntityTitle();
+                        var entityTitle = chaisePage.detailedPage.getEntityTitle();
                         expect(entityTitle.getText()).toBe(randomRecordTitle);
                     });
 
                     it('should display the \'Accession\' key and non-empty content', function () {
                         var accessionText = 'accession';
-                        var accKey = chaisePage.recordPage.findEntityKeyByName(accessionText);
-                        var accValue = chaisePage.recordPage.findEntityValueByName(accessionText);
+                        var accKey = chaisePage.detailedPage.findEntityKeyByName(accessionText);
+                        var accValue = chaisePage.detailedPage.findEntityValueByName(accessionText);
                         expect(accKey.isDisplayed()).toBe(true);
                         expect(accValue.isDisplayed()).toBe(true);
                         expect(accValue.getText()).not.toBe('');
@@ -94,8 +94,8 @@ describe('Search result detail page,', function () {
                     });
                     it('should display the \'Description\' key and non-empty content', function () {
                         var desText = 'description';
-                        var accKey = chaisePage.recordPage.findEntityKeyByName(desText);
-                        var accValue = chaisePage.recordPage.findEntityValueByName(desText);
+                        var accKey = chaisePage.detailedPage.findEntityKeyByName(desText);
+                        var accValue = chaisePage.detailedPage.findEntityValueByName(desText);
                         expect(accKey.isDisplayed()).toBe(true);
                         expect(accValue.isDisplayed()).toBe(true);
                         expect(accValue.getText()).not.toBe('');
@@ -103,8 +103,8 @@ describe('Search result detail page,', function () {
                     });
                     xit('should display the \'Funding\' key and non-empty content', function () {
                         var fundingText = 'funding';
-                        var accKey = chaisePage.recordPage.findEntityKeyByName(fundingText);
-                        var accValue = chaisePage.recordPage.findEntityValueByName(fundingText);
+                        var accKey = chaisePage.detailedPage.findEntityKeyByName(fundingText);
+                        var accValue = chaisePage.detailedPage.findEntityValueByName(fundingText);
                         expect(accKey.isDisplayed()).toBe(true);
                         expect(accValue.isDisplayed()).toBe(true);
                         expect(accValue.getText()).not.toBe('');
@@ -112,8 +112,8 @@ describe('Search result detail page,', function () {
                     }).pend('Some record page may not contain "Funding", ex. Data Type -> Morphometic analysis');
                     xit('should display the \'Pubmed Id\' key and display \'N/A\' or digits', function () {
                         var pubmedText = 'pubmed id';
-                        var accKey = chaisePage.recordPage.findEntityKeyByName(pubmedText);
-                        var accValue = chaisePage.recordPage.findEntityValueByName(pubmedText);
+                        var accKey = chaisePage.detailedPage.findEntityKeyByName(pubmedText);
+                        var accValue = chaisePage.detailedPage.findEntityValueByName(pubmedText);
                         expect(accKey.isDisplayed()).toBe(true);
                         expect(accValue.isDisplayed()).toBe(true);
                         expect(accValue.getText()).toMatch('(^[0-9]*$|^N/A$)');
@@ -122,13 +122,13 @@ describe('Search result detail page,', function () {
 
                     xit('should contain the randomly chosen attribute field', function () {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
-                        var sidebarAttrKey = chaisePage.recordPage.findAssociationKeyByName(sidebarAttr);
+                        var sidebarAttrKey = chaisePage.detailedPage.findAssociationKeyByName(sidebarAttr);
                         expect(sidebarAttrKey.isDisplayed()).toBe(true);
                     });
 
                     xit('should contain the randomly chosen edit filter in association key', function () {
                         var sidebarAttr = randomSidebarAttr.toLowerCase();
-                        var sidebarAttrValue = chaisePage.recordPage.findAssociationValueByName(sidebarAttr);
+                        var sidebarAttrValue = chaisePage.detailedPage.findAssociationValueByName(sidebarAttr);
                         expect(sidebarAttrValue.isDisplayed()).toBe(true);
                         sidebarAttrValue.getText().then(function (valueText) {
                             expect(valueText.toLowerCase()).toContain(randomEditAttr.toLowerCase());
@@ -136,10 +136,10 @@ describe('Search result detail page,', function () {
                     });
 
                     xit('should display \'Files\', toggle it ' + 'to display file icon or \'No rows found\'', function () {
-                        var fileWrapper = chaisePage.recordPage.findToggleWrapperByName('Files');
+                        var fileWrapper = chaisePage.detailedPage.findToggleWrapperByName('Files');
                         expect(fileWrapper.isDisplayed()).toBe(true);
                         expect(fileWrapper.getText()).toBe('FILES');
-                        chaisePage.recordPage.clickToggleWrapperByName('Files');
+                        chaisePage.detailedPage.clickToggleWrapperByName('Files');
                         //var activeEle = fileWrapper.$('div[ng-class="{\'active\': files.open }"]');
                         //chaisePage.customExpect.elementContainClass(activeEle, 'active');
                         var collapseArea = fileWrapper.$('div.panel-collapse');
@@ -155,8 +155,8 @@ describe('Search result detail page,', function () {
 
                     it('should display \'Dataset Geo\', toggle it to display something', function () {
                         var dataset = 'dataset geo';
-                        var dataSetWrapper = chaisePage.recordPage.findToggleWrapperByName(dataset);
-                        chaisePage.recordPage.clickToggleWrapperByName(dataset);
+                        var dataSetWrapper = chaisePage.detailedPage.findToggleWrapperByName(dataset);
+                        chaisePage.detailedPage.clickToggleWrapperByName(dataset);
                         var collapseArea = dataSetWrapper.$('div.panel-collapse');
                         expect(collapseArea.isDisplayed()).toBe(true);
                     });

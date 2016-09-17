@@ -202,7 +202,7 @@ button .glyphicon-trash {
     word-wrap: break-word;
 }
 
-#record-bookmark-container{
+#detailed-bookmark-container{
     text-align: right;
     position: absolute;
     top: 20px;

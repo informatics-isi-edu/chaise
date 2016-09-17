@@ -24,10 +24,10 @@ var config = {
 
 
 //Change this to your desired filed name and Comment below testConfiguration object declaration
-//var configFileName = 'record.dev.json';
+//var configFileName = 'detailed.dev.json';
 //var testConfiguration =  require('../../data_setup/config/' + configFileName);
 
-// Just in case if you plan on not giving a file for configuration, you can always specify a testConfiguration object 
+// Just in case if you plan on not giving a file for configuration, you can always specify a testConfiguration object
 // Comment above 2 lines
 // Empty configuration will run test cases against catalog 1 and default schema
 var testConfiguration = { };
@@ -36,4 +36,3 @@ var dataSetup = require('../../../utils/protractor.parameterize.js');
 dataSetup.parameterize(config, { testConfiguration: testConfiguration , page: '/search' });
 
 exports.config = config;
-

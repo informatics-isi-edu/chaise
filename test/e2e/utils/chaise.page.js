@@ -231,7 +231,7 @@ function resultContent() {
     }
 };
 
-function recordPage() {
+function detailedPage() {
     var that = this;
     this.entityTitle = $('#entity-title');
     this.getEntityTitle = function() {
@@ -413,7 +413,7 @@ var recordEditPage = function() {
     };
 
     this.recordBookmark = function() {
-        return element(by.id('record-bookmark-container'));
+        return element(by.id('detailed-bookmark-container'));
     };
 
     this.getAlertError = function() {
@@ -529,7 +529,7 @@ function chaisePage() {
     this.moreFilter = new moreFilter();
     this.editFilter = new editFilter();
     this.resultContent = new resultContent();
-    this.recordPage = new recordPage();
+    this.detailedPage = new detailedPage();
     this.recordEditPage = new recordEditPage();
     this.record2Page = new record2Page();
     this.recordsetPage = new recordsetPage();
