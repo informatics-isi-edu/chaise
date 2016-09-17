@@ -4,8 +4,6 @@
 
 The below table explains the usage of the default parameters:
 
-### [Chaise App Settings](#Chaise-App-Settings) ###
-
 | Parameter | Values | Default Value | chaise-config.js | URL | Remarks |
 |-----------|--------|---------------|------------------|-----|---------|
 | catalog | A catalog id | 1 | "catalog":\<id\> | catalog=\<id\> | The catalog id has a numeric value |
@@ -34,8 +32,6 @@ The below table explains the usage of the default parameters:
 | editRecord | A boolean | false | "editRecord":\<value\> | N/A | If not present or equal to **true**, the recordedit page allows for inserting records and editing records. The record page will have an edit button for both of these cases as well. If equal to **false**, a dialog appears on recordedit that disallows use of the app and the edit button does not appear in the record app |
 | defaultCatalog | A catalog id | N/A | "defaultCatalog":\<id\> | N/A | The catalog id has a numeric value. Use this parameter to specify which catalog Chaise shows by default. |
 | defaultTables | An object that specifies a catalog's the default schema and table | N/A | "defaultTables": {N: {"schema": S, "table": T}, ...} | N/A | Use this parameter to specify for each catalog `N`, which table `T` Chaise shows by default. |
-
-### [Navigation Menu Settings](#Navigation-Menu-Settings) ###
-To customize the menu items displayed in the navigation bar at the top of all Chaise apps, fill in the `navbar_menu` section of the _chaise-config.js_ file with your links and/or dropdown menus. Consult the _chaise-config.js_ file for a sample menu tree.
-
-Note that only the menu items displayed between the title and username can be customized here. To change the title and logo, see [Chaise App Settings](#Chaise-App-Settings).
+| signUpURL | A URL | N/A | "signUpURL":\<your_URL\> | N/A | Use this parameter to specify what the "Sign Up" link in the navbar should link to. If `signUpURL` is unspecified, the navbar will not display a "Sign Up" link. |
+| profileURL | A URL | N/A | "profileURL":\<your_URL\> | N/A | When a user is logged in, the navbar displays the user's username. Use this parameter to specify what the username in the navbar should link to (e.g. `https://www.globus.org/app/account` if your deployment uses Globus authentication). If `profileURL` is unspecified, the navbar will display the username as regular text. |
+| navbarMenu | An object | N/A | "navbarMenu":\{...\} | N/A | Use this parameter to customize the menu items displayed in the navbar at the top of all Chaise apps by supplying an object with your links and/or dropdown menus. Consult the _chaise-config.js_ file for more details about format. |

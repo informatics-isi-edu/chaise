@@ -8,6 +8,8 @@ var chaiseConfig = {
     navbarBrand: '/',
     navbarBrandImage: null,
     logoutURL: '/image-annotation',
+    // signUpURL: '', The URL at a which a user can create a new account
+    // profileURL: '', Globus deployments can use https://www.globus.org/app/account
     dataBrowser: '/',
     maxColumns: 6,
     showUnfilteredResults: false,
@@ -28,7 +30,6 @@ var chaiseConfig = {
       chosenAttribute: "Data Type",
       chosenValue: "Expression microarray - gene"
     },
-    newTab: true
     navbarMenu: {
         newTab: true,
         children: [
