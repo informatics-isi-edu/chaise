@@ -8,9 +8,6 @@
         // Set default newTab property at root node
         if (!root.hasOwnProperty('newTab')) {
             root.newTab = true;
-            if (chaiseConfig.hasOwnProperty('newTab')) {
-                root.newTab = chaiseConfig.newTab;
-            }
         }
 
         var q = [root];
