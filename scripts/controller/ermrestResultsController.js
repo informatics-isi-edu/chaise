@@ -462,12 +462,16 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 		return ret;
 	};
 
-  this.urlBookmark = function urlBookmark() {
-    return $scope.FacetsData.bookmark;
-  };
+	  this.urlBookmark = function urlBookmark() {
+		    return $scope.FacetsData.bookmark;
+		  };
 
 	this.isUrl = function isUrl(table, column) {
 		return hasAnnotation(table, column, 'url');
+	};
+
+	this.urlExport = function urlExport() {
+		return getExportURL();
 	};
 
 	this.urlLink = function urlLink(table, column, value) {

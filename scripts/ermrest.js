@@ -4,6 +4,7 @@ var goauth_cookie = 'globusonline-goauth';
 var token = null;
 var SCHEMA = null;
 var CATALOG = null;
+var CSV_EXPORT_URL = '#';
 var ERMREST_CATALOG_PATH = '/ermrest/catalog/';
 var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
@@ -1447,9 +1448,11 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 	} else {
 		param['queryPath'] = param['predicate'].slice();
 		var predicate = param['predicate'];
+		var exportPredicate = predicate.slice();
 		if (sortOption != null && sortOption != '') {
 			var sortPredicate = getSortPredicate(data, sortOption, sortOrder, page, pageSize);
 			predicate.push('$A/' + sortPredicate.join(';'));
+			exportPredicate = predicate.slice();
 		} else {
 			if (page > 1) {
 				var firstRow = [];
@@ -1471,17 +1474,25 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 			}
 		}
 		var url = ERMREST_DATA_HOME + '/entity/' + getQueryPredicate(param['options']);
+		CSV_EXPORT_URL = url;
 		param['queryPredicate'] = getQueryPredicate(param['options']);
 		param['primaryKey'] = PRIMARY_KEY[0];
 		if (predicate.length > 0) {
 			url += '/' + predicate.join('/');
 		}
 		url += '/$A';
+		if (exportPredicate.length > 0) {
+			CSV_EXPORT_URL += '/' + exportPredicate.join('/');
+		}
+		CSV_EXPORT_URL += '/$A';
 		if (sortOption != null && sortOption != '') {
 			url += getSortClause(sortOption, sortOrder, false);
+			CSV_EXPORT_URL += getSortClause(sortOption, sortOrder, false);
 		} else {
 			url += '@sort(' + PRIMARY_KEY.join(',') + ')';
+			CSV_EXPORT_URL += '@sort(' + PRIMARY_KEY.join(',') + ')';
 		}
+		CSV_EXPORT_URL += '?accept=csv&limit=None';
 		url += '?limit=' + pageSize;
 		param['getPageUrl'] = url;
 		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetPage, null, param);
@@ -4099,3 +4110,6 @@ function convertFilter(url) {
 	return newUrl;
 }
 
+function getExportURL() {
+	return CSV_EXPORT_URL;
+}

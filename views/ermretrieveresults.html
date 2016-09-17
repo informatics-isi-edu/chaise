@@ -65,7 +65,8 @@
 									<span ng-show="tourCtrl.progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
 									<strong>Tour</strong>
 								</a>
-								<a id="permalink" title="This link stores your current search criteria as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}"><span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
+								<a id="permalink" class="tour-start-btn" title="This link stores your current search criteria as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}"><span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
+								<a id="exportlink" title="This link downloads the data into a CSV file." ng-href="{{facetResults.urlExport()}}"><span class="glyphicon glyphicon-export"></span> <strong>Export</strong></a>
 							</p>
 						</div>
 					</div>
