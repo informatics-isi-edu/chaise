@@ -46,11 +46,13 @@
     "karma-sinon-chai": "x",
     "phantomjs-prebuilt": "x",
     "protractor": "x",
-    "q": "x",
+    "q": "^1.4.1",
     "request": "x",
     "webdriver-manager": "x",
     "ermrest-data-utils": "x",
     "set-cookie-parser": "x",
-    "jsonfile": "x"
+    "jsonfile": "x",
+    "execSync": "x",
+    "fs-extra": "x"
   }
 }

@@ -8,6 +8,7 @@
         'chaise.navbar',
         'chaise.record.display',
         'chaise.record.table',
+        'chaise.html',
         'chaise.utils',
         'ermrestjs',
         'ui.bootstrap'
@@ -19,9 +20,7 @@
             loading: true,
             previousButtonDisabled: true,
             nextButtonDisabled: true,
-            pageLimit: 5,
-            recordStart: 1,
-            recordEnd: 5
+            pageLimit: 25
         };
     }])
 
@@ -72,14 +71,17 @@
 
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                         $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
-                        // We want to limit the number of values shown by default
-                        // Maybe have a chaise config option
+
+                        if ($rootScope.relatedReferences[i].display.defaultPageSize) {
+                            pageInfo.pageLimit = $rootScope.relatedReferences[i].display.defaultPageSize;
+                        }
                         (function(i) {
-                            $rootScope.relatedReferences[i].read(5).then(function (page) {
+                            $rootScope.relatedReferences[i].read(pageInfo.pageLimit).then(function (page) {
 
                                 var model = {
                                     reference: $rootScope.relatedReferences[i],
                                     columns: $rootScope.relatedReferences[i].columns,
+                                    page: page,
                                     hasNext: page.hasNext,      // used to determine if a link should be shown
                                     hasLoaded: true,            // used to determine if the current table and next table should be rendered
                                     open: true,                 // to define if the accordion is open or closed

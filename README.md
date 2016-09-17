@@ -64,11 +64,11 @@ See the [heuristics guide](./doc/heuristics.md) for more information.
 
 ## Chaise Apps and their Contexts
 
-|              | compact | compact/brief | detailed | entry | entry/edit | entry/create | filter | name | * |
-|--------------|---------|---------------|----------|-------|------------|--------------|--------|------|---|
-| [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)    | X       | -             | -        | -     | -          | -            | -      | -    | - |
-| [record2](https://github.com/informatics-isi-edu/chaise/blob/master/record-two/readme.md)   | -       | X             | X        | -     | -          | -            | -      | -    | - |
-| [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md)   | -       | -             | -        | X     | X          | X            | -      | -    | - |
+|              | compact         | compact/brief | detailed        | entry | entry/edit | entry/create | filter | name | * |
+|--------------|-----------------|---------------|-----------------|-------|------------|--------------|--------|------|---|
+| [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)    | Pertains to the data that loads inside the recordset table       | -             | -        | -     | -          | -            | -      | -    | - |
+| [record2](https://github.com/informatics-isi-edu/chaise/blob/master/record-two/readme.md)   | General case that is used if `compact/brief` is not defined.       | Pertains to the data inside the related tables that are loaded after the record. Inherits from `compact` if not defined.             | Pertains to the record itself and the way that the record data will be displayed on the page.         | -     | -          | -            | -      | -    | - |
+| [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md)   | -       | -             | -        | General case that is used during creation if  `entry/create` is not defined and used for editing if `entry/edit` is not defined.    | Modifies the form that shows for editing. Inherits from `entry` if not defined.          | Modifies the form that shows for creation. Inherits from `entry` if not defined.            | -      | -    | - |
 | [viewer](https://github.com/informatics-isi-edu/chaise/blob/master/viewer/readme.md)       | -       | -             | -        | -     | -          | -            | -      | -    | - |
 
 More information about what each context does for each app can be found in that app's readme.md file.

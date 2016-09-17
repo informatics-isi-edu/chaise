@@ -9,7 +9,7 @@
 
 ### [Contexts](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md#context-names)
 The `detailed` context pertains to the record itself and the way that the record data will be displayed on the page.
-The `compact/brief` context pertains to the data inside the related tables that are loaded after the record itself.
+The `compact` context pertains to the data inside the related tables that are loaded after the record itself.
 
 ### [Annotations](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md)
 The following annotations are used to affect how information is displayed:
@@ -17,7 +17,7 @@ The following annotations are used to affect how information is displayed:
   * The `table-display` annotation can be used for a few different cases in record-two. Page size for `compact/brief` will affect the maximum number of results that show in the related entity tables.
   ```
     "tag:isrd.isi.edu,2016:table-display": {
-      "compact/brief": {
+      "compact": {
         "page_size": 5
       }
     }
@@ -38,7 +38,11 @@ The following annotations are used to affect how information is displayed:
   * The `visible-foreign-keys` annotation is used to determine the order of the related entities and their visibility.
   ```
     "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
-      "detailed" : [ <foreign-key1>, <foreign-key2>, ... ]
+      "detailed" : [ 
+        [<schema-name>, <foreign-key-name1>], 
+        [<schema-name>, <foreign-key-name2>], 
+        ... 
+      ]
     }
   ```
 
