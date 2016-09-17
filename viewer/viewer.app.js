@@ -20,10 +20,6 @@
     .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
         var utils = UriUtilsProvider.$get();
 
-        if (chaiseConfig.headTitle !== undefined) {
-            document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
-        }
-
         // Parse the URL
         utils.setOrigin();
         utils.parseURLFragment(window.location, context);
@@ -124,7 +120,9 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'statuses', 'vocabs', 'user', function runApp($window, context, image, annotations, comments, anatomies, statuses, vocabs) {
+    .run(['headInjector', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'statuses', 'vocabs', 'user', function runApp(headInjector, $window, context, image, annotations, comments, anatomies, statuses, vocabs) {
+        headInjector.addTitle();
+        headInjector.addCustomCSS();
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
