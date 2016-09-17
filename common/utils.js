@@ -183,7 +183,7 @@
                 }
             }
 
-            // TODO With Reference API, we don't need the code below? 
+            // TODO With Reference API, we don't need the code below?
 
             // start extracting values after '#' symbol
             var parts = hash.substring(1).split('/');
@@ -457,6 +457,28 @@
                     return viewValue;
                 });
             }
+        };
+    })
+
+    .service('headInjector', function() {
+        function addCustomCSS() {
+            if (chaiseConfig['customCSS'] !== undefined) {
+            	var fileref = document.createElement("link");
+            	fileref.setAttribute("rel", "stylesheet");
+            	fileref.setAttribute("type", "text/css");
+            	fileref.setAttribute("href", chaiseConfig['customCSS']);
+            	document.getElementsByTagName("head")[0].appendChild(fileref);
+            }
+        }
+
+        function addTitle() {
+            if (chaiseConfig.headTitle !== undefined) {
+                document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
+            }
+        }
+        return {
+            addCustomCSS: addCustomCSS,
+            addTitle: addTitle
         };
     });
 })();

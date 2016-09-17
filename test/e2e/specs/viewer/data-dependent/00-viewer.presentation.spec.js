@@ -1,9 +1,9 @@
 var chaisePage = require('../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
-var record2Helpers = require('../helpers.js');
+var viewerHelpers = require('../helpers.js');
 
-describe('View existing record,', function() {
+describe('Viewer app', function() {
 
-	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+    var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
 
     for (var i=0; i< testParams.tuples.length; i++) {
 
@@ -23,9 +23,10 @@ describe('View existing record,', function() {
 					browser.sleep(2000);
 			    });
 
-				describe("Presentation ,", function() {
-					var params = record2Helpers.testPresentation(tupleParams);
-				});
+                // Commented out because no specs to test presentation just yet
+				// describe("Presentation ,", function() {
+				// 	var params = record2Helpers.testPresentation(tupleParams);
+				// });
 
     		});
 
@@ -33,7 +34,6 @@ describe('View existing record,', function() {
 
 
     }
-
     it('should load custom CSS and document title defined in chaise-config.js', function() {
         var chaiseConfig = browser.executeScript('return chaiseConfig');
         if (chaiseConfig.customCSS) {

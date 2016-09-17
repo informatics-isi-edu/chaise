@@ -1,16 +1,16 @@
 var chaisePage = require('../../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
 var recordEditHelpers = require('../../helpers.js');
 
-describe('Record Add', function() {  
+describe('Record Add', function() {
 
     var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
-    
+
     for (var i=0; i< testParams.tables.length; i++) {
-    	
+
     	(function(tableParams, index) {
     		var table;
 
-    		describe("======================================================================= \n    " 
+    		describe("======================================================================= \n    "
     			+ tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
 
 				beforeAll(function () {
@@ -25,7 +25,7 @@ describe('Record Add', function() {
 
 				describe("delete record, ", function() {
 
-					if (tableParams.records > 1) { 
+					if (tableParams.records > 1) {
 
 						it(tableParams.records + " buttons should be visible and enabled", function() {
 							chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
@@ -80,7 +80,7 @@ describe('Record Add', function() {
 							} else {
 								expect(true).toBe(true);
 							}
-						});	
+						});
 					});
 
 					it("should be redirected to record page", function() {
@@ -104,5 +104,17 @@ describe('Record Add', function() {
     	})(testParams.tables[i], i);
 
     }
+
+    it('should load custom CSS and document title defined in chaise-config.js', function() {
+        var chaiseConfig = browser.executeScript('return chaiseConfig');
+        if (chaiseConfig.customCSS) {
+            expect($("link[href='" + chaiseConfig.customCSS + "']").length).toBeTruthy();
+        }
+        if (chaiseConfig.headTitle) {
+            browser.getTitle().then(function(title) {
+                expect(title).toEqual(chaiseConfig.headTitle);
+            });
+        }
+    });
 
 });

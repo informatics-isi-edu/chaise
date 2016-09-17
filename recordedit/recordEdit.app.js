@@ -25,9 +25,6 @@
     .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
         var utils = UriUtilsProvider.$get();
 
-        if (chaiseConfig.headTitle !== undefined) {
-            document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
-        }
         // Parse the URL
         utils.setOrigin();
         utils.parseURLFragment(window.location, context);
@@ -35,7 +32,9 @@
         console.log('Context:',context);
     }])
 
-    .run(['context', 'ERMrest', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(context, ERMrest, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
+    .run(['headInjector', 'context', 'ERMrest', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(headInjector, context, ERMrest, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
+        headInjector.addTitle();
+        headInjector.addCustomCSS();
 
         if (!chaiseConfig.editRecord  && chaiseConfig.editRecord !== undefined) {
             var modalInstance = $uibModal.open({
