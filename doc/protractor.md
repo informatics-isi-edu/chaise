@@ -1,4 +1,4 @@
-# End to End Testing Documentation 
+# End to End Testing Documentation
 
 For now, we only have E2E tests in Chaise. E2E tests are automation tests that simulate a user interacting with the app and assert or expect the app would act correctly accordingly.
 
@@ -18,7 +18,7 @@ chaise/
     |-- unit
     `-- e2e
         |-- data_setup                       
-        |   |-- config                       # test configuration files 
+        |   |-- config                       # test configuration files
         |   |   `-- CONFIG_NAME.json
         |   |-- data                         # Data
         |   |   `-- SCHEMA_NAME
@@ -28,18 +28,18 @@ chaise/
         |-- specs
         |   |-- SPEC_NAME
         |   |   |-- data-dependent           # All the possible test cases that are dependent on some static data should be in this folder
-        |   |   |   |-- 01.TEST_NAME1.js 
+        |   |   |   |-- 01.TEST_NAME1.js
         |   |   |   |-- 02.TEST_NAME3.js                 
         |   |   |   `-- protractor.conf.js  
         |   |   |-- data-independent         # All the possible test cases that are independent of data for a spec should be in this folder  
         |   |   |   |                        # They introspect the existing schema to run the cases*/
-        |   |   |   |-- 01.TEST_NAME1.js 
+        |   |   |   |-- 01.TEST_NAME1.js
         |   |   |   |-- 02.TEST_NAME3.js     
         |   |   |   `-- protractor.conf.js   # change this to specify your test configuration             
         `-- utils
             |-- chaise.page.js               # To declare Page Objects, google "page object pattern" for details
             |-- page.utils.js                # Utilities for Page pbjects
-        
+
 ```
 
 ###Testing workflow
@@ -53,7 +53,7 @@ make test
 ```
 will be executed. Command specified in Makefile will then be executed, which will invoke Protractor to execute the tests.
 ```sh
-protractor search/data-independent/protractor.conf.js && search/data-dependent/protractor.conf.js && protractor record/data-dependentprotractor.conf.js
+protractor search/data-independent/protractor.conf.js && search/data-dependent/protractor.conf.js && protractor detailed/data-dependentprotractor.conf.js
 ```
 Protractor will run "protractor search/data-independent/protractor.conf.js" first, if there is no failure in search/data-independent/protractor.conf.js specs, protractor will proceed to execute "protractor search/data-dependent/protractor.conf.js". If there are failures in search/data-dependent/protractor.conf.js specs, the tests will exit. And it keeps goin on until it has executed all protractor test suites.
 
@@ -110,7 +110,7 @@ If you observer the `protractor.conf.js` has some lines added at the end. They s
 var configFileName = 'search.dev.json';
 var testConfiguration =  require('../../data_setup/config/' + configFileName);
 
-// Just in case if you plan on not giving a file for configuration, you can always specify a testConfiguration object 
+// Just in case if you plan on not giving a file for configuration, you can always specify a testConfiguration object
 // Comment above 2 lines
 
 // Empty configuration will run test cases against catalog 1 and default schema
@@ -163,7 +163,7 @@ The `tests` object is mandatory for data-dependent testcases, as the test-cases 
     "tests" : {
         "Filters on top of the records," : {   // This is the name of describe which will used this data
 
-            // The internal data doesn't has a format, its just an object which can change accorsing to your test needs/ 
+            // The internal data doesn't has a format, its just an object which can change accorsing to your test needs/
             "data" : "testcase2Input2",
             "someMoreData" : "data"
             .
@@ -199,4 +199,4 @@ Ex. after selecting some attributes in sidebar, sometimes it takes chaise one or
 
 Better ways can be used to ascertain that those asyncs are fninished.
 ####Sync with pages
-Normally protractor needs to sync with AngularJS page so that tests can be run. To "sync" is to specify the "ng-app" element in the conf file. 
+Normally protractor needs to sync with AngularJS page so that tests can be run. To "sync" is to specify the "ng-app" element in the conf file.

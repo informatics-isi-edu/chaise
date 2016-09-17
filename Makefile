@@ -21,11 +21,11 @@ BIN=$(MODULES)/.bin
 # Protractor scripts
 E2EDIsearch=test/e2e/specs/search/data-independent/protractor.conf.js
 E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
-E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
+E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
-E2EDrecord2=test/e2e/specs/record2/data-dependent/protractor.conf.js
-E2EDrecord2RelatedTable=test/e2e/specs/record2/related-table/protractor.conf.js
+E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
+E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
 E2EDviewer=test/e2e/specs/viewer/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/specs/login/protractor.conf.js
@@ -43,12 +43,12 @@ CAT=cat
 HTML=search/index.html \
 	 logout/index.html \
 	 login/index.html \
-	 record/index.html \
+	 detailed/index.html \
 	 recordset/index.html \
 	 matrix/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
-	 record-two/index.html
+	 record/index.html
 
 # ERMrestjs Deps
 ERMRESTJS_DIR=../../ermrestjs
@@ -127,13 +127,13 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 MATRIX_TEMPLATES_DEPS =$(TEMPLATES)/erminit.html \
     $(TEMPLATES)/ermmatrix.html
 
-RECORD_TEMPLATES=record/assets/views/record.html
+DETAILED_TEMPLATES=detailed/assets/views/detailed.html
 RECSET_TEMPLATES_DEPS=recordset/recordset.html
 
 # JavaScript and CSS source for Record app
-RECORD_ASSETS=record/assets
+DETAILED_ASSETS=detailed/assets
 
-RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+DETAILED_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
@@ -141,42 +141,42 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/navbar.js
 
-RECORD_JS_DEPS=$(RECORD_ASSETS)/lib/angular-route.min.js \
-	$(RECORD_ASSETS)/lib/angular-resource.min.js \
-	$(RECORD_ASSETS)/lib/angular-animate.min.js \
-	$(RECORD_ASSETS)/lib/angular-cookies.min.js \
-	$(RECORD_ASSETS)/lib/ui-bootstrap-tpls-0.12.1.min.js \
-	$(RECORD_ASSETS)/lib/filesize.min.js \
-	$(RECORD_ASSETS)/lib/slippry/slippry.min.js \
-	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.pack.js \
-	$(RECORD_ASSETS)/lib/jquery.floatThead.min.js \
-    $(RECORD_ASSETS)/lib/ui-grid.js \
-    $(RECORD_ASSETS)/lib/csv.js \
-    $(RECORD_ASSETS)/lib/pdfmake.min.js \
-    $(RECORD_ASSETS)/lib/vfs_fonts.js \
-    $(RECORD_ASSETS)/lib/marked.min.js
+DETAILED_JS_DEPS=$(DETAILED_ASSETS)/lib/angular-route.min.js \
+	$(DETAILED_ASSETS)/lib/angular-resource.min.js \
+	$(DETAILED_ASSETS)/lib/angular-animate.min.js \
+	$(DETAILED_ASSETS)/lib/angular-cookies.min.js \
+	$(DETAILED_ASSETS)/lib/ui-bootstrap-tpls-0.12.1.min.js \
+	$(DETAILED_ASSETS)/lib/filesize.min.js \
+	$(DETAILED_ASSETS)/lib/slippry/slippry.min.js \
+	$(DETAILED_ASSETS)/lib/fancybox/jquery.fancybox.pack.js \
+	$(DETAILED_ASSETS)/lib/jquery.floatThead.min.js \
+    $(DETAILED_ASSETS)/lib/ui-grid.js \
+    $(DETAILED_ASSETS)/lib/csv.js \
+    $(DETAILED_ASSETS)/lib/pdfmake.min.js \
+    $(DETAILED_ASSETS)/lib/vfs_fonts.js \
+    $(DETAILED_ASSETS)/lib/marked.min.js
 
-RECORD_JS_SOURCE= $(JS)/respond.js \
+DETAILED_JS_SOURCE= $(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \
 	$(JS)/ermrest.js \
 	$(COMMON)/utils.js \
-	$(RECORD_ASSETS)/javascripts/app.js
+	$(DETAILED_ASSETS)/javascripts/app.js
 
-RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+DETAILED_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(COMMON)/styles/appheader.css
 
-RECORD_CSS_DEPS=$(RECORD_ASSETS)/lib/slippry/slippry.css \
-	$(RECORD_ASSETS)/lib/fancybox/jquery.fancybox.css \
-	$(RECORD_ASSETS)/stylesheets/ui-grid.css
+DETAILED_CSS_DEPS=$(DETAILED_ASSETS)/lib/slippry/slippry.css \
+	$(DETAILED_ASSETS)/lib/fancybox/jquery.fancybox.css \
+	$(DETAILED_ASSETS)/stylesheets/ui-grid.css
 
-RECORD_CSS_SOURCE=$(COMMON)/styles/app.css
+DETAILED_CSS_SOURCE=$(COMMON)/styles/app.css
 
 # JavaScript and CSS source for Record(2) app
-RECORDTWO_ASSETS=record-two
+RECORD_ASSETS=record
 
-RECORDTWO_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(JS)/vendor/angular-sanitize.js \
@@ -192,14 +192,14 @@ RECORDTWO_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
-RECORDTWO_JS_SOURCE=$(RECORDTWO_ASSETS)/record.app.js \
-	$(RECORDTWO_ASSETS)/record.controller.js
+RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
+	$(RECORD_ASSETS)/record.controller.js
 
-RECORDTWO_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/app.css \
 	$(COMMON)/styles/appheader.css
 
-RECORDTWO_CSS_SOURCE=$(RECORDTWO_ASSETS)/record.css
+RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 
 # JavaScript and CSS source for Viewer app
 VIEWER_ASSETS=viewer
@@ -295,7 +295,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
-	$(RECORD_ASSETS)/lib/angular-animate.min.js \
+	$(DETAILED_ASSETS)/lib/angular-animate.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/errors.js \
@@ -404,7 +404,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecord2RelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -415,22 +415,22 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecord2RelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run search app tests
 .PHONY: testsearch
 testsearch:
 	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)
 
+#Rule to run detailed app tests
+.PHONY: testdetailed
+testdetailed:
+	$(BIN)/protractor $(E2EDdetailed)
+
 #Rule to run record app tests
 .PHONY: testrecord
 testrecord:
-	$(BIN)/protractor $(E2EDrecord)
-
-#Rule to run record-two app tests
-.PHONY: testrecord2
-testrecord2:
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecord2RelatedTable)
+	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable)
 
 #Rule to run record add app tests
 .PHONY: testrecordadd
@@ -464,14 +464,14 @@ logout/index.html: logout/index.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		logout/index.html.in > logout/index.html
 
-record/index.html: record/index.html.in .make-record-asset-block .make-record-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-record-template-block' -e 'd' -e '}' \
-		record/index.html.in > record/index.html
+detailed/index.html: detailed/index.html.in .make-detailed-asset-block .make-detailed-template-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-detailed-asset-block' -e 'd' -e '}' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-detailed-template-block' -e 'd' -e '}' \
+		detailed/index.html.in > detailed/index.html
 
-record-two/index.html: record-two/index.html.in .make-recordtwo-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-recordtwo-asset-block' -e 'd' -e '}' \
-		record-two/index.html.in > record-two/index.html
+record/index.html: record/index.html.in .make-record-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
+		record/index.html.in > record/index.html
 
 recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
@@ -512,21 +512,21 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
 
-.make-record-asset-block: $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_DEPS) $(RECORD_CSS_SOURCE) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_DEPS) $(RECORD_JS_SOURCE) $(JS_CONFIG)
-	> .make-record-asset-block
-	for file in $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-record-asset-block ; \
+.make-detailed-asset-block: $(DETAILED_SHARED_CSS_DEPS) $(DETAILED_CSS_DEPS) $(DETAILED_CSS_SOURCE) $(DETAILED_SHARED_JS_DEPS) $(DETAILED_JS_DEPS) $(DETAILED_JS_SOURCE) $(JS_CONFIG)
+	> .make-detailed-asset-block
+	for file in $(DETAILED_SHARED_CSS_DEPS) $(DETAILED_CSS_DEPS); do \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-detailed-asset-block ; \
 	done
-	for file in $(RECORD_CSS_SOURCE); do \
+	for file in $(DETAILED_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'></script>" >> .make-detailed-asset-block ; \
 	done
-	for file in $(JS_CONFIG) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_DEPS); do \
-		echo "<script src='../$$file'></script>" >> .make-record-asset-block ; \
+	for file in $(JS_CONFIG) $(DETAILED_SHARED_JS_DEPS) $(DETAILED_JS_DEPS); do \
+		echo "<script src='../$$file'></script>" >> .make-detailed-asset-block ; \
 	done
-	for file in $(RECORD_JS_SOURCE); do \
+	for file in $(DETAILED_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-detailed-asset-block ; \
 	done
 
 .make-template-block: $(TEMPLATES_DEPS)
@@ -547,10 +547,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		$(CAT) $$file >> .make-matrix-template-block ; \
 	done
 
-.make-record-template-block: $(RECORD_TEMPLATES)
-	> .make-record-template-block
-	for file in $(RECORD_TEMPLATES); do \
-		$(CAT) $$file >> .make-record-template-block; \
+.make-detailed-template-block: $(DETAILED_TEMPLATES)
+	> .make-detailed-template-block
+	for file in $(DETAILED_TEMPLATES); do \
+		$(CAT) $$file >> .make-detailed-template-block; \
 	done
 
 .make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
@@ -613,24 +613,24 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 
-.make-recordtwo-asset-block: $(RECORDTWO_SHARED_CSS_DEPS) $(RECORDTWO_CSS_SOURCE) $(RECORDTWO_SHARED_JS_DEPS) $(RECORDTWO_JS_SOURCE) $(JS_CONFIG)
-	> .make-recordtwo-asset-block
-	for file in $(RECORDTWO_SHARED_CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-recordtwo-asset-block ; \
+.make-record-asset-block: $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_SOURCE) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_SOURCE) $(JS_CONFIG)
+	> .make-record-asset-block
+	for file in $(RECORD_SHARED_CSS_DEPS); do \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-record-asset-block ; \
 	done
-	for file in $(RECORDTWO_CSS_SOURCE); do \
+	for file in $(RECORD_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-recordtwo-asset-block ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-record-asset-block ; \
 	done
-	for file in $(JS_CONFIG) $(RECORDTWO_SHARED_JS_DEPS); do \
-		echo "<script src='../$$file'></script>" >> .make-recordtwo-asset-block ; \
+	for file in $(JS_CONFIG) $(RECORD_SHARED_JS_DEPS); do \
+		echo "<script src='../$$file'></script>" >> .make-record-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		echo "<script src='$$script'></script>" >> .make-recordtwo-asset-block ; \
+		echo "<script src='$$script'></script>" >> .make-record-asset-block ; \
 	done
-	for file in $(RECORDTWO_JS_SOURCE); do \
+	for file in $(RECORD_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-recordtwo-asset-block ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 
 
@@ -667,6 +667,7 @@ usage:
 	@echo "    clean     		- cleans the dist dir"
 	@echo "    distclean 		- cleans the dist dir and the dependencies"
 	@echo "    testsearch 		- runs search app e2e tests"
-	@echo "    testrecord 		- runs record app e2e tests"
-	@echo "    testrecordadd 	- runs data entry add e2e tests"
-	@echo "    testrecordedit 	- runs date entry edit e2e tests"
+	@echo "    testdetailed 	- runs detailed app e2e tests"
+	@echo "    testrecordadd 	- runs data entry app add e2e tests"
+	@echo "    testrecordedit 	- runs data entry app edit e2e tests"
+	@echo "	   testrecord 		- runs record app e2e tests"

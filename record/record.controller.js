@@ -29,7 +29,7 @@
             var refLocation = ref.location,
                 // This uses $window location because we need the origin and pathname relative to chaise,
                 // whereas refLocation gives you that info but relative to ermrestJS
-                recordsetPathname = $window.location.pathname.replace("record-two", "recordset");
+                recordsetPathname = $window.location.pathname.replace("record", "recordset");
 
             var uri = $window.location.origin + recordsetPathname + '#' + refLocation.catalog + '/' + refLocation.path;
             $window.location.href = uri;

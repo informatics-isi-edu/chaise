@@ -1,5 +1,5 @@
 var chaisePage = require('../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
-var record2Helpers = require('../helpers.js');
+var recordHelpers = require('../helpers.js');
 
 describe('View existing record,', function() {
 
@@ -24,7 +24,7 @@ describe('View existing record,', function() {
 			    });
 
                 describe("Click the create record button ,", function() {
-					var params = record2Helpers.testCreateButton(tupleParams);
+					var params = recordHelpers.testCreateButton(tupleParams);
 				});
 
     		});
