@@ -24,8 +24,8 @@ E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
 E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
-E2EDrecord2=test/e2e/specs/record2/data-dependent/protractor.conf.js
-E2EDrecord2RelatedTable=test/e2e/specs/record2/related-table/protractor.conf.js
+E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
+E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/specs/login/protractor.conf.js
 
@@ -47,7 +47,7 @@ HTML=search/index.html \
 	 matrix/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
-	 record-two/index.html
+	 record/index.html
 
 # ERMrestjs Deps
 ERMRESTJS_DIR=../../ermrestjs
@@ -173,9 +173,9 @@ DETAILED_CSS_DEPS=$(DETAILED_ASSETS)/lib/slippry/slippry.css \
 DETAILED_CSS_SOURCE=$(COMMON)/styles/app.css
 
 # JavaScript and CSS source for Record(2) app
-RECORDTWO_ASSETS=record-two
+RECORD_ASSETS=record
 
-RECORDTWO_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(JS)/vendor/angular-sanitize.js \
@@ -191,14 +191,14 @@ RECORDTWO_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
-RECORDTWO_JS_SOURCE=$(RECORDTWO_ASSETS)/record.app.js \
-	$(RECORDTWO_ASSETS)/record.controller.js
+RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
+	$(RECORD_ASSETS)/record.controller.js
 
-RECORDTWO_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/app.css \
 	$(COMMON)/styles/appheader.css
 
-RECORDTWO_CSS_SOURCE=$(RECORDTWO_ASSETS)/record.css
+RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 
 # JavaScript and CSS source for Viewer app
 VIEWER_ASSETS=viewer
@@ -403,7 +403,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecord2RelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -414,7 +414,7 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecord2RelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run search app tests
 .PHONY: testsearch
@@ -426,10 +426,10 @@ testsearch:
 testdetailed:
 	$(BIN)/protractor $(E2EDdetailed)
 
-#Rule to run record-two app tests
-.PHONY: testrecord2
-testrecord2:
-	$(BIN)/protractor $(E2EDrecord2) && $(BIN)/protractor $(E2EDrecord2RelatedTable)
+#Rule to run record app tests
+.PHONY: testrecord
+testrecord:
+	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable)
 
 #Rule to run record add app tests
 .PHONY: testrecordadd
@@ -463,9 +463,9 @@ detailed/index.html: detailed/index.html.in .make-detailed-asset-block .make-det
 		-e '/%TEMPLATES%/ {' -e 'r .make-detailed-template-block' -e 'd' -e '}' \
 		detailed/index.html.in > detailed/index.html
 
-record-two/index.html: record-two/index.html.in .make-recordtwo-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-recordtwo-asset-block' -e 'd' -e '}' \
-		record-two/index.html.in > record-two/index.html
+record/index.html: record/index.html.in .make-record-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
+		record/index.html.in > record/index.html
 
 recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
@@ -607,24 +607,24 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 
-.make-recordtwo-asset-block: $(RECORDTWO_SHARED_CSS_DEPS) $(RECORDTWO_CSS_SOURCE) $(RECORDTWO_SHARED_JS_DEPS) $(RECORDTWO_JS_SOURCE) $(JS_CONFIG)
-	> .make-recordtwo-asset-block
-	for file in $(RECORDTWO_SHARED_CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-recordtwo-asset-block ; \
+.make-record-asset-block: $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_SOURCE) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_SOURCE) $(JS_CONFIG)
+	> .make-record-asset-block
+	for file in $(RECORD_SHARED_CSS_DEPS); do \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-record-asset-block ; \
 	done
-	for file in $(RECORDTWO_CSS_SOURCE); do \
+	for file in $(RECORD_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-recordtwo-asset-block ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-record-asset-block ; \
 	done
-	for file in $(JS_CONFIG) $(RECORDTWO_SHARED_JS_DEPS); do \
-		echo "<script src='../$$file'></script>" >> .make-recordtwo-asset-block ; \
+	for file in $(JS_CONFIG) $(RECORD_SHARED_JS_DEPS); do \
+		echo "<script src='../$$file'></script>" >> .make-record-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		echo "<script src='$$script'></script>" >> .make-recordtwo-asset-block ; \
+		echo "<script src='$$script'></script>" >> .make-record-asset-block ; \
 	done
-	for file in $(RECORDTWO_JS_SOURCE); do \
+	for file in $(RECORD_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-recordtwo-asset-block ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 
 
@@ -662,5 +662,6 @@ usage:
 	@echo "    distclean 		- cleans the dist dir and the dependencies"
 	@echo "    testsearch 		- runs search app e2e tests"
 	@echo "    testdetailed 	- runs detailed app e2e tests"
-	@echo "    testrecordadd 	- runs data entry add e2e tests"
-	@echo "    testrecordedit 	- runs date entry edit e2e tests"
+	@echo "    testrecordadd 	- runs data entry app add e2e tests"
+	@echo "    testrecordedit 	- runs data entry app edit e2e tests"
+	@echo "	   testrecord 		- runs record app e2e tests"

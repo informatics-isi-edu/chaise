@@ -35,7 +35,7 @@
             context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
 
             // The context object won't change unless the app is reloaded
-            context.appName = "record-two";
+            context.appName = "record";
 
             if (context.filter) {
                 ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {

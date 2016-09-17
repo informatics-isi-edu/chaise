@@ -2,20 +2,20 @@ var chaisePage = require('../../utils/chaise.page.js');
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
-		chaisePage.record2Page.getEntityTitle().then(function(txt) {
+		chaisePage.recordPage.getEntityTitle().then(function(txt) {
 			expect(txt).toBe(tableParams.title);
 		});
 	});
 
 	it("should have '" + tableParams.subTitle +"' as subTitle", function() {
-		chaisePage.record2Page.getEntitySubTitle().then(function(txt) {
+		chaisePage.recordPage.getEntitySubTitle().then(function(txt) {
 			expect(txt).toBe(tableParams.subTitle);
 		});
 	});
 
 	it("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
         var columns = tableParams.columns.filter(function(c) {return c.value != null;});
-		chaisePage.record2Page.getColumns().then(function(els) {
+		chaisePage.recordPage.getColumns().then(function(els) {
 			// Check no of columns are same as needed
 			expect(els.length).toBe(columns.length);
 		});
@@ -23,8 +23,8 @@ exports.testPresentation = function (tableParams) {
 
     it("should show the action buttons properly", function() {
         var EC = protractor.ExpectedConditions,
-            editButton = chaisePage.record2Page.getEditRecordButton(),
-            createButton = chaisePage.record2Page.getCreateRecordButton();
+            editButton = chaisePage.recordPage.getEditRecordButton(),
+            createButton = chaisePage.recordPage.getCreateRecordButton();
 
         browser.wait(EC.elementToBeClickable(editButton), 10000);
         browser.wait(EC.elementToBeClickable(createButton), 10000);
@@ -38,14 +38,14 @@ exports.testPresentation = function (tableParams) {
         });
 
 
-        chaisePage.record2Page.getPermalinkButton().isDisplayed().then(function (bool) {
+        chaisePage.recordPage.getPermalinkButton().isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
         });
     });
 
 	it("should render columns which are specified to be visible and in order", function() {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
-		chaisePage.record2Page.getAllColumnCaptions().then(function(pageColumns) {
+		chaisePage.recordPage.getAllColumnCaptions().then(function(pageColumns) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
 			pageColumns.forEach(function(c) {
@@ -65,12 +65,12 @@ exports.testPresentation = function (tableParams) {
 		var columns = tableParams.columns.filter(function(c) {
             return (c.value != null && typeof c.comment == 'string');
         });
-		chaisePage.record2Page.getColumnsWithUnderline().then(function(pageColumns) {
+		chaisePage.recordPage.getColumnsWithUnderline().then(function(pageColumns) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
 			pageColumns.forEach(function(c) {
 				var comment = columns[index++].comment;
-				chaisePage.record2Page.getColumnComment(c).then(function(actualComment) {
+				chaisePage.recordPage.getColumnComment(c).then(function(actualComment) {
 					var exists = actualComment ? true : undefined;
 					expect(exists).toBeDefined();
 
@@ -83,7 +83,7 @@ exports.testPresentation = function (tableParams) {
 
 	it("should validate the values of each column", function() {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
-		chaisePage.record2Page.getColumnValueElements().then(function(columnEls) {
+		chaisePage.recordPage.getColumnValueElements().then(function(columnEls) {
             expect(columnEls.length).toBe(columns.length);
 			var index = 0;
 			columnEls.forEach(function(el) {
@@ -117,12 +117,12 @@ exports.testPresentation = function (tableParams) {
         var displayName, tableCount,
             relatedTables = tableParams.related_tables;
 
-        chaisePage.record2Page.getRelatedTables().count().then(function(count) {
+        chaisePage.recordPage.getRelatedTables().count().then(function(count) {
             expect(count).toBe(relatedTables.length);
             tableCount = count;
 
             // check the headings have the right name and in the right order
-            return chaisePage.record2Page.getRelatedTableHeadings().getAttribute("heading");
+            return chaisePage.recordPage.getRelatedTableHeadings().getAttribute("heading");
         }).then(function(headings) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
@@ -134,14 +134,14 @@ exports.testPresentation = function (tableParams) {
 
                 // verify all columns are present
                 (function(i, displayName) {
-                    chaisePage.record2Page.getRelatedTableColumnNamesByTable(displayName).getInnerHtml().then(function(columnNames) {
+                    chaisePage.recordPage.getRelatedTableColumnNamesByTable(displayName).getInnerHtml().then(function(columnNames) {
                         for (var j = 0; j < columnNames.length; j++) {
                             expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
                         }
                     });
 
                     // verify all rows are present
-                    chaisePage.record2Page.getRelatedTableRows(displayName).count().then(function(rowCount) {
+                    chaisePage.recordPage.getRelatedTableRows(displayName).count().then(function(rowCount) {
                         expect(rowCount).toBe(relatedTables[i].data.length);
                         expect(headings[i]).toBe("- " + displayName + " (" + rowCount + ")");
                     });
@@ -152,14 +152,14 @@ exports.testPresentation = function (tableParams) {
 
     // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
     it("should not show a related table with zero values.", function() {
-        expect(chaisePage.record2Page.getRelatedTable("media").isPresent()).toBeFalsy();
+        expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
     });
 
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
     it("should honor the page_size annotation for the table, file, in the compact context based on inheritance.", function() {
         var relatedTableName = tableParams.related_table_name_with_page_size_annotation;
 
-        chaisePage.record2Page.getRelatedTableRows(relatedTableName).count().then(function(count) {
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(count) {
             expect(count).toBe(tableParams.page_size);
         });
     });
@@ -167,8 +167,8 @@ exports.testPresentation = function (tableParams) {
     it("clicking the related table heading should change the heading and hide the table.", function() {
         var relatedTable = tableParams.related_tables[0];
         var displayName = relatedTable.title;
-        var tableHeading = chaisePage.record2Page.getRelatedTableHeading(displayName),
-            tableElement = chaisePage.record2Page.getRelatedTable(displayName);
+        var tableHeading = chaisePage.recordPage.getRelatedTableHeading(displayName),
+            tableElement = chaisePage.recordPage.getRelatedTable(displayName);
 
         tableHeading.getAttribute("heading").then(function(heading) {
             // related table should be open by default
@@ -195,7 +195,7 @@ exports.testPresentation = function (tableParams) {
 exports.testEditButton = function () {
     it("should redirect to recordedit app", function() {
         var EC = protractor.ExpectedConditions,
-            editButton = chaisePage.record2Page.getEditRecordButton();
+            editButton = chaisePage.recordPage.getEditRecordButton();
 
         browser.wait(EC.elementToBeClickable(editButton), 10000);
 
@@ -210,7 +210,7 @@ exports.testEditButton = function () {
 exports.testCreateButton = function () {
     it("should redirect to recordedit app", function() {
         var EC = protractor.ExpectedConditions,
-            createButton = chaisePage.record2Page.getCreateRecordButton();
+            createButton = chaisePage.recordPage.getCreateRecordButton();
 
         browser.wait(EC.elementToBeClickable(createButton), 10000);
 
@@ -224,7 +224,7 @@ exports.testCreateButton = function () {
 
 exports.relatedTablesDefaultOrder = function (tableParams) {
     it("should have the tables in default order.", function() {
-        chaisePage.record2Page.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
+        chaisePage.recordPage.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
             // tables should be in order based on the default order because no visible foreign keys annotation is defined
             // Headings have a '-' when page loads, and a count after them
             expect(headings).toEqual(tableParams.tables_order);
@@ -235,7 +235,7 @@ exports.relatedTablesDefaultOrder = function (tableParams) {
     it("should honor the page_size annotation for the table, file, in the compact/brief context.", function() {
         var relatedTableName = tableParams.related_table_name_with_page_size_annotation;
 
-        chaisePage.record2Page.getRelatedTableRows(relatedTableName).count().then(function(count) {
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(count) {
             expect(count).toBe(tableParams.page_size);
         });
     });
@@ -245,7 +245,7 @@ exports.relatedTableLinks = function (tableParams) {
     it("should create a functional link for table rows with links in them.", function() {
         var relatedTableName = tableParams.related_table_name_with_link_in_table;
 
-        chaisePage.record2Page.getRelatedTableRows(relatedTableName).then(function(rows) {
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
             return rows[0].all(by.tagName("td"));
         }).then(function(cells) {
             return cells[2].getInnerHtml();
@@ -258,11 +258,11 @@ exports.relatedTableLinks = function (tableParams) {
     it("should have a View All link for a related table that redirects to recordset.", function() {
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,
-            relatedTableLink = chaisePage.record2Page.getMoreResultsLink(relatedTableName);
+            relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
 
         browser.wait(EC.elementToBeClickable(relatedTableLink), 10000);
 
-        chaisePage.record2Page.getRelatedTableRows(relatedTableName).count().then(function(count) {
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(count) {
             expect(count).toBe(tableParams.booking_count);
 
             expect(relatedTableLink.isDisplayed()).toBeTruthy();

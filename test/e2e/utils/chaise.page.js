@@ -425,7 +425,7 @@ var recordEditPage = function() {
     };
 };
 
-var record2Page = function() {
+var recordPage = function() {
     var that = this;
     this.getEntityTitle = function() {
         return browser.executeScript("return $('#entity-title').text();");
@@ -531,7 +531,7 @@ function chaisePage() {
     this.resultContent = new resultContent();
     this.detailedPage = new detailedPage();
     this.recordEditPage = new recordEditPage();
-    this.record2Page = new record2Page();
+    this.recordPage = new recordPage();
     this.recordsetPage = new recordsetPage();
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));

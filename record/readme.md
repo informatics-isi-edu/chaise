@@ -14,7 +14,7 @@ The `compact` context pertains to the data inside the related tables that are lo
 ### [Annotations](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md)
 The following annotations are used to affect how information is displayed:
 * Table Display (`tag:isrd.isi.edu,2016:table-display`)
-  * The `table-display` annotation can be used for a few different cases in record-two. Page size for `compact/brief` will affect the maximum number of results that show in the related entity tables.
+  * The `table-display` annotation can be used for a few different cases in record. Page size for `compact/brief` will affect the maximum number of results that show in the related entity tables.
   ```
     "tag:isrd.isi.edu,2016:table-display": {
       "compact": {
@@ -48,7 +48,7 @@ The following annotations are used to affect how information is displayed:
 
 
 ### [Config Parameters](https://github.com/informatics-isi-edu/chaise/blob/master/doc/configuration.md)
-The following config parameters are used by record-two:
+The following config parameters are used by record:
 * editRecord 
 * defaultCatalog
 * defaultTables

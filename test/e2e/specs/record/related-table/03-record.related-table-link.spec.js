@@ -1,5 +1,5 @@
 var chaisePage = require('../../../utils/chaise.page.js');
-var record2Helpers = require('../helpers.js');
+var recordHelpers = require('../helpers.js');
 
 describe('View existing record,', function() {
 
@@ -24,8 +24,8 @@ describe('View existing record,', function() {
 			    });
 
                 describe("Show the related entity tables,", function() {
-					var params = record2Helpers.relatedTablesDefaultOrder(tupleParams);
-					var params = record2Helpers.relatedTableLinks(tupleParams);
+					var params = recordHelpers.relatedTablesDefaultOrder(tupleParams);
+					var params = recordHelpers.relatedTableLinks(tupleParams);
 				});
 
     		});
