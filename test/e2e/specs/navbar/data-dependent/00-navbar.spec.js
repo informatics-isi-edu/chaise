@@ -51,7 +51,7 @@ describe('Navbar ', function() {
                 done();
             });
         } else {
-            expect(element(by.id('signup-link')).isDisplayed()).toBeFalsy();
+            expect(element(by.id('signup-link')).isPresent()).toBeFalsy();
             done();
         }
     });
