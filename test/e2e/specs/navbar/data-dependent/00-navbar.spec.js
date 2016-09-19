@@ -17,11 +17,22 @@ describe('Navbar ', function() {
         expect(navbar.isDisplayed()).toBeTruthy();
     });
 
-    it('should display ' + chaiseConfig.navbarBrandText + ' the Chaise config', function() {
+    it('should display ' + chaiseConfig.navbarBrandText || chaiseConfig.headTitle + ' as the title', function() {
         var actualTitle = element(by.id('brand-text'));
         console.log('ptoato', chaiseConfig)
         var expectedTitle = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
         expect(actualTitle.getText()).toEqual(expectedTitle);
+    });
+
+    it('should display ' + chaiseConfig.navbarBrandImage + ' as the logo', function(done) {
+        var actualLogo = element(by.id('brand-image'));
+        var expectedLogo = chaiseConfig.navbarBrandImage;
+        if (!chaiseConfig.navbarBrandImage) {
+            expect(actualLogo.isPresent()).toBeFalsy();
+        } else {
+            expect(actualLogo.isPresent()).toBeTruthy();
+            expect(actualLogo.getAttribute(src)).toEqual(expectedLogo);
+        }
     });
 
     // xit('should have generate the correct # of list items', function() {
