@@ -25,13 +25,12 @@ describe('Navbar ', function() {
     });
 
     it('should use the image specified in chaiseConfig', function() {
-        var actualLogo = element(by.id('brand-image'));
-        var expectedLogo = chaiseConfig.navbarBrandImage;
-        expect(actualLogo.isDisplayed()).toBeTruthy();
         if (!chaiseConfig.navbarBrandImage) {
-            expect(actualLogo.isPresent()).toBeFalsy();
+            expect(element(by.id('brand-image')).isPresent()).toBeFalsy();
         } else {
-            expect(actualLogo.isPresent()).toBeTruthy();
+            var actualLogo = element(by.id('brand-image'));
+            var expectedLogo = chaiseConfig.navbarBrandImage;
+            expect(actualLogo.isDisplayed()).toBeTruthy();
             expect(actualLogo.getAttribute('src')).toMatch(expectedLogo);
         }
     });
@@ -44,15 +43,15 @@ describe('Navbar ', function() {
     });
 
     it('should have a "Sign Up" link with the right href from chaiseConfig', function(done) {
-        var actualLink = element(by.id('signup-link'));
         if (chaiseConfig.signUpURL) {
+            var actualLink = element(by.id('signup-link'));
             browser.wait(EC.elementToBeClickable(actualLink), 10000).then(function() {
                 expect(actualLink.isDisplayed()).toBeTruthy();
                 expect(actualLink.getAttribute('href')).toMatch(chaiseConfig.signUpURL);
                 done();
             });
         } else {
-            expect(actualLink.isDisplayed()).toBeFalsy();
+            expect(element(by.id('signup-link')).isDisplayed()).toBeFalsy();
             done();
         }
     });
