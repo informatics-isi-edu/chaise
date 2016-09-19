@@ -26,7 +26,7 @@ E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
 E2EDrecord2=test/e2e/specs/record2/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/specs/login/protractor.conf.js
-E2Enavbar=test/e2e/specs/navbar/protractor.conf.js
+E2Enavbar=test/e2e/specs/navbar/data-dependent/protractor.conf.js
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)

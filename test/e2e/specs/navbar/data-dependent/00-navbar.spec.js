@@ -1,5 +1,5 @@
 describe('Navbar ', function() {
-    var navbar, menu, EC = protractor.ExpectedConditions;
+    var navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
 
     beforeAll(function (done) {
         browser.get(browser.params.url || "");
@@ -7,6 +7,7 @@ describe('Navbar ', function() {
         menu = element(by.id('navbar-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
+            console.log('1', chaiseConfig);
             return browser.wait(EC.presenceOf(navbar), 5000);
         }).then(function() {
             done();
@@ -17,69 +18,84 @@ describe('Navbar ', function() {
         expect(navbar.isDisplayed()).toBeTruthy();
     });
 
-    it('should display ' + chaiseConfig.navbarBrandText || chaiseConfig.headTitle + ' as the title', function() {
+    it('should display the right title from chaiseConfig', function() {
         var actualTitle = element(by.id('brand-text'));
-        console.log('ptoato', chaiseConfig)
         var expectedTitle = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
         expect(actualTitle.getText()).toEqual(expectedTitle);
     });
 
-    it('should display ' + chaiseConfig.navbarBrandImage + ' as the logo', function(done) {
+    it('should use the image specified in chaiseConfig', function() {
         var actualLogo = element(by.id('brand-image'));
         var expectedLogo = chaiseConfig.navbarBrandImage;
+        expect(actualLogo.isDisplayed()).toBeTruthy();
         if (!chaiseConfig.navbarBrandImage) {
             expect(actualLogo.isPresent()).toBeFalsy();
         } else {
             expect(actualLogo.isPresent()).toBeTruthy();
-            expect(actualLogo.getAttribute(src)).toEqual(expectedLogo);
+            expect(actualLogo.getAttribute('src')).toMatch(expectedLogo);
         }
     });
 
-    // xit('should have generate the correct # of list items', function() {
-    //     var nodesInDOM = menu.all(by.tagName('li'));
-    //     var counter = 0;
-    //     function countNodes(array) {
-    //         array.forEach(function(element) {
-    //             counter++;
-    //             if (element.children) {
-    //                 countNodes(element.children);
-    //             }
-    //         });
-    //         return counter;
-    //     }
-    //     countNodes(expectedMenu);
-    //
-    //     nodesInDOM.count().then(function(count) {
-    //         expect(count).toEqual(counter);
-    //     });
-    // });
-    //
-    // xit('should display the appropriate dropdowns at the appropriate levels', function() {
-    //     // Assign this array to var navbar_menu inside your local chaise-config.js
-    //     // TODO: Still need to figure out w/ Chirag whether this assignment is necessary..
-    //     var sampleMenu = [
-    //         {
-    //             "name": "Search",
-    //             "url": "/chaise/search/#1/legacy:dataset"
-    //         },
-    //         {
-    //             "name": "RecordEdit",
-    //             "children": [
-    //                 {
-    //                     "name": "Add Records",
-    //                     "children": [
-    //                         {
-    //                             "name": "Edit Existing Record",
-    //                             "url": "/chaise/recordedit/#1/legacy:dataset/id=5776"
-    //                         }
-    //                     ]
-    //                 }
-    //             ]
-    //         }
-    //     ];
-    //     var topLevel = element.all(by.css('ul#navbar-menu > li'));
-    //     topLevel.count().then(function(count) {
-    //         expect(count).toEqual(2);
-    //     });
-    // });
+    it('should have a "Log In" link', function() {
+        var actualLink = element(by.id('login-link'));
+        browser.wait(EC.elementToBeClickable(actualLink), 10000).then(function() {
+            expect(actualLink.isDisplayed()).toBeTruthy();
+        });
+    });
+
+    it('should have a "Sign Up" link with the right href from chaiseConfig', function(done) {
+        var actualLink = element(by.id('signup-link'));
+        if (chaiseConfig.signUpURL) {
+            browser.wait(EC.elementToBeClickable(actualLink), 10000).then(function() {
+                expect(actualLink.isDisplayed()).toBeTruthy();
+                expect(actualLink.getAttribute('href')).toMatch(chaiseConfig.signUpURL);
+                done();
+            });
+        } else {
+            expect(actualLink.isDisplayed()).toBeFalsy();
+            done();
+        }
+    });
+
+    it('for the menu, should generate the correct # of list items', function() {
+        var nodesInDOM = menu.all(by.tagName('li'));
+        var counter = 0;
+        function countNodes(array) {
+            array.forEach(function(element) {
+                counter++;
+                if (element.children) {
+                    countNodes(element.children);
+                }
+            });
+            return counter;
+        }
+        countNodes(chaiseConfig.navbarMenu.children);
+
+        nodesInDOM.count().then(function(count) {
+            expect(count).toEqual(counter);
+        });
+    });
+
+    // These last 2 xit'd because we don't handle tests logging in via Globus/other services just yet
+    xit('should display a "Log Out" link', function(done) {
+        element(by.id('login-link')).click();
+        browser.sleep(5000);
+        browser.get(browser.params.url || "");
+        var logOutLink = element(by.id('logout-link'));
+        browser.wait(EC.elementToBeClickable(logOutLink), 10000).then(function() {
+            browser.ignoreSynchronization = true;
+            expect(logOutLink.isDisplayed()).toBeTruthy();
+            done();
+        });
+    });
+
+    xit('should link to the profile URL from chaiseConfig, if specified', function() {
+        var actual = element.all(by.css('.username'));
+        expect(actual.count()).toEqual(1);
+        if (chaiseConfig.profileURL) {
+            expect(actual.getAttribute('href')).toEqual(chaiseConfig.profileURL);
+        } else {
+            expect(actual.getAttribute('href')).toBeFalsy();
+        }
+    });
 });

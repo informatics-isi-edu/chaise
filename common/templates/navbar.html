@@ -18,13 +18,13 @@
             <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a ng-if="user === null && signUpURL" ng-href="{{signUpURL}}">Sign Up</a>
-                        <p ng-if="user !== null && !profileURL" class="navbar-text" ng-bind="user"></p>
-                        <a ng-if="user !== null && profileURL" ng-href="{{profileURL}}" ng-bind="user"></a>
+                        <a id="signup-link" ng-if="user === null && signUpURL" ng-href="{{signUpURL}}">Sign Up</a>
+                        <p class="username navbar-text" ng-if="user !== null && !profileURL" ng-bind="user"></p>
+                        <a class="username" ng-if="user !== null && profileURL" ng-href="{{profileURL}}" ng-bind="user"></a>
                     </li>
                     <li>
-                        <a ng-if="user === null" href="#" ng-click="login()">Log In</a>
-                        <a ng-if="user !== null" href="#" ng-click="logout()">Log Out</a>
+                        <a id="login-link" ng-if="user === null" href="#" ng-click="login()">Log In</a>
+                        <a id="logout-link" ng-if="user !== null" href="#" ng-click="logout()">Log Out</a>
                     </li>
                 </ul>
                 <ul id="navbar-menu" class="nav navbar-nav">
