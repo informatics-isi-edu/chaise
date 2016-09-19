@@ -469,4 +469,30 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		return ret;
 	};
 
+	this.updateExportFormat = function updateExportFormat() {
+		FacetsData.exportOptions.formatOptions = {};
+		var format = FacetsData.exportOptions.format;
+		if (format == "CSV" || format == "JSON") {
+			// nothing to do at this point
+		} else if (format == "BAG") {
+			// setup some defaults
+		}
+	};
+
+	this.doExport = function doExport() {
+		var exportOpts = FacetsData.exportOptions;
+		var baseName = FacetsData.selectedEntity.display || FacetsData.selectedEntity.name;
+		var baseOpts = "?limit=none&download=" + fixedEncodeURIComponent(baseName);
+
+		switch (exportOpts.format) {
+			case "CSV":
+				location.href = exportOpts.exportUrl + baseOpts + "&accept=csv";
+				break;
+			case "JSON":
+				location.href = exportOpts.exportUrl + baseOpts + "&accept=json";
+				break;
+			default:
+				alert("Unsupported export format: " + exportOpts.format);
+		}
+	}
 }]);
