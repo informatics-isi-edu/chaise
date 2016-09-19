@@ -7,7 +7,6 @@ describe('Navbar ', function() {
         menu = element(by.id('navbar-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
-            console.log('1', chaiseConfig);
             return browser.wait(EC.presenceOf(navbar), 5000);
         }).then(function() {
             done();
@@ -20,7 +19,7 @@ describe('Navbar ', function() {
 
     it('should display the right title from chaiseConfig', function() {
         var actualTitle = element(by.id('brand-text'));
-        var expectedTitle = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
+        var expectedTitle = chaiseConfig.navbarBrandText || chaiseConfig.headTitle || 'Chaise';
         expect(actualTitle.getText()).toEqual(expectedTitle);
     });
 
@@ -32,27 +31,6 @@ describe('Navbar ', function() {
             var expectedLogo = chaiseConfig.navbarBrandImage;
             expect(actualLogo.isDisplayed()).toBeTruthy();
             expect(actualLogo.getAttribute('src')).toMatch(expectedLogo);
-        }
-    });
-
-    it('should have a "Log In" link', function() {
-        var actualLink = element(by.id('login-link'));
-        browser.wait(EC.elementToBeClickable(actualLink), 10000).then(function() {
-            expect(actualLink.isDisplayed()).toBeTruthy();
-        });
-    });
-
-    it('should have a "Sign Up" link with the right href from chaiseConfig', function(done) {
-        if (chaiseConfig.signUpURL) {
-            var actualLink = element(by.id('signup-link'));
-            browser.wait(EC.elementToBeClickable(actualLink), 10000).then(function() {
-                expect(actualLink.isDisplayed()).toBeTruthy();
-                expect(actualLink.getAttribute('href')).toMatch(chaiseConfig.signUpURL);
-                done();
-            });
-        } else {
-            expect(element(by.id('signup-link')).isPresent()).toBeFalsy();
-            done();
         }
     });
 
@@ -75,11 +53,30 @@ describe('Navbar ', function() {
         });
     });
 
-    // These last 2 xit'd because we don't handle tests logging in via Globus/other services just yet
+    // These tests are xit'd because we don't handle tests logging in via Globus/other services just yet
+    // e.g. On Travis, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
+    xit('should have a "Log In" link', function() {
+        var actualLink = element(by.id('login-link'));
+        browser.wait(EC.elementToBeClickable(actualLink), 10000).then(function() {
+            expect(actualLink.isDisplayed()).toBeTruthy();
+        });
+    });
+
+    xit('should have a "Sign Up" link with the right href from chaiseConfig', function(done) {
+        if (chaiseConfig.signUpURL) {
+            var actualLink = element(by.id('signup-link'));
+            browser.wait(EC.elementToBeClickable(actualLink), 10000).then(function() {
+                expect(actualLink.isDisplayed()).toBeTruthy();
+                expect(actualLink.getAttribute('href')).toMatch(chaiseConfig.signUpURL);
+                done();
+            });
+        } else {
+            expect(element(by.id('signup-link')).isPresent()).toBeFalsy();
+            done();
+        }
+    });
+
     xit('should display a "Log Out" link', function(done) {
-        element(by.id('login-link')).click();
-        browser.sleep(5000);
-        browser.get(browser.params.url || "");
         var logOutLink = element(by.id('logout-link'));
         browser.wait(EC.elementToBeClickable(logOutLink), 10000).then(function() {
             browser.ignoreSynchronization = true;
