@@ -23,6 +23,7 @@
         <div ng-controller="FormController as form" class="row">
             <navbar></navbar>
             <div class="col-xs-12">
+            <!-- Alerts section -->
                 <div ng-repeat="alert in form.alerts" class="row">
                     <div class="col-xs-12">
                         <div class="alert alert-dismissible" ng-class="{'alert-danger': alert.type == 'error', 'alert-success': alert.type == 'success'}" role="alert">
@@ -31,11 +32,12 @@
                         </div>
                     </div>
                 </div>
+            <!-- Form section -->
                 <div class="row">
                     <div class="col-xs-12">
                         <div class="row">
                             <div class="col-xs-7">
-                                <div id="entity-title"><span ng-if="!form.editMode">Create</span><span ng-if="form.editMode">Edit</span> {{::form.recordEditModel.table.displayname}} Record<span ng-show="form.recordEditModel.rows.length > 1">s</span></div>
+                                <div id="entity-title"><span ng-if="!form.editMode">Create</span><span ng-if="form.editMode">Edit</span> {{displayname}} Record<span ng-show="form.recordEditModel.rows.length > 1">s</span></div>
                                 <span class="text-danger">*</span> indicates required field
                             </div>
                             <div class="col-xs-5 padding-top-10">

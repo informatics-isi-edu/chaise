@@ -2,25 +2,54 @@
     'use strict';
 
     angular.module('chaise.recordEdit', [
-        'ermrestjs',
-        'ngSanitize',
-        'chaise.utils',
-        'chaise.authen',
-        'chaise.navbar',
-        'chaise.errors',
-        'chaise.alerts',
-        'chaise.filters',
-        'chaise.validators',
-        'chaise.delete',
-        'ui.bootstrap',
-        'chaise.modal',
-        'ui.select',
-        'ui.bootstrap',
-        //'rzModule',
         '720kb.datepicker',
-        'ngMessages'
+        'chaise.alerts',
+        'chaise.authen',
+        'chaise.delete',
+        'chaise.errors',
+        'chaise.filters',
+        'chaise.modal',
+        'chaise.navbar',
+        'chaise.utils',
+        'chaise.validators',
+        'ermrestjs',
+        'ngMessages',
+        'ngSanitize',
+        //'rzModule',
+        'ui.bootstrap',
+        'ui.select'
     ])
 
+    .run(['ERMrest', 'ErrorService', 'headInjector', 'UriUtils', '$log', '$rootScope', '$window', function runRecordEditApp(ERMrest, ErrorService, headInjector, UriUtils, $log, $rootScope, $window) {
+        var context = {};
+        UriUtils.setOrigin();
+        headInjector.addTitle();
+        headInjector.addCustomCSS();
+
+        try {
+            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+
+            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
+            context.appName = "recordedit";
+
+            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
+                $rootScope.reference.session = $rootScope.session;
+
+                $log.info("Reference: ", $rootScope.reference);
+
+                return $rootScope.reference.read(1);
+            }).then(function getPage(page) {
+                var tuple = page.tuples[0];
+
+                $rootScope.displayname = tuple.displayname;
+            });
+        }
+    }]);
+
+
+/* Everything below this line is from before refactoring the record edit app */
+/* ======================================================================================================================================= */
     // Configure the context info from the URI
     .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
         var utils = UriUtilsProvider.$get();
@@ -32,7 +61,8 @@
         console.log('Context:',context);
     }])
 
-    .run(['headInjector', 'context', 'ERMrest', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(headInjector, context, ERMrest, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
+    .run(['headInjector', 'context', 'ERMrest', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window',
+    function runApp(headInjector, context, ERMrest, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
         headInjector.addTitle();
         headInjector.addCustomCSS();
 
