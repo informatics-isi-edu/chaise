@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-(function() {
+$(function() {
 
     // The Chaise RecordSet module
     angular.module('recordset', [
@@ -377,4 +377,4 @@
 
 /* end recordset */
 
-})();
+});
