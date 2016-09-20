@@ -3,7 +3,7 @@
 
     angular.module('chaise.record.table', [])
 
-    .directive('recordTable', [function() {
+    .directive('recordTable', ['$window', 'UriUtils', function($window, UriUtils) {
 
         return {
             restrict: 'E',
@@ -17,8 +17,7 @@
                 // }
                 vm: '=',
                 toggleSortOrder: '&',
-                sortby: '&',
-                gotoRowLink: '&'
+                sortby: '&'
             },
             link: function (scope, elem, attr) {
 
@@ -26,9 +25,25 @@
                     scope.sortby({ colname: colname });
                 };
 
-                scope.gotoRowLinkIndex = function (index) {
-                    scope.gotoRowLink({index : index});
-                };
+                scope.gotoRowLink = function(index) {
+                    var tuple = scope.vm.page.tuples[index];
+                    var t_path = tuple.reference.location.compactPath;
+                    var chaiseURL = $window.location.href.replace($window.location.hash, '');
+                    var reload = (chaiseURL.indexOf("/record/") !== -1);
+
+                    chaiseURL = chaiseURL.replace("/recordset/", '');
+                    chaiseURL = chaiseURL.replace("/record/", '');
+                    chaiseURL = chaiseURL.replace("/record-two/", '');
+                    // TODO add line above for each app that uses record-table directive
+                    var path = chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(tuple.reference.location.catalog) + "/" + t_path;
+
+                    location.assign(path);
+
+                    // forcing a reload when linking from record to record, which does not automatically reload
+                    // this is an angular issue (if change path AFTER hash, page does not reload)
+                    if (reload)
+                        location.reload();
+                }
             }
         };
     }]);
