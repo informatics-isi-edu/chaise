@@ -1447,9 +1447,11 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 	} else {
 		param['queryPath'] = param['predicate'].slice();
 		var predicate = param['predicate'];
+		var exportPredicate = predicate.slice();
 		if (sortOption != null && sortOption != '') {
 			var sortPredicate = getSortPredicate(data, sortOption, sortOrder, page, pageSize);
 			predicate.push('$A/' + sortPredicate.join(';'));
+			exportPredicate = predicate.slice();
 		} else {
 			if (page > 1) {
 				var firstRow = [];
@@ -1471,20 +1473,28 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 			}
 		}
 		var url = ERMREST_DATA_HOME + '/entity/' + getQueryPredicate(param['options']);
+		var exportUrl = url;
 		param['queryPredicate'] = getQueryPredicate(param['options']);
 		param['primaryKey'] = PRIMARY_KEY[0];
 		if (predicate.length > 0) {
-			var predicatePath = '/' + predicate.join('/');
-			param['options']['exportOptions']['exportPredicate'] = predicatePath;
-			url += predicatePath;
+  			url += '/' + predicate.join('/');
+  		}
+  		url += '/$A';
+		param['options']['exportOptions']['exportPredicate'] = param['queryPredicate']
+		if (exportPredicate.length > 0) {
+			var predicatePath = '/' + exportPredicate.join('/');
+			param['options']['exportOptions']['exportPredicate'] += '/' + predicatePath;
+			exportUrl += predicatePath;
 		}
-		url += '/$A';
+		exportUrl += '/$A';
+		var sortClause = '@sort(' + PRIMARY_KEY.join(',') + ')';
 		if (sortOption != null && sortOption != '') {
-			url += getSortClause(sortOption, sortOrder, false);
-		} else {
-			url += '@sort(' + PRIMARY_KEY.join(',') + ')';
+			sortClause = getSortClause(sortOption, sortOrder, false);
 		}
-		param['options']['exportOptions']['exportUrl'] = url;
+		url += sortClause;
+		exportUrl += sortClause;
+
+		param['options']['exportOptions']['exportUrl'] = exportUrl;
 		url += '?limit=' + pageSize;
 		param['getPageUrl'] = url;
 		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetPage, null, param);
