@@ -537,3 +537,9 @@ tbody{
 .markdown-container ol {
     list-style-type: decimal;
 }
+.markdown-container code {
+    padding-left: 0;
+    padding-right: 0;
+    color: #333;
+    background-color: #F5F5F5;
+}
