@@ -595,7 +595,7 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 		if (tablePredicate.length > 0) {
 			if (table != options['table'] && association_tables[table] != null) {
 				predicate.push('$A');
-				predicate.push(association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table));
+				predicate.push(association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table));
 				if (aliases != null) {
 					aliases.push(association_tables[table]['alias']);
 				}
@@ -820,7 +820,7 @@ function updateCount(options, successCallback) {
 					var aliasDef = '';
 					if (association_tables_names.contains(table)) {
 						if (!aliases.contains(association_tables[table]['alias'])) {
-							aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+							aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 						}
 					}
 					var tableRef = (association_tables_names.contains(table)
@@ -857,7 +857,7 @@ function updateCount(options, successCallback) {
 		var aliasDef = '';
 		if (association_tables_names.contains(table)) {
 			if (!aliases.contains(association_tables[table]['alias'])) {
-				aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+				aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 			}
 		}
 		var tableRef = (association_tables_names.contains(table)
@@ -942,7 +942,7 @@ function updateGroups(options, successCallback) {
 					var aliasDef = '';
 					if (association_tables_names.contains(table)) {
 						if (!aliases.contains(association_tables[table]['alias'])) {
-							aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+							aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 						}
 					}
 					var tableRef = (association_tables_names.contains(table)
@@ -1058,7 +1058,7 @@ function updateSliders(options, successCallback) {
 						var aliasDef = '';
 						if (association_tables_names.contains(table)) {
 							if (!aliases.contains(association_tables[table]['alias'])) {
-								aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+								aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 							}
 						}
 						var tableRef = (association_tables_names.contains(table)
@@ -1093,7 +1093,7 @@ function updateSliders(options, successCallback) {
 		var aliasDef = '';
 		if (association_tables_names.contains(table)) {
 			if (!aliases.contains(association_tables[table]['alias'])) {
-				aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+				aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 			}
 		}
 		var tableRef = (association_tables_names.contains(table)
@@ -1474,7 +1474,9 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 		param['queryPredicate'] = getQueryPredicate(param['options']);
 		param['primaryKey'] = PRIMARY_KEY[0];
 		if (predicate.length > 0) {
-			url += '/' + predicate.join('/');
+			var predicatePath = '/' + predicate.join('/');
+			param['options']['exportOptions']['exportPredicate'] = predicatePath;
+			url += predicatePath;
 		}
 		url += '/$A';
 		if (sortOption != null && sortOption != '') {
@@ -1482,6 +1484,7 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 		} else {
 			url += '@sort(' + PRIMARY_KEY.join(',') + ')';
 		}
+		param['options']['exportOptions']['exportUrl'] = url;
 		url += '?limit=' + pageSize;
 		param['getPageUrl'] = url;
 		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetPage, null, param);
@@ -1593,7 +1596,7 @@ function getTableColumnsUniques(options, successCallback) {
 		if (metadata != null && !hasTableFacetsHidden(table)) {
 			var column_definitions = metadata['column_definitions'];
 			var url = ERMREST_DATA_HOME + '/aggregate/' + getQueryPredicate(options) + '/$A/';
-			url += (table == options['table'] ? '' : '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias'] + '/');
+			url += (table == options['table'] ? '' : '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias'] + '/');
 			var cnt = [];
 			$.each(column_definitions, function(i, col) {
 				if (!hasColumnFacetHidden(table, col['name'])) {
@@ -1662,7 +1665,7 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 			if (!hasTableFacetsHidden(table)) {
 				var metadata = (table == options['table'] ? options['metadata'] : association_tables[table]['metadata']);
 				var column_definitions = metadata['column_definitions'];
-				var tableURL = (table == options['table'] ? '' : '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias'] + '/');
+				var tableURL = (table == options['table'] ? '' : '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/$A/$' + association_tables[table]['alias'] + '/');
 				$.each(column_definitions, function(i,col) {
 					if (hasAnnotation(table, col['name'], 'dataset')) {
 						return true;
@@ -3420,7 +3423,9 @@ function setFilterValue(facet, separator, result) {
 	if (separator == '::ciregexp::') {
 		result[table][column]['value'] = decodeURIComponent(facet[1]);
 	} else if (separator == '::eq::') {
-		result[table][column]['values'] = {};
+		if (result[table][column]['values'] == null) {
+			result[table][column]['values'] = {};
+		}
 		var values = facet[1].split(';');
 		$.each(values, function(i, value) {
 			result[table][column]['values'][decodeURIComponent(value)] = true;
@@ -3650,7 +3655,7 @@ function updateFacetCount(options, facet, successCallback) {
 				}
 				var aliasDef = '';
 				if (association_tables_names.contains(table)) {
-					aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+					aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 				}
 				var tableRef = (association_tables_names.contains(table)
 					? aliasDef + '$A/$' + association_tables[table]['alias']
@@ -3692,7 +3697,7 @@ function updateFacetGroups(options, facet, successCallback) {
 	var predicate = getPredicate(options, col, table, null, []);
 	var aliasDef = '';
 	if (association_tables_names.contains(table)) {
-		aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+		aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 	}
 	var tableRef = (association_tables_names.contains(table)
 		? aliasDef + '$A/$' + association_tables[table]['alias']
@@ -3749,7 +3754,7 @@ function updateFacetSlider(options, facet, successCallback) {
 	var predicate = getPredicate(options, values['left'] || values['right'] ? null : col, table, null, []);
 	var aliasDef = '';
 	if (association_tables_names.contains(table)) {
-		aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(table) + '/';
+		aliasDef = '$A/' + association_tables[table]['alias'] + ':=' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(table) + '/';
 	}
 	var tableRef = (association_tables_names.contains(table)
 		? aliasDef + '$A/$' + association_tables[table]['alias']
@@ -4043,3 +4048,57 @@ function getTableAnnotationValue(table_name, annotation) {
 	});
 	return ret;
 }
+
+function isRecordFilter(url) {
+	var ret = false;
+	var index = url.indexOf('#');
+	if (index != -1) {
+		var query = url.substring(index+1);
+		var parts = query.split('/');
+		if (parts.length >= 3 && query.indexOf('?') == -1) {
+			ret = true;
+		}
+	}
+	return ret;
+}
+
+function convertFilter(url) {
+	var index = url.indexOf('#');
+	var prefix = url.substring(0, index+1);
+	var parts = url.substring(index+1).split('/');
+	if (parts.length != 3) {
+		throw new Error('Invalid URL');
+	}
+	var catalog = parts[0];
+	var entity = parts[1];
+	var schema = entity.split(':')[0];
+	var table = entity.split(':')[1];
+	var newUrl = prefix + catalog + '/' + entity + '?facets=(';
+	var predicate = [];
+	for (var i=2; i<parts.length; i++) {
+		var orParts = parts[i].split(';');
+		var columns = [];
+		var values = [];
+		for (var j=0; j<orParts.length; j++) {
+			var term = orParts[j].split('=');
+			if (term.length != 2) {
+				throw  new Error('Invalid value: ' + orParts[j]);
+			}
+			var column = term[0];
+			if (column.split(':').length != 1) {
+				throw  new Error('Invalid value: ' + column);
+			}
+			if (columns.length == 0) {
+				columns.push(column);
+			}
+			if (column != columns[0]) {
+				throw  new Error('Invalid value: ' + orParts[j]);
+			}
+			values.push(term[1]);
+		}
+		predicate.push(table + ':' + column + '::eq::' + values.join(';'));
+	}
+	newUrl += predicate.join('/') + ')&layout=table&page=1';
+	return newUrl;
+}
+

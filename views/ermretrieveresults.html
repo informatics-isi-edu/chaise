@@ -65,7 +65,7 @@
 									<span ng-show="tourCtrl.progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
 									<strong>Tour</strong>
 								</a>
-								<a id="permalink" title="This link stores your current search criteria as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}"><span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
+								<a id="permalink" class="tour-start-btn" title="This link stores your current search criteria as a URL. Right click and save." ng-href="{{facetResults.urlBookmark()}}"><span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
 							</p>
 						</div>
 					</div>
@@ -174,28 +174,39 @@
 						</p>
 					</div>
 					<div id="results_tally" class="row" ng-show="facetResults.showupResults()">
-						<div class="col-md-8">
+						<div class="col-md-5">
 							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results, sort by:
-							<ui-select ng-model="FacetsData.sortFacet" theme="select2" ng-disabled="disabled" on-select="facetResults.sortData($event)">
+							<ui-select ng-model="FacetsData.sortFacet" theme="select2" search-enabled="false" ng-disabled="disabled" on-select="facetResults.sortData($event)">
 								<ui-select-match placeholder="Select an attribute">{{facetResults.display(FacetsData.table, FacetsData.sortFacet)}}</ui-select-match>
-								<ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}
-								</ui-select-choices>
+								<ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}</ui-select-choices>
 							</ui-select>
-							<span ng-show="FacetsData.sortOrder=='asc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes toggler"></span><span ng-show="FacetsData.sortOrder=='desc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes-alt toggler"></span></p>
+							<span ng-show="FacetsData.sortOrder=='asc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes toggler"></span>
+                            <span ng-show="FacetsData.sortOrder=='desc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes-alt toggler"></span>
+                            </p>
 						</div>
-						<div class="col-md-4">
-							<div id="views" class="btn-group view-toggle pull-right" role="group">
-								<button data-toggle="tooltip" data-placement="top" title="List" ng-click="facetResults.selectView($event, 'list');" type="button" class="btn btn-default">
-									<i class="md-view-list md-lg" aria-hidden="true"></i>
-								</button>
-								<button data-toggle="tooltip" data-placement="top" title="Table" ng-click="facetResults.selectView($event, 'table');" type="button" class="btn btn-default">
-									<i class="md-view-column md-lg" aria-hidden="true"></i>
-								</button>
-		  					<button data-toggle="tooltip" data-placement="top" title="Card" ng-click="facetResults.selectView($event, 'card');" type="button" class="btn btn-default">
-									<i class="md-view-module md-lg" aria-hidden="true"></i>
-								</button>
-							</div>
-							<span class="btn btn-label pull-right">Switch view:</span>
+						<div class="col-md-7">
+                            <div class="pull-right">
+                                <span class="btn btn-label">Download:</span>
+                                <ui-select ng-model="FacetsData.exportOptions.format" theme="select2" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onExportFormatSelect">
+                                    <ui-select-match placeholder="CSV">{{FacetsData.exportOptions.format}}</ui-select-match>
+                                    <ui-select-choices repeat="format in FacetsData.exportOptions.supportedFormats">{{format}}</ui-select-choices>
+                                </ui-select>
+                                <button data-toggle="tooltip" data-placement="top" title="Download" ng-click="facetResults.onExportClick();" type="button" class="btn btn-default">
+                                    <i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i>
+                                </button>
+                                <span class="btn btn-label">View:</span>
+                                <div id="views" class="btn-group view-toggle" role="group">
+                                    <button data-toggle="tooltip" data-placement="top" title="List" ng-click="facetResults.selectView($event, 'list');" type="button" class="btn btn-default">
+                                        <i class="md-view-list md-lg" aria-hidden="true"></i>
+                                    </button>
+                                    <button data-toggle="tooltip" data-placement="top" title="Table" ng-click="facetResults.selectView($event, 'table');" type="button" class="btn btn-default">
+                                        <i class="md-view-column md-lg" aria-hidden="true"></i>
+                                    </button>
+                                    <button data-toggle="tooltip" data-placement="top" title="Card" ng-click="facetResults.selectView($event, 'card');" type="button" class="btn btn-default">
+                                        <i class="md-view-module md-lg" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
 						</div>
 					</div>
 					<div id="resultstable" class="row" ng-show="facetResults.showupResults()">

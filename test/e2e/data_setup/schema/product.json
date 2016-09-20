@@ -332,7 +332,8 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "record" : ["id", "category", "website", "rating", "summary", "description", "thumbnail", "opened_on", "luxurious"]
+          "detailed" : ["id", "category", "website", "rating", "summary", "description", "thumbnail", "opened_on", "luxurious"],
+          "compact" : ["title", "website", "rating", "summary", "opened_on", "luxurious"]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
@@ -340,6 +341,11 @@
               ["product", "fk_booking_accommodation"],
               ["product", "fk_accommodation_image"]
           ]
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact": {
+            "page_size": 15
+          }
         }
       }
     },

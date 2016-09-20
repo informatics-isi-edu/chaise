@@ -86,7 +86,7 @@ https://example.org/path/to/chaise/app?server=options#state/of/chaise?client=opt
 
 The primary resources (Web applications) and thus resource names in Chaise are:
 - `chaise/search`: resource for searching within a catalog (aliased from `chaise`)
-- `chaise/record`: resource for interacting with a record in the catalog
+- `chaise/detailed`: resource for interacting with a record in the catalog
 - `chaise/login`: resource for establishing a session
 
 These resources are inter-dependent Web applications loaded in distinct client
@@ -159,9 +159,9 @@ Example `chaise\search` URL:
 https://example.org/chaise/search#5/xyz:experiments?facets=investigator::eq::'bill'/created::gt::'2015-04-20'
 ```
 
-### `chaise/record` Resource Names
+### `chaise/detailed` Resource Names
 
-The `chaise/record` resource is an application for viewing and editing a single
+The `chaise/detailed` resource is an application for viewing and editing a single
 data record (i.e., an entity) from a catalog of an ERMrest service. Along with
 the data record, the application also display sets of related entities as part
 of the record display. The application also supports browsing between records
@@ -170,16 +170,16 @@ related entities. It MUST represent the identification of the record in its
 resource name. It SHOULD represent other factors that influence the data
 presentation, such as whether a nested table of related entities is display in
 a standard or transposed table layout. However, as specified in the
-`chase\search` resource, the `chaise\record` application may encounter URLs
+`chase\search` resource, the `chaise\detailed` application may encounter URLs
 that are no longer satisfiable due to changes in the model or the data. In such
 cases, the application MUST notify the user of its inability to display the
 record. Unlike, the search resource, the record resource may not have a way to
 fallback and may only be able to direct the user to the search interface.
 
-The following grammar is used for `chaise/record` resource naming.
+The following grammar is used for `chaise/detailed` resource naming.
 
 ```
-RECORD_URI := BASE_URI 'chaise/record' '#' CATALOG_ID '/' SCHEMA ':' TABLE '/' PREDICATE [ '/' PREDICATE ]* '?' OPTION [ '&' OPTION ]*
+RECORD_URI := BASE_URI 'chaise/detailed' '#' CATALOG_ID '/' SCHEMA ':' TABLE '/' PREDICATE [ '/' PREDICATE ]* '?' OPTION [ '&' OPTION ]*
 BASE_URI := <a standard HTTP URL ending in the base path to the 'chaise' resource>
 
 CATALOG_ID := <a catalog identifier>
@@ -209,10 +209,10 @@ All user-specified parameter values (id, schema, table, attribute, value, etc.)
 MUST be URL encoded. As long as no special characters are used in them (such as
 spaces) the values will be unchanged and user-friendly.
 
-Example `chaise\record` URL:
+Example `chaise\detailed` URL:
 
 ```
-https://example.org/chaise/record#5/xyz:experiments/id::eq::123
+https://example.org/chaise/detailed/#5/xyz:experiments/id::eq::123
 ```
 
 ### `chaise/login` Resource Names

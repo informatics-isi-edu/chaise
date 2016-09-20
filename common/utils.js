@@ -183,7 +183,7 @@
                 }
             }
 
-            // TODO With Reference API, we don't need the code below? 
+            // TODO With Reference API, we don't need the code below?
 
             // start extracting values after '#' symbol
             var parts = hash.substring(1).split('/');
@@ -420,6 +420,30 @@
         return ParsedFilter;
     }])
 
+    .factory("DataUtils", ['$sce', function($sce) {
+        /**
+         *
+         * @param {ERMrest.Page} page
+         * @return [Object] array of row values in the form of {isHTML: boolean, value: v}
+         */
+        function getRowValuesFromPage(page) {
+            return page.tuples.map(function(tuple, index, array) {
+                var row = [];
+                tuple.values.forEach(function(value, index) {
+                    row.push({
+                        isHTML: tuple.isHTML[index],
+                        value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                    });
+                });
+                return row;
+            });
+        }
+
+        return {
+            getRowValuesFromPage: getRowValuesFromPage
+        }
+    }])
+
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {
         return {
@@ -433,6 +457,28 @@
                     return viewValue;
                 });
             }
+        };
+    })
+
+    .service('headInjector', function() {
+        function addCustomCSS() {
+            if (chaiseConfig['customCSS'] !== undefined) {
+            	var fileref = document.createElement("link");
+            	fileref.setAttribute("rel", "stylesheet");
+            	fileref.setAttribute("type", "text/css");
+            	fileref.setAttribute("href", chaiseConfig['customCSS']);
+            	document.getElementsByTagName("head")[0].appendChild(fileref);
+            }
+        }
+
+        function addTitle() {
+            if (chaiseConfig.headTitle !== undefined) {
+                document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
+            }
+        }
+        return {
+            addCustomCSS: addCustomCSS,
+            addTitle: addTitle
         };
     });
 })();

@@ -462,9 +462,9 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 		return ret;
 	};
 
-  this.urlBookmark = function urlBookmark() {
-    return $scope.FacetsData.bookmark;
-  };
+	this.urlBookmark = function urlBookmark() {
+		return $scope.FacetsData.bookmark;
+  	};
 
 	this.isUrl = function isUrl(table, column) {
 		return hasAnnotation(table, column, 'url');
@@ -498,7 +498,8 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
   this.showupResults = function showupResults() {
 	  return chaiseConfig['showUnfilteredResults'] === true || $scope.hasSelectedFacets();
 		  
-  }
+  };
+
   this.hasSelectedFacets = $scope.hasSelectedFacets = function hasSelectedFacets() {
     var selectedFacets = false;
     $.each($scope.FacetsData.box, function(table, columns) {
@@ -595,6 +596,14 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 		if (!$scope.$$phase) {
 			$scope.$apply();
 		}
+	};
+
+	this.onExportFormatSelect = function onExportFormatSelect(event) {
+		FacetsService.updateExportFormat();
+	};
+
+	this.onExportClick = function onExportClick() {
+		FacetsService.doExport();
 	};
 
 }]);

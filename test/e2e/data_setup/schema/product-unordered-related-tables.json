@@ -1,0 +1,839 @@
+{
+  "tables": {
+    "accommodation": {
+      "comment": "List of different types of accommodations",
+      "kind": "table",
+      "entityCount": 0,
+      "keys": [
+        {
+          "comment": null,
+          "annotations": {},
+          "unique_columns": [
+            "id"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product",
+              "column_name": "category"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "category",
+              "schema_name": "product",
+              "column_name": "term"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product",
+              "column_name": "thumbnail"
+            }
+          ],
+          "annotations": {
+            "comment": ["thumbnail"]
+          },
+          "referenced_columns": [
+            {
+              "table_name": "file",
+              "schema_name": "product",
+              "column_name": "id"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product",
+              "column_name": "cover"
+            }
+          ],
+          "annotations": {
+            "comment": ["thumbnail"]
+          },
+          "referenced_columns": [
+            {
+              "table_name": "file",
+              "schema_name": "product",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "table_name": "accommodation",
+      "schema_name": "product",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "serial4"
+          },
+          "annotations": {
+            "comment": [
+              "hidden"
+            ],
+            "tag:misd.isi.edu,2015:display" : {
+              "name" : "Id"
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "title",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": [
+              "title",
+              "top",
+              "orderby"
+            ],
+            "description": {
+              "display": "Name of Accommodation"
+            },
+            "tag:misd.isi.edu,2015:display" : {
+              "name" : "Name of Accommodation"
+            },
+            "facetOrder": [
+              "1"
+            ]
+          }
+        },
+        {
+          "comment": "A valid url of the accommodation",
+          "name": "website",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": [
+              "url"
+            ],
+            "description": {
+              "display": "Website"
+            },
+            "tag:misd.isi.edu,2015:url" : {
+              "url" : "{cname}"
+            },
+            "tag:isrd.isi.edu,2016:column-display" : {
+              "*": {
+                "markdown_pattern" : "[Link to Website]({{website}})"
+              }
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Website"
+            }
+          }
+        },
+        {
+          "comment": "Type of accommodation ('Resort/Hotel/Motel')",
+          "name": "category",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": ["top"],
+            "description": {
+              "display": "Category"
+            },
+            "facetOrder": [
+              "2"
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Category"
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "rating",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "float4"
+          },
+          "annotations": {
+            "comment": ["top"],
+            "description": {
+              "display": "User Rating"
+            },
+            "facetOrder": [
+              "3"
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "User Rating"
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "summary",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "longtext"
+          },
+          "annotations": {
+            "comment": [
+              "text",
+              "unsortable",
+              "summary",
+              "hidden"
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Summary"
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "description",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "markdown"
+          },
+          "annotations": {
+            "comment": [
+              "text",
+              "unsortable",
+              "html",
+              "hidden"
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Description"
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "no_of_rooms",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment" : ["top"],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Number of Rooms"
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "thumbnail",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": [
+              "hidden"
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Thumbnail"
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "cover",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "description": {
+              "display": "Cover Image"
+            },
+            "comment": [
+              "hidden"
+            ],
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Cover Image"
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "opened_on",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "timestamptz"
+          },
+          "annotations": {
+            "comment": [
+              "bottom"
+            ],
+            "description": {
+              "display": "Operational Since"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Operational Since"
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "luxurious",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "boolean"
+          },
+          "annotations": {
+            "comment": ["top"],
+            "description": {
+              "display": "Luxurious"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Is Luxurious"
+            },
+            "tag:isrd.isi.edu,2016:ignore" : ["record"]
+          }
+        }
+      ],
+      "annotations": {
+        "comment": [
+          "default"
+        ],
+        "tag:misd.isi.edu,2015:display": {
+          "name": "Accommodations"
+        },
+        "description": {
+          "display": "Accommodations",
+          "top_columns": ["title", "rating", "category", "opened_on"]
+        },
+        "tag:isrd.isi.edu,2016:visible-columns" : {
+          "detailed" : ["id", "title", "website", "category", "rating", "summary", "description", "no_of_rooms", "cover", "thumbnail", "opened_on", "luxurious"]
+        }
+      }
+    },
+    "booking": {
+      "comment": null,
+      "kind": "table",
+      "entityCount": 0,
+      "keys": [
+        {
+          "comment": null,
+          "annotations": {},
+          "unique_columns": [
+            "id",
+            "accommodation_id"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names" : [["product", "fk_booking_accommodation"]],
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "booking",
+              "schema_name": "product",
+              "column_name": "accommodation_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "table_name": "booking",
+      "schema_name": "product",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "serial4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        },
+        {
+          "comment": null,
+          "name": "accommodation_id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        },
+        {
+          "comment": null,
+          "name": "price",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "float4"
+          },
+          "annotations": {
+            "description": {
+              "display": "Price"
+            },
+            "facetOrder": ["4"]
+          }
+        },
+        {
+          "comment": null,
+          "name": "booking_date",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "timestamptz"
+          },
+          "annotations": {
+            "description": {
+              "display": "Date of Booking"
+            },
+            "facetOrder": ["5"]
+          }
+        }
+      ],
+      "annotations": {
+        "comment": [
+          "association"
+        ],
+        "description": {
+          "display": "Bookings"
+        }
+      }
+    },
+    "file": {
+      "comment": "asset/object",
+      "kind": "table",
+      "keys": [
+        {
+          "comment": null,
+          "annotations": {},
+          "unique_columns": [
+            "id"
+          ]
+        }
+      ],
+      "entityCount": 0,
+      "foreign_keys": [],
+      "table_name": "file",
+      "schema_name": "product",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": [
+              "hidden"
+            ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "filename",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": [
+              "name"
+            ]
+          }
+        },
+        {
+          "comment": "asset/reference",
+          "name": "uri",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": [
+              "thumbnail",
+              "download"
+            ],
+            "tag:isrd.isi.edu,2016:column-display" : {
+              "*": {
+                "markdown_pattern" : "[{{uri}}]({{uri}})"
+              }
+            }
+          }
+        },
+        {
+          "comment": null,
+          "name": "content_type",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": [
+              "type"
+            ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "bytes",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "int8"
+          },
+          "annotations": {
+            "comment": [
+              "orderby"
+            ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "timestamp",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "timestamptz"
+          },
+          "annotations": {}
+        },
+        {
+          "comment": null,
+          "name": "image_width",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "int8"
+          },
+          "annotations": {
+            "comment": [
+              "image"
+            ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "image_height",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "int8"
+          },
+          "annotations": {}
+        },
+        {
+          "comment": "asset/thumbnail",
+          "name": "preview",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": [
+              "preview"
+            ]
+          }
+        }
+      ],
+      "annotations": {
+        "comment": [
+          "exclude"
+        ],
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact/brief": {
+            "page_size": 2
+          }
+        }
+      }
+    },
+    "accommodation_image": {
+      "comment": "this contains asset/thumbnails",
+      "kind": "table",
+      "keys": [
+        {
+          "comment": "vocabulary",
+          "annotations": {},
+          "unique_columns": [
+            "image_id",
+            "accommodation_id"
+          ]
+        }
+      ],
+      "entityCount": 0,
+      "foreign_keys": [
+        {
+          "names" : [["product", "fk_accommodation_image"]],
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "accommodation_image",
+              "schema_name": "product",
+              "column_name": "accommodation_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product",
+              "column_name": "id"
+            }
+          ]
+        },
+        {
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "accommodation_image",
+              "schema_name": "product",
+              "column_name": "image_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "file",
+              "schema_name": "product",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "table_name": "accommodation_image",
+      "schema_name": "product",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "accommodation_id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": [
+              "dataset"
+            ]
+          }
+        },
+        {
+          "comment": "this is an asset/thumbnail",
+          "name": "image_id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": [
+              "image"
+            ],
+            "description": {
+              "display": "Image"
+            }
+          }
+        }
+      ],
+      "annotations": {
+        "comment": [
+          "image"
+        ],
+        "description": {
+          "display": "Accommodation Images"
+        }
+      }
+    },
+    "category": {
+      "comment": "domain",
+      "kind": "table",
+      "keys": [
+        {
+          "comment": "vocabulary",
+          "annotations": {},
+          "unique_columns": [
+            "id"
+          ]
+        },
+        {
+          "comment": "vocabulary",
+          "annotations": {},
+          "unique_columns": [
+            "term"
+          ]
+        }
+      ],
+      "entityCount": 0,
+      "foreign_keys": [],
+      "table_name": "category",
+      "schema_name": "product",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": [
+              "hidden"
+            ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "term",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": ["top"]
+          }
+        }
+      ],
+      "annotations": {
+        "tag:misd.isi.edu,2015:display": {
+          "name": "Categories"
+        },
+        "description": {
+          "display": "Categories"
+        }
+      }
+    },
+    "media": {
+      "comment": null,
+      "kind": "table",
+      "entityCount": 0,
+      "keys": [
+        {
+          "comment": null,
+          "annotations": {},
+          "unique_columns": [
+            "id",
+            "accommodation_id"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names" : [["product", "fk_media_accommodation"]],
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "media",
+              "schema_name": "product",
+              "column_name": "accommodation_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "table_name": "media",
+      "schema_name": "product",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "serial4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        },
+        {
+          "comment": null,
+          "name": "accommodation_id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        }
+      ],
+      "annotations": {
+        "comment": [
+          "association"
+        ],
+        "description": {
+          "display": "Media"
+        }
+      }
+    }
+  },
+  "table_names": [
+    "category",
+    "file",
+    "accommodation",
+    "accommodation_image",
+    "booking",
+    "media"
+  ],
+  "comment": null,
+  "annotations": {
+    "tag:misd.isi.edu,2015:display": {
+      "name": "accommodation"
+    }
+  },
+  "schema_name": "product"
+}

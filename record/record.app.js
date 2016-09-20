@@ -8,6 +8,7 @@
         'chaise.navbar',
         'chaise.record.display',
         'chaise.record.table',
+        'chaise.html',
         'chaise.utils',
         'ermrestjs',
         'ui.bootstrap'
@@ -19,16 +20,16 @@
             loading: true,
             previousButtonDisabled: true,
             nextButtonDisabled: true,
-            pageLimit: 5,
-            recordStart: 1,
-            recordEnd: 5
+            pageLimit: 25
         };
     }])
 
-    .run(['ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
+    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
+        headInjector.addTitle();
+        headInjector.addCustomCSS();
 
         try {
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
@@ -36,7 +37,7 @@
             context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
 
             // The context object won't change unless the app is reloaded
-            context.appName = "record-two";
+            context.appName = "record";
 
             if (context.filter) {
                 ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
@@ -69,21 +70,26 @@
                     $rootScope.tableModels = [];
 
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        // We want to limit the number of values shown by default
-                        // Maybe have a chaise config option
+                        $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
+
+                        if ($rootScope.relatedReferences[i].display.defaultPageSize) {
+                            pageInfo.pageLimit = $rootScope.relatedReferences[i].display.defaultPageSize;
+                        }
                         (function(i) {
-                            $rootScope.relatedReferences[i].read(5).then(function (page) {
+                            $rootScope.relatedReferences[i].read(pageInfo.pageLimit).then(function (page) {
+
                                 var model = {
+                                    reference: $rootScope.relatedReferences[i],
                                     columns: $rootScope.relatedReferences[i].columns,
-                                    hasLoaded: true,     // used to determine if the current table and next table should be rendered
-                                    open: true,         // to define if the accordion is open or closed
-                                    sortby: null,       // column name, user selected or null
-                                    sortOrder: null,    // asc (default) or desc
-                                    rowValues: []       // array of rows values
+                                    page: page,
+                                    hasNext: page.hasNext,      // used to determine if a link should be shown
+                                    hasLoaded: true,            // used to determine if the current table and next table should be rendered
+                                    open: true,                 // to define if the accordion is open or closed
+                                    sortby: null,               // column name, user selected or null
+                                    sortOrder: null,            // asc (default) or desc
+                                    rowValues: []               // array of rows values
                                 };
-                                model.rowValues = page.tuples.map(function (tuple, index, array) {
-                                    return tuple.values;
-                                });
+                                model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 $rootScope.tableModels[i] = model;
                             });
                         })(i);

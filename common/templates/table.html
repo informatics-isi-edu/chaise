@@ -1,7 +1,7 @@
 <div class="outer-table">
     <table class="table table-striped table-bordered table-hover">
         <!-- sortable column header -->
-        <thead>
+        <thead class="table-heading">
             <tr>
                 <th nowrap ng-repeat="col in vm.columns track by $index">
                     <span class="table-column-displayname" ng-click="sortby({colname: col.name})">{{col.displayname}}</span>
@@ -13,8 +13,13 @@
         </thead>
 
         <!-- rows -->
-        <tr class="table-row" ng-repeat="row in vm.rowValues track by $index" ng-click="gotoRowLink({index : $index})" ng-style="{'cursor': 'pointer'}">
-            <td ng-repeat="val in row track by $index">{{val}}</td>
-        </tr>
+        <tbody>
+            <tr class="table-row" ng-repeat="row in vm.rowValues track by $index" ng-click="gotoRowLink({index : $index})" ng-style="{'cursor': 'pointer'}">
+                <td ng-repeat="val in row track by $index" ng-switch="val.isHTML">
+                    <span ng-switch-when="true" ng-bind-html="val.value"></span>
+                    <span ng-switch-default>{{val.value}}</span>
+                </td>
+            </tr>
+        </tbody>
     </table>
 </div>

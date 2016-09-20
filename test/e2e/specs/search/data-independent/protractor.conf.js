@@ -13,7 +13,11 @@ var config = pConfig.getConfig({
     },
   */
 
-    page: '/search'
+    page: 'search',
+    setBaseUrl: function(browser, data) {
+      browser.params.url = process.env.CHAISE_BASE_URL + "/search/#" + data.catalogId + "/" + data.schema.name;
+      return browser.params.url;
+    }
 });
 
 // If ng-app attribute is in a descendant of <body>, tell Protractor where ng-app is

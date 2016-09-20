@@ -231,7 +231,7 @@ function resultContent() {
     }
 };
 
-function recordPage() {
+function detailedPage() {
     var that = this;
     this.entityTitle = $('#entity-title');
     this.getEntityTitle = function() {
@@ -413,7 +413,7 @@ var recordEditPage = function() {
     };
 
     this.recordBookmark = function() {
-        return element(by.id('record-bookmark-container'));
+        return element(by.id('detailed-bookmark-container'));
     };
 
     this.getAlertError = function() {
@@ -425,7 +425,7 @@ var recordEditPage = function() {
     };
 };
 
-var record2Page = function() {
+var recordPage = function() {
     var that = this;
     this.getEntityTitle = function() {
         return browser.executeScript("return $('#entity-title').text();");
@@ -456,7 +456,7 @@ var record2Page = function() {
     };
 
     this.getColumnValueElements = function() {
-        return browser.executeScript("return $('.entity-value > span.ng-binding.ng-scope');");
+        return browser.executeScript("return $('.entity-value > span.ng-scope');");
     };
 
     this.getRelatedTables = function() {
@@ -483,6 +483,15 @@ var record2Page = function() {
         return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
     };
 
+    this.getMoreResultsLink = function(displayName) {
+        // the link is not a child of the table, rather one of the accordion group
+        return element(by.id("rt-heading-" + displayName)).element(by.css(".more-results-link"));
+    };
+
+    this.getRelatedTableRowValues = function(displayName) {
+        return that.getRelatedTableRows(displayName).all(by.tagName("td"));    
+    };
+
     this.getCreateRecordButton = function() {
         return element(by.id("create-record"));
     };
@@ -496,14 +505,34 @@ var record2Page = function() {
     };
 };
 
+var recordsetPage = function() {
+    this.getPageTitle = function() {
+        return browser.executeScript("return $('#page-title').text();");
+    };
+
+    this.getCustomPageSize = function() {
+        return browser.executeScript("return $('#custom-page-size').text().trim();");
+    };
+
+    this.getColumns = function() {
+        return element.all(by.css(".table-column-displayname"));
+    };
+
+    this.getRows = function() {
+        return element.all(by.css('.table-row'));
+    };
+
+};
+
 function chaisePage() {
     this.sidebar = new sidebar();
     this.moreFilter = new moreFilter();
     this.editFilter = new editFilter();
     this.resultContent = new resultContent();
-    this.recordPage = new recordPage();
+    this.detailedPage = new detailedPage();
     this.recordEditPage = new recordEditPage();
-    this.record2Page = new record2Page();
+    this.recordPage = new recordPage();
+    this.recordsetPage = new recordsetPage();
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));
     this.tourBox = element(by.css('.tour-DataBrowserTour'));

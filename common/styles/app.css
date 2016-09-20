@@ -202,7 +202,7 @@ button .glyphicon-trash {
     word-wrap: break-word;
 }
 
-#record-bookmark-container{
+#detailed-bookmark-container{
     text-align: right;
     position: absolute;
     top: 20px;
@@ -216,6 +216,9 @@ button .glyphicon-trash {
 }
 .table.nested .panel-body{
     /*overflow-x: scroll;*/
+}
+.table{
+    margin-bottom: 5px;
 }
 tbody{
         display: table-row-group;
@@ -242,7 +245,12 @@ tbody{
 }
 
 .outer-table{
-    overflow-x: scroll;
+    overflow-x: auto;
+}
+
+.table-heading{
+    background-color: rgb(116, 116, 116);
+    color: #fff;
 }
 
 .table-reference .entity-key{
