@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-$(function() {
+(function() {
 
     // The Chaise RecordSet module
     angular.module('recordset', [
@@ -311,41 +311,42 @@ $(function() {
             AlertsService.addAlert({type:'error', message:error.message});
         }
 
-        ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
-            $rootScope.reference = reference.contextualize.compact;
-            $log.info("Reference:", $rootScope.reference);
-            if (p_context.limit)
-                pageInfo.pageLimit = p_context.limit;
-            else if ($rootScope.reference.display.defaultPageSize)
-                pageInfo.pageLimit = $rootScope.reference.display.defaultPageSize;
-            else
-                pageInfo.pageLimit = 25;
-            recordsetModel.tableDisplayName = $rootScope.reference.displayname;
-            recordsetModel.columns = $rootScope.reference.columns;
 
-            return $rootScope.reference.read(pageInfo.pageLimit);
-        }).then(function getPage(page) {
-            recordsetModel.page = page;
-            recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                $rootScope.reference = reference.contextualize.compact;
+                $log.info("Reference:", $rootScope.reference);
+                if (p_context.limit)
+                    pageInfo.pageLimit = p_context.limit;
+                else if ($rootScope.reference.display.defaultPageSize)
+                    pageInfo.pageLimit = $rootScope.reference.display.defaultPageSize;
+                else
+                    pageInfo.pageLimit = 25;
+                recordsetModel.tableDisplayName = $rootScope.reference.displayname;
+                recordsetModel.columns = $rootScope.reference.columns;
 
-            pageInfo.loading = false;
-            pageInfo.previousButtonDisabled = !page.hasPrevious;
-            pageInfo.nextButtonDisabled = !page.hasNext;
-        }, function error(response) {
-            $log.warn(response);
+                return $rootScope.reference.read(pageInfo.pageLimit);
+            }).then(function getPage(page) {
+                recordsetModel.page = page;
+                recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
 
-            pageInfo.loading = false;
-            pageInfo.previousButtonDisabled = true;
-            pageInfo.nextButtonDisabled = true;
+                pageInfo.loading = false;
+                pageInfo.previousButtonDisabled = !page.hasPrevious;
+                pageInfo.nextButtonDisabled = !page.hasNext;
+            }, function error(response) {
+                $log.warn(response);
 
-            throw response;
-        }).catch(function genericCatch(exception) {
+                pageInfo.loading = false;
+                pageInfo.previousButtonDisabled = true;
+                pageInfo.nextButtonDisabled = true;
 
-            if (exception instanceof ERMrest.UnauthorizedError)
-                ErrorService.catchAll(exception);
-            else
-                AlertsService.addAlert({type:'error', message:exception.message});
-        });
+                throw response;
+            }).catch(function genericCatch(exception) {
+
+                if (exception instanceof ERMrest.UnauthorizedError)
+                    ErrorService.catchAll(exception);
+                else
+                    AlertsService.addAlert({type:'error', message:exception.message});
+            });
 
         /**
          * Do Not Delete
@@ -377,4 +378,4 @@ $(function() {
 
 /* end recordset */
 
-});
+})();
