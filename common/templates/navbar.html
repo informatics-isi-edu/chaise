@@ -9,31 +9,31 @@
                     MENU
                 </button>
                 <a class="navbar-brand" ng-href="{{brandURL || '/' }}">
-                    <img ng-if="brandImage" ng-src="{{brandImage}}">
-                    <span ng-bind="brandText || 'Chaise'"></span>
+                    <img id="brand-image" ng-if="brandImage" ng-src="{{brandImage}}">
+                    <span id="brand-text" ng-bind="brandText || 'Chaise'"></span>
                 </a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li ng-show="user === null">
-                        <a href="#" ng-click="login()">Log In</a>
+                    <li>
+                        <a id="signup-link" ng-if="user === null && signUpURL" ng-href="{{signUpURL}}">Sign Up</a>
+                        <p class="username navbar-text" ng-if="user !== null && !profileURL" ng-bind="user"></p>
+                        <a class="username" ng-if="user !== null && profileURL" ng-href="{{profileURL}}" ng-bind="user"></a>
                     </li>
-                    <li ng-show="user !== null">
-                        <a href="https://www.globus.org/app/account" ng-bind="user"></a>
-                    </li>
-                    <li ng-show="user !== null">
-                        <a href="#" ng-click="logout()">Log Out</a>
+                    <li>
+                        <a id="login-link" ng-if="user === null" href="#" ng-click="login()">Log In</a>
+                        <a id="logout-link" ng-if="user !== null" href="#" ng-click="logout()">Log Out</a>
                     </li>
                 </ul>
-                <ul class="nav navbar-nav">
+                <ul id="navbar-menu" class="nav navbar-nav">
                     <li ng-repeat="item in menu">
-                        <a ng-if="!item.children" ng-href="{{item.url}}" target="_blank">{{item.name}}</a>
+                        <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}">{{item.name}}</a>
                         <a ng-if="item.children" href="#" class="dropdown-toggle" data-toggle="dropdown">{{item.name}} <span class="caret"></span></a>
                         <ul ng-if="item.children" class="dropdown-menu">
                             <li ng-repeat="childItem in item.children" ng-class="{'dropdown-submenu': childItem.children}">
-                                <a ng-if="!childItem.children" ng-href="{{childItem.url}}" target="_blank">{{childItem.name}}</a>
+                                <a ng-if="!childItem.children" ng-href="{{childItem.url}}" target="{{childItem.newTab ? '_blank' : '_self'}}">{{childItem.name}}</a>
                                 <a ng-if="childItem.children" class="dropdown-toggle" data-toggle="dropdown" href="#">{{childItem.name}}</a>
                                 <ul ng-if="childItem.children" navbar-menu menu="childItem.children" class="dropdown-menu"></ul>
                             </li>
