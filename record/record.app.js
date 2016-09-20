@@ -1,4 +1,4 @@
-(function() {
+$(function() {
     'use strict';
 
     angular.module('chaise.record', [
@@ -122,4 +122,4 @@
             ErrorService.errorPopup(exception.message, exception.code, "home page");
         }
     }]);
-})();
+});
