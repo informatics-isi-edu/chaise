@@ -1451,7 +1451,7 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 		if (sortOption != null && sortOption != '') {
 			var sortPredicate = getSortPredicate(data, sortOption, sortOrder, page, pageSize);
 			predicate.push('$A/' + sortPredicate.join(';'));
-			var exportSortPredicate = getSortPredicate(data, sortOption, sortOrder, 1, 0);
+			var exportSortPredicate = getExportSortPredicate(data, sortOption, sortOrder);
 			exportPredicate.push('$A/' + exportSortPredicate.join(';'));
 		} else {
 			if (page > 1) {
@@ -1482,7 +1482,7 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
   		}
   		url += '/$A';
 		param['options']['exportOptions']['exportPredicate'] = param['queryPredicate'];
-		if (exportPredicate.length > 0) {
+        if (exportPredicate.length > 0) {
 			var predicatePath = '/' + exportPredicate.join('/');
 			param['options']['exportOptions']['exportPredicate'] += predicatePath;
 			exportUrl += predicatePath;
@@ -3948,22 +3948,29 @@ function getSortPredicate(data, sortColumn, sortOrder, page, pageSize) {
 	if (data[(page-1)*pageSize][sortColumn] == null) {
 		var offsetPredicate = [];
 		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
-		if (pageSize != 0) {
-            $.each(PRIMARY_KEY, function (i, primaryCol) {
-                offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page - 1) * pageSize][primaryCol]));
-            });
-        }
+		$.each(PRIMARY_KEY, function(i, primaryCol) {
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+		});
 		sortPredicate.push(offsetPredicate.join('&'));
 	} else {
 		var offsetPredicate = [];
 		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
-		if (pageSize != 0) {
-            $.each(PRIMARY_KEY, function (i, primaryCol) {
-                offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page - 1) * pageSize][primaryCol]));
-            });
-        }
+		$.each(PRIMARY_KEY, function(i, primaryCol) {
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+		});
         sortPredicate.push(offsetPredicate.join('&'));
 		sortPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
+		sortPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
+	}
+	return sortPredicate;
+}
+
+function getExportSortPredicate(data, sortColumn, sortOrder) {
+	var sortPredicate = [];
+	if (data[0][sortColumn] == null) {
+		sortPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
+	} else {
+		sortPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[0][sortColumn]));
 		sortPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
 	}
 	return sortPredicate;
