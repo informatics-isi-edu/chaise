@@ -17,7 +17,7 @@ var config = pConfig.getConfig({
     },
 
 	// Specify chaiseConfigPath
-    chaiseConfigFilePath: '/test/e2e/specs/navbar/data-dependent/chaise-config.js'
+    chaiseConfigFilePath: 'test/e2e/specs/navbar/data-dependent/chaise-config.js'
 });
 config.rootElement = '#main-content';
 exports.config = config;
