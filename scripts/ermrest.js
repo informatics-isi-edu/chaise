@@ -1129,30 +1129,32 @@ function successUpdateSliders(data, textStatus, jqXHR, param) {
 	var table = param['table'];
 	var cols = param['cols'];
 	var box = param['options']['box'][table];
-	$.each(cols, function(i, col) {
-		box[col]['ready'] = true;
-		if (data[0]['min_' + encodeSafeURIComponent(col)] != null) {
-			var colType = options['colsDescr'][table][col]['type'];
-			if (!box[col]['left']) {
-				box[col]['min'] = data[0]['min_' + encodeSafeURIComponent(col)];
-				if (datepickerPresentation.contains(colType)) {
-					box[col]['min'] = getDateString(box[col]['min'], 'min');
-				}
-			}
-			if (!box[col]['right']) {
-				box[col]['max'] = data[0]['max_' + encodeSafeURIComponent(col)];
-				if (datepickerPresentation.contains(colType)) {
-					box[col]['max'] = getDateString(box[col]['max'], 'max');
-				}
-			}
-			if (box[col]['right'] && box[col]['max'] == box[col]['ceil']) {
-				delete box[col]['right'];
-			}
-			if (box[col]['left'] && box[col]['min'] == box[col]['floor']) {
-				delete box[col]['left'];
-			}
-		}
-	});
+    if (cols !== undefined) {
+        $.each(cols, function (i, col) {
+            box[col]['ready'] = true;
+            if (data[0]['min_' + encodeSafeURIComponent(col)] != null) {
+                var colType = options['colsDescr'][table][col]['type'];
+                if (!box[col]['left']) {
+                    box[col]['min'] = data[0]['min_' + encodeSafeURIComponent(col)];
+                    if (datepickerPresentation.contains(colType)) {
+                        box[col]['min'] = getDateString(box[col]['min'], 'min');
+                    }
+                }
+                if (!box[col]['right']) {
+                    box[col]['max'] = data[0]['max_' + encodeSafeURIComponent(col)];
+                    if (datepickerPresentation.contains(colType)) {
+                        box[col]['max'] = getDateString(box[col]['max'], 'max');
+                    }
+                }
+                if (box[col]['right'] && box[col]['max'] == box[col]['ceil']) {
+                    delete box[col]['right'];
+                }
+                if (box[col]['left'] && box[col]['min'] == box[col]['floor']) {
+                    delete box[col]['left'];
+                }
+            }
+        });
+    }
 	var ready = true;
 	var tables = [options['table']].concat(association_tables_names);
 	$.each(tables, function(i, table) {
