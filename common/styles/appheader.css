@@ -1,12 +1,3 @@
-html,body {
-	height: 100%;
-	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-}
-
-body {
-	background-color: #FFF;
-}
-
 body > .container {
 	min-height: 100%;
 	position: relative;
@@ -45,11 +36,6 @@ body > .container {
 
 .navbar-inverse .navbar-text {
 	color: #FFF;
-}
-
-#mainnav .form-control-feedback {
-     height: 28px;
-     line-height: 28px;
 }
 
 .dropdown-submenu {

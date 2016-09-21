@@ -1,4 +1,13 @@
 /* Styles for the FB Data app main content - header styles are in appheader.css */
+html {
+    height: 100%;
+}
+
+body {
+    min-height: 100%;
+    position: relative;
+    padding-bottom: 70px;
+}
 
 h1 {
 	margin-top: 0;
@@ -17,16 +26,6 @@ label {
 .sidebar label {
 	font-weight: normal;
 }
-
-[class*=" md-"], [class^="md-"] {
-	/* line-height: inherit; */
-}
-
-/*
-.form-group .glyphicon {
-	vertical-align: middle;
-}
-*/
 
 .form-horizontal .control-label {
 	padding-top: 0;
@@ -77,11 +76,6 @@ label {
 	padding-top: 5px;
 }
 
-#filter {
-	/* min-height: 80px;
-	height: 100%;
-	 float: left; */
-}
 .filter-button {
 	width: 80px;
 	float: right;
@@ -103,10 +97,7 @@ label {
 
 .filter-container {
 	display: block;
-	/* margin-right: 79px; */
-	/* min-height: 80px; */
 	background-color: #FFF;
-	/* border: 1px solid #CCC; */
 	position: relative;
 }
 
@@ -174,11 +165,6 @@ label {
 	height: 36px;
 	border-radius: 0;
 }
-/*
-#view-buttons .btn-default .md-2x {
-	line-height: .8;
-}
-*/
 
 #view-buttons .btn-toolbar {
 	-webkit-white-space: nowrap;
@@ -223,12 +209,9 @@ a.filter-link-cancel {
 
 .badge {
 	background-color: #cc0c0f; /* F55B5D */
-	/* background-color: #FFF; */
-	/* border: 1px solid #e5e5e5;
-	color: #FFF;
-	/* color: #333; */
 	font-weight: 400;
 	font-size: 1em;
+    color: #fff;
 }
 
 .badge.reset, .badge.open-side {
@@ -292,7 +275,6 @@ dl.attribute-group dd {
 	position:fixed;
 	top: 55px; /* corresponds to height of header */
 	bottom: 0;
-	/* z-index: inherit; */
 	transform: none;
 	transition: none;
 }
@@ -339,7 +321,6 @@ dl.attribute-group dd {
 }
 
 .sidebar .sidebar-header {
-	/* border-bottom: 1px solid #CCC; */
 	padding: 0;
 	display: block;
 	width: 340px;
@@ -358,12 +339,10 @@ dl.attribute-group dd {
 #navcontainer {
 	position: relative;
 	margin-bottom: 70px;
-	/* min-height: 100%;  trying to make sticky footer */
-	/* margin: 0px auto 30px; */
 }
+
 .editfilter-container {
 	display: block;
-	/* background-color: #F2F2F2; */
 	border-top: 1px solid #CCC;
 	border-bottom: 1px solid #CCC;
 	padding: 5px; /* 5px 10px */
@@ -371,13 +350,7 @@ dl.attribute-group dd {
 	width: 340px;
 	margin-top: 30px;
 }
-/*
-.editfilter-container a.field-toggle .md-chevron-right {
-	position: relative;
-	top: 5px;
-	color: #bbb;
-	}
-*/
+
 .editfilter-container a:hover {
 	text-decoration: none;
 }
@@ -506,8 +479,8 @@ dl.attribute-group dd {
 }
 
 .meta-actions .meta-icons .glyphicon {
-		padding-left: 5px;
-		color: #4D4D4D;
+	padding-left: 5px;
+	color: #4D4D4D;
 }
 
 .meta-icons a:hover, .meta-icons a:focus {
@@ -559,7 +532,6 @@ dl.attribute-group dd {
 }
 
 .sidebar .sidebar-header .sidebar-toggle {
-	/* width: 34px; */
 	color: #428bca;
 	margin-top: 0;
 	padding: 0;
@@ -577,16 +549,11 @@ dl.attribute-group dd {
 .sidebar-back {
 	display: inline-block;
 	width: 34px;
-  	/* cursor: pointer;
-  	margin-left: 5px;
-  	margin-top: 2px; /* only needed to offset vertical align in .sidebar-title for Safari */
 }
 
 .sidebar-title {
 	display: inline-block;
 	color: #333;
-  	/* margin-right: 0;
-  	cursor: pointer;*/
   	vertical-align: top; /* only needed for Safari workaround */
   	/* from truncate */
   	overflow: hidden;
@@ -599,7 +566,6 @@ dl.attribute-group dd {
 }
 
 .sidebar .search-box {
-	/* border-bottom: 2px solid #e5e5e5; */
 	padding: 10px 15px;
 }
 
@@ -618,7 +584,6 @@ dl.attribute-group dd {
 
 .search-box input.sidebar-search.form-control {
 	font-size: 1.25em;
-	/* border-radius: 20px; */
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 	box-shadow: none;
@@ -677,10 +642,6 @@ p.backlink {
   padding: 20px;
 }
 
-ul.filteritems {
-	/* padding-left: 15px; */
-}
-
 ul.filteritems input[type=text] {
 	padding: 10px;
 	margin: 10px;
@@ -689,7 +650,7 @@ ul.filteritems input[type=text] {
 
 li.attr-date input[type=text] {
 	padding: 10px;
-	margin: 10px;	
+	margin: 10px;
 }
 /* Details page styles */
 
@@ -760,6 +721,10 @@ dt, dd {
 	width: 100%;
 	height: 70px;
 	background-color: #F5F5F5;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .footer > .container {

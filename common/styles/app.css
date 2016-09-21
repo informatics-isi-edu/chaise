@@ -1,6 +1,11 @@
 /****************** GLOBAL ******************/
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	background-color: #FFF;
 }
 
 li{
@@ -49,33 +54,16 @@ button .glyphicon-trash {
 }
 #brand{
     color: #fff;
-/*    font-size: 20px;
-    font-weight: lighter;
-    letter-spacing: 1px;
-    padding: 11px 20px;
-    display: inline-block; */
 }
 
 #entity-title, .entity-title{
     clear: both;
     padding-top: 10px;
-     /*color: rgb(126, 126, 126);
-    font-size: 26px;
-    font-weight: 300;
-    letter-spacing: 2px;*/
 }
 #entity-subtitle{
     text-transform: uppercase;
-    /* color: rgb(179, 179, 179); */
     font-size: 14px;
-    /* font-weight: 300;
-    letter-spacing: 1.5px; */
     margin: 0px 0 12px 0;
-}
-
-.entity-value{
-    /* font-size: 14px;
-    color: rgb(111, 111, 111); */
 }
 
 /****************** Entity Table ******************/
@@ -119,11 +107,6 @@ button .glyphicon-trash {
     border: none;
 }
 
-.panel-title{
-    /* font-weight: 400;
-    color: #838383; */
-}
-
 .panel-title>a:hover, .panel-title>a:focus{
     text-decoration: none;
     color: rgb(63, 124, 184);
@@ -132,8 +115,6 @@ button .glyphicon-trash {
 .panel-default>.panel-heading{
     background: #fff;
     text-transform: uppercase;
-   /*  font-weight: lighter;
-    letter-spacing: 2px; */
     border-bottom: 1px solid #ddd;
 }
 .panel-default>.panel-heading div:before{
@@ -172,23 +153,15 @@ button .glyphicon-trash {
 .reference-views .reference-view-title{
     padding: 3px 1px 5px 0;
     text-transform: uppercase;
-  /*  font-size: 13px;
-    color: #8A8A8A; */
 }
 
 .transpose-toggle{
     display: inline-block;
-   /* font-weight: 400; */
     padding: 1px 17px;
     border-radius: 3px;
     cursor: pointer;
-  /*  color: #B7B7B7; */
     background: #fff;
     width: 81px;
-}
-.transpose-toggle.active{
-  /*  color: #2364AB;
-    font-weight: bold; */
 }
 
 .transpose-toggle:hover, .transpose-toggle:focus, .transpose-toggle:active{
@@ -211,17 +184,11 @@ button .glyphicon-trash {
 
 /*** NESTED TABLES ***/
 
-.panel-body{
-    /*overflow-y: scroll;*/
-}
-.table.nested .panel-body{
-    /*overflow-x: scroll;*/
-}
 .table{
     margin-bottom: 5px;
 }
 tbody{
-        display: table-row-group;
+    display: table-row-group;
     vertical-align: middle;
     border-color: inherit;
 }
@@ -258,7 +225,6 @@ tbody{
     text-transform: capitalize;
     background-color: rgb(116, 116, 116);
     color: #fff;
- /*   letter-spacing: 0.5px; */
     font-weight: normal;
     padding: 10px 20px !important;
 }
@@ -286,8 +252,6 @@ tbody{
     border-right: 1px solid #868686;
     width: 50%;
 }
-
-
 
 .slippry_box.previews{
     height: 600px;
