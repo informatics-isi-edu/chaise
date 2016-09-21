@@ -35,7 +35,6 @@
     // services.
     .constant('context', {
         appName:'recordset',
-        chaiseURL: null,
         mainURI: null,  // the main URL portion up to filters (without modifiers)
         catalogID: null,
         schemaName: null,
@@ -258,17 +257,6 @@
             }
 
         };
-
-
-        $scope.gotoRowLink = function(index) {
-            var tuple = recordsetModel.page.tuples[index];
-            var t_path = tuple.reference.location.compactPath;
-            var path = context.chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(context.catalogID) + "/" + t_path;
-
-            location.assign(path);
-        }
-
-
     }])
 
     // Register work to be performed after loading all modules
@@ -282,8 +270,6 @@
             $rootScope.closeAlert = AlertsService.deleteAlert;
 
             UriUtils.setOrigin();
-            context.chaiseURL = $window.location.href.replace($window.location.hash, '');
-            context.chaiseURL = context.chaiseURL.replace("/recordset/", '');
 
             // parse the URL
             var p_context = UriUtils.parseURLFragment($window.location);
