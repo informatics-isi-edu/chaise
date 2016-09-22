@@ -163,11 +163,19 @@
                         angular.forEach(entity[0], function(value, colName) {
                             try {
                                 var pathColumnType = path.context.columns.get(colName).column.type.name;
-                                if (pathColumnType == 'date' || pathColumnType == 'timestamptz') {
-                                    // Must transform the value into a Date so that
-                                    // Angular won't complain when putting the value
-                                    // in an input of type "date" in the view
-                                    value = (value) ? new Date(value) : "";
+                                if (pathColumnType == 'date' || pathColumnType == 'timestamptz' || pathColumnType == 'timestamp') {
+                                    if (value) {
+                                        value = new Date(value);
+                                        value = {
+                                            date: value,
+                                            time: value
+                                        }
+                                    } else {
+                                        value = {
+                                            date: new Date(),
+                                            time: null
+                                        }
+                                    }
                                 }
                                 recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
                             } catch (exception) { }

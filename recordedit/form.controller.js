@@ -5,6 +5,7 @@
 
     .controller('FormController', ['AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(AlertsService, UriUtils, recordEditModel, context, $window, $log) {
         var vm = this;
+        vm.test = test;
         vm.recordEditModel = recordEditModel;
         vm.server = context.server;
         vm.editMode = context.filter || false;
@@ -17,6 +18,7 @@
         vm.submit = submit;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
+        vm.submissionMode = false; // A flag to track whether the app is in the part of the workflow in which the user has clicked Submit but the app hasn't POSTed or PUT the data to ERMrest yet.
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
 
@@ -115,14 +117,21 @@
                 try {
                     var column = model.table.columns.get(k);
                     switch (column.type.name) {
+                        case 'timestamp':
+                        case 'timestamptz':
+                        case 'date':
+                            if (vm.submissionMode && typeof row[k] === 'object') {
+                                row[k] = new Date(row[k].date.toDateString() + ' ' + row[k].time.toTimeString()).toISOString();
+                            }
                         default: if (row[k] === '') row[k] = null;
-                                 break;
+                            break;
                     }
                 } catch(e) {}
             }
         }
 
         function submit() {
+            vm.submissionMode = true;
             var form = vm.formContainer;
             var model = vm.recordEditModel;
             form.$setUntouched();
@@ -134,12 +143,17 @@
                 return;
             }
 
+            // Somewhere in about here.. you need to check model.rows for date||timestamp columns,
+            // perform the concatenation of date +  time and then set it as the actual final value?
+            // At least some sort of manipulation, where you have to give it a final value instead of an object of multiple vals.
+
             model.rows.forEach(function(row) {
                 transformRowValues(row, model);
             });
 
             if (vm.editMode) {
                 model.table.entity.put(model.rows).then(function success(entities) {
+                    vm.submissionMode = false;
                     // Wrapping redirectAfterSubmission callback fn in the success callback fn
                     // due to inability to pass the success/error responses directly
                     // into redirectAfterSubmission fn. (ReferenceError)
@@ -149,6 +163,7 @@
                 });
             } else {
                 model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
+                    vm.submissionMode = false;
                     vm.redirectAfterSubmission(entities);
                 }, function error(response) {
                     vm.showSubmissionError(response);
@@ -233,6 +248,7 @@
                 displayType = 'dropdown';
             } else {
                 switch (type) {
+                    case 'timestamp':
                     case 'timestamptz':
                     case 'date':
                         displayType = 'date';
@@ -308,7 +324,7 @@
                 hidden = column.annotations.contains('tag:misd.isi.edu,2015:hidden');
 
             } finally {
-               if ((ignore && (ignoreCol.content.length === 0 || ignoreCol.content === null || ignoreCol.content.indexOf('entry') !== -1)) || hidden) {
+               if ((ignore && (ignoreCol.content.length === 0 || ignoreCol.content === null || ignoreCol.content === true || ignoreCol.content.indexOf('entry') !== -1)) || hidden) {
                    return true;
                }
                return false;
@@ -324,5 +340,6 @@
             }
             return 'To be set by system';
         }
+
     }]);
 })();
