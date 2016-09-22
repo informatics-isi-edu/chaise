@@ -4,6 +4,7 @@ describe('Search result detail page,', function () {
     var waitTimeAfterClickingEditFilter = 10000;
     var EC = protractor.ExpectedConditions;
     beforeEach(function (done) {
+        browser.ignoreSynchronization = true;
         browser.get('');
         var sidebar = element(by.id('sidebar'));
         browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {

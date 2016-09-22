@@ -5,6 +5,7 @@ describe('Search result columns,', function () {
     var EC = protractor.ExpectedConditions;
     var timeout  = 10000;
     beforeAll(function (done) {
+        browser.ignoreSynchronization = true;
         browser.get('');
         var sidebar = element(by.id('sidebar'));
         browser.ignoreSynchronization = true;

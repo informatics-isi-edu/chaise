@@ -121,5 +121,30 @@
         } catch (exception) {
             ErrorService.errorPopup(exception.message, exception.code, "home page");
         }
+
+        /**
+         * Do Not Delete
+         *
+         * This code handles address bar changes
+         * Normally when user changes the url in the address bar,
+         * nothing happens.
+         *
+         * This code listens when address bar is changes outside the code,
+         * and redirects to the new location.
+         *
+         * Whenever recordset updates the url (no reloading and no history stack),
+         * it saves the location in $rootScope.location.
+         * When address bar is changed, this code compares the address bar location
+         * with the last save recordset location. If it's the same, the change of url was
+         * done internally, do not refresh page. If not, the change was done manually
+         * outside recordset, refresh page.
+         *
+         */
+        $window.onhashchange = function() {
+            // when address bar changes by user
+            if ($window.location.href !== $rootScope.location) {
+                location.reload();
+            }
+        };
     }]);
 })();

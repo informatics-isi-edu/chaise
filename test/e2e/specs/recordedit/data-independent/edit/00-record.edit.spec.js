@@ -18,6 +18,7 @@ describe('Edit existing record,', function() {
 					tableParams.keys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
 					});
+					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 					

@@ -32,7 +32,7 @@
         console.log('Context:',context);
     }])
 
-    .run(['headInjector', 'context', 'ERMrest', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session', 'UriUtils', '$log', '$uibModal', '$window', function runApp(headInjector, context, ERMrest, recordEditModel, AlertsService, ErrorService, Session, UriUtils, $log, $uibModal, $window) {
+    .run(['headInjector', 'context', 'ERMrest', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session','$rootScope', 'UriUtils', '$log', '$uibModal', '$window', function runApp(headInjector, context, ERMrest, recordEditModel, AlertsService, ErrorService, Session, $rootScope, UriUtils, $log, $uibModal, $window) {
         headInjector.addTitle();
         headInjector.addCustomCSS();
 
