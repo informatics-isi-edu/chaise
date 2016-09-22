@@ -197,7 +197,7 @@ exports.testEditButton = function () {
         var EC = protractor.ExpectedConditions,
             editButton = chaisePage.recordPage.getEditRecordButton();
 
-        browser.wait(EC.elementToBeClickable(editButton), 10000);
+        //browser.wait(EC.elementToBeClickable(editButton), 10000);
 
         editButton.click().then(function() {
             return browser.driver.getCurrentUrl();
@@ -212,7 +212,7 @@ exports.testCreateButton = function () {
         var EC = protractor.ExpectedConditions,
             createButton = chaisePage.recordPage.getCreateRecordButton();
 
-        browser.wait(EC.elementToBeClickable(createButton), 10000);
+        //browser.wait(EC.elementToBeClickable(createButton), 10000);
 
         createButton.click().then(function() {
             return browser.driver.getCurrentUrl();

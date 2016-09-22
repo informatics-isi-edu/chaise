@@ -450,7 +450,7 @@ testrecordedit:
 
 #Rule to run viewer app tests
 .PHONY: testviewer
-testrecordedit:
+testviewer:
 	$(BIN)/protractor $(E2EDviewer)
 
 # Rule to make html
