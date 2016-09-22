@@ -31,6 +31,14 @@
         'ui.bootstrap',
         'ngSanitize'])
 
+    .config(['$provide', function ($provide){
+        $provide.decorator('$browser', ['$delegate', function ($delegate) {
+            $delegate.onUrlChange = function () {};
+            $delegate.url = function () { return ""};
+            return $delegate;
+        }]);
+    }])
+
     // Register the 'context' object which can be accessed by config and other
     // services.
     .constant('context', {
