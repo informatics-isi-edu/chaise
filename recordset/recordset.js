@@ -126,7 +126,7 @@
                 // update the address bar
                 // page does not reload
                 $window.location.replace($scope.permalink());
-                //$rootScope.location = $window.location.href;
+                $rootScope.location = $window.location.href;
 
             }, function error(response) {
                 $log.warn(response);
@@ -193,7 +193,7 @@
                     // update the address bar without adding to history stack
                     // page does not reload
                     $window.location.replace($scope.permalink());
-                    //$rootScope.location = $window.location.href;
+                    $rootScope.location = $window.location.href;
 
                 }, function error(response) {
                     $log.warn(response);
@@ -240,7 +240,7 @@
                     // update the address bar
                     // page does not reload
                     $window.location.replace($scope.permalink());
-                    //$rootScope.location = $window.location.href;
+                    $rootScope.location = $window.location.href;
 
                 }, function error(response) {
                     $log.warn(response);
@@ -276,7 +276,7 @@
             // parse the URL
             var p_context = UriUtils.parseURLFragment($window.location);
 
-            //$rootScope.location = $window.location.href;
+            $rootScope.location = $window.location.href;
             pageInfo.loading = true;
             pageInfo.previousButtonDisabled = true;
             pageInfo.nextButtonDisabled = true;
