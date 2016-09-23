@@ -5,7 +5,6 @@
 
     .controller('FormController', ['AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(AlertsService, UriUtils, recordEditModel, context, $window, $log) {
         var vm = this;
-        vm.test = test;
         vm.recordEditModel = recordEditModel;
         vm.server = context.server;
         vm.editMode = context.filter || false;
@@ -37,6 +36,10 @@
         vm.isForeignKey = isForeignKey;
         vm.matchType = matchType;
         vm.isHiddenColumn = isHiddenColumn;
+
+        vm.timezone = getTimezone();
+        vm.datepickerOpened = {};
+
 
         function redirectAfterSubmission(entities) {
             var form = vm.formContainer;
@@ -341,5 +344,11 @@
             return 'To be set by system';
         }
 
+        function getTimezone() {
+            var now = new Date().toString();
+            var TZ = now.indexOf('(') > -1 ? now.match(/\([^\)]+\)/)[0].match(/[A-Z]/g).join('') : now.match(/[A-Z]{3,4}/)[0];
+            if (TZ == "GMT" && /(GMT\W*\d{4})/.test(now)) TZ = RegExp.$1;
+            return TZ;
+        }
     }]);
 })();
