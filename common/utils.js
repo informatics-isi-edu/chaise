@@ -3,7 +3,7 @@
 
     angular.module('chaise.utils', [])
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', '$window', function($injector, $window, ParsedFilter, $rootScope, $window) {
+    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', function($injector, $window, ParsedFilter, $rootScope) {
 
         /**
          * @function
