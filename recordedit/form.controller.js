@@ -17,7 +17,6 @@
         vm.submit = submit;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
-        vm.submissionMode = false; // A flag to track whether the app is in the part of the workflow in which the user has clicked Submit but the app hasn't POSTed or PUT the data to ERMrest yet.
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
 
@@ -37,8 +36,8 @@
         vm.matchType = matchType;
         vm.isHiddenColumn = isHiddenColumn;
 
-        vm.timezone = getTimezone();
-        vm.datepickerOpened = {};
+        vm.applyCurrentDatetime = applyCurrentDatetime;
+        vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
 
 
         function redirectAfterSubmission(entities) {
@@ -120,12 +119,6 @@
                 try {
                     var column = model.table.columns.get(k);
                     switch (column.type.name) {
-                        case 'timestamp':
-                        case 'timestamptz':
-                        case 'date':
-                            if (vm.submissionMode && typeof row[k] === 'object') {
-                                row[k] = new Date(row[k].date.toDateString() + ' ' + row[k].time.toTimeString()).toISOString();
-                            }
                         default: if (row[k] === '') row[k] = null;
                             break;
                     }
@@ -134,7 +127,6 @@
         }
 
         function submit() {
-            vm.submissionMode = true;
             var form = vm.formContainer;
             var model = vm.recordEditModel;
             form.$setUntouched();
@@ -156,7 +148,6 @@
 
             if (vm.editMode) {
                 model.table.entity.put(model.rows).then(function success(entities) {
-                    vm.submissionMode = false;
                     // Wrapping redirectAfterSubmission callback fn in the success callback fn
                     // due to inability to pass the success/error responses directly
                     // into redirectAfterSubmission fn. (ReferenceError)
@@ -166,7 +157,6 @@
                 });
             } else {
                 model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
-                    vm.submissionMode = false;
                     vm.redirectAfterSubmission(entities);
                 }, function error(response) {
                     vm.showSubmissionError(response);
@@ -344,11 +334,9 @@
             return 'To be set by system';
         }
 
-        function getTimezone() {
-            var now = new Date().toString();
-            var TZ = now.indexOf('(') > -1 ? now.match(/\([^\)]+\)/)[0].match(/[A-Z]/g).join('') : now.match(/[A-Z]{3,4}/)[0];
-            if (TZ == "GMT" && /(GMT\W*\d{4})/.test(now)) TZ = RegExp.$1;
-            return TZ;
+        // Assigns the current timestamp to the model, given an index and column name
+        function applyCurrentDatetime(modelIndex, columnName) {
+            vm.recordEditModel.rows[modelIndex][columnName] = new Date();
         }
     }]);
 })();

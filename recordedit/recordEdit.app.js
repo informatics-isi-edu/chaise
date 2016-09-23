@@ -162,18 +162,7 @@
                             try {
                                 var pathColumnType = path.context.columns.get(colName).column.type.name;
                                 if (pathColumnType == 'date' || pathColumnType == 'timestamptz' || pathColumnType == 'timestamp') {
-                                    if (value) {
-                                        value = new Date(value);
-                                        value = {
-                                            date: value,
-                                            time: value
-                                        }
-                                    } else {
-                                        value = {
-                                            date: new Date(),
-                                            time: null
-                                        }
-                                    }
+                                    value = new Date(value);
                                 }
                                 recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
                             } catch (exception) { }
