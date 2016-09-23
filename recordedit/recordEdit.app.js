@@ -198,20 +198,16 @@
         }).catch(function(exception) {
             ErrorService.catchAll(exception);
         });
+
+        /**
+         * Whenever recordedit updates the url (no reloading and no history stack),
+         * it saves the location in $rootScope.location.
+         * When address bar is changed, this code compares the address bar location
+         * with the last save recordset location. If it's the same, the change of url was
+         * done internally, do not refresh page. If not, the change was done manually
+         * outside recordset, refresh page.
+         */
+        UriUtils.setLocationChangeHandling();
     }]);
 
-    // Refresh the page when the window's hash changes. Needed because Angular
-    // normally doesn't refresh page when hash changes.
-    window.onhashchange = function() {
-        if (window.location.hash != '#undefined') {
-            location.reload();
-        } else {
-            history.replaceState("", document.title, window.location.pathname);
-            location.reload();
-        }
-        function goBack() {
-            window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
-            window.location.lasthash.pop();
-        }
-    }
 })();

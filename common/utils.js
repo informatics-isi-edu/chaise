@@ -3,7 +3,7 @@
 
     angular.module('chaise.utils', [])
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', function($injector, $window, ParsedFilter) {
+    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', '$window', function($injector, $window, ParsedFilter, $rootScope, $window) {
 
         /**
          * @function
@@ -365,12 +365,40 @@
             }
         }
 
+        /**
+         * 
+         * This code handles address bar changes
+         * Normally when user changes the url in the address bar,
+         * nothing happens.
+         *
+         * This code listens when address bar is changes outside the code,
+         * and redirects to the new location.
+         *
+         * Whenever app updates the url (no reloading and no history stack),
+         * it saves the location in $rootScope.location.
+         * When address bar is changed, this code compares the address bar location
+         * with the last save recordset location. If it's the same, the change of url was
+         * done internally, do not refresh page. If not, the change was done manually
+         * outside recordset, refresh page.
+         *
+         */
+        function setLocationChangeHandling() {
+            $window.onhashchange = function() {
+                // when address bar changes by user
+                if ($window.location.href !== $rootScope.location) {
+                    location.reload();
+                }
+            };
+        }
+
+
         return {
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin,
-            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter
+            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
+            setLocationChangeHandling: setLocationChangeHandling
         }
     }])
 
