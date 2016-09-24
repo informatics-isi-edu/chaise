@@ -3,10 +3,10 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(AlertsService, UriUtils, recordEditModel, context, $window, $log) {
+    .controller('FormController', ['AlertsService', 'UriUtils', 'recordEditModel', '$window', '$log', '$rootScope', function FormController(AlertsService, UriUtils, recordEditModel, $window, $log, $rootScope) {
         var vm = this;
+        var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
-        vm.server = context.server;
         vm.editMode = context.filter || false;
         vm.booleanValues = context.booleanValues;
         vm.getAutoGenValue = getAutoGenValue;
@@ -139,17 +139,16 @@
             });
 
             if (vm.editMode) {
-                model.table.entity.put(model.rows).then(function success(entities) {
-                    // Wrapping redirectAfterSubmission callback fn in the success callback fn
-                    // due to inability to pass the success/error responses directly
-                    // into redirectAfterSubmission fn. (ReferenceError)
+                // model.table.entity.put(model.rows).then(function success(entities) {
+                $rootScope.reference.update(model.rows).then(function success(entities) {
                     vm.redirectAfterSubmission(entities);
                 }, function error(response) {
                     vm.showSubmissionError(response);
                 });
             } else {
-                model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
-                    vm.redirectAfterSubmission(entities);
+                $rootScope.reference.create(model.rows).then(function success(page) {
+                // model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
+                    vm.redirectAfterSubmission(page.tuples);
                 }, function error(response) {
                     vm.showSubmissionError(response);
                 });
@@ -271,7 +270,7 @@
         // In this case, columns of type serial* == auto-generated
         function isAutoGen(name) {
             try {
-                return (vm.recordEditModel.table.columns.get(name).type.name.indexOf('serial') === 0);
+                return ($rootScope.reference._table.columns.get(name).type.name.indexOf('serial') === 0);
             } catch (exception) {
                 // handle exception
                 $log.info(exception);

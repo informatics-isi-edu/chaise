@@ -20,6 +20,7 @@
 </head>
 <body>
     <div class="container-fluid">
+        <div ng-if="reference">
         <div ng-controller="FormController as form" class="row">
             <navbar></navbar>
             <div class="col-xs-12">
@@ -59,9 +60,9 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in form.recordEditModel.table.columns.all();" ng-if="::!form.isHiddenColumn(column);">
+                                    <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns" ng-if="::!form.isHiddenColumn(column);">
                                         <td class="entity-key col-xs-1" ng-class="{'coltooltip': column.comment}">
-                                            <span ng-if="!column.nullok" class="text-danger">{{'*'}}</span>
+                                            <span ng-if="!column.nullok" class="text-danger">*</span>
                                             <span ng-class="{'coltooltiplabel': column.comment}">{{::column.displayname}}</span>
                                             <span ng-if="column.comment" class="coltooltiptext">{{::column.comment}}</span>
                                         </td>
@@ -151,6 +152,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </body>

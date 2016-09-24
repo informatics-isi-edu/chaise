@@ -272,7 +272,6 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 
 
 RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
-	$(RE_ASSETS)/context.js \
 	$(RE_ASSETS)/model.js \
 	$(RE_ASSETS)/form.controller.js
 
