@@ -121,5 +121,15 @@
         } catch (exception) {
             ErrorService.errorPopup(exception.message, exception.code, "home page");
         }
+
+        /**
+         * it saves the location in $rootScope.location.
+         * When address bar is changed, this code compares the address bar location
+         * with the last save recordset location. If it's the same, the change of url was
+         * done internally, do not refresh page. If not, the change was done manually
+         * outside recordset, refresh page.
+         *
+         */
+        UriUtils.setLocationChangeHandling();
     }]);
 })();

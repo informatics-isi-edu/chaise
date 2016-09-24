@@ -18,6 +18,7 @@ describe('View recordset,', function() {
                     tupleParams.keys.forEach(function(key) {
                         keys.push(key.name + key.operator + key.value);
                     });
+                    browser.ignoreSynchronization=true;
                     browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
                     browser.sleep(2000);
                 });
