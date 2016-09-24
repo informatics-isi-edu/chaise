@@ -32,7 +32,7 @@ facetsModel.factory('FacetsData', function() {
 		'exportOptions': {
 			format: "CSV",
 			formatOptions:{},
-			supportedFormats:["CSV", "JSON"],
+			supportedFormats:["CSV", "JSON", "BAG"],
 			exportPredicate:'',
 			exportUrl:''
 		},
