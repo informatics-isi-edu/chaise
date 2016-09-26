@@ -1214,6 +1214,9 @@ function getColumnDescriptions(options, successCallback) {
 				return true;
 			}
 			var urlSuffix = null;
+			if (!searchBoxPresentation.contains(obj['type']) && !checkBoxPresentation.contains(obj['type']) && !sliderPresentation.contains(obj['type']) && !datepickerPresentation.contains(obj['type'])) {
+				searchBoxPresentation.push(obj['type']);
+			}
 			if (searchBoxPresentation.contains(obj['type']) || checkBoxPresentation.contains(obj['type'])) {
 				urlSuffix = 'cnt_d_' + encodeSafeURIComponent(col) + ':=cnt_d(' + encodeSafeURIComponent(col) + ')';
 			} else if (sliderPresentation.contains(obj['type']) || datepickerPresentation.contains(obj['type'])) {
@@ -3584,6 +3587,9 @@ function initFacetGroups(options, facet, successCallback) {
 			}
 		});
 		var url = null;
+		if (!searchBoxPresentation.contains(col_type) && !checkBoxPresentation.contains(col_type) && !sliderPresentation.contains(col_type) && !datepickerPresentation.contains(col_type)) {
+			searchBoxPresentation.push(col_type);
+		}
 		if (searchBoxPresentation.contains(col_type) || checkBoxPresentation.contains(col_type)) {
 			url = ERMREST_DATA_HOME + '/aggregate/' + queryPredicate + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 		} else if (datepickerPresentation.contains(col_type) || sliderPresentation.contains(col_type)) {
