@@ -39,7 +39,6 @@
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
 
-
         function redirectAfterSubmission(entities) {
             var form = vm.formContainer;
             var model = vm.recordEditModel;
