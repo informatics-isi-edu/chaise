@@ -212,7 +212,7 @@
 								<div class="radio" ng-repeat="data in FacetsData.tree[0].nodes">
 								  <label class="collection_badge pointer ng-binding highlighted" ng-click="sideBar.searchCollection($event, data)">
 								    <input type="radio" name="collectionsRadios" id="optionsRadios1" value="option1" checked>
-								    <span>{{data.display}}</span>
+								    <span schema_name="{{data.schema}}">{{data.display}}</span>
 								  </label>
 								</div>
 							</div>

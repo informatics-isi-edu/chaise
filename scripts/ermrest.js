@@ -2312,7 +2312,7 @@ function selectCollection() {
 	var clicked = false;
 	$.each($('label', $('#treeDiv')), function(i, label) {
 		$.each($('span', $(label)), function(j, span) {
-			if ($(span).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE)) {
+			if ($(span).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE) && $(span).attr('schema_name') == SCHEMA) {
 				$(label).click();
 				clicked = true;
 				return false;
