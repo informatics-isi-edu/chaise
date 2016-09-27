@@ -37,7 +37,6 @@
         appName:'recordset',
         mainURI: null,  // the main URL portion up to filters (without modifiers)
         catalogID: null,
-        schemaName: null,
         tableName: null
     })
 
@@ -290,7 +289,6 @@
             }
 
             context.catalogID = p_context.catalogID;
-            context.schemaName = p_context.schemaName;
             context.tableName = p_context.tableName;
 
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
