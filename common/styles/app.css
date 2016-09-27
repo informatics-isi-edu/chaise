@@ -138,6 +138,10 @@ button .glyphicon-trash {
 
 .panel-default>.panel-heading+.panel-collapse>.panel-body{
     border-top: none;
+    padding-left: 25px;
+    padding-bottom: 10px;
+    padding-right: 0px;
+    padding-top: 0px;
 }
 
 .reference-views {
