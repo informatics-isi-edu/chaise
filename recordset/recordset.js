@@ -262,8 +262,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService',
-        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService) {
+    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService', 'UiUtils'
+        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService, UiUtils) {
 
         try {
             headInjector.addTitle();
@@ -345,6 +345,10 @@
          * outside recordset, refresh page.
          */
         UriUtils.setLocationChangeHandling();
+
+
+        // This is to allow the dropdown button to open at the top/bottom depending on the space available 
+        UiUtils.setBootstrapDropdownButtonBehavior();
     }]);
 
 /* end recordset */
