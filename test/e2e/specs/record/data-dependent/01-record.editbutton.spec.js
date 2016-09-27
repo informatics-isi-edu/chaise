@@ -26,7 +26,6 @@ describe('View existing record,', function() {
 
 				it('should load chaise-config.js and have editRecord=true', function() {
 			        browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
-			        	console.log(chaiseConfig);
 			        	expect(chaiseConfig.editRecord).toBe(true);
 			        });
 				});
