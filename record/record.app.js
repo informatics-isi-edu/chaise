@@ -4,6 +4,7 @@
     angular.module('chaise.record', [
         'ngSanitize',
         'chaise.errors',
+        'chaise.filters',
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.display',
@@ -24,12 +25,13 @@
         };
     }])
 
-    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
+    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'AlertsService', '$q', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, AlertsService, $q) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
+        $rootScope.alerts = AlertsService.alerts;
 
         try {
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
@@ -50,6 +52,8 @@
                     $rootScope.relatedReferences = $rootScope.reference.related;
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
+                }, function error(exception) {
+                    return $q.reject(exception);
                 }).then(function getPage(page) {
                     var tuple = page.tuples[0];
                     // Used directly in the record-display directive

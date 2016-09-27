@@ -136,10 +136,7 @@
 
                 throw response;
             }).catch(function genericCatch(exception) {
-                if (exception instanceof ERMrest.UnauthorizedError)
-                    ErrorService.catchAll(exception);
-                else
-                    AlertsService.addAlert({type:'error', message:exception.message});
+                ErrorService.catchAll(exception);
             });
         };
 
@@ -203,10 +200,7 @@
 
                     throw response;
                 }).catch(function genericCatch(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError)
-                        ErrorService.catchAll(exception);
-                    else
-                        AlertsService.addAlert({type:'error', message:exception.message});
+                    ErrorService.catchAll(exception);
                 });
 
             }
@@ -250,10 +244,7 @@
 
                     throw response;
                 }).catch(function genericCatch(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError)
-                        ErrorService.catchAll(exception);
-                    else
-                        AlertsService.addAlert({type:'error', message:exception.message});
+                    ErrorService.catchAll(exception);
                 });
             }
 
@@ -268,7 +259,6 @@
             headInjector.addTitle();
             headInjector.addCustomCSS();
             $rootScope.alerts = AlertsService.alerts;
-            $rootScope.closeAlert = AlertsService.deleteAlert;
 
             UriUtils.setOrigin();
 
@@ -294,7 +284,8 @@
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
         } catch (error) {
-            AlertsService.addAlert({type:'error', message:error.message});
+            // pass to error handler
+            ErrorService.catchAll(error);
         }
 
 
@@ -327,10 +318,9 @@
             pageInfo.loading = false;
             pageInfo.previousButtonDisabled = true;
             pageInfo.nextButtonDisabled = true;
-            if (exception instanceof ERMrest.UnauthorizedError)
-                ErrorService.catchAll(exception);
-            else
-                AlertsService.addAlert({type:'error', message:exception.message});
+
+            // pass to error handler
+            ErrorService.catchAll(exception);
         });
 
         /**
