@@ -24,8 +24,14 @@ describe('View existing record,', function() {
 					browser.sleep(2000);
 			    });
 
+				it('should load chaise-config.js and have editRecord=true', function() {
+			        browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
+			        	expect(chaiseConfig.editRecord).toBe(true);
+			        });
+				});
+
                 describe("Click the edit record button ,", function() {
-					var params = recordHelpers.testEditButton(tupleParams);
+                	var params = recordHelpers.testEditButton(tupleParams);
 				});
 
     		});

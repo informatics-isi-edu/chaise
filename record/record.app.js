@@ -25,7 +25,7 @@
         };
     }])
 
-    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'AlertsService', '$q', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, AlertsService, $q) {
+    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'UiUtils', 'AlertsService', '$q', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, UiUtils, AlertsService, $q) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
@@ -135,5 +135,8 @@
          *
          */
         UriUtils.setLocationChangeHandling();
+
+        // This is to allow the dropdown button to open at the top/bottom depending on the space available 
+        UiUtils.setBootstrapDropdownButtonBehavior();
     }]);
 })();
