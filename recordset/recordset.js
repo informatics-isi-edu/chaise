@@ -262,7 +262,7 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService', 'UiUtils'
+    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService', 'UiUtils',
         function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService, UiUtils) {
 
         try {
