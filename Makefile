@@ -254,6 +254,8 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
+	$(COMMON)/vendor/mask.min.js \
+	$(COMMON)/vendor/moment.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
@@ -444,7 +446,7 @@ testrecordedit:
 
 #Rule to run viewer app tests
 .PHONY: testviewer
-testrecordedit:
+testviewer:
 	$(BIN)/protractor $(E2EDviewer)
 
 # Rule to make html

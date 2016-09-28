@@ -16,6 +16,7 @@
         'chaise.modal',
         'ui.select',
         'ui.bootstrap',
+        'ui.mask',
         'ngMessages'
     ])
 
@@ -161,8 +162,23 @@
                         angular.forEach(entity[0], function(value, colName) {
                             try {
                                 var pathColumnType = path.context.columns.get(colName).column.type.name;
-                                if (pathColumnType == 'date' || pathColumnType == 'timestamptz' || pathColumnType == 'timestamp') {
-                                    value = new Date(value);
+                                // Transform columns with date/timestamp values
+                                if (pathColumnType == 'timestamp' || pathColumnType == 'timestamptz') {
+                                    console.log(value);
+                                    // e.g. timestamptz format 2016-09-26T11:17:28.696-07:00
+                                    if (value) {
+                                        value = {
+                                            date: moment(value, moment.ISO_8601, true).format('YYYY-MM-DD'),
+                                            time: moment(value, moment.ISO_8601, true).format('hh:mm:ss'),
+                                            meridiem: moment(value, moment.ISO_8601, true).format('A')
+                                        };
+                                    } else {
+                                        value = {
+                                            date: null,
+                                            time: null
+                                        };
+                                    }
+                                    console.log(value);
                                 }
                                 recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
                             } catch (exception) { }

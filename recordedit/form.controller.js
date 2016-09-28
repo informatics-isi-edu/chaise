@@ -15,6 +15,7 @@
         vm.closeAlert = AlertsService.deleteAlert;
 
         vm.submit = submit;
+        vm.submissionMode = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.copyFormRow = copyFormRow;
@@ -38,6 +39,18 @@
 
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
+        vm.maskOptions = {
+            date: {
+                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/}
+            },
+            time: {
+                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/}
+            }
+        };
+        vm.toggleMeridiem = toggleMeridiem;
+        vm.clearModel = clearModel;
+
+
 
         function redirectAfterSubmission(entities) {
             var form = vm.formContainer;
@@ -118,6 +131,12 @@
                 try {
                     var column = model.table.columns.get(k);
                     switch (column.type.name) {
+                        // Need to convert to 24 hr UTC time
+                        case 'timestamp':
+                        case 'timestamptz':
+                            if (vm.submissionMode && typeof row[k] === 'object') {
+                                row[k] = moment(row[k].date + row[k].time + row[k].meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                            }
                         default: if (row[k] === '') row[k] = null;
                             break;
                     }
@@ -126,6 +145,7 @@
         }
 
         function submit() {
+            vm.submissionMode = true;
             var form = vm.formContainer;
             var model = vm.recordEditModel;
             form.$setUntouched();
@@ -137,16 +157,13 @@
                 return;
             }
 
-            // Somewhere in about here.. you need to check model.rows for date||timestamp columns,
-            // perform the concatenation of date +  time and then set it as the actual final value?
-            // At least some sort of manipulation, where you have to give it a final value instead of an object of multiple vals.
-
             model.rows.forEach(function(row) {
                 transformRowValues(row, model);
             });
 
             if (vm.editMode) {
                 model.table.entity.put(model.rows).then(function success(entities) {
+                    vm.submissionMode = false;
                     // Wrapping redirectAfterSubmission callback fn in the success callback fn
                     // due to inability to pass the success/error responses directly
                     // into redirectAfterSubmission fn. (ReferenceError)
@@ -156,6 +173,7 @@
                 });
             } else {
                 model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
+                    vm.submissionMode = false;
                     vm.redirectAfterSubmission(entities);
                 }, function error(response) {
                     vm.showSubmissionError(response);
@@ -242,6 +260,8 @@
                 switch (type) {
                     case 'timestamp':
                     case 'timestamptz':
+                        displayType = 'timestamp';
+                        break;
                     case 'date':
                         displayType = 'date';
                         break;
@@ -335,7 +355,34 @@
 
         // Assigns the current timestamp to the model, given an index and column name
         function applyCurrentDatetime(modelIndex, columnName) {
-            vm.recordEditModel.rows[modelIndex][columnName] = new Date();
+            // If timestamp or timestamptz column, its model value will be an object
+            if (typeof vm.recordEditModel.rows[modelIndex][columnName] === 'object') {
+                vm.recordEditModel.rows[modelIndex][columnName].date = moment().format('YYYY-MM-DD');
+                vm.recordEditModel.rows[modelIndex][columnName].time = moment().format('hh:mm:ss');
+                vm.recordEditModel.rows[modelIndex][columnName].meridiem = moment().format('A');
+            // else, apply the value to the model directly
+            } else {
+                vm.recordEditModel.rows[modelIndex][columnName] = moment().format();
+            }
+        }
+
+        // Toggle between AM/PM for a time input's ngModel
+        function toggleMeridiem(modelIndex, columnName) {
+            var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem.toLowerCase().charAt(0);
+            if (meridiem === 'a') {
+                return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'PM';
+            }
+            return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'AM';
+        }
+
+        function clearModel(modelIndex, columnName) {
+            // If timestamp or timestamptz column, its model value will be an object
+            if (typeof vm.recordEditModel.rows[modelIndex][columnName] === 'object') {
+                vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: 'AM'};
+            // else, null the model directly
+            } else {
+                vm.recordEditModel.rows[modelIndex][columnName] = null;
+            }
         }
     }]);
 })();
