@@ -164,7 +164,6 @@
                                 var pathColumnType = path.context.columns.get(colName).column.type.name;
                                 // Transform columns with date/timestamp values
                                 if (pathColumnType == 'timestamp' || pathColumnType == 'timestamptz') {
-                                    console.log(value);
                                     // e.g. timestamptz format 2016-09-26T11:17:28.696-07:00
                                     if (value) {
                                         value = {
@@ -178,7 +177,6 @@
                                             time: null
                                         };
                                     }
-                                    console.log(value);
                                 }
                                 recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
                             } catch (exception) { }
