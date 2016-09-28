@@ -36,67 +36,25 @@
         vm.matchType = matchType;
         vm.isHiddenColumn = isHiddenColumn;
 
-        function redirectAfterSubmission(entities) {
-            var form = vm.formContainer;
-            var model = vm.recordEditModel;
-            var rowset = model.rows;
-            var redirectUrl = '../';
-            form.$setUntouched();
-            form.$setPristine();
 
-            if (entities.length === 0) {
-            // 1. var entities = the data returned from ERMrest after POST or PUT operation.
-            // 2. var rowset = this app's representation of the submitted data.
-            // 3. If entities === [], that means the user submitted no new changes
-            // to the record, which means we can use rowset to build the redirect
-            // url later.
-            // Why not just use rowset the whole time? Because after user submits
-            // data, ERMrest might have modified that data, so we should use the
-            // returned data from ERMrest instead of assuming rowset and entities
-            // are always the same.
-                entities = rowset;
-            }
+        // Takes a page object and uses the uri generated for the reference to construct a chaise uri
+        function redirectAfterSubmission(page) {
+            var rowset = vm.recordEditModel.rows,
+                redirectUrl = "../";
 
-            // Find the shortest "primary key" for use in redirect url
-            var keys = model.table.keys.all().sort(function(a, b) {
-                return a.colset.length() - b.colset.length();
-            });
-            var shortestKey = keys[0].colset.columns;
-
-
+            // Created a single entity or Updated one
             if (rowset.length == 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
-                // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
-                // TODO: Postpone using datapath api to build redirect url until
-                // datapath is redeveloped to only use aliases when necessary
-                redirectUrl += 'record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
 
-            } else if (rowset.length > 1) {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record set...'});
-                // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
-                redirectUrl += 'recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
+                redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             } else {
-                return AlertsService.addAlert({type: 'error', message: 'Sorry, there is no data to submit. You must have at least 1 set of data for submission.'});
-            }
+                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
 
-            // finish building the url with entity filters
-            for (var e = 0; e < entities.length; e++) {
-                redirectUrl += (e === 0? "/" : ";");
-
-                // entity keys
-                for (var c = 0, len = shortestKey.length; c < len; c++) {
-                    redirectUrl += (c === 0 && len > 1 ? "(" : "");
-                    redirectUrl += (c > 0 ? "&" : "");
-
-                    var colName = shortestKey[c].name;
-                    redirectUrl += UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[e][colName]);
-                }
-
-                redirectUrl += (len > 1 ? ")" : "");
+                redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             }
 
             // Redirect to record or recordset app..
-            $window.location.replace(redirectUrl);
+            $window.location = redirectUrl;
         }
 
         function showSubmissionError(response) {
@@ -147,8 +105,7 @@
                 });
             } else {
                 $rootScope.reference.create(model.rows).then(function success(page) {
-                // model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
-                    vm.redirectAfterSubmission(page.tuples);
+                    vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
                 });
