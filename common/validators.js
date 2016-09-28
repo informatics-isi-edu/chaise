@@ -54,6 +54,8 @@
         };
     })
 
+    // Validation directive for testing if an input value is a date
+    // Use: <input type="text" date>
     .directive('date', function() {
         return {
             require: 'ngModel',
@@ -68,6 +70,8 @@
         };
     })
 
+    // Validation directive for testing if an input value is a time
+    // Use: <input type="text" time>
     .directive('time', function() {
         return {
             require: 'ngModel',
@@ -81,12 +85,6 @@
                     }
                     return false;
                 };
-                // ctrl.$formatters.push(function(modelValue) {
-                //     return moment(modelValue, moment.ISO_8601, true).format('hh:mm:ss');
-                // });
-                // ctrl.$parsers.push(function(viewValue) {
-                //     return moment(viewValue, moment.ISO_8601, true).format('HH:mm:ss');
-                // });
             }
         };
     });

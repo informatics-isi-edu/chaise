@@ -68,13 +68,11 @@
                                             <input ng-switch-when="autogen" class="form-control" type="text" ng-value="form.getAutoGenValue(form.recordEditModel.rows[rowIndex][column.name]);" disabled>
                                             <!-- date picker input-->
                                             <div ng-switch-when="date" class="input-group">
-                                                <input uib-datepicker-popup="yyyy-MM-dd" name="{{::column.name}}" type="text" class="form-control" placeholder="YYYY-MM-DD"
-                                                ng-model="form.recordEditModel.rows[rowIndex][column.name].date" ng-model-options="{allowInvalid: false}" show-button-bar="false"
-                                                close-text="Close" ng-init="form.datepickerOpened[column.name] = false" is-open="form.datepickerOpened[column.name]" ng-required="!column.nullok">
+                                                <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="YYYY-MM-DD" name="{{::column.name}}"
+                                                    ui-mask="9999-19-39" ui-options="form.maskOptions.date" model-view-value="true" ng-required="!column.nullok" date>
                                                 <span class="input-group-btn">
-                                                    <button type="button" class="btn btn-primary" ng-click="form.datepickerOpened[column.name] = true"><span class="glyphicon glyphicon-calendar"></span></button>
-                                                    <button type="button" class="btn btn-primary" ng-click="form.applyCurrentDatetime(rowIndex, column.name);">Now</button>
-                                                    <button type="button" class="btn btn-danger" ng-click="form.recordEditModel.rows[rowIndex][column.name] = null">Clear</button>
+                                                    <button type="button" class="btn btn-primary" ng-click="form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Today</button>
+                                                    <button type="button" class="btn btn-danger" ng-click="form.clearModel(rowIndex, column.name, column.type.name);">Clear</button>
                                                 </span>
                                             </div>
                                             <!-- timestamp[tz] input -->
@@ -98,12 +96,11 @@
                                                 </div>
                                                 <div class="col-sm-3">
                                                     <div class="btn-group" role="group">
-                                                        <button type="button" class="btn btn-primary" ng-click="form.applyCurrentDatetime(rowIndex, column.name);">Now</button>
-                                                        <button type="button" class="btn btn-danger" ng-click="form.clearModel(rowIndex, column.name);">Clear</button>
+                                                        <button type="button" class="btn btn-primary" ng-click="form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
+                                                        <button type="button" class="btn btn-danger" ng-click="form.clearModel(rowIndex, column.name, column.type.name);">Clear</button>
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <!-- dropdown select input -->
                                             <div ng-switch-when="dropdown">
                                                 <ui-select ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="disabled">

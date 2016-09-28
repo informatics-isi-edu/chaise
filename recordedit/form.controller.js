@@ -353,20 +353,18 @@
             return 'To be set by system';
         }
 
-        // Assigns the current timestamp to the model, given an index and column name
-        function applyCurrentDatetime(modelIndex, columnName) {
-            // If timestamp or timestamptz column, its model value will be an object
-            if (typeof vm.recordEditModel.rows[modelIndex][columnName] === 'object') {
+        // Assigns the current date or timestamp to a column's model
+        function applyCurrentDatetime(modelIndex, columnName, columnType) {
+            if (columnType === 'timestamp' || columnType === 'timestamptz') {
                 vm.recordEditModel.rows[modelIndex][columnName].date = moment().format('YYYY-MM-DD');
                 vm.recordEditModel.rows[modelIndex][columnName].time = moment().format('hh:mm:ss');
                 vm.recordEditModel.rows[modelIndex][columnName].meridiem = moment().format('A');
-            // else, apply the value to the model directly
             } else {
-                vm.recordEditModel.rows[modelIndex][columnName] = moment().format();
+                vm.recordEditModel.rows[modelIndex][columnName] = moment().format('YYYY-MM-DD');
             }
         }
 
-        // Toggle between AM/PM for a time input's ngModel
+        // Toggle between AM/PM for a time input's model
         function toggleMeridiem(modelIndex, columnName) {
             var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem.toLowerCase().charAt(0);
             if (meridiem === 'a') {
@@ -375,11 +373,9 @@
             return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'AM';
         }
 
-        function clearModel(modelIndex, columnName) {
-            // If timestamp or timestamptz column, its model value will be an object
-            if (typeof vm.recordEditModel.rows[modelIndex][columnName] === 'object') {
+        function clearModel(modelIndex, columnName, columnType) {
+            if (columnType === 'timestamp' || columnType === 'timestamptz') {
                 vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: 'AM'};
-            // else, null the model directly
             } else {
                 vm.recordEditModel.rows[modelIndex][columnName] = null;
             }
