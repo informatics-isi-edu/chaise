@@ -19,7 +19,7 @@
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "category"
             }
           ],
@@ -27,7 +27,7 @@
           "referenced_columns": [
             {
               "table_name": "category",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "term"
             }
           ]
@@ -37,7 +37,7 @@
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "thumbnail"
             }
           ],
@@ -47,7 +47,7 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "id"
             }
           ]
@@ -57,7 +57,7 @@
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "cover"
             }
           ],
@@ -67,14 +67,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation",
-      "schema_name": "product",
+      "schema_name": "product-unordered-related-tables",
       "column_definitions": [
         {
           "comment": null,
@@ -352,12 +352,12 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product", "fk_booking_accommodation"]],
+          "names" : [["product-unordered-related-tables", "fk_booking_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "booking",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "accommodation_id"
             }
           ],
@@ -365,14 +365,14 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "booking",
-      "schema_name": "product",
+      "schema_name": "product-unordered-related-tables",
       "column_definitions": [
         {
           "comment": null,
@@ -453,7 +453,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "file",
-      "schema_name": "product",
+      "schema_name": "product-unordered-related-tables",
       "column_definitions": [
         {
           "comment": null,
@@ -607,12 +607,12 @@
       "entityCount": 0,
       "foreign_keys": [
         {
-          "names" : [["product", "fk_accommodation_image"]],
+          "names" : [["product-unordered-related-tables", "fk_accommodation_image"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "accommodation_id"
             }
           ],
@@ -620,7 +620,7 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "id"
             }
           ]
@@ -630,7 +630,7 @@
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "image_id"
             }
           ],
@@ -638,14 +638,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation_image",
-      "schema_name": "product",
+      "schema_name": "product-unordered-related-tables",
       "column_definitions": [
         {
           "comment": null,
@@ -710,7 +710,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "category",
-      "schema_name": "product",
+      "schema_name": "product-unordered-related-tables",
       "column_definitions": [
         {
           "comment": null,
@@ -764,12 +764,12 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product", "fk_media_accommodation"]],
+          "names" : [["product-unordered-related-tables", "fk_media_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "media",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "accommodation_id"
             }
           ],
@@ -777,14 +777,14 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-unordered-related-tables",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "media",
-      "schema_name": "product",
+      "schema_name": "product-unordered-related-tables",
       "column_definitions": [
         {
           "comment": null,
@@ -835,5 +835,5 @@
       "name": "accommodation"
     }
   },
-  "schema_name": "product"
+  "schema_name": "product-unordered-related-tables"
 }
