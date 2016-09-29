@@ -252,13 +252,12 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService', '$q', 'UiUtils',
-        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService, $q, UiUtils) {
+    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', '$q', 'UiUtils',
+        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, $q, UiUtils) {
 
         try {
             headInjector.addTitle();
             headInjector.addCustomCSS();
-            $rootScope.alerts = AlertsService.alerts;
 
             UriUtils.setOrigin();
 
@@ -283,59 +282,64 @@
 
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-        } catch (error) {
+
+
+            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                $rootScope.reference = reference.contextualize.compact;
+                $log.info("Reference:", $rootScope.reference);
+                if (p_context.limit)
+                    pageInfo.pageLimit = p_context.limit;
+                else if ($rootScope.reference.display.defaultPageSize)
+                    pageInfo.pageLimit = $rootScope.reference.display.defaultPageSize;
+                else
+                    pageInfo.pageLimit = 25;
+                recordsetModel.tableDisplayName = $rootScope.reference.displayname;
+                recordsetModel.columns = $rootScope.reference.columns;
+
+                return $rootScope.reference.read(pageInfo.pageLimit);
+            }, function error(response) {
+                return $q.reject(response);
+            }).then(function getPage(page) {
+                recordsetModel.page = page;
+                recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+
+                pageInfo.loading = false;
+                pageInfo.previousButtonDisabled = !page.hasPrevious;
+                pageInfo.nextButtonDisabled = !page.hasNext;
+            }, function error(response) {
+                throw response;
+            }).catch(function genericCatch(exception) {
+                $log.warn(exception);
+                pageInfo.loading = false;
+                pageInfo.previousButtonDisabled = true;
+                pageInfo.nextButtonDisabled = true;
+
+                if (exception instanceof ERMrest.UnauthorizedError)
+                    ErrorService.catchAll(exception);
+                else
+                    ErrorService.errorPopup(exception.message, exception.code, "home page");
+            });
+
+            /**
+             * Whenever recordset updates the url (no reloading and no history stack),
+             * it saves the location in $rootScope.location.
+             * When address bar is changed, this code compares the address bar location
+             * with the last save recordset location. If it's the same, the change of url was
+             * done internally, do not refresh page. If not, the change was done manually
+             * outside recordset, refresh page.
+             */
+            UriUtils.setLocationChangeHandling();
+
+
+            // This is to allow the dropdown button to open at the top/bottom depending on the space available
+            UiUtils.setBootstrapDropdownButtonBehavior();
+        } catch (exception) {
             // pass to error handler
-            ErrorService.catchAll(error);
-        }
-
-
-        ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
-            $rootScope.reference = reference.contextualize.compact;
-            $log.info("Reference:", $rootScope.reference);
-            if (p_context.limit)
-                pageInfo.pageLimit = p_context.limit;
-            else if ($rootScope.reference.display.defaultPageSize)
-                pageInfo.pageLimit = $rootScope.reference.display.defaultPageSize;
+            if (error instanceof ERMrest.UnauthorizedError)
+                ErrorService.catchAll(exception);
             else
-                pageInfo.pageLimit = 25;
-            recordsetModel.tableDisplayName = $rootScope.reference.displayname;
-            recordsetModel.columns = $rootScope.reference.columns;
-
-            return $rootScope.reference.read(pageInfo.pageLimit);
-        }, function error(response) {
-            return $q.reject(response);
-        }).then(function getPage(page) {
-            recordsetModel.page = page;
-            recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-
-            pageInfo.loading = false;
-            pageInfo.previousButtonDisabled = !page.hasPrevious;
-            pageInfo.nextButtonDisabled = !page.hasNext;
-        }, function error(response) {
-            throw response;
-        }).catch(function genericCatch(exception) {
-            $log.warn(exception);
-            pageInfo.loading = false;
-            pageInfo.previousButtonDisabled = true;
-            pageInfo.nextButtonDisabled = true;
-
-            // pass to error handler
-            ErrorService.catchAll(exception);
-        });
-
-        /**
-         * Whenever recordset updates the url (no reloading and no history stack),
-         * it saves the location in $rootScope.location.
-         * When address bar is changed, this code compares the address bar location
-         * with the last save recordset location. If it's the same, the change of url was
-         * done internally, do not refresh page. If not, the change was done manually
-         * outside recordset, refresh page.
-         */
-        UriUtils.setLocationChangeHandling();
-
-
-        // This is to allow the dropdown button to open at the top/bottom depending on the space available 
-        UiUtils.setBootstrapDropdownButtonBehavior();
+                ErrorService.errorPopup(exception.message, exception.code, "home page");
+        }
     }]);
 
 /* end recordset */

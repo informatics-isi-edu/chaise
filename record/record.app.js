@@ -25,13 +25,12 @@
         };
     }])
 
-    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'UiUtils', 'AlertsService', '$q', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, UiUtils, AlertsService, $q) {
+    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'UiUtils', '$q', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, UiUtils, $q) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
-        $rootScope.alerts = AlertsService.alerts;
 
         try {
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
@@ -53,7 +52,8 @@
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
                 }, function error(exception) {
-                    return $q.reject(exception);
+                    //return $q.reject(exception);
+                    throw exception;
                 }).then(function getPage(page) {
                     var tuple = page.tuples[0];
                     // Used directly in the record-display directive
@@ -103,7 +103,10 @@
                     $log.warn(response);
                     throw response;
                 }).catch(function genericCatch(exception) {
-                    ErrorService.catchAll(exception);
+                    if (exception instanceof ERMrest.UnauthorizedError)
+                        ErrorService.catchAll(exception);
+                    else
+                        ErrorService.errorPopup(exception.message, exception.code, "home page");
                 });
             // No filter defined, redirect to search
             } else {
