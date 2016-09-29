@@ -20,8 +20,6 @@
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
 
-        vm.getDefaults = getDefaults;
-
         vm.inputType = null;
         vm.int2min = -32768;
         vm.int2max = 32767;
@@ -31,10 +29,7 @@
         vm.int8max = 9223372036854775807;
 
         vm.columnToDisplayType = columnToDisplayType;
-        vm.isAutoGen = isAutoGen;
-        vm.isForeignKey = isForeignKey;
         vm.matchType = matchType;
-        vm.isHiddenColumn = isHiddenColumn;
 
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
@@ -68,16 +63,26 @@
          * Boolean: If the value is empty ('') then set it as null
          * Date/Timestamptz: If the value is empty ('') then set it as null
          */
-        function transformRowValues(row, model) {
-            for (var k in row) {
-                try {
-                    var column = model.table.columns.get(k);
-                    switch (column.type.name) {
-                        default: if (row[k] === '') row[k] = null;
-                                 break;
+        function transformRowValues(row) {
+            /* Go through the set of columns for the reference.
+             * If a value for that column is present (row[col.name]), transform the row value as needed
+             * NOTE:
+             * Opted to loop through the columns once and use the row object for quick checking instead
+             * of looking at each key in row and looping through the column set each time to grab the column
+             * My solution is worst case n-time
+             * The latter is worst case rowKeys.length * n time
+             */
+            angular.forEach($rootScope.reference.columns, function(col) {
+                if (row[col.name]) {
+                    switch (col.type.name) {
+                        default:
+                            if (row[col.name] === '') {
+                                row[col.name] = null;
+                            }
+                            break;
                     }
-                } catch(e) {}
-            }
+                }
+            });
         }
 
         function submit() {
@@ -93,7 +98,7 @@
             }
 
             model.rows.forEach(function(row) {
-                transformRowValues(row, model);
+                transformRowValues(row);
             });
 
             if (vm.editMode) {
@@ -141,51 +146,13 @@
             vm.recordEditModel.rows.splice(index, 1);
         }
 
-        function getDefaults() {
-            var defaults = [];
-
-            try {
-                var columns = vm.recordEditModel.table.columns.all();
-                var numColumns = columns.length;
-                for (var i = 0; i < numColumns; i++) {
-                    var columnName = columns[i].name;
-                    if (vm.isAutoGen(columnName) || vm.isHiddenColumn(columns[i])) {
-                        defaults.push(columnName);
-                    }
-                }
-            } catch (exception) { // catches table.columns.all()
-                // Should not error, if none it returns an empty array
-            } finally {
-                return defaults;
-            }
-        }
-
-        function getKeyColumns() {
-            var keys = [];
-            try {
-                var _keys = vm.recordEditModel.table.keys.all();
-                var numKeys = _keys.length;
-                for (var i = 0; i < numKeys; i++) {
-                    var columns = _keys[i].colset.columns;
-                    var numColumns = columns.length;
-                    for (var c = 0; c < numColumns; c++) {
-                        keys.push(columns[c]);
-                    }
-                }
-            } catch (exception) { // catches table.keys.all()
-                // Should not error, if none it returns an empty array
-            } finally {
-                return keys;
-            }
-        }
-
         function columnToDisplayType(column) {
             var name = column.name;
             var type = column.type.name;
             var displayType;
-            if (vm.isAutoGen(name)) {
+            if (isAutoGen(column)) {
                 displayType = 'autogen';
-            } else if (vm.isForeignKey(name)) {
+            } else if (isForeignKey(column)) {
                 displayType = 'dropdown';
             } else {
                 switch (type) {
@@ -225,21 +192,17 @@
 
         // Returns true if a column's fields should be automatically generated
         // In this case, columns of type serial* == auto-generated
-        function isAutoGen(name) {
+        function isAutoGen(col) {
             try {
-                return ($rootScope.reference._table.columns.get(name).type.name.indexOf('serial') === 0);
+                return (col.type.name.indexOf('serial') === 0);
             } catch (exception) {
                 // handle exception
                 $log.info(exception);
             }
         }
 
-        function isForeignKey(columnName) {
-            // Columns with FK refs and their FK values are stored in the domainValues
-            // obj with the column name as keys and FK values as values. For now,
-            // we can determine whether a column is a FK by checking whether domainValues
-            // has a key of that column's name.
-            return vm.recordEditModel.domainValues.hasOwnProperty(columnName);
+        function isForeignKey(column) {
+            return column.memberOfForeignKeys.length > 0
         }
 
         // Returns true if a column type is found in the given array of types
@@ -248,28 +211,6 @@
                 return true;
             }
             return false;
-        }
-
-        // Returns true if a column has a 2015:hidden annotation or a 2016:ignore
-        // (with entry context) annotation.
-        function isHiddenColumn(column) {
-            var ignore, ignoreCol, hidden;
-            var ignoreAnnotation = 'tag:isrd.isi.edu,2016:ignore';
-
-            try {
-                ignore = column.annotations.contains(ignoreAnnotation);
-                if (ignore) {
-                    ignoreCol = column.annotations.get(ignoreAnnotation); // still needs to be caught in case something gets out of sync
-                }
-                hidden = column.annotations.contains('tag:misd.isi.edu,2015:hidden');
-
-            } finally {
-               if ((ignore && (ignoreCol.content.length === 0 || ignoreCol.content === null || ignoreCol.content.indexOf('entry') !== -1)) || hidden) {
-                   return true;
-               }
-               return false;
-            }
-
         }
 
         // If in edit mode, autogen fields show the value of the existing record

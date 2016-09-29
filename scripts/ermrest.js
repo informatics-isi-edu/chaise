@@ -60,7 +60,7 @@ var viewer3dFileTypes = ['image/x.nifti'];
 
 var sliderPresentation = [ 'numeric', 'float4', 'int8', 'int4', 'int2', 'float8', 'serial4', 'serial8' ];
 
-var searchBoxPresentation = [ 'text', 'varchar', 'jsonb', 'markdown' ];
+var searchBoxPresentation = [ 'text', 'varchar', 'jsonb', 'markdown', 'gene_sequence' ];
 var checkBoxPresentation = [ 'boolean' ];
 
 var datepickerPresentation = [ 'date', 'timestamp', 'timestamptz', 'time' ];
@@ -1129,30 +1129,32 @@ function successUpdateSliders(data, textStatus, jqXHR, param) {
 	var table = param['table'];
 	var cols = param['cols'];
 	var box = param['options']['box'][table];
-	$.each(cols, function(i, col) {
-		box[col]['ready'] = true;
-		if (data[0]['min_' + encodeSafeURIComponent(col)] != null) {
-			var colType = options['colsDescr'][table][col]['type'];
-			if (!box[col]['left']) {
-				box[col]['min'] = data[0]['min_' + encodeSafeURIComponent(col)];
-				if (datepickerPresentation.contains(colType)) {
-					box[col]['min'] = getDateString(box[col]['min'], 'min');
-				}
-			}
-			if (!box[col]['right']) {
-				box[col]['max'] = data[0]['max_' + encodeSafeURIComponent(col)];
-				if (datepickerPresentation.contains(colType)) {
-					box[col]['max'] = getDateString(box[col]['max'], 'max');
-				}
-			}
-			if (box[col]['right'] && box[col]['max'] == box[col]['ceil']) {
-				delete box[col]['right'];
-			}
-			if (box[col]['left'] && box[col]['min'] == box[col]['floor']) {
-				delete box[col]['left'];
-			}
-		}
-	});
+    if (cols !== undefined) {
+        $.each(cols, function (i, col) {
+            box[col]['ready'] = true;
+            if (data[0]['min_' + encodeSafeURIComponent(col)] != null) {
+                var colType = options['colsDescr'][table][col]['type'];
+                if (!box[col]['left']) {
+                    box[col]['min'] = data[0]['min_' + encodeSafeURIComponent(col)];
+                    if (datepickerPresentation.contains(colType)) {
+                        box[col]['min'] = getDateString(box[col]['min'], 'min');
+                    }
+                }
+                if (!box[col]['right']) {
+                    box[col]['max'] = data[0]['max_' + encodeSafeURIComponent(col)];
+                    if (datepickerPresentation.contains(colType)) {
+                        box[col]['max'] = getDateString(box[col]['max'], 'max');
+                    }
+                }
+                if (box[col]['right'] && box[col]['max'] == box[col]['ceil']) {
+                    delete box[col]['right'];
+                }
+                if (box[col]['left'] && box[col]['min'] == box[col]['floor']) {
+                    delete box[col]['left'];
+                }
+            }
+        });
+    }
 	var ready = true;
 	var tables = [options['table']].concat(association_tables_names);
 	$.each(tables, function(i, table) {
@@ -1212,6 +1214,9 @@ function getColumnDescriptions(options, successCallback) {
 				return true;
 			}
 			var urlSuffix = null;
+			if (!searchBoxPresentation.contains(obj['type']) && !checkBoxPresentation.contains(obj['type']) && !sliderPresentation.contains(obj['type']) && !datepickerPresentation.contains(obj['type'])) {
+				searchBoxPresentation.push(obj['type']);
+			}
 			if (searchBoxPresentation.contains(obj['type']) || checkBoxPresentation.contains(obj['type'])) {
 				urlSuffix = 'cnt_d_' + encodeSafeURIComponent(col) + ':=cnt_d(' + encodeSafeURIComponent(col) + ')';
 			} else if (sliderPresentation.contains(obj['type']) || datepickerPresentation.contains(obj['type'])) {
@@ -1451,7 +1456,7 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 		if (sortOption != null && sortOption != '') {
 			var sortPredicate = getSortPredicate(data, sortOption, sortOrder, page, pageSize);
 			predicate.push('$A/' + sortPredicate.join(';'));
-			var exportSortPredicate = getSortPredicate(data, sortOption, sortOrder, 1, 0);
+			var exportSortPredicate = getExportSortPredicate(data, sortOption, sortOrder);
 			exportPredicate.push('$A/' + exportSortPredicate.join(';'));
 		} else {
 			if (page > 1) {
@@ -1482,7 +1487,7 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
   		}
   		url += '/$A';
 		param['options']['exportOptions']['exportPredicate'] = param['queryPredicate'];
-		if (exportPredicate.length > 0) {
+        if (exportPredicate.length > 0) {
 			var predicatePath = '/' + exportPredicate.join('/');
 			param['options']['exportOptions']['exportPredicate'] += predicatePath;
 			exportUrl += predicatePath;
@@ -2307,7 +2312,7 @@ function selectCollection() {
 	var clicked = false;
 	$.each($('label', $('#treeDiv')), function(i, label) {
 		$.each($('span', $(label)), function(j, span) {
-			if ($(span).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE)) {
+			if ($(span).html().replace(/^\s*/, "").replace(/\s*$/, "") == getTableDisplayName(DEFAULT_TABLE) && $(span).attr('schema_name') == SCHEMA) {
 				$(label).click();
 				clicked = true;
 				return false;
@@ -3582,6 +3587,9 @@ function initFacetGroups(options, facet, successCallback) {
 			}
 		});
 		var url = null;
+		if (!searchBoxPresentation.contains(col_type) && !checkBoxPresentation.contains(col_type) && !sliderPresentation.contains(col_type) && !datepickerPresentation.contains(col_type)) {
+			searchBoxPresentation.push(col_type);
+		}
 		if (searchBoxPresentation.contains(col_type) || checkBoxPresentation.contains(col_type)) {
 			url = ERMREST_DATA_HOME + '/aggregate/' + queryPredicate + '/cnt_d:=cnt_d(' + encodeSafeURIComponent(col) + ')';
 		} else if (datepickerPresentation.contains(col_type) || sliderPresentation.contains(col_type)) {
@@ -3948,22 +3956,29 @@ function getSortPredicate(data, sortColumn, sortOrder, page, pageSize) {
 	if (data[(page-1)*pageSize][sortColumn] == null) {
 		var offsetPredicate = [];
 		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
-		if (pageSize != 0) {
-            $.each(PRIMARY_KEY, function (i, primaryCol) {
-                offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page - 1) * pageSize][primaryCol]));
-            });
-        }
+		$.each(PRIMARY_KEY, function(i, primaryCol) {
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+		});
 		sortPredicate.push(offsetPredicate.join('&'));
 	} else {
 		var offsetPredicate = [];
 		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
-		if (pageSize != 0) {
-            $.each(PRIMARY_KEY, function (i, primaryCol) {
-                offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page - 1) * pageSize][primaryCol]));
-            });
-        }
+		$.each(PRIMARY_KEY, function(i, primaryCol) {
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+		});
         sortPredicate.push(offsetPredicate.join('&'));
 		sortPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
+		sortPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
+	}
+	return sortPredicate;
+}
+
+function getExportSortPredicate(data, sortColumn, sortOrder) {
+	var sortPredicate = [];
+	if (data[0][sortColumn] == null) {
+		sortPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
+	} else {
+		sortPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[0][sortColumn]));
 		sortPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
 	}
 	return sortPredicate;

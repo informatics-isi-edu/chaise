@@ -20,11 +20,15 @@
         'ui.select'
     ])
 
-    .run(['ERMrest', 'ErrorService', 'headInjector', 'UriUtils', '$log', '$rootScope', '$window', function runRecordEditApp(ERMrest, ErrorService, headInjector, UriUtils, $log, $rootScope, $window) {
+    .run(['ERMrest', 'ErrorService', 'headInjector', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', function runRecordEditApp(ERMrest, ErrorService, headInjector, UiUtils, UriUtils, $log, $rootScope, $window) {
         var context = {};
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
+
+        // This is to allow the dropdown button to open at the top/bottom depending on the space available
+        UiUtils.setBootstrapDropdownButtonBehavior();
+        UriUtils.setLocationChangeHandling();
 
         try {
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);

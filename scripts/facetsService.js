@@ -430,7 +430,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				FacetsData['tablesStack'].push(item);
 			}
 		}
-	}
+	};
 
 	this.showChiclet = function showChiclet(facet) {
 		var facet_type = null;
@@ -476,7 +476,148 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			// nothing to do at this point
 		} else if (format == "BAG") {
 			// setup some defaults
+			var bagFormatOpts = {};
+			FacetsData.exportOptions.formatOptions["bag"] = bagFormatOpts;
+			bagFormatOpts["name"] = FacetsData.selectedEntity.display || FacetsData.selectedEntity.name;
+			bagFormatOpts["archiver"] = "zip";
+			bagFormatOpts["metadata"] =	{};
+			bagFormatOpts["table_format"] = "csv";
+			var exportAnnotations = FacetsData.metadata.annotations["tag:misd.isi.edu,2016:export"];
+			var extracts = (exportAnnotations !== undefined) ? exportAnnotations["extracts"] : null;
+			bagFormatOpts["extract"] = (extracts) ? extracts[0] : null;
 		}
+	};
+
+	this.getPredicateTableAliasByEntityName = function getPredicateTableAliasByEntityName(exportPredicate, entityName)
+	{
+		var predicates = exportPredicate.split("/$A/");
+		for (var f=0; f<predicates.length; f++) {
+			var predicate = predicates[f];
+			if (predicate.indexOf(":=") != -1) {
+				var entity = predicate.substring(predicate.indexOf(":=")+2, predicate.indexOf("/"));
+				if (entity == entityName) {
+					return "/$" + predicate.substring(0, predicate.indexOf(":="));
+				}
+			}
+		}
+		return '';
+	};
+
+	this.createBagExportParameters = function createBagExportParameters() {
+		var exportOpts = FacetsData.exportOptions;
+		var bagFormatOpts = FacetsData.exportOptions.formatOptions["bag"];
+		if (bagFormatOpts === undefined) {
+			throw new Error('Undefined BAG format options');
+		}
+		var bagExportParameters = {};
+
+		var bagParameters = {};
+		bagExportParameters["bag"] = bagParameters;
+		bagParameters["bag_name"] = bagFormatOpts["name"];
+		bagParameters["bag_archiver"] = bagFormatOpts["archiver"];
+		bagParameters["bag_metadata"] = bagFormatOpts["metadata"];
+
+		var catalogParameters = {};
+		bagExportParameters["catalog"] = catalogParameters;
+		catalogParameters["host"] =  HOME.replace("https://", "http://"); // TODO: this needs to be configurable
+		catalogParameters["path"] = ERMREST_CATALOG_PATH + CATALOG;
+		var queries = [];
+		catalogParameters["queries"] = queries;
+
+		var extract = bagFormatOpts["extract"];
+		if (!extract) {
+			// this is basically the same as a single file CSV or JSON export but packaged as a bag
+			var query = {};
+			query["output_path"] = bagFormatOpts["name"];
+			query["output_format"] = bagFormatOpts["table_format"];
+			query["query_path"] = exportOpts.exportUrl.substring(ERMREST_DATA_HOME.length) + "?limit=none";
+			queries.push(query);
+		} else {
+			var outputs = extract["outputs"];
+			if ((outputs === undefined) || (outputs && outputs.length === 0)) {
+				var error = "No outputs configured in extract: " + extract["name"];
+				alert(error);
+				throw new Error(error);
+			}
+			var base = this;
+			var depth = 1;
+			var baseTableAlias = "E";
+			var tableAliasToken = baseTableAlias + depth;
+			$.each(outputs, function(i, output) {
+				var query = {};
+				var queryFrags = [];
+				var source = output["source"];
+				var sourceName = source["name"];
+				var sourceType = source["type"];
+				var dest = output["destination"];
+				var destName = dest["name"];
+				var destType = dest["type"];
+				var predicate = exportOpts.exportPredicate;
+
+				queryFrags.push(sourceType);
+				var predicateContainsTargetEntity = predicate.indexOf(sourceName) != -1;
+				if (predicateContainsTargetEntity) {
+					predicate += base.getPredicateTableAliasByEntityName(predicate,sourceName);
+					queryFrags.push(predicate);
+				} else {
+					queryFrags.push(predicate);
+					queryFrags.push("$A");
+					queryFrags.push(tableAliasToken + ":=" + sourceName);
+				}
+				if (source["filter"] !== undefined) {
+					queryFrags.push(source["filter"]);
+				}
+				if ((sourceType === "attribute") || (sourceType === "attributegroup")) {
+					var columnRefs = [];
+					var columnMap = source["column_map"];
+					if (columnMap !== undefined) {
+						for (var col in columnMap) {
+							if (columnMap.hasOwnProperty(col)) {
+								columnRefs.push(col + ":=" + tableAliasToken + ":" + columnMap[col]);
+							}
+						}
+					}
+					queryFrags.push(columnRefs.join(","))
+				}
+				query["query_path"] = "/" + queryFrags.join("/") + "?limit=none";
+				query["output_path"] = destName || sourceName;
+				query["output_format"] = destType || bagFormatOpts["table_format"];
+				queries.push(query);
+			});
+		}
+
+		return bagExportParameters;
+	};
+
+	this.doExportBag = function doExportBag() {
+		var bagExportParameters = this.createBagExportParameters();
+		var serviceUrl = HOME + "/iobox/export/bdbag"; // TODO: this needs to be configurable
+		var bagExportParams = JSON.stringify(bagExportParameters, null, "  ");
+		console.info("Executing BAG export with the following parameters:\n" + bagExportParams);
+		console.time('BAG export duration');
+		document.body.style.cursor = 'wait';
+		$.ajax({
+			url: serviceUrl,
+			type: 'POST',
+			contentType: 'application/json',
+			data: bagExportParams,
+			dataType: 'text',
+			headers: make_headers(),
+			timeout: AJAX_TIMEOUT,
+			async: true,
+			success: function(data, textStatus, jqXHR) {
+				document.body.style.cursor = 'default';
+				var uriList = data.split("\n");
+				if (uriList) {
+					location.href = uriList[0];
+				}
+				console.timeEnd('BAG export duration');
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				handleError(jqXHR, textStatus, errorThrown, serviceUrl)
+				console.timeEnd('BAG export duration');
+			}
+		});
 	};
 
 	this.doExport = function doExport() {
@@ -490,6 +631,9 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				break;
 			case "JSON":
 				location.href = exportOpts.exportUrl + baseOpts + "&accept=json";
+				break;
+			case "BAG":
+				this.doExportBag();
 				break;
 			default:
 				alert("Unsupported export format: " + exportOpts.format);

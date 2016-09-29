@@ -76,7 +76,7 @@
 					</div>
 					<div class="row" id="filterarea">
 						<div id="filter" class="col-md-12">
-							<div class="jumbotron text-center" ng-show="!facetResults.hasSelectedFacets()">
+							<div class="jumbotron text-center" ng-show="!facetResults.showupResults()">
 								<h1 ng-show="false">{{FacetsData.selectedEntity.display}}</h1>
 								<p class="lead">Use the sidebar to the right to select search attributes.</p>
 						  </div>
@@ -187,7 +187,7 @@
 						<div class="col-md-7">
                             <div class="pull-right">
                                 <span class="btn btn-label">Download:</span>
-                                <ui-select ng-model="FacetsData.exportOptions.format" theme="select2" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onExportFormatSelect">
+                                <ui-select ng-model="FacetsData.exportOptions.format" theme="select2" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onExportFormatSelect($event)">
                                     <ui-select-match placeholder="CSV">{{FacetsData.exportOptions.format}}</ui-select-match>
                                     <ui-select-choices repeat="format in FacetsData.exportOptions.supportedFormats">{{format}}</ui-select-choices>
                                 </ui-select>

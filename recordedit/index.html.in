@@ -60,7 +60,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns" ng-if="::!form.isHiddenColumn(column);">
+                                    <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
                                         <td class="entity-key col-xs-1" ng-class="{'coltooltip': column.comment}">
                                             <span ng-if="!column.nullok" class="text-danger">*</span>
                                             <span ng-class="{'coltooltiplabel': column.comment}">{{::column.displayname}}</span>

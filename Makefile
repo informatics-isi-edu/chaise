@@ -437,13 +437,19 @@ testrecord:
 testrecordadd:
 	$(BIN)/protractor $(E2EDIrecordAdd)
 
+#Rule to run recordset app tests
+.PHONY: testrecordset
+testrecordset:
+	$(BIN)/protractor $(E2EDrecordset)
+
+
 .PHONY: testrecordedit
 testrecordedit:
 	$(BIN)/protractor $(E2EDIrecordEdit)
 
 #Rule to run viewer app tests
 .PHONY: testviewer
-testrecordedit:
+testviewer:
 	$(BIN)/protractor $(E2EDviewer)
 
 # Rule to make html
