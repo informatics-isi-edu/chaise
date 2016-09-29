@@ -4,7 +4,6 @@
     angular.module('chaise.record', [
         'ngSanitize',
         'chaise.errors',
-        'chaise.filters',
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.display',
@@ -25,7 +24,7 @@
         };
     }])
 
-    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'UiUtils', '$q', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, UiUtils, $q) {
+    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'UiUtils', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, UiUtils) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
@@ -52,7 +51,6 @@
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
                 }, function error(exception) {
-                    //return $q.reject(exception);
                     throw exception;
                 }).then(function getPage(page) {
                     var tuple = page.tuples[0];

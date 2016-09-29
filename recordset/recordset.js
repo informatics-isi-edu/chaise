@@ -22,7 +22,6 @@
         'ermrestjs',
         'chaise.navbar',
         'chaise.utils',
-        'chaise.filters',
         'chaise.authen',
         'chaise.errors',
         'chaise.modal',
