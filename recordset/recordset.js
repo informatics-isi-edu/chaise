@@ -252,8 +252,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', '$q', 'UiUtils',
-        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, $q, UiUtils) {
+    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'UiUtils',
+        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, UiUtils) {
 
         try {
             headInjector.addTitle();
@@ -298,7 +298,7 @@
 
                 return $rootScope.reference.read(pageInfo.pageLimit);
             }, function error(response) {
-                return $q.reject(response);
+                throw response;
             }).then(function getPage(page) {
                 recordsetModel.page = page;
                 recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
