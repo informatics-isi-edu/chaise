@@ -79,6 +79,7 @@ describe('Record Add', function() {
 								expect("Page has errors").toBe("No errors");
 								hasErrors = true;
 							} else {
+                                browser.pause();
 								expect(true).toBe(true);
 							}
 						});

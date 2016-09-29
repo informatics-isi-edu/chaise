@@ -102,7 +102,6 @@
             });
 
             if (vm.editMode) {
-                // model.table.entity.put(model.rows).then(function success(entities) {
                 $rootScope.reference.update(model.rows).then(function success(entities) {
                     vm.redirectAfterSubmission(entities);
                 }, function error(response) {

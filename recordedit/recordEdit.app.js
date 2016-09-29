@@ -21,7 +21,7 @@
     ])
 
     .run(['ERMrest', 'ErrorService', 'headInjector', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', function runRecordEditApp(ERMrest, ErrorService, headInjector, UiUtils, UriUtils, $log, $rootScope, $window) {
-        var context = {};
+        var context = { booleanValues: ['', true, false] };
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
@@ -66,6 +66,8 @@
                         $rootScope.displayname = tuple.displayname;
 
                     });
+                } else {
+                    $rootScope.displayname = $rootScope.reference.displayname;
                 }
             }, function error(response) {
                 $log.warn(response);
