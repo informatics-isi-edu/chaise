@@ -50,6 +50,8 @@
                     $rootScope.relatedReferences = $rootScope.reference.related;
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
+                }, function error(exception) {
+                    throw exception;
                 }).then(function getPage(page) {
                     var tuple = page.tuples[0];
                     // Used directly in the record-display directive
@@ -102,7 +104,10 @@
                     $log.warn(response);
                     throw response;
                 }).catch(function genericCatch(exception) {
-                    ErrorService.catchAll(exception);
+                    if (exception instanceof ERMrest.UnauthorizedError)
+                        ErrorService.catchAll(exception);
+                    else
+                        ErrorService.errorPopup(exception.message, exception.code, "home page");
                 });
             // No filter defined, redirect to search
             } else {
