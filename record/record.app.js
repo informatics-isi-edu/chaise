@@ -20,7 +20,7 @@
             loading: true,
             previousButtonDisabled: true,
             nextButtonDisabled: true,
-            pageLimit: 25
+            defaultPageLimit: 25
         };
     }])
 
@@ -74,7 +74,10 @@
 
                         if ($rootScope.relatedReferences[i].display.defaultPageSize) {
                             pageInfo.pageLimit = $rootScope.relatedReferences[i].display.defaultPageSize;
+                        } else {
+                            pageInfo.pageLimit = pageInfo.defaultPageLimit;
                         }
+
                         (function(i) {
                             $rootScope.relatedReferences[i].read(pageInfo.pageLimit).then(function (page) {
 
@@ -132,7 +135,7 @@
          */
         UriUtils.setLocationChangeHandling();
 
-        // This is to allow the dropdown button to open at the top/bottom depending on the space available 
+        // This is to allow the dropdown button to open at the top/bottom depending on the space available
         UiUtils.setBootstrapDropdownButtonBehavior();
     }]);
 })();
