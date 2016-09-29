@@ -132,7 +132,7 @@
                         // Need to convert to 24 hr UTC time
                         case 'timestamp':
                         case 'timestamptz':
-                            if (vm.submissionMode && typeof row[k] === 'object') {
+                            if (vm.submissionMode) {
                                 row[k] = moment(row[k].date + row[k].time + row[k].meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                             }
                         default: if (row[k] === '') row[k] = null;
@@ -354,7 +354,7 @@
         // Assigns the current date or timestamp to a column's model
         function applyCurrentDatetime(modelIndex, columnName, columnType) {
             if (columnType === 'timestamp' || columnType === 'timestamptz') {
-                if (!vm.editMode) {
+                if (!vm.editMode && !vm.recordEditModel.rows[modelIndex][columnName]) {
                     // When in entry mode, the model for this timestamp column needs to be initialized with an obj to house the parts of the timestamp
                     // Other col types don't need this initialization b/c values can be directly attached to the model
                     vm.clearModel(modelIndex, columnName, columnType);

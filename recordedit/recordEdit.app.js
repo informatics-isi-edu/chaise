@@ -166,10 +166,11 @@
                                 if (pathColumnType == 'timestamp' || pathColumnType == 'timestamptz') {
                                     // e.g. timestamptz format 2016-09-26T11:17:28.696-07:00
                                     if (value) {
+                                        var ts = moment(value, moment.ISO_8601, true);
                                         value = {
-                                            date: moment(value, moment.ISO_8601, true).format('YYYY-MM-DD'),
-                                            time: moment(value, moment.ISO_8601, true).format('hh:mm:ss'),
-                                            meridiem: moment(value, moment.ISO_8601, true).format('A')
+                                            date: ts.format('YYYY-MM-DD'),
+                                            time: ts.format('hh:mm:ss'),
+                                            meridiem: ts.format('A')
                                         };
                                     } else {
                                         value = {

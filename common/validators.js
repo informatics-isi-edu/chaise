@@ -6,7 +6,6 @@
     // updated float regex
     // ^(Infinity|-Infinity|NaN|-?\d+(\.\d+)?([eE][-+]?\d+)?$
     var FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
-    var TIME_REGEXP = /^(?:([01]?\d|2[0-3]):([0-5]?\d):)?([0-5]?\d)$/ // matches HH:MM:SS
     angular.module('chaise.validators', [])
     // Validation directive for testing if an input value is an integer
     // Use: <input type="number" required integer>
@@ -61,10 +60,11 @@
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
                 ctrl.$validators.date = function(modelValue, viewValue) {
-                    if (ctrl.$isEmpty(modelValue)) {
+                    var value = modelValue || viewValue;
+                    if (ctrl.$isEmpty(value)) {
                         return true;
                     }
-                    return moment(modelValue, 'YYYY-MM-DD', true).isValid();
+                    return moment(value, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid();
                 };
             }
         };
@@ -80,11 +80,21 @@
                     if (ctrl.$isEmpty(modelValue)) {
                         return true;
                     }
-                    if (TIME_REGEXP.test(viewValue)) {
-                        return true;
-                    }
-                    return false;
+                    return moment(modelValue, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid();
                 };
+                /*
+                This parser takes the view value and inserts the appropriate colons before updating the model value.
+                If we decide the placeholder char for the time input's mask should be something other than
+                a valid time character (e.g. underscore or space; currently it's 0), then we need to set the model-view-value
+                attr on the time input's ui-mask to `false` and uncomment the parser below.
+                */
+                // ctrl.$parsers.push(function(value) {
+                //     value = value.replace(/(.{2})/g, '$1:');
+                //     if (value.slice(-1) === ':') {
+                //         value = value.slice(0, -1);
+                //     }
+                //     return value;
+                // });
             }
         };
     });
