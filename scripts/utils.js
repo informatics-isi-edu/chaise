@@ -248,7 +248,7 @@ function getTableColumnsNames(table_name, maxCols) {
 	var ret = [];
     $.each(display_columns['top_columns'], function(i, col) {
         if (display_columns['title'] == col || display_columns['summary'] == col ||
-                        display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) || 
+                        display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) && !display_columns['top_columns_annotation'].contains(col) || 
                         hasAnnotation(table_name, col, 'bottom')) {
                 return true;
         }

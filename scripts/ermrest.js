@@ -26,7 +26,8 @@ var display_columns = {
 		'3dview': [],
 		'hidden': [],
 		'url': [],
-		'top_columns': []
+		'top_columns': [],
+		'top_columns_annotation': []
 };
 
 var back_references = {};
@@ -429,7 +430,8 @@ function getTableColumns(options, successCallback) {
 		'3dview': [],
 		'hidden': [],
 		'url': [],
-		'top_columns': []
+		'top_columns': [],
+		'top_columns_annotation': []
 	};
 
 	PRIMARY_KEY = [];
@@ -679,6 +681,7 @@ function initModels(options, successCallback) {
 	});
 	var topColumns = getTableAnnotation(table, TABLES_MAP_URI, 'top_columns');
 	if (topColumns != null) {
+		display_columns['top_columns_annotation'] = topColumns;
 		display_columns['top_columns'] = [];
 		$.each(topColumns, function(i,col) {
 			display_columns['top_columns'].push(col);

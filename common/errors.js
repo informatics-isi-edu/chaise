@@ -14,7 +14,7 @@
                 message: message,
                 errorCode: errorCode,
                 pageName: pageName
-            }
+            };
 
             var modalInstance = $uibModal.open({
                 templateUrl: '../common/templates/errorDialog.html',
@@ -38,6 +38,8 @@
 
             if (exception instanceof ERMrest.UnauthorizedError) {
                 Session.login($window.location.href);
+            } else {
+                AlertsService.addAlert({type:'error', message:exception.message});
             }
         }
 
