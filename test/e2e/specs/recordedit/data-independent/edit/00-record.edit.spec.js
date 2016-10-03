@@ -18,6 +18,7 @@ describe('Edit existing record,', function() {
 					tableParams.keys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
 					});
+					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 
@@ -39,9 +40,6 @@ describe('Edit existing record,', function() {
 
 				describe("Presentation and validation,", function() {
                     var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
-                    afterAll(function(done) {
-                        done();
-                    });
 				});
 
 				describe("Submit existing record", function() {

@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.alerts', [])
+    angular.module('chaise.alerts', ['chaise.filters'])
 
     .factory('AlertsService', [function AlertsService() {
         var alerts = [];
@@ -22,6 +22,23 @@
             alerts: alerts,
             addAlert: addAlert,
             deleteAlert: deleteAlert
+        };
+    }])
+
+    .directive('alerts', ['AlertsService', function(AlertsService) {
+
+        return {
+            restrict: 'E',
+            templateUrl: '../common/templates/alerts.html',
+            scope: {
+                alerts: '='
+            },
+            link: function (scope, elem, attr) {
+
+                scope.closeAlert = function (alert) {
+                    AlertsService.deleteAlert(alert);
+                };
+            }
         };
     }]);
 })();

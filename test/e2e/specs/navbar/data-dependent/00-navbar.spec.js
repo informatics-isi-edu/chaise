@@ -2,6 +2,7 @@ describe('Navbar ', function() {
     var navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
 
     beforeAll(function (done) {
+        browser.ignoreSynchronization=true;
         browser.get(browser.params.url || "");
         navbar = element(by.id('mainnav'));
         menu = element(by.id('navbar-menu'));

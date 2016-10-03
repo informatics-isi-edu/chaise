@@ -3,7 +3,7 @@
 
     angular.module('chaise.utils', [])
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', function($injector, $window, ParsedFilter) {
+    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', function($injector, $window, ParsedFilter, $rootScope) {
 
         /**
          * @function
@@ -365,12 +365,40 @@
             }
         }
 
+        /**
+         * 
+         * This code handles address bar changes
+         * Normally when user changes the url in the address bar,
+         * nothing happens.
+         *
+         * This code listens when address bar is changes outside the code,
+         * and redirects to the new location.
+         *
+         * Whenever app updates the url (no reloading and no history stack),
+         * it saves the location in $rootScope.location.
+         * When address bar is changed, this code compares the address bar location
+         * with the last save recordset location. If it's the same, the change of url was
+         * done internally, do not refresh page. If not, the change was done manually
+         * outside recordset, refresh page.
+         *
+         */
+        function setLocationChangeHandling() {
+            $window.onhashchange = function() {
+                // when address bar changes by user
+                if ($window.location.href !== $rootScope.location) {
+                    location.reload();
+                }
+            };
+        }
+
+
         return {
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin,
-            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter
+            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
+            setLocationChangeHandling: setLocationChangeHandling
         }
     }])
 
@@ -443,6 +471,36 @@
             getRowValuesFromPage: getRowValuesFromPage
         }
     }])
+    
+    .factory("UiUtils", [function() {
+        /**
+         *
+         * To allow the dropdown button to open at the top/bottom depending on the space available 
+         */
+        function setBootstrapDropdownButtonBehavior() {
+            $(document).on("shown.bs.dropdown", ".btn-group", function () {
+                // calculate the required sizes, spaces
+                var $ul = $(this).children(".dropdown-menu");
+                var $button = $(this).children(".dropdown-toggle");
+                var ulOffset = $ul.offset();
+                // how much space would be left on the top if the dropdown opened that direction
+                var spaceUp = (ulOffset.top - $button.height() - $ul.height()) - $(window).scrollTop();
+                // how much space is left at the bottom
+                var spaceDown = $(window).scrollTop() + $(window).height() - (ulOffset.top + $ul.height());
+                // switch to dropup only if there is no space at the bottom AND there is space at the top, or there isn't either but it would be still better fit
+                if (spaceDown < 0 && (spaceUp >= 0 || spaceUp > spaceDown))
+                  $(this).addClass("dropup");
+            }).on("hidden.bs.dropdown", ".dropdown", function() {
+                // always reset after close
+                $(this).removeClass("dropup");
+            });
+        }
+
+        return {
+            setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior
+        }
+    }])
+    
 
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {

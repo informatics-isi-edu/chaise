@@ -419,51 +419,30 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 			});
 
             describe("Timestamp fields,", function() {
-                var columns;
-                beforeAll(function() {
-                    columns = chaisePage.dataUtils.editInputs.getTimestampTypeColumns(table, [IGNORE, HIDDEN]);
-                });
                 it('should have 3 inputs with validation for each timestamp column', function() {
+                    var columns = chaisePage.dataUtils.editInputs.getTimestampTypeColumns(table, [IGNORE, HIDDEN]);
                     columns.forEach(function(column) {
                         var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex);
-                        timeInputs.getAttribute('value').then(function(value) {
-                            console.log('value', value);
-                        });
-                        // var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemInput = timeInputs.meridiem;
-                        // if (column._value != undefined) {
-                        //     // Get values from date, time, am/pm input fields
-                        //     var dateInputVal = dateInput.getAttribute('value');
-                        //     var timeInputVal = timeInput.getAttribute('value');
-                        //     var meridiemInputVal = meridiemInputVal.getAttribute('value');
-                        //
-                        //     // Parse column value into date, time, and am/pm
-                        //     var colVal = moment(column._value, moment.ISO_8601);
-                        //     var dateVal = colVal.format('YYYY-MM-DD');
-                        //     var timeVal = colVal.format('hh:mm:ss');
-                        //     var meridiemVal = colVal.format('A');
-                        //
-                        //     expect(dateInputVal).toEqual(dateVal);
-                        //     expect(timeInputVal).toEqual(timeVal);
-                        //     expect(meridiemInputVal).toEqual(meridiemVal);
-                        // }
+                        var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemInput = timeInputs.meridiem;
+
+                        expect(dateInput).toBeDefined();
+                        expect(timeInput).toBeDefined();
+                        expect(meridiemInput).toBeDefined();
 
                         // Test time and meridiem input validation, date input tested in earlier describe block
-                        // var invalidTimeValues = [chance.word(), '23:45:67'];
-                        // invalidTimeValues.forEach(function(value) {
-                        //     chaisePage.recordEditPage.clearInput(timeInput);
-                        //     timeInput.sendKeys(value);
-                        //     expect(timeInput.getAttribute('value')).toBeFalsy();
-                        // });
+                        var defaultTimeValue = '12:00:00';
+                        timeInput.clear();
+                        timeInput.sendKeys(chance.word());
+                        expect(timeInput.getAttribute('value')).toEqual(defaultTimeValue);
 
-                        // chaisePage.recordEditPage.clearInput(meridiemInput);
-                        // expect(meridiemInput.getAttribute('value')).toEqual('AM');
+                        // var currentMeridiem = meridiemInput.getAttribute('value');
                         // chaisePage.clickButton(meridiemInput);
-                        // expect(meridiemInput.getAttribute('value')).toEqual('PM');
+                        // if (currentMeridiem == 'AM') {
+                        //     expect(meridiemInput.getAttribute('value')).toEqual('PM');
+                        // } else {
+                        //     expect(meridiemInput.getAttribute('value')).toEqual('AM');
+                        // }
                     });
-                });
-
-                xit('should validate time inputs correctly', function() {
-
                 });
 
                 xit('should have the current time after clicking the \"Now\" button', function() {

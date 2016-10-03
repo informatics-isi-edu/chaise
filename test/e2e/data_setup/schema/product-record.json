@@ -19,7 +19,7 @@
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "category"
             }
           ],
@@ -27,7 +27,7 @@
           "referenced_columns": [
             {
               "table_name": "category",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "term"
             }
           ]
@@ -37,7 +37,7 @@
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "thumbnail"
             }
           ],
@@ -47,7 +47,7 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "id"
             }
           ]
@@ -57,7 +57,7 @@
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "cover"
             }
           ],
@@ -67,14 +67,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation",
-      "schema_name": "product",
+      "schema_name": "product-record",
       "column_definitions": [
         {
           "comment": null,
@@ -337,9 +337,9 @@
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
           "*" : [
-              ["product", "fk_booking_accommodation"],
-              ["product", "fk_accommodation_image"],
-              ["product", "fk_media_accommodation"]
+              ["product-record", "fk_booking_accommodation"],
+              ["product-record", "fk_accommodation_image"],
+              ["product-record", "fk_media_accommodation"]
           ]
         }
       }
@@ -360,12 +360,12 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product", "fk_booking_accommodation"]],
+          "names" : [["product-record", "fk_booking_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "booking",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "accommodation_id"
             }
           ],
@@ -373,14 +373,14 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "booking",
-      "schema_name": "product",
+      "schema_name": "product-record",
       "column_definitions": [
         {
           "comment": null,
@@ -461,7 +461,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "file",
-      "schema_name": "product",
+      "schema_name": "product-record",
       "column_definitions": [
         {
           "comment": null,
@@ -615,12 +615,12 @@
       "entityCount": 0,
       "foreign_keys": [
         {
-          "names" : [["product", "fk_accommodation_image"]],
+          "names" : [["product-record", "fk_accommodation_image"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "accommodation_id"
             }
           ],
@@ -628,7 +628,7 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "id"
             }
           ]
@@ -638,7 +638,7 @@
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "image_id"
             }
           ],
@@ -646,14 +646,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation_image",
-      "schema_name": "product",
+      "schema_name": "product-record",
       "column_definitions": [
         {
           "comment": null,
@@ -718,7 +718,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "category",
-      "schema_name": "product",
+      "schema_name": "product-record",
       "column_definitions": [
         {
           "comment": null,
@@ -772,12 +772,12 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product", "fk_media_accommodation"]],
+          "names" : [["product-record", "fk_media_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "media",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "accommodation_id"
             }
           ],
@@ -785,14 +785,14 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product",
+              "schema_name": "product-record",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "media",
-      "schema_name": "product",
+      "schema_name": "product-record",
       "column_definitions": [
         {
           "comment": null,
@@ -843,5 +843,5 @@
       "name": "accommodation"
     }
   },
-  "schema_name": "product"
+  "schema_name": "product-record"
 }

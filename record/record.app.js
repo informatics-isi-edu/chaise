@@ -20,11 +20,11 @@
             loading: true,
             previousButtonDisabled: true,
             nextButtonDisabled: true,
-            pageLimit: 25
+            defaultPageLimit: 25
         };
     }])
 
-    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window) {
+    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'UiUtils', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, UiUtils) {
         var context = {};
         $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
@@ -50,6 +50,8 @@
                     $rootScope.relatedReferences = $rootScope.reference.related;
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
+                }, function error(exception) {
+                    throw exception;
                 }).then(function getPage(page) {
                     var tuple = page.tuples[0];
                     // Used directly in the record-display directive
@@ -74,7 +76,10 @@
 
                         if ($rootScope.relatedReferences[i].display.defaultPageSize) {
                             pageInfo.pageLimit = $rootScope.relatedReferences[i].display.defaultPageSize;
+                        } else {
+                            pageInfo.pageLimit = pageInfo.defaultPageLimit;
                         }
+
                         (function(i) {
                             $rootScope.relatedReferences[i].read(pageInfo.pageLimit).then(function (page) {
 
@@ -99,7 +104,10 @@
                     $log.warn(response);
                     throw response;
                 }).catch(function genericCatch(exception) {
-                    ErrorService.catchAll(exception);
+                    if (exception instanceof ERMrest.UnauthorizedError)
+                        ErrorService.catchAll(exception);
+                    else
+                        ErrorService.errorPopup(exception.message, exception.code, "home page");
                 });
             // No filter defined, redirect to search
             } else {
@@ -121,5 +129,18 @@
         } catch (exception) {
             ErrorService.errorPopup(exception.message, exception.code, "home page");
         }
+
+        /**
+         * it saves the location in $rootScope.location.
+         * When address bar is changed, this code compares the address bar location
+         * with the last save recordset location. If it's the same, the change of url was
+         * done internally, do not refresh page. If not, the change was done manually
+         * outside recordset, refresh page.
+         *
+         */
+        UriUtils.setLocationChangeHandling();
+
+        // This is to allow the dropdown button to open at the top/bottom depending on the space available
+        UiUtils.setBootstrapDropdownButtonBehavior();
     }]);
 })();

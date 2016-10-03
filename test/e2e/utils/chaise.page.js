@@ -346,12 +346,12 @@ var recordEditPage = function() {
 
     this.getTimestampInputsForAColumn = function(name, index) {
         index = index || 0;
-        // var inputs = {};
-        // inputs.date = element(by.model('form.recordEditModel.rows[' + index + '][' + name + '].date'));
-        // inputs.time = element(by.model('form.recordEditModel.rows[' + index + '][' + name + '].time'));
-        // inputs.meridiem = element(by.model('form.recordEditModel.rows[' + index + '][' + name + '].meridiem'));
-        // return inputs;
-        return element.all(by.model('form.recordEditModel.rows[rowIndex][column.name].date'));
+        var inputs = {};
+        inputs.date = element(by.model('form.recordEditModel.rows[' + index + ']["' + name + '"].date'));
+        inputs.time = element.all(by.css('input[name="' + name + '"][time]')).first();
+        inputs.meridiem = element.all(by.css('button[name="' + name + '"]')).first();
+        // inputs.meridiem = element(by.binding('form.recordEditModel.rows[' + index + ']["' + name + '"].meridiem || \'AM\''));
+        return inputs;
     };
 
     this.getIntegerInputForAColumn = function(name, index) {

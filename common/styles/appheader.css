@@ -38,6 +38,11 @@ body > .container {
 	color: #FFF;
 }
 
+.navbar-inverse .navbar-toggle {
+    border-color: #fff;
+		color: #fff;
+}
+
 .dropdown-submenu {
     position: relative;
 }

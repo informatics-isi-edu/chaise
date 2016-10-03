@@ -22,7 +22,6 @@
         'ermrestjs',
         'chaise.navbar',
         'chaise.utils',
-        'chaise.filters',
         'chaise.authen',
         'chaise.errors',
         'chaise.modal',
@@ -37,9 +36,10 @@
         appName:'recordset',
         mainURI: null,  // the main URL portion up to filters (without modifiers)
         catalogID: null,
-        schemaName: null,
         tableName: null
     })
+
+
 
     // Register the 'recordsetModel' object, which can be accessed by other
     // services, but cannot be access by providers (and config, apparently).
@@ -124,7 +124,7 @@
                 // update the address bar
                 // page does not reload
                 $window.location.replace($scope.permalink());
-                //$rootScope.location = $window.location.href;
+                $rootScope.location = $window.location.href;
 
             }, function error(response) {
                 $log.warn(response);
@@ -135,10 +135,7 @@
 
                 throw response;
             }).catch(function genericCatch(exception) {
-                if (exception instanceof ERMrest.UnauthorizedError)
-                    ErrorService.catchAll(exception);
-                else
-                    AlertsService.addAlert({type:'error', message:exception.message});
+                ErrorService.catchAll(exception);
             });
         };
 
@@ -191,7 +188,7 @@
                     // update the address bar without adding to history stack
                     // page does not reload
                     $window.location.replace($scope.permalink());
-                    //$rootScope.location = $window.location.href;
+                    $rootScope.location = $window.location.href;
 
                 }, function error(response) {
                     $log.warn(response);
@@ -202,10 +199,7 @@
 
                     throw response;
                 }).catch(function genericCatch(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError)
-                        ErrorService.catchAll(exception);
-                    else
-                        AlertsService.addAlert({type:'error', message:exception.message});
+                    ErrorService.catchAll(exception);
                 });
 
             }
@@ -238,7 +232,7 @@
                     // update the address bar
                     // page does not reload
                     $window.location.replace($scope.permalink());
-                    //$rootScope.location = $window.location.href;
+                    $rootScope.location = $window.location.href;
 
                 }, function error(response) {
                     $log.warn(response);
@@ -249,10 +243,7 @@
 
                     throw response;
                 }).catch(function genericCatch(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError)
-                        ErrorService.catchAll(exception);
-                    else
-                        AlertsService.addAlert({type:'error', message:exception.message});
+                    ErrorService.catchAll(exception);
                 });
             }
 
@@ -260,21 +251,19 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'AlertsService',
-        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, AlertsService) {
+    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'UiUtils',
+        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, UiUtils) {
 
         try {
             headInjector.addTitle();
             headInjector.addCustomCSS();
-            $rootScope.alerts = AlertsService.alerts;
-            $rootScope.closeAlert = AlertsService.deleteAlert;
 
             UriUtils.setOrigin();
 
             // parse the URL
             var p_context = UriUtils.parseURLFragment($window.location);
 
-            //$rootScope.location = $window.location.href;
+            $rootScope.location = $window.location.href;
             pageInfo.loading = true;
             pageInfo.previousButtonDisabled = true;
             pageInfo.nextButtonDisabled = true;
@@ -288,14 +277,10 @@
             }
 
             context.catalogID = p_context.catalogID;
-            context.schemaName = p_context.schemaName;
             context.tableName = p_context.tableName;
 
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-        } catch (error) {
-            AlertsService.addAlert({type:'error', message:error.message});
-        }
 
 
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
@@ -311,6 +296,8 @@
                 recordsetModel.columns = $rootScope.reference.columns;
 
                 return $rootScope.reference.read(pageInfo.pageLimit);
+            }, function error(response) {
+                throw response;
             }).then(function getPage(page) {
                 recordsetModel.page = page;
                 recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
@@ -319,47 +306,39 @@
                 pageInfo.previousButtonDisabled = !page.hasPrevious;
                 pageInfo.nextButtonDisabled = !page.hasNext;
             }, function error(response) {
-                $log.warn(response);
-
+                throw response;
+            }).catch(function genericCatch(exception) {
+                $log.warn(exception);
                 pageInfo.loading = false;
                 pageInfo.previousButtonDisabled = true;
                 pageInfo.nextButtonDisabled = true;
 
-                throw response;
-            }).catch(function genericCatch(exception) {
-
                 if (exception instanceof ERMrest.UnauthorizedError)
                     ErrorService.catchAll(exception);
                 else
-                    AlertsService.addAlert({type:'error', message:exception.message});
+                    ErrorService.errorPopup(exception.message, exception.code, "home page");
             });
 
-        /**
-         * Do Not Delete
-         *
-         * This code handles address bar changes
-         * Normally when user changes the url in the address bar,
-         * nothing happens.
-         *
-         * This code listens when address bar is changes outside the code,
-         * and redirects to the new location.
-         *
-         * Whenever recordset updates the url (no reloading and no history stack),
-         * it saves the location in $rootScope.location.
-         * When address bar is changed, this code compares the address bar location
-         * with the last save recordset location. If it's the same, the change of url was
-         * done internally, do not refresh page. If not, the change was done manually
-         * outside recordset, refresh page.
-         *
-         */
-        //$window.onhashchange = function() {
-        //    // when address bar changes by user
-        //    if ($window.location.href !== $rootScope.location) {
-        //        location.reload();
-        //    }
-        //};
+            /**
+             * Whenever recordset updates the url (no reloading and no history stack),
+             * it saves the location in $rootScope.location.
+             * When address bar is changed, this code compares the address bar location
+             * with the last save recordset location. If it's the same, the change of url was
+             * done internally, do not refresh page. If not, the change was done manually
+             * outside recordset, refresh page.
+             */
+            UriUtils.setLocationChangeHandling();
 
 
+            // This is to allow the dropdown button to open at the top/bottom depending on the space available
+            UiUtils.setBootstrapDropdownButtonBehavior();
+        } catch (exception) {
+            // pass to error handler
+            if (error instanceof ERMrest.UnauthorizedError)
+                ErrorService.catchAll(exception);
+            else
+                ErrorService.errorPopup(exception.message, exception.code, "home page");
+        }
     }]);
 
 /* end recordset */

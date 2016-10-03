@@ -5,12 +5,11 @@
 
 #record-bookmark-container {
     text-align: right;
-    top: 20px;
+    top: 0;
 }
 
 .more-results-link {
     display: block;
     width: inherit;
     max-width: inherit;
-    padding-bottom: 5px;
 }
