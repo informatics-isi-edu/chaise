@@ -88,7 +88,7 @@
                                                     <div class="input-group">
                                                         <span class="input-group-addon">Time</span>
                                                         <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].time" name="{{::column.name}}"
-                                                            ui-mask="19?:?5?9?:?5?9" ui-options="form.maskOptions.time" model-view-value="true" ui-mask-placeholder ui-mask-placeholder-char="0" ng-required="!column.nullok" time>
+                                                            ui-mask="19?:?5?9?:?5?9" ui-options="form.maskOptions.time" model-view-value="true" ui-mask-placeholder="12:00:00" ui-mask-placeholder-char="0" ng-required="!column.nullok" time>
                                                         <span class="input-group-btn">
                                                             <button class="btn btn-primary" type="button" ng-click="form.toggleMeridiem(rowIndex, column.name);" ng-bind="form.recordEditModel.rows[rowIndex][column.name].meridiem || 'AM'"></button>
                                                         </span>

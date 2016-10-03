@@ -1,12 +1,12 @@
 var chaisePage = require('../../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
 var recordEditHelpers = require('../../helpers.js');
 
-describe('Edit existing record,', function() {  
+describe('Edit existing record,', function() {
 
 	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
-    
+
     for (var i=0; i< testParams.tables.length; i++) {
-    	
+
     	(function(tableParams, index) {
 
     		describe("For table " + table.table_name + ",", function() {
@@ -20,9 +20,9 @@ describe('Edit existing record,', function() {
 					});
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					
+
 					browser.sleep(3000);
-					
+
 			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {
@@ -38,7 +38,10 @@ describe('Edit existing record,', function() {
 
 
 				describe("Presentation and validation,", function() {
-					var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
+                    var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
+                    afterAll(function(done) {
+                        done();
+                    });
 				});
 
 				describe("Submit existing record", function() {
@@ -57,7 +60,7 @@ describe('Edit existing record,', function() {
 							} else {
 								expect(true).toBe(true);
 							}
-						});	
+						});
 					});
 
 					it("should be redirected to record page", function() {

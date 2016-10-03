@@ -41,10 +41,12 @@
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
         vm.maskOptions = {
             date: {
-                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/}
+                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
+                clearOnBlur: false
             },
             time: {
-                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/}
+                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
+                clearOnBlur: false
             }
         };
         vm.toggleMeridiem = toggleMeridiem;
