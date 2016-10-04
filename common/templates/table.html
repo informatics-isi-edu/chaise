@@ -16,7 +16,7 @@
         <tbody>
             <tr class="table-row" ng-repeat="row in vm.rowValues track by $index" ng-click="gotoRowLink($index)" ng-style="{'cursor': 'pointer'}">
                 <td ng-repeat="val in row track by $index" ng-switch="val.isHTML">
-                    <span ng-switch-when="true" ng-bind-html="val.value"></span>
+                    <span ng-switch-when="true" ng-bind-html="val.value" ng-click="$event.stopPropagation()" ng-style="{'cursor': 'auto'}"></span>
                     <span ng-switch-default>{{val.value}}</span>
                 </td>
             </tr>
