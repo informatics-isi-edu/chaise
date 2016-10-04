@@ -4,7 +4,7 @@
         <thead class="table-heading">
             <tr>
                 <th nowrap ng-repeat="col in vm.columns track by $index">
-                    <span class="table-column-displayname" ng-click="sortby({colname: col.name})">{{col.displayname}}</span>
+                    <span class="table-column-displayname" ng-class="{'coltooltiplabel': col.comment}" title="{{col.comment}}" ng-click="sortby({colname: col.name})">{{::col.displayname}}</span>
                     <span ng-show="vm.sortby==col.name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-asc" ng-style="{'cursor': 'pointer'}"></span>
                     <span ng-show="vm.sortby==col.name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-desc" ng-style="{'cursor': 'pointer'}"></span>
                     <span ng-show="vm.sortby!==col.name" class="fa fa-fw fa-sort" ng-click="sortby({colname: col.name})" ng-style="{'cursor': 'pointer'}"></span>
