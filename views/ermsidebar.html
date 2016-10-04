@@ -1,7 +1,7 @@
 <div ng-controller="SideBarCtrl as sideBar" ng-show="sideBar.displaySidebar()" class="col-md-3 sidebar-outer">
 	<div ng-init="FacetsData.progress=true" class="ng-hide" ng-show="sideBar.showSidebar()">
 		<!-- Selected Attributes sidebar -->
-		<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right open" role="navigation">
+		<aside id="sidebar" class="sidebar sidebar-default open" ng-class="{'sidebar-fixed-left': position == 'left', 'sidebar-fixed-right': position == 'right'}" role="navigation">
 			<div class="sidebar-wrap">
 			    <!-- Sidebar header -->
 					<div ng-hide="sideBar.hideSearchTextFacet()" class="search-box input-group col-md-12">
@@ -32,7 +32,7 @@
 
 
 		<!-- View All Attributes sidebar -->
-		<aside id="morefilters" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+		<aside id="morefilters" class="sidebar sidebar-default" ng-class="{'sidebar-fixed-left': position == 'left', 'sidebar-fixed-right': position == 'right'}" role="navigation">
 			<div class="search-box input-group">
 				<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
 				<span class="input-group-addon">
@@ -88,7 +88,7 @@
 
 		<!-- Adjust value ranges per field sidebar -->
 
-		<aside id="editfilter" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+		<aside id="editfilter" class="sidebar sidebar-default" ng-class="{'sidebar-fixed-left': position == 'left', 'sidebar-fixed-right': position == 'right'}" role="navigation">
 			    <!-- Sidebar header -->
 					<div ng-if="sideBar.if_type(FacetsData.tag, 'enum')" class="search-box input-group">
 						<input type="text" ng-model="FacetsData.searchFilter" class="sidebar-search form-control" placeholder="Search values in this attribute..." ng-keyup="sideBar.delay_search_filters($event.keyCode)">
@@ -157,7 +157,7 @@
 			    </div>
 		</aside>
 		<!-- Collections sidebar -->
-		<aside id="collectionsTree" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+		<aside id="collectionsTree" class="sidebar sidebar-default" ng-class="{'sidebar-fixed-left': position == 'left', 'sidebar-fixed-right': position == 'right'}" role="navigation">
 		    <!-- Sidebar header -->
 		    <div class="sidebar-header">
 		        <!-- <div class="row">
