@@ -46,5 +46,23 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
+	it("should show line under columns which have a comment and inspect the comment value too", function() {
+		var columns = tableParams.columns.filter(function(c) {
+			return (c.value != null && typeof c.comment == 'string');
+		});
+		chaisePage.recordsetPage.getColumnsWithUnderline().then(function(pageColumns) {
+			expect(pageColumns.length).toBe(columns.length);
+			var index = 0;
+			pageColumns.forEach(function(c) {
+				var comment = columns[index++].comment;
+				chaisePage.recordsetPage.getColumnComment(c).then(function(actualComment) {
+					var exists = actualComment ? true : undefined;
+					expect(exists).toBeDefined();
 
+					// Check comment is same
+					expect(actualComment.getInnerHtml()).toBe(comment);
+				});
+			});
+		});
+	});
 };
