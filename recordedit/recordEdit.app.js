@@ -20,7 +20,7 @@
         'ui.select'
     ])
 
-    .run(['ERMrest', 'ErrorService', 'headInjector', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', function runRecordEditApp(ERMrest, ErrorService, headInjector, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, UiUtils, UriUtils, $log, $rootScope, $window) {
         var context = { booleanValues: ['', true, false] };
         UriUtils.setOrigin();
         headInjector.addTitle();
@@ -61,10 +61,39 @@
                     // check id range before reading?
                     $rootScope.reference.read(1).then(function getPage(page) {
                         console.log(page);
-                        var tuple = page.tuples[0];
+                        var column, value,
+                            tuple = page.tuples[0],
+                            values = tuple.values;
 
                         $rootScope.displayname = tuple.displayname;
 
+                        for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+                            column = $rootScope.reference.columns[i];
+
+                            console.log(column.type.name);
+                            switch (column.type.name) {
+                                case "timestamptz":
+                                case "date":
+                                    value = (values[i] ? new Date(values[i]) : '');
+                                    break;
+                                case "int2":
+                                case "int4":
+                                case "int8":
+                                case "float4":
+                                case "float8":
+                                case "numeric":
+                                    value = (values[i] ? parseInt(values[i], 10) : '');
+                                    break;
+                                default:
+                                    value = values[i];
+                                    break;
+                            }
+
+                            recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
+                        }
+                    }, function error(response) {
+                        $log.warn(response);
+                        throw reponse;
                     });
                 } else {
                     $rootScope.displayname = $rootScope.reference.displayname;
