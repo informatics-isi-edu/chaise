@@ -173,27 +173,19 @@
 							of <strong>{{FacetsData.totalServerItems}}.</strong>
 						</p>
 					</div>
-					<div id="results_tally" class="row" ng-show="facetResults.showupResults()">
-						<div class="col-md-5">
-							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results, sort by:
-							<ui-select ng-model="FacetsData.sortFacet" theme="select2" search-enabled="false" ng-disabled="disabled" on-select="facetResults.sortData($event)">
-								<ui-select-match placeholder="Select an attribute">{{facetResults.display(FacetsData.table, FacetsData.sortFacet)}}</ui-select-match>
-								<ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}</ui-select-choices>
-							</ui-select>
-							<span ng-show="FacetsData.sortOrder=='asc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes toggler"></span>
-                            <span ng-show="FacetsData.sortOrder=='desc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes-alt toggler"></span>
-                            </p>
-						</div>
-						<div class="col-md-7">
+                    <div id="results_tally" class="row" ng-show="facetResults.showupResults()">
+                        <div class="col-xs-12">
+                            <div class="pull-left">
+    							<p>Showing <strong>{{facetResults.displayRange()}}</strong> of <strong>{{FacetsData.totalServerItems}}</strong> results, sort by:
+    							<ui-select ng-model="FacetsData.sortFacet" theme="select2" search-enabled="false" ng-disabled="disabled" on-select="facetResults.sortData($event)">
+    								<ui-select-match placeholder="Select an attribute">{{facetResults.display(FacetsData.table, FacetsData.sortFacet)}}</ui-select-match>
+    								<ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}</ui-select-choices>
+    							</ui-select>
+    							<span ng-show="FacetsData.sortOrder=='asc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes toggler"></span>
+                                <span ng-show="FacetsData.sortOrder=='desc'" ng-click="facetResults.changeSortOrder($event)" class="glyphicon glyphicon-sort-by-attributes-alt toggler"></span>
+                                </p>
+                            </div>
                             <div class="pull-right">
-                                <span class="btn btn-label">Download:</span>
-                                <ui-select ng-model="FacetsData.exportOptions.format" theme="select2" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onExportFormatSelect($event)">
-                                    <ui-select-match placeholder="CSV">{{FacetsData.exportOptions.format}}</ui-select-match>
-                                    <ui-select-choices repeat="format in FacetsData.exportOptions.supportedFormats">{{format}}</ui-select-choices>
-                                </ui-select>
-                                <button data-toggle="tooltip" data-placement="top" title="Download" ng-click="facetResults.onExportClick();" type="button" class="btn btn-default">
-                                    <i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i>
-                                </button>
                                 <span class="btn btn-label">View:</span>
                                 <div id="views" class="btn-group view-toggle" role="group">
                                     <button data-toggle="tooltip" data-placement="top" title="List" ng-click="facetResults.selectView($event, 'list');" type="button" class="btn btn-default">
@@ -207,7 +199,17 @@
                                     </button>
                                 </div>
                             </div>
-						</div>
+                            <div class="pull-right">
+                                <span class="btn btn-label">Download:</span>
+                                <ui-select ng-model="FacetsData.exportOptions.format" theme="select2" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onExportFormatSelect($event)">
+                                    <ui-select-match placeholder="CSV">{{FacetsData.exportOptions.format}}</ui-select-match>
+                                    <ui-select-choices repeat="format in FacetsData.exportOptions.supportedFormats">{{format}}</ui-select-choices>
+                                </ui-select>
+                                <button data-toggle="tooltip" data-placement="top" title="Download" ng-click="facetResults.onExportClick();" type="button" class="btn btn-default">
+                                    <i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i>
+                                </button>
+    						</div>
+                        </div>
 					</div>
 					<div id="resultstable" class="row" ng-show="facetResults.showupResults()">
 						<div ng-if="FacetsData.view=='list'" class="col-md-12 ng-hide" ng-repeat="row in FacetsData.ermrestData" ng-show="FacetsData.view=='list'">
