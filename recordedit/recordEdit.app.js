@@ -60,17 +60,16 @@
                 if (context.filter) {
                     // check id range before reading?
                     $rootScope.reference.read(1).then(function getPage(page) {
-                        console.log(page);
                         var column, value,
                             tuple = page.tuples[0],
                             values = tuple.values;
 
+                        $rootScope.tuples = page.tuples;
                         $rootScope.displayname = tuple.displayname;
 
                         for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                             column = $rootScope.reference.columns[i];
 
-                            console.log(column.type.name);
                             switch (column.type.name) {
                                 case "timestamptz":
                                 case "date":

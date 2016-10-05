@@ -102,7 +102,22 @@
             });
 
             if (vm.editMode) {
-                $rootScope.reference.update(model.rows).then(function success(entities) {
+
+                // get tuple.data
+                var data = $rootScope.tuples[0].data;
+
+                // loop through model.rows
+                // there should only be 1 row for editting
+                for (var i = 0; i < model.rows.length; i++) {
+                    var row = model.rows[i];
+                    var tuple = $rootScope.tuples[i];
+                    // assign each value from the form to the data object on tuple
+                    for (var key in row) {
+                        tuple.data[key] = (row[key] === '' ? null : row[key]);
+                    }
+                }
+
+                $rootScope.reference.update($rootScope.tuples).then(function success(entities) {
                     vm.redirectAfterSubmission(entities);
                 }, function error(response) {
                     vm.showSubmissionError(response);
