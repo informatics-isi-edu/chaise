@@ -260,7 +260,7 @@ dl.attribute-group dd {
      height: 76px;
      line-height: 1.4;
      max-width: 500px;
-		 white-space: nowrap;
+	 white-space: nowrap;
      overflow: hidden;
      text-overflow: ellipsis;
 }
@@ -287,11 +287,20 @@ dl.attribute-group dd {
 
 .sidebar-fixed-right {
 	box-shadow: none;
+    border: none;
 	border-left: 1px solid #ccc;
 	transform: none;
 }
 
-.sidebar-fixed-right.open {
+.sidebar-fixed-left {
+    left: 0;
+    box-shadow: none;
+    border: none;
+    border-right: 1px solid #ccc;
+    transform: none;
+}
+
+.sidebar-fixed-left.open, .sidebar-fixed-right.open {
 	transform: none;
 }
 
@@ -718,7 +727,6 @@ dt, dd {
 /* Footer styles */
 
 .footer {
-	width: 100%;
 	height: 70px;
 	background-color: #F5F5F5;
     position: absolute;
@@ -771,17 +779,22 @@ dt, dd {
 	color: #000;
 }
 
-#results-table-view th, #results-table-view td {
+#results-table-view th {
 	text-align: center;
+}
+
+#results-table-view td {
+    text-align: left;
+    overflow: hidden;
+    word-wrap: break-word;
 }
 
 #results-table-view td.results-title {
 	text-align: left;
 	width: 450px;
 	overflow: hidden;
-	text-overflow:ellipsis;
-	white-space:nowrap;
-	max-width: 450px;
+	min-width: 300px;
+    word-wrap: break-word;
 }
 
 th.table-more-bt {
