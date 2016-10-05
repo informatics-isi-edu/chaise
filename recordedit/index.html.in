@@ -96,8 +96,8 @@
                                                 </div>
                                                 <div class="col-sm-3">
                                                     <div class="btn-group" role="group">
-                                                        <button type="button" class="btn btn-primary" ng-click="form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
-                                                        <button type="button" class="btn btn-danger" ng-click="form.clearModel(rowIndex, column.name, column.type.name);">Clear</button>
+                                                        <button type="button" name="{{::column.name}}" class="btn btn-primary" ng-click="form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
+                                                        <button type="button" name="{{::column.name}}" class="btn btn-danger" ng-click="form.clearModel(rowIndex, column.name, column.type.name);">Clear</button>
                                                     </div>
                                                 </div>
                                             </div>

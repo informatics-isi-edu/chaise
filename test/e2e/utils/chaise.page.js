@@ -336,7 +336,6 @@ var recordEditPage = function() {
 
     this.getDateInputForAColumn = function(name, index) {
         index = index || 0;
-        // return browser.executeScript("return $('td.entity-value input[type=\"date\"][name=\"" + name + "\"]')[" + index + "];");
         return element(by.model('form.recordEditModel.rows[' + index + ']["' + name + '"]'));
     };
 
@@ -347,10 +346,9 @@ var recordEditPage = function() {
     this.getTimestampInputsForAColumn = function(name, index) {
         index = index || 0;
         var inputs = {};
-        inputs.date = element(by.model('form.recordEditModel.rows[' + index + ']["' + name + '"].date'));
+        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).first();
         inputs.time = element.all(by.css('input[name="' + name + '"][time]')).first();
         inputs.meridiem = element.all(by.css('button[name="' + name + '"]')).first();
-        // inputs.meridiem = element(by.binding('form.recordEditModel.rows[' + index + ']["' + name + '"].meridiem || \'AM\''));
         return inputs;
     };
 
