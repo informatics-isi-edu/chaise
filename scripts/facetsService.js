@@ -518,7 +518,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 
 		var catalogParameters = {};
 		bagExportParameters["catalog"] = catalogParameters;
-		catalogParameters["host"] =  HOME.replace("https://", "http://"); // TODO: this needs to be configurable
+		catalogParameters["host"] = HOME;
 		catalogParameters["path"] = ERMREST_CATALOG_PATH + CATALOG;
 		var queries = [];
 		catalogParameters["queries"] = queries;
@@ -613,7 +613,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				console.timeEnd('BAG export duration');
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
-				handleError(jqXHR, textStatus, errorThrown, serviceUrl)
+				handleError(jqXHR, textStatus, errorThrown, serviceUrl);
 				console.timeEnd('BAG export duration');
 			}
 		});

@@ -29,7 +29,6 @@
                     var tuple = scope.vm.page.tuples[index];
                     var t_path = tuple.reference.location.compactPath;
                     var chaiseURL = $window.location.href.replace($window.location.hash, '');
-                    var reload = (chaiseURL.indexOf("/record/") !== -1);
                     var apps = ["recordset", "record", "record-two"]; // TODO add each app that uses record-table directive
 
                     apps.forEach(function(element, index, array) {
@@ -39,11 +38,7 @@
 
                     location.assign(path);
 
-                    // forcing a reload when linking from record to record, which does not automatically reload
-                    // this is an angular issue (if change path AFTER hash, page does not reload)
-                    if (reload)
-                        location.reload();
-                }
+                };
             }
         };
     }]);
