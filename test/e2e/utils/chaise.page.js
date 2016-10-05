@@ -531,6 +531,13 @@ var recordsetPage = function() {
         return element.all(by.css('.table-row'));
     };
 
+    this.getColumnsWithUnderline = function() {
+        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"].coltooltiplabel');");
+    };
+
+    this.getColumnComment = function(el) {
+        return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
+    };
 };
 
 function chaisePage() {

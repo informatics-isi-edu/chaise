@@ -101,24 +101,23 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		// var mainContent = $('#main-content');
 		// var openSideBtn = $('div.open-side');
 	    if (toggle == 'sidebar-toggle') {
-				$('#sidebar').toggleClass('open');
+			$('#sidebar').toggleClass('open');
 	    } else if (toggle == 'field-toggle') {
-        $('#editfilter').toggleClass('open');
+            $('#editfilter').toggleClass('open');
 	    } else if (toggle == 'collections-toggle') {
-				var overlay = $('.sidebar-overlay');
-				var sidebar = $('#collectionsTree');
-				sidebar.toggleClass('open');
-				if (sidebar.hasClass('sidebar-fixed-right') && sidebar.hasClass('open')) {
-            overlay.addClass('active');
-        } else {
-            overlay.removeClass('active');
-        }
-
+			var overlay = $('.sidebar-overlay');
+			var sidebar = $('#collectionsTree');
+			sidebar.toggleClass('open');
+			if ((sidebar.hasClass('sidebar-fixed-left') || sidebar.hasClass('sidebar-fixed-right')) && sidebar.hasClass('open')) {
+                overlay.addClass('active');
+            } else {
+                overlay.removeClass('active');
+            }
 	    } else if (toggle == 'more-field-toggle') {
 	    	if (FacetsData.facetSelection) {
 		    	this.updateSessionFilter();
 	    	}
-        $('#morefilters').toggleClass('open');
+            $('#morefilters').toggleClass('open');
 	    }
 		// Resize main content pane depending on sidebar open or close
 		// Show/hide .open-side button depending on sidebar open or close
@@ -519,7 +518,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 
 		var catalogParameters = {};
 		bagExportParameters["catalog"] = catalogParameters;
-		catalogParameters["host"] =  HOME.replace("https://", "http://"); // TODO: this needs to be configurable
+		catalogParameters["host"] = HOME;
 		catalogParameters["path"] = ERMREST_CATALOG_PATH + CATALOG;
 		var queries = [];
 		catalogParameters["queries"] = queries;
@@ -614,7 +613,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				console.timeEnd('BAG export duration');
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
-				handleError(jqXHR, textStatus, errorThrown, serviceUrl)
+				handleError(jqXHR, textStatus, errorThrown, serviceUrl);
 				console.timeEnd('BAG export duration');
 			}
 		});
