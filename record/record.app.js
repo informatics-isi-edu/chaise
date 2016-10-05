@@ -40,6 +40,7 @@
             context.appName = "record";
 
             if (context.filter) {
+                ERMrest.appLinkFn(UriUtils.appTagToURL);
                 ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                     // $rootScope.reference != reference after contextualization
                     $rootScope.reference = reference.contextualize.detailed;

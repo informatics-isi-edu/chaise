@@ -28,13 +28,13 @@
                 scope.gotoRowLink = function(index) {
                     var tuple = scope.vm.page.tuples[index];
                     var t_path = tuple.reference.location.compactPath;
-                    var chaiseURL = $window.location.href.replace($window.location.hash, '');
-                    var apps = ["recordset", "record", "record-two"]; // TODO add each app that uses record-table directive
-
-                    apps.forEach(function(element, index, array) {
-                        chaiseURL = chaiseURL.replace("/" + element + "/", '');
-                    });
-                    var path = chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(tuple.reference.location.catalog) + "/" + t_path;
+                    var newRef = tuple.reference.contextualize.detailed;
+                    var appUrl = newRef.appLink;
+                    var path;
+                    if (appUrl)
+                        path = appUrl + "/#" + UriUtils.fixedEncodeURIComponent(newRef.location.catalog) + "/" + t_path;
+                    else
+                        path = UriUtils.chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(tuple.reference.location.catalog) + "/" + t_path;
 
                     location.assign(path);
 

@@ -282,7 +282,7 @@
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
 
-
+            ERMrest.appLinkFn(UriUtils.appTagToURL);
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                 $rootScope.reference = reference.contextualize.compact;
                 $log.info("Reference:", $rootScope.reference);

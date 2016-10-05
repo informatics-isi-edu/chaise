@@ -3,7 +3,22 @@
 
     angular.module('chaise.utils', [])
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', function($injector, $window, ParsedFilter, $rootScope) {
+    .constant("appTagMapping", {
+        "tag:isrd.isi.edu,2016:chaise:record": "record",
+        "tag:isrd.isi.edu,2016:chaise:record-two": "record-two",
+        "tag:isrd.isi.edu,2016:chaise:viewer": "viewer",
+        "tag:isrd.isi.edu,2016:chaise:search": "search",
+        "tag:isrd.isi.edu,2016:chaise:recordset": "recordset",
+        "tag:isrd.isi.edu,2016:chaise:recordedit": "recordedit"
+})
+
+    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', function($injector, $window, ParsedFilter, $rootScope, appTagMapping) {
+
+        var chaiseURL = $window.location.href.replace($window.location.hash, '');
+        var apps = ['record', 'recordset', 'record-two', 'search', 'viewer'];
+        apps.forEach(function(app) {
+            chaiseURL = chaiseURL.replace("/" + app + "/", '');
+        });
 
         /**
          * @function
@@ -83,6 +98,16 @@
             return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
                 return '%' + c.charCodeAt(0).toString(16).toUpperCase();
             })
+        }
+
+        /**
+         * convert an app tag to app url
+         * @param {string} tag
+         * @returns {string} url
+         */
+        function appTagToURL(tag) {
+            var app = appTagMapping[tag];
+            return chaiseURL + "/" + app;
         }
 
         /**
@@ -393,6 +418,8 @@
 
 
         return {
+            chaiseURL: chaiseURL,
+            appTagToURL: appTagToURL,
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             parseURLFragment: parseURLFragment,

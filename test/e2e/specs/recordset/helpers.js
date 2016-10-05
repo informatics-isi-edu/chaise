@@ -65,4 +65,15 @@ exports.testPresentation = function (tableParams) {
 			});
 		});
 	});
+
+	it("click on row should redirect to record app", function() {
+		chaisePage.recordsetPage.getRows().then(function(rows) {
+			rows[0].click().then(function() {
+				return browser.driver.getCurrentUrl();
+			}).then(function(url) {
+				expect(url.indexOf('/record/#')).toBeGreaterThan(-1);
+			})
+		});
+
+	});
 };
