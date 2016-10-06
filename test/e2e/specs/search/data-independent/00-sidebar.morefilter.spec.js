@@ -45,7 +45,7 @@ describe('Chaise initial sidebar,', function () {
         });
 
         describe('sidebar header title,', function () {
-            var initSidebarHeaderText = 'CHOOSE ATTRIBUTES:';
+            var initSidebarHeaderText = 'CHOOSE ATTRIBUTES';
             var sidebarHeader = chaisePage.sidebar.sidebarHeader;
             it('should show correctly when initialized', function () {
                 expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
@@ -149,9 +149,9 @@ describe('Chaise initial sidebar,', function () {
 
         var previousCheckedAttr, previousUncheckedAttr;
         describe('when back to initial sidebar', function () {
-            it('sidebar header should show \'CHOOSE ATTRIBUTES:\'', function () {
+            it('sidebar header should show \'CHOOSE ATTRIBUTES\'', function () {
                 chaisePage.moreFilter.goBackToSidebar();
-                expect(sidebarHeader.getText()).toBe('CHOOSE ATTRIBUTES:');
+                expect(sidebarHeader.getText()).toBe('CHOOSE ATTRIBUTES');
             });
 
             it('should show previously checked attribute', function () {

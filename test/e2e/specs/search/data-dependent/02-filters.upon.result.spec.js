@@ -215,7 +215,7 @@ var afterAttributeTestCompletion = function() {
         });
 
         it('should show correct initial sidebar header', function () {
-            expect(chaisePage.sidebar.sidebarHeader.getText()).toBe('CHOOSE ATTRIBUTES:');
+            expect(chaisePage.sidebar.sidebarHeader.getText()).toBe('CHOOSE ATTRIBUTES');
         });
 
         config.attributes.forEach(function(attr) {

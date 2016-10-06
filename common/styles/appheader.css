@@ -9,6 +9,10 @@ body > .container {
 	padding-top: 70px;
 }
 
+#mainnav {
+    z-index: 1037;
+}
+
 .navbar-inverse {
     background-color: #000;
     border-color: #000;
