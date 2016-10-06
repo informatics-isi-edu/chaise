@@ -60,6 +60,17 @@
                 if (context.filter) {
                     // check id range before reading?
                     $rootScope.reference.read(1).then(function getPage(page) {
+                        $log.info("Page: ", page);
+
+                        if (page.tuples.length < 1) {
+                            var filter = context.filter;
+                            var noDataMessage = "No entity exists with " + filter.column + filter.operator + filter.value;
+                            var noDataError = new Error(noDataMessage);
+                            noDataError.code = "404 Not Found";
+
+                            throw noDataError;
+                        }
+
                         var column, value,
                             tuple = page.tuples[0],
                             values = tuple.values;
@@ -93,6 +104,8 @@
                     }, function error(response) {
                         $log.warn(response);
                         throw reponse;
+                    }).catch(function readCatch(exception) {
+                        ErrorService.errorPopup(exception.message, exception.code, "home page");
                     });
                 } else {
                     $rootScope.displayname = $rootScope.reference.displayname;
