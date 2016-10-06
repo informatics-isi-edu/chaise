@@ -14,10 +14,10 @@
 
     .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', function($injector, $window, ParsedFilter, $rootScope, appTagMapping) {
 
-        var chaiseURL = $window.location.href.replace($window.location.hash, '');
+        var chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
         var apps = ['record', 'recordset', 'record-two', 'search', 'viewer'];
         apps.forEach(function(app) {
-            chaiseURL = chaiseURL.replace("/" + app + "/", '');
+            chaiseBaseURL = chaiseBaseURL.replace("/" + app + "/", '');
         });
 
         /**
@@ -108,7 +108,7 @@
          */
         function appTagToURL(tag, location) {
             var app = appTagMapping[tag];
-            var url = chaiseURL + "/" + app + "/#" + location.catalog;
+            var url = chaiseBaseURL + "/" + app + "/#" + location.catalog;
             if (app === "recordset" || app == "record") {
                 url = url + "/" + location.path;
             } else {
@@ -425,7 +425,7 @@
 
 
         return {
-            chaiseURL: chaiseURL,
+            chaiseBaseURL: chaiseBaseURL,
             appTagToURL: appTagToURL,
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,

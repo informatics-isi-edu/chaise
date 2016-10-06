@@ -71,7 +71,8 @@ exports.testPresentation = function (tableParams) {
 			rows[0].click().then(function() {
 				return browser.driver.getCurrentUrl();
 			}).then(function(url) {
-				expect(url.indexOf('/record/#')).toBeGreaterThan(-1);
+				var result = '/record/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
+				expect(url.indexOf(result)).toBeGreaterThan(-1);
 			})
 		});
 

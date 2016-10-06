@@ -33,7 +33,7 @@
                     if (appUrl)
                         location.assign(appUrl);
                     else {
-                        path = UriUtils.chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(tuple.reference.location.catalog) + "/" + t_path;
+                        path = UriUtils.chaiseBaseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(tuple.reference.location.catalog) + "/" + t_path;
                         location.assign(path);
                     }
 
