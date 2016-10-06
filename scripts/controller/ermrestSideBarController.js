@@ -15,7 +15,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     $scope.requestCounter = 0;
     $scope.chaiseConfig = chaiseConfig;
     $scope.position = chaiseConfig.sidebarPosition || 'right';
-    $scope.defaultHeading = chaiseConfig.attributesSidebarHeading || 'Choose Attributes';
+    $scope.defaultHeading = chaiseConfig.attributesSidebarHeading || 'CHOOSE ATTRIBUTES';
     $('[data-toggle="tooltip"]').tooltip();
 
   	$scope.translate = function(value) {
