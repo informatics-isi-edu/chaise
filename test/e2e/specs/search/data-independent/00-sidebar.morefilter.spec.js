@@ -45,7 +45,7 @@ describe('Chaise initial sidebar,', function () {
         });
 
         describe('sidebar header title,', function () {
-            var initSidebarHeaderText = 'CHOOSE ATTRIBUTES:';
+            var initSidebarHeaderText = 'CHOOSE ATTRIBUTES';
             var sidebarHeader = chaisePage.sidebar.sidebarHeader;
             it('should show correctly when initialized', function () {
                 expect(sidebarHeader.getText()).toBe(initSidebarHeaderText);
