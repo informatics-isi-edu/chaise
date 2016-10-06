@@ -117,8 +117,8 @@
                     }
                 }
 
-                $rootScope.reference.update($rootScope.tuples).then(function success(entities) {
-                    vm.redirectAfterSubmission(entities);
+                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
+                    vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
                 });
