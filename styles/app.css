@@ -295,7 +295,6 @@ dl.attribute-group dd {
 	box-shadow: none;
     border: none;
 	transform: none;
-    z-index: 1;
 }
 
 .sidebar-fixed-right {
