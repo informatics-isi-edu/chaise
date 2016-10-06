@@ -30,13 +30,12 @@
                     var t_path = tuple.reference.location.compactPath;
                     var newRef = tuple.reference.contextualize.detailed;
                     var appUrl = newRef.appLink;
-                    var path;
                     if (appUrl)
-                        path = appUrl + "/#" + UriUtils.fixedEncodeURIComponent(newRef.location.catalog) + "/" + t_path;
-                    else
+                        location.assign(appUrl);
+                    else {
                         path = UriUtils.chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(tuple.reference.location.catalog) + "/" + t_path;
-
-                    location.assign(path);
+                        location.assign(path);
+                    }
 
                 };
             }

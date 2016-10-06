@@ -101,13 +101,20 @@
         }
 
         /**
-         * convert an app tag to app url
+         * given an app tag and location object, return the full url
          * @param {string} tag
+         * @param {ERMrest.Location} location
          * @returns {string} url
          */
-        function appTagToURL(tag) {
+        function appTagToURL(tag, location) {
             var app = appTagMapping[tag];
-            return chaiseURL + "/" + app;
+            var url = chaiseURL + "/" + app + "/#" + location.catalog;
+            if (app === "recordset" || app == "record") {
+                url = url + "/" + location.path;
+            } else {
+                // TODO for each app, could be the same as record and recordset
+            }
+            return url;
         }
 
         /**
