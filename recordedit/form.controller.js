@@ -208,8 +208,7 @@
         // In this case, columns of type serial* == auto-generated
         function isAutoGen(col) {
             try {
-                // return (col.type.name.indexOf('serial') === 0);
-                return false;
+                return (col.type.name.indexOf('serial') === 0);
             } catch (exception) {
                 // handle exception
                 $log.info(exception);
