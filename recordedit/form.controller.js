@@ -15,7 +15,7 @@
         vm.closeAlert = AlertsService.deleteAlert;
 
         vm.submit = submit;
-        vm.submissionMode = false;
+        vm.readyToSubmit = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.copyFormRow = copyFormRow;
@@ -134,7 +134,7 @@
                         // Need to convert to 24 hr UTC time
                         case 'timestamp':
                         case 'timestamptz':
-                            if (vm.submissionMode) {
+                            if (vm.readyToSubmit) {
                                 row[k] = moment(row[k].date + row[k].time + row[k].meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                             }
                         default: if (row[k] === '') row[k] = null;
@@ -145,25 +145,27 @@
         }
 
         function submit() {
-            vm.submissionMode = true;
             var form = vm.formContainer;
             var model = vm.recordEditModel;
-            form.$setUntouched();
-            form.$setPristine();
+            // form.$setUntouched();
+            // form.$setPristine();
 
             if (form.$invalid) {
+                vm.readyToSubmit = false;
                 AlertsService.addAlert({type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'});
                 form.$setSubmitted();
                 return;
             }
 
+            // Form data is valid, time to transform row values for submission to ERMrest
+            vm.readyToSubmit = true;
             model.rows.forEach(function(row) {
                 transformRowValues(row, model);
             });
 
             if (vm.editMode) {
                 model.table.entity.put(model.rows).then(function success(entities) {
-                    vm.submissionMode = false;
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     // Wrapping redirectAfterSubmission callback fn in the success callback fn
                     // due to inability to pass the success/error responses directly
                     // into redirectAfterSubmission fn. (ReferenceError)
@@ -173,7 +175,7 @@
                 });
             } else {
                 model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
-                    vm.submissionMode = false;
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     vm.redirectAfterSubmission(entities);
                 }, function error(response) {
                     vm.showSubmissionError(response);
@@ -187,12 +189,15 @@
             var index = vm.recordEditModel.rows.length - 1;
             var protoRowValidityStates = vm.formContainer.row[index];
             var validRow = true;
-            angular.forEach(protoRowValidityStates, function(value, key) {
+            Object.keys(protoRowValidityStates).some(function(key) {
+                var value = protoRowValidityStates[key];
                 if (value.$dirty && value.$invalid) {
+                    vm.readyToSubmit = false, validRow = false;
                     AlertsService.addAlert({type: 'error', message: "Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again."});
-                    validRow = false;
+                    return true;
                 }
             });
+
             if (validRow) {
                 var rowset = vm.recordEditModel.rows;
                 var protoRow = rowset[index];
@@ -356,11 +361,6 @@
         // Assigns the current date or timestamp to a column's model
         function applyCurrentDatetime(modelIndex, columnName, columnType) {
             if (columnType === 'timestamp' || columnType === 'timestamptz') {
-                if (!vm.editMode && !vm.recordEditModel.rows[modelIndex][columnName]) {
-                    // When in entry mode, the model for this timestamp column needs to be initialized with an obj to house the parts of the timestamp
-                    // Other col types don't need this initialization b/c values can be directly attached to the model
-                    vm.clearModel(modelIndex, columnName, columnType);
-                }
                 return vm.recordEditModel.rows[modelIndex][columnName] = {
                     date: moment().format('YYYY-MM-DD'),
                     time: moment().format('hh:mm:ss'),
@@ -372,8 +372,11 @@
 
         // Toggle between AM/PM for a time input's model
         function toggleMeridiem(modelIndex, columnName) {
-            var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem.toLowerCase().charAt(0);
-            if (meridiem === 'a') {
+            if (!vm.recordEditModel.rows[modelIndex][columnName]) {
+                vm.recordEditModel.rows[modelIndex][columnName] = {meridiem: 'AM'};
+            }
+            var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem;
+            if (meridiem.charAt(0).toLowerCase() === 'a') {
                 return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'PM';
             }
             return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'AM';

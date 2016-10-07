@@ -421,6 +421,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
             describe("Timestamp fields,", function() {
                 var timeInputFields = [];
                 var columns;
+                beforeAll(function() {
+                    jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
+                });
                 it('should have 3 inputs with validation for each timestamp column', function() {
                     columns = chaisePage.dataUtils.editInputs.getTimestampTypeColumns(table, [IGNORE, HIDDEN]);
                     columns.forEach(function(column) {
@@ -437,15 +440,6 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                         timeInput.sendKeys(chance.word());
                         expect(timeInput.getAttribute('value')).toEqual(defaultTimeValue);
 
-                        // Test meridiem input validation,
-                        meridiemInput.getText().then(function(text) {
-                            chaisePage.clickButton(meridiemInput);
-                            if (text === 'AM') {
-                                expect(meridiemInput.getText()).toEqual('PM');
-                            } else {
-                                expect(meridiemInput.getText()).toEqual('AM');
-                            }
-                        });
                         timeInputFields.push({
                             date: dateInput,
                             time: timeInput,
@@ -468,10 +462,10 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                 it('should have the current time after clicking the \"Now\" button', function() {
                     timeInputFields.forEach(function(obj) {
                         var nowBtn = element.all(by.css('button[name="' + obj.column.name + '"]')).get(1);
-                        nowBtn.click();
                         var date = moment().format('YYYY-MM-DD');
                         var time = moment().format('hh:mm');
                         var meridiem = moment().format('A');
+                        nowBtn.click();
                         expect(obj.date.getAttribute('value')).toEqual(date);
                         expect(obj.time.getAttribute('value')).toMatch(time);
                         expect(obj.meridiem.getText()).toEqual(meridiem);
@@ -480,7 +474,6 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
             });
 
 			describe("Integer fields,", function() {
-
 				it("should render input type as number with integer attribute", function() {
 					console.log("\n       Integer Fields");
 					var columns = chaisePage.dataUtils.editInputs.getIntegerDataTypeColumns(table, [IGNORE, HIDDEN]);
