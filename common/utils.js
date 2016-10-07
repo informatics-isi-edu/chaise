@@ -109,11 +109,7 @@
         function appTagToURL(tag, location) {
             var app = appTagMapping[tag];
             var url = chaiseBaseURL + "/" + app + "/#" + location.catalog;
-            if (app === "recordset" || app == "record") {
-                url = url + "/" + location.path;
-            } else {
-                // TODO for each app, could be the same as record and recordset
-            }
+            url = url + "/" + location.path;
             return url;
         }
 
