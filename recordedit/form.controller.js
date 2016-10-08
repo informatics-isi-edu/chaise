@@ -39,6 +39,11 @@
 
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
+        vm.toggleMeridiem = toggleMeridiem;
+        vm.clearModel = clearModel;
+        // Specifies the regexes to be used for a token in a ui-mask input. For example, the '1' key in
+        // in vm.maskOptions.date means that only 0 or 1 is allowed wherever the '1' key is used in a ui-mask template.
+        // See the maskDefinitions section for more info: https://github.com/angular-ui/ui-mask.
         vm.maskOptions = {
             date: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
@@ -49,8 +54,6 @@
                 clearOnBlur: false
             }
         };
-        vm.toggleMeridiem = toggleMeridiem;
-        vm.clearModel = clearModel;
 
         function redirectAfterSubmission(entities) {
             var form = vm.formContainer;
