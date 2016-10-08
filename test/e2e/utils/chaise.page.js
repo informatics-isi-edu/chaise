@@ -336,11 +336,20 @@ var recordEditPage = function() {
 
     this.getDateInputForAColumn = function(name, index) {
         index = index || 0;
-        return browser.executeScript("return $('td.entity-value input[type=\"date\"][name=\"" + name + "\"]')[" + index + "];");
+        return element(by.model('form.recordEditModel.rows[' + index + ']["' + name + '"]'));
     };
 
     this.getDatePickerForAnInput = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().find('.ng-scope._720kb-datepicker-open')[0];", el);
+    };
+
+    this.getTimestampInputsForAColumn = function(name, index) {
+        index = index || 0;
+        var inputs = {};
+        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).first();
+        inputs.time = element.all(by.css('input[name="' + name + '"][time]')).first();
+        inputs.meridiem = element.all(by.css('button[name="' + name + '"]')).first();
+        return inputs;
     };
 
     this.getIntegerInputForAColumn = function(name, index) {
@@ -489,7 +498,7 @@ var recordPage = function() {
     };
 
     this.getRelatedTableRowValues = function(displayName) {
-        return that.getRelatedTableRows(displayName).all(by.tagName("td"));    
+        return that.getRelatedTableRows(displayName).all(by.tagName("td"));
     };
 
     this.getCreateRecordButton = function() {

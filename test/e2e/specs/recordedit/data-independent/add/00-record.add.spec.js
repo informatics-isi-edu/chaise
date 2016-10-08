@@ -73,7 +73,7 @@ describe('Record Add', function() {
 
 					var hasErrors = false;
 
-					it("should have no errors, and should be redirected", function() {
+					it("should have no errors, and should be redirected", function(done) {
 						chaisePage.recordEditPage.getAlertError().then(function(err) {
 							if (err) {
 								expect("Page has errors").toBe("No errors");
@@ -82,6 +82,7 @@ describe('Record Add', function() {
 								expect(true).toBe(true);
 							}
 						});
+                        done();
 					});
 
 					it("should be redirected to record page", function() {

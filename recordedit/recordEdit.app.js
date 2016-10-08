@@ -16,8 +16,7 @@
         'chaise.modal',
         'ui.select',
         'ui.bootstrap',
-        //'rzModule',
-        '720kb.datepicker',
+        'ui.mask',
         'ngMessages'
     ])
 
@@ -163,11 +162,22 @@
                         angular.forEach(entity[0], function(value, colName) {
                             try {
                                 var pathColumnType = path.context.columns.get(colName).column.type.name;
-                                if (pathColumnType == 'date' || pathColumnType == 'timestamptz') {
-                                    // Must transform the value into a Date so that
-                                    // Angular won't complain when putting the value
-                                    // in an input of type "date" in the view
-                                    value = (value) ? new Date(value) : "";
+                                // Transform columns with date/timestamp values
+                                if (pathColumnType == 'timestamp' || pathColumnType == 'timestamptz') {
+                                    // e.g. timestamptz format 2016-09-26T11:17:28.696-07:00
+                                    if (value) {
+                                        var ts = moment(value, moment.ISO_8601, true);
+                                        value = {
+                                            date: ts.format('YYYY-MM-DD'),
+                                            time: ts.format('hh:mm:ss'),
+                                            meridiem: ts.format('A')
+                                        };
+                                    } else {
+                                        value = {
+                                            date: null,
+                                            time: null
+                                        };
+                                    }
                                 }
                                 recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
                             } catch (exception) { }

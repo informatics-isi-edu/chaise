@@ -15,6 +15,7 @@
         vm.closeAlert = AlertsService.deleteAlert;
 
         vm.submit = submit;
+        vm.readyToSubmit = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.copyFormRow = copyFormRow;
@@ -35,6 +36,21 @@
         vm.isForeignKey = isForeignKey;
         vm.matchType = matchType;
         vm.isHiddenColumn = isHiddenColumn;
+
+        vm.applyCurrentDatetime = applyCurrentDatetime;
+        vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
+        vm.maskOptions = {
+            date: {
+                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
+                clearOnBlur: false
+            },
+            time: {
+                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
+                clearOnBlur: false
+            }
+        };
+        vm.toggleMeridiem = toggleMeridiem;
+        vm.clearModel = clearModel;
 
         function redirectAfterSubmission(entities) {
             var form = vm.formContainer;
@@ -115,8 +131,14 @@
                 try {
                     var column = model.table.columns.get(k);
                     switch (column.type.name) {
+                        // Need to convert to 24 hr UTC time
+                        case 'timestamp':
+                        case 'timestamptz':
+                            if (vm.readyToSubmit) {
+                                row[k] = moment(row[k].date + row[k].time + row[k].meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                            }
                         default: if (row[k] === '') row[k] = null;
-                                 break;
+                            break;
                     }
                 } catch(e) {}
             }
@@ -125,21 +147,25 @@
         function submit() {
             var form = vm.formContainer;
             var model = vm.recordEditModel;
-            form.$setUntouched();
-            form.$setPristine();
+            // form.$setUntouched();
+            // form.$setPristine();
 
             if (form.$invalid) {
+                vm.readyToSubmit = false;
                 AlertsService.addAlert({type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'});
                 form.$setSubmitted();
                 return;
             }
 
+            // Form data is valid, time to transform row values for submission to ERMrest
+            vm.readyToSubmit = true;
             model.rows.forEach(function(row) {
                 transformRowValues(row, model);
             });
 
             if (vm.editMode) {
                 model.table.entity.put(model.rows).then(function success(entities) {
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     // Wrapping redirectAfterSubmission callback fn in the success callback fn
                     // due to inability to pass the success/error responses directly
                     // into redirectAfterSubmission fn. (ReferenceError)
@@ -149,6 +175,7 @@
                 });
             } else {
                 model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     vm.redirectAfterSubmission(entities);
                 }, function error(response) {
                     vm.showSubmissionError(response);
@@ -162,12 +189,15 @@
             var index = vm.recordEditModel.rows.length - 1;
             var protoRowValidityStates = vm.formContainer.row[index];
             var validRow = true;
-            angular.forEach(protoRowValidityStates, function(value, key) {
+            Object.keys(protoRowValidityStates).some(function(key) {
+                var value = protoRowValidityStates[key];
                 if (value.$dirty && value.$invalid) {
+                    vm.readyToSubmit = false, validRow = false;
                     AlertsService.addAlert({type: 'error', message: "Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again."});
-                    validRow = false;
+                    return true;
                 }
             });
+
             if (validRow) {
                 var rowset = vm.recordEditModel.rows;
                 var protoRow = rowset[index];
@@ -233,7 +263,10 @@
                 displayType = 'dropdown';
             } else {
                 switch (type) {
+                    case 'timestamp':
                     case 'timestamptz':
+                        displayType = 'timestamp';
+                        break;
                     case 'date':
                         displayType = 'date';
                         break;
@@ -308,7 +341,7 @@
                 hidden = column.annotations.contains('tag:misd.isi.edu,2015:hidden');
 
             } finally {
-               if ((ignore && (ignoreCol.content.length === 0 || ignoreCol.content === null || ignoreCol.content.indexOf('entry') !== -1)) || hidden) {
+               if ((ignore && (ignoreCol.content.length === 0 || ignoreCol.content === null || ignoreCol.content === true || ignoreCol.content.indexOf('entry') !== -1)) || hidden) {
                    return true;
                }
                return false;
@@ -323,6 +356,37 @@
                 return value;
             }
             return 'To be set by system';
+        }
+
+        // Assigns the current date or timestamp to a column's model
+        function applyCurrentDatetime(modelIndex, columnName, columnType) {
+            if (columnType === 'timestamp' || columnType === 'timestamptz') {
+                return vm.recordEditModel.rows[modelIndex][columnName] = {
+                    date: moment().format('YYYY-MM-DD'),
+                    time: moment().format('hh:mm:ss'),
+                    meridiem: moment().format('A')
+                }
+            }
+            return vm.recordEditModel.rows[modelIndex][columnName] = moment().format('YYYY-MM-DD');
+        }
+
+        // Toggle between AM/PM for a time input's model
+        function toggleMeridiem(modelIndex, columnName) {
+            if (!vm.recordEditModel.rows[modelIndex][columnName]) {
+                vm.recordEditModel.rows[modelIndex][columnName] = {meridiem: 'AM'};
+            }
+            var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem;
+            if (meridiem.charAt(0).toLowerCase() === 'a') {
+                return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'PM';
+            }
+            return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'AM';
+        }
+
+        function clearModel(modelIndex, columnName, columnType) {
+            if (columnType === 'timestamp' || columnType === 'timestamptz') {
+                return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: null};
+            }
+            return vm.recordEditModel.rows[modelIndex][columnName] = null;
         }
     }]);
 })();
