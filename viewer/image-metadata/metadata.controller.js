@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('ImageMetadataController', ['AuthService', 'vocabs', 'image', 'statuses', 'context', function(AuthService, vocabs, image, statuses, context) {
+    .controller('ImageMetadataController', ['AlertsService', 'AuthService', 'vocabs', 'image', 'statuses', 'context', function(AlertsService, AuthService, vocabs, image, statuses, context) {
         var vm = this;
         vm.image = image;
         vm.vocabs = vocabs;

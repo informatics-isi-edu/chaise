@@ -1,5 +1,6 @@
 var chaisePage = require('../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
 var chance = require('chance').Chance();
+var moment = require('moment');
 
 exports.testPresentationAndBasicValidation = function(tableParams) {
 
@@ -172,7 +173,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							var text = (chaisePage.dataUtils.editInputs.isUrl(c)) ? chance.url() : chance.sentence({ words: 5 });
 							c._value = text;
 							txtInput.sendKeys(text);
-							
+
 							expect(txtInput.getAttribute('value')).toBeDefined(text);
 						} else {
 							expect(undefined).toBeDefined();
@@ -312,9 +313,45 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 			});
 
-			describe("Date and timestamptz fields,", function() {
-				
-				it("should have a datepicker element", function() {
+			describe("Date fields,", function() {
+                it('should show input fields and validate for date columns', function() {
+                    var columns = chaisePage.dataUtils.editInputs.getDateTypeColumns(table, [IGNORE, HIDDEN]);
+                    columns.forEach(function(column) {
+                        var dateInput = chaisePage.recordEditPage.getDateInputForAColumn(column.name, recordIndex);
+                        datePickerFields.push(dateInput);
+                        if (column._value != undefined) {
+							expect(dateInput.getAttribute('value')).toBe(column._value);
+						}
+
+                        chaisePage.recordEditPage.clearInput(dateInput);
+
+                        dateInput.sendKeys('1234-13-31');
+                        expect(dateInput.getAttribute('value')).toBeFalsy();
+
+                        chaisePage.recordEditPage.clearInput(dateInput);
+
+                        dateInput.sendKeys('2016-01-01');
+                        expect(dateInput.getAttribute('value')).toEqual('2016-01-01');
+                    });
+                });
+
+                it('\"Today\" button should enter the current date into the input', function() {
+                    var today = moment().format('YYYY-MM-DD');
+                    datePickerFields.forEach(function(dp) {
+                        var todayBtn = dp.all(by.css('.input-group-btn > button'))[0];
+                        todayBtn.click();
+                        expect(dp.getAttribute('value')).toEqual(today);
+                    });
+                });
+
+                it('\"Clear\" button clear the date input respectively', function() {
+                    datePickerFields.forEach(function(dp) {
+                        var clearBtn = dp.all(by.css('.input-group-btn > button'))[1];
+                        expect(dp.getAttribute('value')).toBeFalsy();
+                    });
+                });
+
+				xit("should have a datepicker element", function() {
 					console.log("\n        Date/Timestamptz fields");
 					var columns = chaisePage.dataUtils.editInputs.getDateTypeColumns(table, [IGNORE, HIDDEN]);
 					columns.forEach(function(column) {
@@ -333,7 +370,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							}
 						});
 					});
-				});
+				}).pend('Postpone test until a datepicker is re-implemented');
 
 				it("should render open datepicker on click", function() {
 					datePickerFields.forEach(function(dp) {
@@ -348,7 +385,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							dp.datePicker = datePicker;
 						});
 					});
-				});
+				}).pend('Postpone test until a datepicker is re-implemented');
 
 				it("should select a date , and check the value", function() {
 					datePickerFields.forEach(function(dateInput) {
@@ -358,9 +395,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							var day = chaisePage.recordEditPage.getRandomInt(1, dayBtns.length);
 							console.log(dayBtns.length);
 							dayBtns[day-1].click();
-							
+
 							var month = ((new Date()).getMonth() + 1);
-							month = (month < 10) ? "0" + month : month; 
+							month = (month < 10) ? "0" + month : month;
 							day = (day < 10) ? "0" + day : day;
 
 							var date = (new Date()).getFullYear() + "-" + month + "-"  + day;
@@ -378,11 +415,65 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							});
 						});
 					});
-				});
+				}).pend('Postpone test until a datepicker is re-implemented');
 			});
 
+            describe("Timestamp fields,", function() {
+                var timeInputFields = [];
+                var columns;
+                beforeAll(function() {
+                    jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
+                });
+                it('should have 3 inputs with validation for each timestamp column', function() {
+                    columns = chaisePage.dataUtils.editInputs.getTimestampTypeColumns(table, [IGNORE, HIDDEN]);
+                    columns.forEach(function(column) {
+                        var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex);
+                        var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemInput = timeInputs.meridiem;
+
+                        expect(dateInput).toBeDefined();
+                        expect(timeInput).toBeDefined();
+                        expect(meridiemInput).toBeDefined();
+
+                        // Test time input validation; date input tested in earlier describe block
+                        var defaultTimeValue = '12:00:00';
+                        timeInput.clear();
+                        timeInput.sendKeys(chance.word());
+                        expect(timeInput.getAttribute('value')).toEqual(defaultTimeValue);
+
+                        timeInputFields.push({
+                            date: dateInput,
+                            time: timeInput,
+                            meridiem: meridiemInput,
+                            column: column
+                        });
+                    });
+                });
+
+                it('should clear the input after clicking the \"Clear\" button', function() {
+                    timeInputFields.forEach(function(obj) {
+                        var clearBtn = element.all(by.css('button[name="' + obj.column.name + '"]')).get(2);
+                        clearBtn.click();
+                        expect(obj.date.getAttribute('value')).toBeFalsy();
+                        expect(obj.time.getAttribute('value')).toBeFalsy();
+                        expect(obj.meridiem.getText()).toEqual('AM');
+                    });
+                });
+
+                it('should have the current time after clicking the \"Now\" button', function() {
+                    timeInputFields.forEach(function(obj) {
+                        var nowBtn = element.all(by.css('button[name="' + obj.column.name + '"]')).get(1);
+                        var date = moment().format('YYYY-MM-DD');
+                        var time = moment().format('hh:mm');
+                        var meridiem = moment().format('A');
+                        nowBtn.click();
+                        expect(obj.date.getAttribute('value')).toEqual(date);
+                        expect(obj.time.getAttribute('value')).toMatch(time);
+                        expect(obj.meridiem.getText()).toEqual(meridiem);
+                    });
+                });
+            });
+
 			describe("Integer fields,", function() {
-				
 				it("should render input type as number with integer attribute", function() {
 					console.log("\n       Integer Fields");
 					var columns = chaisePage.dataUtils.editInputs.getIntegerDataTypeColumns(table, [IGNORE, HIDDEN]);
@@ -407,15 +498,15 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 				it("should validate required and invalid text input", function() {
 					integerDataTypeFields.forEach(function(intInput) {
-						
-						var prevValue = ""; 
+
+						var prevValue = "";
 
 						// Clear value if it is in edit mode
 						if (chaisePage.dataUtils.editInputs.isKey(intInput.column.name, tableParams.keys)) {
 							el.getAttribute(value).then(function(value) {
 								prevValue = value + "";
 							});
-						} 
+						}
 						chaisePage.recordEditPage.clearInput(intInput);
 
 						if (!intInput.column.nullok) {
@@ -433,9 +524,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 						var text = "1j2yu", actualValue = "12";
 						intInput.sendKeys(text);
 						expect(intInput.getAttribute('value')).toBe(actualValue);
-						
+
 						// Required Error message should disappear;
-						
+
 						chaisePage.recordEditPage.getInputErrorMessage(intInput, 'required').then(function(err) {
 							if (err) {
 								expect(undefined).toBe("Integer input " + intInput.column.name + " Required Error message to be hidden");
@@ -443,11 +534,11 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 								expect(true).toBeDefined();
 							}
 						});
-						
+
 						// Clear value
 						chaisePage.recordEditPage.clearInput(intInput);
 						expect(intInput.getAttribute('value')).toBe("");
-						
+
 						//Restore the value to the original one
 						if (chaisePage.dataUtils.editInputs.isKey(intInput.column.name, tableParams.keys)) {
 							intInput.sendKeys(prevValue);
@@ -465,8 +556,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							min = -2147483648, max = 2147483647, invalidMaxNo = "3827374576453", invalidMinNo = "-326745374576375";
 						}
 
-						var validNo = chaisePage.recordEditPage.getRandomInt(min, max) + "", invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352"; 
-						
+						var validNo = chaisePage.recordEditPage.getRandomInt(min, max) + "", invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
+
 						// Store original value to reset it for avoiding any conflicts or referece issues due to unique or foreign key issue
 						if (chaisePage.dataUtils.editInputs.isKey(intInput.column.name, tableParams.keys)) {
 							el.getAttribute(value).then(function(value) {
@@ -477,7 +568,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 						// Clear value if it is in edit mode
 						chaisePage.recordEditPage.clearInput(intInput);
 
-						// Check for invalid maximum number 
+						// Check for invalid maximum number
 						intInput.sendKeys(invalidMaxNo);
 						chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
 							if (err) {
@@ -551,7 +642,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 			});
 
 			describe("Float fields,", function() {
-				
+
 				it("should render input type as number with float attribute", function() {
 					console.log("\n       Float Fields");
 					var columns = chaisePage.dataUtils.editInputs.getFloatDataTypeColumns(table, [IGNORE, HIDDEN]);
@@ -574,15 +665,15 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 				it("should validate invalid text input", function() {
 					floatDataTypeFields.forEach(function(floatInput) {
-						
-						var validNo = chaisePage.recordEditPage.getRandomArbitrary() + ""; 
+
+						var validNo = chaisePage.recordEditPage.getRandomArbitrary() + "";
 
 						// Clear value if it is in edit mode
 						if (chaisePage.dataUtils.editInputs.isKey(floatInput.column.name, tableParams.keys)) {
 							el.getAttribute(value).then(function(value) {
 								validNo = value + "";
 							});
-						} 
+						}
 						chaisePage.recordEditPage.clearInput(floatInput);
 
 						if (!floatInput.column.nullok) {
@@ -600,7 +691,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 						var text = "1j2yu.5", actualValue = "12.5";
 						floatInput.sendKeys(text);
 						expect(floatInput.getAttribute('value')).toBe(actualValue);
-						
+
 						// Required Error message should disappear;
 						chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required').then(function(err) {
 							if (err) {
