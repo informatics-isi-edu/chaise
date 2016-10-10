@@ -4,15 +4,23 @@
     angular.module('chaise.utils', [])
 
     .constant("appTagMapping", {
-        "tag:isrd.isi.edu,2016:chaise:record": "record",
-        "tag:isrd.isi.edu,2016:chaise:record-two": "record-two",
-        "tag:isrd.isi.edu,2016:chaise:viewer": "viewer",
-        "tag:isrd.isi.edu,2016:chaise:search": "search",
-        "tag:isrd.isi.edu,2016:chaise:recordset": "recordset",
-        "tag:isrd.isi.edu,2016:chaise:recordedit": "recordedit"
-})
+        "tag:isrd.isi.edu,2016:chaise:record": "/record",
+        "tag:isrd.isi.edu,2016:chaise:detailed": "/detailed",
+        "tag:isrd.isi.edu,2016:chaise:viewer": "/viewer",
+        "tag:isrd.isi.edu,2016:chaise:search": "/search",
+        "tag:isrd.isi.edu,2016:chaise:recordset": "/recordset",
+        "tag:isrd.isi.edu,2016:chaise:recordedit": "/recordedit"
+    })
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', function($injector, $window, ParsedFilter, $rootScope, appTagMapping) {
+    .constant("appContextMapping", {
+        "detailed": "/record",
+        "compact": "/recordset",
+        "edit": "/recordedit",
+        "entry": "/recordedit"
+    })
+
+    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils',
+        function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils) {
 
         var chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
         var apps = ['record', 'recordset', 'record-two', 'search', 'viewer'];
@@ -104,13 +112,20 @@
          * given an app tag and location object, return the full url
          * @param {string} tag
          * @param {ERMrest.Location} location
+         * @param {string} context - optional, used to determine default app is tag is null/undefined
          * @returns {string} url
          */
-        function appTagToURL(tag, location) {
-            var app = appTagMapping[tag];
-            var url = chaiseBaseURL + "/" + app + "/#" + location.catalog;
-            url = url + "/" + location.path;
-            return url;
+        function appTagToURL(tag, location, context) {
+            var appPath;
+            if (!tag && context) {
+                appPath = ContextUtils.getValueFromContext(appContextMapping, context);
+            } else if (tag) {
+                appPath = appTagMapping[tag];
+            } else {
+                return undefined;
+            }
+
+            return chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
         }
 
         /**
@@ -528,6 +543,26 @@
 
         return {
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior
+        }
+    }])
+
+
+    .factory("ContextUtils", [function() {
+
+        function getValueFromContext(object, context) {
+            var partial = context,
+                parts = context.split("/");
+            while (partial !== "") {
+                if (partial in object) { // found the context
+                    return object[partial];
+                }
+                parts.splice(-1,1); // remove the last part
+                partial = parts.join("/");
+            }
+        }
+
+        return {
+            getValueFromContext: getValueFromContext
         }
     }])
     

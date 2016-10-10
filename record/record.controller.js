@@ -9,22 +9,31 @@
         vm.modifyRecord = chaiseConfig.editRecord === false ? false : true;
 
         vm.createRecord = function() {
-            var appURL = $rootScope.reference.contextualize.entryCreate.appLink;
-            if (!appURL) {
-                var parts = $rootScope.reference.location.compactPath.split('/');
-                // Should I substring based on the position of id or should I split on '/' and piece back together parts 0,1?
-                appURL = "../recordedit/#" + $rootScope.reference.location.catalog + '/' + parts[0];
-            }
+            try {
+                var newRef = $rootScope.reference.contextualize.entryCreate;
+                var appURL = newRef.appLink;
+                if (!appURL) {
+                    throw new Error("Application Error: app linking undefined for " + newRef.compactPath);
+                }
 
-            $window.location.href = appURL;
+                $window.location.href = appURL;
+            } catch (error) {
+                ErrorService.errorPopup(error.message, error.code, "home page");
+            }
         };
 
         vm.editRecord = function() {
-            var appURL = $rootScope.reference.contextualize.entryEdit.appLink;
-            if (!appURL)
-                appURL = "../recordedit/#" + $rootScope.reference.location.catalog + '/' + $rootScope.reference.location.compactPath;
+            try {
+                var newRef = $rootScope.reference.contextualize.entryEdit;
+                var appURL = newRef.appLink;
+                if (!appURL) {
+                    throw new Error("Application Error: app linking undefined for " + newRef.compactPath);
+                }
 
-            $window.location.href = appURL;
+                $window.location.href = appURL;
+            } catch (error) {
+                ErrorService.errorPopup(error.message, error.code, "home page");
+            }
         };
 
         vm.permalink = function getPermalink() {
@@ -35,17 +44,16 @@
         };
 
         vm.toRecordSet = function(ref) {
-            var appURL = ref.appLink;
-            if (!appURL) {
-                var refLocation = ref.location,
-                // This uses $window location because we need the origin and pathname relative to chaise,
-                // whereas refLocation gives you that info but relative to ermrestJS
-                recordsetPathname = $window.location.pathname.replace("record", "recordset");
+            try {
+                var appURL = ref.appLink;
+                if (!appURL) {
+                    throw new Error("Application Error: app linking undefined for " + ref.compactPath);
+                }
 
-                appURL = $window.location.origin + recordsetPathname + '#' + refLocation.catalog + '/' + refLocation.path;
+                $window.location.href = appURL;
+            } catch (error) {
+                ErrorService.errorPopup(error.message, error.code, "home page");
             }
-
-            $window.location.href = appURL;
         };
     }]);
 })();
