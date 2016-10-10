@@ -265,6 +265,7 @@
 
             $rootScope.location = $window.location.href;
             pageInfo.loading = true;
+            $rootScope.context = context;
             pageInfo.previousButtonDisabled = true;
             pageInfo.nextButtonDisabled = true;
 

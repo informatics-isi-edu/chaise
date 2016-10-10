@@ -22,12 +22,7 @@
     .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils',
         function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils) {
 
-        var chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
-        var apps = ['record', 'recordset', 'record-two', 'search', 'viewer'];
-        apps.forEach(function(app) {
-            chaiseBaseURL = chaiseBaseURL.replace("/" + app + "/", '');
-        });
-
+            var chaiseBaseURL;
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
@@ -116,6 +111,9 @@
          * @returns {string} url
          */
         function appTagToURL(tag, location, context) {
+            if (!chaiseBaseURL)
+                chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
+            chaiseBaseURL = chaiseBaseURL.replace("/" + $rootScope.context.appName + "/", '');
             var appPath;
             if (!tag && context) {
                 appPath = ContextUtils.getValueFromContext(appContextMapping, context);
@@ -436,7 +434,6 @@
 
 
         return {
-            chaiseBaseURL: chaiseBaseURL,
             appTagToURL: appTagToURL,
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
