@@ -4,12 +4,14 @@
 
     <div id="mainContent" class="container-fluid">
 
+        <alerts alerts="alerts"></alerts>
+
         <div class="row">
             <!-- permalink -->
             <a id="permalink" class="pull-right" ng-href="{{ permalink() }}">
                 <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
 
-            <h2 id="page-title">Records for {{ vm.tableDisplayName }}</h2>
+            <h2 id="page-title">{{ vm.tableDisplayName }}</h2>
 
         </div>
 

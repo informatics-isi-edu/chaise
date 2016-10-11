@@ -1,17 +1,14 @@
-var chaisePage = require('../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
 var recordsetHelpers = require('../helpers.js');
 
 describe('View recordset,', function() {
 
-    var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+    var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
 
     for (var i=0; i< testParams.tuples.length; i++) {
 
         (function(tupleParams, index) {
 
             describe("For table " + tupleParams.table_name + ",", function() {
-
-                var table, record;
 
                 beforeAll(function () {
                     var keys = [];

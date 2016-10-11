@@ -65,4 +65,16 @@ exports.testPresentation = function (tableParams) {
 			});
 		});
 	});
+
+	it("click on row should redirect to record app", function() {
+		chaisePage.recordsetPage.getRows().then(function(rows) {
+			rows[0].click().then(function() {
+				return browser.driver.getCurrentUrl();
+			}).then(function(url) {
+				var result = '/record/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
+				expect(url.indexOf(result)).toBeGreaterThan(-1);
+			})
+		});
+
+	});
 };
