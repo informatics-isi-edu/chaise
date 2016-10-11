@@ -3,36 +3,31 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['$window', '$rootScope', function RecordController($window, $rootScope) {
+    .controller('RecordController', ['$window', '$rootScope', 'AlertsService', function RecordController($window, $rootScope, AlertsService) {
         var vm = this;
 
+        vm.alerts = AlertsService.alerts;
         vm.modifyRecord = chaiseConfig.editRecord === false ? false : true;
 
         vm.createRecord = function() {
-            try {
-                var newRef = $rootScope.reference.contextualize.entryCreate;
-                var appURL = newRef.appLink;
-                if (!appURL) {
-                    throw new Error("Application Error: app linking undefined for " + newRef.compactPath);
-                }
-
+            var newRef = $rootScope.reference.contextualize.entryCreate;
+            var appURL = newRef.appLink;
+            if (!appURL) {
+                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
+            }
+            else {
                 $window.location.href = appURL;
-            } catch (error) {
-                ErrorService.errorPopup(error.message, error.code, "home page");
             }
         };
 
         vm.editRecord = function() {
-            try {
-                var newRef = $rootScope.reference.contextualize.entryEdit;
-                var appURL = newRef.appLink;
-                if (!appURL) {
-                    throw new Error("Application Error: app linking undefined for " + newRef.compactPath);
-                }
-
+            var newRef = $rootScope.reference.contextualize.entryEdit;
+            var appURL = newRef.appLink;
+            if (!appURL) {
+                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
+            }
+            else {
                 $window.location.href = appURL;
-            } catch (error) {
-                ErrorService.errorPopup(error.message, error.code, "home page");
             }
         };
 
@@ -44,15 +39,12 @@
         };
 
         vm.toRecordSet = function(ref) {
-            try {
-                var appURL = ref.appLink;
-                if (!appURL) {
-                    throw new Error("Application Error: app linking undefined for " + ref.compactPath);
-                }
-
+            var appURL = ref.appLink;
+            if (!appURL) {
+                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + ref.compactPath});
+            }
+            else {
                 $window.location.href = appURL;
-            } catch (error) {
-                ErrorService.errorPopup(error.message, error.code, "home page");
             }
         };
     }]);

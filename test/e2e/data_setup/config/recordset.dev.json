@@ -29,7 +29,7 @@
         "schemaName" : "product",
         "table_name" : "accommodation",
         "displayName" : "Accommodations",
-        "title" : "Records for Accommodations",
+        "title" : "Accommodations",
         "keys" : [{ "name": "id", "value": "2001", "operator" : "::gt::"}],
         "sortby" : "no_of_rooms",
         "columns" : ["Name of Accommodation", "Website", "User Rating", "Summary", "Operational Since", "Is Luxurious"],

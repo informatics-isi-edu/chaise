@@ -9,6 +9,10 @@
     <navbar></navbar>
 
     <div class="container-fluid">
+        <div ng-controller="RecordController as ctrl">
+            <alerts alerts="ctrl.alerts"></alerts>
+        </div>
+
         <div id="record-bookmark-container" class="col-xs-12 meta-icons" ng-controller="RecordController as ctrl">
             <a id="create-record" ng-if="reference && reference.canCreate && ctrl.modifyRecord" title="Click here to create a record" ng-click="::ctrl.createRecord()">
                 <span class="glyphicon glyphicon-plus"></span> <strong>Create Record</strong>

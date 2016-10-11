@@ -251,14 +251,16 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'UiUtils',
-        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, UiUtils) {
+    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'UiUtils', 'AlertsService',
+        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, UiUtils, AlertsService) {
 
         try {
             headInjector.addTitle();
             headInjector.addCustomCSS();
 
             UriUtils.setOrigin();
+
+            $rootScope.alerts = AlertsService.alerts;
 
             // parse the URL
             var p_context = UriUtils.parseURLFragment($window.location);
