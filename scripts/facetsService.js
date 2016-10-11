@@ -188,6 +188,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	this.successGetMetadata = function (data, textStatus, jqXHR, successGetTableColumns) {
 		FacetsData['metadata'] = data;
 		getTableColumns(FacetsData, successGetTableColumns);
+		this.updateExportFormats()
 	};
 
 	this.successGetTableColumns = function (columns) {
@@ -468,22 +469,35 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		return ret;
 	};
 
-	this.updateExportFormat = function updateExportFormat() {
+	this.updateExportFormats = function updateExportFormats() {
+		FacetsData.exportOptions.supportedFormats = JSON.parse(JSON.stringify(FacetsData.exportOptions.defaultFormats));
+		var exportAnnotations = FacetsData.metadata.annotations["tag:isrd.isi.edu,2016:export"];
+		var templates = (exportAnnotations !== undefined) ? exportAnnotations["templates"] : null;
+		if (templates == null) {
+			return;
+		}
+		$.each(templates, function(i, template) {
+			var name = template['name'];
+			var format_name = template['format_name'] || null;
+			var format_type = template['format_type'] || "FILE";
+			if (format_name) {
+				var format = {name:format_name, type:format_type, template: template};
+				FacetsData.exportOptions.supportedFormats.push(format);
+			}
+		});
+	};
+
+	this.updateExportFormatOptions = function updateExportFormatOptions() {
 		FacetsData.exportOptions.formatOptions = {};
 		var format = FacetsData.exportOptions.format;
-		if (format == "CSV" || format == "JSON") {
-			// nothing to do at this point
-		} else if (format == "BAG") {
+		if (format["type"] == "BAG") {
 			// setup some defaults
 			var bagFormatOpts = {};
-			FacetsData.exportOptions.formatOptions["bag"] = bagFormatOpts;
 			bagFormatOpts["name"] = FacetsData.selectedEntity.display || FacetsData.selectedEntity.name;
 			bagFormatOpts["archiver"] = "zip";
 			bagFormatOpts["metadata"] =	{};
 			bagFormatOpts["table_format"] = "csv";
-			var exportAnnotations = FacetsData.metadata.annotations["tag:misd.isi.edu,2016:export"];
-			var extracts = (exportAnnotations !== undefined) ? exportAnnotations["extracts"] : null;
-			bagFormatOpts["extract"] = (extracts) ? extracts[0] : null;
+			FacetsData.exportOptions.formatOptions["bag"] = bagFormatOpts;
 		}
 	};
 
@@ -502,29 +516,28 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		return '';
 	};
 
-	this.createBagExportParameters = function createBagExportParameters() {
+	this.createExportParameters = function createExportParameters() {
 		var exportOpts = FacetsData.exportOptions;
-		var bagFormatOpts = FacetsData.exportOptions.formatOptions["bag"];
-		if (bagFormatOpts === undefined) {
-			throw new Error('Undefined BAG format options');
-		}
-		var bagExportParameters = {};
+		var exportParameters = {};
 
-		var bagParameters = {};
-		bagExportParameters["bag"] = bagParameters;
-		bagParameters["bag_name"] = bagFormatOpts["name"];
-		bagParameters["bag_archiver"] = bagFormatOpts["archiver"];
-		bagParameters["bag_metadata"] = bagFormatOpts["metadata"];
+		var bagFormatOpts = FacetsData.exportOptions.formatOptions["bag"];
+		if (bagFormatOpts !== undefined) {
+			var bagParameters = {};
+			exportParameters["bag"] = bagParameters;
+			bagParameters["bag_name"] = bagFormatOpts["name"];
+			bagParameters["bag_archiver"] = bagFormatOpts["archiver"];
+			bagParameters["bag_metadata"] = bagFormatOpts["metadata"];
+		}
 
 		var catalogParameters = {};
-		bagExportParameters["catalog"] = catalogParameters;
+		exportParameters["catalog"] = catalogParameters;
 		catalogParameters["host"] = HOME;
 		catalogParameters["path"] = ERMREST_CATALOG_PATH + CATALOG;
 		var queries = [];
 		catalogParameters["queries"] = queries;
 
-		var extract = bagFormatOpts["extract"];
-		if (!extract) {
+		var template = exportOpts.format["template"];
+		if (!template) {
 			// this is basically the same as a single file CSV or JSON export but packaged as a bag
 			var query = {};
 			query["output_path"] = bagFormatOpts["name"];
@@ -532,9 +545,9 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			query["query_path"] = exportOpts.exportUrl.substring(ERMREST_DATA_HOME.length) + "?limit=none";
 			queries.push(query);
 		} else {
-			var outputs = extract["outputs"];
+			var outputs = template["outputs"];
 			if ((outputs === undefined) || (outputs && outputs.length === 0)) {
-				var error = "No outputs configured in extract: " + extract["name"];
+				var error = "No outputs configured in template: " + template["name"];
 				alert(error);
 				throw new Error(error);
 			}
@@ -551,6 +564,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				var dest = output["destination"];
 				var destName = dest["name"];
 				var destType = dest["type"];
+				var destParams = dest["params"];
 				var predicate = exportOpts.exportPredicate;
 
 				queryFrags.push(sourceType);
@@ -572,7 +586,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 					if (columnMap !== undefined) {
 						for (var col in columnMap) {
 							if (columnMap.hasOwnProperty(col)) {
-								columnRefs.push(col + ":=" + tableAliasToken + ":" + columnMap[col]);
+								columnRefs.push(col + ":=" + columnMap[col]);
 							}
 						}
 					}
@@ -581,25 +595,28 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				query["query_path"] = "/" + queryFrags.join("/") + "?limit=none";
 				query["output_path"] = destName || sourceName;
 				query["output_format"] = destType || bagFormatOpts["table_format"];
+				if (destParams != null) {
+					query["output_format_params"] = destParams;
+				}
 				queries.push(query);
 			});
 		}
 
-		return bagExportParameters;
+		return exportParameters;
 	};
 
-	this.doExportBag = function doExportBag() {
-		var bagExportParameters = this.createBagExportParameters();
-		var serviceUrl = HOME + "/iobox/export/bdbag"; // TODO: this needs to be configurable
-		var bagExportParams = JSON.stringify(bagExportParameters, null, "  ");
-		console.info("Executing BAG export with the following parameters:\n" + bagExportParams);
-		console.time('BAG export duration');
+	this.invokeExternalExport = function invokeExternalExport() {
+		var exportParameters = JSON.stringify(this.createExportParameters(), null, "  ");
+		var serviceUrl = HOME + "/iobox/export/" + // TODO: this service base url needs to be configurable
+			(FacetsData.exportOptions.format["type"] == "BAG" ? "bdbag" : "file");
+		console.info("Executing external export with the following parameters:\n" + exportParameters);
+		console.time('External export duration');
 		document.body.style.cursor = 'wait';
 		$.ajax({
 			url: serviceUrl,
 			type: 'POST',
 			contentType: 'application/json',
-			data: bagExportParams,
+			data: exportParameters,
 			dataType: 'text',
 			headers: make_headers(),
 			timeout: AJAX_TIMEOUT,
@@ -610,11 +627,11 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				if (uriList) {
 					location.href = uriList[0];
 				}
-				console.timeEnd('BAG export duration');
+				console.timeEnd('External export duration');
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				handleError(jqXHR, textStatus, errorThrown, serviceUrl);
-				console.timeEnd('BAG export duration');
+				console.timeEnd('External export duration');
 			}
 		});
 	};
@@ -623,19 +640,22 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		var exportOpts = FacetsData.exportOptions;
 		var baseName = FacetsData.selectedEntity.display || FacetsData.selectedEntity.name;
 		var baseOpts = "?limit=none&download=" + fixedEncodeURIComponent(baseName);
-
-		switch (exportOpts.format) {
-			case "CSV":
-				location.href = exportOpts.exportUrl + baseOpts + "&accept=csv";
-				break;
-			case "JSON":
-				location.href = exportOpts.exportUrl + baseOpts + "&accept=json";
+		var exportFormatName = exportOpts.format["name"];
+		var exportFormatType = exportOpts.format["type"];
+		switch (exportFormatType) {
+			case "DIRECT":
+				if (exportFormatName == "CSV") {
+					location.href = exportOpts.exportUrl + baseOpts + "&accept=csv";
+				} else if (exportFormatName == "JSON") {
+					location.href = exportOpts.exportUrl + baseOpts + "&accept=json";
+				}
 				break;
 			case "BAG":
-				this.doExportBag();
+			case "FILE":
+				this.invokeExternalExport();
 				break;
 			default:
-				alert("Unsupported export format: " + exportOpts.format);
+				alert("Unsupported export format: " + exportOpts.format["type"]);
 		}
 	}
 }]);

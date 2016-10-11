@@ -599,7 +599,7 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	};
 
 	this.onExportFormatSelect = function onExportFormatSelect(event) {
-		FacetsService.updateExportFormat();
+		FacetsService.updateExportFormatOptions();
 	};
 
 	this.onExportClick = function onExportClick() {
