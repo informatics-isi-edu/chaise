@@ -27,7 +27,7 @@
                         catalogId = chaiseConfig.defaultCatalog;
 
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + tableConfig.schema + ':' + tableConfig.table;
+                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
                         throw new Error(tableMissing);
@@ -56,7 +56,7 @@
                     // check for default Table
                     if (chaiseConfig.defaultTables) {
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + tableConfig.schema + ':' + tableConfig.table;
+                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
                         throw new Error(tableMissing);
@@ -68,7 +68,7 @@
             }
 
             var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
-            var path = '/catalog/' + catalogId + '/entity' + hash;
+            var path = '/catalog/' + fixedEncodeURIComponent(catalogId) + '/entity' + hash;
 
             return baseUri + path;
         }
