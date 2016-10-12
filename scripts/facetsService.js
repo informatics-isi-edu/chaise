@@ -470,6 +470,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 	};
 
 	this.updateExportFormats = function updateExportFormats() {
+		FacetsData.exportOptions.format = JSON.parse(JSON.stringify(FacetsData.exportOptions.defaultFormat));
 		FacetsData.exportOptions.supportedFormats = JSON.parse(JSON.stringify(FacetsData.exportOptions.defaultFormats));
 		var exportAnnotations = FacetsData.metadata.annotations["tag:isrd.isi.edu,2016:export"];
 		var templates = (exportAnnotations !== undefined) ? exportAnnotations["templates"] : null;
