@@ -36,7 +36,8 @@
         appName:'recordset',
         mainURI: null,  // the main URL portion up to filters (without modifiers)
         catalogID: null,
-        tableName: null
+        tableName: null,
+        chaiseBaseURL: null
     })
 
 
@@ -49,7 +50,8 @@
         sortby: null,     // column name, user selected or null
         sortOrder: null,  // asc (default) or desc
         page: null,        // current page
-        rowValues: []      // array of rows values, each value has this structure {isHTML:boolean, value:value}
+        rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
+        search: null       // search term
     })
 
     .factory('pageInfo', [function() {
@@ -146,7 +148,9 @@
                 return $window.location.href;
             }
 
-            var url = context.mainURI;
+            //var url = context.mainURI;
+            var url = context.chaiseBaseURL + "#" + UriUtils.fixedEncodeURIComponent($rootScope.reference.location.catalog) + "/" +
+                $rootScope.reference.location.compactPath;
 
             // add sort modifier
             if ($rootScope.reference.location.sort)
@@ -248,6 +252,20 @@
             }
 
         };
+
+        $scope.search = function(term) {
+
+            recordsetModel.search = term;
+            $rootScope.reference = $rootScope.reference.search(term); // this will clear previous search first
+            $scope.read(pageInfo.defaultPageLimit);
+        };
+
+        $scope.clearSearch = function() {
+            if ($rootScope.reference.location.searchTerm)
+                $scope.search();
+
+            recordsetModel.search = null;
+        }
     }])
 
     // Register work to be performed after loading all modules
@@ -259,6 +277,8 @@
             headInjector.addCustomCSS();
 
             UriUtils.setOrigin();
+
+            context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
 
             $rootScope.alerts = AlertsService.alerts;
 
@@ -297,6 +317,7 @@
                     pageInfo.pageLimit = 25;
                 recordsetModel.tableDisplayName = $rootScope.reference.displayname;
                 recordsetModel.columns = $rootScope.reference.columns;
+                recordsetModel.search = $rootScope.reference.location.searchTerm;
 
                 return $rootScope.reference.read(pageInfo.pageLimit);
             }, function error(response) {
