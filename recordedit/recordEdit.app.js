@@ -106,6 +106,8 @@
                                 case "float4":
                                 case "float8":
                                 case "numeric":
+                                    value = (values[i] ? parseFloat(values[i]) : '');
+                                    break;
                                 default:
                                     value = values[i];
                                     break;
