@@ -9,7 +9,7 @@
         vm.recordEditModel = recordEditModel;
         vm.editMode = context.filter || false;
         vm.booleanValues = context.booleanValues;
-        vm.getAutoGenValue = getAutoGenValue;
+        vm.getDisabledInputValue = getDisabledInputValue;
 
         vm.alerts = AlertsService.alerts;
         vm.closeAlert = AlertsService.deleteAlert;
@@ -192,8 +192,8 @@
             var name = column.name;
             var type = column.type.name;
             var displayType;
-            if (isAutoGen(column)) {
-                displayType = 'autogen';
+            if (isDisabled(column)) {
+                displayType = 'disabled';
             } else if (isForeignKey(column)) {
                 displayType = 'dropdown';
             } else {
@@ -235,14 +235,16 @@
             return displayType;
         }
 
-        // Returns true if a column's fields should be automatically generated
-        // In this case, columns of type serial* == auto-generated
-        function isAutoGen(col) {
+        // Returns with true or an object if input should be disabled
+        function isDisabled(column) {
+            var context = 'entry/create';
+            if (vm.editMode) {
+                context = 'entry/edit'
+            }
             try {
-                return (col.type.name.indexOf('serial') === 0);
-            } catch (exception) {
-                // handle exception
-                $log.info(exception);
+                return column.getInputDisabled(context);
+            } catch (e) {
+                $log.info(e);
             }
         }
 
@@ -257,14 +259,19 @@
             }
             return false;
         }
-        
-        // If in edit mode, autogen fields show the value of the existing record
-        // Otherwise, show a static string in entry mode.
-        function getAutoGenValue(value) {
-            if (vm.editMode) {
-                return value;
+
+        function getDisabledInputValue(column) {
+            try {
+                var value = column.getInputDisabled(context);
+                if (value) {
+                    if (typeof value === 'object') {
+                        return value.message;
+                    }
+                    return '';
+                }
+            } catch (e) {
+                $log.info(e);
             }
-            return 'To be set by system';
         }
 
         // Assigns the current date or timestamp to a column's model
