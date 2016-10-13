@@ -3,7 +3,7 @@
 
     angular.module('chaise.record.table', [])
 
-    .directive('recordTable', ['$window', 'UriUtils', function($window, UriUtils) {
+    .directive('recordTable', ['$window', 'UriUtils', 'AlertsService', function($window, UriUtils, AlertsService) {
 
         return {
             restrict: 'E',
@@ -27,17 +27,12 @@
 
                 scope.gotoRowLink = function(index) {
                     var tuple = scope.vm.page.tuples[index];
-                    var t_path = tuple.reference.location.compactPath;
-                    var chaiseURL = $window.location.href.replace($window.location.hash, '');
-                    var apps = ["recordset", "record", "record-two"]; // TODO add each app that uses record-table directive
-
-                    apps.forEach(function(element, index, array) {
-                        chaiseURL = chaiseURL.replace("/" + element + "/", '');
-                    });
-                    var path = chaiseURL + "/record/#" + UriUtils.fixedEncodeURIComponent(tuple.reference.location.catalog) + "/" + t_path;
-
-                    location.assign(path);
-
+                    var appUrl = tuple.reference.contextualize.detailed.appLink;
+                    if (appUrl)
+                        location.assign(appUrl);
+                    else {
+                        AlertsService.addAlert({type: "error", message: "Application Error: row linking undefined for " + tuple.reference.location.compactPath});
+                    }
                 };
             }
         };

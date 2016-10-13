@@ -251,8 +251,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'UiUtils',
-        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, UiUtils) {
+    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'UiUtils', 'AlertsService',
+        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, UiUtils, AlertsService) {
 
         try {
             headInjector.addTitle();
@@ -260,11 +260,14 @@
 
             UriUtils.setOrigin();
 
+            $rootScope.alerts = AlertsService.alerts;
+
             // parse the URL
             var p_context = UriUtils.parseURLFragment($window.location);
 
             $rootScope.location = $window.location.href;
             pageInfo.loading = true;
+            $rootScope.context = context;
             pageInfo.previousButtonDisabled = true;
             pageInfo.nextButtonDisabled = true;
 
@@ -282,7 +285,7 @@
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
 
-
+            ERMrest.appLinkFn(UriUtils.appTagToURL);
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                 $rootScope.reference = reference.contextualize.compact;
                 $log.info("Reference:", $rootScope.reference);

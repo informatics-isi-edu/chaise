@@ -201,9 +201,9 @@
                             </div>
                             <div class="pull-right">
                                 <span class="btn btn-label">Download:</span>
-                                <ui-select ng-model="FacetsData.exportOptions.format" theme="select2" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onExportFormatSelect($event)">
-                                    <ui-select-match placeholder="CSV">{{FacetsData.exportOptions.format}}</ui-select-match>
-                                    <ui-select-choices repeat="format in FacetsData.exportOptions.supportedFormats">{{format}}</ui-select-choices>
+                                <ui-select ng-model="FacetsData.exportOptions.format" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onExportFormatSelect($event)">
+                                    <ui-select-match placeholder="CSV">{{FacetsData.exportOptions.format.name}}</ui-select-match>
+                                    <ui-select-choices repeat="format in FacetsData.exportOptions.supportedFormats">{{format.name}}</ui-select-choices>
                                 </ui-select>
                                 <button data-toggle="tooltip" data-placement="top" title="Download" ng-click="facetResults.onExportClick();" type="button" class="btn btn-default">
                                     <i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i>

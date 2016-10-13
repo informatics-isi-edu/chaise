@@ -26,14 +26,16 @@
   "tests" : {
     "params": {
       "tuples" : [{
+        "schemaName" : "product",
         "table_name" : "accommodation",
         "displayName" : "Accommodations",
-        "title" : "Records for Accommodations",
+        "title" : "Accommodations",
         "keys" : [{ "name": "id", "value": "2001", "operator" : "::gt::"}],
         "sortby" : "no_of_rooms",
         "columns" : ["Name of Accommodation", "Website", "User Rating", "Summary", "Operational Since", "Is Luxurious"],
         "data" : [
           {
+            "id": 2003,
             "title": "NH Munich Resort",
             "website": "http://www.nh-hotels.com/hotels/munich",
             "rating": "3.20",
@@ -42,6 +44,7 @@
             "luxurious": "true"
           },
           {
+            "id": 2002,
             "title": "Sherathon Hotel",
             "website": "http://www.starwoodhotels.com/sheraton/index.html",
             "rating": "4.30",
@@ -50,6 +53,7 @@
             "luxurious": "true"
           },
           {
+            "id": 2004,
             "title": "Super 8 North Hollywood Motel",
             "website": "https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests",
             "summary": "Fair Hotel. Close to Universal Studios. Located near shopping areas with easy access to parking. Professional staff and clean rooms. Poorly-maintained rooms.",

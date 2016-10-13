@@ -30,9 +30,14 @@ facetsModel.factory('FacetsData', function() {
 		'ermrestData': [],
 		'error': false,
 		'exportOptions': {
-			format: "CSV",
+			format: {},
 			formatOptions:{},
-			supportedFormats:["CSV", "JSON", "BAG"],
+			defaultFormat: {name:"CSV", type:"DIRECT", template:null},
+			defaultFormats:[
+				{name:"CSV", type:"DIRECT", template:null},
+				{name:"JSON", type:"DIRECT", template:null}
+			],
+			supportedFormats:[],
 			exportPredicate:'',
 			exportUrl:''
 		},

@@ -15,8 +15,8 @@
         'ermrestjs',
         'ngMessages',
         'ngSanitize',
-        //'rzModule',
         'ui.bootstrap',
+        'ui.mask',
         'ui.select'
     ])
 
@@ -82,18 +82,30 @@
                             column = $rootScope.reference.columns[i];
 
                             switch (column.type.name) {
+                                case "timestamp":
                                 case "timestamptz":
-                                case "date":
-                                    value = (values[i] ? new Date(values[i]) : '');
+                                    if (values[i]) {
+                                        var ts = moment(value, moment.ISO_8601, true);
+                                        value = {
+                                            date: ts.format('YYYY-MM-DD'),
+                                            time: ts.format('hh:mm:ss'),
+                                            meridiem: ts.format('A')
+                                        };
+                                    } else {
+                                        value = {
+                                            date: null,
+                                            time: null
+                                        };
+                                    }
                                     break;
                                 case "int2":
                                 case "int4":
                                 case "int8":
+                                    value = (values[i] ? parseInt(values[i], 10) : '');
+                                    break;
                                 case "float4":
                                 case "float8":
                                 case "numeric":
-                                    value = (values[i] ? parseInt(values[i], 10) : '');
-                                    break;
                                 default:
                                     value = values[i];
                                     break;

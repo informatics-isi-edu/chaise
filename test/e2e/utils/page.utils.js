@@ -1,5 +1,5 @@
 var COMMENT_URI = "comment", FACET_URI = "facet", FACETORDER_URI = "facetOrder", DESCRIPTION_URI = "description";
-	
+
 var Sidebar = function() {
 	var self = this;
 
@@ -20,7 +20,7 @@ var Sidebar = function() {
 		if (!dataTypes || dataTypes.contains(c.type.typename)) {
 			if ( c['annotations'] == null || c['annotations'][COMMENT_URI] == null || !c['annotations'][COMMENT_URI].intersect(annotations).length) {
 				return false;
-			} 
+			}
 		}
 		return true;
 	};
@@ -40,7 +40,7 @@ var Sidebar = function() {
 		referenceTables.forEach(function(referenceTable) {
 			for(var k in schema.content.tables) {
 				var column = table.column_definitions.find(function(c) { return c.name == referenceTable.foreign_column_name });
-				var isHidden = isColumnHidden(column, annotations, dataTypes); 
+				var isHidden = isColumnHidden(column, annotations, dataTypes);
 				metadata = schema.content.tables[k];
 				if (k == referenceTable['table_name']) {
 					if (metadata['annotations'] && metadata['annotations'][COMMENT_URI] && !metadata['annotations'][COMMENT_URI].contains('exclude') && metadata['annotations'][COMMENT_URI].contains('association')) {
@@ -100,14 +100,14 @@ var Sidebar = function() {
 		return visibleColumns.slice(0);
 	};
 
-	// Returns columns which don't have 'hidden', 'summary' and 'dataset' set in their comment annotation 
+	// Returns columns which don't have 'hidden', 'summary' and 'dataset' set in their comment annotation
 	this.getAllSidebarColumns = function(schema, table, dataTypes) {
 		var annotation = ['exclude', 'hidden', 'summary', 'image'];
 		return self.getColumns(table, annotation, dataTypes).concat(this.getAllReferenceColumnsForATable(schema, table, annotation, dataTypes));
 	};
 
 
-	// Returns columns which don't have 'hidden', 'summary', 'bottom' and 'dataset' set in their comment annotation 
+	// Returns columns which don't have 'hidden', 'summary', 'bottom' and 'dataset' set in their comment annotation
 	this.getAllVisibleSidebarColumns = function(schema, table, dataTypes) {
 		var annotation = ['exclude', 'hidden', 'summary', 'bottom', 'image'];
 		var columns =  self.getColumns(table, annotation, dataTypes).concat(this.getAllReferenceColumnsForATable(schema, table, annotation, dataTypes));
@@ -115,7 +115,7 @@ var Sidebar = function() {
 	};
 
 
-	// Returns columns which don't have 'hidden', 'summary', and 'dataset' set in their comment annotation 
+	// Returns columns which don't have 'hidden', 'summary', and 'dataset' set in their comment annotation
 	this.getInvisibleSidebarColumns = function(schema, table, dataTypes) {
 		var columns = this.getAllSidebarColumns(schema, table, dataTypes);
 		this.getAllVisibleSidebarColumns(schema, table, dataTypes).forEach(function(c) {
@@ -130,7 +130,7 @@ var Sidebar = function() {
 		return columns.slice(0);
 	};
 
-	// Returns columns which have  either 'hidden', 'summary', 'bottom' or 'dataset' set in their comment annotation 
+	// Returns columns which have  either 'hidden', 'summary', 'bottom' or 'dataset' set in their comment annotation
 	this.getAllInvisibleColumns = function(schema, table, dataTypes) {
 		var columns = table.column_definitions;
 		this.getAllSidebarColumns(schema, table, dataTypes).forEach(function() {
@@ -195,11 +195,11 @@ var Sidebar = function() {
 	this.getColumnDisplayName = function(column) {
 		var annotation = column.annotations;
 		// If display name found in annotation then return it else
-		// compute the display name replacing undercores with space and 
+		// compute the display name replacing undercores with space and
 		// changing the case of first letter of each word to uppercase
-		if (annotation && annotation[DESCRIPTION_URI] && annotation[DESCRIPTION_URI]['display']) 
+		if (annotation && annotation[DESCRIPTION_URI] && annotation[DESCRIPTION_URI]['display'])
 			return annotation[DESCRIPTION_URI]['display'];
-		
+
 		var parts = column.name.split('_'), strings = [];
 		parts.forEach(function(part) {
 			strings.push(part[0].toUpperCase() + part.substr(1));
@@ -241,13 +241,13 @@ var EditInputs = function(sidebar) {
 					}
 				}
 			});
-		} 
+		}
 		return isHidden;
 	};
 
 	this.getForeignKey = function(column, table) {
 		var foreignKey = null;
-		
+
 		table.foreign_keys.forEach(function(fk) {
 			var index = 0;
 			fk.foreign_key_columns.forEach(function(col) {
@@ -265,12 +265,12 @@ var EditInputs = function(sidebar) {
 		var annotation = column.annotations;
 		property = property || 'name';
 		// If display name found in annotation then return it else
-		// compute the display name replacing undercores with space and 
+		// compute the display name replacing undercores with space and
 		// changing the case of first letter of each word to uppercase
-		if (annotation && annotation['tag:misd.isi.edu,2015:display'] && annotation['tag:misd.isi.edu,2015:display']['name']) 
+		if (annotation && annotation['tag:misd.isi.edu,2015:display'] && annotation['tag:misd.isi.edu,2015:display']['name'])
 			return annotation['tag:misd.isi.edu,2015:display']['name'];
 		if (pascalCase) return column[property].charAt(0).toUpperCase() + column[property].slice(1);
-		
+
 		return column[property];
 	};
 
@@ -356,12 +356,23 @@ var EditInputs = function(sidebar) {
 	this.getDateTypeColumns = function(table, annotations) {
 		var columns = [];
 		this.getVisibleColumns(table, annotations).forEach(function(c) {
-			if ((c.type.typename == 'date' || c.type.typename == 'timestamptz') && !that.getForeignKey(c, table)) {
+			if ((c.type.typename == 'date') && !that.getForeignKey(c, table)) {
 				columns.push(c);
 			}
 		});
 		return columns;
 	};
+
+    this.getTimestampTypeColumns = function(table, annotations) {
+		var columns = [];
+		this.getVisibleColumns(table, annotations).forEach(function(c) {
+			if ((c.type.typename == 'timestamptz' || c.type.typename == 'timestamp') && !that.getForeignKey(c, table)) {
+				columns.push(c);
+			}
+		});
+		return columns;
+	};
+
 
 	this.getIntegerDataTypeColumns = function(table, annotations) {
 		var columns = [];
@@ -399,7 +410,7 @@ var EditInputs = function(sidebar) {
 
 var DataUtils = function() {
 	this.sidebar = new Sidebar();
-	this.editInputs = new EditInputs(this.sidebar); 
+	this.editInputs = new EditInputs(this.sidebar);
 };
 
 module.exports = DataUtils;

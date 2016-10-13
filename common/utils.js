@@ -3,8 +3,26 @@
 
     angular.module('chaise.utils', [])
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', function($injector, $window, ParsedFilter, $rootScope) {
+    .constant("appTagMapping", {
+        "tag:isrd.isi.edu,2016:chaise:record": "/record",
+        "tag:isrd.isi.edu,2016:chaise:detailed": "/detailed",
+        "tag:isrd.isi.edu,2016:chaise:viewer": "/viewer",
+        "tag:isrd.isi.edu,2016:chaise:search": "/search",
+        "tag:isrd.isi.edu,2016:chaise:recordset": "/recordset",
+        "tag:isrd.isi.edu,2016:chaise:recordedit": "/recordedit"
+    })
 
+    .constant("appContextMapping", {
+        "detailed": "/record",
+        "compact": "/recordset",
+        "edit": "/recordedit",
+        "entry": "/recordedit"
+    })
+
+    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils',
+        function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils) {
+
+            var chaiseBaseURL;
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
@@ -27,7 +45,7 @@
                         catalogId = chaiseConfig.defaultCatalog;
 
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + tableConfig.schema + ':' + tableConfig.table;
+                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
                         throw new Error(tableMissing);
@@ -56,7 +74,7 @@
                     // check for default Table
                     if (chaiseConfig.defaultTables) {
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + tableConfig.schema + ':' + tableConfig.table;
+                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
                         throw new Error(tableMissing);
@@ -68,7 +86,7 @@
             }
 
             var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
-            var path = '/catalog/' + catalogId + '/entity' + hash;
+            var path = '/catalog/' + fixedEncodeURIComponent(catalogId) + '/entity' + hash;
 
             return baseUri + path;
         }
@@ -83,6 +101,29 @@
             return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
                 return '%' + c.charCodeAt(0).toString(16).toUpperCase();
             })
+        }
+
+        /**
+         * given an app tag and location object, return the full url
+         * @param {string} tag
+         * @param {ERMrest.Location} location
+         * @param {string} context - optional, used to determine default app is tag is null/undefined
+         * @returns {string} url
+         */
+        function appTagToURL(tag, location, context) {
+            if (!chaiseBaseURL)
+                chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
+            chaiseBaseURL = chaiseBaseURL.replace("/" + $rootScope.context.appName + "/", '');
+            var appPath;
+            if (!tag && context) {
+                appPath = ContextUtils.getValueFromContext(appContextMapping, context);
+            } else if (tag) {
+                appPath = appTagMapping[tag];
+            } else {
+                return undefined;
+            }
+
+            return chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
         }
 
         /**
@@ -393,6 +434,7 @@
 
 
         return {
+            appTagToURL: appTagToURL,
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             parseURLFragment: parseURLFragment,
@@ -498,6 +540,26 @@
 
         return {
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior
+        }
+    }])
+
+
+    .factory("ContextUtils", [function() {
+
+        function getValueFromContext(object, context) {
+            var partial = context,
+                parts = context.split("/");
+            while (partial !== "") {
+                if (partial in object) { // found the context
+                    return object[partial];
+                }
+                parts.splice(-1,1); // remove the last part
+                partial = parts.join("/");
+            }
+        }
+
+        return {
+            getValueFromContext: getValueFromContext
         }
     }])
     

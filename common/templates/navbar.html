@@ -23,8 +23,8 @@
                         <a class="username" ng-if="user !== null && profileURL" ng-href="{{profileURL}}" ng-bind="user"></a>
                     </li>
                     <li>
-                        <a id="login-link" ng-if="user === null" href="#" ng-click="login()">Log In</a>
-                        <a id="logout-link" ng-if="user !== null" href="#" ng-click="logout()">Log Out</a>
+                        <a id="login-link" ng-if="user === null" ng-click="login()">Log In</a>
+                        <a id="logout-link" ng-if="user !== null" ng-click="logout()">Log Out</a>
                     </li>
                 </ul>
                 <ul id="navbar-menu" class="nav navbar-nav">

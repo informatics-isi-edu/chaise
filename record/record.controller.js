@@ -3,19 +3,32 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['$window', '$rootScope', function RecordController($window, $rootScope) {
+    .controller('RecordController', ['$window', '$rootScope', 'AlertsService', function RecordController($window, $rootScope, AlertsService) {
         var vm = this;
 
+        vm.alerts = AlertsService.alerts;
         vm.modifyRecord = chaiseConfig.editRecord === false ? false : true;
 
         vm.createRecord = function() {
-            var parts = $rootScope.reference.location.compactPath.split('/');
-            // Should I substring based on the position of id or should I split on '/' and piece back together parts 0,1?
-            $window.location.href = "../recordedit/#" + $rootScope.reference.location.catalog + '/' + parts[0];
+            var newRef = $rootScope.reference.contextualize.entryCreate;
+            var appURL = newRef.appLink;
+            if (!appURL) {
+                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
+            }
+            else {
+                $window.location.href = appURL;
+            }
         };
 
         vm.editRecord = function() {
-            $window.location.href = "../recordedit/#" + $rootScope.reference.location.catalog + '/' + $rootScope.reference.location.compactPath;
+            var newRef = $rootScope.reference.contextualize.entryEdit;
+            var appURL = newRef.appLink;
+            if (!appURL) {
+                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
+            }
+            else {
+                $window.location.href = appURL;
+            }
         };
 
         vm.permalink = function getPermalink() {
@@ -26,13 +39,13 @@
         };
 
         vm.toRecordSet = function(ref) {
-            var refLocation = ref.location,
-                // This uses $window location because we need the origin and pathname relative to chaise,
-                // whereas refLocation gives you that info but relative to ermrestJS
-                recordsetPathname = $window.location.pathname.replace("record", "recordset");
-
-            var uri = $window.location.origin + recordsetPathname + '#' + refLocation.catalog + '/' + refLocation.path;
-            $window.location.href = uri;
+            var appURL = ref.appLink;
+            if (!appURL) {
+                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + ref.compactPath});
+            }
+            else {
+                $window.location.href = appURL;
+            }
         };
     }]);
 })();
