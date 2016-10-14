@@ -105,7 +105,7 @@
                                             <!-- dropdown select input -->
                                             <div ng-switch-when="dropdown">
                                                 <ui-select ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="::form.isDisabled(column);">
-                                                    <ui-select-match name="{{::column.name}}" placeholder="Select a value">{{$select.selected.display}}</ui-select-match>
+                                                    <ui-select-match name="{{::column.name}}" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}">{{$select.selected.display}}</ui-select-match>
                                                     <ui-select-choices repeat="domainValue.key as domainValue in form.recordEditModel.domainValues[column.name] | filter: $select.search" >
                                                         <div ng-bind-html="domainValue.display | highlight: $select.search"></div>
                                                     </ui-select-choices>
@@ -113,7 +113,7 @@
                                             </div>
                                             <!-- int2 input -->
                                             <input ng-switch-when="integer2" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
-                                                name="{{column.name}}" type="number" class="form-control" ng-required="!column.nullok" min="{{form.int2min}}" max="{{form.int2max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
+                                                name="{{column.name}}" type="number" class="form-control" ng-required="!column.nullok" min="{{form.int2min}}" max="{{form.int2max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
                                                 <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int2'">
                                                     <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
                                                     <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
@@ -122,7 +122,7 @@
 
                                             <!-- int4 input -->
                                             <input ng-switch-when="integer4" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
-                                                name="{{column.name}}" type="number" class="form-control" ng-required="!column.nullok" min="{{form.int4min}}" max="{{form.int4max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
+                                                name="{{column.name}}" type="number" class="form-control" ng-required="!column.nullok" min="{{form.int4min}}" max="{{form.int4max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
                                                 <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int4'">
                                                     <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
                                                     <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
@@ -131,7 +131,7 @@
 
                                             <!-- int8 input -->
                                             <input ng-switch-when="integer8" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
-                                                name="{{column.name}}" type="number" class="form-control" ng-required="!column.nullok" min="{{form.int8min}}" max="{{form.int8max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
+                                                name="{{column.name}}" type="number" class="form-control" ng-required="!column.nullok" min="{{form.int8min}}" max="{{form.int8max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
                                                 <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int8'">
                                                     <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
                                                     <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
@@ -139,11 +139,11 @@
                                             </input>
                                             <!-- float/decimal/numeric -->
                                             <input ng-switch-when="number" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
-                                                name="{{column.name}}" type="number" class="form-control" ng-required="!column.nullok" ng-disabled="::form.isDisabled(column);" placeholder="{{form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" float>
+                                                name="{{column.name}}" type="number" class="form-control" ng-required="!column.nullok" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" float>
                                             <!-- boolean input -->
                                             <div ng-switch-when="boolean">
                                                 <ui-select ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="::form.isDisabled(column);">
-                                                    <ui-select-match name="{{column.name}}" placeholder="Select a value">{{$select.selected}}</ui-select-match>
+                                                    <ui-select-match name="{{column.name}}" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}">{{$select.selected}}</ui-select-match>
                                                     <ui-select-choices repeat="domainValue in form.booleanValues | filter: $select.search" >
                                                         <div ng-bind-html="domainValue | highlight: $select.search"></div>
                                                     </ui-select-choices>
@@ -151,10 +151,10 @@
                                             </div>
                                             <!-- longtext/textarea input -->
                                             <textarea ng-switch-when="longtext" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
-                                                name="{{::column.name}}" class="form-control" ng-required="!column.nullok" ng-disabled="::form.isDisabled(column);" placeholder="{{form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></textarea>
+                                                name="{{::column.name}}" class="form-control" ng-required="!column.nullok" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></textarea>
                                             <!-- shorttext/default text input -->
                                             <input ng-switch-default ng-model="form.recordEditModel.rows[rowIndex][column.name]"
-                                                name="{{::column.name}}" type="text" class="form-control" ng-required="!column.nullok" ng-disabled="::form.isDisabled(column);" placeholder="{{form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>
+                                                name="{{::column.name}}" type="text" class="form-control" ng-required="!column.nullok" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>
 
                                             <!-- Validation error messages to show when the form field is touched -->
                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert">

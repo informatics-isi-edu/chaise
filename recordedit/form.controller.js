@@ -8,6 +8,7 @@
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
         vm.editMode = context.filter || false;
+        context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
         vm.isDisabled = isDisabled;
         vm.getDisabledInputValue = getDisabledInputValue;
@@ -236,12 +237,8 @@
 
         // Returns with true or an object if input should be disabled
         function isDisabled(column) {
-            var context = 'entry/create';
-            if (vm.editMode) {
-                context = 'entry/edit';
-            }
             try {
-                if (column.getInputDisabled(context)) {
+                if (column.getInputDisabled(context.appContext)) {
                     return true;
                 }
                 return false;
@@ -263,12 +260,8 @@
         }
 
         function getDisabledInputValue(column, value) {
-            var context = 'entry/create';
-            if (vm.editMode) {
-                context = 'entry/edit';
-            }
             try {
-                var disabled = column.getInputDisabled(context);
+                var disabled = column.getInputDisabled(context.appContext);
                 if (disabled) {
                     if (typeof disabled === 'object') {
                         return disabled.message;
