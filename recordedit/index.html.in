@@ -67,8 +67,6 @@
                                             <span ng-if="column.comment" class="coltooltiptext">{{::column.comment}}</span>
                                         </td>
                                         <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.columnToDisplayType(column);">
-                                            <!-- disabled input -->
-                                            <!-- <input ng-switch-when="disabled" class="form-control" type="text" ng-value="form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);" disabled> -->
                                             <!-- date input-->
                                             <div ng-switch-when="date" class="input-group">
                                                 <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="YYYY-MM-DD" name="{{::column.name}}"
