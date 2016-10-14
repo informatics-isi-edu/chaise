@@ -85,7 +85,9 @@
                                 case "timestamp":
                                 case "timestamptz":
                                     if (values[i]) {
-                                        var ts = moment(value, moment.ISO_8601, true);
+                                        // Cannot ensure that all timestamp values are formatted in ISO 8601
+                                        // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
+                                        var ts = moment(values[i]);
                                         value = {
                                             date: ts.format('YYYY-MM-DD'),
                                             time: ts.format('hh:mm:ss'),
@@ -115,6 +117,7 @@
 
                             recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
                         }
+                        console.log('Model:', recordEditModel);
                     }, function error(response) {
                         $log.warn(response);
                         throw reponse;

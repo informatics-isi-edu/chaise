@@ -9,6 +9,7 @@
         vm.recordEditModel = recordEditModel;
         vm.editMode = context.filter || false;
         vm.booleanValues = context.booleanValues;
+        vm.isDisabled = isDisabled;
         vm.getDisabledInputValue = getDisabledInputValue;
 
         vm.alerts = AlertsService.alerts;
@@ -192,9 +193,7 @@
             var name = column.name;
             var type = column.type.name;
             var displayType;
-            if (isDisabled(column)) {
-                displayType = 'disabled';
-            } else if (isForeignKey(column)) {
+            if (isForeignKey(column)) {
                 displayType = 'dropdown';
             } else {
                 switch (type) {
@@ -239,10 +238,13 @@
         function isDisabled(column) {
             var context = 'entry/create';
             if (vm.editMode) {
-                context = 'entry/edit'
+                context = 'entry/edit';
             }
             try {
-                return column.getInputDisabled(context);
+                if (column.getInputDisabled(context)) {
+                    return true;
+                }
+                return false;
             } catch (e) {
                 $log.info(e);
             }
@@ -260,12 +262,18 @@
             return false;
         }
 
-        function getDisabledInputValue(column) {
+        function getDisabledInputValue(column, value) {
+            var context = 'entry/create';
+            if (vm.editMode) {
+                context = 'entry/edit';
+            }
             try {
-                var value = column.getInputDisabled(context);
-                if (value) {
-                    if (typeof value === 'object') {
-                        return value.message;
+                var disabled = column.getInputDisabled(context);
+                if (disabled) {
+                    if (typeof disabled === 'object') {
+                        return disabled.message;
+                    } else if (vm.editMode) {
+                        return value;
                     }
                     return '';
                 }
@@ -300,7 +308,7 @@
 
         function clearModel(modelIndex, columnName, columnType) {
             if (columnType === 'timestamp' || columnType === 'timestamptz') {
-                return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: null};
+                return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: 'AM'};
             }
             return vm.recordEditModel.rows[modelIndex][columnName] = null;
         }
