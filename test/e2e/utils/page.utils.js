@@ -314,6 +314,23 @@ var EditInputs = function(sidebar) {
 		return columns;
 	};
 
+    this.getDisabledColumns = function(columns, annotations) {
+        var disabledCols = {};
+        annotations.forEach(function(annotation) {
+            disabledCols[annotation] = [];
+        });
+        columns.forEach(function(column) {
+            if (column['annotations']) {
+                Object.keys(column['annotations']).forEach(function(annotation) {
+                    if (annotations.indexOf(annotation) !== -1) {
+                        disabledCols[annotation].push(column);
+                    }
+                });
+            }
+        });
+        return disabledCols;
+    }
+
 	this.getLongTextDataTypeColumns = function(table, annotations) {
 		var columns = [];
 		this.getVisibleColumns(table, annotations).forEach(function(c) {
