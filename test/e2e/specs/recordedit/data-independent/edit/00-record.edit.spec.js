@@ -23,7 +23,6 @@ describe('Edit existing record,', function() {
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 
 					browser.sleep(3000);
-
 			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {
