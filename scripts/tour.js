@@ -80,13 +80,13 @@ function addSteps(){
     element: "#navcontainer .sidebar-nav",
     title: "Choose Attributes",
     content: "Using this list you can select attributes to filter the results.",
-    placement: "left",
+    placement: getPlacement("left"),
   }, {
     element: "a.view-attr",
     title: "View All Attributes",
     content: "There are many more available attributes to refine your search. \
   You can click here to see the list of all available attributes.",
-    placement: "left",
+    placement: getPlacement("left"),
     onNext: function(tour) {
       $("a.view-attr").click();
 
@@ -98,7 +98,7 @@ function addSteps(){
    This list displays all available attributes. We'll choose to add  \
    " + createLabel(extraAttr.text().trim()) + "as an attribute. To get back to the default list of \
    attributes, we'll use the 'All Attributes' button on top.",
-    placement: "left",
+    placement: getPlacement("left"),
     onNext: function(tour) {
       extraAttr.click();
       $(".sidebar-toggle.field-enable:eq(0)").click();
@@ -109,7 +109,7 @@ function addSteps(){
   }, {
     element: "#navcontainer .sidebar-nav .field-toggle:contains('" + extraAttr.text().trim() + "')",
     title: "New Attribute",
-    placement: "left",
+    placement: getPlacement("left"),
     content: "As you can see, " + createLabel(extraAttr.text().trim()) +
       " is now added to list of attributes.",
     onPrev: function(tour) {
@@ -120,7 +120,7 @@ function addSteps(){
     element: "#navcontainer a:visible:not(.view-attr):contains(" + chosenAttr.text().trim() + "):eq(0)",
     title: "Choose Attributes",
     content: "Let's choose " + createLabel(chosenAttr.text().trim()) + " to see its values.",
-    placement: "left",
+    placement: getPlacement("left"),
     onNext: function(tour) {
       chosenAttr.click();
       chosenValue = chosenValue ? chosenValue : getChosenValue();
@@ -131,7 +131,7 @@ function addSteps(){
     content: 'Now you can see all the different values for \
    ' + createLabel(chosenAttr.text().trim()) + ' in the database. \
    You can choose as many as you want. We are going to choose just one.',
-    placement: "left",
+    placement: getPlacement("left"),
     onShow: function(tour) {},
     onPrev: function(tour) {
       $(".field-enable.sidebar-toggle:eq(1)").click();
@@ -143,7 +143,7 @@ function addSteps(){
     element: ".field-enable.sidebar-toggle:eq(1)",
     title: "Go Back",
     content: 'To go back to the default sidebar view, you can click here.',
-    placement: "left",
+    placement: getPlacement("left"),
     onNext: function(tour) {
       $(".field-enable.sidebar-toggle:eq(1)").click();
     },
@@ -171,7 +171,7 @@ function addSteps(){
     title: "Filters",
     content: "This area displays all of the filters that are applied. By \
   clicking on the <i class='md-cancel md-lg'></i> button you can clear the filter.",
-    placement: "right",
+    placement: getPlacement("right"),
   }, {
     element: "#filter .filter-item:visible a:not(:contains(Clear),.filter-link-cancel)",
     title: " Chosen Attributes",
@@ -185,7 +185,7 @@ function addSteps(){
     title: "Add Value",
     content: "After clicking on the attribute name, this list came up. \
   You can change your filters in here.",
-    placement: "left",
+    placement: getPlacement("left"),
     onPrev: function(tour) {
       $(".field-enable.sidebar-toggle:eq(1)").click();
     },
@@ -197,7 +197,7 @@ function addSteps(){
     title: "Search Attributes",
     content: 'You can also search within attributes using this box. \
   Just type something and the list of attributes will be filtered.',
-    placement: "left",
+    placement: getPlacement("left"),
     onNext: function(tour) {
       searchInputAttr = searchInputAttr ? searchInputAttr : getSearchTerm(true, $("#navcontainer a:visible:not(.view-attr)"));
       $(".search-box input:eq(0)").val(searchInputAttr).trigger('input').keyup();
@@ -209,7 +209,7 @@ function addSteps(){
     element: "#navcontainer .sidebar-nav",
     title: "Filtered Attribute List",
     content: "As you can see after adding the term, this list is filtered.",
-    placement: "left",
+    placement: getPlacement("left"),
     onNext: function(tour) {
       searchChosenAttr = searchChosenAttr ? searchChosenAttr : getSearchChosenAttribute();
       searchChosenAttr.click();
@@ -222,7 +222,7 @@ function addSteps(){
     element: ".search-box input:eq(2)",
     title: "Search Values",
     content: "You can also search within the values of an attribute.",
-    placement: "left",
+    placement: getPlacement("left"),
     onPrev: function(tour) {
       $(".field-enable.sidebar-toggle:eq(1)").click();
       $(".search-box input:eq(0)").val(searchInputAttr).trigger('input').keyup();
@@ -235,7 +235,7 @@ function addSteps(){
     element: ".nav.filteritems",
     title: "Filtered Values",
     content: "As you can see, the values are filtered based on the search term.",
-    placement: "left",
+    placement: getPlacement("left"),
     onPrev: function(tour) {
       $(".search-box input:eq(2)").val("").trigger('input').keyup();
     },
@@ -247,7 +247,7 @@ function addSteps(){
     element: '#resultstable .panel:eq(0)',
     title: "Dataset Details",
     content: "By clicking on the title of each dataset, you can see its details.",
-    placement: "right",
+    placement: getPlacement("right"),
     onPrev: function(tour) {
       searchChosenAttr.click();
       $(".search-box input:eq(2)").val(searchInputValue).trigger('input').keyup();
@@ -268,6 +268,15 @@ function addSteps(){
   tour._options.steps = [];
   tour.addSteps(tourSteps);
 
+}
+
+
+function getPlacement(placement) {
+  if(chaiseConfig && chaiseConfig.sidebarPosition == "left") {
+    var reverse = {"left": "right", "right": "left"};
+    return reverse[placement];
+  }
+  return placement;
 }
 
 /**
