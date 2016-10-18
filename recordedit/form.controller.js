@@ -11,6 +11,7 @@
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
         vm.isDisabled = isDisabled;
+        vm.isRequired = isRequired;
         vm.getDisabledInputValue = getDisabledInputValue;
 
         vm.alerts = AlertsService.alerts;
@@ -304,6 +305,13 @@
                 return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: 'AM'};
             }
             return vm.recordEditModel.rows[modelIndex][columnName] = null;
+        }
+
+        function isRequired(column) {
+            if (!column.nullok && !isDisabled(column)) {
+                return true;
+            }
+            return false;
         }
     }]);
 })();
