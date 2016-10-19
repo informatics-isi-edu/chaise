@@ -180,7 +180,6 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							txtInput.column = c;
 
 							if (c._value != undefined) {
-                                console.log('The column:', c);
 								expect(txtInput.getAttribute('value')).toBe(c._value);
 							}
 
