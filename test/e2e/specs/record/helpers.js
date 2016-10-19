@@ -24,10 +24,12 @@ exports.testPresentation = function (tableParams) {
     it("should show the action buttons properly", function() {
         var EC = protractor.ExpectedConditions,
             editButton = chaisePage.recordPage.getEditRecordButton(),
-            createButton = chaisePage.recordPage.getCreateRecordButton();
+            createButton = chaisePage.recordPage.getCreateRecordButton(),
+            deleteButton = chaisePage.recordPage.getDeleteRecordButton();
 
         browser.wait(EC.elementToBeClickable(editButton), 10000);
         browser.wait(EC.elementToBeClickable(createButton), 10000);
+        browser.wait(EC.elementToBeClickable(deleteButton), 10000);
 
         editButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -37,6 +39,9 @@ exports.testPresentation = function (tableParams) {
             expect(bool).toBeTruthy();
         });
 
+        deleteButton.isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
 
         chaisePage.recordPage.getPermalinkButton().isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -224,15 +229,16 @@ exports.testCreateButton = function () {
 
 exports.testDeleteButton = function () {
     it("should redirect to the root path.", function () {
-        var deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
+        var EC = protractor.ExpectedConditions,
             modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
             config;
 
         browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
             config = chaiseConfig;
 
-            return deleteButton.click()
+            return chaisePage.recordPage.getDeleteRecordButton().click()
         }).then(function () {
+            browser.wait(EC.visibilityOf(modalTitle), 5000);
             // expect modal to open
             return modalTitle.getText();
         }).then(function (text) {
@@ -240,11 +246,14 @@ exports.testDeleteButton = function () {
 
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function () {
+            browser.driver.sleep(1000);
+
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            console.log(url);
-            browser.pause();
+            var parts = url.split("/");
 
+            expect(parts.length).toBe(4);
+            expect(parts[3]).toBe("");
         });
     });
 }

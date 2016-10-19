@@ -27,6 +27,7 @@ describe('View existing record,', function() {
 			    it('should load chaise-config.js and have confirmDelete=true and dataBrowser=/', function() {
 			        browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
 			        	expect(chaiseConfig.confirmDelete).toBe(true);
+                        expect(chaiseConfig.dataBrowser).toBe("");
 			        });
 				});
 
