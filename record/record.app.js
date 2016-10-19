@@ -3,6 +3,7 @@
 
     angular.module('chaise.record', [
         'ngSanitize',
+        'chaise.delete',
         'chaise.errors',
         'chaise.modal',
         'chaise.navbar',

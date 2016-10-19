@@ -44,6 +44,7 @@
                             <div class="col-xs-5 padding-top-10">
                                 <div class="pull-right">
                                     <button class="btn btn-primary" type="submit" ng-click="form.submit();">Submit Data</button>
+                                    <button ng-if="form.editMode" class="btn btn-default" type="button" ng-click="form.deleteRecord();">Delete Record</button>
                                 </div>
                             </div>
                         </div>

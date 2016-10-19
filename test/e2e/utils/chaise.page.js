@@ -509,6 +509,18 @@ var recordPage = function() {
         return element(by.id("edit-record"));
     };
 
+    this.getDeleteRecordButton = function () {
+        return element(by.id("delete-record"));
+    };
+
+    this.getConfirmDeleteTitle = function() {
+        return element(by.css(".modal-title"));
+    };
+
+    this.getConfirmDeleteButton = function () {
+        return element(by.css(".btn-danger"));
+    }
+
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
     };

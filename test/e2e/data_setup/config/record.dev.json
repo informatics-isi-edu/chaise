@@ -28,6 +28,7 @@
             "tuples" : [{
                 "table_name" : "accommodation",
                 "keys" : [{ "name": "id", "value": "2002", "operator" : "="}],
+                "deleteKeys": [{ "name": "id", "value": "4004", "operator": "="}],
                 "title": "Sherathon Hotel",
                 "subTitle" : "Accommodations",
                 "tables_order" : ["- booking (2)", "- accommodation_image (2)"],

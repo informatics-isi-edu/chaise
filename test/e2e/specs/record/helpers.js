@@ -222,6 +222,33 @@ exports.testCreateButton = function () {
     });
 };
 
+exports.testDeleteButton = function () {
+    it("should redirect to the root path.", function () {
+        var deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
+            modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
+            config;
+
+        browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
+            config = chaiseConfig;
+
+            return deleteButton.click()
+        }).then(function () {
+            // expect modal to open
+            return modalTitle.getText();
+        }).then(function (text) {
+            expect(text).toBe("Confirm Delete");
+
+            return chaisePage.recordPage.getConfirmDeleteButton().click();
+        }).then(function () {
+            return browser.driver.getCurrentUrl();
+        }).then(function(url) {
+            console.log(url);
+            browser.pause();
+
+        });
+    });
+}
+
 exports.relatedTablesDefaultOrder = function (tableParams) {
     it("should have the tables in default order.", function() {
         chaisePage.recordPage.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
