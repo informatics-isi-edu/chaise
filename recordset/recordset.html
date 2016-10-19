@@ -26,15 +26,16 @@
                 <!-- search box -->
                 <div class="input-group">
                     <input type="text"
+                           id="search-input"
                            ng-model="vm.search"
                            class="form-control"
                            enter-key="search(vm.search)"
                            placeholder="search {{vm.tableDisplayName}}">
                     <span class="input-group-btn">
-                        <button class="btn btn-primary" ng-click="search(vm.search)" role="button">
+                        <button id="search-submit" class="btn btn-primary" ng-click="search(vm.search)" role="button">
                             &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                         </button>
-                        <button class="btn btn-primary" ng-disabled="!reference.location.searchTerm" ng-click="clearSearch()" type="button">Reset</button>
+                        <button id="search-clear" class="btn btn-primary" ng-disabled="!reference.location.searchTerm" ng-click="clearSearch()" type="button">Reset</button>
                     </span>
                 </div>
             </div>
