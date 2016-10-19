@@ -4,7 +4,7 @@
     angular.module('chaise.errors', ['chaise.alerts', 'chaise.authen', 'chaise.modal', 'chaise.utils'])
 
     // Factory for each error type
-    .factory('ErrorService', ['Session', '$log', '$uibModal', '$window', function ErrorService(Session, $log, $uibModal, $window) {
+    .factory('ErrorService', ['Session', '$log', '$uibModal', '$window', 'AlertsService', function ErrorService(Session, $log, $uibModal, $window, AlertsService) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page

@@ -8,8 +8,11 @@
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
         vm.editMode = context.filter || false;
+        context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
-        vm.getAutoGenValue = getAutoGenValue;
+        vm.isDisabled = isDisabled;
+        vm.isRequired = isRequired;
+        vm.getDisabledInputValue = getDisabledInputValue;
 
         vm.alerts = AlertsService.alerts;
         vm.closeAlert = AlertsService.deleteAlert;
@@ -192,9 +195,7 @@
             var name = column.name;
             var type = column.type.name;
             var displayType;
-            if (isAutoGen(column)) {
-                displayType = 'autogen';
-            } else if (isForeignKey(column)) {
+            if (isForeignKey(column)) {
                 displayType = 'dropdown';
             } else {
                 switch (type) {
@@ -235,14 +236,15 @@
             return displayType;
         }
 
-        // Returns true if a column's fields should be automatically generated
-        // In this case, columns of type serial* == auto-generated
-        function isAutoGen(col) {
+        // Returns with true or an object if input should be disabled
+        function isDisabled(column) {
             try {
-                return (col.type.name.indexOf('serial') === 0);
-            } catch (exception) {
-                // handle exception
-                $log.info(exception);
+                if (column.getInputDisabled(context.appContext)) {
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                $log.info(e);
             }
         }
 
@@ -257,14 +259,21 @@
             }
             return false;
         }
-        
-        // If in edit mode, autogen fields show the value of the existing record
-        // Otherwise, show a static string in entry mode.
-        function getAutoGenValue(value) {
-            if (vm.editMode) {
-                return value;
+
+        function getDisabledInputValue(column, value) {
+            try {
+                var disabled = column.getInputDisabled(context.appContext);
+                if (disabled) {
+                    if (typeof disabled === 'object') {
+                        return disabled.message;
+                    } else if (vm.editMode) {
+                        return value;
+                    }
+                    return '';
+                }
+            } catch (e) {
+                $log.info(e);
             }
-            return 'To be set by system';
         }
 
         // Assigns the current date or timestamp to a column's model
@@ -293,9 +302,16 @@
 
         function clearModel(modelIndex, columnName, columnType) {
             if (columnType === 'timestamp' || columnType === 'timestamptz') {
-                return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: null};
+                return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: 'AM'};
             }
             return vm.recordEditModel.rows[modelIndex][columnName] = null;
+        }
+
+        function isRequired(column) {
+            if (!column.nullok && !isDisabled(column)) {
+                return true;
+            }
+            return false;
         }
     }]);
 })();

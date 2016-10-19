@@ -473,10 +473,15 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	this.urlLink = function urlLink(table, column, value) {
 		var ret = [];
 		if (value != null) {
-			var values = value.split(',');
+			var values = [value];
+			try {
+				values = value.split(',');
+			} catch (e) {
+				
+			}
 			$.each(values, function(i, val) {
 				var vals = [];
-				vals.push(val);
+				vals.push(getUrlText(table, column, val));
 				var urlPattern = getUrlPattern(table, column, 'url_pattern');
 				if (urlPattern != null) {
 					val = urlPattern.replace('{value}', val);
