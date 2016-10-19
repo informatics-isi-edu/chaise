@@ -150,6 +150,14 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							expect(true).toBeDefined();
 							longTextDataTypeFields.push(txtArea);
 
+                            if (c.type.typename === 'markdown') {
+                                chaisePage.recordEditPage.getHelpTextBlock(txtArea).then(function(text) {
+                                    expect(text).toBeDefined();
+                                }).catch(function(error) {
+                                    console.log(error);
+                                });
+                            }
+
 							if (c._value != undefined) {
 								expect(txtArea.getAttribute('value')).toBe(c._value);
 							}

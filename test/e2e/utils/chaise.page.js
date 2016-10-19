@@ -300,6 +300,14 @@ var recordEditPage = function() {
         return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
     };
 
+    this.getHelpTextBlock = function(el) {
+        return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
+    };
+
+    this.getInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
     this.getDropdown = function(el, index) {
         index = index || 0;
         return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container')[" + index + "];", el);
