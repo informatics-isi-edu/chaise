@@ -29,7 +29,7 @@
                            id="search-input"
                            ng-model="vm.search"
                            class="form-control"
-                           enter-key="search(vm.search)"
+                           on-enter="search(vm.search)"
                            placeholder="search {{vm.tableDisplayName}}">
                     <span class="input-group-btn">
                         <button id="search-submit" class="btn btn-primary" ng-click="search(vm.search)" role="button">

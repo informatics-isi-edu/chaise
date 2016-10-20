@@ -580,7 +580,7 @@
         };
     })
 
-    .directive('enterKey', function() {
+    .directive('onEnter', function() {
         return function(scope, element, attrs) {
 
             element.bind("keydown keypress", function(event) {
@@ -590,7 +590,7 @@
                 if (keyCode === 13) {
                     scope.$apply(function() {
                         // Evaluate the expression
-                        scope.$eval(attrs.enterKey);
+                        scope.$eval(attrs.onEnter);
                     });
 
                     event.preventDefault();
