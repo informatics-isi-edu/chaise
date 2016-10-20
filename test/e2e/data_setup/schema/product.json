@@ -88,9 +88,11 @@
             "comment": [
               "hidden"
             ],
-            "tag:misd.isi.edu,2015:display" : {
+            "tag:misd.isi.edu,2015:display": {
               "name" : "Id"
-            }
+            },
+            "tag:isrd.isi.edu,2016:generated": null,
+            "tag:isrd.isi.edu,2016:immutable": null
           }
         },
         {

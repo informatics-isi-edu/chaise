@@ -278,7 +278,7 @@ var recordEditPage = function() {
     };
 
     this.getColumnWithAsterisk = function(el) {
-        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"!column.nullok\"].text-danger')[0];", el);
+        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"::form.isRequired(column);\"].text-danger')[0];", el);
     };
 
     this.getColumnComment = function(el) {
