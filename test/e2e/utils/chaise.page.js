@@ -432,6 +432,10 @@ var recordEditPage = function() {
     this.getRecordModelRows = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
     };
+
+    this.getDeleteRecordButton = function () {
+        return element(by.id("delete-button"));
+    }
 };
 
 var recordPage = function() {
@@ -518,7 +522,7 @@ var recordPage = function() {
     };
 
     this.getConfirmDeleteButton = function () {
-        return element(by.css(".btn-danger"));
+        return element(by.id("delete-confirmation"));
     }
 
     this.getPermalinkButton = function() {

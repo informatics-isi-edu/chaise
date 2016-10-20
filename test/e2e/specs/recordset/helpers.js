@@ -19,7 +19,7 @@ exports.testPresentation = function (tableParams) {
 
 	it("should show correct table rows", function() {
 		chaisePage.recordsetPage.getRows().then(function(rows) {
-			expect(rows.length).toBe(3);
+			expect(rows.length).toBe(4);
 			for (var i = 0; i < rows.length; i++) {
 				(function(index) {
 					rows[index].all(by.tagName("td")).then(function (cells) {

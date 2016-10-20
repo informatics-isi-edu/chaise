@@ -2,11 +2,15 @@
     "setup": {
         "schemaConfigurations": [{
             "catalog": {
+                "acls": [
+                    {"name": "content_write_user", "user": "*" },
+                    {"name": "content_read_user", "user": "*" }
+                ]
             },
             "schema": {
                 "name": "product",
-                "createNew": true, 
-                "path": "test/e2e/data_setup/schema/product.json" 
+                "createNew": true,
+                "path": "test/e2e/data_setup/schema/product.json"
             },
             "tables": {
             	"createNew": true
@@ -19,11 +23,13 @@
         "schema": "product"
     },
     "cleanup" : true,
-    "tests" : { 
+    "tests" : {
         "params": {
             "tables" : [{
                 "table_name" : "accommodation",
-                "keys" : [{ "name": "id", "value": "2002", "operator" : "="}]
+                "keys" : [{ "name": "id", "value": "2002", "operator" : "="}],
+                "delete_keys": [{ "name": "id", "value": "4004", "operator": "="}],
+                "edit_entity_displayname": "Sherathon Hotel"
             }]
         }
     }

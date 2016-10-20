@@ -60,7 +60,7 @@ describe('Edit existing record,', function() {
 						});
 					});
 
-					it("should be redirected to record page", function() {
+					xit("should be redirected to record page", function() {
 						if (!hasErrors) {
 							browser.sleep(3000);
 							browser.driver.getCurrentUrl().then(function(url) {
@@ -68,7 +68,7 @@ describe('Edit existing record,', function() {
 						        console.log(url);
 						    });
 						}
-					});
+					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 
 				});
 

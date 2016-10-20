@@ -408,8 +408,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	#$(BIN)/protractor $(E2Enavbar) &&
-	$(BIN)/protractor $(E2EDrecord) # && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma

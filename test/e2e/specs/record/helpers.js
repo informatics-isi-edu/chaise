@@ -228,7 +228,7 @@ exports.testCreateButton = function () {
 };
 
 exports.testDeleteButton = function () {
-    it("should redirect to the root path.", function () {
+    it("should redirect to data browser.", function () {
         var EC = protractor.ExpectedConditions,
             modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
             config;
@@ -253,7 +253,7 @@ exports.testDeleteButton = function () {
             var parts = url.split("/");
 
             expect(parts.length).toBe(4);
-            expect(parts[3]).toBe("");
+            expect(parts[3]).toBe(config.dataBrowser);
         });
     });
 }
