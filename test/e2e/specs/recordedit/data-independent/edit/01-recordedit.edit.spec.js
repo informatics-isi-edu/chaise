@@ -49,7 +49,7 @@ describe('Edit existing record,', function() {
 
 					var hasErrors = false;
 
-					it("should have no errors, and should be redirected", function() {
+					xit("should have no errors, and should be redirected", function() {
 						chaisePage.recordEditPage.getAlertError().then(function(err) {
 							if (err) {
 								expect("Page has errors").toBe("No errors");
@@ -58,7 +58,7 @@ describe('Edit existing record,', function() {
 								expect(true).toBe(true);
 							}
 						});
-					});
+					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 
 					xit("should be redirected to record page", function() {
 						if (!hasErrors) {
