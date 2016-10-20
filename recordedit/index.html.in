@@ -151,8 +151,13 @@
                                                 </ui-select>
                                             </div>
                                             <!-- longtext/textarea input -->
-                                            <textarea ng-switch-when="longtext" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
-                                                name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></textarea>
+                                            <div ng-switch-when="longtext">
+                                                <textarea ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
+                                                    name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></textarea>
+                                                <span ng-if="::column.type.name === 'markdown'" class="help-block">
+                                                    <small><a ng-href="{{form.mdHelpLinks.cheatsheet}}" target="_blank">Markdown reference sheet</a> | Test your Markdown in <a ng-href="{{form.mdHelpLinks.editor}}" target="_blank">a live preview editor</a>.</small>
+                                                </span>
+                                            </div>
                                             <!-- shorttext/default text input -->
                                             <input ng-switch-default ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                 name="{{::column.name}}" type="text" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>
