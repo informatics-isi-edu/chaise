@@ -51,7 +51,7 @@
     .config(['userProvider', 'context', 'SessionProvider', function configureUser(userProvider, context, SessionProvider) {
 
         SessionProvider.$get().getSession().then(function success(session) {
-            var groups = context.groups;
+            var groups = chaiseConfig.userGroups || context.groups;
             // session.attributes is an array of objects that have a display_name and id
             // We MUST use the id field to check for role inclusion as it is the unique identifier
             var attributes = session.attributes.map(function(attribute) { return attribute.id });
