@@ -66,6 +66,39 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
+	it("apply different searches, ", function() {
+		var searchBox = chaisePage.recordsetPage.getSearchBox();
+		searchBox.sendKeys('Super 8 North Hollywood Motel');
+		chaisePage.recordsetPage.getSearchSubmitButton().click().then(function() {
+			browser.sleep(1000);
+			return chaisePage.recordsetPage.getRows();
+		}).then(function(rows) {
+			expect(rows.length).toBe(1);
+
+			// clear search
+			return chaisePage.recordsetPage.getSearchClearButton().click();
+		}).then(function() {
+			browser.sleep(1000);
+			return chaisePage.recordsetPage.getRows();
+		}).then(function(rows) {
+			expect(rows.length).toBe(3);
+
+			// apply conjunctive search words
+			searchBox.sendKeys('"Super 8" motel "North Hollywood"');
+
+			return chaisePage.recordsetPage.getSearchSubmitButton().click();
+		}).then(function() {
+			browser.sleep(1000);
+			return chaisePage.recordsetPage.getRows();
+		}).then(function(rows) {
+			expect(rows.length).toBe(1);
+
+			// clear search
+			return chaisePage.recordsetPage.getSearchClearButton().click();
+		});
+
+	});
+
 	it("click on row should redirect to record app", function() {
 		chaisePage.recordsetPage.getRows().then(function(rows) {
 			rows[0].click().then(function() {
