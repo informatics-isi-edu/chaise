@@ -8,6 +8,7 @@
 
         vm.alerts = AlertsService.alerts;
         vm.modifyRecord = chaiseConfig.editRecord === false ? false : true;
+        vm.showEmptyRelatedTables = false;
 
         vm.createRecord = function() {
             var newRef = $rootScope.reference.contextualize.entryCreate;
@@ -41,10 +42,18 @@
         vm.toRecordSet = function(ref) {
             var appURL = ref.appLink;
             if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + ref.compactPath});
+                return AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + ref.compactPath});
             }
-            else {
-                $window.location.href = appURL;
+            return $window.location.href = appURL;
+        };
+
+        vm.showRelatedTable = function(i) {
+            if ($rootScope.tableModels && $rootScope.tableModels[i-1] && $rootScope.tableModels[i]) {
+                var isFirstOrHasLoaded = i === 0 || $rootScope.tableModels[i-1].hasLoaded;
+                if (vm.showEmptyRelatedTables) {
+                    return isFirstOrHasLoaded;
+                }
+                return isFirstOrHasLoaded && $rootScope.tableModels[i].rowValues.length > 0;
             }
         };
     }]);

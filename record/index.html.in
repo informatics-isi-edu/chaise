@@ -35,22 +35,26 @@
             <record-display columns="columns" values="recordValues"></record-display>
         </div>
 
-        <uib-accordion close-others="false">
-            <div uib-accordion-group class="related-table-heading" id="rt-heading-{{relatedRef.displayname}}" ng-repeat="relatedRef in relatedReferences track by $index"
-                ng-if="($index === 0 || tableModels[$index-1].hasLoaded) && tableModels[$index].rowValues.length > 0"
-                heading="{{tableModels[$index].open ? '-' : '+'}} {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" is-open="tableModels[$index].open">
-                <!-- for different elements inside the accordion -->
-                <div ng-switch on="relatedRef.display.type">
-                    <a class="more-results-link text-right" ng-controller="RecordController as ctrl" ng-click="ctrl.toRecordSet(relatedRef)">View All Records</a>
-                    <div ng-switch-when="markdown">
-                        <span class="markdown-container" bind-html-unsafe="tableModels[$index].page.content"></span>
-                    </div>
-                    <!-- ng-switch-when="table" is also the default case -->
-                    <div ng-switch-default>
-                        <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
+        <div ng-controller="RecordController as ctrl">
+            <button ng-click="ctrl.showEmptyRelatedTables = true">Show Empties</button>
+            <uib-accordion close-others="false">
+                <div uib-accordion-group class="related-table-heading" id="rt-heading-{{relatedRef.displayname}}" ng-repeat="relatedRef in relatedReferences track by $index"
+                    ng-if="ctrl.showRelatedTable($index)"
+                    heading="{{tableModels[$index].open ? '-' : '+'}} {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" is-open="tableModels[$index].open">
+                    <!-- for different elements inside the accordion -->
+                    <div ng-switch on="relatedRef.display.type">
+                        <!-- <a class="more-results-link text-right" ng-href="{{ctrl.toRecordSet(relatedRef)}}">View All Records</a> -->
+                        <a class="more-results-link text-right" ng-click="ctrl.toRecordSet(relatedRef)">View All Records</a>
+                        <div ng-switch-when="markdown">
+                            <span class="markdown-container" bind-html-unsafe="tableModels[$index].page.content"></span>
+                        </div>
+                        <!-- ng-switch-when="table" is also the default case -->
+                        <div ng-switch-default>
+                            <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </uib-accordion>
+            </uib-accordion>
+        </div>
     </div>
 </body>
