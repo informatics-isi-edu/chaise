@@ -84,7 +84,6 @@
             $log.warn(response);
         }
 
-
         /*
          * Allows to tranform some form values depending on their types
          * Boolean: If the value is empty ('') then set it as null
@@ -179,7 +178,7 @@
                     // redirect after successful delete
                     $window.location.href = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
                 }, function deleteFailure(response) {
-                    $log.warn(response);
+                    vm.showSubmissionError(response);
                 }).catch(function (error) {
                     $log.info(error);
                 });

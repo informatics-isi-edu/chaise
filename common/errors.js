@@ -4,11 +4,15 @@
     angular.module('chaise.errors', ['chaise.alerts', 'chaise.authen', 'chaise.modal', 'chaise.utils'])
 
     // Factory for each error type
-    .factory('ErrorService', ['Session', '$log', '$uibModal', '$window', 'AlertsService', function ErrorService(Session, $log, $uibModal, $window, AlertsService) {
+    .factory('ErrorService', ['AlertsService', 'Session', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, Session, $log, $rootScope, $uibModal, $window) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
+            var providedLink = true;
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
-            if (!redirectLink) var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+            if (!redirectLink) {
+                providedLink = false;
+                var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+            }
 
             var params = {
                 message: message,
@@ -28,7 +32,11 @@
             });
 
             modalInstance.result.then(function () {
-                $window.location.replace(redirectLink);
+                if (errorCode == "401 Unauthorized" && !providedLink) {
+                    Session.login($window.location.href);
+                } else {
+                    $window.location.replace(redirectLink);
+                }
             });
         }
 
