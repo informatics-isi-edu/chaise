@@ -36,7 +36,8 @@
                 //success, go to databrowser or home
                 $window.location.href = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
             }, function deleteFail(error) {
-                $log.warn(error);
+                AlertsService.addAlert({type: 'error', message: error.message});
+                $log.warn(response);
             });
         }
 

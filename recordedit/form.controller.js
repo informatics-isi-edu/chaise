@@ -83,7 +83,6 @@
             $log.warn(response);
         }
 
-
         /*
          * Allows to tranform some form values depending on their types
          * Boolean: If the value is empty ('') then set it as null
