@@ -164,9 +164,8 @@
                                 var pathColumnType = path.context.columns.get(colName).column.type.name;
                                 // Transform columns with date/timestamp values
                                 if (pathColumnType == 'timestamp' || pathColumnType == 'timestamptz') {
-                                    // e.g. timestamptz format 2016-09-26T11:17:28.696-07:00
                                     if (value) {
-                                        var ts = moment(value, moment.ISO_8601, true);
+                                        var ts = moment(value);
                                         value = {
                                             date: ts.format('YYYY-MM-DD'),
                                             time: ts.format('hh:mm:ss'),
@@ -175,7 +174,8 @@
                                     } else {
                                         value = {
                                             date: null,
-                                            time: null
+                                            time: null,
+                                            meridiem: null
                                         };
                                     }
                                 }

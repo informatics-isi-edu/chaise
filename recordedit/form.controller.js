@@ -138,8 +138,13 @@
                         case 'timestamp':
                         case 'timestamptz':
                             if (vm.readyToSubmit) {
-                                row[k] = moment(row[k].date + row[k].time + row[k].meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                if (row[k].date && row[k].time && row[k].meridiem) {
+                                    row[k] = moment(row[k].date + row[k].time + row[k].meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                } else if (!row[k].date || !row[k].time || !row[k].meridiem) {
+                                    row[k] = null;
+                                }
                             }
+                            break;
                         default: if (row[k] === '') row[k] = null;
                             break;
                     }
