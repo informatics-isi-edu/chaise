@@ -196,6 +196,7 @@
 
         function searchPopup() {
             var params = {};
+            console.log("before modal");
 
             //make read request, then open modal with that data
             $uibModal.open({

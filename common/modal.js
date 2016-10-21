@@ -25,7 +25,7 @@
             $uibModalInstance.close();
         }
     }])
-    .controller('SearchPopupController', ['$uidModalInstance', 'params', function SearchPopupController($uibModalInstance, params) {
+    .controller('SearchPopupController', ['$uibModalInstance', 'params', function SearchPopupController($uibModalInstance, params) {
         var vm = this;
         vm.params = params;
     }]);

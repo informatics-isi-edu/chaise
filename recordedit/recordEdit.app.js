@@ -139,6 +139,7 @@
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
+                        console.log($rootScope.session);
                         notAuthorizedError.code = ($rootScope.session ? "403 Fordbidden" : "401 Unauthorized");
 
                         throw notAuthorizedError;
