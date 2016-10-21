@@ -4,7 +4,7 @@
     angular.module('chaise.errors', ['chaise.alerts', 'chaise.authen', 'chaise.modal', 'chaise.utils'])
 
     // Factory for each error type
-    .factory('ErrorService', ['Session', '$log', '$uibModal', '$window', 'AlertsService', function ErrorService(Session, $log, $uibModal, $window, AlertsService) {
+    .factory('ErrorService', ['AlertsService', 'Session', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, Session, $log, $rootScope, $uibModal, $window) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
             var providedLink = true;

@@ -128,7 +128,7 @@
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Update entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
-                        notAuthorizedError.code = "401 Unauthorized";
+                        notAuthorizedError.code = ($rootScope.session ? "403 Fordbidden" : "401 Unauthorized");
 
                         throw notAuthorizedError;
                     }
@@ -139,7 +139,7 @@
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
-                        notAuthorizedError.code = "401 Unauthorized";
+                        notAuthorizedError.code = ($rootScope.session ? "403 Fordbidden" : "401 Unauthorized");
 
                         throw notAuthorizedError;
                     }
