@@ -260,7 +260,7 @@
 
             recordsetModel.search = term;
             $rootScope.reference = $rootScope.reference.search(term); // this will clear previous search first
-            $scope.read(pageInfo.defaultPageLimit);
+            $scope.read(pageInfo.pageLimit);
         };
 
         $scope.clearSearch = function() {
