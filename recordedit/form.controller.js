@@ -195,10 +195,18 @@
         }
 
         function searchPopup() {
+            var params = {};
+
             //make read request, then open modal with that data
             $uibModal.open({
-                templateUrl: "../common/templates/searchPopup.modal.html"
-            })
+                templateUrl: "../common/templates/searchPopup.modal.html",
+                controller: "SearchPopupController",
+                controllerAs: "ctrl",
+                size: "lg",
+                resolve: {
+                    params: params
+                }
+            });
         }
 
         function copyFormRow() {
