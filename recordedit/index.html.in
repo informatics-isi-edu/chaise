@@ -20,9 +20,9 @@
 </head>
 <body>
     <div class="container-fluid">
-        <div ng-if="reference">
+        <navbar></navbar>
+        <div ng-if="reference && (reference.canCreate || reference.canEdit)">
         <div ng-controller="FormController as form" class="row">
-            <navbar></navbar>
             <div class="col-xs-12">
             <!-- Alerts section -->
                 <div ng-repeat="alert in form.alerts" class="row">

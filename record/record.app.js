@@ -125,7 +125,7 @@
 
                 var message = "No filter was defined. Cannot find a record without a filter.";
                 var redirectLink = $window.location.origin + modifiedPath + modifiedHash;
-                ErrorService.errorPopup(message, '', "search page", redirectLink);
+                ErrorService.errorPopup(message, "No Entity", "search page", redirectLink);
             }
         // no catalog or schema:table defined, no defaults either, redirect to home page
         } catch (exception) {

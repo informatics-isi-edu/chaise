@@ -7,8 +7,12 @@
     .factory('ErrorService', ['Session', '$log', '$uibModal', '$window', 'AlertsService', function ErrorService(Session, $log, $uibModal, $window, AlertsService) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
+            var providedLink = true;
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
-            if (!redirectLink) var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+            if (!redirectLink) {
+                providedLink = false;
+                var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+            }
 
             var params = {
                 message: message,
@@ -28,7 +32,11 @@
             });
 
             modalInstance.result.then(function () {
-                $window.location.replace(redirectLink);
+                if (errorCode == "401 Unauthorized" && !providedLink) {
+                    Session.login($window.location.href);
+                } else {
+                    $window.location.replace(redirectLink);
+                }
             });
         }
 
