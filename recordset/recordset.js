@@ -255,6 +255,9 @@
 
         $scope.search = function(term) {
 
+            if (term)
+                term = term.trim();
+
             recordsetModel.search = term;
             $rootScope.reference = $rootScope.reference.search(term); // this will clear previous search first
             $scope.read(pageInfo.defaultPageLimit);
