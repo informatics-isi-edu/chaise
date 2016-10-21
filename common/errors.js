@@ -17,7 +17,7 @@
             };
 
             var modalInstance = $uibModal.open({
-                templateUrl: '../common/templates/errorDialog.html',
+                templateUrl: '../common/templates/errorDialog.modal.html',
                 controller: 'ErrorDialogController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',

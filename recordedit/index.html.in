@@ -104,13 +104,17 @@
                                                 </div>
                                             </div>
                                             <!-- dropdown select input -->
-                                            <div ng-switch-when="dropdown">
-                                                <ui-select ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="::form.isDisabled(column);">
+                                            <div ng-switch-when="popup-select">
+                                                <input ng-model="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                <button on-click="form.searchPopup()">
+                                                    <span class="glyphicon glyphicon-search"></span>
+                                                </button>
+                                                <!-- <ui-select ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="::form.isDisabled(column);">
                                                     <ui-select-match name="{{::column.name}}" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}">{{$select.selected.display}}</ui-select-match>
                                                     <ui-select-choices repeat="domainValue.key as domainValue in form.recordEditModel.domainValues[column.name] | filter: $select.search" >
                                                         <div ng-bind-html="domainValue.display | highlight: $select.search"></div>
                                                     </ui-select-choices>
-                                                </ui-select>
+                                                </ui-select> -->
                                             </div>
                                             <!-- int2 input -->
                                             <input ng-switch-when="integer2" ng-model="form.recordEditModel.rows[rowIndex][column.name]"

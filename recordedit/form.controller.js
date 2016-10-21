@@ -25,6 +25,7 @@
         vm.readyToSubmit = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
+        vm.searchPopup = searchPopup;
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
         vm.deleteRecord = deleteRecord;
@@ -194,6 +195,13 @@
             }
         }
 
+        function searchPopup() {
+            //make read request, then open modal with that data
+            $uibModal.open({
+                templateUrl: "../common/templates/searchPopup.modal.html"
+            })
+        }
+
         function copyFormRow() {
             // Check if the prototype row to copy has any invalid values. If it
             // does, display an error. Otherwise, copy the row.
@@ -231,7 +239,7 @@
             var type = column.type.name;
             var displayType;
             if (isForeignKey(column)) {
-                displayType = 'dropdown';
+                displayType = 'popup-select';
             } else {
                 switch (type) {
                     case 'timestamp':
