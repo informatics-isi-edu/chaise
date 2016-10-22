@@ -97,7 +97,8 @@
                                         } else {
                                             value = {
                                                 date: null,
-                                                time: null
+                                                time: null,
+                                                meridiem: null
                                             };
                                         }
                                         break;
@@ -133,7 +134,6 @@
                         throw notAuthorizedError;
                     }
                 } else {
-
                     if ($rootScope.reference.canCreate) {
                         $rootScope.displayname = $rootScope.reference.displayname;
                     } else {
