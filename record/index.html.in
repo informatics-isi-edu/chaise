@@ -8,35 +8,35 @@
 <body>
     <navbar></navbar>
 
-    <div class="container-fluid">
+    <div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
+            <div id="record-bookmark-container" class="col-xs-12 meta-icons">
+                <a id="create-record" ng-if="reference && reference.canCreate && ctrl.modifyRecord" title="Click here to create a record" ng-click="::ctrl.createRecord()">
+                    <span class="glyphicon glyphicon-plus"></span> <strong>Create Record</strong>
+                </a>&nbsp;&nbsp;
+                <a id="edit-record" ng-if="reference && reference.canUpdate && ctrl.modifyRecord" title="Click here to edit this record" ng-click="::ctrl.editRecord()">
+                    <span class="glyphicon glyphicon-pencil"></span> <strong>Edit Record</strong>
+                </a>&nbsp;&nbsp;
+                <a id="show-all-related-tables" ng-click="ctrl.showEmptyRelatedTables = true">
+                    <span class="glyphicon glyphicon-resize-vertical"></span> <strong>Show All Related Entities</strong>
+                </a>&nbsp;&nbsp;
+                <a id="permalink" title="This link stores your search criteria as a URL. Right click and save." ng-href="{{ctrl.permalink()}}">
+                    <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
+                </a>
+            </div>
+
             <alerts alerts="ctrl.alerts"></alerts>
-        </div>
 
-        <div id="record-bookmark-container" class="col-xs-12 meta-icons" ng-controller="RecordController as ctrl">
-            <a id="create-record" ng-if="reference && reference.canCreate && ctrl.modifyRecord" title="Click here to create a record" ng-click="::ctrl.createRecord()">
-                <span class="glyphicon glyphicon-plus"></span> <strong>Create Record</strong>
-            </a>&nbsp;&nbsp;
-            <a id="edit-record" ng-if="reference && reference.canUpdate && ctrl.modifyRecord" title="Click here to edit this record" ng-click="::ctrl.editRecord()">
-                <span class="glyphicon glyphicon-pencil"></span> <strong>Edit Record</strong>
-            </a>&nbsp;&nbsp;
-            <a id="permalink" title="This link stores your search criteria as a URL. Right click and save." ng-href="{{ctrl.permalink()}}">
-                <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
-            </a>
-        </div>
+            <div ng-if="reference">
+                <div id="entity-title">{{ recordDisplayname }}</div>
+                <div id="entity-subtitle">{{ reference.displayname }}</div>
+            </div>
 
-        <div ng-if="reference">
-            <div id="entity-title">{{ recordDisplayname }}</div>
-            <div id="entity-subtitle">{{ reference.displayname }}</div>
-        </div>
+            <!-- defined on $rootScope in run function -->
+            <div ng-if="recordValues && columns">
+                <record-display columns="columns" values="recordValues"></record-display>
+            </div>
 
-        <!-- defined on $rootScope in run function -->
-        <div ng-if="recordValues && columns">
-            <record-display columns="columns" values="recordValues"></record-display>
-        </div>
-
-        <div ng-controller="RecordController as ctrl">
-            <button ng-click="ctrl.showEmptyRelatedTables = true">Show Empties</button>
             <uib-accordion close-others="false">
                 <div uib-accordion-group class="related-table-heading" id="rt-heading-{{relatedRef.displayname}}" ng-repeat="relatedRef in relatedReferences track by $index"
                     ng-if="ctrl.showRelatedTable($index)"
