@@ -133,7 +133,6 @@
                         throw notAuthorizedError;
                     }
                 } else {
-
                     if ($rootScope.reference.canCreate) {
                         $rootScope.displayname = $rootScope.reference.displayname;
                     } else {

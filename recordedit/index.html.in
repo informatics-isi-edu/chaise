@@ -21,7 +21,7 @@
 <body>
     <div class="container-fluid">
         <navbar></navbar>
-        <div ng-if="reference"><!-- TODO make this conditional with reference.canCreate || reference.canUpdate -->
+        <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
         <div ng-controller="FormController as form" class="row">
             <div class="col-xs-12">
             <!-- Alerts section -->
