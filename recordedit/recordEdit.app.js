@@ -97,7 +97,8 @@
                                         } else {
                                             value = {
                                                 date: null,
-                                                time: null
+                                                time: null,
+                                                meridiem: null
                                             };
                                         }
                                         break;

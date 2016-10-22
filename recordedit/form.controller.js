@@ -103,9 +103,14 @@
                     switch (col.type.name) {
                         case "timestamp":
                         case "timestamptz":
-                        if (vm.readyToSubmit) {
-                            rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                        }
+                            if (vm.readyToSubmit) {
+                                if (rowVal.date && rowVal.time && rowVal.meridiem) {
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                } else if (!rowVal.date || !rowVal.time || !rowVal.meridiem) {
+                                    rowVal = null;
+                                }
+                            }
+                            break;
                         default:
                             if (rowVal === '') {
                                 rowVal = null;
