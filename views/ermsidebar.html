@@ -77,7 +77,7 @@
 						<input type="checkbox" ng-model="FacetsData.chooseColumns[facet['table']][facet['name']]"
 							class="check" ng-click="sideBar.clickFacet($event,facet,'input')"/>
 					</div>
-					<label ng-class="sideBar.getMoreFieldValueClass(facet)" ng-click="sideBar.clickFacet($event,facet,'label')">{{facet['display']}}</label>
+					<label ng-attr-title="{{facet['display']}}" ng-class="sideBar.getMoreFieldValueClass(facet)" ng-click="sideBar.clickFacet($event,facet,'label')">{{facet['display']}}</label>
 					<div class="field-count pull-right">
 						<span ng-if="chaiseConfig.showBadgeCounts" class="badge">{{sideBar.displayFacetCount(facet)}}</span>
 					</div>
