@@ -81,7 +81,7 @@ exports.testPresentation = function (tableParams) {
 			browser.sleep(1000);
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
-			expect(rows.length).toBe(3);
+			expect(rows.length).toBe(4);
 
 			// apply conjunctive search words
 			searchBox.sendKeys('"Super 8" motel "North Hollywood"');
