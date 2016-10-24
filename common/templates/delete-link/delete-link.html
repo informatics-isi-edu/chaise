@@ -1,7 +1,7 @@
 <div ng-class="{'coltooltip': tooltip}">
     <a ng-click="deleteFn();">
         <span ng-if="icon" class="glyphicon glyphicon-trash"></span>
-        <span ng-if="label">{{label}}</span>
+        <strong ng-if="label"> {{label}}</strong>
     </a>
     <span ng-if="tooltip" class="coltooltiptext">{{tooltip}}</span>
 </div>

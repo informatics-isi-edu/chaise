@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'UriUtils', 'recordEditModel', '$window', '$log', '$rootScope', function FormController(AlertsService, UriUtils, recordEditModel, $window, $log, $rootScope) {
+    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$log', '$rootScope', '$uibModal', '$window', function FormController(AlertsService, recordEditModel, UriUtils, $log, $rootScope, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
@@ -27,6 +27,7 @@
         vm.showSubmissionError = showSubmissionError;
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
+        vm.deleteRecord = deleteRecord;
 
         vm.inputType = null;
         vm.int2min = -32768;
@@ -79,9 +80,8 @@
 
         function showSubmissionError(response) {
             AlertsService.addAlert({type: 'error', message: response.message});
-            $log.info(response);
+            $log.warn(response);
         }
-
 
         /*
          * Allows to tranform some form values depending on their types
@@ -103,9 +103,14 @@
                     switch (col.type.name) {
                         case "timestamp":
                         case "timestamptz":
-                        if (vm.readyToSubmit) {
-                            rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                        }
+                            if (vm.readyToSubmit) {
+                                if (rowVal.date && rowVal.time && rowVal.meridiem) {
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                } else if (!rowVal.date || !rowVal.time || !rowVal.meridiem) {
+                                    rowVal = null;
+                                }
+                            }
+                            break;
                         default:
                             if (rowVal === '') {
                                 rowVal = null;
@@ -159,6 +164,36 @@
                     vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
+                });
+            }
+        }
+
+        function deleteRecord() {
+            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+                $uibModal.open({
+                    templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
+                    controller: "ConfirmDeleteController",
+                    controllerAs: "ctrl",
+                    size: "sm"
+                }).result.then(function success() {
+                    // user accepted prompt to delete
+                    return $rootScope.reference.delete();
+                }).then(function deleteSuccess() {
+                    // redirect after successful delete
+                    $window.location.href = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+                }, function deleteFailure(response) {
+                    vm.showSubmissionError(response);
+                }).catch(function (error) {
+                    $log.info(error);
+                });
+            } else {
+                $rootScope.reference.delete().then(function deleteSuccess() {
+                    // redirect after successful delete
+                    $window.location.href = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+                }, function deleteFailure(response) {
+                    vm.showSubmissionError(response);
+                }).catch(function (error) {
+                    $log.info(error);
                 });
             }
         }

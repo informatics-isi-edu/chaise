@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['$window', '$rootScope', 'AlertsService', function RecordController($window, $rootScope, AlertsService) {
+    .controller('RecordController', ['AlertsService', '$log', '$rootScope', '$window', function RecordController(AlertsService, $log, $rootScope, $window) {
         var vm = this;
 
         vm.alerts = AlertsService.alerts;
@@ -30,6 +30,16 @@
                 $window.location.href = appURL;
             }
         };
+
+        vm.deleteRecord = function() {
+            $rootScope.reference.delete().then(function deleteSuccess() {
+                //success, go to databrowser or home
+                $window.location.href = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+            }, function deleteFail(error) {
+                AlertsService.addAlert({type: 'error', message: error.message});
+                $log.warn(response);
+            });
+        }
 
         vm.permalink = function getPermalink() {
             if (!$rootScope.reference) {

@@ -73,7 +73,7 @@ describe('Record Add', function() {
 
 					var hasErrors = false;
 
-					it("should have no errors, and should be redirected", function(done) {
+					xit("should have no errors, and should be redirected", function(done) {
 						chaisePage.recordEditPage.getAlertError().then(function(err) {
 							if (err) {
 								expect("Page has errors").toBe("No errors");
@@ -83,9 +83,9 @@ describe('Record Add', function() {
 							}
 						});
                         done();
-					});
+					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 
-					it("should be redirected to record page", function() {
+					xit("should be redirected to record page", function() {
 						if (!hasErrors) {
 							browser.sleep(3000);
 							browser.driver.getCurrentUrl().then(function(url) {
@@ -97,7 +97,7 @@ describe('Record Add', function() {
 						        }
 						    });
 						}
-					});
+					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 
 				});
 

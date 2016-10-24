@@ -891,8 +891,8 @@ function successUpdateCount(data, textStatus, jqXHR, param) {
 	var cols = param['cols'];
 	$.each(cols, function(i, col) {
 		box[col]['ready'] = true;
-		box[col]['count'] = col + ' (' + data[0]['cnt_' + col] + ')';
-		box[col]['facetcount'] = data[0]['cnt_' + col];
+		box[col]['count'] = col + ' (' + data[0][('cnt_' + col).substring(0,63)] + ')';
+		box[col]['facetcount'] = data[0][('cnt_' + col).substring(0,63)];
 	});
 	var ready = true;
 	var tables = [options['table']].concat(association_tables_names);
@@ -1268,7 +1268,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 	var successCallback = param['successCallback'];
 	$.each(cols, function(i, col) {
 		if (searchBoxPresentation.contains(entity[col]['type']) || checkBoxPresentation.contains(entity[col]['type'])) {
-			if (data[0]['cnt_d_' + col] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
+			if (data[0][('cnt_d_' + col).substring(0,63)] <= MULTI_SELECT_LIMIT && !textColumns.contains(col)) {
 				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(options) + '/$A/' +
 					getSortGroup(options['table'], col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(options['table'], col, 'rank')) + ')?limit=none';
 				var attributegroupParam = {};
@@ -1279,7 +1279,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 				attributegroupParam['options'] = options;
 				attributegroupParam['alert'] = alertObject;
 				ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetColumnDescriptions, errorErmrest, attributegroupParam);
-			} else if (data[0]['cnt_d_' + col] >= MULTI_SELECT_LIMIT) {
+			} else if (data[0][('cnt_d_' + col).substring(0,63)] >= MULTI_SELECT_LIMIT) {
 				var url = ERMREST_DATA_HOME + '/attributegroup/' + getQueryPredicate(param['options']) + '/$A/' +
 					getSortGroup(options['table'], col, 'rank') + '@sort(' + encodeSafeURIComponent(getSortColumn(options['table'], col, 'rank')) + ')?limit=none';
 				var attributegroupParam = {};
@@ -1313,12 +1313,12 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			entity[col]['values'] = values;
 		} else if (sliderPresentation.contains(entity[col]['type'])) {
 			entity[col]['ready'] = true;
-			entity[col]['min'] = data[0]['min_' + col];
-			entity[col]['max'] = data[0]['max_' + col];
+			entity[col]['min'] = data[0][('min_' + col).substring(0,63)];
+			entity[col]['max'] = data[0][('max_' + col).substring(0,63)];
 		} else if (datepickerPresentation.contains(entity[col]['type'])) {
 			entity[col]['ready'] = true;
-			entity[col]['min'] = getDateString(data[0]['min_' + col], 'min');
-			entity[col]['max'] = getDateString(data[0]['max_' + col], 'max');
+			entity[col]['min'] = getDateString(data[0][('min_' + col).substring(0,63)], 'min');
+			entity[col]['max'] = getDateString(data[0][('max_' + col).substring(0,63)], 'max');
 		}
 	});
 	var ready = true;
@@ -1661,7 +1661,7 @@ function successGetTableColumnsUniques(data, textStatus, jqXHR, param) {
 			} else if (facetPolicy == 'on_demand' && !facetIsInBookmark(table_name, col['name'], options.filter)) {
 				cols[col['name']]['cnt'] = 1;
 			} else {
-				cols[col['name']]['cnt'] = data[0]['cnt_'+col['name']];
+				cols[col['name']]['cnt'] = data[0][('cnt_'+col['name']).substring(0,63)];
 			}
 			cols[col['name']]['distinct'] = -1;
 		}

@@ -17,7 +17,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	if (tableParams.keys) {
 		it("should have edit record title", function() {
 			chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
-				expect(txt).toBe("Edit " + chaisePage.dataUtils.editInputs.getDisplayName(table, 'table_name', false) + " Records");
+				expect(txt).toBe("Edit " + tableParams.edit_entity_displayname + " Records");
 			});
 		});
 
@@ -178,7 +178,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				});
 			});
 
-			it("should show text input for shorttext and text datatype", function() {
+			xit("should show text input for shorttext and text datatype", function() {
 				var columns = chaisePage.dataUtils.editInputs.getTextDataTypeColumns(table, [IGNORE, HIDDEN]);
 				columns.forEach(function(c) {
 					chaisePage.recordEditPage.getInputForAColumn(c.name, recordIndex).then(function(txtInput) {
@@ -299,7 +299,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 					});
 				});
 
-				it("should show a dropdown", function() {
+				xit("should show a dropdown", function() {
 					console.log("\n        Foreign Key Fields");
 					pageColumns.forEach(function(pc) {
 						chaisePage.recordEditPage.getDropdown(pc, recordIndex).then(function(dropdown) {
@@ -319,11 +319,11 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							}
 						});
 					});
-				});
+				}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 
 				if (tableParams.records) {
 
-					it("should select any random option", function() {
+					xit("should select any random option", function() {
 						dropdowns.forEach(function(dropdown) {
 							chaisePage.recordEditPage.selectDropdownValue(dropdown).then(function(value) {
 								chaisePage.recordEditPage.getDropdownText(dropdown).then(function(value) {
@@ -332,7 +332,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 								});
 							});
 						});
-					});
+					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 				}
 
 			});

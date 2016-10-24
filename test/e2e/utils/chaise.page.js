@@ -440,6 +440,10 @@ var recordEditPage = function() {
     this.getRecordModelRows = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
     };
+
+    this.getDeleteRecordButton = function () {
+        return element(by.id("delete-button"));
+    }
 };
 
 var recordPage = function() {
@@ -517,6 +521,18 @@ var recordPage = function() {
         return element(by.id("edit-record"));
     };
 
+    this.getDeleteRecordButton = function () {
+        return element(by.id("delete-record"));
+    };
+
+    this.getConfirmDeleteTitle = function() {
+        return element(by.css(".modal-title"));
+    };
+
+    this.getConfirmDeleteButton = function () {
+        return element(by.id("delete-confirmation"));
+    }
+
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
     };
@@ -546,6 +562,18 @@ var recordsetPage = function() {
     this.getColumnComment = function(el) {
         return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
     };
+
+    this.getSearchBox = function() {
+        return element(by.id("search-input"));
+    };
+
+    this.getSearchSubmitButton = function() {
+        return element(by.id("search-submit"));
+    };
+
+    this.getSearchClearButton = function() {
+        return element(by.id("search-clear"));
+    }
 };
 
 function chaisePage() {
