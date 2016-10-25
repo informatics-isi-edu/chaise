@@ -48,12 +48,18 @@
         };
 
         vm.showRelatedTable = function(i) {
-            if ($rootScope.tableModels && $rootScope.tableModels[i-1] && $rootScope.tableModels[i]) {
-                var isFirstOrHasLoaded = i === 0 || $rootScope.tableModels[i-1].hasLoaded;
-                if (vm.showEmptyRelatedTables) {
-                    return isFirstOrHasLoaded;
+            var isFirst = false, prevTableHasLoaded = false;
+            if ($rootScope.tableModels && $rootScope.tableModels[i]) {
+                if (i === 0) {
+                    isFirst = true;
+                } else if ($rootScope.tableModels[i-1]) {
+                    prevTableHasLoaded = $rootScope.tableModels[i-1].hasLoaded;
                 }
-                return isFirstOrHasLoaded && $rootScope.tableModels[i].rowValues.length > 0;
+
+                if (vm.showEmptyRelatedTables) {
+                    return isFirst || prevTableHasLoaded;
+                }
+                return (isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues.length > 0;
             }
         };
     }]);
