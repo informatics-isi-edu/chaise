@@ -16,43 +16,12 @@
         </div>
 
         <!-- loading spinner -->
-        <div ng-show="pageInfo.loading" id="spinner">
+        <div ng-show="!vm.hasLoaded" id="spinner">
             <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
             <div style="margin-top: 15px;">Loading...</div>
         </div>
 
-        <!-- pagination -->
-        <div style="margin-bottom: 10px;">
-            <span class="dropdown" style="margin-left: 5px">
-                <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
-                    <span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                    <li ng-if="pageLimits.indexOf(pageInfo.pageLimit) === -1"><a id="custom-page-size" href ng-click="pageLimit(pageInfo.pageLimit)">
-                        <span class="glyphicon glyphicon-ok"></span>
-                        {{ pageInfo.pageLimit }} (Custom)</a>
-                    </li>
-                    <li ng-repeat="limit in pageLimits"><a href ng-click="pageLimit(limit)">
-                        <span class="glyphicon" ng-class="pageInfo.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
-                        {{ limit }}</a>
-                    </li>
-                </ul>
-            </span>
-        </div>
-
-        <!-- record table -->
-        <div ng-if="vm.rowValues.length > 0">
-            <record-table id="rs-{{vm.tableDisplayName}}" vm="vm" toggle-sort-order="toggleSortOrder()" sortby="sortby(colname)"></record-table>
-        </div>
-
-            <!-- bottom pagination -->
-        <div class="pager">
-            <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="pageInfo.previousButtonDisabled">
-                <span class="glyphicon glyphicon-chevron-left"></span>
-            </button>
-            <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="pageInfo.nextButtonDisabled">
-                <span class="glyphicon glyphicon-chevron-right"></span>
-            </button>
-        </div>
+        <recordset vm="vm" default-row-linking="true"></recordset>
     </div>
 
 </div>

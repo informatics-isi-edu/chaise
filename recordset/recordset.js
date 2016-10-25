@@ -36,7 +36,8 @@
         appName:'recordset',
         mainURI: null,  // the main URL portion up to filters (without modifiers)
         catalogID: null,
-        tableName: null
+        tableName: null,
+        chaiseBaseURL: null
     })
 
 
@@ -44,38 +45,22 @@
     // Register the 'recordsetModel' object, which can be accessed by other
     // services, but cannot be access by providers (and config, apparently).
     .value('recordsetModel', {
+        hasLoaded: false,
+        reference: null,
         tableDisplayName: null,
         columns: [],
         sortby: null,     // column name, user selected or null
         sortOrder: null,  // asc (default) or desc
         page: null,        // current page
-        rowValues: []      // array of rows values, each value has this structure {isHTML:boolean, value:value}
+        rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
+        search: null,       // search term
+        pageLimit: 25       // number of rows per page
     })
 
-    .factory('pageInfo', [function() {
-        return {
-            loading: true,
-            previousButtonDisabled: true,
-            nextButtonDisabled: true,
-            pageLimit: 25
-        };
-
-    }])
-
     // Register the recordset controller
-    .controller('recordsetController', ['$scope', '$rootScope', 'context', 'pageInfo', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService',
-        function($scope, $rootScope, context, pageInfo, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService) {
+    .controller('recordsetController', ['$scope', '$rootScope', 'context', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService',  function($scope, $rootScope, context, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService) {
 
         $scope.vm = recordsetModel;
-
-        $scope.pageInfo = pageInfo;
-
-        $scope.pageLimits = [10, 25, 50, 75, 100, 200];
-
-        $scope.pageLimit = function(limit) {
-            pageInfo.pageLimit = limit;
-            $scope.read();
-        };
 
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
@@ -89,170 +74,42 @@
             Session.logout();
         };
 
-        $scope.sortby = function(column) {
-            if (recordsetModel.sortby !== column) {
-                recordsetModel.sortby = column;
-                recordsetModel.sortOrder = "asc";
-                $rootScope.reference = $rootScope.reference.sort([{"column":recordsetModel.sortby, "descending":(recordsetModel.sortOrder === "desc")}]);
-                $scope.read();
-            }
-
-        };
-
-        $scope.toggleSortOrder = function () {
-            recordsetModel.sortOrder = (recordsetModel.sortOrder === 'asc' ? recordsetModel.sortOrder = 'desc' : recordsetModel.sortOrder = 'asc');
-            $rootScope.reference = $rootScope.reference.sort([{"column":recordsetModel.sortby, "descending":(recordsetModel.sortOrder === "desc")}]);
-            $scope.read();
-        };
-
-        $scope.read = function() {
-
-            pageInfo.previousButtonDisabled = true;
-            pageInfo.nextButtonDisabled = true;
-            pageInfo.loading = true;
-
-            $rootScope.reference.read(pageInfo.pageLimit).then(function (page) {
-                $window.scrollTo(0, 0);
-
-                recordsetModel.page = page;
-                recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-
-                pageInfo.loading = false;
-                pageInfo.previousButtonDisabled = !page.hasPrevious;
-                pageInfo.nextButtonDisabled = !page.hasNext;
-
-                // update the address bar
-                // page does not reload
-                $window.location.replace($scope.permalink());
-                $rootScope.location = $window.location.href;
-
-            }, function error(response) {
-                $log.warn(response);
-
-                pageInfo.loading = false;
-                pageInfo.previousButtonDisabled = true;
-                pageInfo.nextButtonDisabled = true;
-
-                throw response;
-            }).catch(function genericCatch(exception) {
-                ErrorService.catchAll(exception);
-            });
-        };
+        // row data updated from directive
+        // update permalink, address bar without reload
+        $scope.$on('recordset-update', function() {
+            $window.location.replace($scope.permalink());
+            $rootScope.location = $window.location.href;
+        });
 
         $scope.permalink = function() {
 
             // before run, use window location
-            if (!$rootScope.reference) {
+            if (!recordsetModel.reference) {
                 return $window.location.href;
             }
 
-            var url = context.mainURI;
+            //var url = context.mainURI;
+            var url = context.chaiseBaseURL + "#" + UriUtils.fixedEncodeURIComponent(recordsetModel.reference.location.catalog) + "/" +
+                recordsetModel.reference.location.compactPath;
 
             // add sort modifier
-            if ($rootScope.reference.location.sort)
-                url = url + $rootScope.reference.location.sort;
+            if (recordsetModel.reference.location.sort)
+                url = url + recordsetModel.reference.location.sort;
 
             // add paging modifier
-            if ($rootScope.reference.location.paging)
-                url = url + $rootScope.reference.location.paging;
+            if (recordsetModel.reference.location.paging)
+                url = url + recordsetModel.reference.location.paging;
 
-            url = url + "?limit=" + pageInfo.pageLimit;
+            url = url + "?limit=" + recordsetModel.pageLimit;
 
             return url;
         };
 
-        $scope.before = function() {
-
-            var previous = recordsetModel.page.previous;
-            if (previous) {
-
-                pageInfo.loading = true;
-
-                // disable buttons while loading
-                pageInfo.previousButtonDisabled = true;
-                pageInfo.nextButtonDisabled = true;
-
-                $rootScope.reference = previous;
-                $log.info("Reference:", $rootScope.reference);
-
-                $rootScope.reference.read(pageInfo.pageLimit).then(function getPage(page) {
-                    $window.scrollTo(0, 0);
-
-                    recordsetModel.page = page;
-                    recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-
-                    pageInfo.loading = false;
-                    pageInfo.previousButtonDisabled = !page.hasPrevious;
-                    pageInfo.nextButtonDisabled = !page.hasNext;
-
-                    // update the address bar without adding to history stack
-                    // page does not reload
-                    $window.location.replace($scope.permalink());
-                    $rootScope.location = $window.location.href;
-
-                }, function error(response) {
-                    $log.warn(response);
-
-                    pageInfo.loading = false;
-                    pageInfo.previousButtonDisabled = true;
-                    pageInfo.nextButtonDisabled = true;
-
-                    throw response;
-                }).catch(function genericCatch(exception) {
-                    ErrorService.catchAll(exception);
-                });
-
-            }
-        };
-
-        $scope.after = function() {
-
-            var next = recordsetModel.page.next;
-            if (next) {
-
-                pageInfo.loading = true;
-
-                // disable buttons while loading
-                pageInfo.previousButtonDisabled = true;
-                pageInfo.nextButtonDisabled = true;
-
-                $rootScope.reference = next;
-                $log.info("Reference:", $rootScope.reference);
-
-                $rootScope.reference.read(pageInfo.pageLimit).then(function getPage(page) {
-                    $window.scrollTo(0, 0);
-
-                    recordsetModel.page = page;
-                    recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-
-                    pageInfo.loading = false;
-                    pageInfo.previousButtonDisabled = !page.hasPrevious;
-                    pageInfo.nextButtonDisabled = !page.hasNext;
-
-                    // update the address bar
-                    // page does not reload
-                    $window.location.replace($scope.permalink());
-                    $rootScope.location = $window.location.href;
-
-                }, function error(response) {
-                    $log.warn(response);
-
-                    pageInfo.loading = false;
-                    pageInfo.previousButtonDisabled = true;
-                    pageInfo.nextButtonDisabled = true;
-
-                    throw response;
-                }).catch(function genericCatch(exception) {
-                    ErrorService.catchAll(exception);
-                });
-            }
-
-        };
     }])
 
     // Register work to be performed after loading all modules
-    .run(['DataUtils', 'headInjector', '$window', 'pageInfo', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'UiUtils', 'AlertsService',
-        function(DataUtils, headInjector, $window, pageInfo, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, UiUtils, AlertsService) {
+    .run(['DataUtils', 'headInjector', '$window', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'UiUtils', 'AlertsService',
+        function(DataUtils, headInjector, $window, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, UiUtils, AlertsService) {
 
         try {
             headInjector.addTitle();
@@ -260,16 +117,16 @@
 
             UriUtils.setOrigin();
 
+            context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
+
             $rootScope.alerts = AlertsService.alerts;
 
             // parse the URL
             var p_context = UriUtils.parseURLFragment($window.location);
 
             $rootScope.location = $window.location.href;
-            pageInfo.loading = true;
+            recordsetModel.hasLoaded = false;
             $rootScope.context = context;
-            pageInfo.previousButtonDisabled = true;
-            pageInfo.nextButtonDisabled = true;
 
             context.mainURI = p_context.mainURI;
 
@@ -287,34 +144,31 @@
 
             ERMrest.appLinkFn(UriUtils.appTagToURL);
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
-                $rootScope.reference = reference.contextualize.compact;
-                $log.info("Reference:", $rootScope.reference);
+                recordsetModel.reference = reference.contextualize.compact;
+                $log.info("Reference:", recordsetModel.reference);
                 if (p_context.limit)
-                    pageInfo.pageLimit = p_context.limit;
-                else if ($rootScope.reference.display.defaultPageSize)
-                    pageInfo.pageLimit = $rootScope.reference.display.defaultPageSize;
+                    recordsetModel.pageLimit = p_context.limit;
+                else if (recordsetModel.reference.display.defaultPageSize)
+                    recordsetModel.pageLimit = recordsetModel.reference.display.defaultPageSize;
                 else
-                    pageInfo.pageLimit = 25;
-                recordsetModel.tableDisplayName = $rootScope.reference.displayname;
-                recordsetModel.columns = $rootScope.reference.columns;
+                    recordsetModel.pageLimit = 25;
+                recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
+                recordsetModel.columns = recordsetModel.reference.columns;
+                recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
-                return $rootScope.reference.read(pageInfo.pageLimit);
+                return recordsetModel.reference.read(recordsetModel.pageLimit);
             }, function error(response) {
                 throw response;
             }).then(function getPage(page) {
                 recordsetModel.page = page;
                 recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
 
-                pageInfo.loading = false;
-                pageInfo.previousButtonDisabled = !page.hasPrevious;
-                pageInfo.nextButtonDisabled = !page.hasNext;
+                recordsetModel.hasLoaded = true;
             }, function error(response) {
                 throw response;
             }).catch(function genericCatch(exception) {
                 $log.warn(exception);
-                pageInfo.loading = false;
-                pageInfo.previousButtonDisabled = true;
-                pageInfo.nextButtonDisabled = true;
+                recordsetModel.hasLoaded = true;
 
                 if (exception instanceof ERMrest.UnauthorizedError)
                     ErrorService.catchAll(exception);
