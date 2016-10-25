@@ -3,6 +3,22 @@
 
     angular.module('chaise.record.table', [])
 
+    /**
+     * Ways to use recordTable directive
+     *
+     * Table without any controllers, default row click action (go to record)
+     * <record-table vm="vm" default-row-linking="true"></record-table>
+     *
+     * Table without any controllers, customized row click function
+     * <record-table vm="vm" on-row-click="gotoRowLink(index)"></record-table>
+     *
+     * Table with controllers (search, page size, previous/next), default row click action (go to record)
+     * <recordset vm="vm" default-row-linking="true"></recordset>
+     *
+     * Table with controllers (search, page size, previous/next), customized row click function
+     * <recordset vm="vm" on-row-click="gotoRowLink(index)"></recordset>
+     */
+
     .directive('recordTable', ['$window', 'AlertsService', 'DataUtils', function($window, AlertsService, DataUtils) {
 
         return {
@@ -22,8 +38,9 @@
                 //   search: null       // search term
                 // }
                 vm: '=',
-                defaultRowLinking: "=", // set to true will use default row link function (go to record)
-                onRowClick: '='         // set this if not using defaultRowLinking
+                defaultRowLinking: "=?", // set to true to use default row click action (go to record)
+                onRowClickBind: '=?',    // used by the recordset template to pass down on click function
+                onRowClick: '&?'      // set row click function if not using default
             },
             link: function (scope, elem, attr) {
 
@@ -79,9 +96,15 @@
                     }
                 };
 
-                scope.onRowClickIndex = function (index) {
-                    scope.onRowClick({index: index});
-                };
+                scope.rowClickAction = function(args) {
+                    if (scope.defaultRowLinking !== undefined && scope.defaultRowLinking === true) {
+                        scope.gotoRowLink(args.index);
+                    } else if (scope.onRowClickBind) {
+                        scope.onRowClickBind(args);
+                    } else if (scope.onRowClick) {
+                        scope.onRowClick(args);
+                    }
+                }
 
             }
         };
@@ -94,8 +117,8 @@
             templateUrl: '../common/templates/recordset.html',
             scope: {
                 vm: '=',
-                defaultRowLinking: "=",
-                onRowClick: '&'
+                defaultRowLinking: "=?", // set true to use default row click action (link to record)
+                onRowClick: '&?'         // set row click function if not using default
             },
             link: function (scope, elem, attr) {
 
