@@ -28,9 +28,14 @@
     .controller('SearchPopupController', ['$uibModalInstance', 'params', function SearchPopupController($uibModalInstance, params) {
         var vm = this;
         vm.params = params;
+        vm.ok = ok;
         vm.cancel = cancel;
 
         console.log("Params: ", params);
+
+        function ok() {
+            $uibModalInstance.close();
+        }
 
         function cancel() {
             $uibModalInstance.dismiss("cancel");

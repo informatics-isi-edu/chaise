@@ -2,8 +2,9 @@
     <h3 class="modal-title">Foreign Key Search</h3>
 </div>
 <div class="modal-body">
-    input a table here
+    <recordset vm="vm" on-row-click="function(idx)"></recordset>
 </div>
-</div class="modal-footer">
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="ctrl.ok()">Continue</button>
     <button class="btn btn-default" type="button" ng-click="ctrl.cancel()">Cancel</button>
 </div>

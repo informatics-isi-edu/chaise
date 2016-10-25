@@ -199,7 +199,7 @@
             }
         }
 
-        function searchPopup(column) {
+        function searchPopup(rowIndex, column) {
             var params = {};
             var modalInstance = $uibModal.open({
                 templateUrl: "../common/templates/searchPopup.modal.html",
@@ -210,16 +210,21 @@
                     params: params
                 }
             });
+            console.log(rowIndex);
             console.log(column);
 
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
-            column.reference.read(25).then(function getPseudoData(page) {
-                // pass the page as a param for the modal
-                console.log(page);
-                params.page = page;
-                return modalInstance.result;
-            }).then(function dataSelected() {
+            // column.reference.read(25).then(function getPseudoData(page) {
+            //     // pass the page as a param for the modal
+            //     console.log(page);
+            //     params.page = page;
+            //     return modalInstance.result;
+            // })
+            modalInstance.result.then(function dataSelected() {
+                // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in form and rowModel
+                // vm.recordEditModel.rows[rowIndex][column.name] = tuple.val;
+
             }, function noDataSelected() {
 
             });

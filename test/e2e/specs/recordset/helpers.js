@@ -81,7 +81,7 @@ exports.testPresentation = function (tableParams) {
 			browser.sleep(1000);
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
-			expect(rows.length).toBe(3);
+			expect(rows.length).toBe(4);
 
 			// apply conjunctive search words
 			searchBox.sendKeys('"Super 8" motel "North Hollywood"');
@@ -102,6 +102,8 @@ exports.testPresentation = function (tableParams) {
 	it("click on row should redirect to record app", function() {
 		chaisePage.recordsetPage.getRows().then(function(rows) {
 			rows[0].click().then(function() {
+                browser.driver.sleep(1000);
+
 				return browser.driver.getCurrentUrl();
 			}).then(function(url) {
 				var result = '/record/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
