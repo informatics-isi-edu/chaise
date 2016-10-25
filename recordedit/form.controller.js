@@ -199,12 +199,9 @@
             }
         }
 
-        function searchPopup() {
+        function searchPopup(column) {
             var params = {};
-            console.log("before modal");
-
-            //make read request, then open modal with that data
-            $uibModal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: "../common/templates/searchPopup.modal.html",
                 controller: "SearchPopupController",
                 controllerAs: "ctrl",
@@ -212,6 +209,19 @@
                 resolve: {
                     params: params
                 }
+            });
+            console.log(column);
+
+            // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
+            column.reference.read(25).then(function getPseudoData(page) {
+                // pass the page as a param for the modal
+                console.log(page);
+                params.page = page;
+                return modalInstance.result;
+            }).then(function dataSelected() {
+                // set data in form and rowModel
+            }, function noDataSelected() {
+
             });
         }
 

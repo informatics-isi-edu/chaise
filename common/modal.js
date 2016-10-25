@@ -29,5 +29,11 @@
         var vm = this;
         vm.params = params;
         vm.cancel = cancel;
+
+        console.log("Params: ", params);
+
+        function cancel() {
+            $uibModalInstance.dismiss("cancel");
+        }
     }]);
 })();
