@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$log', '$rootScope', '$uibModal', '$window', function FormController(AlertsService, recordEditModel, UriUtils, $log, $rootScope, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'ERMrest', 'recordEditModel', 'UriUtils', '$log', '$rootScope', '$uibModal', '$window', function FormController(AlertsService, ERMrest, recordEditModel, UriUtils, $log, $rootScope, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
@@ -213,14 +213,24 @@
             console.log(rowIndex);
             console.log(column);
 
+            var newRefUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + "/ermrest";
+            newRefUri += "/catalog/" + UriUtils.fixedEncodeURIComponent(1) + "/entity/" + UriUtils.fixedEncodeURIComponent("Synapse") + ':' + UriUtils.fixedEncodeURIComponent("Person");
+
+            ERMrest.resolve(newRefUri, {cid: "recordedit"}).then(function getReference(reference) {
+                return reference.read(25);
+            }).then(function getPseudoData(page) {
+                console.log(page);
+                params.page = page;
+
+                return modalInstance.result;
+
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
             // column.reference.read(25).then(function getPseudoData(page) {
             //     // pass the page as a param for the modal
             //     console.log(page);
             //     params.page = page;
             //     return modalInstance.result;
-            // })
-            modalInstance.result.then(function dataSelected() {
+            }).then(function dataSelected() {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in form and rowModel
                 // vm.recordEditModel.rows[rowIndex][column.name] = tuple.val;

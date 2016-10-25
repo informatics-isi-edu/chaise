@@ -26,7 +26,8 @@
         }
     }])
     .controller('SearchPopupController', ['$uibModalInstance', 'params', function SearchPopupController($uibModalInstance, params) {
-        var vm = this;
+        var vm = this,
+            tableModel = {};
         vm.params = params;
         vm.ok = ok;
         vm.cancel = cancel;
