@@ -4,39 +4,61 @@
     angular.module('chaise.record.table', [])
 
     /**
-     * Ways to use recordTable directive
+     * Ways to use recordTable directive:
      *
-     * Table without any controllers, default row click action (go to record)
-     * <record-table vm="vm" default-row-linking="true"></record-table>
+     * 1. Table only, default row click action (go to record)
+     *    <record-table vm="vm" default-row-linking="true"></record-table>
      *
-     * Table without any controllers, customized row click function
-     * <record-table vm="vm" on-row-click="gotoRowLink(index)"></record-table>
+     * 2. Table only, customized row click function
+     *    <record-table vm="vm" on-row-click="gotoRowLink(index)"></record-table>
      *
-     * Table with controllers (search, page size, previous/next), default row click action (go to record)
-     * <recordset vm="vm" default-row-linking="true"></recordset>
+     * 3. Table with search, page size, previous/next, default row click action (go to record)
+     *    <recordset vm="vm" default-row-linking="true"></recordset>
      *
-     * Table with controllers (search, page size, previous/next), customized row click function
-     * <recordset vm="vm" on-row-click="gotoRowLink(index)"></recordset>
+     * 4. Table with search, page size, previous/next, customized row click function
+     *    <recordset vm="vm" on-row-click="gotoRowLink(index)"></recordset>
+     *
+     *
+     * vm is the table model, should have this format:
+     *
+     *      { hasLoaded,    // data is ready, loading icon should not be visible
+     *        reference,    // reference object
+     *        tableDisplayName,
+     *        columns,      // array of Column objects
+     *        sortby,       // column name, user selected or null
+     *        sortOrder,    // asc (default) or desc
+     *        page,         // current page object
+     *        pageLimit,    // number of rows per page
+     *        rowValues,    // array of rows values, each value has this structure {isHTML:boolean, value:value}
+     *        search: null  // search term
+     *       }
+     *
+     *
+     * Handle recordset/recordTable events in your controller:
+     *
+     * 1. recordset-update - data model has been updated
+     *    your app may want to update address bar, permalink etc.
+     *
+     *      $scope.$on('recordset-update', function() {
+     *          $window.scrollTo(0, 0);
+     *          $window.location.replace($scope.permalink());
+     *          $rootScope.location = $window.location.href;
+     *      });
+     *
+     * 2. error - an exception was caught
+     *
+     *      $scope.$on('error', function(event, exception) {
+     *          $log.warn(exception);
+     *          ErrorService.catchAll(exception);
+     *      });
      */
 
-    .directive('recordTable', ['$window', 'AlertsService', 'DataUtils', function($window, AlertsService, DataUtils) {
+    .directive('recordTable', ['AlertsService', 'DataUtils', function(AlertsService, DataUtils) {
 
         return {
             restrict: 'E',
             templateUrl: '../common/templates/table.html',
             scope: {
-                // vm is the table model, should have this format
-                // { hasLoaded,  // data is ready
-                //   reference,
-                //   tableDisplayName,
-                //   columns,
-                //   sortby,     // column name, user selected or null
-                //   sortOrder,  // asc (default) or desc
-                //   page,        // current page
-                //   pageLimit,   // number of rows per page
-                //   rowValues,      // array of rows values, each value has this structure {isHTML:boolean, value:value}
-                //   search: null       // search term
-                // }
                 vm: '=',
                 defaultRowLinking: "=?", // set to true to use default row click action (go to record)
                 onRowClickBind: '=?',    // used by the recordset template to pass down on click function
@@ -49,25 +71,19 @@
                     scope.vm.hasLoaded = false;
 
                     scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
-                        $window.scrollTo(0, 0);
 
                         scope.vm.page = page;
                         scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
-
                         scope.vm.hasLoaded = true;
 
                         // tell parent controller data updated
                         scope.$emit('recordset-update');
 
                     }, function error(response) {
-                        $log.warn(response);
+                        scope.vm.hasLoaded = true;
+                        scope.$emit('error', response);
 
-                        scope.vm.hasLoaded = false;
-
-
-                    }).catch(function genericCatch(exception) {
-                        ErrorService.catchAll(exception);
-                    });
+                    })
                 };
 
                 scope.sortby = function(column) {
@@ -110,7 +126,7 @@
         };
     }])
 
-    .directive('recordset', ['$window', 'AlertsService', 'DataUtils', function($window, AlertsService, DataUtils) {
+    .directive('recordset', ['DataUtils', function(DataUtils) {
 
         return {
             restrict: 'E',
@@ -129,24 +145,19 @@
                     scope.vm.hasLoaded = false;
 
                     scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
-                        $window.scrollTo(0, 0);
 
                         scope.vm.page = page;
                         scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
-
                         scope.vm.hasLoaded = true;
 
                         // tell parent controller data updated
                         scope.$emit('recordset-update');
 
                     }, function error(response) {
-                        $log.warn(response);
+                        scope.vm.hasLoaded = true;
+                        scope.$emit('error', response);
 
-                        scope.vm.hasLoaded = false;
-
-                    }).catch(function genericCatch(exception) {
-                        ErrorService.catchAll(exception);
-                    });
+                    })
                 };
 
                 scope.setPageLimit = function(limit) {

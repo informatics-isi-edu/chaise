@@ -77,8 +77,14 @@
         // row data updated from directive
         // update permalink, address bar without reload
         $scope.$on('recordset-update', function() {
+            $window.scrollTo(0, 0);
             $window.location.replace($scope.permalink());
             $rootScope.location = $window.location.href;
+        });
+
+        $scope.$on('error', function(event, exception) {
+            $log.warn(exception);
+            ErrorService.catchAll(exception);
         });
 
         $scope.permalink = function() {
