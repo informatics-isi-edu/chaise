@@ -542,6 +542,18 @@ var recordsetPage = function() {
     this.getColumnComment = function(el) {
         return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
     };
+
+    this.getSearchBox = function() {
+        return element(by.id("search-input"));
+    };
+
+    this.getSearchSubmitButton = function() {
+        return element(by.id("search-submit"));
+    };
+
+    this.getSearchClearButton = function() {
+        return element(by.id("search-clear"));
+    }
 };
 
 function chaisePage() {
