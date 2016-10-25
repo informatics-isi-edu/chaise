@@ -52,8 +52,32 @@
      *          ErrorService.catchAll(exception);
      *      });
      */
+    .factory('recordTableUtils', ['DataUtils', function(DataUtils) {
+        function read(scope) {
+            scope.vm.hasLoaded = false;
 
-    .directive('recordTable', ['AlertsService', 'DataUtils', function(AlertsService, DataUtils) {
+            scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
+
+                scope.vm.page = page;
+                scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
+                scope.vm.hasLoaded = true;
+
+                // tell parent controller data updated
+                scope.$emit('recordset-update');
+
+            }, function error(response) {
+                scope.vm.hasLoaded = true;
+                scope.$emit('error', response);
+
+            })
+        }
+
+        return {
+            read: read
+        }
+    }])
+        
+    .directive('recordTable', ['AlertsService', 'recordTableUtils', function(AlertsService, recordTableUtils) {
 
         return {
             restrict: 'E',
@@ -66,32 +90,12 @@
             },
             link: function (scope, elem, attr) {
 
-                scope.read = function() { // TODO how to not duplicate this code in recordset directive and use this here?
-
-                    scope.vm.hasLoaded = false;
-
-                    scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
-
-                        scope.vm.page = page;
-                        scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
-                        scope.vm.hasLoaded = true;
-
-                        // tell parent controller data updated
-                        scope.$emit('recordset-update');
-
-                    }, function error(response) {
-                        scope.vm.hasLoaded = true;
-                        scope.$emit('error', response);
-
-                    })
-                };
-
                 scope.sortby = function(column) {
                     if (scope.vm.sortby !== column) {
                         scope.vm.sortby = column;
                         scope.vm.sortOrder = "asc";
                         scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
-                        scope.read();
+                        recordTableUtils.read(scope);
                     }
 
                 };
@@ -99,7 +103,7 @@
                 scope.toggleSortOrder = function () {
                     scope.vm.sortOrder = (scope.vm.sortOrder === 'asc' ? scope.vm.sortOrder = 'desc' : scope.vm.sortOrder = 'asc');
                     scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
-                    scope.read();
+                    recordTableUtils.read(scope);
                 };
 
                 scope.gotoRowLink = function(index) {
@@ -126,7 +130,7 @@
         };
     }])
 
-    .directive('recordset', ['DataUtils', function(DataUtils) {
+    .directive('recordset', ['recordTableUtils', function(recordTableUtils) {
 
         return {
             restrict: 'E',
@@ -140,29 +144,9 @@
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
 
-                scope.read = function() {
-
-                    scope.vm.hasLoaded = false;
-
-                    scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
-
-                        scope.vm.page = page;
-                        scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
-                        scope.vm.hasLoaded = true;
-
-                        // tell parent controller data updated
-                        scope.$emit('recordset-update');
-
-                    }, function error(response) {
-                        scope.vm.hasLoaded = true;
-                        scope.$emit('error', response);
-
-                    })
-                };
-
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
-                    scope.read();
+                    recordTableUtils.read(scope);
                 };
 
                 scope.before = function() {
@@ -171,7 +155,7 @@
                     if (previous) {
 
                         scope.vm.reference = previous;
-                        scope.read();
+                        recordTableUtils.read(scope);
 
                     }
                 };
@@ -182,7 +166,7 @@
                     if (next) {
 
                         scope.vm.reference = next;
-                        scope.read();
+                        recordTableUtils.read(scope);
                     }
 
                 };
@@ -194,7 +178,7 @@
 
                     scope.vm.search = term;
                     scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
-                    scope.read();
+                    recordTableUtils.read(scope);
                 };
 
                 scope.clearSearch = function() {
