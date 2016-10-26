@@ -13,6 +13,7 @@
         'chaise.utils',
         'chaise.validators',
         'ermrestjs',
+        'ngCookies',
         'ngMessages',
         'ngSanitize',
         'ui.bootstrap',
@@ -20,7 +21,12 @@
         'ui.select'
     ])
 
-    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .config(['$cookiesProvider', '$windowProvider', function($cookiesProvider, $windowProvider) {
+        $cookiesProvider.defaults.path = '/';
+        $cookiesProvider.defaults.secure = true;
+    }])
+
+    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
         var context = { booleanValues: ['', true, false] };
         UriUtils.setOrigin();
         headInjector.addTitle();
@@ -31,11 +37,6 @@
         UriUtils.setLocationChangeHandling();
 
         try {
-            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
-
-            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
-            context.appName = "recordedit";
-
             // If defined but false, throw an error
             if (!chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
                 var message = 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.';
@@ -55,6 +56,60 @@
                 $rootScope.reference.session = $rootScope.session;
 
                 $log.info("Reference: ", $rootScope.reference);
+
+                // Case for creating an entity with prefilled values
+                if (context.prefill) {
+                    // get the cookie with the prefill value
+                    var cookie = $cookies.getObject(context.prefill);
+                    if (cookie) {
+                        // assign those values into the model
+                        Object.keys(cookie).forEach(function(key) {
+                            // TODO: Should refactor this switch statement out into its function after GPCR decodeURIComponent
+                            // It's nearly identical to the switch statement in the if (context.filter) {} case
+                            var colName = key; var colValue = cookie[key]; var colType;
+                            $rootScope.reference.columns.some(function(column) {
+                                if (column.name === colName) {
+                                    colType = column.type.name;
+                                    return true;
+                                }
+                            });
+                            switch (colType) {
+                                case "timestamp":
+                                case "timestamptz":
+                                    if (colValue) {
+                                        // Cannot ensure that all timestamp values are formatted in ISO 8601
+                                        // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
+                                        var ts = moment(colValue);
+                                        value = {
+                                            date: ts.format('YYYY-MM-DD'),
+                                            time: ts.format('hh:mm:ss'),
+                                            meridiem: ts.format('A')
+                                        };
+                                    } else {
+                                        value = {
+                                            date: null,
+                                            time: null,
+                                            meridiem: null
+                                        };
+                                    }
+                                    break;
+                                case "int2":
+                                case "int4":
+                                case "int8":
+                                    colValue = (colValue ? parseInt(colValue, 10) : '');
+                                    break;
+                                case "float4":
+                                case "float8":
+                                case "numeric":
+                                    colValue = (colValue ? parseFloat(colValue) : '');
+                                    break;
+                                default:
+                                    break;
+                            }
+                            recordEditModel.rows[recordEditModel.rows.length - 1][colName] = colValue;
+                        });
+                    }
+                }
 
                 // Case for editing an entity
                 if (context.filter) {
