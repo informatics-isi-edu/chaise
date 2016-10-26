@@ -507,6 +507,10 @@ var recordPage = function() {
         return element(by.id("edit-record"));
     };
 
+    this.getShowAllRelatedEntitiesButton = function() {
+        return element(by.id("show-all-related-tables"));
+    };
+
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
     };
