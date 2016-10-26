@@ -10,13 +10,13 @@
      *    <record-table vm="vm" default-row-linking="true"></record-table>
      *
      * 2. Table only, customized row click function
-     *    <record-table vm="vm" on-row-click="gotoRowLink(index)"></record-table>
+     *    <record-table vm="vm" on-row-click="gotoRowLink(tuple)"></record-table>
      *
      * 3. Table with search, page size, previous/next, default row click action (go to record)
      *    <recordset vm="vm" default-row-linking="true"></recordset>
      *
      * 4. Table with search, page size, previous/next, customized row click function
-     *    <recordset vm="vm" on-row-click="gotoRowLink(index)"></recordset>
+     *    <recordset vm="vm" on-row-click="gotoRowLink(tuple)"></recordset>
      *
      *
      * vm is the table model, should have this format:
@@ -116,9 +116,10 @@
                     }
                 };
 
-                scope.rowClickAction = function(args) {
+                scope.rowClickAction = function(index) {
+                    var args = {"tuple":scope.vm.page.tuples[index]};
                     if (scope.defaultRowLinking !== undefined && scope.defaultRowLinking === true) {
-                        scope.gotoRowLink(args.index);
+                        scope.gotoRowLink(index);
                     } else if (scope.onRowClickBind) {
                         scope.onRowClickBind(args);
                     } else if (scope.onRowClick) {
