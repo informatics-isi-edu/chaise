@@ -3,7 +3,7 @@
     <!-- <span class="glyphicon glyphicon-remove-circle pull-right" ng-click="ctrl.cancel()"></span> -->
 </div>
 <div class="modal-body">
-    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok()"></recordset>
+    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok(tuple)"></recordset>
 </div>
 <div class="modal-footer">
     <button class="btn btn-primary" type="button" ng-click="ctrl.ok()">Continue</button>

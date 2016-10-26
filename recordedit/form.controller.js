@@ -220,6 +220,7 @@
 
                 return modalInstance.result;
             }).then(function dataSelected(tuple) {
+                console.log(tuple);
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in form and rowModel
                 // vm.recordEditModel.rows[rowIndex][column.name] = tuple.val;

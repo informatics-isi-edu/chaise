@@ -48,11 +48,9 @@
             search:             null
         }
 
-        function ok(index) {
-            console.log(index);
-            console.log("before close");
-
-            $uibModalInstance.close();
+        function ok(tuple) {
+            console.log(tuple);
+            $uibModalInstance.close(tuple);
         }
 
         function cancel() {

@@ -76,7 +76,7 @@
             read: read
         }
     }])
-        
+
     .directive('recordTable', ['AlertsService', 'recordTableUtils', function(AlertsService, recordTableUtils) {
 
         return {
@@ -116,9 +116,10 @@
                     }
                 };
 
-                scope.rowClickAction = function(args) {
+                scope.rowClickAction = function(index) {
+                    var args = {"tuple": scope.vm.page.tuples[index]};
                     if (scope.defaultRowLinking !== undefined && scope.defaultRowLinking === true) {
-                        scope.gotoRowLink(args.index);
+                        scope.gotoRowLink(index);
                     } else if (scope.onRowClickBind) {
                         scope.onRowClickBind(args);
                     } else if (scope.onRowClick) {
