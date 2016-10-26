@@ -27,12 +27,26 @@
     }])
     .controller('SearchPopupController', ['$uibModalInstance', 'params', function SearchPopupController($uibModalInstance, params) {
         var vm = this,
-            tableModel = {};
+            reference = params.page.reference;
+
         vm.params = params;
         vm.ok = ok;
         vm.cancel = cancel;
 
         console.log("Params: ", params);
+
+        vm.tableModel = {
+            hasLoaded:          true,
+            reference:          reference,
+            tableDisplayName:   reference.displayname,
+            columns:            reference.columns,
+            sortBy:             null,
+            sortOrder:          null,
+            page:               params.page,
+            pageLimit:          25,
+            rowValues:          [],
+            search:             null
+        }
 
         function ok() {
             $uibModalInstance.close();
