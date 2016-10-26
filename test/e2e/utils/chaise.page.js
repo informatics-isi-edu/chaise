@@ -173,9 +173,7 @@ function contentFilter() {
         return that.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
     };
     this.findFilterWrapperTitleByWrapperName = function (wrapperAttrName) {
-        var titleSpan = that.findFilterWrapperByName(wrapperAttrName)
-            .$('span[ng-attr-title="{{facetResults.displayTitle(facet)}}"]');
-        return titleSpan.getAttribute('title');
+        return browser.executeScript("return $('div.filter-item.ng-scope:not(.ng-hide):contains(\"" + wrapperAttrName + "\") span[ng-attr-title=\"{{facetResults.displayTitle(facet)}}\"]').attr('title');");
     };
     this.clickFilterWrapperCancelByName = function (attrName) {
         that.findFilterWrapperByName(attrName).$('a.filter-link-cancel').click();
@@ -532,6 +530,10 @@ var recordPage = function() {
     this.getConfirmDeleteButton = function () {
         return element(by.id("delete-confirmation"));
     }
+
+    this.getShowAllRelatedEntitiesButton = function() {
+        return element(by.id("show-all-related-tables"));
+    };
 
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
