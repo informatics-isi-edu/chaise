@@ -25,15 +25,15 @@
             $uibModalInstance.close();
         }
     }])
-    .controller('SearchPopupController', ['$uibModalInstance', 'params', function SearchPopupController($uibModalInstance, params) {
-        var vm = this,
-            reference = params.page.reference;
+    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', function SearchPopupController($scope, $uibModalInstance, DataUtils, params) {
+        var vm = this;
 
         vm.params = params;
         vm.ok = ok;
         vm.cancel = cancel;
 
         console.log("Params: ", params);
+        var reference = params.page.reference;
 
         vm.tableModel = {
             hasLoaded:          true,
@@ -44,11 +44,14 @@
             sortOrder:          null,
             page:               params.page,
             pageLimit:          25,
-            rowValues:          [],
+            rowValues:          DataUtils.getRowValuesFromPage(params.page),
             search:             null
         }
 
-        function ok() {
+        function ok(index) {
+            console.log(index);
+            console.log("before close");
+
             $uibModalInstance.close();
         }
 

@@ -201,36 +201,25 @@
 
         function searchPopup(rowIndex, column) {
             var params = {};
-            var modalInstance = $uibModal.open({
-                templateUrl: "../common/templates/searchPopup.modal.html",
-                controller: "SearchPopupController",
-                controllerAs: "ctrl",
-                size: "lg",
-                resolve: {
-                    params: params
-                }
-            });
-            console.log(rowIndex);
-            console.log(column);
-
-            var newRefUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + "/ermrest";
-            newRefUri += "/catalog/" + UriUtils.fixedEncodeURIComponent(1) + "/entity/" + UriUtils.fixedEncodeURIComponent("Synapse") + ':' + UriUtils.fixedEncodeURIComponent("Person");
-
-            ERMrest.resolve(newRefUri, {cid: "recordedit"}).then(function getReference(reference) {
-                return reference.read(25);
-            }).then(function getPseudoData(page) {
-                console.log(page);
-                params.page = page;
-
-                return modalInstance.result;
 
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
-            // column.reference.read(25).then(function getPseudoData(page) {
-            //     // pass the page as a param for the modal
-            //     console.log(page);
-            //     params.page = page;
-            //     return modalInstance.result;
-            }).then(function dataSelected() {
+            column.reference.read(25).then(function getPseudoData(page) {
+                // pass the page as a param for the modal
+                params.page = page;
+
+                var modalInstance = $uibModal.open({
+                    animation: false,
+                    controller: "SearchPopupController",
+                    controllerAs: "ctrl",
+                    resolve: {
+                        params: params
+                    },
+                    size: "lg",
+                    templateUrl: "../common/templates/searchPopup.modal.html"
+                });
+
+                return modalInstance.result;
+            }).then(function dataSelected(tuple) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in form and rowModel
                 // vm.recordEditModel.rows[rowIndex][column.name] = tuple.val;
@@ -330,7 +319,7 @@
         }
 
         function isForeignKey(column) {
-            return column.memberOfForeignKeys.length > 0
+            return (column.memberOfForeignKeys.length > 0 || column.isPseudo)
         }
 
         // Returns true if a column type is found in the given array of types
