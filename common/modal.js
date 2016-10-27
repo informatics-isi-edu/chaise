@@ -32,7 +32,6 @@
         vm.ok = ok;
         vm.cancel = cancel;
 
-        console.log("Params: ", params);
         var reference = params.page.reference;
 
         vm.tableModel = {
@@ -49,7 +48,6 @@
         }
 
         function ok(tuple) {
-            console.log(tuple);
             $uibModalInstance.close(tuple);
         }
 

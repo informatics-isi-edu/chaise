@@ -120,13 +120,14 @@
                     }
                 }
             });
+
+            return row;
         }
 
         function submit() {
             var form = vm.formContainer;
             var model = vm.recordEditModel;
-            // form.$setUntouched();
-            // form.$setPristine();
+            console.log("Model: ", model);
 
             if (form.$invalid) {
                 vm.readyToSubmit = false;
@@ -137,36 +138,43 @@
 
             // Form data is valid, time to transform row values for submission to ERMrest
             vm.readyToSubmit = true;
-            model.rows.forEach(function(row) {
-                transformRowValues(row);
+            for (var j = 0; j < model.rows.length; j++) {
+                var transformedRow = transformRowValues(model.rows[j]);
+                console.log("Pre-transform: ", model.rows[j]);
+                console.log("Transoformed: ", transformedRow);
+                for (key in transformedRow) {
+                    console.log(key);
+                }
+                // model.submissionRows[j]
+
             });
 
-            if (vm.editMode) {
+            // if (vm.editMode) {
                 // loop through model.rows
                 // there should only be 1 row for editting
-                for (var i = 0; i < model.rows.length; i++) {
-                    var row = model.rows[i];
-                    var data = $rootScope.tuples[i].data;
-                    // assign each value from the form to the data object on tuple
-                    for (var key in row) {
-                        data[key] = (row[key] === '' ? null : row[key]);
-                    }
-                }
-
-                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    vm.redirectAfterSubmission(page);
-                }, function error(response) {
-                    vm.showSubmissionError(response);
-                });
-            } else {
-                $rootScope.reference.create(model.rows).then(function success(page) {
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    vm.redirectAfterSubmission(page);
-                }, function error(response) {
-                    vm.showSubmissionError(response);
-                });
-            }
+                // for (var i = 0; i < model.rows.length; i++) {
+                //     var row = model.rows[i];
+                //     var data = $rootScope.tuples[i].data;
+                //     // assign each value from the form to the data object on tuple
+                //     for (var key in row) {
+                //         data[key] = (row[key] === '' ? null : row[key]);
+                //     }
+                // }
+            //
+            //     $rootScope.reference.update($rootScope.tuples).then(function success(page) {
+            //         vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+            //         vm.redirectAfterSubmission(page);
+            //     }, function error(response) {
+            //         vm.showSubmissionError(response);
+            //     });
+            // } else {
+            //     $rootScope.reference.create(model.rows).then(function success(page) {
+            //         vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+            //         vm.redirectAfterSubmission(page);
+            //     }, function error(response) {
+            //         vm.showSubmissionError(response);
+            //     });
+            // }
         }
 
         function deleteRecord() {
@@ -220,13 +228,24 @@
 
                 return modalInstance.result;
             }).then(function dataSelected(tuple) {
-                console.log(tuple);
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in form and rowModel
-                // vm.recordEditModel.rows[rowIndex][column.name] = tuple.val;
+                console.log(column);
 
+                // TODO bad idea assuming there's 1 value
+                // var foreignKeyCol = column._foreignKey.mapping._to[0].name;
+                // vm.recordEditModel.rows[rowIndex][column.name].$viewValue = tuple.displayname;
+                // set the tuple instead
+                var data = {
+                    column: column,
+                    tuple: tuple
+                }
+                vm.recordEditModel.rows[rowIndex][column.name] = data;
+                // vm.recordEditModel.rows[rowIndex][column.name] = tuple.data[foreignKeyCol];
+
+                console.log(recordEditModel.rows[rowIndex]);
             }, function noDataSelected() {
-
+                // do nothing
             });
         }
 
@@ -251,9 +270,9 @@
                 var row = angular.copy(protoRow);
 
                 // transform row values to avoid parsing issues with null values
-                transformRowValues(row, vm.recordEditModel);
+                var transformedRow = transformRowValues(row);
 
-                rowset.push(row);
+                rowset.push(transformedRow);
 
             }
         }

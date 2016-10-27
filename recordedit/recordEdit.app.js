@@ -8,6 +8,7 @@
         'chaise.delete',
         'chaise.errors',
         'chaise.filters',
+        'chaise.foreignkey',
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.table',

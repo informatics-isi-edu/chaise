@@ -105,7 +105,7 @@
                                             </div>
                                             <!-- dropdown select input -->
                                             <div ng-switch-when="popup-select">
-                                                <input ng-model="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                <input foreign-key-display ng-model="form.recordEditModel.rows[rowIndex][column.name]"></input>
                                                 <button ng-click="form.searchPopup(rowIndex, column)">
                                                     <span class="glyphicon glyphicon-search"></span>
                                                 </button>

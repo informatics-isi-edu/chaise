@@ -7,7 +7,7 @@
     .value('recordEditModel', {
         table: {},
         rows: [{}], // rows of data in the form, not the table from ERMrest
-        domainValues: {}
+        submissionRows: [{}] // rows of data converted to raw data for submission
         // , filterUri: ''
     });
 })();
