@@ -105,8 +105,8 @@
                                             </div>
                                             <!-- dropdown select input -->
                                             <div ng-switch-when="dropdown">
-                                                <input ng-model="form.recordEditModel.rows[rowIndex][column.name]"></input>
-                                                    <button ng-click="form.createRecord(column)">
+                                                <input ng-model="form.recordEditModel.rows[rowIndex][column.name]">
+                                                    <button class="create-record-btn" ng-click="form.createRecord(column)">
                                                         <span class="glyphicon glyphicon-plus"></span>
                                                     </button>
                                                 <!--<ui-select ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="::form.isDisabled(column);">
