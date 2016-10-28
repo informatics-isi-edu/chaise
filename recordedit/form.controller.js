@@ -239,7 +239,7 @@
             var type = column.type.name;
             var displayType;
             if (isForeignKey(column)) {
-                displayType = 'dropdown';
+                displayType = 'popup-select';
             } else {
                 switch (type) {
                     case 'timestamp':
@@ -294,7 +294,7 @@
         }
 
         function isForeignKey(column) {
-            return column.memberOfForeignKeys.length > 0
+            return column.memberOfForeignKeys.length > 0 || column.isPseudo;
         }
 
         // Returns true if a column type is found in the given array of types
