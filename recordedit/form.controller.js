@@ -140,25 +140,30 @@
             for (var j = 0; j < model.rows.length; j++) {
                 var transformedRow = transformRowValues(model.rows[j]);
                 $rootScope.reference.columns.forEach(function (column) {
-                    // if value is in the transformed row that means it was updated in the UI
-                    if (transformedRow[column.name]) {
-                        // If the column is a pseudo column, it should already exist in submissionRows[j]
-                        if (column.isPseudo) {
-                            // check if value is set in submission data yet
-                            var referenceColumn = column.foreignKey.colset.columns[0];
-                            var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+                    // If the column is a pseudo column, it needs to get the originating columns name for data submission
+                    if (column.isPseudo) {
 
-                            // user didn't change the foreign key, copy the value over to the submission data with the proper column name
-                            if (!model.submissionRows[j][referenceColumn.name]) {
-                                model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[j].data[referenceColumn.name];
-                            }
-                        } else {
-                            model.submissionRows[j][column.name] = transformedRow[column.name];
+                        var referenceColumn = column.foreignKey.colset.columns[0];
+                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+
+                        // check if value is set in submission data yet
+                        if (!model.submissionRows[j][referenceColumn.name]) {
+                            /*
+                             * User didn't change the foreign key, copy the value over to the submission data with the proper column name
+                             * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
+                             * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
+                             */
+                            model.submissionRows[j][referenceColumn.name] = (vm.editMode ? $rootScope.tuples[j].data[referenceColumn.name] : null);
                         }
+                    // not pseudo, column.name is sufficient for the keys
+                    } else {
+                        // set null if not set so that the whole data object is filled out for posting to ermrestJS
+                        model.submissionRows[j][column.name] = (transformedRow[column.name] ? transformedRow[column.name] : null);
                     }
                 });
             }
 
+            console.log(model.submissionRows);
             if (vm.editMode) {
                 // loop through model.rows
                 // there should only be 1 row for editting
@@ -171,8 +176,8 @@
                     }
                 }
 
-                console.log(model.submissionRows);
                 console.log($rootScope.tuples);
+                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                 $rootScope.reference.update($rootScope.tuples).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     vm.redirectAfterSubmission(page);
@@ -241,8 +246,7 @@
                 return modalInstance.result;
             }).then(function dataSelected(tuple) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
-                // set data in form and rowModel
-                console.log(column);
+                // set data in view model (model.rows) and submission model (model.submissionRows)
 
                 // TODO bad idea assuming there's 1 value
                 var referenceCol = column.foreignKey.colset.columns[0];
@@ -252,7 +256,6 @@
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname;
                 vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
 
-                console.log(recordEditModel);
             }, function noDataSelected() {
                 // do nothing
             });
@@ -282,12 +285,16 @@
                 var transformedRow = transformRowValues(row);
 
                 rowset.push(transformedRow);
-                vm.recordEditModel.submissionRows.push({});
+
+                var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
+
+                vm.recordEditModel.submissionRows.push(submissionRow);
             }
         }
 
         function removeFormRow(index) {
             vm.recordEditModel.rows.splice(index, 1);
+            vm.recordEditModel.submissionRows.splice(index, 1);
         }
 
         function columnToDisplayType(column) {
