@@ -3,6 +3,7 @@
 
     angular.module('chaise.record', [
         'ngSanitize',
+        'ngCookies',
         'chaise.delete',
         'chaise.errors',
         'chaise.modal',
@@ -23,6 +24,11 @@
             nextButtonDisabled: true,
             defaultPageLimit: 25
         };
+    }])
+
+    .config(['$cookiesProvider', function($cookiesProvider) {
+        $cookiesProvider.defaults.path = '/';
+        $cookiesProvider.defaults.secure = true;
     }])
 
     .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'UiUtils', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, UiUtils) {
@@ -55,7 +61,7 @@
                 }, function error(exception) {
                     throw exception;
                 }).then(function getPage(page) {
-                    var tuple = page.tuples[0];
+                    var tuple = $rootScope.tuple = page.tuples[0];
                     // Used directly in the record-display directive
                     $rootScope.recordDisplayname = tuple.displayname;
 

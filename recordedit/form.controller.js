@@ -285,7 +285,7 @@
                 if (column.getInputDisabled(context.appContext)) {
                     return true;
                 } else if (vm.prefillCookie) {
-                    return vm.prefillCookie.hasOwnProperty(column.name);
+                    return vm.prefillCookie.constraintName == column.name;
                 }
                 return false;
             } catch (e) {

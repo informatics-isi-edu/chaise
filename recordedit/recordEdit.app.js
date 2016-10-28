@@ -21,7 +21,7 @@
         'ui.select'
     ])
 
-    .config(['$cookiesProvider', '$windowProvider', function($cookiesProvider, $windowProvider) {
+    .config(['$cookiesProvider', function($cookiesProvider) {
         $cookiesProvider.defaults.path = '/';
         $cookiesProvider.defaults.secure = true;
     }])
@@ -57,58 +57,25 @@
 
                 $log.info("Reference: ", $rootScope.reference);
 
-                // Case for creating an entity with prefilled values
+                // Case for creating an entity, with prefilled values
                 if (context.prefill) {
                     // get the cookie with the prefill value
                     var cookie = $cookies.getObject(context.prefill);
                     if (cookie) {
+                        console.log('Cookie', cookie);
                         // assign those values into the model
-                        Object.keys(cookie).forEach(function(key) {
-                            // TODO: Should refactor this switch statement out into its function after GPCR decodeURIComponent
-                            // It's nearly identical to the switch statement in the if (context.filter) {} case
-                            var colName = key; var colValue = cookie[key]; var colType;
-                            $rootScope.reference.columns.some(function(column) {
-                                if (column.name === colName) {
-                                    colType = column.type.name;
-                                    return true;
-                                }
-                            });
-                            switch (colType) {
-                                case "timestamp":
-                                case "timestamptz":
-                                    if (colValue) {
-                                        // Cannot ensure that all timestamp values are formatted in ISO 8601
-                                        // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
-                                        var ts = moment(colValue);
-                                        value = {
-                                            date: ts.format('YYYY-MM-DD'),
-                                            time: ts.format('hh:mm:ss'),
-                                            meridiem: ts.format('A')
-                                        };
-                                    } else {
-                                        value = {
-                                            date: null,
-                                            time: null,
-                                            meridiem: null
-                                        };
-                                    }
-                                    break;
-                                case "int2":
-                                case "int4":
-                                case "int8":
-                                    colValue = (colValue ? parseInt(colValue, 10) : '');
-                                    break;
-                                case "float4":
-                                case "float8":
-                                case "numeric":
-                                    colValue = (colValue ? parseFloat(colValue) : '');
-                                    break;
-                                default:
-                                    break;
-                            }
-                            recordEditModel.rows[recordEditModel.rows.length - 1][colName] = colValue;
+
+                        // Update view model
+                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname;
+
+                        // Update submission model
+                        var columnNames = Object.keys(cookie.keys);
+                        columnNames.forEach(function(colName) {
+                            var colValue = cookie.keys[colName];
+                            recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
                         });
                     }
+                    console.log('Model', recordEditModel);
                 }
 
                 // Case for editing an entity
