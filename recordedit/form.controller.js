@@ -127,7 +127,6 @@
         function submit() {
             var form = vm.formContainer;
             var model = vm.recordEditModel;
-            console.log("Model: ", model);
 
             if (form.$invalid) {
                 vm.readyToSubmit = false;
@@ -140,41 +139,54 @@
             vm.readyToSubmit = true;
             for (var j = 0; j < model.rows.length; j++) {
                 var transformedRow = transformRowValues(model.rows[j]);
-                console.log("Pre-transform: ", model.rows[j]);
-                console.log("Transoformed: ", transformedRow);
-                for (key in transformedRow) {
-                    console.log(key);
-                }
-                // model.submissionRows[j]
+                $rootScope.reference.columns.forEach(function (column) {
+                    // if value is in the transformed row that means it was updated in the UI
+                    if (transformedRow[column.name]) {
+                        // If the column is a pseudo column, it should already exist in submissionRows[j]
+                        if (column.isPseudo) {
+                            // check if value is set in submission data yet
+                            var referenceColumn = column.foreignKey.colset.columns[0];
+                            var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
 
-            });
+                            // user didn't change the foreign key, copy the value over to the submission data with the proper column name
+                            if (!model.submissionRows[j][referenceColumn.name]) {
+                                model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[j].data[referenceColumn.name];
+                            }
+                        } else {
+                            model.submissionRows[j][column.name] = transformedRow[column.name];
+                        }
+                    }
+                });
+            }
 
-            // if (vm.editMode) {
+            if (vm.editMode) {
                 // loop through model.rows
                 // there should only be 1 row for editting
-                // for (var i = 0; i < model.rows.length; i++) {
-                //     var row = model.rows[i];
-                //     var data = $rootScope.tuples[i].data;
-                //     // assign each value from the form to the data object on tuple
-                //     for (var key in row) {
-                //         data[key] = (row[key] === '' ? null : row[key]);
-                //     }
-                // }
-            //
-            //     $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-            //         vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-            //         vm.redirectAfterSubmission(page);
-            //     }, function error(response) {
-            //         vm.showSubmissionError(response);
-            //     });
-            // } else {
-            //     $rootScope.reference.create(model.rows).then(function success(page) {
-            //         vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-            //         vm.redirectAfterSubmission(page);
-            //     }, function error(response) {
-            //         vm.showSubmissionError(response);
-            //     });
-            // }
+                for (var i = 0; i < model.submissionRows.length; i++) {
+                    var row = model.submissionRows[i];
+                    var data = $rootScope.tuples[i].data;
+                    // assign each value from the form to the data object on tuple
+                    for (var key in row) {
+                        data[key] = (row[key] === '' ? null : row[key]);
+                    }
+                }
+
+                console.log(model.submissionRows);
+                console.log($rootScope.tuples);
+                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                    vm.redirectAfterSubmission(page);
+                }, function error(response) {
+                    vm.showSubmissionError(response);
+                });
+            } else {
+                $rootScope.reference.create(model.submissionRows).then(function success(page) {
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                    vm.redirectAfterSubmission(page);
+                }, function error(response) {
+                    vm.showSubmissionError(response);
+                });
+            }
         }
 
         function deleteRecord() {
@@ -233,17 +245,14 @@
                 console.log(column);
 
                 // TODO bad idea assuming there's 1 value
-                // var foreignKeyCol = column._foreignKey.mapping._to[0].name;
-                // vm.recordEditModel.rows[rowIndex][column.name].$viewValue = tuple.displayname;
-                // set the tuple instead
-                var data = {
-                    column: column,
-                    tuple: tuple
-                }
-                vm.recordEditModel.rows[rowIndex][column.name] = data;
-                // vm.recordEditModel.rows[rowIndex][column.name] = tuple.data[foreignKeyCol];
+                var referenceCol = column.foreignKey.colset.columns[0];
+                var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
 
-                console.log(recordEditModel.rows[rowIndex]);
+                // set the tuple instead
+                vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname;
+                vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
+
+                console.log(recordEditModel);
             }, function noDataSelected() {
                 // do nothing
             });
@@ -273,7 +282,7 @@
                 var transformedRow = transformRowValues(row);
 
                 rowset.push(transformedRow);
-
+                vm.recordEditModel.submissionRows.push({});
             }
         }
 

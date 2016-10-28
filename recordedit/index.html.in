@@ -105,8 +105,8 @@
                                             </div>
                                             <!-- dropdown select input -->
                                             <div ng-switch-when="popup-select">
-                                                <input foreign-key-display ng-model="form.recordEditModel.rows[rowIndex][column.name]"></input>
-                                                <button ng-click="form.searchPopup(rowIndex, column)">
+                                                <span ng-bind="form.recordEditModel.rows[rowIndex][column.name]"></span>
+                                                <button ng-click="form.searchPopup(rowIndex, column)" class="pull-right">
                                                     <span class="glyphicon glyphicon-search"></span>
                                                 </button>
                                                 <!-- <ui-select ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="::form.isDisabled(column);">
