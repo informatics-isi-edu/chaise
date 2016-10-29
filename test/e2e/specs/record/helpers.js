@@ -303,13 +303,17 @@ exports.relatedTableLinks = function (tableParams) {
 
         var allWindows;
         addRelatedRecordLink.click().then(function() {
+            // This Add link opens in a new tab so we have to track the windows in the browser...
             return browser.getAllWindowHandles();
         }).then(function(handles) {
             allWindows = handles;
+            // ... and switch to the new tab here...
             return browser.switchTo().window(allWindows[1]);
         }).then(function() {
+            // ... and then get the url from this new tab...
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
+            // ... before switching back to the original Record app's tab so that the next it spec can run properly
             browser.switchTo().window(allWindows[0]);
             expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
             expect(url.indexOf(relatedTableName)).toBeGreaterThan(-1);

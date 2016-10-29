@@ -62,9 +62,6 @@
                     // get the cookie with the prefill value
                     var cookie = $cookies.getObject(context.prefill);
                     if (cookie) {
-                        console.log('Cookie', cookie);
-                        // assign those values into the model
-
                         // Update view model
                         recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname;
 

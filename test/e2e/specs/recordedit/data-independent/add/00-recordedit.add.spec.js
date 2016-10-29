@@ -1,5 +1,5 @@
 var chaisePage = require('../../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
-var recordEditHelpers = require('../../helpers.js');
+var recordEditHelpers = require('../../helpers.js'), chance = require('chance').Chance();
 
 describe('Record Add', function() {
 
@@ -100,6 +100,38 @@ describe('Record Add', function() {
 					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 
 				});
+
+                it('should pre-fill fields from cookie if prefill query param is set', function() {
+                    if (tableParams.table_name.toLowerCase() == 'Accommodation'.toLowerCase()) {
+                        // Write a dummy cookie for creating a record in Accommodation table
+                        var testCookie = {
+                            title: chance.sentence(),
+                            rating: chance.floating({min: 0, max: 100})
+                        };
+                        browser.manage().addCookie('test', JSON.stringify(testCookie));
+
+                        // Reload the page with prefill query param in url
+                        browser.get(browser.params.url + ":" + tableParams.table_name + '?prefill=test');
+                        browser.sleep(3000);
+
+                        browser.manage().getCookie('test').then(function(cookie) {
+                            if (cookie) {
+                                // Check if those fields have the values
+                                Object.keys(testCookie).forEach(function(cookieKey) {
+                                    chaisePage.recordEditPage.getInputForAColumn(cookieKey).then(function(input) {
+                                        var inputValue = input.getAttribute('value');
+                                        var expectedValue = testCookie[cookieKey];
+                                        expect(inputValue).toBe(inputValue);
+                                    });
+                                });
+                            } else {
+                                expect('Cookie did not load').toEqual('but cookie should have loaded');
+                            }
+                            browser.get(browser.params.url + ":" + tableParams.table_name);
+                            browser.sleep(3000);
+                        });
+                    }
+                });
 
     		});
 
