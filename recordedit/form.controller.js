@@ -26,6 +26,7 @@
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.searchPopup = searchPopup;
+        vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
 
         vm.copyFormRow = copyFormRow;
@@ -262,7 +263,7 @@
         }
 
         function clearForeignKey(rowIndex, column) {
-            // TODO bad idea assuming there's 1 valu
+            // TODO bad idea assuming there's 1 value
             var model = vm.recordEditModel,
                 referenceCol = column.foreignKey.colset.columns[0];
 
@@ -272,6 +273,17 @@
             delete model.submissionRows[rowIndex][referenceCol.name];
 
             console.log(model);
+        }
+
+        function createRecord(column) {
+            var newRef = column.reference.contextualize.entryCreate;
+            var appURL = newRef.appLink;
+            if (!appURL) {
+                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
+            }
+            else {
+                $window.open(appURL, '_blank');
+            }
         }
 
         function copyFormRow() {
@@ -368,7 +380,7 @@
         }
 
         function isForeignKey(column) {
-            return (column.memberOfForeignKeys.length > 0 || column.isPseudo)
+            return (column.memberOfForeignKeys.length > 0 || column.isPseudo);
         }
 
         // Returns true if a column type is found in the given array of types

@@ -111,6 +111,11 @@
                                                         <span class="glyphicon glyphicon-link"></span>
                                                     </button>
                                                 </span>
+                                                <!-- <span class="input-group-btn"> -->
+                                                    <button class="input-group-btn btn create-record-btn" type="button" ng-click="form.createRecord(column)">
+                                                        <span class="glyphicon glyphicon-plus"></span>
+                                                    </button>
+                                                <!-- </span> -->
                                                 <span class="input-group-btn">
                                                     <button class="btn btn-danger" type="button" ng-click="form.clearForeignKey(rowIndex, column)">
                                                         <span class="glyphicon glyphicon-remove"></span>

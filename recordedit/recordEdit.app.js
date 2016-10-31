@@ -46,6 +46,7 @@
                 throw error;
             }
 
+            ERMrest.appLinkFn(UriUtils.appTagToURL);
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                 $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = $rootScope.session;

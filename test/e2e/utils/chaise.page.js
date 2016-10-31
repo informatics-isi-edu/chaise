@@ -340,6 +340,10 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).find('.select2-chosen:not(\".ng-hide\")').text().trim();", el);
     };
 
+    this.getCreateBtns = function() {
+        return element.all(by.css(".create-record-btn"));
+    };
+
     this.getDateInputForAColumn = function(name, index) {
         index = index || 0;
         return element(by.model('form.recordEditModel.rows[' + index + ']["' + name + '"]'));
