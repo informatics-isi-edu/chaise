@@ -173,9 +173,7 @@ function contentFilter() {
         return that.htmlElement.element(by.cssContainingText('div.filter-item.ng-scope:not(.ng-hide)', attrName))
     };
     this.findFilterWrapperTitleByWrapperName = function (wrapperAttrName) {
-        var titleSpan = that.findFilterWrapperByName(wrapperAttrName)
-            .$('span[ng-attr-title="{{facetResults.displayTitle(facet)}}"]');
-        return titleSpan.getAttribute('title');
+        return browser.executeScript("return $('div.filter-item.ng-scope:not(.ng-hide):contains(\"" + wrapperAttrName + "\") span[ng-attr-title=\"{{facetResults.displayTitle(facet)}}\"]').attr('title');");
     };
     this.clickFilterWrapperCancelByName = function (attrName) {
         that.findFilterWrapperByName(attrName).$('a.filter-link-cancel').click();
@@ -340,6 +338,10 @@ var recordEditPage = function() {
 
     this.getDropdownText = function(el) {
         return browser.executeScript("return $(arguments[0]).find('.select2-chosen:not(\".ng-hide\")').text().trim();", el);
+    };
+
+    this.getCreateBtns = function() {
+        return element.all(by.css(".create-record-btn"));
     };
 
     this.getDateInputForAColumn = function(name, index) {
@@ -532,6 +534,10 @@ var recordPage = function() {
     this.getConfirmDeleteButton = function () {
         return element(by.id("delete-confirmation"));
     }
+
+    this.getShowAllRelatedEntitiesButton = function() {
+        return element(by.id("show-all-related-tables"));
+    };
 
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));

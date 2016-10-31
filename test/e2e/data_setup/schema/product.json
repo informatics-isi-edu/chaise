@@ -769,7 +769,7 @@
     "tag:isrd.isi.edu,2016:app-links": {
       "detailed": "tag:isrd.isi.edu,2016:chaise:record",
       "compact": "tag:isrd.isi.edu,2016:chaise:recordset",
-      "entry": "tag:isrd.isi.edu,2016:chaise:viewer"
+      "entry": "tag:isrd.isi.edu,2016:chaise:recordedit"
     }
   },
   "schema_name": "product"

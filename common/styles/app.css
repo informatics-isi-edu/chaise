@@ -527,3 +527,7 @@ tbody{
 .markdown-container .embed-block {
     margin: 10px 10px 10px 0px; 
 }
+
+.input-timestamptz {
+    min-width: 112px;
+}

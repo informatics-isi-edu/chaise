@@ -25,6 +25,7 @@
         vm.readyToSubmit = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
+        vm.createRecord = createRecord;
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
         vm.deleteRecord = deleteRecord;
@@ -198,6 +199,17 @@
             }
         }
 
+        function createRecord(column) {
+            var newRef = column.reference.contextualize.entryCreate;
+            var appURL = newRef.appLink;
+            if (!appURL) {
+                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
+            }
+            else {
+                $window.open(appURL, '_blank');
+            }
+        }
+
         function copyFormRow() {
             // Check if the prototype row to copy has any invalid values. If it
             // does, display an error. Otherwise, copy the row.
@@ -288,7 +300,7 @@
         }
 
         function isForeignKey(column) {
-            return column.memberOfForeignKeys.length > 0
+            return (column.memberOfForeignKeys.length > 0 || column.isPseudo);
         }
 
         // Returns true if a column type is found in the given array of types
