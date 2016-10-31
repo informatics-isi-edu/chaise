@@ -146,7 +146,7 @@ describe('Record Add', function() {
         });
 
         afterAll(function() {
-            browser.manage().deleteCookieNamed('test');
+            browser.manage().deleteCookie('test');
         });
     });
 
