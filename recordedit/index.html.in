@@ -103,13 +103,13 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- dropdown select input -->
-                                            <div ng-switch-when="popup-select">
-                                                <span ng-bind="form.recordEditModel.rows[rowIndex][column.name]"></span>
-                                                <span class="btn-group pull-right" role="group">
-                                                    <button class="btn btn-default" type="button" ng-click="form.searchPopup(rowIndex, column)">
-                                                        <span class="glyphicon glyphicon-search"></span>
-                                                    </button>
+                                            <!-- modal popup input -->
+                                            <div ng-switch-when="popup-select" class="input-group">
+                                                <input class="form-control" type="text" ng-click="form.searchPopup(rowIndex, column)" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="Click to link a value" />
+                                                <span class="input-group-addon">
+                                                    <i class="glyphicon glyphicon-link" ng-click="form.searchPopup(rowIndex, column)"></i>
+                                                </span>
+                                                <span class="input-group-btn">
                                                     <button class="btn btn-danger" type="button" ng-click="form.clearForeignKey(rowIndex, column)">
                                                         <span class="glyphicon glyphicon-remove"></span>
                                                     </button>
