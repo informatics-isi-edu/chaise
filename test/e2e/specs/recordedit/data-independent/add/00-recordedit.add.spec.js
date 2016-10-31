@@ -20,11 +20,11 @@ describe('Record Add', function() {
 					browser.sleep(3000);
 			    });
 
-				describe("Presentation and validation,", function() {
+				xdescribe("Presentation and validation,", function() {
 					var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
 				});
 
-				describe("delete record, ", function() {
+				xdescribe("delete record, ", function() {
 
 					if (tableParams.records > 1) {
 
@@ -65,7 +65,7 @@ describe('Record Add', function() {
 					}
 				});
 
-				describe("Submit " + tableParams.records + " records", function() {
+				xdescribe("Submit " + tableParams.records + " records", function() {
 					beforeAll(function() {
 						// Submit the form
 						chaisePage.recordEditPage.submitForm();
@@ -100,44 +100,43 @@ describe('Record Add', function() {
 					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 
 				});
-
-                it('should pre-fill fields from cookie if prefill query param is set', function() {
-                    if (tableParams.table_name.toLowerCase() == 'Accommodation'.toLowerCase()) {
-                        // Write a dummy cookie for creating a record in Accommodation table
-                        var testCookie = {
-                            title: chance.sentence(),
-                            rating: chance.floating({min: 0, max: 100})
-                        };
-                        browser.manage().addCookie('test', JSON.stringify(testCookie));
-
-                        // Reload the page with prefill query param in url
-                        browser.get(browser.params.url + ":" + tableParams.table_name + '?prefill=test');
-                        browser.sleep(3000);
-
-                        browser.manage().getCookie('test').then(function(cookie) {
-                            if (cookie) {
-                                // Check if those fields have the values
-                                Object.keys(testCookie).forEach(function(cookieKey) {
-                                    chaisePage.recordEditPage.getInputForAColumn(cookieKey).then(function(input) {
-                                        var inputValue = input.getAttribute('value');
-                                        var expectedValue = testCookie[cookieKey];
-                                        expect(inputValue).toBe(inputValue);
-                                    });
-                                });
-                            } else {
-                                expect('Cookie did not load').toEqual('but cookie should have loaded');
-                            }
-                            browser.get(browser.params.url + ":" + tableParams.table_name);
-                            browser.sleep(3000);
-                        });
-                    }
-                });
-
     		});
 
     	})(testParams.tables[i], i);
 
     }
+
+    describe('When url has a prefill query string param set, ', function() {
+        var testCookie = {};
+        beforeAll(function() {
+            // Write a dummy cookie for creating a record in Accommodation table
+            testCookie = {
+                constraintName: 'product:accommodation_category_fkey1', // A FK that Accommodation table has with Category table
+                rowname: chance.sentence(),
+                keys: {id: 1}
+            };
+            browser.manage().addCookie('test', JSON.stringify(testCookie));
+
+            // Reload the page with prefill query param in url
+            browser.get(browser.params.url + ":" + testParams.tables[0].table_name + '?prefill=test');
+            browser.sleep(3000);
+        });
+
+        it('should pre-fill fields from the prefill cookie', function() {
+            browser.manage().getCookie('test').then(function(cookie) {
+                if (cookie) {
+                    var input = element.all(by.css('.popup-select-value')).first();
+                    expect(input.getText()).toBe(testCookie.rowname);
+                } else {
+                    expect('Cookie did not load').toEqual('but cookie should have loaded');
+                }
+            });
+        });
+
+        afterAll(function() {
+            browser.manage().deleteCookieNamed('test');
+        });
+    });
 
     it('should load custom CSS and document title defined in chaise-config.js', function() {
         var chaiseConfig = browser.executeScript('return chaiseConfig');
