@@ -121,6 +121,10 @@ describe('Record Add', function() {
     describe('When url has a prefill query string param set, ', function() {
         var testCookie = {};
         beforeAll(function() {
+            // Refresh the page
+            browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
+            browser.sleep(3000);
+
             // Write a dummy cookie for creating a record in Accommodation table
             testCookie = {
                 constraintName: 'product:accommodation_category_fkey1', // A FK that Accommodation table has with Category table
