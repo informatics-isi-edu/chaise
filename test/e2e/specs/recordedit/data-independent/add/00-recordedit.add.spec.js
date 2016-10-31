@@ -20,11 +20,11 @@ describe('Record Add', function() {
 					browser.sleep(3000);
 			    });
 
-				xdescribe("Presentation and validation,", function() {
+				describe("Presentation and validation,", function() {
 					var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
 				});
 
-				xdescribe("delete record, ", function() {
+				describe("delete record, ", function() {
 
 					if (tableParams.records > 1) {
 
@@ -65,7 +65,7 @@ describe('Record Add', function() {
 					}
 				});
 
-				xdescribe("Submit " + tableParams.records + " records", function() {
+				describe("Submit " + tableParams.records + " records", function() {
 					beforeAll(function() {
 						// Submit the form
 						chaisePage.recordEditPage.submitForm();
@@ -106,9 +106,24 @@ describe('Record Add', function() {
 
     }
 
+    it('should load custom CSS and document title defined in chaise-config.js', function() {
+        var chaiseConfig = browser.executeScript('return chaiseConfig');
+        if (chaiseConfig.customCSS) {
+            expect($("link[href='" + chaiseConfig.customCSS + "']").length).toBeTruthy();
+        }
+        if (chaiseConfig.headTitle) {
+            browser.getTitle().then(function(title) {
+                expect(title).toEqual(chaiseConfig.headTitle);
+            });
+        }
+    });
+
     describe('When url has a prefill query string param set, ', function() {
         var testCookie = {};
         beforeAll(function() {
+            browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
+            browser.sleep(3000);
+
             // Write a dummy cookie for creating a record in Accommodation table
             testCookie = {
                 constraintName: 'product:accommodation_category_fkey1', // A FK that Accommodation table has with Category table
@@ -136,18 +151,6 @@ describe('Record Add', function() {
         afterAll(function() {
             browser.manage().deleteCookieNamed('test');
         });
-    });
-
-    it('should load custom CSS and document title defined in chaise-config.js', function() {
-        var chaiseConfig = browser.executeScript('return chaiseConfig');
-        if (chaiseConfig.customCSS) {
-            expect($("link[href='" + chaiseConfig.customCSS + "']").length).toBeTruthy();
-        }
-        if (chaiseConfig.headTitle) {
-            browser.getTitle().then(function(title) {
-                expect(title).toEqual(chaiseConfig.headTitle);
-            });
-        }
     });
 
 });
