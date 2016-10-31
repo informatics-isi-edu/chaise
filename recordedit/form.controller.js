@@ -26,6 +26,8 @@
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.searchPopup = searchPopup;
+        vm.clearForeignKey = clearForeignKey;
+
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
         vm.deleteRecord = deleteRecord;
@@ -148,11 +150,11 @@
 
                         // check if value is set in submission data yet
                         if (!model.submissionRows[j][referenceColumn.name]) {
-                            /*
+                            /**
                              * User didn't change the foreign key, copy the value over to the submission data with the proper column name
                              * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
                              * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
-                             */
+                            **/
                             model.submissionRows[j][referenceColumn.name] = (vm.editMode ? $rootScope.tuples[j].data[referenceColumn.name] : null);
                         }
                     // not pseudo, column.name is sufficient for the keys
@@ -163,7 +165,6 @@
                 });
             }
 
-            console.log(model.submissionRows);
             if (vm.editMode) {
                 // loop through model.rows
                 // there should only be 1 row for editting
@@ -176,7 +177,6 @@
                     }
                 }
 
-                console.log($rootScope.tuples);
                 // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                 $rootScope.reference.update($rootScope.tuples).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
@@ -259,6 +259,19 @@
             }, function noDataSelected() {
                 // do nothing
             });
+        }
+
+        function clearForeignKey(rowIndex, column) {
+            // TODO bad idea assuming there's 1 valu
+            var model = vm.recordEditModel,
+                referenceCol = column.foreignKey.colset.columns[0];
+
+            console.log(referenceCol);
+
+            delete model.rows[rowIndex][column.name];
+            delete model.submissionRows[rowIndex][referenceCol.name];
+
+            console.log(model);
         }
 
         function copyFormRow() {
