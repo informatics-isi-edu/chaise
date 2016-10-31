@@ -74,6 +74,10 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			if (sortColumn != null) {
 				FacetsData.sortFacet = sortColumn;
 				FacetsData.sortOrder = 'asc';
+				var sortOrder = getTableAnnotation(FacetsData.table, TABLES_MAP_URI, 'sortOrder');
+				if (sortOrder != null) {
+					FacetsData.sortOrder = sortOrder;
+				}
 			}
 		}
 	};

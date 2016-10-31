@@ -25,11 +25,13 @@ exports.testPresentation = function (tableParams) {
         var EC = protractor.ExpectedConditions,
             editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
-            deleteButton = chaisePage.recordPage.getDeleteRecordButton();
+            deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
+            showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
         browser.wait(EC.elementToBeClickable(editButton), 10000);
         browser.wait(EC.elementToBeClickable(createButton), 10000);
         browser.wait(EC.elementToBeClickable(deleteButton), 10000);
+        browser.wait(EC.elementToBeClickable(showAllRTButton), 10000);
 
         editButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -40,6 +42,10 @@ exports.testPresentation = function (tableParams) {
         });
 
         deleteButton.isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+
+        showAllRTButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
         });
 
@@ -193,6 +199,13 @@ exports.testPresentation = function (tableParams) {
             return tableHeading.getAttribute("class");
         }).then(function(attribute) {
             expect(attribute).not.toMatch("panel-open");
+        });
+    });
+
+    // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
+    it("should show a related table with zero values upon clicking a link to show all related entities", function() {
+        chaisePage.recordPage.getShowAllRelatedEntitiesButton().click().then(function() {
+            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
         });
     });
 };
