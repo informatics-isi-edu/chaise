@@ -230,26 +230,26 @@
         }
 
         function searchPopup(rowIndex, column) {
+
+            if (isDisabled(column)) return;
+
             var params = {};
 
-            // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
-            column.reference.read(25).then(function getPseudoData(page) {
-                // pass the page as a param for the modal
-                params.page = page;
+            // pass the reference as a param for the modal
+            params.reference = column.reference;
 
-                var modalInstance = $uibModal.open({
-                    animation: false,
-                    controller: "SearchPopupController",
-                    controllerAs: "ctrl",
-                    resolve: {
-                        params: params
-                    },
-                    size: "lg",
-                    templateUrl: "../common/templates/searchPopup.modal.html"
-                });
+            var modalInstance = $uibModal.open({
+                animation: false,
+                controller: "SearchPopupController",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                size: "lg",
+                templateUrl: "../common/templates/searchPopup.modal.html"
+            });
 
-                return modalInstance.result;
-            }).then(function dataSelected(tuple) {
+            modalInstance.result.then(function dataSelected(tuple) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
