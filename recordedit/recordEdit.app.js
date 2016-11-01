@@ -27,7 +27,7 @@
         $cookiesProvider.defaults.secure = true;
     }])
 
-    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'UiUtils', 'UriUtils', 'Session', '$log', '$rootScope', '$window', '$cookies', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, UiUtils, UriUtils, Session, $log, $rootScope, $window, $cookies) {
+    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
         var session,
             context = { booleanValues: ['', true, false] };
         UriUtils.setOrigin();
