@@ -32,20 +32,26 @@
         vm.ok = ok;
         vm.cancel = cancel;
 
-        var reference = params.page.reference;
+        vm.hasLoaded = false;
+        var reference = params.reference;
 
-        vm.tableModel = {
-            hasLoaded:          true,
-            reference:          reference,
-            tableDisplayName:   reference.displayname,
-            columns:            reference.columns,
-            sortBy:             null,
-            sortOrder:          null,
-            page:               params.page,
-            pageLimit:          25,
-            rowValues:          DataUtils.getRowValuesFromPage(params.page),
-            search:             null
-        }
+        // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
+        reference.read(25).then(function getPseudoData(page) {
+            vm.hasLoaded = true;
+
+            vm.tableModel = {
+                hasLoaded:          vm.hasLoaded,
+                reference:          reference,
+                tableDisplayName:   reference.displayname,
+                columns:            reference.columns,
+                sortBy:             null,
+                sortOrder:          null,
+                page:               page,
+                pageLimit:          25,
+                rowValues:          DataUtils.getRowValuesFromPage(page),
+                search:             null
+            }
+        });
 
         function ok(tuple) {
             $uibModalInstance.close(tuple);
