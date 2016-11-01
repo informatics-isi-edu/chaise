@@ -82,7 +82,7 @@
                                                 <div class="col-xs-12" ng-class="{'col-md-4': form.editMode}">
                                                     <div class="input-group">
                                                         <span class="input-group-addon">Date</span>
-                                                        <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].date" placeholder="YYYY-MM-DD" name="{{::column.name}}"
+                                                        <input class="form-control input-timestamptz" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].date" placeholder="YYYY-MM-DD" name="{{::column.name}}"
                                                             ui-mask="9999-99-99" ui-options="form.maskOptions.date" model-view-value="true" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" date>
                                                     </div>
                                                 </div>
