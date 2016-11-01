@@ -10,9 +10,11 @@
         'chaise.filters',
         'chaise.modal',
         'chaise.navbar',
+        'chaise.record.table',
         'chaise.utils',
         'chaise.validators',
         'ermrestjs',
+        'ngCookies',
         'ngMessages',
         'ngSanitize',
         'ui.bootstrap',
@@ -20,7 +22,12 @@
         'ui.select'
     ])
 
-    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .config(['$cookiesProvider', function($cookiesProvider) {
+        $cookiesProvider.defaults.path = '/';
+        $cookiesProvider.defaults.secure = true;
+    }])
+
+    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
         var context = { booleanValues: ['', true, false] };
         UriUtils.setOrigin();
         headInjector.addTitle();
@@ -31,11 +38,6 @@
         UriUtils.setLocationChangeHandling();
 
         try {
-            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
-
-            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
-            context.appName = "recordedit";
-
             // If defined but false, throw an error
             if (!chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
                 var message = 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.';
@@ -50,11 +52,30 @@
             context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
             context.appName = "recordedit";
 
+            ERMrest.appLinkFn(UriUtils.appTagToURL);
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                 $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = $rootScope.session;
 
                 $log.info("Reference: ", $rootScope.reference);
+
+                // Case for creating an entity, with prefilled values
+                if (context.prefill) {
+                    // get the cookie with the prefill value
+                    var cookie = $cookies.getObject(context.prefill);
+                    if (cookie) {
+                        // Update view model
+                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname;
+
+                        // Update submission model
+                        var columnNames = Object.keys(cookie.keys);
+                        columnNames.forEach(function(colName) {
+                            var colValue = cookie.keys[colName];
+                            recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
+                        });
+                    }
+                    console.log('Model', recordEditModel);
+                }
 
                 // Case for editing an entity
                 if (context.filter) {
@@ -139,6 +160,7 @@
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
+                        console.log($rootScope.session);
                         notAuthorizedError.code = ($rootScope.session ? "403 Fordbidden" : "401 Unauthorized");
 
                         throw notAuthorizedError;

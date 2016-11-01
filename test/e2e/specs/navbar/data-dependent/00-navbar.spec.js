@@ -54,14 +54,14 @@ describe('Navbar ', function() {
         });
     });
 
-    // These tests are xit'd because we don't handle tests logging in via Globus/other services just yet
+    // TODO: These tests are xit'd because we don't handle tests logging in via Globus/other services just yet
     // e.g. On Travis, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
     xit('should have a "Log In" link', function() {
         var actualLink = element(by.id('login-link'));
         browser.wait(EC.elementToBeClickable(actualLink), 10000).then(function() {
             expect(actualLink.isDisplayed()).toBeTruthy();
         });
-    });
+    }).pend("Pending until we handle tests logging in via Globus/other services");
 
     xit('should have a "Sign Up" link with the right href from chaiseConfig', function(done) {
         if (chaiseConfig.signUpURL) {
@@ -75,7 +75,7 @@ describe('Navbar ', function() {
             expect(element(by.id('signup-link')).isPresent()).toBeFalsy();
             done();
         }
-    });
+    }).pend("Pending until we handle tests logging in via Globus/other services");
 
     xit('should display a "Log Out" link', function(done) {
         var logOutLink = element(by.id('logout-link'));
@@ -84,7 +84,7 @@ describe('Navbar ', function() {
             expect(logOutLink.isDisplayed()).toBeTruthy();
             done();
         });
-    });
+    }).pend("Pending until we handle tests logging in via Globus/other services");
 
     xit('should link to the profile URL from chaiseConfig, if specified', function() {
         var actual = element.all(by.css('.username'));
@@ -94,5 +94,5 @@ describe('Navbar ', function() {
         } else {
             expect(actual.getAttribute('href')).toBeFalsy();
         }
-    });
+    }).pend("Pending until we handle tests logging in via Globus/other services");
 });

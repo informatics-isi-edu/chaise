@@ -1,0 +1,12 @@
+<div class="modal-header">
+    <button class="pull-right" type="button">
+        <span class="glyphicon glyphicon-remove" ng-click="ctrl.cancel()"></span>
+    </button>
+    <h3 class="modal-title">Foreign Key Search</h3>
+</div>
+<div class="modal-body">
+    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok(tuple)"></recordset>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-default" type="button" ng-click="ctrl.cancel()">Cancel</button>
+</div>

@@ -1,5 +1,5 @@
 var chaisePage = require('../../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
-var recordEditHelpers = require('../../helpers.js');
+var recordEditHelpers = require('../../helpers.js'), chance = require('chance').Chance();
 
 describe('Record Add', function() {
 
@@ -100,7 +100,6 @@ describe('Record Add', function() {
 					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 
 				});
-
     		});
 
     	})(testParams.tables[i], i);
@@ -117,6 +116,42 @@ describe('Record Add', function() {
                 expect(title).toEqual(chaiseConfig.headTitle);
             });
         }
+    });
+
+    describe('When url has a prefill query string param set, ', function() {
+        var testCookie = {};
+        beforeAll(function() {
+            // Refresh the page
+            browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
+            browser.sleep(3000);
+
+            // Write a dummy cookie for creating a record in Accommodation table
+            testCookie = {
+                constraintName: 'product:accommodation_category_fkey1', // A FK that Accommodation table has with Category table
+                rowname: chance.sentence(),
+                keys: {id: 1}
+            };
+            browser.manage().addCookie('test', JSON.stringify(testCookie));
+
+            // Reload the page with prefill query param in url
+            browser.get(browser.params.url + ":" + testParams.tables[0].table_name + '?prefill=test');
+            browser.sleep(3000);
+        });
+
+        it('should pre-fill fields from the prefill cookie', function() {
+            browser.manage().getCookie('test').then(function(cookie) {
+                if (cookie) {
+                    var input = element.all(by.css('.popup-select-value')).first();
+                    expect(input.getText()).toBe(testCookie.rowname);
+                } else {
+                    expect('Cookie did not load').toEqual('but cookie should have loaded');
+                }
+            });
+        });
+
+        afterAll(function() {
+            browser.manage().deleteCookie('test');
+        });
     });
 
 });

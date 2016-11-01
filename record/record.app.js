@@ -3,6 +3,7 @@
 
     angular.module('chaise.record', [
         'ngSanitize',
+        'ngCookies',
         'chaise.delete',
         'chaise.errors',
         'chaise.modal',
@@ -15,19 +16,21 @@
         'ui.bootstrap'
     ])
 
-    // The page info object passed to the table directive
-    .factory('pageInfo', [function() {
+    .factory('constants', [function(){
         return {
-            loading: true,
-            previousButtonDisabled: true,
-            nextButtonDisabled: true,
-            defaultPageLimit: 25
+            defaultPageSize: 25,
         };
     }])
 
-    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'UiUtils', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, UiUtils) {
+    .config(['$cookiesProvider', function($cookiesProvider) {
+        $cookiesProvider.defaults.path = '/';
+        $cookiesProvider.defaults.secure = true;
+    }])
+
+    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', '$log', '$rootScope', '$window', 'UiUtils', 'constants',
+        function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, $log, $rootScope, $window, UiUtils, constants) {
+
         var context = {};
-        $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
@@ -55,7 +58,7 @@
                 }, function error(exception) {
                     throw exception;
                 }).then(function getPage(page) {
-                    var tuple = page.tuples[0];
+                    var tuple = $rootScope.tuple = page.tuples[0];
                     // Used directly in the record-display directive
                     $rootScope.recordDisplayname = tuple.displayname;
 
@@ -76,25 +79,28 @@
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                         $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
 
+                        var pageSize;
                         if ($rootScope.relatedReferences[i].display.defaultPageSize) {
-                            pageInfo.pageLimit = $rootScope.relatedReferences[i].display.defaultPageSize;
+                            pageSize = $rootScope.relatedReferences[i].display.defaultPageSize;
                         } else {
-                            pageInfo.pageLimit = pageInfo.defaultPageLimit;
+                            pageSize = constants.defaultPageSize;
                         }
 
                         (function(i) {
-                            $rootScope.relatedReferences[i].read(pageInfo.pageLimit).then(function (page) {
+                            $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
 
                                 var model = {
                                     reference: $rootScope.relatedReferences[i],
                                     columns: $rootScope.relatedReferences[i].columns,
                                     page: page,
+                                    pageLimit: ($rootScope.relatedReferences[i].display.defaultPageSize ? $rootScope.relatedReferences[i].display.defaultPageSize : constants.defaultPageSize),
                                     hasNext: page.hasNext,      // used to determine if a link should be shown
                                     hasLoaded: true,            // used to determine if the current table and next table should be rendered
                                     open: true,                 // to define if the accordion is open or closed
                                     sortby: null,               // column name, user selected or null
                                     sortOrder: null,            // asc (default) or desc
-                                    rowValues: []               // array of rows values
+                                    rowValues: [],              // array of rows values
+                                    search: null                // search term
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 $rootScope.tableModels[i] = model;
@@ -114,7 +120,7 @@
             // No filter defined, redirect to search
             } else {
                 // change the path and redirect to search because no id was supplied
-                var modifiedPath = $window.location.pathname.replace(context.appName, "search");
+                var modifiedPath = $window.location.pathname.replace(context.appName, "recordset");
                 // If default catalog/table are not defined, ...chaiseURItoErmrestURI would have caught that error
                 var catalogId = (context.catalogID ? context.catalogID : chaiseConfig.defaultCatalog);
                 if (chaiseConfig.defaultTables) {

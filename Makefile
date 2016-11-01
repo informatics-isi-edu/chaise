@@ -181,6 +181,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(JS)/vendor/angular-sanitize.js \
+	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
@@ -249,19 +250,21 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 
 VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
-# JavaScript and CSS source for Data Entry app
+# JavaScript and CSS source for RecordEdit app
 RE_ASSETS=recordedit
 
 RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
+	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/mask.min.js \
 	$(COMMON)/vendor/moment.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \

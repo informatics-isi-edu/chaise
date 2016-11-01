@@ -103,15 +103,23 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- dropdown select input -->
-                                            <div ng-switch-when="dropdown">
-                                                <ui-select ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="::form.isDisabled(column);">
-                                                    <ui-select-match name="{{::column.name}}" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}">{{$select.selected.display}}</ui-select-match>
-                                                    <ui-select-choices repeat="domainValue.key as domainValue in form.recordEditModel.domainValues[column.name] | filter: $select.search" >
-                                                        <div ng-bind-html="domainValue.display | highlight: $select.search"></div>
-                                                    </ui-select-choices>
-                                                </ui-select>
+
+                                            <!-- modal popup input -->
+                                            <div ng-switch-when="popup-select" class="input-group">
+                                                <input class="form-control" type="text" ng-click="form.searchPopup(rowIndex, column)" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" ng-disabled="::form.isDisabled(column);">
+                                                <span class="input-group-btn">
+                                                    <button class="btn btn-default" type="button" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
+                                                        <span class="glyphicon glyphicon-chevron-down"></span>
+                                                    </button>
+                                                    <button class="btn btn-primary create-record-btn" type="button" ng-click="form.createRecord(column)" ng-disabled="::form.isDisabled(column);">
+                                                        <span class="glyphicon glyphicon-plus"></span>
+                                                    </button>
+                                                    <button class="btn btn-danger" type="button" ng-click="form.clearForeignKey(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
+                                                        <span class="glyphicon glyphicon-remove"></span>
+                                                    </button>
+                                                </span>
                                             </div>
+
                                             <!-- int2 input -->
                                             <input ng-switch-when="integer2" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                 name="{{column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{form.int2min}}" max="{{form.int2max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
