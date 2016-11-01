@@ -27,8 +27,9 @@
         $cookiesProvider.defaults.secure = true;
     }])
 
-    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
-        var context = { booleanValues: ['', true, false] };
+    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+        var session,
+            context = { booleanValues: ['', true, false] };
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
@@ -52,10 +53,14 @@
             context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
             context.appName = "recordedit";
 
-            ERMrest.appLinkFn(UriUtils.appTagToURL);
-            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+            Session.getSession().then(function getSession(_session) {
+                session = _session;
+                ERMrest.appLinkFn(UriUtils.appTagToURL);
+
+                return ERMrest.resolve(ermrestUri, {cid: context.appName});
+            }).then(function getReference(reference) {
                 $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
-                $rootScope.reference.session = $rootScope.session;
+                $rootScope.reference.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);
 
@@ -94,8 +99,8 @@
                             }
 
                             var column, value,
-                            tuple = page.tuples[0],
-                            values = tuple.values;
+                                tuple = page.tuples[0],
+                                values = tuple.values;
 
                             $rootScope.tuples = page.tuples;
                             $rootScope.displayname = tuple.displayname;
@@ -150,7 +155,7 @@
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Update entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
-                        notAuthorizedError.code = ($rootScope.session ? "403 Fordbidden" : "401 Unauthorized");
+                        notAuthorizedError.code = "403 Fordbidden";
 
                         throw notAuthorizedError;
                     }
@@ -160,8 +165,8 @@
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
-                        console.log($rootScope.session);
-                        notAuthorizedError.code = ($rootScope.session ? "403 Fordbidden" : "401 Unauthorized");
+
+                        notAuthorizedError.code = "403 Fordbidden";
 
                         throw notAuthorizedError;
                     }
