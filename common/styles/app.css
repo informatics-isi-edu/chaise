@@ -556,7 +556,7 @@ tbody{
  
 /* Sets the table's maximum height to 70% of the screen height and adds a border at the bottom */
 .modal-body .outer-table {
-    max-height: 72vh;
+    max-height: 70vh;
     border: 1px solid lightgrey;
 }
 
