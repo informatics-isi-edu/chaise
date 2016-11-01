@@ -108,14 +108,17 @@
                                             <div ng-switch-when="popup-select" class="input-group">
                                                 <input class="form-control" type="text" ng-click="form.searchPopup(rowIndex, column)" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" ng-disabled="::form.isDisabled(column);">
                                                 <span class="input-group-btn">
-                                                    <button class="btn btn-default" type="button" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
+                                                    <button class="btn btn-default coltooltip" type="button" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
                                                         <span class="glyphicon glyphicon-chevron-down"></span>
+                                                        <span class="coltooltiptext">Choose from an existing value</span>
                                                     </button>
-                                                    <button class="btn btn-primary create-record-btn" type="button" ng-click="form.createRecord(column)" ng-disabled="::form.isDisabled(column);">
+                                                    <button class="btn btn-primary coltooltip create-record-btn" type="button" ng-click="form.createRecord(column)" ng-disabled="::form.isDisabled(column);">
                                                         <span class="glyphicon glyphicon-plus"></span>
+                                                        <span class="coltooltiptext">Create a new value</span>
                                                     </button>
-                                                    <button class="btn btn-danger" type="button" ng-click="form.clearForeignKey(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
+                                                    <button class="btn btn-danger coltooltip" type="button" ng-click="form.clearForeignKey(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
                                                         <span class="glyphicon glyphicon-remove"></span>
+                                                        <span class="coltooltiptext">Clear field</span>
                                                     </button>
                                                 </span>
                                             </div>

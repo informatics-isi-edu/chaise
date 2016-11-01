@@ -71,7 +71,6 @@ button .glyphicon-trash {
 .coltooltip {
     position: relative;
     display: inline-block;
-    border-bottom: 1px black;
 }
 
 .coltooltiplabel {
@@ -88,8 +87,9 @@ button .glyphicon-trash {
     border-radius: 6px;
     font-size: 11px;
     position: absolute;
-    z-index: 1;
+    z-index: 3;
     text-transform: none;
+    white-space: normal;
 }
 
 .coltooltip:hover .coltooltiptext {
@@ -525,7 +525,7 @@ tbody{
 }
 
 .markdown-container .embed-block {
-    margin: 10px 10px 10px 0px; 
+    margin: 10px 10px 10px 0px;
 }
 
 .input-timestamptz {
