@@ -6,9 +6,9 @@
     .factory('Session', ['$http', '$q', '$window', 'UriUtils', function ($http, $q, $window, UriUtils) {
 
         function NotFoundError(status, message) {
-                this.code = 404;
-                this.status = status;
-                this.message = message;
+            this.code = 404;
+            this.status = status;
+            this.message = message;
         }
 
         NotFoundError.prototype = Object.create(Error.prototype);

@@ -103,6 +103,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+
                                             <!-- modal popup input -->
                                             <div ng-switch-when="popup-select" class="input-group">
                                                 <input class="form-control" type="text" ng-click="form.searchPopup(rowIndex, column)" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="Click to link a value" />
@@ -118,6 +119,7 @@
                                                     </button>
                                                 </span>
                                             </div>
+
                                             <!-- int2 input -->
                                             <input ng-switch-when="integer2" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                 name="{{column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{form.int2min}}" max="{{form.int2max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>

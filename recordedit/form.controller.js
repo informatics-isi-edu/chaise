@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'ERMrest', 'recordEditModel', 'UriUtils', '$log', '$rootScope', '$uibModal', '$window', function FormController(AlertsService, ERMrest, recordEditModel, UriUtils, $log, $rootScope, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$uibModal', '$window', function FormController(AlertsService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
@@ -61,6 +61,7 @@
                 clearOnBlur: false
             }
         };
+        vm.prefillCookie = $cookies.getObject(context.prefill);
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
         function redirectAfterSubmission(page) {
@@ -188,6 +189,9 @@
             } else {
                 $rootScope.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                    if (vm.prefillCookie) {
+                        $cookies.remove(context.prefill);
+                    }
                     vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
@@ -367,11 +371,13 @@
             return displayType;
         }
 
-        // Returns with true or an object if input should be disabled
+        // Returns true if column.getInputDisabled returns truthy OR if column was prefilled via cookie
         function isDisabled(column) {
             try {
                 if (column.getInputDisabled(context.appContext)) {
                     return true;
+                } else if (vm.prefillCookie) {
+                    return vm.prefillCookie.constraintName == column.name;
                 }
                 return false;
             } catch (e) {

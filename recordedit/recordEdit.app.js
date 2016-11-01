@@ -14,6 +14,7 @@
         'chaise.utils',
         'chaise.validators',
         'ermrestjs',
+        'ngCookies',
         'ngMessages',
         'ngSanitize',
         'ui.bootstrap',
@@ -21,7 +22,12 @@
         'ui.select'
     ])
 
-    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .config(['$cookiesProvider', function($cookiesProvider) {
+        $cookiesProvider.defaults.path = '/';
+        $cookiesProvider.defaults.secure = true;
+    }])
+
+    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
         var context = { booleanValues: ['', true, false] };
         UriUtils.setOrigin();
         headInjector.addTitle();
@@ -32,11 +38,6 @@
         UriUtils.setLocationChangeHandling();
 
         try {
-            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
-
-            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
-            context.appName = "recordedit";
-
             // If defined but false, throw an error
             if (!chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
                 var message = 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.';
@@ -52,6 +53,24 @@
                 $rootScope.reference.session = $rootScope.session;
 
                 $log.info("Reference: ", $rootScope.reference);
+
+                // Case for creating an entity, with prefilled values
+                if (context.prefill) {
+                    // get the cookie with the prefill value
+                    var cookie = $cookies.getObject(context.prefill);
+                    if (cookie) {
+                        // Update view model
+                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname;
+
+                        // Update submission model
+                        var columnNames = Object.keys(cookie.keys);
+                        columnNames.forEach(function(colName) {
+                            var colValue = cookie.keys[colName];
+                            recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
+                        });
+                    }
+                    console.log('Model', recordEditModel);
+                }
 
                 // Case for editing an entity
                 if (context.filter) {
