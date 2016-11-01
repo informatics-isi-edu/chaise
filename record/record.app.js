@@ -16,13 +16,9 @@
         'ui.bootstrap'
     ])
 
-    // The page info object passed to the table directive
-    .factory('pageInfo', [function() {
+    .factory('constants', [function(){
         return {
-            loading: true,
-            previousButtonDisabled: true,
-            nextButtonDisabled: true,
-            defaultPageLimit: 25
+            defaultPageSize: 25,
         };
     }])
 
@@ -31,9 +27,10 @@
         $cookiesProvider.defaults.secure = true;
     }])
 
-    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', 'pageInfo', '$log', '$rootScope', '$window', 'UiUtils', function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, pageInfo, $log, $rootScope, $window, UiUtils) {
+    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', '$log', '$rootScope', '$window', 'UiUtils', 'constants',
+        function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, $log, $rootScope, $window, UiUtils, constants) {
+
         var context = {};
-        $rootScope.pageInfo = pageInfo;
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
@@ -82,25 +79,28 @@
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                         $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
 
+                        var pageSize;
                         if ($rootScope.relatedReferences[i].display.defaultPageSize) {
-                            pageInfo.pageLimit = $rootScope.relatedReferences[i].display.defaultPageSize;
+                            pageSize = $rootScope.relatedReferences[i].display.defaultPageSize;
                         } else {
-                            pageInfo.pageLimit = pageInfo.defaultPageLimit;
+                            pageSize = constants.defaultPageSize;
                         }
 
                         (function(i) {
-                            $rootScope.relatedReferences[i].read(pageInfo.pageLimit).then(function (page) {
+                            $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
 
                                 var model = {
                                     reference: $rootScope.relatedReferences[i],
                                     columns: $rootScope.relatedReferences[i].columns,
                                     page: page,
+                                    pageLimit: ($rootScope.relatedReferences[i].display.defaultPageSize ? $rootScope.relatedReferences[i].display.defaultPageSize : constants.defaultPageSize),
                                     hasNext: page.hasNext,      // used to determine if a link should be shown
                                     hasLoaded: true,            // used to determine if the current table and next table should be rendered
                                     open: true,                 // to define if the accordion is open or closed
                                     sortby: null,               // column name, user selected or null
                                     sortOrder: null,            // asc (default) or desc
-                                    rowValues: []               // array of rows values
+                                    rowValues: [],              // array of rows values
+                                    search: null                // search term
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 $rootScope.tableModels[i] = model;

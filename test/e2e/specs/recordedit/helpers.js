@@ -278,7 +278,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 			});
 
-			xdescribe("Foreign key fields,", function() {
+			describe("Foreign key fields,", function() {
 
 				var pageColumns = [], columns = [], dropdowns = [];
 
@@ -320,6 +320,29 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 						});
 					});
 				}).pend("Postpone test until foreign key UI is updated for the new reference apis");
+
+				it("should have a `create new` button that opens a new tab", function(done){
+                    var handles;
+					console.log("\n        Foreign Key Fields");
+					var createBtns = chaisePage.recordEditPage.getCreateBtns();
+					expect(createBtns.count()).toBe(columns.length * (recordIndex + 1));
+                    var fkc = columns[0];
+                    browser.executeScript('arguments[0].click();', createBtns.get(recordIndex)).then(function(){
+                        return browser.getAllWindowHandles();
+                    }).then(function(h){
+                        handles = h;
+                        return browser.switchTo().window(handles[1]);
+                    }).then(function(){
+                        return browser.getCurrentUrl();
+                    }).then(function(currentUrl) {
+                        var url = '/recordedit/#' + browser.params.catalogId + "/" + fkc.referencedColumn.schema_name + ":" + fkc.referencedColumn.table_name;
+                        expect(currentUrl.indexOf(url)).toBeGreaterThan(-1);
+                        return browser.close();
+                    }).then(function() {
+                        browser.switchTo().window(handles[0]);
+                    });
+                    done();
+				});
 
 				if (tableParams.records) {
 
