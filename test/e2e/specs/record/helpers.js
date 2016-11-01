@@ -304,6 +304,36 @@ exports.relatedTableLinks = function (tableParams) {
         });
     });
 
+    it('should have a Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
+        var EC = protractor.ExpectedConditions,
+            relatedTableName = tableParams.related_table_name_with_more_results,
+            addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
+
+        // Should make sure user is logged in
+        browser.wait(EC.elementToBeClickable(addRelatedRecordLink), 10000);
+
+        expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
+
+        var allWindows;
+        addRelatedRecordLink.click().then(function() {
+            // This Add link opens in a new tab so we have to track the windows in the browser...
+            return browser.getAllWindowHandles();
+        }).then(function(handles) {
+            allWindows = handles;
+            // ... and switch to the new tab here...
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function() {
+            // ... and then get the url from this new tab...
+            return browser.driver.getCurrentUrl();
+        }).then(function(url) {
+            // ... before switching back to the original Record app's tab so that the next it spec can run properly
+            browser.switchTo().window(allWindows[0]);
+            expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
+            expect(url.indexOf(relatedTableName)).toBeGreaterThan(-1);
+            expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
+        });
+    });
+
     it("should have a View All link for a related table that redirects to recordset.", function() {
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,

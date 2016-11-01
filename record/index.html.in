@@ -11,18 +11,22 @@
     <div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
             <div id="record-bookmark-container" class="col-xs-12 meta-icons">
-                <a id="create-record" ng-if="reference && reference.canCreate && ctrl.modifyRecord" title="Click here to create a record" ng-click="::ctrl.createRecord()">
+                <a id="create-record" class="coltooltip" ng-click="::ctrl.createRecord()" ng-if="reference && reference.canCreate && ctrl.modifyRecord">
                     <span class="glyphicon glyphicon-plus"></span> <strong>Create Record</strong>
+                    <span class="coltooltiptext">Click here to create a record</span>
                 </a>&nbsp;&nbsp;
-                <a id="edit-record" ng-if="reference && reference.canUpdate && ctrl.modifyRecord" title="Click here to edit this record" ng-click="::ctrl.editRecord()">
+                <a id="edit-record" class="coltooltip" ng-click="::ctrl.editRecord()" ng-if="reference && reference.canUpdate && ctrl.modifyRecord">
                     <span class="glyphicon glyphicon-pencil"></span> <strong>Edit Record</strong>
-                </a>&nbsp;&nbsp;
-                <a id="show-all-related-tables" ng-click="ctrl.showEmptyRelatedTables = true">
-                    <span class="glyphicon glyphicon-resize-vertical"></span> <strong>Show All Related Entities</strong>
+                    <span class="coltooltiptext">Click here to edit this record</span>
                 </a>&nbsp;&nbsp;
                 <delete-link id="delete-record" ng-if="reference && reference.canDelete && ctrl.modifyRecord" label="Delete Record" tooltip="Click here to delete this record" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
-                <a id="permalink" title="This link stores your search criteria as a URL. Right click and save." ng-href="{{ctrl.permalink()}}">
+                <a id="show-all-related-tables" class="coltooltip" ng-click="ctrl.showEmptyRelatedTables = true">
+                    <span class="glyphicon glyphicon-resize-vertical"></span> <strong>Show All Related Entities</strong>
+                    <span class="coltooltiptext">Click here to show empty related entities too.</span>
+                </a>&nbsp;&nbsp;
+                <a id="permalink" class="coltooltip" ng-href="{{ctrl.permalink()}}">
                     <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
+                    <span class="coltooltiptext">This link stores your search criteria as a URL. Right click and save.</span>
                 </a>
             </div>
 
@@ -44,14 +48,22 @@
                     heading="{{tableModels[$index].open ? '-' : '+'}} {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}})" is-open="tableModels[$index].open">
                     <!-- for different elements inside the accordion -->
                     <div ng-switch on="relatedRef.display.type">
-                        <!-- <a class="more-results-link text-right" ng-href="{{ctrl.toRecordSet(relatedRef)}}">View All Records</a> -->
-                        <a class="more-results-link text-right" ng-click="ctrl.toRecordSet(relatedRef)">View All Records</a>
-                        <div ng-switch-when="markdown">
-                            <span class="markdown-container" bind-html-unsafe="tableModels[$index].page.content"></span>
+                        <div class="row">
+                            <div class="col-xs-12 text-right">
+                                <span ng-if="relatedRef.canCreate && ctrl.modifyRecord"><a class="add-records-link" ng-click="ctrl.addRelatedRecord(relatedRef)">Add Record</a> |</span>
+                                <a class="more-results-link" ng-click="ctrl.toRecordSet(relatedRef)">View All Records</a>
+                            </div>
                         </div>
-                        <!-- ng-switch-when="table" is also the default case -->
-                        <div ng-switch-default>
-                            <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]" default-row-linking="true"></record-table>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div ng-switch-when="markdown">
+                                    <span class="markdown-container" bind-html-unsafe="tableModels[$index].page.content"></span>
+                                </div>
+                                <!-- ng-switch-when="table" is also the default case -->
+                                <div ng-switch-default>
+                                    <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
