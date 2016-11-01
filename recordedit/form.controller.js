@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$log', '$rootScope', '$uibModal', '$window', '$cookies', function FormController(AlertsService, recordEditModel, UriUtils, $log, $rootScope, $uibModal, $window, $cookies) {
+    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$uibModal', '$window', function FormController(AlertsService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
@@ -25,7 +25,10 @@
         vm.readyToSubmit = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
+        vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
+        vm.clearForeignKey = clearForeignKey;
+
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
         vm.deleteRecord = deleteRecord;
@@ -121,13 +124,13 @@
                     }
                 }
             });
+
+            return row;
         }
 
         function submit() {
             var form = vm.formContainer;
             var model = vm.recordEditModel;
-            // form.$setUntouched();
-            // form.$setPristine();
 
             if (form.$invalid) {
                 vm.readyToSubmit = false;
@@ -138,15 +141,37 @@
 
             // Form data is valid, time to transform row values for submission to ERMrest
             vm.readyToSubmit = true;
-            model.rows.forEach(function(row) {
-                transformRowValues(row);
-            });
+            for (var j = 0; j < model.rows.length; j++) {
+                var transformedRow = transformRowValues(model.rows[j]);
+                $rootScope.reference.columns.forEach(function (column) {
+                    // If the column is a pseudo column, it needs to get the originating columns name for data submission
+                    if (column.isPseudo) {
+
+                        var referenceColumn = column.foreignKey.colset.columns[0];
+                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+
+                        // check if value is set in submission data yet
+                        if (!model.submissionRows[j][referenceColumn.name]) {
+                            /**
+                             * User didn't change the foreign key, copy the value over to the submission data with the proper column name
+                             * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
+                             * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
+                            **/
+                            model.submissionRows[j][referenceColumn.name] = (vm.editMode ? $rootScope.tuples[j].data[referenceColumn.name] : null);
+                        }
+                    // not pseudo, column.name is sufficient for the keys
+                    } else {
+                        // set null if not set so that the whole data object is filled out for posting to ermrestJS
+                        model.submissionRows[j][column.name] = (transformedRow[column.name] ? transformedRow[column.name] : null);
+                    }
+                });
+            }
 
             if (vm.editMode) {
                 // loop through model.rows
                 // there should only be 1 row for editting
-                for (var i = 0; i < model.rows.length; i++) {
-                    var row = model.rows[i];
+                for (var i = 0; i < model.submissionRows.length; i++) {
+                    var row = model.submissionRows[i];
                     var data = $rootScope.tuples[i].data;
                     // assign each value from the form to the data object on tuple
                     for (var key in row) {
@@ -154,6 +179,7 @@
                     }
                 }
 
+                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                 $rootScope.reference.update($rootScope.tuples).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     vm.redirectAfterSubmission(page);
@@ -161,7 +187,7 @@
                     vm.showSubmissionError(response);
                 });
             } else {
-                $rootScope.reference.create(model.rows).then(function success(page) {
+                $rootScope.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     if (vm.prefillCookie) {
                         $cookies.remove(context.prefill);
@@ -203,6 +229,53 @@
             }
         }
 
+        function searchPopup(rowIndex, column) {
+            var params = {};
+
+            // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
+            column.reference.read(25).then(function getPseudoData(page) {
+                // pass the page as a param for the modal
+                params.page = page;
+
+                var modalInstance = $uibModal.open({
+                    animation: false,
+                    controller: "SearchPopupController",
+                    controllerAs: "ctrl",
+                    resolve: {
+                        params: params
+                    },
+                    size: "lg",
+                    templateUrl: "../common/templates/searchPopup.modal.html"
+                });
+
+                return modalInstance.result;
+            }).then(function dataSelected(tuple) {
+                // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
+                // set data in view model (model.rows) and submission model (model.submissionRows)
+
+                // TODO bad idea assuming there's 1 value
+                var referenceCol = column.foreignKey.colset.columns[0];
+                var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
+
+                // set the tuple instead
+                vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname;
+                vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
+
+            }, function noDataSelected() {
+                // do nothing
+            });
+        }
+
+        function clearForeignKey(rowIndex, column) {
+            // TODO bad idea assuming there's 1 value
+            var model = vm.recordEditModel,
+                referenceCol = column.foreignKey.colset.columns[0];
+
+            model.rows[rowIndex][column.name] = null;
+            delete model.submissionRows[rowIndex][referenceCol.name];
+            $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
+        }
+
         function createRecord(column) {
             var newRef = column.reference.contextualize.entryCreate;
             var appURL = newRef.appLink;
@@ -235,15 +308,19 @@
                 var row = angular.copy(protoRow);
 
                 // transform row values to avoid parsing issues with null values
-                transformRowValues(row, vm.recordEditModel);
+                var transformedRow = transformRowValues(row);
 
-                rowset.push(row);
+                rowset.push(transformedRow);
 
+                var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
+
+                vm.recordEditModel.submissionRows.push(submissionRow);
             }
         }
 
         function removeFormRow(index) {
             vm.recordEditModel.rows.splice(index, 1);
+            vm.recordEditModel.submissionRows.splice(index, 1);
         }
 
         function columnToDisplayType(column) {

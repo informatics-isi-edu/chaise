@@ -25,11 +25,10 @@
                     <span class="coltooltiptext">Click here to show empty related entities too.</span>
                 </a>&nbsp;&nbsp;
                 <a id="permalink" class="coltooltip" ng-href="{{ctrl.permalink()}}">
-                    <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
+                    <span class="glyphicon glyphicon-bookmark"></span><strong> Permalink</strong>
                     <span class="coltooltiptext">This link stores your search criteria as a URL. Right click and save.</span>
                 </a>
             </div>
-
             <alerts alerts="ctrl.alerts"></alerts>
 
             <div ng-if="reference">

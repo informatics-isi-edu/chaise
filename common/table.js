@@ -76,7 +76,7 @@
             read: read
         }
     }])
-        
+
     .directive('recordTable', ['AlertsService', 'recordTableUtils', function(AlertsService, recordTableUtils) {
 
         return {
@@ -117,7 +117,7 @@
                 };
 
                 scope.rowClickAction = function(index) {
-                    var args = {"tuple":scope.vm.page.tuples[index]};
+                    var args = {"tuple": scope.vm.page.tuples[index]};
                     if (scope.defaultRowLinking !== undefined && scope.defaultRowLinking === true) {
                         scope.gotoRowLink(index);
                     } else if (scope.onRowClickBind) {
