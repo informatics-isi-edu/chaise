@@ -5,6 +5,10 @@
     <h3 class="modal-title">Foreign Key Search</h3>
 </div>
 <div class="modal-body">
+    <div ng-show="!ctrl.hasLoaded" id="spinner">
+        <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
+        <div style="margin-top: 15px;">Loading...</div>
+    </div>
     <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok(tuple)"></recordset>
 </div>
 <div class="modal-footer">
