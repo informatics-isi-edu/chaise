@@ -404,6 +404,8 @@
                         return value;
                     }
                     return '';
+                } else if (isForeignKey(column)) {
+                    return 'Click to link a value';
                 }
             } catch (e) {
                 $log.info(e);
