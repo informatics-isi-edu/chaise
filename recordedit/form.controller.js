@@ -270,7 +270,7 @@
 
             model.rows[rowIndex][column.name] = null;
             delete model.submissionRows[rowIndex][referenceCol.name];
-            $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
+            if ($rootScope.tuples) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
         }
 
         function createRecord(column) {
