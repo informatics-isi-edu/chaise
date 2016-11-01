@@ -108,7 +108,9 @@
                                             <div ng-switch-when="popup-select" class="form-group has-feedback input-group">
                                                 <label class="sr-only"></label>
                                                 <input class="form-control popup-select-value " type="text" readonly ng-style="{'cursor': 'pointer'}" ng-click="form.searchPopup(rowIndex, column)" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" ng-disabled="::form.isDisabled(column);">
-                                                <span class="form-control-feedback glyphicon glyphicon-remove" style="right: 80px;" ng-click="form.clearForeignKey(rowIndex, column)" ng-disabled="::form.isDisabled(column);"></span>
+                                                <div class="form-control-feedback" ng-hide="::form.isDisabled(column);">
+                                                    <span class="glyphicon glyphicon-remove" style="right: 80px;" ng-click="form.clearForeignKey(rowIndex, column)"></span>
+                                                </div>
                                                 <span class="input-group-btn">
                                                     <button class="btn btn-default" type="button" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
                                                         <span class="glyphicon glyphicon-chevron-down"></span>
