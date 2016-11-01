@@ -106,10 +106,10 @@
 
                                             <!-- modal popup input -->
                                             <div ng-switch-when="popup-select" class="input-group">
-                                                <input class="form-control" type="text" ng-click="form.searchPopup(rowIndex, column)" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="Click to link a value" />
+                                                <input class="form-control" type="text" ng-click="form.searchPopup(rowIndex, column)" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="Select a value" />
                                                 <span class="input-group-btn">
                                                     <button class="btn btn-default" type="button" ng-click="form.searchPopup(rowIndex, column)">
-                                                        <span class="glyphicon glyphicon-link"></span>
+                                                        <span class="glyphicon glyphicon-chevron-down"></span>
                                                     </button>
                                                     <button class="btn btn-primary create-record-btn" type="button" ng-click="form.createRecord(column)">
                                                         <span class="glyphicon glyphicon-plus"></span>
