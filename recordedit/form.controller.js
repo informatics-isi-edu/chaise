@@ -230,6 +230,9 @@
         }
 
         function searchPopup(rowIndex, column) {
+
+            if (isDisabled(column)) return;
+
             var params = {};
 
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
