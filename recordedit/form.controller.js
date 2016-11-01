@@ -404,6 +404,8 @@
                         return value;
                     }
                     return '';
+                } else if (isForeignKey(column)) {
+                    return 'Select a value';
                 }
             } catch (e) {
                 $log.info(e);
