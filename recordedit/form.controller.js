@@ -271,12 +271,9 @@
             var model = vm.recordEditModel,
                 referenceCol = column.foreignKey.colset.columns[0];
 
-            console.log(referenceCol);
-
-            delete model.rows[rowIndex][column.name];
+            model.rows[rowIndex][column.name] = null;
             delete model.submissionRows[rowIndex][referenceCol.name];
-
-            console.log(model);
+            $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
         }
 
         function createRecord(column) {
