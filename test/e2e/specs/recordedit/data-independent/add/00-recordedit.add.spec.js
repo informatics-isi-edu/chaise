@@ -142,7 +142,7 @@ describe('Record Add', function() {
             browser.manage().getCookie('test').then(function(cookie) {
                 if (cookie) {
                     var input = element.all(by.css('.popup-select-value')).first();
-                    expect(input.getText()).toBe(testCookie.rowname);
+                    expect(input.getAttribute('value')).toBe(testCookie.rowname);
                 } else {
                     expect('Cookie did not load').toEqual('but cookie should have loaded');
                 }
