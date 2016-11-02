@@ -104,7 +104,8 @@
              * My solution is worst case n-time
              * The latter is worst case rowKeys.length * n time
              */
-            angular.forEach($rootScope.reference.columns, function(col) {
+            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+                var col = $rootScope.reference.columns[i];
                 var rowVal = row[col.name];
                 if (rowVal) {
                     switch (col.type.name) {
@@ -125,7 +126,8 @@
                             break;
                     }
                 }
-            });
+                row[col.name] = rowVal;
+            }
 
             return row;
         }
