@@ -36,8 +36,6 @@
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
 
-        vm.title = "Choose " + reference.displayname;
-
         vm.tableModel = {
             hasLoaded:          false,
             reference:          reference,

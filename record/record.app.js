@@ -76,6 +76,7 @@
 
                     $rootScope.tableModels = [];
 
+                    if ($rootScope.relatedReferences.length > 0) $rootScope.loading = true;
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                         $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
 
@@ -104,6 +105,10 @@
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 $rootScope.tableModels[i] = model;
+
+                                if (i == $rootScope.relatedReferences.length-1) {
+                                    $rootScope.loading = false;
+                                }
                             });
                         })(i);
                     }

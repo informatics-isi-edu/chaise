@@ -67,6 +67,7 @@
                     </div>
                 </div>
             </uib-accordion>
+            <span ng-show="loading">Loading...</span>
         </div>
     </div>
 </body>
