@@ -241,7 +241,7 @@
             var params = {};
 
             // pass the reference as a param for the modal
-            params.reference = column.reference;
+            params.reference = column.reference.contextualize.compactSelect;
 
             var modalInstance = $uibModal.open({
                 animation: false,
