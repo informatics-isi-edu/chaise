@@ -513,6 +513,8 @@ tbody{
     background-color:rgba(220, 220, 220, 0.68);
     padding:7px;
     border-radius:10px;
+    display: inline-block;
+    margin: 2px;
 }
 
 .markdown-container img {
