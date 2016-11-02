@@ -230,6 +230,9 @@
         }
 
         function searchPopup(rowIndex, column) {
+
+            if (isDisabled(column)) return;
+
             var params = {};
 
             // pass the reference as a param for the modal
