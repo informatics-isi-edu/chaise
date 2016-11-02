@@ -68,15 +68,12 @@ button .glyphicon-trash {
 
 /****************** Entity Table ******************/
 
-.coltooltip {
-}
-
 .coltooltiplabel {
     border-bottom: 1px dotted black;
 }
 
 .coltooltip .coltooltiptext {
-    visibility: hidden;
+    display: none;
     width: 100px;
     background-color: #454545;
     color: #f0f0f0;
@@ -91,7 +88,7 @@ button .glyphicon-trash {
 }
 
 .coltooltip:hover .coltooltiptext {
-    visibility: visible;
+    display: inline-block;
 }
 
 
