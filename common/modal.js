@@ -32,7 +32,12 @@
         vm.ok = ok;
         vm.cancel = cancel;
 
+<<<<<<< HEAD
         var reference = params.reference;
+=======
+        vm.hasLoaded = false;
+        var reference = vm.reference = params.reference;
+>>>>>>> recordedit2-master
 
         vm.title = "Choose " + reference.displayname;
 

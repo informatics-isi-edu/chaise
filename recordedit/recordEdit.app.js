@@ -148,7 +148,7 @@
                             $log.info('Model: ', recordEditModel);
                         }, function error(response) {
                             $log.warn(response);
-                            throw reponse;
+                            throw response;
                         }).catch(function readCatch(exception) {
                             ErrorService.errorPopup(exception.message, exception.code, "home page");
                         });
