@@ -33,7 +33,7 @@
         vm.cancel = cancel;
 
         vm.hasLoaded = false;
-        var reference = params.reference;
+        var reference = vm.reference = params.reference;
 
         // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
         reference.read(25).then(function getPseudoData(page) {
