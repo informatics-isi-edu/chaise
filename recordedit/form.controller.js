@@ -48,6 +48,7 @@
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
         vm.toggleMeridiem = toggleMeridiem;
         vm.clearModel = clearModel;
+        vm.blurElement = blurElement;
         // Specifies the regexes to be used for a token in a ui-mask input. For example, the '1' key in
         // in vm.maskOptions.date means that only 0 or 1 is allowed wherever the '1' key is used in a ui-mask template.
         // See the maskDefinitions section for more info: https://github.com/angular-ui/ui-mask.
@@ -62,6 +63,7 @@
             }
         };
         vm.prefillCookie = $cookies.getObject(context.prefill);
+
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
         function redirectAfterSubmission(page) {
@@ -448,6 +450,11 @@
                 return true;
             }
             return false;
+        }
+
+        // Given an $event, this will blur or removes the focus from the element that triggerd the event
+        function blurElement(e) {
+            e.currentTarget.blur();
         }
     }]);
 })();
