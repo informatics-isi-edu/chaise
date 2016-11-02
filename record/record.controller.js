@@ -34,8 +34,9 @@
 
         vm.deleteRecord = function() {
             $rootScope.reference.delete().then(function deleteSuccess() {
+                 var location = $rootScope.reference.location;
                 //success, go to databrowser or home
-                $window.location.href = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+                $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
             }, function deleteFail(error) {
                 AlertsService.addAlert({type: 'error', message: error.message});
                 $log.warn(response);
