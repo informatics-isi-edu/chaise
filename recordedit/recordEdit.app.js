@@ -58,6 +58,12 @@
                 ERMrest.appLinkFn(UriUtils.appTagToURL);
 
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
+            }, function sessionFailed() {
+                var noSessionMessage = "There is no current session.";
+                var noSessionError = new Error(noSessionMessage);
+                noSessionError.code = "401 Unauthorized";
+
+                throw noSessionError;
             }).then(function getReference(reference) {
                 $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = session;
@@ -175,10 +181,13 @@
                 $log.warn(response);
                 throw response;
             }).catch(function genericCatch(exception) {
-                if (exception instanceof ERMrest.UnauthorizedError)
+                if (exception instanceof ERMrest.UnauthorizedError || exception.code == "401 Unauthorized") {
                     ErrorService.catchAll(exception);
-                else
+                } else if (exception.code == "403 Forbidden") {
+                    ErrorService.errorPopup(exception.message, exception.code, "previous page", $window.document.referrer);
+                } else {
                     ErrorService.errorPopup(exception.message, exception.code, "home page");
+                }
             });
         } catch (exception) {
             ErrorService.errorPopup(exception.message, exception.code, "home page");

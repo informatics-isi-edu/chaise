@@ -44,7 +44,7 @@
         function catchAll(exception) {
             $log.info(exception);
 
-            if (exception instanceof ERMrest.UnauthorizedError) {
+            if (exception instanceof ERMrest.UnauthorizedError || exception.code == "401 Unauthorized") {
                 Session.login($window.location.href);
             } else {
                 AlertsService.addAlert({type:'error', message:exception.message});
