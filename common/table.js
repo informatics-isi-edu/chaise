@@ -116,7 +116,12 @@
                     }
                 };
 
-                scope.rowClickAction = function(index) {
+                scope.rowClickAction = function(event, index) {
+                    var el = event.target || event.srcElement;
+                    if (el.nodeName.toLowerCase() === 'a' || el.nodeName.toLowerCase() === 'button') {
+                        return false;
+                    }
+
                     var args = {"tuple": scope.vm.page.tuples[index]};
                     if (scope.defaultRowLinking !== undefined && scope.defaultRowLinking === true) {
                         scope.gotoRowLink(index);
