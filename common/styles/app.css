@@ -69,8 +69,6 @@ button .glyphicon-trash {
 /****************** Entity Table ******************/
 
 .coltooltip {
-    position: relative;
-    display: inline-block;
 }
 
 .coltooltiplabel {
