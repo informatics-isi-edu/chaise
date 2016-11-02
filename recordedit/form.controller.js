@@ -202,6 +202,7 @@
         }
 
         function deleteRecord() {
+            var location = $rootScope.reference.location;
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -213,16 +214,16 @@
                     return $rootScope.reference.delete();
                 }).then(function deleteSuccess() {
                     // redirect after successful delete
-                    $window.location.href = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+                    $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    vm.showSubmissionError(response);
+                    if (response != "cancel") vm.showSubmissionError(response);
                 }).catch(function (error) {
                     $log.info(error);
                 });
             } else {
                 $rootScope.reference.delete().then(function deleteSuccess() {
                     // redirect after successful delete
-                    $window.location.href = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+                    $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
                     vm.showSubmissionError(response);
                 }).catch(function (error) {

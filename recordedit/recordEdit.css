@@ -42,7 +42,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
 /*Centers the modal*/
-.modal-dialog {
+.modal-lg {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 95vw;
@@ -56,7 +56,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 /*Sets the maximum height of the modal body to 85% of the screen height*/
-.modal-body {
+.modal-lg .modal-body {
   max-height: 90vh;
   min-height: 40vh;
 }
@@ -91,7 +91,7 @@ input[type=number]::-webkit-outer-spin-button {
     }
 }
 
-#spinner { 
+#spinner {
   width: 100%;
   text-align: center;
   padding: 14px 0;
