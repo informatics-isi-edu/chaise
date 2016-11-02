@@ -6,7 +6,7 @@
 </div>
 <div class="modal-body">
     <div ng-show="!ctrl.tableModel.hasLoaded" id="spinner">
-        <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
+        <img src="spinner.gif" class="spinner"/>
         <div style="margin-top: 15px;">Loading...</div>
     </div>
     <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok(tuple)"></recordset>

@@ -54,6 +54,7 @@ input[type=number]::-webkit-outer-spin-button {
 /*Sets the maximum height of the modal body to 85% of the screen height*/
 .modal-body {
   max-height: 90vh;
+  min-height: 40vh;
 }
  
 /* Sets the table's maximum height to 70% of the screen height and adds a border at the bottom */
@@ -86,6 +87,25 @@ input[type=number]::-webkit-outer-spin-button {
     }
 }
 
-#spinner{ 
-  top: 25vh;
+#spinner { 
+  width: 100%;
+  text-align: center;
+  padding: 14px 0;
+  position: absolute;
+  height: 100%;
+  margin-top: -185px;
+  left: 0%;
+  z-index: 10;
+  background: rgba(128, 128, 128, 0.25);
+}
+
+img.spinner{
+    display: block;
+    margin: 0 auto;
+    width: 32px;
+    height: 32px;
+    opacity: 0.8;
+    position: absolute;
+    top: 40%;
+    left: 50%;
 }
