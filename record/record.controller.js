@@ -79,7 +79,6 @@
                 }
 
                 if ((isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues.length > 0) {
-                    console.log($rootScope.lastRendered);
                     return (i == $rootScope.lastRendered);
                 }
             }
