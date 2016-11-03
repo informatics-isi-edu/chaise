@@ -77,7 +77,7 @@
                     $rootScope.tableModels = [];
                     $rootScope.lastRendered = null;
 
-                    if ($rootScope.relatedReferences.length > 0) $rootScope.loading = true;
+                    $rootScope.loading = ($rootScope.relatedReferences.length > 0);
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                         $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
 

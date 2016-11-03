@@ -69,10 +69,11 @@
                     prevTableHasLoaded = $rootScope.tableModels[i-1].hasLoaded;
                     if ($rootScope.lastRendered == (i-1)) {
                         $rootScope.lastRendered = i;
-                        if ($rootScope.lastRendered == $rootScope.relatedReferences.length-1) {
-                            $rootScope.loading = false;
-                        }
                     }
+                }
+                
+                if ($rootScope.lastRendered == $rootScope.relatedReferences.length-1) {
+                    $rootScope.loading = false;
                 }
 
                 if (vm.showEmptyRelatedTables) {
