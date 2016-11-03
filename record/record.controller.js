@@ -78,9 +78,11 @@
                     return isFirst || prevTableHasLoaded;
                 }
 
-                if ((isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues.length > 0) {
+                if ((isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues && $rootScope.tableModels[i].rowValues.length > 0) {
                     return (i == $rootScope.lastRendered);
                 }
+
+                return false;
             }
         };
 
