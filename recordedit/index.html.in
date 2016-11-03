@@ -123,6 +123,7 @@
                                                         <span class="coltooltiptext">Create a new value</span>
                                                     </button>
                                                 </span>
+                                                <input type="hidden" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(column);" />
                                             </div>
 
                                             <!-- int2 input -->
