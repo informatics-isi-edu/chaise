@@ -39,7 +39,7 @@
                 $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
             }, function deleteFail(error) {
                 AlertsService.addAlert({type: 'error', message: error.message});
-                $log.warn(response);
+                $log.warn(error);
             });
         };
 
@@ -62,15 +62,26 @@
             var isFirst = false, prevTableHasLoaded = false;
             if ($rootScope.tableModels && $rootScope.tableModels[i]) {
                 if (i === 0) {
+                    $rootScope.lastRendered = 0;
                     isFirst = true;
                 } else if ($rootScope.tableModels[i-1]) {
                     prevTableHasLoaded = $rootScope.tableModels[i-1].hasLoaded;
+                    if ($rootScope.lastRendered == (i-1)) {
+                        $rootScope.lastRendered = i;
+                        if ($rootScope.lastRendered == $rootScope.relatedReferences.length-1) {
+                            $rootScope.loading = false;
+                        }
+                    }
                 }
 
                 if (vm.showEmptyRelatedTables) {
                     return isFirst || prevTableHasLoaded;
                 }
-                return (isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues.length > 0;
+
+                if ((isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues.length > 0) {
+                    console.log($rootScope.lastRendered);
+                    return (i == $rootScope.lastRendered);
+                }
             }
         };
 
