@@ -1,0 +1,8 @@
+<div ng-switch="isHtml">
+    <span ng-switch-when="true" class="markdown-container" ng-bind-html="contentx"></span>
+    <span ng-switch-default>{{contentx}}</span>
+    <span ng-show="overflow">
+        ...
+        <span style="display:inline-block; text-decoration: underline" class="text-primary readmore" ng-click="readmore()">>>></span>
+    </span>
+</div>

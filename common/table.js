@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.record.table', [])
+    angular.module('chaise.record.table', ['chaise.ellipses'])
 
     /**
      * Ways to use recordTable directive:
@@ -118,7 +118,7 @@
 
                 scope.rowClickAction = function(event, index) {
                     var el = event.target || event.srcElement;
-                    if (el.nodeName.toLowerCase() === 'a' || el.nodeName.toLowerCase() === 'button') {
+                    if (el.nodeName.toLowerCase() === 'a' || el.nodeName.toLowerCase() === 'button' || el.classList.contains("readmore")) {
                         return false;
                     }
 
