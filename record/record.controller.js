@@ -7,7 +7,8 @@
         var vm = this;
 
         vm.alerts = AlertsService.alerts;
-        vm.modifyRecord = chaiseConfig.editRecord === false ? false : true;
+        vm.modifyRecord = chaiseConfig.editRecord;
+        vm.showDeleteButton = chaiseConfig.showDeleteButton;
         vm.showEmptyRelatedTables = false;
 
         vm.createRecord = function() {
