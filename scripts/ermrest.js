@@ -440,11 +440,10 @@ function getTableColumns(options, successCallback) {
 		$.each(metadata['keys'], function(i, key) {
 			if (key['unique_columns'] != null) {
 				unique_columns = key['unique_columns'];
-				return false;
+				$.each(unique_columns, function(i, col) {
+					PRIMARY_KEY.push(encodeSafeURIComponent(col));
+				});
 			}
-		});
-		$.each(unique_columns, function(i, col) {
-			PRIMARY_KEY.push(encodeSafeURIComponent(col));
 		});
 	}
 	var columns_definitions = [];

@@ -44,13 +44,17 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
     this.buildPredicate = function(keys, entity){
         // Build an array of predicates for the Ermrest Filter lanaguage
         var predicates = [];
-
-        for (var i = 0; i< keys.length; i++){
-        	// the PRIMARY_KEY array has the keys already encoded, so decode them in order to extract the value from the row
-            var key = decodeURIComponent(keys[i]);
-            var predicate = encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(entity[key]);
-            predicates.push(predicate);
+        if (display_columns['title'] != null && keys.contains(display_columns['title'])) {
+            predicates.push(encodeSafeURIComponent(display_columns['title']) + '=' + encodeSafeURIComponent(entity[display_columns['title']]));
+        } else {
+            for (var i = 0; i< keys.length; i++){
+            	// the PRIMARY_KEY array has the keys already encoded, so decode them in order to extract the value from the row
+                var key = decodeURIComponent(keys[i]);
+                var predicate = encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(entity[key]);
+                predicates.push(predicate);
+            }
         }
+
         // Join predicates with a conjunctive filter '&'
         return predicates.join('&');
     };
