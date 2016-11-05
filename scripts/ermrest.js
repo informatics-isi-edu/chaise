@@ -3799,12 +3799,21 @@ function successUpdateFacetSlider(data, textStatus, jqXHR, param) {
 	var table = param['table'];
 	var col = param['col'];
 	var box = param['options']['box'][table];
+	var col_type = options['colsDescr'][table][col]['type'];
 	if (data[0]['min'] != null) {
 		if (!box[col]['left']) {
-			box[col]['min'] = data[0]['min'];
+			if (datepickerPresentation.contains(col_type)) {
+				box[col]['min'] = getDateString(data[0]['min'], 'min');
+			} else {
+				box[col]['min'] = data[0]['min'];
+			}
 		}
 		if (!box[col]['right']) {
-			box[col]['max'] = data[0]['max'];
+			if (datepickerPresentation.contains(col_type)) {
+				box[col]['max'] = getDateString(data[0]['max'], 'max');
+			} else {
+				box[col]['max'] = data[0]['max'];
+			}
 		}
 		if (box[col]['right'] && box[col]['max'] == box[col]['ceil']) {
 			delete box[col]['right'];
