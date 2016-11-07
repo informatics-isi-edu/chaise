@@ -441,7 +441,9 @@ function getTableColumns(options, successCallback) {
 			if (key['unique_columns'] != null) {
 				unique_columns = key['unique_columns'];
 				$.each(unique_columns, function(i, col) {
-					PRIMARY_KEY.push(encodeSafeURIComponent(col));
+					if (!PRIMARY_KEY.contains(encodeSafeURIComponent(col))) {
+						PRIMARY_KEY.push(encodeSafeURIComponent(col));
+					}
 				});
 			}
 		});
