@@ -468,9 +468,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
             describe("Timestamp fields,", function() {
                 var timeInputFields = [];
                 var columns;
-                beforeAll(function() {
-                    jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
-                });
+                // beforeAll(function() {
+                //     jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
+                // });
                 it('should have 3 inputs with validation for each timestamp column', function() {
                     columns = chaisePage.dataUtils.editInputs.getTimestampTypeColumns(table, [IGNORE, HIDDEN]);
                     columns.forEach(function(column) {
@@ -509,13 +509,30 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                 it('should have the current time after clicking the \"Now\" button', function() {
                     timeInputFields.forEach(function(obj) {
                         var nowBtn = element.all(by.css('button[name="' + obj.column.name + '"]')).get(1);
-                        var date = moment().format('YYYY-MM-DD');
-                        var time = moment().format('hh:mm');
+                        var UIdate, date = moment().format('YYYY-MM-DD');
+                        var UItime, time = moment().format('x'); // in milliseconds
+                        var timeDelta = 60 * 1000; // 1 minute, in milliseconds
+                        var startTime = time - timeDelta, endTime = time + timeDelta;
                         var meridiem = moment().format('A');
+
                         nowBtn.click();
-                        expect(obj.date.getAttribute('value')).toEqual(date);
-                        expect(obj.time.getAttribute('value')).toMatch(time);
-                        expect(obj.meridiem.getText()).toEqual(meridiem);
+                        obj.date.getAttribute('value').then(function(dateVal) {
+                            // Check date input
+                            UIdate = dateVal;
+                            expect(dateVal).toEqual(date);
+                            return obj.time.getAttribute('value');
+                        }).then(function(timeVal) {
+                            // Check time input value is within an interval
+                            UItime = timeVal;
+                            var UItimestamp = moment(UIdate + UItime, 'YYYY-MM-DDhh:mm').format('x'); // in milliseconds
+                            expect(startTime < UItimestamp < endTime).toBeTruthy();
+                            return obj.meridiem.getText();
+                        }).then(function(meridiemVal) {
+                            // Check meridiem btn
+                            expect(meridiemVal).toEqual(meridiem);
+                        }).catch(function(error) {
+                            console.log(error);
+                        });
                     });
                 });
             });
