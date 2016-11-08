@@ -532,7 +532,7 @@ $(JS_CONFIG): chaise-config-sample.js
 	done
 	for file in $(DETAILED_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'></script>" >> .make-detailed-asset-block ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-detailed-asset-block ; \
 	done
 	for file in $(JS_CONFIG) $(DETAILED_SHARED_JS_DEPS) $(DETAILED_JS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
