@@ -508,14 +508,16 @@ $(JS_CONFIG): chaise-config-sample.js
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
 	> .make-asset-block
 	for file in $(CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
 	done
 	for file in $(CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
 	done
 	for file in $(JS_CONFIG) $(JS_DEPS); do \
-		echo "<script src='../$$file'></script>" >> .make-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
 	for file in $(JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -525,14 +527,16 @@ $(JS_CONFIG): chaise-config-sample.js
 .make-detailed-asset-block: $(DETAILED_SHARED_CSS_DEPS) $(DETAILED_CSS_DEPS) $(DETAILED_CSS_SOURCE) $(DETAILED_SHARED_JS_DEPS) $(DETAILED_JS_DEPS) $(DETAILED_JS_SOURCE) $(JS_CONFIG)
 	> .make-detailed-asset-block
 	for file in $(DETAILED_SHARED_CSS_DEPS) $(DETAILED_CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-detailed-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-detailed-asset-block ; \
 	done
 	for file in $(DETAILED_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'></script>" >> .make-detailed-asset-block ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-detailed-asset-block ; \
 	done
 	for file in $(JS_CONFIG) $(DETAILED_SHARED_JS_DEPS) $(DETAILED_JS_DEPS); do \
-		echo "<script src='../$$file'></script>" >> .make-detailed-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-detailed-asset-block ; \
 	done
 	for file in $(DETAILED_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -566,17 +570,20 @@ $(JS_CONFIG): chaise-config-sample.js
 .make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
 	> .make-viewer-asset-block
 	for file in $(VIEWER_SHARED_CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-viewer-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
 	done
 	for file in $(VIEWER_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
 	done
 	for file in $(JS_CONFIG) $(VIEWER_SHARED_JS_DEPS); do \
-		echo "<script src='../$$file'></script>" >> .make-viewer-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		echo "<script src='$$script'></script>" >> .make-viewer-asset-block ; \
+		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
+		echo "<script src='$$script?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 	for file in $(VIEWER_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -586,17 +593,20 @@ $(JS_CONFIG): chaise-config-sample.js
 .make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_CSS_SOURCE) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG)
 	> .make-de-asset-block
 	for file in $(RE_SHARED_CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-de-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
 	for file in $(RE_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
 	for file in $(JS_CONFIG) $(RE_SHARED_JS_DEPS); do \
-		echo "<script src='../$$file'></script>" >> .make-de-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		echo "<script src='$$script'></script>" >> .make-de-asset-block ; \
+		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
+		echo "<script src='$$script?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
 	for file in $(RE_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -606,17 +616,20 @@ $(JS_CONFIG): chaise-config-sample.js
 .make-rs-asset-block: $(RECSET_SHARED_CSS_DEPS) $(RECSET_CSS_SOURCE) $(RECSET_SHARED_JS_DEPS) $(RECSET_JS_SOURCE) $(JS_CONFIG)
 	> .make-rs-asset-block
 	for file in $(RECSET_SHARED_CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-rs-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
 	done
 	for file in $(RECSET_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
 	done
 	for file in $(JS_CONFIG) $(RECSET_SHARED_JS_DEPS); do \
-		echo "<script src='../$$file'></script>" >> .make-rs-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		echo "<script src='$$script'></script>" >> .make-rs-asset-block ; \
+		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
+		echo "<script src='$$script?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 	for file in $(RECSET_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -626,17 +639,20 @@ $(JS_CONFIG): chaise-config-sample.js
 .make-record-asset-block: $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_SOURCE) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_SOURCE) $(JS_CONFIG)
 	> .make-record-asset-block
 	for file in $(RECORD_SHARED_CSS_DEPS); do \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file'>" >> .make-record-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-record-asset-block ; \
 	done
 	for file in $(RECORD_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-record-asset-block ; \
 	done
 	for file in $(JS_CONFIG) $(RECORD_SHARED_JS_DEPS); do \
-		echo "<script src='../$$file'></script>" >> .make-record-asset-block ; \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		echo "<script src='$$script'></script>" >> .make-record-asset-block ; \
+		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
+		echo "<script src='$$script?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 	for file in $(RECORD_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
