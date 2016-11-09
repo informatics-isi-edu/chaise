@@ -16,6 +16,10 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 	if (tableParams.keys) {
 		it("should have edit record title", function() {
+            var EC = protractor.ExpectedConditions;
+
+            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
+
 			chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
 				expect(txt).toBe("Edit " + tableParams.edit_entity_displayname + " Records");
 			});
@@ -30,6 +34,10 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 	} else {
 		it("should have create record title", function() {
+            var EC = protractor.ExpectedConditions;
+
+            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
+
 			chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
 				expect(txt).toBe("Create " + chaisePage.dataUtils.editInputs.getDisplayName(table, 'table_name', false) + " Records");
 			});
@@ -178,7 +186,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				});
 			});
 
-			xit("should show text input for shorttext and text datatype", function() {
+			it("should show text input for shorttext and text datatype", function() {
 				var columns = chaisePage.dataUtils.editInputs.getTextDataTypeColumns(table, [IGNORE, HIDDEN]);
 				columns.forEach(function(c) {
 					chaisePage.recordEditPage.getInputForAColumn(c.name, recordIndex).then(function(txtInput) {
@@ -299,31 +307,73 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 					});
 				});
 
-				xit("should show a dropdown", function() {
-					console.log("\n        Foreign Key Fields");
-					pageColumns.forEach(function(pc) {
-						chaisePage.recordEditPage.getDropdown(pc, recordIndex).then(function(dropdown) {
-							console.log("         ->" + pc.column.name);
-							if (dropdown) {
-								expect(true).toBeDefined();
-								dropdown.column = pc.column;
-								dropdowns.push(dropdown);
+                // in the edit case
+                if (!tableParams.records) {
+                    it("clicking the 'x' should remove the value in the foreign key field.", function () {
+                        var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].displayName, recordIndex);
+                        //the first foreignkey input for editing should be pre-filled
+                        expect(foreignKeyInput.getAttribute("value")).toBeDefined();
 
-								if (dropdown.column._value != undefined) {
-									expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(dropdown.column._value);
-								}
+                        chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().get(0).click().then(function() {
+                            // value is empty string after removing it
+                            expect(foreignKeyInput.getAttribute("value")).toBe('');
+                        });
+                    });
 
-								foreignKeyFields.push(dropdown);
-							} else {
-								expect(undefined).toBeDefined();
-							}
-						});
-					});
-				}).pend("Postpone test until foreign key UI is updated for the new reference apis");
+                    it("clicking 'x' in the model should close it without returning a value.", function () {
+                        var modalClose = chaisePage.recordEditPage.getModalCloseBtn(),
+                            EC = protractor.ExpectedConditions;
 
-				it("should have a `create new` button that opens a new tab", function(done){
+                        chaisePage.recordEditPage.getModalPopupBtns().get(0).click().then(function() {
+                            // wait for the modal to open
+                            browser.wait(EC.visibilityOf(modalClose), 5000);
+                            return modalClose.click();
+                        }).then(function() {
+                            var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].displayName, recordIndex);
+                            expect(foreignKeyInput.getAttribute("value")).toBe('');
+                        })
+                    });
+				}
+
+                it("should open a modal search and select a foreign key value.", function () {
+                    var popupBtns = chaisePage.recordEditPage.getModalPopupBtns(),
+                        modalTitle = chaisePage.recordEditPage.getModalTitle(),
+                        EC = protractor.ExpectedConditions;
+
+                    expect(popupBtns.count()).toBe(columns.length * (recordIndex + 1));
+
+                    for (var i=0; i<columns.length; i++) {
+                        (function(i) {
+                            var rows;
+                            popupBtns.get( (columns.length * recordIndex) + i ).click().then(function() {
+                                // wait for the modal to open
+                                browser.wait(EC.visibilityOf(modalTitle), 5000);
+
+                                return modalTitle.getText();
+                            }).then(function(text) {
+                                // make sure modal opened
+                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+
+                                rows = chaisePage.recordsetPage.getRows();
+                                // count is needed for clicking a random row
+                                return rows.count();
+                            }).then(function(ct) {
+                                expect(ct).toBeGreaterThan(0);
+
+                                var index = Math.floor(Math.random() * ct);
+                                return rows.get(index).click();
+                            }).then(function() {
+                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
+
+                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
+                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
+                            });
+                        })(i);
+                    }
+                });
+
+				it("should have a `create new` button that opens a new tab", function(){
                     var handles;
-					console.log("\n        Foreign Key Fields");
 					var createBtns = chaisePage.recordEditPage.getCreateBtns();
 					expect(createBtns.count()).toBe(columns.length * (recordIndex + 1));
                     var fkc = columns[0];
@@ -341,30 +391,14 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                     }).then(function() {
                         browser.switchTo().window(handles[0]);
                     });
-                    done();
 				});
-
-				if (tableParams.records) {
-
-					xit("should select any random option", function() {
-						dropdowns.forEach(function(dropdown) {
-							chaisePage.recordEditPage.selectDropdownValue(dropdown).then(function(value) {
-								chaisePage.recordEditPage.getDropdownText(dropdown).then(function(value) {
-									dropdown.column._value = value;
-									expect(value.length ? true : false).toBe(true);
-								});
-							});
-						});
-					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
-				}
-
 			});
 
 			describe("Date fields,", function() {
                 it('should show input fields and validate for date columns', function() {
                     var columns = chaisePage.dataUtils.editInputs.getDateTypeColumns(table, [IGNORE, HIDDEN]);
                     columns.forEach(function(column) {
-                        var dateInput = chaisePage.recordEditPage.getDateInputForAColumn(column.name, recordIndex);
+                        var dateInput = chaisePage.recordEditPage.getInputValue(column.name, recordIndex);
                         datePickerFields.push(dateInput);
                         if (column._value != undefined) {
 							expect(dateInput.getAttribute('value')).toBe(column._value);
@@ -402,7 +436,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 					console.log("\n        Date/Timestamptz fields");
 					var columns = chaisePage.dataUtils.editInputs.getDateTypeColumns(table, [IGNORE, HIDDEN]);
 					columns.forEach(function(column) {
-						chaisePage.recordEditPage.getDateInputForAColumn(column.name, recordIndex).then(function(dateInput) {
+						chaisePage.recordEditPage.getInputValue(column.name, recordIndex).then(function(dateInput) {
 							console.log("         ->" + column.name);
 							if (dateInput) {
 								expect(true).toBeDefined();

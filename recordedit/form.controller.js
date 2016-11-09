@@ -152,6 +152,7 @@
                     // If the column is a pseudo column, it needs to get the originating columns name for data submission
                     if (column.isPseudo) {
 
+                        // TODO loop through all columns in foreign key mapping are proper
                         var referenceColumn = column.foreignKey.colset.columns[0];
                         var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
 
@@ -259,7 +260,7 @@
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
-                // TODO bad idea assuming there's 1 value
+                // TODO loop through all columns in foreign key mapping are proper
                 var referenceCol = column.foreignKey.colset.columns[0];
                 var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
 
