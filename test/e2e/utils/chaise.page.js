@@ -344,9 +344,33 @@ var recordEditPage = function() {
         return element.all(by.css(".create-record-btn"));
     };
 
-    this.getDateInputForAColumn = function(name, index) {
+    this.getModalPopupBtns = function() {
+        return element.all(by.css(".modal-popup-btn"));
+    };
+
+    this.getForeignKeyInputRemoveBtns = function() {
+        return element.all(by.css(".foreignkey-remove"));
+    }
+
+    this.getModalTitle = function() {
+        return element(by.css(".modal-title"));
+    };
+
+    this.getModalCloseBtn = function() {
+            return element(by.css(".modal-close"));
+    };
+
+    this.getFormTitle = function() {
+        return element(by.id("entity-title"));
+    };
+
+    this.getForeignKeyInputValue = function(columnDisplayName, index) {
+        return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
+    };
+
+    this.getInputValue = function(columnName, index) {
         index = index || 0;
-        return element(by.model('form.recordEditModel.rows[' + index + ']["' + name + '"]'));
+        return element(by.model('form.recordEditModel.rows[' + index + ']["' + columnName + '"]'));
     };
 
     this.getDatePickerForAnInput = function(el) {
