@@ -240,7 +240,7 @@ exports.testCreateButton = function () {
 };
 
 exports.testDeleteButton = function () {
-    xit("should redirect to data browser.", function () {
+    it("should redirect to data browser.", function () {
         var EC = protractor.ExpectedConditions,
             modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
             config;
