@@ -83,7 +83,7 @@ describe('Record Add', function() {
 							}
 						});
                         done();
-					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
+					});
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
@@ -96,7 +96,7 @@ describe('Record Add', function() {
 						        }
 						    });
 						}
-					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
+					});
 
 				});
     		});

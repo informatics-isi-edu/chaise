@@ -44,7 +44,7 @@ describe('Edit existing record,', function() {
     			        });
                     });
 
-                    xit("from recordedit page and redirect to data browser.", function () {
+                    it("from recordedit page and redirect to data browser.", function () {
                         var EC = protractor.ExpectedConditions,
                             modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
                             config;
