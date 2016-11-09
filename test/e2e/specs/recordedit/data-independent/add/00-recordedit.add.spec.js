@@ -73,7 +73,7 @@ describe('Record Add', function() {
 
 					var hasErrors = false;
 
-					xit("should have no errors, and should be redirected", function(done) {
+					it("should have no errors, and should be redirected", function(done) {
 						chaisePage.recordEditPage.getAlertError().then(function(err) {
 							if (err) {
 								expect("Page has errors").toBe("No errors");
@@ -85,11 +85,10 @@ describe('Record Add', function() {
                         done();
 					}).pend("Postpone test until foreign key UI is updated for the new reference apis");
 
-					xit("should be redirected to record page", function() {
+					it("should be redirected to record page", function() {
 						if (!hasErrors) {
 							browser.sleep(3000);
 							browser.driver.getCurrentUrl().then(function(url) {
-								console.log(url);
 						        if (tableParams.records > 1) {
 						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset/")).toBe(true);
 						        } else {
