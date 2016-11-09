@@ -24,6 +24,17 @@ describe('View existing record,', function() {
 					browser.sleep(2000);
 			    });
 
+                it('should load document title defined in chaise-config.js and have showDeleteButton=true', function() {
+                    browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                        expect(chaiseConfig.showDeleteButton).toBe(true);
+                        if (chaiseConfig.headTitle) {
+                            browser.getTitle().then(function(title) {
+                                expect(title).toEqual(chaiseConfig.headTitle);
+                            });
+                        }
+                    });
+                });
+
 				describe("Presentation ,", function() {
 					var params = recordHelpers.testPresentation(tupleParams);
 				});
@@ -31,19 +42,5 @@ describe('View existing record,', function() {
     		});
 
     	})(testParams.tuples[i], i);
-
-
     }
-
-    it('should load custom CSS and document title defined in chaise-config.js', function() {
-        var chaiseConfig = browser.executeScript('return chaiseConfig');
-        if (chaiseConfig.customCSS) {
-            expect($("link[href='" + chaiseConfig.customCSS + "']").length).toBeTruthy();
-        }
-        if (chaiseConfig.headTitle) {
-            browser.getTitle().then(function(title) {
-                expect(title).toEqual(chaiseConfig.headTitle);
-            });
-        }
-    });
 });
