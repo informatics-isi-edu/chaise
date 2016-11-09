@@ -13,6 +13,8 @@ var config = pConfig.getConfig({
     },
   */
 
+    chaiseConfigFilePath: 'test/e2e/specs/record/data-dependent/chaise-config.js',
+
     page: 'record',
     setBaseUrl: function(browser, data) {
       browser.params.url = process.env.CHAISE_BASE_URL + "/record/#" + data.catalogId + "/" + data.schema.name;

@@ -30,7 +30,7 @@ exports.testPresentation = function (tableParams) {
 
         browser.wait(EC.elementToBeClickable(editButton), 10000);
         browser.wait(EC.elementToBeClickable(createButton), 10000);
-        // browser.wait(EC.elementToBeClickable(deleteButton), 10000);
+        browser.wait(EC.elementToBeClickable(deleteButton), 10000);
         browser.wait(EC.elementToBeClickable(showAllRTButton), 10000);
 
         editButton.isDisplayed().then(function (bool) {
@@ -41,9 +41,9 @@ exports.testPresentation = function (tableParams) {
             expect(bool).toBeTruthy();
         });
 
-        // deleteButton.isDisplayed().then(function (bool) {
-        //     expect(bool).toBeTruthy();
-        // });
+        deleteButton.isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
 
         showAllRTButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -241,7 +241,7 @@ exports.testCreateButton = function () {
 };
 
 exports.testDeleteButton = function () {
-    xit("should redirect to data browser.", function () {
+    it("should redirect to data browser.", function () {
         var EC = protractor.ExpectedConditions,
             modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
             config;
@@ -268,7 +268,7 @@ exports.testDeleteButton = function () {
             expect(parts.length).toBe(4);
             expect(parts[3]).toBe(config.dataBrowser);
         });
-    }).pend("Test is currently pending because we know why it's breaking. This is so we ccan make sure no other regressions exist.");
+    });
 }
 
 exports.relatedTablesDefaultOrder = function (tableParams) {
