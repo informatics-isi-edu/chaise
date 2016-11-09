@@ -524,3 +524,15 @@ tbody{
 .markdown-container .embed-block {
     margin: 10px 10px 10px 0px;
 }
+
+.hideContent {
+    overflow: hidden;
+    line-height: 1.45em;
+    max-height: 7.25em;
+}
+
+.showContent {
+    line-height: 1.45em;
+    height: auto;
+    display: inline
+}

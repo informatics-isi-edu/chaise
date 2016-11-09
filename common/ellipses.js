@@ -4,7 +4,7 @@
     angular.module('chaise.ellipses', [])
 
 
-        .directive('ellipses', ['$sce', function($sce) {
+        .directive('ellipses', ['$sce', '$timeout', function($sce, $timeout) {
 
             return {
                 restrict: 'E',
@@ -13,29 +13,35 @@
                     content: '=',
                     isHtml: "="
                 },
-                link: function (scope) {
+                link: function (scope, element) {
 
-                    scope.max = 300;
+                    scope.overflow = false;
+                    scope.linkText = "more";
 
-                    scope.toPresentation = function(text, isHtml) {
-                        if (!isHtml) {
-                            if (text.length > scope.max)
-                                return text.substring(0, scope.max - 1);
-                            else
-                                return text;
-                        } else {
-                            return $sce.trustAsHtml(text)
-                        }
-                    };
-
-                    scope.contentx = scope.toPresentation(scope.content, scope.isHtml);
-
-                    scope.overflow = scope.content.length > scope.max;
+                    // 1em = 14px
+                    // 7.25em = 101.5px
+                    scope.maxHeight = "7.25em";
+                    scope.showMore = false;
 
                     scope.readmore = function() {
-                        scope.contentx = (scope.isHtml? $sce.trustAsHtml(scope.content) : scope.content);
-                        scope.overflow = false;
+                        if (scope.overflow) {
+                            scope.overflow = false;
+                            scope.linkText = "less";
+                        } else {
+                            scope.overflow = true;
+                            scope.linkText = "more";
+                        }
                     }
+
+                    $timeout(function() {
+                        if (element.children().first().children().first().children().first().prop('offsetHeight') > 101.5) {
+                            scope.overflow = true;
+                            scope.showMore = true;
+                        } else {
+                            scope.overflow = false;
+                        }
+                    }, 0);
+
                 }
             };
         }])
