@@ -1,6 +1,7 @@
 // Configure deployment-specific data here
 
 var chaiseConfig = {
+    name: "record data dependent",
     layout: 'list',
     confirmDelete: true,
     headTitle: 'Chaise',

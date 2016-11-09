@@ -1,6 +1,7 @@
 // Configure deployment-specific data here
 
 var chaiseConfig = {
+    name: "record no delete btn",
     layout: 'list',
     confirmDelete: true,
     headTitle: 'Chaise',

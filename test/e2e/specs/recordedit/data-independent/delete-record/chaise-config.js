@@ -1,6 +1,7 @@
 // Configure deployment-specific data here
 
 var chaiseConfig = {
+    name: "recordedit delete record",
     layout: 'list',
     confirmDelete: true,
     headTitle: 'Chaise',
