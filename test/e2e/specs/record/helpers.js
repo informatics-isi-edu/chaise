@@ -195,7 +195,6 @@ exports.testPresentation = function (tableParams) {
         }).then(function(heading) {
             // related table should be closed now and a '+' should be shown instead of a '-'
             expect(heading.indexOf('+')).toBeGreaterThan(-1);
-
             return tableHeading.getAttribute("class");
         }).then(function(attribute) {
             expect(attribute).not.toMatch("panel-open");
@@ -263,10 +262,7 @@ exports.testDeleteButton = function () {
 
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            var parts = url.split("/");
-
-            expect(parts.length).toBe(4);
-            expect(parts[3]).toBe(config.dataBrowser);
+            expect(url.indexOf('/search/')).toBeGreaterThan(-1);
         });
     });
 }

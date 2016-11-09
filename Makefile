@@ -24,7 +24,9 @@ E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
 E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
+E2EDIrecordEditDeleteRecord=test/e2e/specs/recordedit/data-independent/delete-record/protractor.conf.js
 E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
+E2ErecordNoDeleteBtn=test/e2e/specs/record/no-delete-btn/protractor.conf.js
 E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
 E2EDviewer=test/e2e/specs/viewer/data-dependent/protractor.conf.js
@@ -411,7 +413,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma

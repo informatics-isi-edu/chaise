@@ -1,7 +1,7 @@
 var chaisePage = require('../../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../helpers.js');
 
-describe('Edit existing record,', function() {
+describe('Delete existing record,', function() {
 
 	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
 
@@ -37,36 +37,16 @@ describe('Edit existing record,', function() {
 			    });
 
                 describe("delete existing record ", function () {
-                    it("should load chaise-config.js and nhave confirmDelete=true and dataBrowser=''", function () {
+                    it("should load chaise-config.js and have confirmDelete=true and dataBrowser=''", function () {
                         browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
     			        	expect(chaiseConfig.confirmDelete).toBe(true);
                             expect(chaiseConfig.dataBrowser).toBe("");
     			        });
                     });
 
-                    it("from recordedit page and redirect to data browser.", function () {
-                        var EC = protractor.ExpectedConditions,
-                            modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
-                            config;
-
-                        browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
-                            config = chaiseConfig;
-                            return chaisePage.recordEditPage.getDeleteRecordButton().click()
-                        }).then(function () {
-                            browser.wait(EC.visibilityOf(modalTitle), 5000);
-                            // expect modal to open
-                            return modalTitle.getText();
-                        }).then(function (text) {
-                            expect(text).toBe("Confirm Delete");
-
-                            return chaisePage.recordPage.getConfirmDeleteButton().click();
-                        }).then(function () {
-                            browser.driver.sleep(1000);
-
-                            return browser.driver.getCurrentUrl();
-                        }).then(function(url) {
-                            expect(url.indexOf('/search/')).toBeGreaterThan(-1);
-                        });
+                    it('should not display a delete record button', function() {
+                        var deleteBtn = chaisePage.recordPage.getDeleteRecordButton();
+                        expect(deleteBtn.isPresent()).toBeFalsy();
                     });
                 });
             });
