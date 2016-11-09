@@ -304,7 +304,7 @@ exports.relatedTableLinks = function (tableParams) {
         });
     });
 
-    xit('should have a Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
+    it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,
             addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
@@ -332,7 +332,7 @@ exports.relatedTableLinks = function (tableParams) {
             expect(url.indexOf(relatedTableName)).toBeGreaterThan(-1);
             expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
         });
-    }).pend("Test is currently pending because we know why it's breaking. This is so we ccan make sure no other regressions exist.");
+    });
 
     it("should have a View All link for a related table that redirects to recordset.", function() {
         var EC = protractor.ExpectedConditions,

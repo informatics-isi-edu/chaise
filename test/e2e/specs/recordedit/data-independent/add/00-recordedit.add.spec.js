@@ -137,16 +137,16 @@ describe('Record Add', function() {
             browser.sleep(3000);
         });
 
-        xit('should pre-fill fields from the prefill cookie', function() {
+        it('should pre-fill fields from the prefill cookie', function() {
             browser.manage().getCookie('test').then(function(cookie) {
                 if (cookie) {
-                    var input = element.all(by.css('.popup-select-value')).first();
-                    expect(input.getAttribute('value')).toBe(testCookie.rowname);
+                    var field = element.all(by.css('.popup-select-value')).first();
+                    expect(field.getText()).toBe(testCookie.rowname);
                 } else {
                     expect('Cookie did not load').toEqual('but cookie should have loaded');
                 }
             });
-        }).pend("Test is currently pending because we know why it's breaking. This is so we ccan make sure no other regressions exist.");
+        });
 
         afterAll(function() {
             browser.manage().deleteCookie('test');
