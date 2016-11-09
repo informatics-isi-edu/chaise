@@ -27,10 +27,11 @@
         $cookiesProvider.defaults.secure = true;
     }])
 
-    .run(['DataUtils', 'headInjector', 'ERMrest', 'UriUtils', 'ErrorService', '$log', '$rootScope', '$window', 'UiUtils', 'constants',
-        function runApp(DataUtils, headInjector, ERMrest, UriUtils, ErrorService, $log, $rootScope, $window, UiUtils, constants) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
-        var context = {};
+        var session,
+            context = {};
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
@@ -45,10 +46,21 @@
 
             if (context.filter) {
                 ERMrest.appLinkFn(UriUtils.appTagToURL);
-                ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                Session.getSession().then(function getSession(_session) {
+                    session = _session;
+                    ERMrest.appLinkFn(UriUtils.appTagToURL);
+
+                    return ERMrest.resolve(ermrestUri, {cid: context.appName});
+                }, function sessionFailed() {
+                    var noSessionMessage = "There is no current session.";
+                    var noSessionError = new Error(noSessionMessage);
+                    noSessionError.code = "401 Unauthorized";
+
+                    throw noSessionError;
+                }).then(function getReference(reference) {
                     // $rootScope.reference != reference after contextualization
                     $rootScope.reference = reference.contextualize.detailed;
-                    $rootScope.reference.session = $rootScope.session;
+                    $rootScope.reference.session = session;
 
                     $log.info("Reference: ", $rootScope.reference);
 
