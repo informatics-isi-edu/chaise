@@ -24,7 +24,7 @@ describe('View existing record,', function() {
 					browser.sleep(2000);
 			    });
 
-                it('should load document title defined in chaise-config.js and have showDeleteButton=true', function() {
+                it('should load document title defined in chaise-config.js and have showDeleteButton=true', function(done) {
                     browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                         console.log(chaiseConfig);
                         expect(chaiseConfig.showDeleteButton).toBe(true);
@@ -33,6 +33,7 @@ describe('View existing record,', function() {
                                 expect(title).toEqual(chaiseConfig.headTitle);
                             });
                         }
+                        done();
                     });
                 });
 

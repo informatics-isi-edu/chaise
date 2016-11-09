@@ -1,6 +1,7 @@
 // Configure deployment-specific data here
 
 var chaiseConfig = {
+    name: "navebar",
     layout: 'list',
     confirmDelete: true,
     headTitle: 'test123',
