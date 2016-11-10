@@ -513,7 +513,7 @@
         return ParsedFilter;
     }])
 
-    .factory("DataUtils", ['$sce', function($sce) {
+    .factory("DataUtils", [function() {
         /**
          *
          * @param {ERMrest.Page} page
@@ -525,7 +525,8 @@
                 tuple.values.forEach(function(value, index) {
                     row.push({
                         isHTML: tuple.isHTML[index],
-                        value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                        //value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                        value: value
                     });
                 });
                 return row;

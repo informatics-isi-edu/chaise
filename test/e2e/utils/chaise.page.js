@@ -348,9 +348,14 @@ var recordEditPage = function() {
         return element.all(by.css(".modal-popup-btn"));
     };
 
+
+    this.getModalPopupBtnsUsingScript = function() {
+        return browser.executeScript("return $('.modal-popup-btn')");
+    };
+
     this.getForeignKeyInputRemoveBtns = function() {
-        return element.all(by.css(".foreignkey-remove"));
-    }
+        return browser.executeScript("return $('.foreignkey-remove');");
+    };
 
     this.getModalTitle = function() {
         return element(by.css(".modal-title"));

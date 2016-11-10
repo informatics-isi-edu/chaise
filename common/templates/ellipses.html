@@ -1,0 +1,10 @@
+<div ng-switch="isHtml">
+    <div ng-class="{'hideContent': overflow == true, 'showContent': overflow == false}" >
+	    <span ng-switch-when="true" class="markdown-container" ng-bind-html="content"></span>
+	    <span ng-switch-default>{{content}}</span>
+    </div>
+    <div ng-show="showMore" style="display:inline;">
+        ...
+        <span style="display:inline-block; text-decoration: underline" class="text-primary readmore" ng-click="readmore()">{{linkText}}</span>
+    </div>
+</div>
