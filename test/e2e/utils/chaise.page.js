@@ -354,8 +354,8 @@ var recordEditPage = function() {
     };
 
     this.getForeignKeyInputRemoveBtns = function() {
-        return element.all(by.css(".foreignkey-remove"));
-    }
+        return browser.executeScript("return $('.foreignkey-remove');");
+    };
 
     this.getModalTitle = function() {
         return element(by.css(".modal-title"));

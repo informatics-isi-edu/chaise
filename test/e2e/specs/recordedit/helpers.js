@@ -309,12 +309,15 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
                 // in the edit case
                 if (!tableParams.records) {
+                	
                     it("clicking the 'x' should remove the value in the foreign key field.", function () {
                         var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].displayName, recordIndex);
                         //the first foreignkey input for editing should be pre-filled
                         expect(foreignKeyInput.getAttribute("value")).toBeDefined();
 
-                        chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().get(0).click().then(function() {
+                        chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(foreignKeyInputRemoveBtn) {
+                        	return chaisePage.clickButton(foreignKeyInputRemoveBtn[0]);
+                        }).then(function() {
                             // value is empty string after removing it
                             expect(foreignKeyInput.getAttribute("value")).toBe('');
                         });
@@ -324,14 +327,16 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                         var modalClose = chaisePage.recordEditPage.getModalCloseBtn(),
                             EC = protractor.ExpectedConditions;
 
-                        chaisePage.recordEditPage.getModalPopupBtns().get(0).click().then(function() {
+                        chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtn) {
+                        	return chaisePage.clickButton(popupBtn);
+                        }).then(function() {
                             // wait for the modal to open
                             browser.wait(EC.visibilityOf(modalClose), 5000);
                             return modalClose.click();
                         }).then(function() {
                             var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].displayName, recordIndex);
                             expect(foreignKeyInput.getAttribute("value")).toBe('');
-                        })
+                        });
                     });
 				}
 
