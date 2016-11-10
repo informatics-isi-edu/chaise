@@ -79,8 +79,6 @@ exports.getConfig = function(options) {
     process.exit(1);
   }
 
-  execSync("sudo cat /var/www/html/chaise/chaise-config.js");
-
   dataSetup.parameterize(config, dateSetupOptions);
 
   return config;
