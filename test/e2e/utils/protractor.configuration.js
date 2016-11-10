@@ -58,26 +58,25 @@ exports.getConfig = function(options) {
     }
   } 
 
+  var execSync = require('child_process').execSync;
   var remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
-  if (typeof remoteChaiseDirPath !== 'string') {
-    var fsExtra = require('fs-extra');
-    try {
-      fsExtra.copySync(process.env.PWD + "/" + chaiseFilePath, process.env.PWD + "/chaise-config.js", { encoding: 'utf8' });
-      console.log("Copied file " + chaiseFilePath + " successfully to chaise-config.js \n");
-    } catch (err) {
-      console.error(err);
-      console.log("Unable to copy file " + chaiseFilePath + " to chaise-config.js \n");
-      process.exit(1);
-    }
+  var cmd = 'cp ' + (process.env.PWD + "/" + chaiseFilePath) + " " + (process.env.PWD + "/chaise-config.js");
+
+  // The tests will take this path when it is not running on Travis and remoteChaseDirPath is not null
+  if (typeof remoteChaiseDirPath == 'string') {
+    cmd = 'scp ' + chaiseFilePath + ' ' + remoteChaiseDirPath  + '/chaise-config.js';
+    console.log("Copying using scp");
   } else {
-    var execSync = require('child_process').execSync;
-    var code = execSync('scp ' + chaiseFilePath + ' ' + remoteChaiseDirPath  + '/chaise-config.js');
-    console.log(code);
-    if (code == 0) console.log("Copied file " + chaiseFilePath + " successfully to chaise-config.js \n");
-    else {
-      console.log("Unable to copy file " + chaiseFilePath + " to chaise-config.js \n");
-      process.exit(1);
-    }
+    console.log("Copying using cp on Travis");
+  }
+
+
+  var code = execSync(cmd);
+  console.log(code);
+  if (code == 0) console.log("Copied file " + chaiseFilePath + " successfully to chaise-config.js \n");
+  else {
+    console.log("Unable to copy file " + chaiseFilePath + " to chaise-config.js \n");
+    process.exit(1);
   }
 
   dataSetup.parameterize(config, dateSetupOptions);
