@@ -59,11 +59,8 @@
 
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }, function sessionFailed() {
-                var noSessionMessage = "There is no current session.";
-                var noSessionError = new Error(noSessionMessage);
-                noSessionError.code = "401 Unauthorized";
-
-                throw noSessionError;
+                // do nothing but return without a session
+                return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
                 $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = session;
