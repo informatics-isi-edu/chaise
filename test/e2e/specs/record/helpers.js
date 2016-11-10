@@ -30,7 +30,7 @@ exports.testPresentation = function (tableParams) {
 
         browser.wait(EC.elementToBeClickable(editButton), 10000);
         browser.wait(EC.elementToBeClickable(createButton), 10000);
-        // browser.wait(EC.elementToBeClickable(deleteButton), 10000);
+        browser.wait(EC.elementToBeClickable(deleteButton), 10000);
         browser.wait(EC.elementToBeClickable(showAllRTButton), 10000);
 
         editButton.isDisplayed().then(function (bool) {
@@ -41,9 +41,9 @@ exports.testPresentation = function (tableParams) {
             expect(bool).toBeTruthy();
         });
 
-        // deleteButton.isDisplayed().then(function (bool) {
-        //     expect(bool).toBeTruthy();
-        // });
+        deleteButton.isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
 
         showAllRTButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -195,7 +195,6 @@ exports.testPresentation = function (tableParams) {
         }).then(function(heading) {
             // related table should be closed now and a '+' should be shown instead of a '-'
             expect(heading.indexOf('+')).toBeGreaterThan(-1);
-
             return tableHeading.getAttribute("class");
         }).then(function(attribute) {
             expect(attribute).not.toMatch("panel-open");
@@ -241,7 +240,7 @@ exports.testCreateButton = function () {
 };
 
 exports.testDeleteButton = function () {
-    xit("should redirect to data browser.", function () {
+    it("should redirect to data browser.", function () {
         var EC = protractor.ExpectedConditions,
             modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
             config;
@@ -263,12 +262,9 @@ exports.testDeleteButton = function () {
 
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            var parts = url.split("/");
-
-            expect(parts.length).toBe(4);
-            expect(parts[3]).toBe(config.dataBrowser);
+            expect(url.indexOf('/search/')).toBeGreaterThan(-1);
         });
-    }).pend("Test is currently pending because we know why it's breaking. This is so we ccan make sure no other regressions exist.");
+    });
 }
 
 exports.relatedTablesDefaultOrder = function (tableParams) {
@@ -304,7 +300,7 @@ exports.relatedTableLinks = function (tableParams) {
         });
     });
 
-    xit('should have a Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
+    it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,
             addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
@@ -332,7 +328,7 @@ exports.relatedTableLinks = function (tableParams) {
             expect(url.indexOf(relatedTableName)).toBeGreaterThan(-1);
             expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
         });
-    }).pend("Test is currently pending because we know why it's breaking. This is so we ccan make sure no other regressions exist.");
+    });
 
     it("should have a View All link for a related table that redirects to recordset.", function() {
         var EC = protractor.ExpectedConditions,

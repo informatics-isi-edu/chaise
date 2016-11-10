@@ -1,7 +1,7 @@
 // Configure deployment-specific data here
 
 var chaiseConfig = {
-    name: "Sample",
+    name: "recordedit delete record",
     layout: 'list',
     confirmDelete: true,
     headTitle: 'Chaise',
@@ -22,7 +22,7 @@ var chaiseConfig = {
     recordUiGridExportCSVEnabled: true,
     recordUiGridExportPDFEnabled: true,
     editRecord: true,
-    showDeleteButton: true,
+    showDeleteButton: false,
     tour: {
       pickRandom: false,
       searchInputAttribute: "Data",

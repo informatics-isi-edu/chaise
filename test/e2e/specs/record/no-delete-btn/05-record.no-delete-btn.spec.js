@@ -24,15 +24,17 @@ describe('View existing record,', function() {
 					browser.sleep(2000);
 			    });
 
-			    it("should load chaise-config.js and have confirmDelete=true", function() {
+			    it("should load chaise-config.js and have confirmDelete=true and dataBrowser=''", function() {
 			        browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
 			        	expect(chaiseConfig.confirmDelete).toBe(true);
+                        expect(chaiseConfig.dataBrowser).toBe("");
 			        });
 				});
 
-                describe("Click the delete record button ,", function() {
-					var params = recordHelpers.testDeleteButton(tupleParams);
-				});
+                it('should not display a delete record button', function() {
+                    var deleteBtn = chaisePage.recordPage.getDeleteRecordButton();
+                    expect(deleteBtn.isPresent()).toBeFalsy();
+                });
 
     		});
 

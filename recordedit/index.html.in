@@ -110,11 +110,11 @@
                                                 <div class="form-control popup-select-value" type="text" ng-style="form.isDisabled(column)? {'cursor': 'default'} : {'cursor': 'pointer'}" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);"
                                                     ng-bind-html="(form.recordEditModel.rows[rowIndex][column.name] ? form.recordEditModel.rows[rowIndex][column.name] : form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]))"></div>
                                                 <div class="form-control-feedback coltooltip" ng-hide="(form.isDisabled(column)) || (!form.recordEditModel.rows[rowIndex][column.name])" ng-style="{'cursor': 'pointer', 'right': '80px'}">
-                                                    <span class="glyphicon glyphicon-remove" ng-click="form.clearForeignKey(rowIndex, column)"></span>
+                                                    <span class="glyphicon glyphicon-remove foreignkey-remove" ng-click="form.clearForeignKey(rowIndex, column)"></span>
                                                     <span class="coltooltiptext">Clear field</span>
                                                 </div>
                                                 <span class="input-group-btn">
-                                                    <button ng-focus="form.blurElement($event);" class="btn btn-default coltooltip" type="button" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
+                                                    <button ng-focus="form.blurElement($event);" class="btn btn-default coltooltip modal-popup-btn" type="button" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
                                                         <span class="glyphicon glyphicon-chevron-down"></span>
                                                         <span class="coltooltiptext">Choose from an existing value</span>
                                                     </button>
@@ -123,7 +123,8 @@
                                                         <span class="coltooltiptext">Create a new value</span>
                                                     </button>
                                                 </span>
-                                                <input type="hidden" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(column);" />
+                                                <!-- So that the foreign key input can be validated -->
+                                                <input type="hidden" id="row-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(column);" />
                                             </div>
 
                                             <!-- int2 input -->

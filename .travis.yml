@@ -56,6 +56,10 @@ before_install:
   - bower install
   - sudo make build
   - sudo make install
+  - cd ..
+  - git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
+  - cd ErmrestDataUtils
+  - sudo npm install
   - cd ../chaise
   - sudo npm install
 
