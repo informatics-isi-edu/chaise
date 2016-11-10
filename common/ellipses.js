@@ -34,7 +34,7 @@
                     }
 
                     $timeout(function() {
-                        if (element.children().first().children().first().children().first().prop('offsetHeight') > 101.5) {
+                        if (element.children().first().prop('offsetHeight') > 101.5) {
                             scope.overflow = true;
                             scope.showMore = true;
                         } else {
