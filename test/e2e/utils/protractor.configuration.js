@@ -60,7 +60,7 @@ exports.getConfig = function(options) {
 
   var execSync = require('child_process').execSync;
   var remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
-  var cmd = 'sudo cp ' + (process.env.PWD + "/" + chaiseFilePath) + " " + (process.env.PWD + "/chaise-config.js");
+  var cmd = 'sudo cp ' + ("/var/www/html/chaise/" + chaiseFilePath) + " " + ("/var/www/html/chaise/chaise-config.js");
 
   // The tests will take this path when it is not running on Travis and remoteChaseDirPath is not null
   if (typeof remoteChaiseDirPath == 'string') {
@@ -78,6 +78,8 @@ exports.getConfig = function(options) {
     console.log("Unable to copy file " + chaiseFilePath + " to chaise-config.js \n");
     process.exit(1);
   }
+
+  execSync("sudo cat /var/www/html/chaise/chaise-config.js");
 
   dataSetup.parameterize(config, dateSetupOptions);
 
