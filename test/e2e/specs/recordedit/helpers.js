@@ -309,7 +309,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
                 // in the edit case
                 if (!tableParams.records) {
-                	
+
                     it("clicking the 'x' should remove the value in the foreign key field.", function () {
                         var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].displayName, recordIndex);
                         //the first foreignkey input for editing should be pre-filled
@@ -327,8 +327,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                         var modalClose = chaisePage.recordEditPage.getModalCloseBtn(),
                             EC = protractor.ExpectedConditions;
 
-                        chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtn) {
-                        	return chaisePage.clickButton(popupBtn);
+                        chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+                        	return chaisePage.clickButton(popupBtns[0]);
                         }).then(function() {
                             // wait for the modal to open
                             browser.wait(EC.visibilityOf(modalClose), 5000);
