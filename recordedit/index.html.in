@@ -113,12 +113,12 @@
                                                     <span class="glyphicon glyphicon-remove foreignkey-remove" ng-click="form.clearForeignKey(rowIndex, column)"></span>
                                                     <span class="coltooltiptext">Clear field</span>
                                                 </div>
-                                                <span class="input-group-btn">
+                                                <span class="input-group-addon" style="padding: 0px;background-color: transparent;border: none;vertical-align: top;">
                                                     <button ng-focus="form.blurElement($event);" class="btn btn-default coltooltip modal-popup-btn" type="button" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
                                                         <span class="glyphicon glyphicon-chevron-down"></span>
                                                         <span class="coltooltiptext">Choose from an existing value</span>
                                                     </button>
-                                                    <button ng-focus="form.blurElement($event);" class="btn btn-primary coltooltip create-record-btn" type="button" ng-click="form.createRecord(column)" ng-disabled="::form.isDisabled(column);">
+                                                    <button ng-focus="form.blurElement($event);" class="btn btn-primary coltooltip create-record-btn" type="button" ng-click="form.createRecord(column)" ng-disabled="::form.isDisabled(column);" style="margin-left: -4px;">
                                                         <span class="glyphicon glyphicon-plus"></span>
                                                         <span class="coltooltiptext">Create a new value</span>
                                                     </button>
