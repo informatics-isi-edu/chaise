@@ -62,5 +62,9 @@
                 return (isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues.length > 0;
             }
         };
+
+        vm.toggleRelatedTables = function() {
+            vm.showEmptyRelatedTables = !vm.showEmptyRelatedTables;
+        };
     }]);
 })();
