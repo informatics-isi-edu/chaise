@@ -336,40 +336,43 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				}
 
                 it("should open a modal search and select a foreign key value.", function () {
-                    var popupBtns = chaisePage.recordEditPage.getModalPopupBtns(),
-                        modalTitle = chaisePage.recordEditPage.getModalTitle(),
-                        EC = protractor.ExpectedConditions;
+                   
+                    chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+                    	var modalTitle = chaisePage.recordEditPage.getModalTitle(),
+                        	EC = protractor.ExpectedConditions;
 
-                    expect(popupBtns.count()).toBe(columns.length * (recordIndex + 1));
+                    	expect(popupBtns.length).toBe(columns.length * (recordIndex + 1));
 
-                    for (var i=0; i<columns.length; i++) {
-                        (function(i) {
-                            var rows;
-                            popupBtns.get( (columns.length * recordIndex) + i ).click().then(function() {
-                                // wait for the modal to open
-                                browser.wait(EC.visibilityOf(modalTitle), 5000);
+	                    for (var i=0; i<columns.length; i++) {
+	                        (function(i) {
+	                            var rows;
+	                            chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]).then(function() {
+	                                // wait for the modal to open
+	                                browser.wait(EC.visibilityOf(modalTitle), 5000);
 
-                                return modalTitle.getText();
-                            }).then(function(text) {
-                                // make sure modal opened
-                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+	                                return modalTitle.getText();
+	                            }).then(function(text) {
+	                                // make sure modal opened
+	                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
 
-                                rows = chaisePage.recordsetPage.getRows();
-                                // count is needed for clicking a random row
-                                return rows.count();
-                            }).then(function(ct) {
-                                expect(ct).toBeGreaterThan(0);
+	                                rows = chaisePage.recordsetPage.getRows();
+	                                // count is needed for clicking a random row
+	                                return rows.count();
+	                            }).then(function(ct) {
+	                                expect(ct).toBeGreaterThan(0);
 
-                                var index = Math.floor(Math.random() * ct);
-                                return rows.get(index).click();
-                            }).then(function() {
-                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
+	                                var index = Math.floor(Math.random() * ct);
+	                                return rows.get(index).click();
+	                            }).then(function() {
+	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
 
-                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
-                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-                            });
-                        })(i);
-                    }
+	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
+	                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
+	                            });
+	                        })(i);
+	                    }
+                    });
+                    
                 });
 
 				it("should have a `create new` button that opens a new tab", function(){
