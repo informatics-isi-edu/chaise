@@ -48,15 +48,11 @@
                 ERMrest.appLinkFn(UriUtils.appTagToURL);
                 Session.getSession().then(function getSession(_session) {
                     session = _session;
-                    ERMrest.appLinkFn(UriUtils.appTagToURL);
 
                     return ERMrest.resolve(ermrestUri, {cid: context.appName});
-                }, function sessionFailed() {
-                    var noSessionMessage = "There is no current session.";
-                    var noSessionError = new Error(noSessionMessage);
-                    noSessionError.code = "401 Unauthorized";
-
-                    throw noSessionError;
+                }, function(exception){
+                    // do nothing but return without a session
+                    return ERMrest.resolve(ermrestUri, {cid: context.appName});
                 }).then(function getReference(reference) {
                     // $rootScope.reference != reference after contextualization
                     $rootScope.reference = reference.contextualize.detailed;
