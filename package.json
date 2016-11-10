@@ -54,6 +54,7 @@
     "q": "^1.4.1",
     "request": "x",
     "set-cookie-parser": "x",
-    "webdriver-manager": "x"
+    "webdriver-manager": "x",
+    "request-q": "x"
   }
 }

@@ -1,4 +1,6 @@
 var ermrestUtils = require("ermrest-data-utils");
+
+//var ermrestUtils = require(process.env.PWD +"/../ErmrestDataUtils/import.js");
 var Q = require('q'); 
 
 // Fetches the schemas for the current catalog
