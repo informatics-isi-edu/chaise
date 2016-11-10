@@ -60,7 +60,7 @@ exports.getConfig = function(options) {
 
   var execSync = require('child_process').execSync;
   var remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
-  var cmd = 'cp ' + (process.env.PWD + "/" + chaiseFilePath) + " " + (process.env.PWD + "/chaise-config.js");
+  var cmd = 'sudo cp ' + (process.env.PWD + "/" + chaiseFilePath) + " " + (process.env.PWD + "/chaise-config.js");
 
   // The tests will take this path when it is not running on Travis and remoteChaseDirPath is not null
   if (typeof remoteChaiseDirPath == 'string') {
