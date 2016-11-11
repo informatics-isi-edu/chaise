@@ -309,12 +309,15 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
                 // in the edit case
                 if (!tableParams.records) {
+
                     it("clicking the 'x' should remove the value in the foreign key field.", function () {
                         var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].displayName, recordIndex);
                         //the first foreignkey input for editing should be pre-filled
                         expect(foreignKeyInput.getAttribute("value")).toBeDefined();
 
-                        chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().get(0).click().then(function() {
+                        chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(foreignKeyInputRemoveBtn) {
+                        	return chaisePage.clickButton(foreignKeyInputRemoveBtn[0]);
+                        }).then(function() {
                             // value is empty string after removing it
                             expect(foreignKeyInput.getAttribute("value")).toBe('');
                         });
@@ -324,52 +327,57 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                         var modalClose = chaisePage.recordEditPage.getModalCloseBtn(),
                             EC = protractor.ExpectedConditions;
 
-                        chaisePage.recordEditPage.getModalPopupBtns().get(0).click().then(function() {
+                        chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+                        	return chaisePage.clickButton(popupBtns[0]);
+                        }).then(function() {
                             // wait for the modal to open
                             browser.wait(EC.visibilityOf(modalClose), 5000);
                             return modalClose.click();
                         }).then(function() {
                             var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].displayName, recordIndex);
                             expect(foreignKeyInput.getAttribute("value")).toBe('');
-                        })
+                        });
                     });
 				}
 
                 it("should open a modal search and select a foreign key value.", function () {
-                    var popupBtns = chaisePage.recordEditPage.getModalPopupBtns(),
-                        modalTitle = chaisePage.recordEditPage.getModalTitle(),
-                        EC = protractor.ExpectedConditions;
+                   
+                    chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+                    	var modalTitle = chaisePage.recordEditPage.getModalTitle(),
+                        	EC = protractor.ExpectedConditions;
 
-                    expect(popupBtns.count()).toBe(columns.length * (recordIndex + 1));
+                    	expect(popupBtns.length).toBe(columns.length * (recordIndex + 1));
 
-                    for (var i=0; i<columns.length; i++) {
-                        (function(i) {
-                            var rows;
-                            popupBtns.get( (columns.length * recordIndex) + i ).click().then(function() {
-                                // wait for the modal to open
-                                browser.wait(EC.visibilityOf(modalTitle), 5000);
+	                    for (var i=0; i<columns.length; i++) {
+	                        (function(i) {
+	                            var rows;
+	                            chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]).then(function() {
+	                                // wait for the modal to open
+	                                browser.wait(EC.visibilityOf(modalTitle), 5000);
 
-                                return modalTitle.getText();
-                            }).then(function(text) {
-                                // make sure modal opened
-                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+	                                return modalTitle.getText();
+	                            }).then(function(text) {
+	                                // make sure modal opened
+	                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
 
-                                rows = chaisePage.recordsetPage.getRows();
-                                // count is needed for clicking a random row
-                                return rows.count();
-                            }).then(function(ct) {
-                                expect(ct).toBeGreaterThan(0);
+	                                rows = chaisePage.recordsetPage.getRows();
+	                                // count is needed for clicking a random row
+	                                return rows.count();
+	                            }).then(function(ct) {
+	                                expect(ct).toBeGreaterThan(0);
 
-                                var index = Math.floor(Math.random() * ct);
-                                return rows.get(index).click();
-                            }).then(function() {
-                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
+	                                var index = Math.floor(Math.random() * ct);
+	                                return rows.get(index).click();
+	                            }).then(function() {
+	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
 
-                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
-                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-                            });
-                        })(i);
-                    }
+	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
+	                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
+	                            });
+	                        })(i);
+	                    }
+                    });
+                    
                 });
 
 				it("should have a `create new` button that opens a new tab", function(){
