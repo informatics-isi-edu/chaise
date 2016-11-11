@@ -32,7 +32,7 @@
             });
 
             modalInstance.result.then(function () {
-                if (errorCode == "401 Unauthorized" && !providedLink) {
+                if (errorCode == "Unauthorized" && !providedLink) {
                     Session.login($window.location.href);
                 } else {
                     $window.location.replace(redirectLink);
@@ -44,7 +44,7 @@
         function catchAll(exception) {
             $log.info(exception);
 
-            if (exception instanceof ERMrest.UnauthorizedError || exception.code == "401 Unauthorized") {
+            if (exception instanceof ERMrest.UnauthorizedError || exception.code == "Unauthorized") {
                 Session.login($window.location.href);
             } else {
                 AlertsService.addAlert({type:'error', message:exception.message});

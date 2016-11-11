@@ -96,7 +96,7 @@
                                 var filter = context.filter;
                                 var noDataMessage = "No entity exists with " + filter.column + filter.operator + filter.value;
                                 var noDataError = new Error(noDataMessage);
-                                noDataError.code = "404 Not Found";
+                                noDataError.code = "Not Found";
 
                                 throw noDataError;
                             }
@@ -155,21 +155,35 @@
                         }).catch(function readCatch(exception) {
                             ErrorService.errorPopup(exception.message, exception.code, "home page");
                         });
+                    } else if (session) {
+                        var notAuthorizedMessage = "You are not authorized to Update entities.";
+                        var notAuthorizedError = new Error(notAuthorizedMessage);
+                        notAuthorizedError.code = "Fordbidden";
+
+                        throw notAuthorizedError;
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Update entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
-                        notAuthorizedError.code = "403 Fordbidden";
+
+                        notAuthorizedError.code = "Unauthorized";
 
                         throw notAuthorizedError;
                     }
                 } else {
                     if ($rootScope.reference.canCreate) {
                         $rootScope.displayname = $rootScope.reference.displayname;
+                    } else if (session) {
+                        var forbiddenMessage = "You are not authorized to Create entities.";
+                        var forbiddenError = new Error(forbiddenMessage);
+
+                        forbiddenError.code = "Forbidden";
+
+                        throw forbiddenError;
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
 
-                        notAuthorizedError.code = "403 Fordbidden";
+                        notAuthorizedError.code = "Unauthorized";
 
                         throw notAuthorizedError;
                     }
@@ -178,9 +192,9 @@
                 $log.warn(response);
                 throw response;
             }).catch(function genericCatch(exception) {
-                if (exception instanceof ERMrest.UnauthorizedError || exception.code == "401 Unauthorized") {
+                if (exception instanceof ERMrest.UnauthorizedError || exception.code == "Unauthorized") {
                     ErrorService.catchAll(exception);
-                } else if (exception.code == "403 Forbidden") {
+                } else if (exception.code == "Forbidden") {
                     ErrorService.errorPopup(exception.message, exception.code, "previous page", $window.document.referrer);
                 } else {
                     ErrorService.errorPopup(exception.message, exception.code, "home page");
