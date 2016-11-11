@@ -2,222 +2,195 @@
     'use strict';
 
     angular.module('chaise.recordEdit', [
-        'ermrestjs',
-        'ngSanitize',
-        'chaise.utils',
-        'chaise.authen',
-        'chaise.navbar',
-        'chaise.errors',
+        '720kb.datepicker',
         'chaise.alerts',
-        'chaise.filters',
-        'chaise.validators',
+        'chaise.authen',
         'chaise.delete',
-        'ui.bootstrap',
+        'chaise.errors',
+        'chaise.filters',
         'chaise.modal',
-        'ui.select',
+        'chaise.navbar',
+        'chaise.record.table',
+        'chaise.utils',
+        'chaise.validators',
+        'ermrestjs',
+        'ngCookies',
+        'ngMessages',
+        'ngSanitize',
         'ui.bootstrap',
         'ui.mask',
-        'ngMessages'
+        'ui.select'
     ])
 
-    // Configure the context info from the URI
-    .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
-        var utils = UriUtilsProvider.$get();
-
-        // Parse the URL
-        utils.setOrigin();
-        utils.parseURLFragment(window.location, context);
-
-        console.log('Context:',context);
+    .config(['$cookiesProvider', function($cookiesProvider) {
+        $cookiesProvider.defaults.path = '/';
+        $cookiesProvider.defaults.secure = true;
     }])
 
-    .run(['headInjector', 'context', 'ERMrest', 'recordEditModel', 'AlertsService', 'ErrorService', 'Session','$rootScope', 'UriUtils', '$log', '$uibModal', '$window', function runApp(headInjector, context, ERMrest, recordEditModel, AlertsService, ErrorService, Session, $rootScope, UriUtils, $log, $uibModal, $window) {
+    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+        var session,
+            context = { booleanValues: ['', true, false] };
+        UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
 
-        if (!chaiseConfig.editRecord  && chaiseConfig.editRecord !== undefined) {
-            var modalInstance = $uibModal.open({
-                controller: 'ErrorDialogController',
-                controllerAs: 'ctrl',
-                size: 'sm',
-                templateUrl: '../common/templates/errorDialog.html',
-                backdrop: 'static',
-                keyboard: false,
-                resolve: {
-                    params: {
-                        title: 'Record Editing Disabled',
-                        message: 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.'
-                    }
-                }
-            });
+        // This is to allow the dropdown button to open at the top/bottom depending on the space available
+        UiUtils.setBootstrapDropdownButtonBehavior();
+        UriUtils.setLocationChangeHandling();
 
-            modalInstance.result.then(function() {
-                $window.location.href = chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin;
-            });
-        }
-        // generic try/catch
         try {
-            var server = context.server = ERMrest.ermrestFactory.getServer(context.serviceURL, {cid: context.appName});
-        } catch (exception) {
-            ErrorService.catchAll(exception);
-        }
-        server.catalogs.get(context.catalogID).then(function success(catalog) {
-            try {
-                var schema = catalog.schemas.get(context.schemaName); // caught by generic exception case
-                var table = schema.tables.get(context.tableName); // caught by generic exception case
+            // If defined but false, throw an error
+            if (!chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
+                var message = 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.';
+                var error = new Error(message);
+                error.code = "Record Editing Disabled";
 
-                console.log('Table:', table);
-                recordEditModel.table = table;
+                throw error;
+            }
 
-                var foreignKeys = table.foreignKeys.all(); // caught by generic exception case
-                angular.forEach(foreignKeys, function(fkey) {
-                    // simple implies one column
-                    if (fkey.simple) {
-                        var ftable = fkey.key.table;
-                        var keyColumn = fkey.key.colset.columns[0];
+            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-                        /* FIRST USE CASE: covered by default; display = key column */
+            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
+            context.appName = "recordedit";
 
-                        var pattern = "{" + keyColumn.name + "}";
-                        var displayColumns = [keyColumn];
+            Session.getSession().then(function getSession(_session) {
+                session = _session;
+                ERMrest.appLinkFn(UriUtils.appTagToURL);
 
-                        /* SECOND USE CASE: conditional if the table is tagged as a vocabulary */
+                return ERMrest.resolve(ermrestUri, {cid: context.appName});
+            }, function sessionFailed() {
+                var noSessionMessage = "There is no current session.";
+                var noSessionError = new Error(noSessionMessage);
+                noSessionError.code = "401 Unauthorized";
 
-                        try {
-                            var vocabAnnotationTag = "tag:misd.isi.edu,2015:vocabulary";
-                            var displayAnnotationTag = "tag:misd.isi.edu,2015:display";
+                throw noSessionError;
+            }).then(function getReference(reference) {
+                $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
+                $rootScope.reference.session = session;
 
-                            if (ftable.annotations.contains(vocabAnnotationTag)) {
-                                // no need to catch this, using `.contains` verifies it exists or not
-                                // if an exception is thrown at this point it will be caught by generic exception case
-                                var vocabAnnotation = ftable.annotations.get(vocabAnnotationTag);
-                                if (vocabAnnotation.content.term) {
-                                    var termColumn = ftable.columns.get(vocabAnnotation.content.term); // caught by generic exception case
-                                    displayColumns.push(termColumn); // the array is now [keyColumn, termColumn]
-                                }
-                                // vocabulary term is undefined
-                                else {
-                                    var ftableColumns = ftable.columns.all(); // caught by generic exception case
-                                    for (var i = 0, length = ftableColumns.length; i < length; i++) {
-                                        var uppColumnName = ftableColumns[i].name.toUpperCase();
-                                        if (uppColumnName == 'TERM' || uppColumnName == 'NAME') {
-                                            displayColumns.push(ftableColumns[i]);
-                                            break;
-                                        }
-                                    } /* term undefined */
-                                }
-                                if (displayColumns.length > 1) {
-                                    pattern = "{" + displayColumns[1].name + "}";
-                                }
-                                /* END USE CASE 2 */
-                            }
-                            /* THIRD USE CASE: not a vocabulary but it has a “display : row name” annotation */
-                            /* Git issue #358 */
-                            else if (ftable.annotations.contains(displayAnnotationTag)) {
-                                // no need to catch this, using `.contains` verifies it exists or not
-                                // if an exception is thrown at this point it will be caught by generic exception case
-                                var displayAnnotation = ftable.annotations.get(displayAnnotationTag);
-                                if (displayAnnotation.content.row_name) {
-                                    // TODO
-                                    // var array_of_col_names = REGEX THE array of column_name strings from “ … `{` column_name `}` …” patterns
-                                    // angular.forEach(array_of_col_names, function(column_name) {
-                                    //     displayColumns.push(table.columns.get(column_name));
-                                    // });
-                                    //
-                                    // pattern = displayAnnotation.row_name;
-                                }
-                            }
-                        } finally {
-                            (function(fkey) {
-                                ftable.entity.get(null, null, displayColumns).then(function success(rowset) {
-                                    var domainValues = recordEditModel.domainValues[fkey.colset.columns[0].name] = [];
-                                    var displayColumnName = (displayColumns[1] ? displayColumns[1].name : keyColumn.name);
+                $log.info("Reference: ", $rootScope.reference);
 
-                                    angular.forEach(rowset.data, function(column) {
-                                        domainValues.push( {key: column[keyColumn.name], display: column[displayColumnName]/*Util.patternExpansion( pattern, column.data )*/} );
-                                    });
-                                }, function error(response) {
-                                    // shouldn't error out
-                                    $log.info(response);
-                                });
-                            })(fkey);
-                        }
-                    }
-                });
+                // Case for creating an entity, with prefilled values
+                if (context.prefill) {
+                    // get the cookie with the prefill value
+                    var cookie = $cookies.getObject(context.prefill);
+                    if (cookie) {
+                        // Update view model
+                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname;
 
-                // If there are filters, populate the model with existing records' column values
-                if (context.filter && (context.filter.type === "BinaryPredicate" || context.filter.type === "Conjunction")) {
-                    var path = new ERMrest.DataPath(table);
-                    // TODO: Store filters in URI form in model to use later on form submission
-                    var filterString = UriUtils.parsedFilterToERMrestFilter(context.filter, table);
-                    // recordEditModel.filterUri = filterString.toUri();
-
-                    var path = path.filter(filterString);
-                    path.entity.get().then(function success(entity) {
-                        if (entity.length === 0) {
-                            AlertsService.addAlert({type: 'error', message: 'Sorry, the requested record was not found. Please check the URL and refresh the page.' });
-                            console.log('The requested record in schema ' + context.schemaName + ', table ' + context.tableName + ' with the following attributes: ' + context.filter + ' was not found.');
-                        }
-
-                        angular.forEach(entity[0], function(value, colName) {
-                            try {
-                                var pathColumnType = path.context.columns.get(colName).column.type.name;
-                                // Transform columns with date/timestamp values
-                                if (pathColumnType == 'timestamp' || pathColumnType == 'timestamptz') {
-                                    if (value) {
-                                        var ts = moment(value);
-                                        value = {
-                                            date: ts.format('YYYY-MM-DD'),
-                                            time: ts.format('hh:mm:ss'),
-                                            meridiem: ts.format('A')
-                                        };
-                                    } else {
-                                        value = {
-                                            date: null,
-                                            time: null,
-                                            meridiem: null
-                                        };
-                                    }
-                                }
-                                recordEditModel.rows[recordEditModel.rows.length - 1][colName] = value;
-                            } catch (exception) { }
+                        // Update submission model
+                        var columnNames = Object.keys(cookie.keys);
+                        columnNames.forEach(function(colName) {
+                            var colValue = cookie.keys[colName];
+                            recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
                         });
-                    });
+                    }
+                    console.log('Model', recordEditModel);
                 }
-                console.log('Model:',recordEditModel);
 
-            } catch (exception) { // handle generic catch
+                // Case for editing an entity
+                if (context.filter) {
+                    if ($rootScope.reference.canUpdate) {
+                        // check id range before reading?
+                        $rootScope.reference.read(1).then(function getPage(page) {
+                            $log.info("Page: ", page);
 
-                // ideally this would be used for Table/Schema not found instead of in general case
-                if (exception instanceof ERMrest.NotFoundError) {
-                    $log.info(exception);
+                            if (page.tuples.length < 1) {
+                                var filter = context.filter;
+                                var noDataMessage = "No entity exists with " + filter.column + filter.operator + filter.value;
+                                var noDataError = new Error(noDataMessage);
+                                noDataError.code = "404 Not Found";
+
+                                throw noDataError;
+                            }
+
+                            var column, value,
+                                tuple = page.tuples[0],
+                                values = tuple.values;
+
+                            $rootScope.tuples = page.tuples;
+                            $rootScope.displayname = tuple.displayname;
+
+                            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+                                column = $rootScope.reference.columns[i];
+
+                                switch (column.type.name) {
+                                    case "timestamp":
+                                    case "timestamptz":
+                                        if (values[i]) {
+                                            // Cannot ensure that all timestamp values are formatted in ISO 8601
+                                            // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
+                                            var ts = moment(values[i]);
+                                            value = {
+                                                date: ts.format('YYYY-MM-DD'),
+                                                time: ts.format('hh:mm:ss'),
+                                                meridiem: ts.format('A')
+                                            };
+                                        } else {
+                                            value = {
+                                                date: null,
+                                                time: null,
+                                                meridiem: null
+                                            };
+                                        }
+                                        break;
+                                    case "int2":
+                                    case "int4":
+                                    case "int8":
+                                        value = (values[i] ? parseInt(values[i], 10) : '');
+                                        break;
+                                    case "float4":
+                                    case "float8":
+                                    case "numeric":
+                                        value = (values[i] ? parseFloat(values[i]) : '');
+                                        break;
+                                    default:
+                                        value = values[i];
+                                        break;
+                                }
+
+                                recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
+                            }
+                            $log.info('Model: ', recordEditModel);
+                        }, function error(response) {
+                            $log.warn(response);
+                            throw response;
+                        }).catch(function readCatch(exception) {
+                            ErrorService.errorPopup(exception.message, exception.code, "home page");
+                        });
+                    } else {
+                        var notAuthorizedMessage = "You are not authorized to Update entities.";
+                        var notAuthorizedError = new Error(notAuthorizedMessage);
+                        notAuthorizedError.code = "403 Fordbidden";
+
+                        throw notAuthorizedError;
+                    }
+                } else {
+                    if ($rootScope.reference.canCreate) {
+                        $rootScope.displayname = $rootScope.reference.displayname;
+                    } else {
+                        var notAuthorizedMessage = "You are not authorized to Create entities.";
+                        var notAuthorizedError = new Error(notAuthorizedMessage);
+
+                        notAuthorizedError.code = "403 Fordbidden";
+
+                        throw notAuthorizedError;
+                    }
+                }
+            }, function error(response) {
+                $log.warn(response);
+                throw response;
+            }).catch(function genericCatch(exception) {
+                if (exception instanceof ERMrest.UnauthorizedError || exception.code == "401 Unauthorized") {
+                    ErrorService.catchAll(exception);
+                } else if (exception.code == "403 Forbidden") {
+                    ErrorService.errorPopup(exception.message, exception.code, "previous page", $window.document.referrer);
+                } else {
                     ErrorService.errorPopup(exception.message, exception.code, "home page");
                 }
-
-                throw exception;
-            }
-
-        }, function error(response) { // error promise for server.catalogs.get()
-            // for not found and bad request
-            if (response instanceof ERMrest.NotFoundError || response instanceof ERMrest.BadRequestError) {
-                $log.info(exception);
-                ErrorService.errorPopup(response.message, response.code, "home page");
-            }
-
-            throw response;
-        }).catch(function(exception) {
-            ErrorService.catchAll(exception);
-        });
-
-        /**
-         * Whenever recordedit updates the url (no reloading and no history stack),
-         * it saves the location in $rootScope.location.
-         * When address bar is changed, this code compares the address bar location
-         * with the last save recordset location. If it's the same, the change of url was
-         * done internally, do not refresh page. If not, the change was done manually
-         * outside recordset, refresh page.
-         */
-        UriUtils.setLocationChangeHandling();
+            });
+        } catch (exception) {
+            ErrorService.errorPopup(exception.message, exception.code, "home page");
+        }
     }]);
-
 })();

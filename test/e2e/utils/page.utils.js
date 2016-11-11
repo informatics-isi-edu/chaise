@@ -1,4 +1,4 @@
-var COMMENT_URI = "comment", FACET_URI = "facet", FACETORDER_URI = "facetOrder", DESCRIPTION_URI = "description";
+var COMMENT_URI = "comment", FACET_URI = "facet", FACETORDER_URI = "facetOrder", DESCRIPTION_URI = "description", IMMUTABLE = "tag:isrd.isi.edu,2016:immutable", GENERATED = "tag:isrd.isi.edu,2016:generated";
 
 var Sidebar = function() {
 	var self = this;
@@ -299,7 +299,9 @@ var EditInputs = function(sidebar) {
 	this.getColumnsWithRequired = function(table, annotations) {
 		var columns = [];
 		this.getVisibleColumns(table, annotations).forEach(function(c) {
-			if (!c.nullok) columns.push(c);
+			if (!c.nullok && !that.isDisabled(c, [IMMUTABLE, GENERATED])) {
+                columns.push(c);
+            }
 		});
 		return columns;
 	};
@@ -313,6 +315,23 @@ var EditInputs = function(sidebar) {
 		});
 		return columns;
 	};
+
+    this.getDisabledColumns = function(columns, annotations) {
+        var disabledCols = {};
+        annotations.forEach(function(annotation) {
+            disabledCols[annotation] = [];
+        });
+        columns.forEach(function(column) {
+            if (column['annotations']) {
+                Object.keys(column['annotations']).forEach(function(annotation) {
+                    if (annotations.indexOf(annotation) !== -1) {
+                        disabledCols[annotation].push(column);
+                    }
+                });
+            }
+        });
+        return disabledCols;
+    };
 
 	this.getLongTextDataTypeColumns = function(table, annotations) {
 		var columns = [];
@@ -406,6 +425,18 @@ var EditInputs = function(sidebar) {
 		if (column.annotations && column.annotations[COMMENT_URI] && column.annotations[COMMENT_URI].contains('url')) return true;
 		return false;
 	};
+
+    this.isDisabled = function(column, annotations) {
+        var disabled = false;
+        if (column.annotations) {
+            Object.keys(column.annotations).forEach(function(annotation) {
+                if (annotations.indexOf(annotation) !== -1) {
+                    disabled = true;
+                }
+            });
+        }
+        return disabled;
+    };
 };
 
 var DataUtils = function() {

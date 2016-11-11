@@ -15,7 +15,7 @@ describe('View existing record,', function() {
 
 				beforeAll(function () {
 					var keys = [];
-					tupleParams.keys.forEach(function(key) {
+					tupleParams.deleteKeys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
 					});
 					browser.ignoreSynchronization=true;
@@ -24,14 +24,14 @@ describe('View existing record,', function() {
 					browser.sleep(2000);
 			    });
 
-				it('should load chaise-config.js and have editRecord=true', function() {
-			        browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
-			        	expect(chaiseConfig.editRecord).toBe(true);
+			    it("should load chaise-config.js and have confirmDelete=true", function() {
+			        browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+			        	expect(chaiseConfig.confirmDelete).toBe(true);
 			        });
 				});
 
-                describe("Click the edit record button ,", function() {
-                	var params = recordHelpers.testEditButton(tupleParams);
+                describe("Click the delete record button ,", function() {
+					var params = recordHelpers.testDeleteButton(tupleParams);
 				});
 
     		});

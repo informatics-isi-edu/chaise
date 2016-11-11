@@ -13,7 +13,7 @@ var config = pConfig.getConfig({
     },
   */
 
-    chaiseConfigFilePath: 'test/e2e/specs/record/data-dependent/chaise-config.js',
+    chaiseConfigFilePath: 'test/e2e/specs/record/no-delete-btn/chaise-config.js',
 
     page: 'record',
     setBaseUrl: function(browser, data) {

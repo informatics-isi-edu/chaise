@@ -25,10 +25,12 @@ exports.testPresentation = function (tableParams) {
         var EC = protractor.ExpectedConditions,
             editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
+            deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
         browser.wait(EC.elementToBeClickable(editButton), 10000);
         browser.wait(EC.elementToBeClickable(createButton), 10000);
+        browser.wait(EC.elementToBeClickable(deleteButton), 10000);
         browser.wait(EC.elementToBeClickable(showAllRTButton), 10000);
 
         editButton.isDisplayed().then(function (bool) {
@@ -36,6 +38,10 @@ exports.testPresentation = function (tableParams) {
         });
 
         createButton.isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+
+        deleteButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
         });
 
@@ -189,7 +195,6 @@ exports.testPresentation = function (tableParams) {
         }).then(function(heading) {
             // related table should be closed now and a '+' should be shown instead of a '-'
             expect(heading.indexOf('+')).toBeGreaterThan(-1);
-
             return tableHeading.getAttribute("class");
         }).then(function(attribute) {
             expect(attribute).not.toMatch("panel-open");
@@ -234,6 +239,34 @@ exports.testCreateButton = function () {
     });
 };
 
+exports.testDeleteButton = function () {
+    it("should redirect to data browser.", function () {
+        var EC = protractor.ExpectedConditions,
+            modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
+            config;
+
+        browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
+            config = chaiseConfig;
+
+            return chaisePage.recordPage.getDeleteRecordButton().click()
+        }).then(function () {
+            browser.wait(EC.visibilityOf(modalTitle), 5000);
+            // expect modal to open
+            return modalTitle.getText();
+        }).then(function (text) {
+            expect(text).toBe("Confirm Delete");
+
+            return chaisePage.recordPage.getConfirmDeleteButton().click();
+        }).then(function () {
+            browser.driver.sleep(1000);
+
+            return browser.driver.getCurrentUrl();
+        }).then(function(url) {
+            expect(url.indexOf('/search/')).toBeGreaterThan(-1);
+        });
+    });
+}
+
 exports.relatedTablesDefaultOrder = function (tableParams) {
     it("should have the tables in default order.", function() {
         chaisePage.recordPage.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
@@ -264,6 +297,36 @@ exports.relatedTableLinks = function (tableParams) {
         }).then(function(cell) {
             // check that an element was created inside the td with an href attribute
             expect(cell.indexOf("href")).toBeGreaterThan(-1);
+        });
+    });
+
+    it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
+        var EC = protractor.ExpectedConditions,
+            relatedTableName = tableParams.related_table_name_with_more_results,
+            addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
+
+        // Should make sure user is logged in
+        browser.wait(EC.elementToBeClickable(addRelatedRecordLink), 10000);
+
+        expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
+
+        var allWindows;
+        addRelatedRecordLink.click().then(function() {
+            // This Add link opens in a new tab so we have to track the windows in the browser...
+            return browser.getAllWindowHandles();
+        }).then(function(handles) {
+            allWindows = handles;
+            // ... and switch to the new tab here...
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function() {
+            // ... and then get the url from this new tab...
+            return browser.driver.getCurrentUrl();
+        }).then(function(url) {
+            // ... before switching back to the original Record app's tab so that the next it spec can run properly
+            browser.switchTo().window(allWindows[0]);
+            expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
+            expect(url.indexOf(relatedTableName)).toBeGreaterThan(-1);
+            expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
         });
     });
 

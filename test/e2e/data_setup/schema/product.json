@@ -88,9 +88,11 @@
             "comment": [
               "hidden"
             ],
-            "tag:misd.isi.edu,2015:display" : {
+            "tag:misd.isi.edu,2015:display": {
               "name" : "Id"
-            }
+            },
+            "tag:isrd.isi.edu,2016:generated": null,
+            "tag:isrd.isi.edu,2016:immutable": null
           }
         },
         {
@@ -396,7 +398,9 @@
             "typename": "serial4"
           },
           "annotations": {
-            "comment": ["hidden"]
+            "comment": ["hidden"],
+            "tag:isrd.isi.edu,2016:generated": null,
+            "tag:isrd.isi.edu,2016:immutable": null
           }
         },
         {
@@ -767,7 +771,7 @@
     "tag:isrd.isi.edu,2016:app-links": {
       "detailed": "tag:isrd.isi.edu,2016:chaise:record",
       "compact": "tag:isrd.isi.edu,2016:chaise:recordset",
-      "entry": "tag:isrd.isi.edu,2016:chaise:viewer"
+      "entry": "tag:isrd.isi.edu,2016:chaise:recordedit"
     }
   },
   "schema_name": "product"

@@ -3,6 +3,8 @@
 
     angular.module('chaise.record', [
         'ngSanitize',
+        'ngCookies',
+        'chaise.delete',
         'chaise.errors',
         'chaise.modal',
         'chaise.navbar',
@@ -18,6 +20,11 @@
         return {
             defaultPageSize: 25,
         };
+    }])
+
+    .config(['$cookiesProvider', function($cookiesProvider) {
+        $cookiesProvider.defaults.path = '/';
+        $cookiesProvider.defaults.secure = true;
     }])
 
     .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
@@ -59,7 +66,7 @@
                 }, function error(exception) {
                     throw exception;
                 }).then(function getPage(page) {
-                    var tuple = page.tuples[0];
+                    var tuple = $rootScope.tuple = page.tuples[0];
                     // Used directly in the record-display directive
                     $rootScope.recordDisplayname = tuple.displayname;
 
@@ -76,7 +83,9 @@
                     $rootScope.columns = $rootScope.reference.columns;
 
                     $rootScope.tableModels = [];
+                    $rootScope.lastRendered = null;
 
+                    $rootScope.loading = ($rootScope.relatedReferences.length > 0);
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                         $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
 
@@ -105,6 +114,12 @@
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 $rootScope.tableModels[i] = model;
+                            }, function readFail() {
+                                var model = {
+                                    hasLoaded: true
+                                }
+
+                                $rootScope.tableModels[i] = model;
                             });
                         })(i);
                     }
@@ -121,7 +136,7 @@
             // No filter defined, redirect to search
             } else {
                 // change the path and redirect to search because no id was supplied
-                var modifiedPath = $window.location.pathname.replace(context.appName, "search");
+                var modifiedPath = $window.location.pathname.replace(context.appName, "recordset");
                 // If default catalog/table are not defined, ...chaiseURItoErmrestURI would have caught that error
                 var catalogId = (context.catalogID ? context.catalogID : chaiseConfig.defaultCatalog);
                 if (chaiseConfig.defaultTables) {
@@ -132,7 +147,7 @@
 
                 var message = "No filter was defined. Cannot find a record without a filter.";
                 var redirectLink = $window.location.origin + modifiedPath + modifiedHash;
-                ErrorService.errorPopup(message, '', "search page", redirectLink);
+                ErrorService.errorPopup(message, "No Entity", "search page", redirectLink);
             }
         // no catalog or schema:table defined, no defaults either, redirect to home page
         } catch (exception) {

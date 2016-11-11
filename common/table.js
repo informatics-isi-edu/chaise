@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.record.table', [])
+    angular.module('chaise.record.table', ['chaise.ellipses'])
 
     /**
      * Ways to use recordTable directive:
@@ -76,7 +76,7 @@
             read: read
         }
     }])
-        
+
     .directive('recordTable', ['AlertsService', 'recordTableUtils', function(AlertsService, recordTableUtils) {
 
         return {
@@ -116,8 +116,13 @@
                     }
                 };
 
-                scope.rowClickAction = function(index) {
-                    var args = {"tuple":scope.vm.page.tuples[index]};
+                scope.rowClickAction = function(event, index) {
+                    var el = event.target || event.srcElement;
+                    if (el.nodeName.toLowerCase() === 'a' || el.nodeName.toLowerCase() === 'button' || el.classList.contains("readmore")) {
+                        return false;
+                    }
+
+                    var args = {"tuple": scope.vm.page.tuples[index]};
                     if (scope.defaultRowLinking !== undefined && scope.defaultRowLinking === true) {
                         scope.gotoRowLink(index);
                     } else if (scope.onRowClickBind) {

@@ -5,8 +5,8 @@
             },
             "schema": {
                 "name": "product",
-                "createNew": true, 
-                "path": "test/e2e/data_setup/schema/product.json" 
+                "createNew": true,
+                "path": "test/e2e/data_setup/schema/product.json"
             },
             "tables": {
             	"createNew": true
@@ -27,35 +27,35 @@
     			"text": "Category",
     			"filters": [{
     				"content": ["Hotel"],
-    				"entityCount" : 2
+    				"entityCount" : 3
     			}, {
     				"content": ["Hotel", "Motel"],
-    				"entityCount" : 3
+    				"entityCount" : 4
     			},	{
     				"content": ["Motel", "Resort"],
     				"entityCount" : 2
     			},{
     				"content": ["Hotel", "Motel", "Resort"],
-    				"entityCount" : 4
+    				"entityCount" : 5
     			}],
     			"totalContentCount": 3,
-    			"totalEntityCount": 4
+    			"totalEntityCount": 5
     		}, {
     			"clearAllFilters": false,
     			"clearPreviousFilters": false,
     			"text": "Luxurious",
     			"filters": [{
     				"content" : ["true"],
-    				"entityCount": 3
+    				"entityCount": 4
     			}, {
     				"content" : ["false"],
     				"entityCount": 1
     			}, {
     				"content" : ["false", "true"],
-    				"entityCount": 4
+    				"entityCount": 5
     			}],
     			"totalContentCount": 2,
-    			"totalEntityCount": 4
+    			"totalEntityCount": 5
     		}, {
     			"clearAllFilters": false,
     			"clearPreviousFilters": [0],
@@ -73,7 +73,7 @@
     				"content": ["Radisson Hotel", "Super 8 North Hollywood Motel", "NH Munich Resort"],
     				"entityCount" : 3
     			}],
-    			"totalContentCount": 4,
+    			"totalContentCount": 5,
     			"totalEntityCount": 3
     		}]
     	}

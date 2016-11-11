@@ -3,13 +3,21 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'UriUtils', 'recordEditModel', 'context', '$window', '$log', function FormController(AlertsService, UriUtils, recordEditModel, context, $window, $log) {
+    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$uibModal', '$window', function FormController(AlertsService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $uibModal, $window) {
         var vm = this;
+        var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
-        vm.server = context.server;
         vm.editMode = context.filter || false;
+        vm.showDeleteButton = chaiseConfig.showDeleteButton === true ? true : false;
+        context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
-        vm.getAutoGenValue = getAutoGenValue;
+        vm.mdHelpLinks = { // Links to Markdown references to be used in help text
+            editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
+            cheatsheet: "http://commonmark.org/help/"
+        };
+        vm.isDisabled = isDisabled;
+        vm.isRequired = isRequired;
+        vm.getDisabledInputValue = getDisabledInputValue;
 
         vm.alerts = AlertsService.alerts;
         vm.closeAlert = AlertsService.deleteAlert;
@@ -18,10 +26,13 @@
         vm.readyToSubmit = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
+        vm.searchPopup = searchPopup;
+        vm.createRecord = createRecord;
+        vm.clearForeignKey = clearForeignKey;
+
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
-
-        vm.getDefaults = getDefaults;
+        vm.deleteRecord = deleteRecord;
 
         vm.inputType = null;
         vm.int2min = -32768;
@@ -32,15 +43,13 @@
         vm.int8max = 9223372036854775807;
 
         vm.columnToDisplayType = columnToDisplayType;
-        vm.isAutoGen = isAutoGen;
-        vm.isForeignKey = isForeignKey;
         vm.matchType = matchType;
-        vm.isHiddenColumn = isHiddenColumn;
 
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
         vm.toggleMeridiem = toggleMeridiem;
         vm.clearModel = clearModel;
+        vm.blurElement = blurElement;
         // Specifies the regexes to be used for a token in a ui-mask input. For example, the '1' key in
         // in vm.maskOptions.date means that only 0 or 1 is allowed wherever the '1' key is used in a ui-mask template.
         // See the maskDefinitions section for more info: https://github.com/angular-ui/ui-mask.
@@ -54,109 +63,79 @@
                 clearOnBlur: false
             }
         };
-
-        function redirectAfterSubmission(entities) {
-            var form = vm.formContainer;
-            var model = vm.recordEditModel;
-            var rowset = model.rows;
-            var redirectUrl = '../';
-            form.$setUntouched();
-            form.$setPristine();
-
-            if (entities.length === 0) {
-            // 1. var entities = the data returned from ERMrest after POST or PUT operation.
-            // 2. var rowset = this app's representation of the submitted data.
-            // 3. If entities === [], that means the user submitted no new changes
-            // to the record, which means we can use rowset to build the redirect
-            // url later.
-            // Why not just use rowset the whole time? Because after user submits
-            // data, ERMrest might have modified that data, so we should use the
-            // returned data from ERMrest instead of assuming rowset and entities
-            // are always the same.
-                entities = rowset;
-            }
-
-            // Find the shortest "primary key" for use in redirect url
-            var keys = model.table.keys.all().sort(function(a, b) {
-                return a.colset.length() - b.colset.length();
-            });
-            var shortestKey = keys[0].colset.columns;
+        vm.prefillCookie = $cookies.getObject(context.prefill);
 
 
+        // Takes a page object and uses the uri generated for the reference to construct a chaise uri
+        function redirectAfterSubmission(page) {
+            var rowset = vm.recordEditModel.rows,
+                redirectUrl = "../";
+
+            // Created a single entity or Updated one
             if (rowset.length == 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
-                // example: https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=5564
-                // TODO: Postpone using datapath api to build redirect url until
-                // datapath is redeveloped to only use aliases when necessary
-                redirectUrl += 'record/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
 
-            } else if (rowset.length > 1) {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record set...'});
-                // example: https://synapse-dev.isrd.isi.edu/chaise/recordset/#1/Zebrafish:Subject@sort(Birth%20Date::desc::)
-                redirectUrl += 'recordset/#' + context.catalogID + '/' + UriUtils.fixedEncodeURIComponent(context.schemaName) + ':' + UriUtils.fixedEncodeURIComponent(context.tableName);
+                redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             } else {
-                return AlertsService.addAlert({type: 'error', message: 'Sorry, there is no data to submit. You must have at least 1 set of data for submission.'});
-            }
+                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
 
-            // finish building the url with entity filters
-            for (var e = 0; e < entities.length; e++) {
-                redirectUrl += (e === 0? "/" : ";");
-
-                // entity keys
-                for (var c = 0, len = shortestKey.length; c < len; c++) {
-                    redirectUrl += (c === 0 && len > 1 ? "(" : "");
-                    redirectUrl += (c > 0 ? "&" : "");
-
-                    var colName = shortestKey[c].name;
-                    redirectUrl += UriUtils.fixedEncodeURIComponent(colName) + '=' + UriUtils.fixedEncodeURIComponent(entities[e][colName]);
-                }
-
-                redirectUrl += (len > 1 ? ")" : "");
+                redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             }
 
             // Redirect to record or recordset app..
-            $window.location.replace(redirectUrl);
+            $window.location = redirectUrl;
         }
 
         function showSubmissionError(response) {
             AlertsService.addAlert({type: 'error', message: response.message});
-            $log.info(response);
+            $log.warn(response);
         }
-
 
         /*
          * Allows to tranform some form values depending on their types
          * Boolean: If the value is empty ('') then set it as null
          * Date/Timestamptz: If the value is empty ('') then set it as null
          */
-        function transformRowValues(row, model) {
-            for (var k in row) {
-                try {
-                    var column = model.table.columns.get(k);
-                    switch (column.type.name) {
-                        // Need to convert to 24 hr UTC time
-                        case 'timestamp':
-                        case 'timestamptz':
+        function transformRowValues(row) {
+            /* Go through the set of columns for the reference.
+             * If a value for that column is present (row[col.name]), transform the row value as needed
+             * NOTE:
+             * Opted to loop through the columns once and use the row object for quick checking instead
+             * of looking at each key in row and looping through the column set each time to grab the column
+             * My solution is worst case n-time
+             * The latter is worst case rowKeys.length * n time
+             */
+            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+                var col = $rootScope.reference.columns[i];
+                var rowVal = row[col.name];
+                if (rowVal) {
+                    switch (col.type.name) {
+                        case "timestamp":
+                        case "timestamptz":
                             if (vm.readyToSubmit) {
-                                if (row[k].date && row[k].time && row[k].meridiem) {
-                                    row[k] = moment(row[k].date + row[k].time + row[k].meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                                } else if (!row[k].date || !row[k].time || !row[k].meridiem) {
-                                    row[k] = null;
+                                if (rowVal.date && rowVal.time && rowVal.meridiem) {
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                } else if (!rowVal.date || !rowVal.time || !rowVal.meridiem) {
+                                    rowVal = null;
                                 }
                             }
                             break;
-                        default: if (row[k] === '') row[k] = null;
+                        default:
+                            if (rowVal === '') {
+                                rowVal = null;
+                            }
                             break;
                     }
-                } catch(e) {}
+                }
+                row[col.name] = rowVal;
             }
+
+            return row;
         }
 
         function submit() {
             var form = vm.formContainer;
             var model = vm.recordEditModel;
-            // form.$setUntouched();
-            // form.$setPristine();
 
             if (form.$invalid) {
                 vm.readyToSubmit = false;
@@ -167,27 +146,151 @@
 
             // Form data is valid, time to transform row values for submission to ERMrest
             vm.readyToSubmit = true;
-            model.rows.forEach(function(row) {
-                transformRowValues(row, model);
-            });
+            for (var j = 0; j < model.rows.length; j++) {
+                var transformedRow = transformRowValues(model.rows[j]);
+                $rootScope.reference.columns.forEach(function (column) {
+                    // If the column is a pseudo column, it needs to get the originating columns name for data submission
+                    if (column.isPseudo) {
+
+                        // TODO loop through all columns in foreign key mapping are proper
+                        var referenceColumn = column.foreignKey.colset.columns[0];
+                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+
+                        // check if value is set in submission data yet
+                        if (!model.submissionRows[j][referenceColumn.name]) {
+                            /**
+                             * User didn't change the foreign key, copy the value over to the submission data with the proper column name
+                             * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
+                             * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
+                            **/
+                            model.submissionRows[j][referenceColumn.name] = (vm.editMode ? $rootScope.tuples[j].data[referenceColumn.name] : null);
+                        }
+                    // not pseudo, column.name is sufficient for the keys
+                    } else {
+                        // set null if not set so that the whole data object is filled out for posting to ermrestJS
+                        model.submissionRows[j][column.name] = (transformedRow[column.name] ? transformedRow[column.name] : null);
+                    }
+                });
+            }
 
             if (vm.editMode) {
-                model.table.entity.put(model.rows).then(function success(entities) {
+                // loop through model.rows
+                // there should only be 1 row for editting
+                for (var i = 0; i < model.submissionRows.length; i++) {
+                    var row = model.submissionRows[i];
+                    var data = $rootScope.tuples[i].data;
+                    // assign each value from the form to the data object on tuple
+                    for (var key in row) {
+                        data[key] = (row[key] === '' ? null : row[key]);
+                    }
+                }
+
+                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
+                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    // Wrapping redirectAfterSubmission callback fn in the success callback fn
-                    // due to inability to pass the success/error responses directly
-                    // into redirectAfterSubmission fn. (ReferenceError)
-                    vm.redirectAfterSubmission(entities);
+                    vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
                 });
             } else {
-                model.table.entity.post(model.rows, vm.getDefaults()).then(function success(entities) {
+                $rootScope.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    vm.redirectAfterSubmission(entities);
+                    if (vm.prefillCookie) {
+                        $cookies.remove(context.prefill);
+                    }
+                    vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
                 });
+            }
+        }
+
+        function deleteRecord() {
+            var location = $rootScope.reference.location;
+            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+                $uibModal.open({
+                    templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
+                    controller: "ConfirmDeleteController",
+                    controllerAs: "ctrl",
+                    size: "sm"
+                }).result.then(function success() {
+                    // user accepted prompt to delete
+                    return $rootScope.reference.delete();
+                }).then(function deleteSuccess() {
+                    // redirect after successful delete
+                    $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
+                }, function deleteFailure(response) {
+                    if (response != "cancel") vm.showSubmissionError(response);
+                }).catch(function (error) {
+                    $log.info(error);
+                });
+            } else {
+                $rootScope.reference.delete().then(function deleteSuccess() {
+                    // redirect after successful delete
+                    $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
+                }, function deleteFailure(response) {
+                    vm.showSubmissionError(response);
+                }).catch(function (error) {
+                    $log.info(error);
+                });
+            }
+        }
+
+        function searchPopup(rowIndex, column) {
+
+            if (isDisabled(column)) return;
+
+            var params = {};
+
+            // pass the reference as a param for the modal
+            params.reference = column.reference.contextualize.compactSelect;
+
+            var modalInstance = $uibModal.open({
+                animation: false,
+                controller: "SearchPopupController",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                size: "lg",
+                templateUrl: "../common/templates/searchPopup.modal.html"
+            });
+
+            modalInstance.result.then(function dataSelected(tuple) {
+                // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
+                // set data in view model (model.rows) and submission model (model.submissionRows)
+
+                // TODO loop through all columns in foreign key mapping are proper
+                var referenceCol = column.foreignKey.colset.columns[0];
+                var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
+
+                // set the tuple instead
+                vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname;
+                vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
+
+            }, function noDataSelected() {
+                // do nothing
+            });
+        }
+
+        function clearForeignKey(rowIndex, column) {
+            // TODO bad idea assuming there's 1 value
+            var model = vm.recordEditModel,
+                referenceCol = column.foreignKey.colset.columns[0];
+
+            model.rows[rowIndex][column.name] = null;
+            delete model.submissionRows[rowIndex][referenceCol.name];
+            if ($rootScope.tuples) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
+        }
+
+        function createRecord(column) {
+            var newRef = column.reference.contextualize.entryCreate;
+            var appURL = newRef.appLink;
+            if (!appURL) {
+                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
+            }
+            else {
+                $window.open(appURL, '_blank');
             }
         }
 
@@ -212,63 +315,27 @@
                 var row = angular.copy(protoRow);
 
                 // transform row values to avoid parsing issues with null values
-                transformRowValues(row, vm.recordEditModel);
+                var transformedRow = transformRowValues(row);
 
-                rowset.push(row);
+                rowset.push(transformedRow);
 
+                var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
+
+                vm.recordEditModel.submissionRows.push(submissionRow);
             }
         }
 
         function removeFormRow(index) {
             vm.recordEditModel.rows.splice(index, 1);
-        }
-
-        function getDefaults() {
-            var defaults = [];
-
-            try {
-                var columns = vm.recordEditModel.table.columns.all();
-                var numColumns = columns.length;
-                for (var i = 0; i < numColumns; i++) {
-                    var columnName = columns[i].name;
-                    if (vm.isAutoGen(columnName) || vm.isHiddenColumn(columns[i])) {
-                        defaults.push(columnName);
-                    }
-                }
-            } catch (exception) { // catches table.columns.all()
-                // Should not error, if none it returns an empty array
-            } finally {
-                return defaults;
-            }
-        }
-
-        function getKeyColumns() {
-            var keys = [];
-            try {
-                var _keys = vm.recordEditModel.table.keys.all();
-                var numKeys = _keys.length;
-                for (var i = 0; i < numKeys; i++) {
-                    var columns = _keys[i].colset.columns;
-                    var numColumns = columns.length;
-                    for (var c = 0; c < numColumns; c++) {
-                        keys.push(columns[c]);
-                    }
-                }
-            } catch (exception) { // catches table.keys.all()
-                // Should not error, if none it returns an empty array
-            } finally {
-                return keys;
-            }
+            vm.recordEditModel.submissionRows.splice(index, 1);
         }
 
         function columnToDisplayType(column) {
             var name = column.name;
             var type = column.type.name;
             var displayType;
-            if (vm.isAutoGen(name)) {
-                displayType = 'autogen';
-            } else if (vm.isForeignKey(name)) {
-                displayType = 'dropdown';
+            if (isForeignKey(column)) {
+                displayType = 'popup-select';
             } else {
                 switch (type) {
                     case 'timestamp':
@@ -308,23 +375,22 @@
             return displayType;
         }
 
-        // Returns true if a column's fields should be automatically generated
-        // In this case, columns of type serial* == auto-generated
-        function isAutoGen(name) {
+        // Returns true if column.getInputDisabled returns truthy OR if column was prefilled via cookie
+        function isDisabled(column) {
             try {
-                return (vm.recordEditModel.table.columns.get(name).type.name.indexOf('serial') === 0);
-            } catch (exception) {
-                // handle exception
-                $log.info(exception);
+                if (column.getInputDisabled(context.appContext)) {
+                    return true;
+                } else if (vm.prefillCookie) {
+                    return vm.prefillCookie.constraintName == column.name;
+                }
+                return false;
+            } catch (e) {
+                $log.info(e);
             }
         }
 
-        function isForeignKey(columnName) {
-            // Columns with FK refs and their FK values are stored in the domainValues
-            // obj with the column name as keys and FK values as values. For now,
-            // we can determine whether a column is a FK by checking whether domainValues
-            // has a key of that column's name.
-            return vm.recordEditModel.domainValues.hasOwnProperty(columnName);
+        function isForeignKey(column) {
+            return (column.memberOfForeignKeys.length > 0 || column.isPseudo);
         }
 
         // Returns true if a column type is found in the given array of types
@@ -335,35 +401,22 @@
             return false;
         }
 
-        // Returns true if a column has a 2015:hidden annotation or a 2016:ignore
-        // (with entry context) annotation.
-        function isHiddenColumn(column) {
-            var ignore, ignoreCol, hidden;
-            var ignoreAnnotation = 'tag:isrd.isi.edu,2016:ignore';
-
+        function getDisabledInputValue(column, value) {
             try {
-                ignore = column.annotations.contains(ignoreAnnotation);
-                if (ignore) {
-                    ignoreCol = column.annotations.get(ignoreAnnotation); // still needs to be caught in case something gets out of sync
+                var disabled = column.getInputDisabled(context.appContext);
+                if (disabled) {
+                    if (typeof disabled === 'object') {
+                        return disabled.message;
+                    } else if (vm.editMode) {
+                        return value;
+                    }
+                    return '';
+                } else if (isForeignKey(column)) {
+                    return 'Select a value';
                 }
-                hidden = column.annotations.contains('tag:misd.isi.edu,2015:hidden');
-
-            } finally {
-               if ((ignore && (ignoreCol.content.length === 0 || ignoreCol.content === null || ignoreCol.content === true || ignoreCol.content.indexOf('entry') !== -1)) || hidden) {
-                   return true;
-               }
-               return false;
+            } catch (e) {
+                $log.info(e);
             }
-
-        }
-
-        // If in edit mode, autogen fields show the value of the existing record
-        // Otherwise, show a static string in entry mode.
-        function getAutoGenValue(value) {
-            if (vm.editMode) {
-                return value;
-            }
-            return 'To be set by system';
         }
 
         // Assigns the current date or timestamp to a column's model
@@ -392,9 +445,21 @@
 
         function clearModel(modelIndex, columnName, columnType) {
             if (columnType === 'timestamp' || columnType === 'timestamptz') {
-                return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: null};
+                return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: 'AM'};
             }
             return vm.recordEditModel.rows[modelIndex][columnName] = null;
+        }
+
+        function isRequired(column) {
+            if (!column.nullok && !isDisabled(column)) {
+                return true;
+            }
+            return false;
+        }
+
+        // Given an $event, this will blur or removes the focus from the element that triggerd the event
+        function blurElement(e) {
+            e.currentTarget.blur();
         }
     }]);
 })();

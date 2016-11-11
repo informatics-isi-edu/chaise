@@ -276,7 +276,7 @@ var recordEditPage = function() {
     };
 
     this.getColumnWithAsterisk = function(el) {
-        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"!column.nullok\"].text-danger')[0];", el);
+        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"::form.isRequired(column);\"].text-danger')[0];", el);
     };
 
     this.getColumnComment = function(el) {
@@ -296,6 +296,14 @@ var recordEditPage = function() {
     this.getTextAreaForAcolumn = function(name, index) {
         index = index || 0;
         return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
+    };
+
+    this.getHelpTextBlock = function(el) {
+        return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
+    };
+
+    this.getInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
     this.getDropdown = function(el, index) {
@@ -332,9 +340,42 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).find('.select2-chosen:not(\".ng-hide\")').text().trim();", el);
     };
 
-    this.getDateInputForAColumn = function(name, index) {
+    this.getCreateBtns = function() {
+        return element.all(by.css(".create-record-btn"));
+    };
+
+    this.getModalPopupBtns = function() {
+        return element.all(by.css(".modal-popup-btn"));
+    };
+
+
+    this.getModalPopupBtnsUsingScript = function() {
+        return browser.executeScript("return $('.modal-popup-btn')");
+    };
+
+    this.getForeignKeyInputRemoveBtns = function() {
+        return browser.executeScript("return $('.foreignkey-remove');");
+    };
+
+    this.getModalTitle = function() {
+        return element(by.css(".modal-title"));
+    };
+
+    this.getModalCloseBtn = function() {
+            return element(by.css(".modal-close"));
+    };
+
+    this.getFormTitle = function() {
+        return element(by.id("entity-title"));
+    };
+
+    this.getForeignKeyInputValue = function(columnDisplayName, index) {
+        return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
+    };
+
+    this.getInputValue = function(columnName, index) {
         index = index || 0;
-        return element(by.model('form.recordEditModel.rows[' + index + ']["' + name + '"]'));
+        return element(by.model('form.recordEditModel.rows[' + index + ']["' + columnName + '"]'));
     };
 
     this.getDatePickerForAnInput = function(el) {
@@ -430,6 +471,10 @@ var recordEditPage = function() {
     this.getRecordModelRows = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
     };
+
+    this.getDeleteRecordButton = function () {
+        return element(by.id("delete-button"));
+    }
 };
 
 var recordPage = function() {
@@ -495,6 +540,11 @@ var recordPage = function() {
         return element(by.id("rt-heading-" + displayName)).element(by.css(".more-results-link"));
     };
 
+    this.getAddRecordLink = function(displayName) {
+        // the link is not a child of the table, rather one of the accordion group
+        return element(by.id("rt-heading-" + displayName)).element(by.css(".add-records-link"));
+    };
+
     this.getRelatedTableRowValues = function(displayName) {
         return that.getRelatedTableRows(displayName).all(by.tagName("td"));
     };
@@ -506,6 +556,18 @@ var recordPage = function() {
     this.getEditRecordButton = function() {
         return element(by.id("edit-record"));
     };
+
+    this.getDeleteRecordButton = function () {
+        return element(by.id("delete-record"));
+    };
+
+    this.getConfirmDeleteTitle = function() {
+        return element(by.css(".modal-title"));
+    };
+
+    this.getConfirmDeleteButton = function () {
+        return element(by.id("delete-confirmation"));
+    }
 
     this.getShowAllRelatedEntitiesButton = function() {
         return element(by.id("show-all-related-tables"));
