@@ -115,3 +115,17 @@ img.spinner{
     top: 40%;
     left: 49%;
 }
+
+.popup-select-value {
+  height: auto !important; 
+  max-height: 5.35em !important; 
+  min-width: 200px !important;
+  z-index: 0;
+}
+
+.modal-popup .input-group-addon {
+  padding: 0px;
+  background-color: transparent;
+  border: none;
+  vertical-align: top;
+}
