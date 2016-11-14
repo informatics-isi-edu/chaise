@@ -65,7 +65,6 @@ describe('Edit existing record,', function() {
 							browser.sleep(3000);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
-						        console.log(url);
 						    });
 						}
 					});

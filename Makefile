@@ -24,7 +24,9 @@ E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
 E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
+E2EDIrecordEditDeleteRecord=test/e2e/specs/recordedit/data-independent/delete-record/protractor.conf.js
 E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
+E2ErecordNoDeleteBtn=test/e2e/specs/record/no-delete-btn/protractor.conf.js
 E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
 E2EDviewer=test/e2e/specs/viewer/data-dependent/protractor.conf.js
@@ -181,13 +183,16 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(JS)/vendor/angular-sanitize.js \
+	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/record.js \
+	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js \
@@ -248,19 +253,22 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 
 VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
-# JavaScript and CSS source for Data Entry app
+# JavaScript and CSS source for RecordEdit app
 RE_ASSETS=recordedit
 
 RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
+	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/mask.min.js \
 	$(COMMON)/vendor/moment.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/ellipses.js \
+	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
@@ -275,7 +283,6 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 
 
 RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
-	$(RE_ASSETS)/context.js \
 	$(RE_ASSETS)/model.js \
 	$(RE_ASSETS)/form.controller.js
 
@@ -304,6 +311,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
+	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/bindHtmlUnsafe.js
@@ -408,7 +416,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -419,7 +427,7 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable)  && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run search app tests
 .PHONY: testsearch
@@ -434,7 +442,7 @@ testdetailed:
 #Rule to run record app tests
 .PHONY: testrecord
 testrecord:
-	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable)
+	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordRelatedTable) 
 
 #Rule to run record add app tests
 .PHONY: testrecordadd

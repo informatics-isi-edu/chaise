@@ -37,6 +37,16 @@
                 ermrestUri = {},
                 catalogId;
 
+            // If hash has ?prefill or &prefill parameter, remove it
+            if (hash.indexOf('prefill=') !== -1) {
+                var startIndex = hash.indexOf('prefill=');
+                var stopIndex = hash.indexOf('&', startIndex);
+                if (stopIndex !== -1) {
+                    hash = hash.substring(0, startIndex) + hash.substring(stopIndex + 1);
+                } else {
+                    hash = hash.substring(0, startIndex - 1);
+                }
+            }
 
             // If the hash is empty, check for defaults
             if (hash == '' || hash === undefined || hash.length == 1) {
@@ -87,7 +97,6 @@
 
             var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
             var path = '/catalog/' + fixedEncodeURIComponent(catalogId) + '/entity' + hash;
-
             return baseUri + path;
         }
 
@@ -153,8 +162,8 @@
                 return context;
             }
 
-            // parse out modifiers, expects in order of sort, paging and limit
-            var modifiers = ["@sort(", "@before(", "@after", "?limit="];
+            // parse out modifiers, expects in order of sort, paging, limit, and prefill
+            var modifiers = ["@sort(", "@before(", "@after", "?limit=", "?prefill=", "&prefill="];
             for (i = 0; i < modifiers.length; i++) {
                 if (hash.indexOf(modifiers[i]) !== -1) {
                     hash = hash.split(modifiers[i])[0]; // remove modifiers from uri
@@ -222,6 +231,20 @@
                 if (modifierPath.indexOf("?limit=") !== -1) {
                     context.limit = parseInt(modifierPath.match(/\?limit=([0-9]*)/)[1]);
                 }
+
+                // extract ?prefill or &prefill
+                var prefills = ['?prefill=', '&prefill='];
+                prefills.forEach(function(query) {
+                    if (modifierPath.indexOf(query) !== -1) {
+                        var startIndex = modifierPath.indexOf(query) + query.length;
+                        var stopIndex = modifierPath.indexOf('&', startIndex);
+                        if (stopIndex !== -1) {
+                            context.prefill = modifierPath.substring(startIndex, stopIndex);
+                        } else {
+                            context.prefill = modifierPath.substring(startIndex);
+                        }
+                    }
+                });
             }
 
             // TODO With Reference API, we don't need the code below?
@@ -407,7 +430,7 @@
         }
 
         /**
-         * 
+         *
          * This code handles address bar changes
          * Normally when user changes the url in the address bar,
          * nothing happens.
@@ -490,7 +513,7 @@
         return ParsedFilter;
     }])
 
-    .factory("DataUtils", ['$sce', function($sce) {
+    .factory("DataUtils", [function() {
         /**
          *
          * @param {ERMrest.Page} page
@@ -502,7 +525,8 @@
                 tuple.values.forEach(function(value, index) {
                     row.push({
                         isHTML: tuple.isHTML[index],
-                        value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                        //value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+                        value: value
                     });
                 });
                 return row;
@@ -513,11 +537,11 @@
             getRowValuesFromPage: getRowValuesFromPage
         }
     }])
-    
+
     .factory("UiUtils", [function() {
         /**
          *
-         * To allow the dropdown button to open at the top/bottom depending on the space available 
+         * To allow the dropdown button to open at the top/bottom depending on the space available
          */
         function setBootstrapDropdownButtonBehavior() {
             $(document).on("shown.bs.dropdown", ".btn-group", function () {
@@ -562,7 +586,7 @@
             getValueFromContext: getValueFromContext
         }
     }])
-    
+
 
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {

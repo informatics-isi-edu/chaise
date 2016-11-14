@@ -4,11 +4,15 @@
     angular.module('chaise.errors', ['chaise.alerts', 'chaise.authen', 'chaise.modal', 'chaise.utils'])
 
     // Factory for each error type
-    .factory('ErrorService', ['$log', '$window', '$uibModal', 'UriUtils', 'AlertsService', 'Session', function ErrorService($log, $window, $uibModal, UriUtils, AlertsService, Session) {
+    .factory('ErrorService', ['AlertsService', 'Session', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, Session, $log, $rootScope, $uibModal, $window) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
+            var providedLink = true;
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
-            if (!redirectLink) var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+            if (!redirectLink) {
+                providedLink = false;
+                var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+            }
 
             var params = {
                 message: message,
@@ -17,7 +21,7 @@
             };
 
             var modalInstance = $uibModal.open({
-                templateUrl: '../common/templates/errorDialog.html',
+                templateUrl: '../common/templates/errorDialog.modal.html',
                 controller: 'ErrorDialogController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
@@ -28,7 +32,11 @@
             });
 
             modalInstance.result.then(function () {
-                $window.location.replace(redirectLink);
+                if (errorCode == "401 Unauthorized" && !providedLink) {
+                    Session.login($window.location.href);
+                } else {
+                    $window.location.replace(redirectLink);
+                }
             });
         }
 
@@ -36,37 +44,16 @@
         function catchAll(exception) {
             $log.info(exception);
 
-            if (exception instanceof ERMrest.UnauthorizedError) {
+            if (exception instanceof ERMrest.UnauthorizedError || exception.code == "401 Unauthorized") {
                 Session.login($window.location.href);
             } else {
                 AlertsService.addAlert({type:'error', message:exception.message});
             }
         }
 
-        // This may change, but figured each app would handle this similarly
-        function catalogNotFound(catalogID, error) {
-            AlertsService.addAlert({type: 'error', message: 'Sorry, the requested catalog "' + catalogID + '" was not found. Please check the URL and refresh the page' });
-            $log.info(error);
-        }
-
-        // This may change, but figured each app would handle this similarly
-        function tableNotFound(tableName, error) {
-            AlertsService.addAlert({type: 'error', message: 'Sorry, the requested table "' + tableName + '" was not found. Please check the URL and refresh the page.' });
-            $log.info(error);
-        }
-
-        // This may change, but figured each app would handle this similarly
-        function schemaNotFound(schemaName, error) {
-            AlertsService.addAlert({type: 'error', message: 'Sorry, the requested schema "' + schemaName + '" was not found. Please check the URL and refresh the page' });
-            $log.info(error);
-        }
-
         return {
             errorPopup: errorPopup,
-            catchAll: catchAll,
-            catalogNotFound: catalogNotFound,
-            tableNotFound: tableNotFound,
-            schemaNotFound: schemaNotFound
+            catchAll: catchAll
         };
     }]);
 })();

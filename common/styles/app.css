@@ -68,18 +68,12 @@ button .glyphicon-trash {
 
 /****************** Entity Table ******************/
 
-.coltooltip {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px black;
-}
-
 .coltooltiplabel {
     border-bottom: 1px dotted black;
 }
 
 .coltooltip .coltooltiptext {
-    visibility: hidden;
+    display: none;
     width: 100px;
     background-color: #454545;
     color: #f0f0f0;
@@ -88,12 +82,13 @@ button .glyphicon-trash {
     border-radius: 6px;
     font-size: 11px;
     position: absolute;
-    z-index: 1;
+    z-index: 3;
     text-transform: none;
+    white-space: normal;
 }
 
 .coltooltip:hover .coltooltiptext {
-    visibility: visible;
+    display: inline-block;
 }
 
 
@@ -518,6 +513,8 @@ tbody{
     background-color:rgba(220, 220, 220, 0.68);
     padding:7px;
     border-radius:10px;
+    display: inline-block;
+    margin: 2px;
 }
 
 .markdown-container img {
@@ -525,9 +522,17 @@ tbody{
 }
 
 .markdown-container .embed-block {
-    margin: 10px 10px 10px 0px; 
+    margin: 10px 10px 10px 0px;
 }
 
-.input-timestamptz {
-    min-width: 112px;
+.hideContent {
+    overflow: hidden;
+    line-height: 1.45em;
+    max-height: 7.25em;
+}
+
+.showContent {
+    line-height: 1.45em;
+    height: auto;
+    display: inline
 }

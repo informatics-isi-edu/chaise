@@ -29,3 +29,103 @@ input[type=number]::-webkit-outer-spin-button {
 #copy-record-btn {
     margin-top: 8px;
 }
+
+.input-timestamptz {
+    min-width: 112px;
+}
+
+.form-control-feedback.coltooltip > .coltooltiptext{
+    padding: 0;
+}
+
+/*******Bootstrap  Modal styling *********/
+
+/*When the modal fills the screen it has an even 2.5% on top and bottom*/
+/*Centers the modal*/
+.modal-lg {
+  margin: 2.5vh auto;
+  width: auto !important;
+  max-width: 95vw;
+}
+
+/*Sets the maximum height of the entire modal to 95% of the screen height*/
+.modal-content {
+  max-height: 95vh;
+  overflow: hidden;
+  max-width: 95vw;
+}
+
+/*Sets the maximum height of the modal body to 85% of the screen height*/
+.modal-lg .modal-body {
+  max-height: 90vh;
+  min-height: 40vh;
+}
+
+/* Sets the table's maximum height to 70% of the screen height and adds a border at the bottom */
+.modal-body .outer-table {
+    max-height: 70vh;
+    border: 1px solid lightgrey;
+}
+
+/* Sets the margin-bottom for the table inside modal to 0px*/
+.modal-body .outer-table .table {
+    margin-bottom: 0px;
+    overflow: scroll;
+}
+
+@media (max-width: 800px) {
+    .modal-body .outer-table {
+        max-height: 67vh;
+    }
+}
+
+@media (max-width: 600px) {
+    .modal-body .outer-table {
+        max-height: 60vh;
+    }
+}
+
+@media (max-width: 500px) {
+    .modal-body .outer-table {
+        max-height: 55vh;
+    }
+}
+
+#spinner {
+  width: 100%;
+  text-align: center;
+  padding: 14px 0;
+  position: absolute;
+  height: 100%;
+  top: 10vh;
+  left: 10vh;
+  z-index: 10;
+  border: none;
+  border-radius: 0px;
+  background: rgba(128, 128, 128, 0.25);
+}
+
+img.spinner{
+    display: block;
+    margin: 0 auto;
+    width: 32px;
+    height: 32px;
+    opacity: 0.8;
+    position: absolute;
+    top: 40%;
+    left: 49%;
+}
+
+.popup-select-value {
+  height: auto !important; 
+  max-height: 5.35em !important; 
+  min-width: 200px !important;
+  z-index: 0;
+}
+
+.modal-popup .input-group-addon {
+  padding: 0px;
+  background-color: transparent;
+  border: none;
+  vertical-align: top;
+}

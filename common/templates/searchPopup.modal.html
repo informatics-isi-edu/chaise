@@ -1,0 +1,11 @@
+<div class="modal-header">
+    <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
+    <h3 class="modal-title">Choose <span ng-bind="ctrl.reference.displayname"></span></h3>
+</div>
+<div class="modal-body">
+    <div ng-show="!ctrl.tableModel.hasLoaded" id="spinner">
+        <img src="loader.gif" class="spinner"/>
+        <div style="margin-top: 15px;">Loading...</div>
+    </div>
+    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok(tuple)"></recordset>
+</div>
