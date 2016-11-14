@@ -114,10 +114,12 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['DataUtils', 'headInjector', '$window', 'context', 'recordsetModel', 'ERMrest', '$rootScope', 'Session', 'UriUtils', '$log', 'ErrorService', 'UiUtils', 'AlertsService',
-        function(DataUtils, headInjector, $window, context, recordsetModel, ERMrest, $rootScope, Session, UriUtils, $log, ErrorService, UiUtils, AlertsService) {
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
         try {
+            var session;
+
             headInjector.addTitle();
             headInjector.addCustomCSS();
 
@@ -149,9 +151,19 @@
 
 
             ERMrest.appLinkFn(UriUtils.appTagToURL);
-            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+            Session.getSession().then(function getSession(_session) {
+                session = _session;
+
+                return ERMrest.resolve(ermrestUri, {cid: context.appName});
+            }, function(exception) {
+                // do nothing but return without a session
+                return ERMrest.resolve(ermrestUri, {cid: context.appName});
+            }).then(function getReference(reference) {
                 recordsetModel.reference = reference.contextualize.compact;
+                recordsetModel.reference.session = session;
+
                 $log.info("Reference:", recordsetModel.reference);
+
                 if (p_context.limit)
                     recordsetModel.pageLimit = p_context.limit;
                 else if (recordsetModel.reference.display.defaultPageSize)
