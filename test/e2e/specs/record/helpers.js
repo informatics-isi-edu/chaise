@@ -202,13 +202,16 @@ exports.testPresentation = function (tableParams) {
     });
 
     // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
-    it("should show or hide a related table with zero values upon clicking a link to toggle visibility of related entities", function() {
+    it("should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities", function() {
         var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
         showAllRTButton.click().then(function() {
             expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
             return showAllRTButton.click();
         }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
+            return showAllRTButton.click();
+        }).then(function() {
+            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
         }).catch(function(error) {
             console.log(error);
         });
