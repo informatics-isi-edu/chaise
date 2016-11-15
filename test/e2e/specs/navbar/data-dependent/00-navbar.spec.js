@@ -8,7 +8,6 @@ describe('Navbar ', function() {
         menu = element(by.id('navbar-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
-            console.log(chaiseConfig);
             return browser.wait(EC.presenceOf(navbar), 5000);
         }).then(function() {
             done();
