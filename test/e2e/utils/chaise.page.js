@@ -511,6 +511,10 @@ var recordPage = function() {
         return browser.executeScript("return $('.entity-value > span.ng-scope');");
     };
 
+    this.getLinkChild = function(el) {
+        return browser.executeScript("return $(arguments[0]).find('a')[0];", el);
+    }
+
     this.getRelatedTables = function() {
         return element.all(by.css(".related-table"));
     }

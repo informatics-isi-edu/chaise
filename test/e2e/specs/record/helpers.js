@@ -1,4 +1,5 @@
 var chaisePage = require('../../utils/chaise.page.js');
+var mustache = require('../../../../../ermrestjs/vendor/mustache.min.js');
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
@@ -96,10 +97,22 @@ exports.testPresentation = function (tableParams) {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.recordPage.getColumnValueElements().then(function(columnEls) {
             expect(columnEls.length).toBe(columns.length);
-			var index = 0;
+			var index = 0, columnUrl, aTag;
 			columnEls.forEach(function(el) {
 				var column = columns[index++];
-				expect(el.getInnerHtml()).toBe(column.value);
+                if (column.presentation && column.presentation.type == "url") {
+                    chaisePage.recordPage.getLinkChild(el).then(function(aTag) {
+                        columnUrl = mustache.render(column.presentation.template, {
+                            "catalog_id": process.env.catalogId,
+                            "chaise_url": process.env.CHAISE_BASE_URL,
+                        });
+
+                        expect(aTag.getAttribute('href')).toEqual(columnUrl);
+                        expect(aTag.getText()).toEqual(column.value);
+                    });
+                } else {
+                    expect(el.getInnerHtml()).toBe(column.value);
+                }
 			});
 		});
 	});
