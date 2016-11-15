@@ -20,8 +20,13 @@
                     <span class="coltooltiptext">Click here to edit this record</span>
                 </a>&nbsp;&nbsp;
                 <delete-link id="delete-record" ng-if="reference && reference.canDelete && ctrl.modifyRecord && ctrl.showDeleteButton" label="Delete Record" tooltip="Click here to delete this record" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
-                <a id="show-all-related-tables" class="coltooltip" ng-click="ctrl.showEmptyRelatedTables = true">
-                    <span class="glyphicon glyphicon-resize-vertical"></span> <strong>Show All Related Entities</strong>
+                <a id="show-all-related-tables" class="coltooltip" ng-click="ctrl.toggleRelatedTables();">
+                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
+                    <strong>
+                        <span ng-show="!ctrl.showEmptyRelatedTables">Show All</span>
+                        <span ng-show="ctrl.showEmptyRelatedTables">Hide Empty</span>
+                         Related Entities
+                    </strong>
                     <span class="coltooltiptext">Click here to show empty related entities too.</span>
                 </a>&nbsp;&nbsp;
                 <a id="permalink" class="coltooltip" ng-href="{{ctrl.permalink()}}">

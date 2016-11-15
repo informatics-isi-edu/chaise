@@ -71,7 +71,7 @@
                         $rootScope.lastRendered = i;
                     }
                 }
-                
+
                 if ($rootScope.lastRendered == $rootScope.relatedReferences.length-1) {
                     $rootScope.loading = false;
                 }
@@ -86,6 +86,11 @@
 
                 return false;
             }
+        };
+
+
+        vm.toggleRelatedTables = function() {
+            vm.showEmptyRelatedTables = !vm.showEmptyRelatedTables;
         };
 
         // Send user to RecordEdit to create a new row in this related table
@@ -105,15 +110,13 @@
                 // Assign the column value into cookie
                 cookie.keys[fromColumn.name] = $rootScope.tuple.data[toColumn.name];
             });
-            console.log('Cookie', cookie);
-            // 2. Generate a unique for a coookie, set to expire after 24hrs, set it on browser.
+            // 2. Generate a unique cookie name and set it to expire after 24hrs.
             var COOKIE_NAME = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
             $cookies.putObject(COOKIE_NAME, cookie, {
                 expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
             });
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]
             var appLink = newRef.appLink + '?prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME);
-            console.log(appLink);
             // 4. Redirect to the url in a new tab
             var window = $window.open(appLink, '_blank');
             if (window) {
@@ -125,11 +128,12 @@
             }
         };
 
-        // TODO: Refactor this out to common/
+        // Refactor this out to common folder if other apps need it
         function getRandomInt(min, max) {
           min = Math.ceil(min);
           max = Math.floor(max);
           return Math.floor(Math.random() * (max - min)) + min;
         }
+
     }]);
 })();
