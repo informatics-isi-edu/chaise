@@ -3,8 +3,14 @@
 
     angular.module('chaise.errors', ['chaise.alerts', 'chaise.authen', 'chaise.modal', 'chaise.utils'])
 
+    .constant('errorNames', {
+        unauthorized: "Unauthorized",
+        forbidden: "Forbidden",
+        notFound: "Not Found"
+    })
+
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'Session', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, Session, $log, $rootScope, $uibModal, $window) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
             var providedLink = true;
@@ -32,7 +38,7 @@
             });
 
             modalInstance.result.then(function () {
-                if (errorCode == "Unauthorized" && !providedLink) {
+                if (errorCode == errorNames.unauthorized && !providedLink) {
                     Session.login($window.location.href);
                 } else {
                     $window.location.replace(redirectLink);
@@ -44,7 +50,7 @@
         function catchAll(exception) {
             $log.info(exception);
 
-            if (exception instanceof ERMrest.UnauthorizedError || exception.code == "Unauthorized") {
+            if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.login($window.location.href);
             } else {
                 AlertsService.addAlert({type:'error', message:exception.message});
