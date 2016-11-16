@@ -527,12 +527,12 @@ tbody{
 
 .hideContent {
     overflow: hidden;
-    line-height: 1.45em;
-    max-height: 7.25em;
+    line-height: 20px;
+    max-height: 100px;
 }
 
 .showContent {
-    line-height: 1.45em;
+    line-height: 20px;
     height: auto;
     display: inline
 }
