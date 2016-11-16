@@ -13,7 +13,8 @@ exports.getConfig = function(options) {
       'chromeOptions' : {
          args: ['--lang=en',
                 '--window-size=2480,1920']
-      }
+      },
+      'platform': 'OS X 10.11'
     },
     specs: [
       '*.spec.js'
