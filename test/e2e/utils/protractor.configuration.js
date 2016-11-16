@@ -14,7 +14,9 @@ exports.getConfig = function(options) {
          args: ['--lang=en',
                 '--window-size=2480,1920']
       },
-      'platform': 'OS X 10.11'
+      'os': 'MacOS El Capitan 10.11',
+      'platform': 'OS X 10.11',
+      'screenResolution': '1920x1440'
     },
     specs: [
       '*.spec.js'
@@ -26,10 +28,7 @@ exports.getConfig = function(options) {
     }
   };
 
-  if (process.env.TRAVIS) {
-    config.capabilities['tunnel-identifier'] = process.env.TRAVIS_JOB_NUMBER;
-    config.capabilities['build'] = process.env.TRAVIS_BUILD_NUMBER;
-  }
+
   if (!options.configFileName && !options.testConfiguration) throw new Error("No configfile provided in protractor.conf.js");
   if (!options.page) throw new Error("No page provided in protractor.conf.js");
 
