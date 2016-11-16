@@ -25,6 +25,10 @@ exports.getConfig = function(options) {
     }
   };
 
+  if (process.env.TRAVIS) {
+    config.capabilities['tunnel-identifier'] = process.env.TRAVIS_JOB_NUMBER;
+    config.capabilities['build'] = process.env.TRAVIS_BUILD_NUMBER;
+  }
   if (!options.configFileName && !options.testConfiguration) throw new Error("No configfile provided in protractor.conf.js");
   if (!options.page) throw new Error("No page provided in protractor.conf.js");
 
