@@ -27,9 +27,12 @@
         $cookiesProvider.defaults.secure = true;
     }])
 
-    .run(['ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', function runRecordEditApp(ERMrest, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+    .run(['ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
+        function runRecordEditApp(ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+
         var session,
             context = { booleanValues: ['', true, false] };
+            
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
@@ -59,11 +62,8 @@
 
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }, function sessionFailed() {
-                var noSessionMessage = "There is no current session.";
-                var noSessionError = new Error(noSessionMessage);
-                noSessionError.code = "401 Unauthorized";
-
-                throw noSessionError;
+                // do nothing but return without a session
+                return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
                 $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = session;
@@ -99,7 +99,7 @@
                                 var filter = context.filter;
                                 var noDataMessage = "No entity exists with " + filter.column + filter.operator + filter.value;
                                 var noDataError = new Error(noDataMessage);
-                                noDataError.code = "404 Not Found";
+                                noDataError.code = errorNames.notFound;
 
                                 throw noDataError;
                             }
@@ -158,21 +158,35 @@
                         }).catch(function readCatch(exception) {
                             ErrorService.errorPopup(exception.message, exception.code, "home page");
                         });
+                    } else if (session) {
+                        var notAuthorizedMessage = "You are not authorized to Update entities.";
+                        var notAuthorizedError = new Error(notAuthorizedMessage);
+                        notAuthorizedError.code = errorNames.forbidden;
+
+                        throw notAuthorizedError;
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Update entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
-                        notAuthorizedError.code = "403 Fordbidden";
+
+                        notAuthorizedError.code = errorNames.unauthorized;
 
                         throw notAuthorizedError;
                     }
                 } else {
                     if ($rootScope.reference.canCreate) {
                         $rootScope.displayname = $rootScope.reference.displayname;
+                    } else if (session) {
+                        var forbiddenMessage = "You are not authorized to Create entities.";
+                        var forbiddenError = new Error(forbiddenMessage);
+
+                        forbiddenError.code = errorNames.forbidden;
+
+                        throw forbiddenError;
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
 
-                        notAuthorizedError.code = "403 Fordbidden";
+                        notAuthorizedError.code = errorNames.unauthorized;
 
                         throw notAuthorizedError;
                     }
@@ -181,9 +195,9 @@
                 $log.warn(response);
                 throw response;
             }).catch(function genericCatch(exception) {
-                if (exception instanceof ERMrest.UnauthorizedError || exception.code == "401 Unauthorized") {
+                if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                     ErrorService.catchAll(exception);
-                } else if (exception.code == "403 Forbidden") {
+                } else if (exception.code == errorNames.forbidden) {
                     ErrorService.errorPopup(exception.message, exception.code, "previous page", $window.document.referrer);
                 } else {
                     ErrorService.errorPopup(exception.message, exception.code, "home page");

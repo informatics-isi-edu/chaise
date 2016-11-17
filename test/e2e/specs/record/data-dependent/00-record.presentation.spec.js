@@ -25,7 +25,6 @@ describe('View existing record,', function() {
 
                 it('should load document title defined in chaise-config.js and have showDeleteButton=true', function(done) {
                     browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                        console.log(chaiseConfig);
                         expect(chaiseConfig.showDeleteButton).toBe(true);
                         if (chaiseConfig.headTitle) {
                             browser.getTitle().then(function(title) {

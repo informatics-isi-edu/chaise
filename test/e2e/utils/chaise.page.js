@@ -513,11 +513,15 @@ var recordPage = function() {
 
     this.getColumnValue = function(columnName) {
         return element(by.id("row-" + columnName)).element(by.css(".entity-value")).element(by.css(".ng-scope"));
-    }
+    };
+
+    this.getLinkChild = function(el) {
+        return browser.executeScript("return $(arguments[0]).find('a')[0];", el);
+    };
 
     this.getRelatedTables = function() {
         return element.all(by.css(".related-table"));
-    }
+    };
 
     this.getRelatedTable = function(displayName) {
         return element(by.id("rt-" + displayName));
