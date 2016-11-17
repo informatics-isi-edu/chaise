@@ -341,7 +341,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				}
 
                 it("should open a modal search and select a foreign key value.", function () {
-                   
+
                     chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
                     	var modalTitle = chaisePage.recordEditPage.getModalTitle(),
                         	EC = protractor.ExpectedConditions;
@@ -377,7 +377,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                        })(i);
 	                    }
                     });
-                    
+
                 });
 
 				it("should have a `create new` button that opens a new tab", function(){

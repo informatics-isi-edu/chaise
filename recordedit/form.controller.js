@@ -152,18 +152,19 @@
                     // If the column is a pseudo column, it needs to get the originating columns name for data submission
                     if (column.isPseudo) {
 
-                        // TODO loop through all columns in foreign key mapping are proper
-                        var referenceColumn = column.foreignKey.colset.columns[0];
-                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
-
-                        // check if value is set in submission data yet
-                        if (!model.submissionRows[j][referenceColumn.name]) {
-                            /**
-                             * User didn't change the foreign key, copy the value over to the submission data with the proper column name
-                             * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
-                             * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
-                            **/
-                            model.submissionRows[j][referenceColumn.name] = (vm.editMode ? $rootScope.tuples[j].data[referenceColumn.name] : null);
+                        var foreignKeyColumns = column.foreignKey.colset.columns;
+                        for (var k = 0; k < foreignKeyColumns.length; k++) {
+                            var referenceColumn = foreignKeyColumns[k];
+                            var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+                            // check if value is set in submission data yet
+                            if (!model.submissionRows[j][referenceColumn.name]) {
+                                /**
+                                 * User didn't change the foreign key, copy the value over to the submission data with the proper column name
+                                 * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
+                                 * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
+                                **/
+                                model.submissionRows[j][referenceColumn.name] = (vm.editMode ? $rootScope.tuples[j].data[referenceColumn.name] : null);
+                            }
                         }
                     // not pseudo, column.name is sufficient for the keys
                     } else {
@@ -260,27 +261,32 @@
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
-                // TODO loop through all columns in foreign key mapping are proper
-                var referenceCol = column.foreignKey.colset.columns[0];
-                var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
+                var foreignKeyColumns = column.foreignKey.colset.columns;
+                for (var i = 0; i < foreignKeyColumns.length; i++) {
+                    var referenceCol = foreignKeyColumns[i];
+                    var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
 
-                // set the tuple instead
+                    vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
+                }
+
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname;
-                vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
-
             }, function noDataSelected() {
                 // do nothing
             });
         }
 
         function clearForeignKey(rowIndex, column) {
-            // TODO bad idea assuming there's 1 value
-            var model = vm.recordEditModel,
-                referenceCol = column.foreignKey.colset.columns[0];
+            var model = vm.recordEditModel;
+
+            var foreignKeyColumns = column.foreignKey.colset.columns;
+            for (var i = 0; i < foreignKeyColumns.length; i++) {
+                var referenceCol = foreignKeyColumns[i];
+
+                delete model.submissionRows[rowIndex][referenceCol.name];
+                if ($rootScope.tuples) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
+            }
 
             model.rows[rowIndex][column.name] = null;
-            delete model.submissionRows[rowIndex][referenceCol.name];
-            if ($rootScope.tuples) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
         }
 
         function createRecord(column) {

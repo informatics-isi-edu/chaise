@@ -251,7 +251,7 @@
                                     <td class="entity-key col-md-2">Accession Number</td>
                                     <td class="entity-value col-md-10">
                                         <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.accession_number">{{metadata.image.entity.description}}</span>
+                                            <span ng-if="metadata.image.entity.accession_number">{{metadata.image.entity.accession_number}}</span>
                                             <span ng-if="!metadata.image.entity.accession_number" class="text-muted">No data</span>
                                         </div>
                                         <div ng-show="metadata.editMode" class="form-inline">
