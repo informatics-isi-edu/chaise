@@ -169,7 +169,6 @@ DETAILED_JS_SOURCE= $(JS)/respond.js \
 
 DETAILED_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/font-awesome/css/font-awesome.min.css \
 	$(COMMON)/styles/appheader.css
 
 DETAILED_CSS_DEPS=$(DETAILED_ASSETS)/lib/slippry/slippry.css \
@@ -290,7 +289,6 @@ RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
 
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/font-awesome/css/font-awesome.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
 	$(CSS)/vendor/angular-datepicker.css \
@@ -324,8 +322,7 @@ RECSET_JS_SOURCE=$(COMMON)/authen.js \
     $(RECSET_ASSETS)/recordset.js
 
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/font-awesome/css/font-awesome.min.css
+	$(CSS)/material-design/css/material-design-iconic-font.min.css
 
 RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css \
     $(COMMON)/styles/app.css \

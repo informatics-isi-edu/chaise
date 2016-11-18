@@ -5,9 +5,9 @@
             <tr>
                 <th nowrap ng-repeat="col in vm.columns track by $index">
                     <span class="table-column-displayname" ng-class="{'coltooltiplabel': col.comment}" title="{{col.comment}}" ng-click="!col.isPseudo && sortby(col.name)">{{::col.displayname}}</span>
-                    <span ng-show="!col.isPseudo && vm.sortby==col.name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-asc" ng-style="{'cursor': 'pointer'}"></span>
-                    <span ng-show="!col.isPseudo && vm.sortby==col.name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="fa fa-sort-amount-desc" ng-style="{'cursor': 'pointer'}"></span>
-                    <span ng-show="!col.isPseudo && vm.sortby!==col.name" class="fa fa-fw fa-sort" ng-click="sortby(col.name)" ng-style="{'cursor': 'pointer'}"></span>
+                    <span ng-show="!col.isPseudo && vm.sortby==col.name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes" ng-style="{'cursor': 'pointer'}"></span>
+                    <span ng-show="!col.isPseudo && vm.sortby==col.name && vm.sortOrder=='desc'" ng-click="toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes-alt" ng-style="{'cursor': 'pointer'}"></span>
+                    <span ng-show="!col.isPseudo && vm.sortby!==col.name" class="glyphicon glyphicon-sort" ng-click="sortby(col.name)" ng-style="{'cursor': 'pointer'}"></span>
                 </th>
             </tr>
         </thead>
