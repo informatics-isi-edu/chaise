@@ -24,6 +24,7 @@
 
         vm.submit = submit;
         vm.readyToSubmit = false;
+        vm.submissionButtonDisabled = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.searchPopup = searchPopup;
@@ -146,6 +147,7 @@
 
             // Form data is valid, time to transform row values for submission to ERMrest
             vm.readyToSubmit = true;
+            vm.submissionButtonDisabled = true;
             for (var j = 0; j < model.rows.length; j++) {
                 var transformedRow = transformRowValues(model.rows[j]);
                 $rootScope.reference.columns.forEach(function (column) {
@@ -192,6 +194,7 @@
                     vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
+                    vm.submissionButtonDisabled = false;
                 });
             } else {
                 $rootScope.reference.create(model.submissionRows).then(function success(page) {
@@ -202,6 +205,7 @@
                     vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
+                    vm.submissionButtonDisabled = false;
                 });
             }
         }

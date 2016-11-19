@@ -55,7 +55,7 @@ describe('Add a record,', function() {
                     });
                 });
 
-                describe("Submit " + tableParams.records + " records", function() {
+                describe("Submit record", function() {
 					beforeAll(function() {
 						// Submit the form
 						chaisePage.recordEditPage.submitForm();
