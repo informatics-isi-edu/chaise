@@ -622,7 +622,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	};
 
 	this.showUsableFilter = function showUsableFilter(facet) {
-		var ret = (facetPolicy == 'on_demand') || ($scope.showSearchFilter(facet) &&
+		var ret = (facetPolicy == 'on_demand' && (!hasAnnotation(facet['table'], facet['name'], 'top') && (initializedFacets[facet['table']] == null || !initializedFacets[facet['table']].contains(facet['name'])))) || ($scope.showSearchFilter(facet) &&
 			($scope.FacetsData.narrowFilter.length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || (new RegExp($scope.FacetsData.narrowFilter, 'i')).test(facet['display'])));
 			//($scope.FacetsData..length == 0 || $scope.FacetsData.chooseColumns[facet['table']][facet['name']] || $scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0);
 		return ret;

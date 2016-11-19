@@ -37,7 +37,7 @@
             <alerts alerts="ctrl.alerts"></alerts>
 
             <div ng-if="reference">
-                <div id="entity-title">{{ recordDisplayname }}</div>
+                <div id="entity-title" ng-bind-html="recordDisplayname"></div>
                 <div id="entity-subtitle">{{ reference.displayname }}</div>
             </div>
 

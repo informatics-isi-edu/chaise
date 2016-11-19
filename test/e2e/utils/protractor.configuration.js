@@ -13,7 +13,10 @@ exports.getConfig = function(options) {
       'chromeOptions' : {
          args: ['--lang=en',
                 '--window-size=2480,1920']
-      }
+      },
+      'os': 'MacOS El Capitan 10.11',
+      'platform': 'OS X 10.11',
+      'screenResolution': '1920x1440'
     },
     specs: [
       '*.spec.js'
@@ -24,6 +27,7 @@ exports.getConfig = function(options) {
       print: function() {}
     }
   };
+
 
   if (!options.configFileName && !options.testConfiguration) throw new Error("No configfile provided in protractor.conf.js");
   if (!options.page) throw new Error("No page provided in protractor.conf.js");
