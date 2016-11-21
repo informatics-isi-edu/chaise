@@ -55,7 +55,7 @@ describe('Add a record,', function() {
                     });
                 });
 
-                describe("Submit " + tableParams.records + " records", function() {
+                describe("Submit record", function() {
 					beforeAll(function() {
 						// Submit the form
 						chaisePage.recordEditPage.submitForm();
@@ -77,13 +77,17 @@ describe('Add a record,', function() {
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
+                            var EC = protractor.ExpectedConditions;
+
 							browser.sleep(3000);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
 
                                 for (var i = 0; i < tableParams.column_names.length; i++) {
                                     var columnName = tableParams.column_names[i];
-                                    expect(chaisePage.recordPage.getColumnValue(columnName).getAttribute("value")).toBeDefined();
+                                    var column = chaisePage.recordPage.getColumnValue(columnName);
+                                    browser.wait(EC.visibilityOf(column), 1000);
+                                    expect(column.getAttribute("value")).toBeDefined();
                                 }
 						    });
 						}

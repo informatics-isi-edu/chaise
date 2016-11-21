@@ -32,7 +32,7 @@
 
         var session,
             context = { booleanValues: ['', true, false] };
-            
+
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();

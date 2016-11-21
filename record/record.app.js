@@ -79,7 +79,6 @@
                             value: value
                         });
                     });
-                    console.log(tuple);
 
                     $rootScope.columns = $rootScope.reference.columns;
 

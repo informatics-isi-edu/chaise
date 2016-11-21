@@ -474,7 +474,11 @@ var recordEditPage = function() {
 
     this.getDeleteRecordButton = function () {
         return element(by.id("delete-button"));
-    }
+    };
+
+    this.getSubmitRecordButton = function () {
+        return element(by.id("submit-record-button"));
+    };
 };
 
 var recordPage = function() {
