@@ -21,7 +21,7 @@
                 </a>&nbsp;&nbsp;
                 <delete-link id="delete-record" ng-if="reference && reference.canDelete && ctrl.modifyRecord && ctrl.showDeleteButton" label="Delete Record" tooltip="Click here to delete this record" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
                 <a id="show-all-related-tables" class="coltooltip" ng-click="ctrl.toggleRelatedTables();">
-                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
+                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
                     <strong>
                         <span ng-show="!ctrl.showEmptyRelatedTables">Show All</span>
                         <span ng-show="ctrl.showEmptyRelatedTables">Hide Empty</span>
