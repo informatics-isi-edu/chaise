@@ -497,17 +497,30 @@
         var element = document.querySelector('.ng-scope');
         var $rootElement = angular.element(element).injector().get('$rootElement');
 
+        var formContainerEl = $rootElement.find('.form-container');
+
         // Get the formedit div
         var elem = $rootElement.find('#formEdit');
-
-        // Set outer width of element to be less by caption column Width and add buttonWidth, 
-        // so that it doesn't scrolls due to the margin-left applied before extra padding
-        var elemWidth = elem.outerWidth();
-        vm.formEditDivMarginLeft.width = elemWidth - captionColumWidth - 30 - 15;
 
         // Get height of formEdit div to use for resizing the fixed columns height
         var elemHeight = elem.outerHeight();
         var trs;
+
+        var scope = $rootScope;
+
+        // Set outer width of element to be less by caption column Width and add buttonWidth, 
+        // so that it doesn't scrolls due to the margin-left applied before extra padding
+        function onResize(doNotInvokeEvent) {
+            var elemWidth = formContainerEl.outerWidth();
+            vm.formEditDivMarginLeft.width = elemWidth - captionColumWidth - 30 - 15;
+            if (!doNotInvokeEvent) scope.$digest();
+        }
+        onResize(true);
+
+        // Listen to window resize event to change the width of div formEdit
+        angular.element($window).bind('resize', function() {
+            onResize();
+        });
 
         // This function is called whenever the height of formEdit div changes
         // This might be because of selecting/clearing something from the popup for foreighn keys
