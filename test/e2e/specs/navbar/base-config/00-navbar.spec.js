@@ -77,7 +77,7 @@ describe('Navbar ', function() {
         });
     }).pend("Pending until we handle tests logging in via Globus/other services");
 
-    xit('should link to the profile URL from chaiseConfig, if specified', function() {
+    xit('should link to the profile URL from chaiseConfig', function() {
         var actual = element.all(by.css('.username'));
         expect(actual.count()).toEqual(1);
         expect(actual.getAttribute('href')).toEqual(chaiseConfig.profileURL);
