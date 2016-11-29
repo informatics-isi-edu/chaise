@@ -540,8 +540,6 @@
                 // This should be done once only
                 if (!elemHeight) elemHeight = elem.outerHeight();
 
-                console.log("Height changed");
-
                 // Get all rows of the table
                 if (!trs) trs = elem.find('tr.entity');
 
