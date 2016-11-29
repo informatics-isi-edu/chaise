@@ -32,8 +32,11 @@ describe('View recordset,', function() {
     }
 
     it('should load custom CSS and document title defined in chaise-config.js', function() {
-        var chaiseConfig;
-        browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
+        var chaiseConfig, tupleParams = testParams.tuples[0], keys = [];
+        tupleParams.keys.forEach(function(key) {
+            keys.push(key.name + key.operator + key.value);
+        });
+        browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
         browser.sleep(3000);
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
