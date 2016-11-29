@@ -167,7 +167,15 @@ exports.testPresentation = function (tableParams) {
                     // verify all rows are present
                     chaisePage.recordPage.getRelatedTableRows(displayName).count().then(function(rowCount) {
                         expect(rowCount).toBe(relatedTables[i].data.length);
-                        expect(headings[i]).toBe("- " + displayName + " (" + rowCount + ")");
+
+                        // Because this spec is reused in multiple recordedit tests, this if-else branching just ensures the correct expectation is used depending on which table is encountered
+                        if (displayName == tableParams.related_table_name_with_page_size_annotation) {
+                        // The annotation_image table has more rows than the page_size, so its heading will have a + after the row count
+                            expect(headings[i]).toBe("- " + displayName + " (" + rowCount + "+)");
+                        } else {
+                        // All other tables should not have the + at the end its heading
+                            expect(headings[i]).toBe("- " + displayName + " (" + rowCount + ")");
+                        }
                     });
                 })(i, displayName);
             }
@@ -344,7 +352,8 @@ exports.relatedTableLinks = function (tableParams) {
             // ... and then get the url from this new tab...
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            // ... before switching back to the original Record app's tab so that the next it spec can run properly
+            // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
+            browser.close();
             browser.switchTo().window(allWindows[0]);
             expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
             expect(url.indexOf(relatedTableName)).toBeGreaterThan(-1);
