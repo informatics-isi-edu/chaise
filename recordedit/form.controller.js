@@ -472,6 +472,8 @@
             e.currentTarget.blur();
         }
 
+        /*------------------------code below is for fixing the column names when scrolling -----------*/
+
         var captionColumWidth = 130;
         var marginLeft = captionColumWidth - 5;
         
@@ -502,10 +504,8 @@
         // Get the formedit div
         var elem = $rootElement.find('#formEdit');
 
-        // Get height of formEdit div to use for resizing the fixed columns height
-        var elemHeight = elem.outerHeight();
+        var elemHeight;
         var trs;
-
         var scope = $rootScope;
 
         // Set outer width of element to be less by caption column Width and add buttonWidth, 
@@ -529,18 +529,19 @@
 
             // Set timer null to reset settimeout
             timer = null;
-            
+
             // get current height of div formEdit
             var h = elem.height();
 
             // If current height of div formEdit has changed than the previous one
             if (elemHeight !== h) {
                 
+                // Get height of formEdit div to use for resizing the fixed columns height
+                // This should be done once only
+                if (!elemHeight) elemHeight = elem.outerHeight();
+
                 console.log("Height changed");
 
-                // Set elemHeight to avoid changing height of first td for no change in height
-                elemHeight = h;
-                
                 // Get all rows of the table
                 if (!trs) trs = elem.find('tr.entity');
 
@@ -549,8 +550,13 @@
                     // Get the height of the first column and  second column of the row
                     // Which are the key and value for the row
 
-                    var keytdHeight = trs[i].children[0].offsetHeight, 
-                        valuetdHeight = trs[i].children[1].offsetHeight;  
+                    var keytdHeight = trs[i].children[0].getAttribute('data-height');
+                    if (keytdHeight == null) {
+                        keytdHeight = trs[i].children[0].offsetHeight;
+                        trs[i].children[0].setAttribute('data-height', keytdHeight);
+                    } 
+                    
+                    var valuetdHeight = trs[i].children[1].offsetHeight;  
 
                     // If keytdHeight is greater than valuetdHeight
                     // then set valuetdHeight
@@ -564,7 +570,7 @@
             }
         }
 
-        var DEBOUNCE_INTERVAL = 50; //play with this to get a balance of performance/responsiveness
+        var TIMER_INTERVAL = 50; //play with this to get a balance of performance/responsiveness
         var timer;
 
         // Watch for height changes on the rootscope
@@ -572,7 +578,7 @@
             timer = timer || 
             $timeout(function() {
                   resizeColumns(); 
-            }, DEBOUNCE_INTERVAL, false);
+            }, TIMER_INTERVAL, false);
         });
     }]);
 })();
