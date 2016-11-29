@@ -48,8 +48,30 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row padding-right-15">
+                            <div class="btn-group pull-right">
+                                <button id="copy-record-btn" class="btn btn-sm btn-primary center-block" ng-click="form.copyFormRow();" ng-if="!form.editMode" type="button">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                </button>
+                                <button id="copy-x-rows-btn" class="btn btn-sm btn-primary center-block" ng-click="form.showMultiInsert = !form.showMultiInsert" type="button">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row add-rows-input-row">
+                            <div ng-show="form.showMultiInsert" class="pull-right add-rows-input">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" ng-model="form.numberRowsToAdd">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-sm btn-default center-block" ng-click="form.copyFormRow()" type="button">
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row form-container">
-                            <div class="col-xs-11">
+                            <div class="col-xs-12">
                                 <table ng-form="form.formContainer" class="table">
                                     <tr ng-if="!form.editMode">
                                         <td>&nbsp;</td>
@@ -192,11 +214,6 @@
                                         </td>
                                     </tr>
                                  </table>
-                            </div>
-                            <div class="col-xs-1 pull-right">
-                                <button id="copy-record-btn" class="btn btn-sm btn-primary center-block" ng-click="form.copyFormRow();" ng-if="!form.editMode" type="button">
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                </button>
                             </div>
                         </div>
                     </div>

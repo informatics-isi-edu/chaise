@@ -2,8 +2,24 @@
     padding-top: 10px;
 }
 
+.padding-right-15 {
+    padding-right: 15px;
+}
+
+.add-rows-input-row {
+    padding-right: 30px;
+    position: absolute;
+}
+
 span.space-1::before {
     content: '\00A0';
+}
+
+.add-rows-input {
+    z-index: 2;
+    padding: 5px;
+    background-color: #D6DBDF;
+    width: 10%;
 }
 
 textarea {
@@ -24,10 +40,6 @@ input[type=number]::-webkit-outer-spin-button {
 
 .form-container {
     margin-top: 30px;
-}
-
-#copy-record-btn {
-    margin-top: 8px;
 }
 
 .input-timestamptz {
@@ -117,8 +129,8 @@ img.spinner{
 }
 
 .popup-select-value {
-  height: auto !important; 
-  max-height: 5.35em !important; 
+  height: auto !important;
+  max-height: 5.35em !important;
   min-width: 200px !important;
   z-index: 0;
 }

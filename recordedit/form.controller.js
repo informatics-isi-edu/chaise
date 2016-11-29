@@ -31,6 +31,8 @@
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
 
+        vm.numberRowsToAdd = 1;
+        vm.showMultiInsert = false;
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
         vm.deleteRecord = deleteRecord;
@@ -322,16 +324,18 @@
             if (validRow) {
                 var rowset = vm.recordEditModel.rows;
                 var protoRow = rowset[index];
-                var row = angular.copy(protoRow);
 
-                // transform row values to avoid parsing issues with null values
-                var transformedRow = transformRowValues(row);
+                for (var i = 0; i < vm.numberRowsToAdd; i++) {
+                    var row = angular.copy(protoRow);
+                    // transform row values to avoid parsing issues with null values
+                    var transformedRow = transformRowValues(row);
+                    var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
 
-                rowset.push(transformedRow);
-
-                var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
-
-                vm.recordEditModel.submissionRows.push(submissionRow);
+                    rowset.push(transformedRow);
+                    vm.recordEditModel.submissionRows.push(submissionRow);
+                }
+                vm.showMultiInsert = false;
+                vm.numberRowsToAdd = 1;
             }
         }
 
