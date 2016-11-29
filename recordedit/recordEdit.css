@@ -30,10 +30,6 @@ input[type=number]::-webkit-outer-spin-button {
     margin-top: 8px;
 }
 
-.input-timestamptz {
-    min-width: 112px;
-}
-
 .form-control-feedback.coltooltip > .coltooltiptext{
     padding: 0;
 }
@@ -119,7 +115,6 @@ img.spinner{
 .popup-select-value {
   height: auto !important; 
   max-height: 5.35em !important; 
-  min-width: 200px !important;
   z-index: 0;
 }
 
@@ -129,3 +124,39 @@ img.spinner{
   border: none;
   vertical-align: top;
 }
+
+td.entity-key {
+  min-width: 130px;
+}
+
+td.entity-value {
+  min-width: 250px;
+}
+
+#formEdit {
+  position: static;
+  overflow-x: scroll;
+  overflow-y: visible;
+}
+
+#formEdit table tr td:first-child {
+  position: absolute !important;
+  left: 0;
+  top: auto;
+  margin-left: 10px;
+  margin-top: 1px;
+  background: white;
+  z-index: 10;
+}
+
+#formEdit table tr td:last-child {
+  padding-right:0px; 
+}
+
+.add-button {
+  position: absolute;
+  right: 15px;
+  top: auto;
+  float: right;
+}
+

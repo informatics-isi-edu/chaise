@@ -49,11 +49,11 @@
                             </div>
                         </div>
                         <div class="row form-container">
-                            <div class="col-xs-11">
+                            <div class="col-xs-12" id="formEdit" ng-style="form.formEditDivMarginLeft">
                                 <table ng-form="form.formContainer" class="table">
                                     <tr ng-if="!form.editMode">
-                                        <td>&nbsp;</td>
-                                        <td ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
+                                        <td ng-style="form.firstHeaderStyle">&nbsp;</td>
+                                        <td ng-style="form.headerHeight" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
                                             <div class="row">
                                                 <div class="col-xs-12">
                                                     <delete-link ng-show="form.recordEditModel.rows.length > 1" button-size="sm" tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
@@ -61,8 +61,8 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
-                                        <td class="entity-key col-xs-1" ng-class="{'coltooltip': column.comment}">
+                                    <tr class="entity" ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
+                                        <td ng-style="form.captionColumWidth" class="entity-key col-xs-1" ng-class="{'coltooltip': column.comment}">
                                             <span ng-if="::form.isRequired(column);" class="text-danger">*</span>
                                             <span ng-class="{'coltooltiplabel': column.comment}">{{::column.displayname}}</span>
                                             <span ng-if="::column.comment" class="coltooltiptext">{{::column.comment}}</span>
@@ -193,7 +193,7 @@
                                     </tr>
                                  </table>
                             </div>
-                            <div class="col-xs-1 pull-right">
+                            <div class="add-button">
                                 <button id="copy-record-btn" class="btn btn-sm btn-primary center-block" ng-click="form.copyFormRow();" ng-if="!form.editMode" type="button">
                                     <span class="glyphicon glyphicon-plus"></span>
                                 </button>
