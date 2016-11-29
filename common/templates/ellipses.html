@@ -2,7 +2,7 @@
     <div ng-switch="val.isHTML">
         <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" >
             <span ng-switch-when="true" class="markdown-container" ng-bind-html="val.value"></span>
-            <span ng-switch-default>{{val.value}}</span>
+            <span ng-switch-default ng-bind="val.value"></span>
         </div>
         <div ng-if="overflow[$index]" style="display:inline;">
             ...
