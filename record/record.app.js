@@ -98,7 +98,6 @@
 
                         (function(i) {
                             $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
-
                                 var model = {
                                     reference: $rootScope.relatedReferences[i],
                                     columns: $rootScope.relatedReferences[i].columns,
@@ -117,13 +116,11 @@
                             }, function readFail() {
                                 var model = {
                                     hasLoaded: true
-                                }
-
+                                };
                                 $rootScope.tableModels[i] = model;
                             });
                         })(i);
                     }
-
                 }, function error(response) {
                     $log.warn(response);
                     throw response;
