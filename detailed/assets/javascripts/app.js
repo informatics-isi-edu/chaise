@@ -1283,6 +1283,9 @@ chaiseRecordApp.controller('DetailCtrl', ['$rootScope', '$scope', '$sce', '$http
                     for (var i = 0, len = data['previews'].length; i < len; i++) {
                         var preview = data['previews'][i];
                         var preview_params = '';
+                        if (!preview.preview) {
+                            continue;
+                        }
                         if (preview.preview.indexOf('{') === 0) {
                             var preview_obj = JSON.parse(preview.preview);
                             var preview_urls = preview_obj['preview_urls'];

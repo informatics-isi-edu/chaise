@@ -12,20 +12,20 @@
         <div ng-controller="RecordController as ctrl">
             <div id="record-bookmark-container" class="col-xs-12 meta-icons">
                 <a id="create-record" class="coltooltip" ng-click="::ctrl.createRecord()" ng-if="reference && reference.canCreate && ctrl.modifyRecord">
-                    <span class="glyphicon glyphicon-plus"></span> <strong>Create Record</strong>
+                    <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
                     <span class="coltooltiptext">Click here to create a record</span>
                 </a>&nbsp;&nbsp;
                 <a id="edit-record" class="coltooltip" ng-click="::ctrl.editRecord()" ng-if="reference && reference.canUpdate && ctrl.modifyRecord">
-                    <span class="glyphicon glyphicon-pencil"></span> <strong>Edit Record</strong>
+                    <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                     <span class="coltooltiptext">Click here to edit this record</span>
                 </a>&nbsp;&nbsp;
-                <delete-link id="delete-record" ng-if="reference && reference.canDelete && ctrl.modifyRecord && ctrl.showDeleteButton" label="Delete Record" tooltip="Click here to delete this record" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
+                <delete-link id="delete-record" ng-if="reference && reference.canDelete && ctrl.modifyRecord && ctrl.showDeleteButton" label="Delete" tooltip="Click here to delete this record" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
                 <a id="show-all-related-tables" class="coltooltip" ng-click="ctrl.toggleRelatedTables();">
                     <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
                     <strong>
                         <span ng-show="!ctrl.showEmptyRelatedTables">Show All</span>
                         <span ng-show="ctrl.showEmptyRelatedTables">Hide Empty</span>
-                         Related Entities
+                         Related Records
                     </strong>
                     <span class="coltooltiptext">Click here to show empty related entities too.</span>
                 </a>&nbsp;&nbsp;
@@ -53,8 +53,8 @@
                     <div ng-switch on="relatedRef.display.type">
                         <div class="row">
                             <div class="col-xs-12 text-right">
-                                <span ng-if="relatedRef.canCreate && ctrl.modifyRecord"><a class="add-records-link" ng-click="ctrl.addRelatedRecord(relatedRef)">Add Record</a> |</span>
-                                <a class="more-results-link" ng-click="ctrl.toRecordSet(relatedRef)">View All Records</a>
+                                <span ng-if="relatedRef.canCreate && ctrl.modifyRecord"><a class="add-records-link" ng-click="ctrl.addRelatedRecord(relatedRef)">Add</a> |</span>
+                                <a class="more-results-link" ng-click="ctrl.toRecordSet(relatedRef)">View All</a>
                             </div>
                         </div>
                         <div class="row">

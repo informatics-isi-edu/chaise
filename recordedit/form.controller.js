@@ -400,7 +400,7 @@
         }
 
         function isForeignKey(column) {
-            return (column.memberOfForeignKeys.length > 0 || column.isPseudo);
+            return column.isPseudo;
         }
 
         // Returns true if a column type is found in the given array of types

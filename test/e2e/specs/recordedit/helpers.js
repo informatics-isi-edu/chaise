@@ -307,6 +307,17 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 					});
 				});
 
+                it('should show an uneditable field for each foreign key column', function() {
+                    var expectedNumOfPopupFields = columns.length * (recordIndex + 1);
+                    var popupFields = element.all(by.css('.popup-select-value'));
+                    expect(popupFields.count()).toBe(expectedNumOfPopupFields);
+                    // Ensure each field is an uneditable div element (not an input)
+                    popupFields.map(function(field) {
+                        expect(field.getTagName()).toBe('div');
+                        expect(field.getAttribute('contenteditable')).toBe('false');
+                    });
+                });
+
                 // in the edit case
                 if (!tableParams.records) {
 
