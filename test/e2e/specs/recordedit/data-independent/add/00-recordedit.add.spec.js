@@ -106,15 +106,18 @@ describe('Record Add', function() {
     }
 
     it('should load custom CSS and document title defined in chaise-config.js', function() {
-        var chaiseConfig = browser.executeScript('return chaiseConfig');
-        if (chaiseConfig.customCSS) {
-            expect($("link[href='" + chaiseConfig.customCSS + "']").length).toBeTruthy();
-        }
-        if (chaiseConfig.headTitle) {
-            browser.getTitle().then(function(title) {
-                expect(title).toEqual(chaiseConfig.headTitle);
-            });
-        }
+        var chaiseConfig;
+        browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
+        browser.sleep(3000);
+        browser.executeScript('return chaiseConfig').then(function(config) {
+            chaiseConfig = config;
+            return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
+        }).then(function(elemArray) {
+            expect(elemArray.length).toBeTruthy();
+            return browser.getTitle();
+        }).then(function(title) {
+            expect(title).toEqual(chaiseConfig.headTitle);
+        });
     });
 
     describe('When url has a prefill query string param set, ', function() {
@@ -143,6 +146,7 @@ describe('Record Add', function() {
                     var field = element.all(by.css('.popup-select-value')).first();
                     expect(field.getText()).toBe(testCookie.rowname);
                 } else {
+                    // Fail the test
                     expect('Cookie did not load').toEqual('but cookie should have loaded');
                 }
             });

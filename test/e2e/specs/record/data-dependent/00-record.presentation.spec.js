@@ -43,4 +43,19 @@ describe('View existing record,', function() {
 
     	})(testParams.tuples[i], i);
     }
+
+    it('should load custom CSS and document title defined in chaise-config.js', function() {
+        var chaiseConfig;
+        browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
+        browser.sleep(3000);
+        browser.executeScript('return chaiseConfig').then(function(config) {
+            chaiseConfig = config;
+            return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
+        }).then(function(elemArray) {
+            expect(elemArray.length).toBeTruthy();
+            return browser.getTitle();
+        }).then(function(title) {
+            expect(title).toEqual(chaiseConfig.headTitle);
+        });
+    });
 });

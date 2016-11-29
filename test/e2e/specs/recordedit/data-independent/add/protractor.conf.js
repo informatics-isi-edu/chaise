@@ -13,6 +13,7 @@ var config = pConfig.getConfig({
     },
   */
 
+    chaiseConfigFilePath: 'test/e2e/specs/recordedit/data-independent/add/chaise-config.js',
     page: 'recordedit',
     setBaseUrl: function(browser, data) {
       browser.params.url = process.env.CHAISE_BASE_URL + "/recordedit" + "/#" + data.catalogId + "/" + data.schema.name;
