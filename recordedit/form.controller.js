@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$uibModal', '$window', function FormController(AlertsService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$uibModal', '$window', '$timeout', function FormController(AlertsService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $uibModal, $window, $timeout) {
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
@@ -404,7 +404,7 @@
         }
 
         function isForeignKey(column) {
-            return (column.memberOfForeignKeys.length > 0 || column.isPseudo);
+            return column.isPseudo;
         }
 
         // Returns true if a column type is found in the given array of types
@@ -475,5 +475,112 @@
         function blurElement(e) {
             e.currentTarget.blur();
         }
+
+        /*------------------------code below is for fixing the column names when scrolling -----------*/
+
+        var captionColumWidth = 130;
+        var marginLeft = captionColumWidth - 5;
+        
+        // Sets a fixed width for the columns, as they're positioned absolute
+        vm.captionColumWidth = { 'width' : captionColumWidth + "px" };
+
+        // Sets margin-left for the formedit div as the first columns are positioned absolute
+        // to avoid overlap between them
+        vm.formEditDivMarginLeft = { 'margin-left': marginLeft + "px", 'padding-right': '0px' };
+
+        // Sets a fixed header height to match the border for the columns
+        var headerHeight = 46;
+        vm.headerHeight = { 'height' : headerHeight + "px" };
+        
+        // Adds height and width to the first empty heading of the first row
+        // to make it uniform 
+        vm.firstHeaderStyle = {
+            'width' : captionColumWidth + "px",
+            'height' : headerHeight + "px"
+        };
+
+        // Get root element
+        var element = document.querySelector('.ng-scope');
+        var $rootElement = angular.element(element).injector().get('$rootElement');
+
+        var formContainerEl = $rootElement.find('.form-container');
+
+        // Get the formedit div
+        var elem = $rootElement.find('#formEdit');
+
+        var elemHeight;
+        var trs;
+        var scope = $rootScope;
+
+        // Set outer width of element to be less by caption column Width and add buttonWidth, 
+        // so that it doesn't scrolls due to the margin-left applied before extra padding
+        function onResize(doNotInvokeEvent) {
+            var elemWidth = formContainerEl.outerWidth();
+            vm.formEditDivMarginLeft.width = elemWidth - captionColumWidth - 30 - 15;
+            if (!doNotInvokeEvent) scope.$digest();
+        }
+        onResize(true);
+
+        // Listen to window resize event to change the width of div formEdit
+        angular.element($window).bind('resize', function() {
+            onResize();
+        });
+
+        // This function is called whenever the height of formEdit div changes
+        // This might be because of selecting/clearing something from the popup for foreighn keys
+        // It is called initially once, to adjust heights of fixed columns according to their next td element
+        function resizeColumns() {
+
+            // Set timer null to reset settimeout
+            timer = null;
+
+            // get current height of div formEdit
+            var h = elem.height();
+
+            // If current height of div formEdit has changed than the previous one
+            if (elemHeight !== h) {
+                
+                // Get height of formEdit div to use for resizing the fixed columns height
+                // This should be done once only
+                if (!elemHeight) elemHeight = elem.outerHeight();
+
+                // Get all rows of the table
+                if (!trs) trs = elem.find('tr.entity');
+
+                // iterate over each row
+                for(var i=0;i<trs.length;i++) { 
+                    // Get the height of the first column and  second column of the row
+                    // Which are the key and value for the row
+
+                    var keytdHeight = trs[i].children[0].getAttribute('data-height');
+                    if (keytdHeight == null) {
+                        keytdHeight = trs[i].children[0].offsetHeight;
+                        trs[i].children[0].setAttribute('data-height', keytdHeight);
+                    } 
+                    
+                    var valuetdHeight = trs[i].children[1].offsetHeight;  
+
+                    // If keytdHeight is greater than valuetdHeight
+                    // then set valuetdHeight
+                    // else change coltdHeight for viceversa condition
+                    if (keytdHeight > valuetdHeight) { 
+                        trs[i].children[1].height = keytdHeight;
+                    } else if (valuetdHeight > keytdHeight)  {   
+                        trs[i].children[0].height = valuetdHeight;
+                    } 
+                }
+            }
+        }
+
+        var TIMER_INTERVAL = 50; //play with this to get a balance of performance/responsiveness
+        var timer;
+
+        // Watch for height changes on the rootscope
+        $rootScope.$watch(function() { 
+            timer = timer || 
+            $timeout(function() {
+                  resizeColumns(); 
+            }, TIMER_INTERVAL, false);
+        });
     }]);
 })();
