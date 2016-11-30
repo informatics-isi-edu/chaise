@@ -127,18 +127,14 @@ img.spinner{
   vertical-align: top;
 }
 
-td.entity-key {
-  min-width: 130px;
-}
-
 td.entity-value {
   min-width: 250px;
 }
 
 #formEdit {
   position: static;
-  overflow-x: scroll;
-  overflow-y: visible;
+  overflow-x: auto;
+  overflow-y: auto;
   padding-right: 0px;
 }
 
@@ -164,9 +160,16 @@ td.entity-value {
   border-top: 1px solid #ddd;
 }
 
-#formEdit table tr:first-child td:first-child {
+#formEdit table tr:first-child td {
   margin-top: 0px;
   height: 48px !important;
+}
+
+td.entity-key, #formEdit table tr:first-child td:first-child {
+  min-width: 130px;
+  color: #999;
+  font-weight: normal;
+  font-size: 1em;
 }
 
 .add-button {

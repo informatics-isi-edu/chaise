@@ -52,11 +52,12 @@
                             <div class="col-xs-12" id="formEdit" ng-style="form.formEditDivMarginLeft">
                                 <table ng-form="form.formContainer" class="table">
                                     <tr ng-if="!form.editMode">
-                                        <td ng-style="form.firstHeaderStyle">&nbsp;</td>
+                                        <td ng-style="form.firstHeaderStyle">Record Number</td>
                                         <td ng-style="form.headerHeight" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
                                             <div class="row">
                                                 <div class="col-xs-12">
-                                                    <delete-link ng-show="form.recordEditModel.rows.length > 1" button-size="sm" tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
+                                                    <div class="pull-left" ng-bind="rowIndex + 1"></div>
+                                                    <delete-link class="pull-right" ng-show="form.recordEditModel.rows.length > 1" button-size="sm" tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
                                                 </div>
                                             </div>
                                         </td>
