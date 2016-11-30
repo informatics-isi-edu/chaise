@@ -106,3 +106,7 @@
     font-weight: normal;
     font-size: 1em;
 }
+
+.panel-title >a:hover span, .panel-title>a:focus span{
+    color: rgb(63, 124, 184);
+}
