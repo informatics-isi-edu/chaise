@@ -75,7 +75,6 @@ button .glyphicon-trash {
 .coltooltip .coltooltiptext {
     display: none;
     width: 100px;
-    max-width: 150px;
     background-color: #454545;
     color: #f0f0f0;
     text-align: center;
