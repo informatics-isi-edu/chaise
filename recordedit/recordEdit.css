@@ -161,13 +161,13 @@ td.entity-value {
   border-top: 1px solid #ddd;
   margin-top: 0px;
   height: 48px !important;
+  color: #999;
+  font-weight: normal;
+  font-size: 1em;
 }
 
 td.entity-key, #formEdit table tr:first-child td:first-child {
   min-width: 130px;
-  color: #999;
-  font-weight: normal;
-  font-size: 1em;
 }
 
 .add-button {
