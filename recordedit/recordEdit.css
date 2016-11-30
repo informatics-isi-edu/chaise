@@ -158,9 +158,6 @@ td.entity-value {
 
 #formEdit table tr:first-child td {
   border-top: 1px solid #ddd;
-}
-
-#formEdit table tr:first-child td {
   margin-top: 0px;
   height: 48px !important;
 }
@@ -189,6 +186,11 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
   color: #999;
 }
 
+
+#formEdit table tr:first-child td:first-child {
+  height: 49px !important;
+}
+
 /* Chrome only: */
 @media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) { 
   #formEdit {
@@ -207,6 +209,6 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
   }
 
   #formEdit table tr:first-child td:first-child {
-  margin-top: -1px;
-  height: 48px !important;
+    margin-top: -1px;
+  }
 }
