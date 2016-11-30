@@ -4151,3 +4151,20 @@ function convertFilter(url) {
 	return newUrl;
 }
 
+function getColumnAnnotation(table_name, column_name, annotation, key) {
+	var ret = null;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name']) {
+			var column_definitions = table['column_definitions'];
+			$.each(column_definitions, function(i, col) {
+				if (col['name'] == column_name && col['annotations'] != null && col['annotations'][annotation] != null) {
+					ret = col['annotations'][annotation][key];
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	return ret;
+}
+
