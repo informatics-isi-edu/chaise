@@ -33,7 +33,8 @@ E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
 E2EDviewer=test/e2e/specs/viewer/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/specs/login/protractor.conf.js
-E2Enavbar=test/e2e/specs/navbar/data-dependent/protractor.conf.js
+E2Enavbar=test/e2e/specs/navbar/base-config/protractor.conf.js
+E2EnavbarHeadTitle=test/e2e/specs/navbar/no-logo-no-brandtext/protractor.conf.js
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)
@@ -420,7 +421,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -431,7 +432,13 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable)  && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable)  && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)  && $(BIN)/protractor $(E2Elogin)
+
+
+#Rule to run navbar tests
+.PHONY: testnavbar
+testnavbar:
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle)
 
 #Rule to run search app tests
 .PHONY: testsearch
