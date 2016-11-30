@@ -116,6 +116,8 @@ img.spinner{
   height: auto !important; 
   max-height: 5.35em !important; 
   z-index: 0;
+  border-radius: 5px !important;
+  padding-right: 0px;
 }
 
 .modal-popup .input-group-addon {
@@ -140,6 +142,11 @@ td.entity-value {
   padding-right: 0px;
 }
 
+#formEdit > table {
+  overflow: hidden;
+  margin-bottom: 0px;
+}
+
 #formEdit table tr td:first-child {
   position: absolute !important;
   left: 0;
@@ -162,17 +169,6 @@ td.entity-value {
   height: 48px !important;
 }
 
-
-@-moz-document url-prefix() {
-  #formEdit table tr td:first-child {
-    margin-top: 0px;  
-  }
-
-  #formEdit table tr:first-child td:first-child {
-  margin-top: -1px;
-  height: 48px !important;
-}
-
 .add-button {
   position: absolute;
   right: 15px;
@@ -184,13 +180,30 @@ td.entity-value {
   width: 100%;
 }
 
-.popup-select-value {
-  border-radius: 5px !important;
-  padding-right: 0px;
-}
-
 .record-number {
   font-size: 14px;
   margin-left: 10px;
   color: #999;
+}
+
+/* Chrome only: */
+@media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) { 
+  #formEdit {
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+  }
+
+  #formEdit table {
+    margin-bottom: -1px !important;
+  }
+}
+
+@-moz-document url-prefix() {
+  #formEdit table tr td:first-child {
+    margin-top: 0px;  
+  }
+
+  #formEdit table tr:first-child td:first-child {
+  margin-top: -1px;
+  height: 48px !important;
 }
