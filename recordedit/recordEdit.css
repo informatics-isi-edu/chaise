@@ -137,6 +137,7 @@ td.entity-value {
   position: static;
   overflow-x: scroll;
   overflow-y: visible;
+  padding-right: 0px;
 }
 
 #formEdit table tr td:first-child {
@@ -147,11 +148,19 @@ td.entity-value {
   margin-top: 1px;
   background: white;
   z-index: 10;
+  border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
 }
 
-#formEdit table tr td:last-child {
-  padding-right:0px; 
+#formEdit table tr:first-child td {
+  border-top: 1px solid #ddd;
 }
+
+#formEdit table tr:first-child td:first-child {
+  margin-top: 0px;
+  height: 48px !important;
+}
+
 
 .add-button {
   position: absolute;
@@ -160,3 +169,17 @@ td.entity-value {
   float: right;
 }
 
+.modal-popup {
+  width: 100%;
+}
+
+.popup-select-value {
+  border-radius: 5px !important;
+  padding-right: 0px;
+}
+
+.record-number {
+  font-size: 14px;
+  margin-left: 10px;
+  color: #999;
+}
