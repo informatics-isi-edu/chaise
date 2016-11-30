@@ -75,6 +75,7 @@ button .glyphicon-trash {
 .coltooltip .coltooltiptext {
     display: none;
     width: 100px;
+    max-width: 150px;
     background-color: #454545;
     color: #f0f0f0;
     text-align: center;
@@ -85,6 +86,11 @@ button .glyphicon-trash {
     z-index: 3;
     text-transform: none;
     white-space: normal;
+}
+
+.coltooltip .paragraph{
+    width: 200px;
+    text-align: left;
 }
 
 .coltooltip:hover .coltooltiptext {
@@ -525,6 +531,8 @@ tbody{
     margin: 10px 10px 10px 0px;
 }
 
+/***************** ellipses ***************/
+
 .hideContent {
     overflow: hidden;
     line-height: 20px;
@@ -535,4 +543,9 @@ tbody{
     line-height: 20px;
     height: auto;
     display: inline
+}
+
+/************* custom buttons **************/
+.btn-no-focus:focus {
+    outline: none;
 }

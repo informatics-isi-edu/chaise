@@ -12,6 +12,10 @@
                     <button id="search-submit" class="btn btn-primary" ng-click="search(vm.search)" role="button">
                         &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                     </button>
+                    <button type="button" tabIndex="-1" class="btn btn-primary btn-no-focus coltooltip">
+                        <span class="glyphicon glyphicon-question-sign"></span>
+                        <span class="coltooltiptext paragraph"><p>Use space to separate between conjunctive terms and quotations for exact phrases.</p><p>For example, typing <i><b>usc 1234</b></i> returns all records containing "usc" and "1234".</p><p>Typing <i><b>"usc 1234"</b></i> returns all records containing "usc 1234".</span>
+                    </button>
                     <button id="search-clear" class="btn btn-primary" ng-disabled="!vm.reference.location.searchTerm" ng-click="clearSearch()" type="button">Reset</button>
                 </span>
         </div>
