@@ -136,6 +136,7 @@ td.entity-value {
   overflow-x: auto;
   overflow-y: auto;
   padding-right: 0px;
+  margin-bottom: 20px;
 }
 
 #formEdit > table {
