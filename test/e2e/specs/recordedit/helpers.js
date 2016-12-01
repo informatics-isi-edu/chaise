@@ -107,7 +107,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 		describe(title + ",",function() {
 
-			if (recordIndex > 0) {
+			if (recordIndex > 0 && tableParams.clickAdd) {
 				it("should click add record button", function() {
 					chaisePage.recordEditPage.getAddRowButton().then(function(button) {
 						chaisePage.clickButton(button);

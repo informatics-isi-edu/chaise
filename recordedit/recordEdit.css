@@ -41,13 +41,9 @@ input[type=number]::-webkit-outer-spin-button {
 .form-container {
     margin-top: 30px;
 }
- 
+
 .input-timestamptz {
     min-width: 112px;
-}
-
-#copy-record-btn {
-    margin-top: 8px;
 }
 
 .form-control-feedback.coltooltip > .coltooltiptext{

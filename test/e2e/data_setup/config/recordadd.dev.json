@@ -27,11 +27,19 @@
         "params" : {
             "tables" : [{
                 "table_name" : "accommodation",
-                "records": 3
+                "records": 3,
+                "clickAdd" : true
             }, {
                 "table_name" : "booking",
-                "records": 1
-            }]
+                "records": 1,
+                "clickAdd" : true
+            }],
+            "multi_insert" : {
+                "table_name" : "accommodation",
+                "records" : 3,
+                "clickAdd" : false,
+                "max_input_rows" : 200
+            }
         }
     }
 }
