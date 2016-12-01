@@ -57,7 +57,7 @@
                                             <div class="row">
                                                 <div class="col-xs-12">
                                                     <div class="pull-left" ng-bind="rowIndex + 1"></div>
-                                                    <delete-link class="pull-right" ng-show="form.recordEditModel.rows.length > 1" button-size="sm" tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
+                                                    <delete-link class="pull-right" ng-show="form.recordEditModel.rows.length > 1" button-size="sm"  tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
                                                 </div>
                                             </div>
                                         </td>
@@ -65,8 +65,7 @@
                                     <tr class="entity" ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
                                         <td ng-style="form.captionColumWidth" class="entity-key col-xs-1" ng-class="{'coltooltip': column.comment}">
                                             <span ng-if="::form.isRequired(column);" class="text-danger">*</span>
-                                            <span ng-class="{'coltooltiplabel': column.comment}">{{::column.displayname}}</span>
-                                            <span ng-if="::column.comment" class="coltooltiptext">{{::column.comment}}</span>
+                                            <span ng-class="{'coltooltiplabel': column.comment}" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="{{::column.comment}}">{{::column.displayname}}</span>
                                         </td>
                                         <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.columnToDisplayType(column);">
                                             <!-- date input-->
@@ -114,11 +113,11 @@
                                                     <span class="glyphicon glyphicon-remove foreignkey-remove" ng-click="form.clearForeignKey(rowIndex, column)" tooltip-append-to-body=true tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                                                 </div>
                                                 <span class="input-group-addon" ng-show="::!form.isDisabled(column);">
-                                                    <button ng-focus="form.blurElement($event);" class="btn btn-default coltooltip modal-popup-btn" type="button" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);">
-                                                        <span class="glyphicon glyphicon-chevron-down" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Choose from an existing value"></span>
+                                                    <button ng-focus="form.blurElement($event);" class="btn btn-default coltooltip modal-popup-btn" type="button" ng-click="form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Choose from an existing value">
+                                                        <span class="glyphicon glyphicon-chevron-down"></span>
                                                     </button>
-                                                    <button ng-focus="form.blurElement($event);" class="btn btn-primary coltooltip create-record-btn" type="button" ng-click="form.createRecord(column)" ng-disabled="::form.isDisabled(column);" style="margin-left: -4px;">
-                                                        <span class="glyphicon glyphicon-plus" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Create a new value"></span>
+                                                    <button ng-focus="form.blurElement($event);" class="btn btn-primary coltooltip create-record-btn" type="button" ng-click="form.createRecord(column)" ng-disabled="::form.isDisabled(column);" style="margin-left: -4px;" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Create a new value">
+                                                        <span class="glyphicon glyphicon-plus"></span>
                                                     </button>
                                                 </span>
                                                 <!-- So that the foreign key input can be validated -->
