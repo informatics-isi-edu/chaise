@@ -72,14 +72,18 @@
             var rowset = vm.recordEditModel.rows,
                 redirectUrl = "../";
 
+            // If no page arg provided, it means no submission to ERMrest was made because user made no changes while editing a record
+            if (typeof page === 'undefined') {
+                // Default the page arg to the existing $rootScope in order to allow retrieval of catalog and compactPath info under via page.reference later
+                page = $rootScope;
+            }
+
             // Created a single entity or Updated one
             if (rowset.length == 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
-
                 redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             } else {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
-
+                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the recordset...'});
                 redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             }
 
@@ -177,25 +181,36 @@
             }
 
             if (vm.editMode) {
-                // loop through model.rows
-                // there should only be 1 row for editting
-                for (var i = 0; i < model.submissionRows.length; i++) {
-                    var row = model.submissionRows[i];
-                    var data = $rootScope.tuples[i].data;
-                    // assign each value from the form to the data object on tuple
-                    for (var key in row) {
-                        data[key] = (row[key] === '' ? null : row[key]);
-                    }
-                }
-
-                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
-                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    vm.redirectAfterSubmission(page);
-                }, function error(response) {
-                    vm.showSubmissionError(response);
-                    vm.submissionButtonDisabled = false;
+                // Check whether there has been any changes since to model.rows since app initialization
+                var hasNoChanges = model.rows.every(function(element, index, array) {
+                    return angular.equals(element, model.oldRows[index]);
                 });
+
+                if (hasNoChanges) {
+                    // Redirect to record without PUT'ing to ERMrest
+                    vm.readyToSubmit = false;
+                    vm.redirectAfterSubmission();
+                } else {
+                    // loop through model.submissionRows
+                    // there should only be 1 row for editing
+                    for (var i = 0; i < model.submissionRows.length; i++) {
+                        var row = model.submissionRows[i];
+                        var data = $rootScope.tuples[i].data;
+                        // assign each value from the form to the data object on tuple
+                        for (var key in row) {
+                            data[key] = (row[key] === '' ? null : row[key]);
+                        }
+                    }
+
+                    // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
+                    $rootScope.reference.update($rootScope.tuples).then(function success(page) {
+                        vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                        vm.redirectAfterSubmission(page);
+                    }, function error(response) {
+                        vm.showSubmissionError(response);
+                        vm.submissionButtonDisabled = false;
+                    });
+                }
             } else {
                 $rootScope.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
@@ -476,7 +491,7 @@
 
         var captionColumWidth = 130;
         var marginLeft = captionColumWidth - 5;
-        
+
         // Sets a fixed width for the columns, as they're positioned absolute
         vm.captionColumWidth = { 'width' : captionColumWidth + "px" };
 
@@ -487,9 +502,9 @@
         // Sets a fixed header height to match the border for the columns
         var headerHeight = 46;
         vm.headerHeight = { 'height' : headerHeight + "px" };
-        
+
         // Adds height and width to the first empty heading of the first row
-        // to make it uniform 
+        // to make it uniform
         vm.firstHeaderStyle = {
             'width' : captionColumWidth + "px",
             'height' : headerHeight + "px"
@@ -508,7 +523,7 @@
         var trs;
         var scope = $rootScope;
 
-        // Set outer width of element to be less by caption column Width and add buttonWidth, 
+        // Set outer width of element to be less by caption column Width and add buttonWidth,
         // so that it doesn't scrolls due to the margin-left applied before extra padding
         function onResize(doNotInvokeEvent) {
             var elemWidth = formContainerEl.outerWidth();
@@ -535,7 +550,7 @@
 
             // If current height of div formEdit has changed than the previous one
             if (elemHeight !== h) {
-                
+
                 // Get height of formEdit div to use for resizing the fixed columns height
                 // This should be done once only
                 if (!elemHeight) elemHeight = elem.outerHeight();
@@ -544,7 +559,7 @@
                 if (!trs) trs = elem.find('tr.entity');
 
                 // iterate over each row
-                for(var i=0;i<trs.length;i++) { 
+                for(var i=0;i<trs.length;i++) {
                     // Get the height of the first column and  second column of the row
                     // Which are the key and value for the row
 
@@ -552,18 +567,18 @@
                     if (keytdHeight == null) {
                         keytdHeight = trs[i].children[0].offsetHeight;
                         trs[i].children[0].setAttribute('data-height', keytdHeight);
-                    } 
-                    
-                    var valuetdHeight = trs[i].children[1].offsetHeight;  
+                    }
+
+                    var valuetdHeight = trs[i].children[1].offsetHeight;
 
                     // If keytdHeight is greater than valuetdHeight
                     // then set valuetdHeight
                     // else change coltdHeight for viceversa condition
-                    if (keytdHeight > valuetdHeight) { 
+                    if (keytdHeight > valuetdHeight) {
                         trs[i].children[1].height = keytdHeight;
-                    } else if (valuetdHeight > keytdHeight)  {   
+                    } else if (valuetdHeight > keytdHeight)  {
                         trs[i].children[0].height = valuetdHeight;
-                    } 
+                    }
                 }
             }
         }
@@ -572,10 +587,10 @@
         var timer;
 
         // Watch for height changes on the rootscope
-        $rootScope.$watch(function() { 
-            timer = timer || 
+        $rootScope.$watch(function() {
+            timer = timer ||
             $timeout(function() {
-                  resizeColumns(); 
+                  resizeColumns();
             }, TIMER_INTERVAL, false);
         });
     }]);

@@ -41,7 +41,7 @@ describe('Edit existing record,', function() {
                     var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
 				});
 
-				describe("Submit existing record", function() {
+				describe("Submitting an existing record", function() {
 					beforeAll(function() {
 						// Submit the form
 						chaisePage.recordEditPage.submitForm();
@@ -68,14 +68,31 @@ describe('Edit existing record,', function() {
 						    });
 						}
 					});
-
 				});
 
     		});
 
     	})(testParams.tables[i], i);
-
-
     }
+    describe('and submitting the form without making any changes', function() {
+        var keys = [], tableParams = testParams.tables[0];
+        beforeAll(function() {
+            tableParams.keys.forEach(function(key) {
+                keys.push(key.name + key.operator + key.value);
+            });
+            browser.ignoreSynchronization=true;
+            browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
+            browser.sleep(3000);
+            chaisePage.recordEditPage.submitForm();
+            browser.sleep(3000);
+        });
 
+        it('should also redirect to the correct Record page', function() {
+            browser.driver.getCurrentUrl().then(function(url) {
+                var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
+                redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
+                expect(url).toBe(redirectUrl);
+            });
+        });
+    });
 });
