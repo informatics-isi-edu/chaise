@@ -1,10 +1,12 @@
-<div ng-switch="isHtml">
-    <div ng-class="{'hideContent': overflow == true, 'showContent': overflow == false}" >
-	    <span ng-switch-when="true" class="markdown-container" ng-bind-html="content"></span>
-	    <span ng-switch-default>{{content}}</span>
+<td ng-repeat="val in rowValues track by $index">
+    <div ng-switch="val.isHTML">
+        <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}">
+            <span ng-switch-when="true" class="markdown-container" ng-bind-html="val.value"></span>
+            <span ng-switch-default ng-bind="val.value"></span>
+        </div>
+        <div ng-if="overflow[$index]" style="display:inline;">
+            ...
+            <span style="display:inline-block; text-decoration: underline" class="text-primary readmore" ng-click="readmore($index)">{{linkText}}</span>
+        </div>
     </div>
-    <div ng-show="showMore" style="display:inline;">
-        ...
-        <span style="display:inline-block; text-decoration: underline" class="text-primary readmore" ng-click="readmore()">{{linkText}}</span>
-    </div>
-</div>
+</td>
