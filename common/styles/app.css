@@ -87,6 +87,11 @@ button .glyphicon-trash {
     white-space: normal;
 }
 
+.coltooltip .paragraph{
+    width: 200px;
+    text-align: left;
+}
+
 .coltooltip:hover .coltooltiptext {
     display: inline-block;
 }
@@ -525,6 +530,8 @@ tbody{
     margin: 10px 10px 10px 0px;
 }
 
+/***************** ellipses ***************/
+
 .hideContent {
     overflow: hidden;
     line-height: 20px;
@@ -535,4 +542,9 @@ tbody{
     line-height: 20px;
     height: auto;
     display: inline
+}
+
+/************* custom buttons **************/
+.btn-no-focus:focus {
+    outline: none;
 }
