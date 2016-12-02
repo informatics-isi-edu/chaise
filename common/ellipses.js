@@ -16,7 +16,7 @@
                     scope.overflow = []; // for each cell in the row
 
                     scope.hideContent = false;
-                    scope.linkText = "show more";
+                    scope.linkText = "more";
                     scope.maxHeightStyle = { };
 
                     // 1em = 14px
@@ -26,11 +26,11 @@
                     scope.readmore = function() {
                         if (scope.overflow) {
                             scope.overflow = false;
-                            scope.linkText = "show less";
+                            scope.linkText = "less";
                             scope.maxHeightStyle =  { };
                         } else {
                             scope.overflow = true;
-                            scope.linkText = "show more";
+                            scope.linkText = "more";
                             scope.maxHeightStyle =  { "max-height": maxHeight + "px" };
                         }
                     }
