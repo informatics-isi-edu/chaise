@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', '$rootScope', '$window', function RecordController(AlertsService, $cookies, $log, UriUtils, $rootScope, $window) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', '$rootScope', '$window', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, $rootScope, $window) {
         var vm = this;
 
         vm.alerts = AlertsService.alerts;
@@ -98,7 +98,9 @@
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
             var cookie = {
                 rowname: $rootScope.recordDisplayname,
-                constraintName: ref.origFKR.constraint_names[0].join(':')
+                constraintName: ref.origFKR.constraint_names[0].join(':'),
+                originUri: $rootScope.reference.uri,
+                objectUri: ref.uri
             };
             var newRef = ref.contextualize.entryCreate;
             var mapping = newRef.origFKR.mapping;
@@ -126,6 +128,30 @@
                 // Browser blocked the popup/new window/new tab. TODO: Just redirect in same window?
                 $window.location.href = appLink;
             }
+        };
+
+        // When page gets focus, check cookie for any related table row additions
+        // re-read the records for that table
+        $window.onfocus = function() {
+            // if cookie has addition { objectUri: count, ... }
+            var cookie = $cookies.getObject($rootScope.reference.uri);
+            if (cookie) {
+                for (var objectUri in cookie) {
+                    // find matching Reference
+                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+                        if ($rootScope.relatedReferences[i].uri === objectUri) {
+                            // update table's row values
+                            (function (i) {
+                                $rootScope.relatedReferences[i].read($rootScope.tableModels[i].pageLimit).then(function (page) {
+                                    $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
+                                });
+                            })(i);
+                        }
+                    }
+                }
+                $cookies.remove($rootScope.reference.uri);
+            }
+
         };
 
         // Refactor this out to common folder if other apps need it

@@ -218,6 +218,17 @@
                 $rootScope.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     if (vm.prefillCookie) {
+
+                        // only do this if came from record->relatedTable->add
+                        // We can tell from having prefill
+                        var cookie = $cookies.getObject(vm.prefillCookie.originUri);
+                        if (!cookie)
+                            cookie = {};
+                        cookie[vm.prefillCookie.objectUri] = model.submissionRows.length;
+                        $cookies.putObject(vm.prefillCookie.originUri, cookie, {
+                            expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                        });
+
                         $cookies.remove(context.prefill);
                     }
                     vm.redirectAfterSubmission(page);
