@@ -166,6 +166,11 @@ td.entity-value {
   font-size: 1em;
 }
 
+#formEdit td {
+  border-right:1px solid #ddd;
+}
+
+
 td.entity-key, #formEdit table tr:first-child td:first-child {
   min-width: 130px;
 }

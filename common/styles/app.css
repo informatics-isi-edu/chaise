@@ -170,13 +170,8 @@ button .glyphicon-trash {
 .table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
     border-top: none;
     border-bottom: 1px solid #ddd;
-    border-right: 1px solid #ddd;
     max-width: 500px;
     word-wrap: break-word;
-}
-
-.table>tbody>tr:first-child td {
-    border-top: 1px solid #ddd;
 }
 
 #detailed-bookmark-container{
@@ -540,4 +535,8 @@ tbody{
     line-height: 20px;
     height: auto;
     display: inline
+}
+
+.showContent .markdown-container > p {
+    margin-bottom: 0px;
 }
