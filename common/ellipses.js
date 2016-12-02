@@ -21,7 +21,7 @@
 
                     // 1em = 14px
                     // 7.25em = 101.5px
-                    var maxHeight = 160;
+                    var maxHeight = chaiseConfig.maxRecordsetRowHeight || 160;
                     
                     scope.readmore = function() {
                         if (scope.overflow) {
