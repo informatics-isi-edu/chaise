@@ -24,12 +24,12 @@
                     var maxHeight = chaiseConfig.maxRecordsetRowHeight || 160;
                     
                     scope.readmore = function() {
-                        if (scope.overflow) {
-                            scope.overflow = false;
+                        if (scope.hideContent) {
+                            scope.hideContent = false;
                             scope.linkText = "less";
                             scope.maxHeightStyle =  { };
                         } else {
-                            scope.overflow = true;
+                            scope.hideContent = true;
                             scope.linkText = "more";
                             scope.maxHeightStyle =  { "max-height": maxHeight + "px" };
                         }
