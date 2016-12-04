@@ -72,6 +72,19 @@ facetsModel.factory('FacetsData', function() {
 			currentPage: 1
 		},
 		'pageRange': [],
+		'plotOptions': {
+			keys:[],
+			keyLabels:[],
+			data:[],
+			dataUrl:'',
+			format: defaultPlotFormats[0],
+			supportedFormats: defaultPlotFormats,
+			coordinates: {
+				x:{ column:null, display:null },
+				y:{ column:null, display:null },
+				z:{ column:null, display:null }
+			}
+		},
 		'progress': false,
 		'ready': false,
 		'score': [],
@@ -100,3 +113,72 @@ facetsModel.factory('FacetsData', function() {
 		'viewer3dFile': []
 	};
 });
+
+var defaultPlotFormats =
+[
+	{
+		name:"Histogram",
+		type:"histogram",
+		marker: {
+			color: 'rgba(50,250,50,0.7)'
+		},
+		coordinates:['x'],
+		layout:{
+			hovermode: 'closest',
+			margin: { t: 0, l: 30, r: 0, b: 30 },
+			bargap: 0.05,
+			bargroupgap: 0.2,
+			barmode: "overlay",
+			showlegend: false,
+			autosize: true
+		}
+	},
+	{
+		name:"Histogram 2D",
+		type:"histogram2dcontour",
+		marker: {
+			color: 'red'
+		},
+		coordinates:['x','y'],
+		layout:{
+			hovermode: 'closest',
+			margin: { t: 0, l: 30, r: 0, b: 30 },
+			showlegend: false,
+			autosize: true
+		}
+	},
+	{
+		name:"Scatter",
+		type:"scatter",
+		mode:"markers",
+		marker: {
+			color: 'rgba(1,1,255,0.7)',
+			outliercolor: 'red'
+		},
+		coordinates:['x', 'y'],
+		layout:{
+			hovermode: 'closest',
+			margin: { t: 0, l: 30, r: 0, b: 30 },
+			showlegend: false,
+			autosize: true
+		}
+	},
+	{
+		name:"Bar",
+		type:"bar",
+		mode:"markers",
+		marker: {
+			color: 'rgba(1,1,255,0.4)'
+		},
+		coordinates:['x','y'],
+		layout:{
+			hovermode: 'closest',
+			margin: { t: 0, l: 30, r: 0, b: 30 },
+			bargap: 0.1,
+			bargroupgap: 0.5,
+			barmode: "overlay",
+			showlegend: false,
+			autosize: true
+		}
+	}
+];
