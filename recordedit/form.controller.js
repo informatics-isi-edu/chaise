@@ -31,7 +31,7 @@
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
 
-        var MAX_ROWS_TO_ADD = 200;
+        var MAX_ROWS_TO_ADD = 201;
         vm.numberRowsToAdd = 1;
         vm.showMultiInsert = false;
         vm.copyFormRow = copyFormRow;
@@ -308,8 +308,8 @@
         }
 
         function copyFormRow() {
-            if (vm.numberRowsToAdd > MAX_ROWS_TO_ADD) {
-                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + MAX_ROWS_TO_ADD + '.'});
+            if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > MAX_ROWS_TO_ADD) {
+                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (MAX_ROWS_TO_ADD-vm.recordEditModel.rows.length) + ', inclusive.'});
                 return true;
             }
             // Check if the prototype row to copy has any invalid values. If it
