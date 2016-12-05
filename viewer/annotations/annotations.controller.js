@@ -304,5 +304,6 @@
             }
             return vm.numVisibleAnnotations = counter;
         }
+
     }]);
 })();
