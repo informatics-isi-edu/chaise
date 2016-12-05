@@ -12,8 +12,15 @@
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
+
+        vm.filterChannelsAreHidden = true;
+        vm.filterChannels = filterChannels;
+
         vm.annotationsAreHidden = false;
         vm.toggleAnnotations = toggleAnnotations;
+
+        vm.annotationsSidebarAreHidden = true;
+        vm.openAnnotations = openAnnotations;
 
         function downloadView() {
             var filename = vm.image.entity.slide_id;
@@ -42,7 +49,58 @@
         function toggleAnnotations() {
             var messageType = vm.annotationsAreHidden ? 'showAllAnnotations' : 'hideAllAnnotations';
             iframe.postMessage({messageType: messageType}, origin);
+            var btnptr = $('#hide-btn');
+            if(vm.annotationsAreHidden) {
+              btnptr.removeClass('pick');
+              } else {
+                btnptr.addClass('pick');
+            }
             vm.annotationsAreHidden = !vm.annotationsAreHidden;
+        }
+
+        function openAnnotations() {
+            var btnptr = $('#edit-btn');
+            var panelptr=$('#annotations-panel');
+            var sidebarptr=$('#sidebar');
+            if(vm.annotationsSidebarAreHidden) {
+              if(!vm.filterChannelsAreHidden) { // close channels
+                filterChannels();
+              }
+              sidebarptr.css("display","");
+              btnptr.addClass('pick');
+              panelptr.removeClass('fade-out').addClass('fade-in');
+              } else {
+                btnptr.removeClass('pick');
+                panelptr.removeClass('fade-in').addClass('fade-out');
+            }
+            vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
+        }
+
+        function covered() {
+            var sidebarptr=$('#sidebar');
+            var covered=false;
+            var tmp=sidebarptr.css("display");
+            if(tmp && tmp!='none')
+              covered=true;
+            return covered;
+        }
+
+        function filterChannels() {
+            var btnptr = $('#filter-btn');
+            var sidebarptr=$('#sidebar');
+  
+            if(vm.filterChannelsAreHidden) {
+              btnptr.addClass('pick');
+              if(!vm.annotationsSidebarAreHidden) { // annotation is up
+                openAnnotations(); // close it
+              }
+              if(covered())
+                  sidebarptr.css("display","none");
+              } else {
+                btnptr.removeClass('pick');
+            }
+            iframe.postMessage({messageType: 'filterChannels'}, origin);
+            vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
         }
     }]);
 })();

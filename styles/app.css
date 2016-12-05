@@ -820,6 +820,20 @@ th.table-more-bt {
 	word-wrap: break-word;
 }
 
+#results-plot-fullscreen {
+	position: relative;
+    top: 10px;
+    bottom: 10px;
+    display: flex;
+	height: auto;
+    flex-direction: column;
+    border: thin solid gray;
+}
+
+#results-plot-view {
+    flex-grow: 1;
+}
+
 /* Temporarily hide features that are not active yet */
 
 #browser-header, #add-filter-btn, #view-buttons, #dashboard-link {

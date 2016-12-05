@@ -120,7 +120,7 @@
 									rz-slider-floor="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['floor']"
 									rz-slider-ceil="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['ceil']"
 									rz-slider-translate="translate"
-									rz-slider-on-change="sideBar.delay_slider(FacetsData.tag)"> </rzslider></li>
+									rz-slider-on-end="sideBar.delay_slider(FacetsData.tag)"> </rzslider></li>
 							<li ng-if="sideBar.if_type(FacetsData.tag, 'text')"><input placeholder="Search filters by keyword..."
 								type="text" ng-model="FacetsData.box[FacetsData.tag['table']][FacetsData.tag['name']]['value']"
 								ng-keyup="sideBar.delay_predicate(FacetsData.tag,$event.keyCode)"

@@ -42,67 +42,12 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 
     // Build ermrest predicate base on JSON params
     this.buildPredicate = function(keys, entity){
-        // Build an array of predicates for the Ermrest Filter lanaguage
-        var predicates = [];
-        if (display_columns['title'] != null && keys.contains(display_columns['title'])) {
-            predicates.push(encodeSafeURIComponent(display_columns['title']) + '=' + encodeSafeURIComponent(entity[display_columns['title']]));
-        } else {
-            for (var i = 0; i< keys.length; i++){
-            	// the PRIMARY_KEY array has the keys already encoded, so decode them in order to extract the value from the row
-                var key = decodeURIComponent(keys[i]);
-                var predicate = encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(entity[key]);
-                predicates.push(predicate);
-            }
-        }
-
-        // Join predicates with a conjunctive filter '&'
-        return predicates.join('&');
+		return FacetsService.buildPredicate(keys, entity);
     };
 
     // Returns the path for a given row
     this.rowPath = function(row){
-        var prefix = window.location.href;
-        
-        // match /search/ of /search/index.html in the url
-        // everything before /search/ is the base url
-        var index = prefix.indexOf('\/search\/index.html');
-        if (index == -1) {
-        	index = prefix.indexOf('\/search\/');
-        }
-        if (index != -1) {
-            prefix = prefix.substring(0, index);
-        }
-        // in case we have a view, we want the "original" table in the detail
-        var table_name = getTableAnnotation($scope.FacetsData.table, TABLES_MAP_URI, 'originalTable');
-        if (table_name == null) {
-        	table_name = $scope.FacetsData.table;
-        }
-        
-        // defaults
-        var resource = "record/";
-        var mode = 'tag:isrd.isi.edu,2016:recordlink/fragmentfilter';
-        
-        // schema Record Link overwrites the defaults
-        var recordLink = getSchemaAnnotation(SCHEMA, SCHEMA_RECORD_LINK_URI);
-        if (recordLink != null) {
-        	resource = recordLink['resource'];
-        	mode = recordLink['mode'];
-        }
-        
-        // table Record Link overwrites the defaults or schema Record Link
-        recordLink = getTableAnnotationValue(table_name, TABLE_RECORD_LINK_URI);
-        if (recordLink != null) {
-        	resource = recordLink['resource'];
-        	mode = recordLink['mode'];
-        }
-        
-        var suffix = '';
-        if (mode == 'tag:isrd.isi.edu,2016:recordlink/fragmentfilter') {
-        	suffix = '#' + CATALOG + '/' + SCHEMA + ':' +  encodeSafeURIComponent(table_name) + '/' + this.buildPredicate(PRIMARY_KEY, row);
-        }
-        
-        var detailPath = prefix + '/' + resource + suffix;
-        return detailPath;
+		return FacetsService.rowPath(row);
     };
 
 	// "m" is the number of columns per row
@@ -615,4 +560,34 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 		FacetsService.doExport();
 	};
 
+	this.onPlotFormatUpdate = function onPlotFormatUpdate(event) {
+		FacetsService.updatePlotFormatOptions();
+	};
+
+	this.onPlotCoordinateUpdate = function onPlotCoordinateUpdate(event) {
+		FacetsService.updatePlotCoordinateOptions();
+	};
+
+	this.plotFormatSupportsCoordinate = function plotFormatSupportsCoordinate(coord) {
+		return FacetsData.plotOptions.format.coordinates.contains(coord);
+	};
+
+	this.onRenderPlot = function onRenderPlot() {
+		FacetsService.renderPlot();
+	};
+
+	this.plotViewEnabled = function plotViewEnabled() {
+		if (!chaiseConfig['plotViewEnabled']) {
+			return false;
+		}
+
+		// resize handler
+		window.onresize = function () {
+			var node = document.getElementById('results-plot-view');
+			if (node) {
+				Plotly.Plots.resize(node);
+			}
+		};
+		return true;
+	};
 }]);
