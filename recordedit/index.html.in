@@ -51,12 +51,12 @@
                         <div class="row padding-right-15">
                             <div class="btn-group pull-right">
                                 <button id="copy-record-btn" class="btn btn-sm btn-primary center-block" ng-click="form.copyFormRow();" ng-if="!form.editMode" type="button"
-                                    tooltip-placement="bottom" tooltip-append-to-body="true" uib-tooltip="Click to add 1 record">
+                                    tooltip-placement="bottom" tooltip-append-to-body="true" uib-tooltip="Click to add 1 record.">
                                     <span class="glyphicon glyphicon-plus"></span>
                                 </button>
                                 <button id="copy-x-rows-btn" class="btn btn-sm btn-primary center-block" ng-click="form.showMultiInsert = !form.showMultiInsert" type="button"
-                                    tooltip-placement="bottom" tooltip-append-to-body="true" uib-tooltip="Click to add 1 or more records">
-                                    <span class="glyphicon glyphicon-pencil"></span>
+                                    tooltip-placement="bottom" tooltip-append-to-body="true" uib-tooltip="Click to add a maximum of {{form.MAX_ROWS_TO_ADD-1}} records.">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
                                 </button>
                             </div>
                         </div>
