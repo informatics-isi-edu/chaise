@@ -865,10 +865,13 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		];
 		Plotly.newPlot('results-plot-view', plotData, layout, {displaylogo: false});
 
+        var node = document.getElementById('results-plot-view');
 		// click handler
-		var node = document.getElementById('results-plot-view');
 		if (node) {
 			node.on('plotly_click', function (data) {
+                if (!data) {
+                    return;
+                }
 				var pointData;
 				for (var i = 0; i < data.points.length; i++) {
 					pointData = FacetsData.plotOptions.data[data.points[i].pointNumber];
@@ -877,6 +880,43 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 						window.open(url, '_blank');
 					}
 				}
+			});
+		}
+
+		// select handler
+		if (node) {
+			node.on('plotly_selected', function (data) {
+                if (!data) {
+                    return;
+                }
+				var urlFrag = '';
+                var pointData;
+                var count = 0;
+				for (var i = 0; i < data.points.length; i++) {
+                    if (!(data.points[i].x && data.points[i].y)) {
+                        continue;
+                    }
+					pointData = FacetsData.plotOptions.data[data.points[i].pointNumber];
+					if (pointData) {
+                        urlFrag += (count) ? ';(' : '(';
+                        for (var k = 0; k < plotOpts.keys.length; k++) {
+                            if (k > 0) {
+                                urlFrag += '&';
+                            }
+                            urlFrag += plotOpts.keys[k] + '=' + pointData[plotOpts.keys[k]]
+                        }
+                        urlFrag += ')';
+                        count++;
+					}
+				}
+				if (!count) {
+                    return;
+                }
+				var baseUrl = window.location.href;
+                baseUrl = baseUrl.replace('search', 'recordset');
+                baseUrl = baseUrl.substring(0, baseUrl.indexOf('?'));
+                var url = baseUrl + '/' + urlFrag;
+                window.open(url, '_blank');
 			});
 		}
 	}
