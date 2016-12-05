@@ -65,7 +65,7 @@
                                 <div class="input-group">
                                     <input id="copy-rows-input" type="number" class="form-control " ng-model="form.numberRowsToAdd">
                                     <span class="input-group-btn">
-                                        <button id="copy-rows-submit" class="btn btn-sm btn-default center-block" ng-click="form.copyFormRow()" type="button">
+                                        <button id="copy-rows-submit" class="btn btn-default center-block" ng-click="form.copyFormRow()" type="button">
                                             <span class="glyphicon glyphicon-ok"></span>
                                         </button>
                                     </span>
