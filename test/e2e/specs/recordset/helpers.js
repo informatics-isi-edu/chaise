@@ -100,6 +100,7 @@ exports.testPresentation = function (tableParams) {
 	});
 
 	it("click on row should redirect to record app", function() {
+        browser.sleep(1000);
 		chaisePage.recordsetPage.getRows().then(function(rows) {
 			rows[0].click().then(function() {
                 browser.driver.sleep(1000);

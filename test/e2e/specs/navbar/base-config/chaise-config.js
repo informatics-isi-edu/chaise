@@ -1,16 +1,22 @@
-// Configure deployment-specific data here
+/* This config tests navbar functionalities with:
+ - No headTitle
+ - navbarBrandImage
+ - navbarBrandText
+ - signUpURL
+ - profileURL
+*/
 
 var chaiseConfig = {
     name: "navebar",
     layout: 'list',
     confirmDelete: true,
-    headTitle: 'test123',
     customCSS: '/assets/css/chaise.css',
     navbarBrand: 'test123',
-    navbarBrandImage: 'test123',
+    navbarBrandImage: 'test123.jpg',
     navbarBrandText: 'test123',
+    headTitle: 'this one should be ignored in favor of navbarBrandText',
     logoutURL: 'test123',
-    profileURL: 'test123',
+    profileURL: 'test123l;akjdf;lakdsjf',
     dataBrowser: '/',
     maxColumns: 6,
     showUnfilteredResults: false,
@@ -32,7 +38,7 @@ var chaiseConfig = {
       chosenAttribute: "Data Type",
       chosenValue: "Expression microarray - gene"
    },
-   signUpURL: 'test123',
+   signUpURL: 'test123.coma;lksjf;laksj',
    navbarMenu: {
        newTab: true,
        children: [

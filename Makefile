@@ -33,7 +33,8 @@ E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
 E2EDviewer=test/e2e/specs/viewer/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/specs/login/protractor.conf.js
-E2Enavbar=test/e2e/specs/navbar/data-dependent/protractor.conf.js
+E2Enavbar=test/e2e/specs/navbar/base-config/protractor.conf.js
+E2EnavbarHeadTitle=test/e2e/specs/navbar/no-logo-no-brandtext/protractor.conf.js
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)
@@ -96,7 +97,8 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/ng-grid.js \
 	$(JS)/vendor/select.js \
-	$(JS)/vendor/bootstrap-tour.min.js
+	$(JS)/vendor/bootstrap-tour.min.js \
+	$(JS)/vendor/plotly-latest.min.js
 
 JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
@@ -170,7 +172,6 @@ DETAILED_JS_SOURCE= $(JS)/respond.js \
 
 DETAILED_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/font-awesome/css/font-awesome.min.css \
 	$(COMMON)/styles/appheader.css
 
 DETAILED_CSS_DEPS=$(DETAILED_ASSETS)/lib/slippry/slippry.css \
@@ -291,7 +292,6 @@ RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
 
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/font-awesome/css/font-awesome.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
 	$(CSS)/vendor/angular-datepicker.css \
@@ -325,8 +325,7 @@ RECSET_JS_SOURCE=$(COMMON)/authen.js \
     $(RECSET_ASSETS)/recordset.js
 
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/font-awesome/css/font-awesome.min.css
+	$(CSS)/material-design/css/material-design-iconic-font.min.css
 
 RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css \
     $(COMMON)/styles/app.css \
@@ -420,7 +419,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -431,7 +430,13 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+
+#Rule to run navbar tests
+.PHONY: testnavbar
+testnavbar:
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle)
+>>>>>>> master
 
 #Rule to run search app tests
 .PHONY: testsearch

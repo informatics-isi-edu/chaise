@@ -85,7 +85,10 @@
                             recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
                         });
                     }
-                    console.log('Model', recordEditModel);
+                    $log.info('Model: ', recordEditModel);
+                    // Keep a copy of the initial rows data so that we can see if user has made any changes later
+                    recordEditModel.oldRows = angular.copy(recordEditModel.rows);
+                    $log.info('Old model.rows:', recordEditModel.oldRows);
                 }
 
                 // Case for editing an entity
@@ -152,6 +155,8 @@
                                 recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
                             }
                             $log.info('Model: ', recordEditModel);
+                            // Keep a copy of the initial rows data so that we can see if user has made any changes later
+                            recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                         }, function error(response) {
                             $log.warn(response);
                             throw response;

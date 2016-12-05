@@ -42,7 +42,7 @@
 }
 
 .panel-default>.panel-heading{
-    text-transform: uppercase;
+    text-transform: inherit;
     padding: 8px 8px 8px 0px;
     color: inherit;
     border: none;
@@ -104,7 +104,7 @@
 .panel a.accordion-toggle span {
     color: #999;
     font-weight: normal;
-    font-size: 1em;
+    font-size: 17px;
 }
 
 .panel-title >a:hover span, .panel-title>a:focus span{

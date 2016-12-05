@@ -21,7 +21,10 @@
             <div style="margin-top: 15px;">Loading...</div>
         </div>
 
-        <recordset vm="vm" default-row-linking="true"></recordset>
+        <div ng-show="vm.hasLoaded">
+            <recordset vm="vm" default-row-linking="true"></recordset>
+        </div>
+
     </div>
 
 </div>

@@ -17,7 +17,7 @@ var config = pConfig.getConfig({
      */
     page: '/viewer',
 
-
+    chaiseConfigFilePath: 'test/e2e/specs/viewer/data-dependent/chaise-config.js',
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL + "/viewer" + "/#" + data.catalogId + "/" + data.schema.name;
         return browser.params.url;
