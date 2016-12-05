@@ -38,7 +38,7 @@
             "id": 2003,
             "title": "NH Munich Resort",
             "website": "http://www.nh-hotels.com/hotels/munich",
-            "rating": "3.20",
+            "rating": "3.2000",
             "summary": "NH Hotels has six resorts in the city of Munich. Very close to Munich Main Train Station -- the train being one of the most interesting choices of transport for travelling around Germany -- is the four-star NH München Deutscher Kaiser Hotel. In addition to the excellent quality of accommodation that it offers, the hotel is located close to Marienplatz, the monumental central square in the city, the Frauenkirche church, Stachus (Karlsplatz) and the Viktualienmarkt. Other places of interest to explore in Munich are the English garden, the spectacular Nymphenburg Palace and the German Museum, a museum of science and technology very much in keeping with the industrial spirit of the city. Do not forget to visit Munich at the end of September and beginning of October, the time for its most famous international festival: Oktoberfest! Beer, sausages, baked knuckles and other gastronomic specialities await you in a festive atmosphere on the grasslands of Theresienwiese. Not to be missed! And with NH Hotels you can choose the hotels in Munich which best suit your travel plans, with free WiFi and the possibility to bring your pets with you.\n... more",
             "opened_on": "6/15/1976, 12:00:00 AM",
             "luxurious": "true"
@@ -47,7 +47,7 @@
             "id": 2002,
             "title": "Sherathon Hotel",
             "website": "http://www.starwoodhotels.com/sheraton/index.html",
-            "rating": "4.30",
+            "rating": "4.3000",
             "summary": "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
             "opened_on": "12/9/2008, 12:00:00 AM",
             "luxurious": "true"
@@ -57,7 +57,7 @@
             "title": "Super 8 North Hollywood Motel",
             "website": "https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests",
             "summary": "Fair Hotel. Close to Universal Studios. Located near shopping areas with easy access to parking. Professional staff and clean rooms. Poorly-maintained rooms.",
-            "rating": "2.80",
+            "rating": "2.8000",
             "opened_on": "6/11/2013, 12:00:00 AM",
             "luxurious": "false"
           },
@@ -66,7 +66,7 @@
             "title": "Hilton Hotel",
             "website": "",
             "summary": "Great Hotel. We've got the best prices out of anyone. Stay here to make America great again. Located near shopping areas with easy access to parking. Professional staff and clean rooms. Poorly-maintained rooms.",
-            "rating": "4.20",
+            "rating": "4.2000",
             "opened_on": "6/11/2013, 12:00:00 AM",
             "luxurious": "true"
           }

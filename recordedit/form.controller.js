@@ -75,14 +75,18 @@
             var rowset = vm.recordEditModel.rows,
                 redirectUrl = "../";
 
+            // If no page arg provided, it means no submission to ERMrest was made because user made no changes while editing a record
+            if (typeof page === 'undefined') {
+                // Default the page arg to the existing $rootScope in order to allow retrieval of catalog and compactPath info under via page.reference later
+                page = $rootScope;
+            }
+
             // Created a single entity or Updated one
             if (rowset.length == 1) {
                 AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
-
                 redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             } else {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
-
+                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the recordset...'});
                 redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             }
 
@@ -180,25 +184,36 @@
             }
 
             if (vm.editMode) {
-                // loop through model.rows
-                // there should only be 1 row for editting
-                for (var i = 0; i < model.submissionRows.length; i++) {
-                    var row = model.submissionRows[i];
-                    var data = $rootScope.tuples[i].data;
-                    // assign each value from the form to the data object on tuple
-                    for (var key in row) {
-                        data[key] = (row[key] === '' ? null : row[key]);
-                    }
-                }
-
-                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
-                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    vm.redirectAfterSubmission(page);
-                }, function error(response) {
-                    vm.showSubmissionError(response);
-                    vm.submissionButtonDisabled = false;
+                // Check whether there has been any changes since to model.rows since app initialization
+                var hasNoChanges = model.rows.every(function(element, index, array) {
+                    return angular.equals(element, model.oldRows[index]);
                 });
+
+                if (hasNoChanges) {
+                    // Redirect to record without PUT'ing to ERMrest
+                    vm.readyToSubmit = false;
+                    vm.redirectAfterSubmission();
+                } else {
+                    // loop through model.submissionRows
+                    // there should only be 1 row for editing
+                    for (var i = 0; i < model.submissionRows.length; i++) {
+                        var row = model.submissionRows[i];
+                        var data = $rootScope.tuples[i].data;
+                        // assign each value from the form to the data object on tuple
+                        for (var key in row) {
+                            data[key] = (row[key] === '' ? null : row[key]);
+                        }
+                    }
+
+                    // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
+                    $rootScope.reference.update($rootScope.tuples).then(function success(page) {
+                        vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                        vm.redirectAfterSubmission(page);
+                    }, function error(response) {
+                        vm.showSubmissionError(response);
+                        vm.submissionButtonDisabled = false;
+                    });
+                }
             } else {
                 $rootScope.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
