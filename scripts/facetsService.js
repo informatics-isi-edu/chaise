@@ -776,7 +776,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		var plotUrl = plotOpts.dataUrl;
 		var plotKeys = plotOpts.keys;
 		var coordinates = plotOpts.coordinates;
-		plotUrl += '/';
+		plotUrl += '/$A/';
         for (var k=0; k < plotKeys.length; k++) {
 			if (k > 0) {
 				plotUrl += ',';
