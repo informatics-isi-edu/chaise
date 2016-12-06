@@ -225,7 +225,7 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
   cursor: not-allowed !important;
 }
 
-#formEdit.editMode td.entity-key {
+#formEdit.editMode table tr td:first-child {
   border-right: 0px;
 }
 
