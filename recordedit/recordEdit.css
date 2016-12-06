@@ -190,10 +190,6 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
   min-width: 130px;
 }
 
-#formEdit table tr td:last-child {
-  padding-right:0px;
-}
-
 .add-button {
   position: absolute;
   right: 15px;
