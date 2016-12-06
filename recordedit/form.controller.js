@@ -546,6 +546,8 @@
             onResize();
         });
 
+        var editMode = vm.editMode;
+
         // This function is called whenever the height of formEdit div changes
         // This might be because of selecting/clearing something from the popup for foreighn keys
         // It is called initially once, to adjust heights of fixed columns according to their next td element
@@ -579,6 +581,8 @@
                     }
 
                     var valuetdHeight = trs[i].children[1].offsetHeight;
+
+                    if (editMode && i==0) valuetdHeight++;
 
                     // If keytdHeight is greater than valuetdHeight
                     // then set valuetdHeight
