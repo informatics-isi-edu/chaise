@@ -31,6 +31,9 @@
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
 
+        vm.MAX_ROWS_TO_ADD = 201;
+        vm.numberRowsToAdd = 1;
+        vm.showMultiInsert = false;
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
         vm.deleteRecord = deleteRecord;
@@ -320,6 +323,10 @@
         }
 
         function copyFormRow() {
+            if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
+                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD-vm.recordEditModel.rows.length) + ', inclusive.'});
+                return true;
+            }
             // Check if the prototype row to copy has any invalid values. If it
             // does, display an error. Otherwise, copy the row.
             var index = vm.recordEditModel.rows.length - 1;
@@ -337,16 +344,18 @@
             if (validRow) {
                 var rowset = vm.recordEditModel.rows;
                 var protoRow = rowset[index];
-                var row = angular.copy(protoRow);
 
-                // transform row values to avoid parsing issues with null values
-                var transformedRow = transformRowValues(row);
+                for (var i = 0; i < vm.numberRowsToAdd; i++) {
+                    var row = angular.copy(protoRow);
+                    // transform row values to avoid parsing issues with null values
+                    var transformedRow = transformRowValues(row);
+                    var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
 
-                rowset.push(transformedRow);
-
-                var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
-
-                vm.recordEditModel.submissionRows.push(submissionRow);
+                    rowset.push(transformedRow);
+                    vm.recordEditModel.submissionRows.push(submissionRow);
+                }
+                vm.showMultiInsert = false;
+                vm.numberRowsToAdd = 1;
             }
         }
 
