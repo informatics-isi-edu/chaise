@@ -48,7 +48,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row padding-right-15">
+                        <div class="row padding-right-15" ng-show="!form.editMode">
                             <div class="btn-group pull-right">
                                 <button id="copy-record-btn" class="btn btn-sm btn-primary center-block" ng-click="form.copyFormRow();" ng-if="!form.editMode" type="button"
                                     tooltip-placement="bottom" tooltip-append-to-body="true" uib-tooltip="Click to add 1 record.">
