@@ -361,7 +361,7 @@ exports.relatedTableLinks = function (tableParams) {
         });
     });
 
-    it("should have a View All link for a related table that redirects to recordset.", function() {
+    it("should have a View More link for a related table that redirects to recordset.", function() {
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,
             relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
