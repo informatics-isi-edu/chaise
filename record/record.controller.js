@@ -5,6 +5,7 @@
 
     .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', '$rootScope', '$window', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, $rootScope, $window) {
         var vm = this;
+        var addRecordRequests = {}; // generated unique id : reference of related table
 
         vm.alerts = AlertsService.alerts;
         vm.modifyRecord = chaiseConfig.editRecord === false ? false : true;
@@ -99,8 +100,6 @@
             var cookie = {
                 rowname: $rootScope.recordDisplayname,
                 constraintName: ref.origFKR.constraint_names[0].join(':'),
-                originUri: $rootScope.reference.uri,
-                objectUri: ref.uri
             };
             var newRef = ref.contextualize.entryCreate;
             var mapping = newRef.origFKR.mapping;
@@ -117,6 +116,7 @@
             $cookies.putObject(COOKIE_NAME, cookie, {
                 expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
             });
+            addRecordRequests[COOKIE_NAME] = ref;
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]
             var appLink = newRef.appLink + '?prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME);
             // 4. Redirect to the url in a new tab
@@ -133,13 +133,14 @@
         // When page gets focus, check cookie for any related table row additions
         // re-read the records for that table
         $window.onfocus = function() {
-            // if cookie has addition { objectUri: count, ... }
-            var cookie = $cookies.getObject($rootScope.reference.uri);
-            if (cookie) {
-                for (var objectUri in cookie) {
-                    // find matching Reference
+            // check current requests
+            for (var id in addRecordRequests) {
+                var cookie = $cookies.getObject(id);
+                if (cookie && typeof cookie !== "object") {
+                    // cookie is an object means it has not been modified
+                    // cookie is a value means new record has been added, cookie has been modified
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        if ($rootScope.relatedReferences[i].uri === objectUri) {
+                        if ($rootScope.relatedReferences[i] === addRecordRequests[id]) {
                             // update table's row values
                             (function (i) {
                                 $rootScope.relatedReferences[i].read($rootScope.tableModels[i].pageLimit).then(function (page) {
@@ -148,8 +149,13 @@
                             })(i);
                         }
                     }
+
+                    // remove from cookie
+                    $cookies.remove(id);
+
+                    // remove from addRecordRequests
+                    delete addRecordRequests[id];
                 }
-                $cookies.remove($rootScope.reference.uri);
             }
 
         };
