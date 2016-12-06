@@ -146,7 +146,7 @@ exports.testPresentation = function (tableParams) {
             tableCount = count;
 
             // check the headings have the right name and in the right order
-            return chaisePage.recordPage.getRelatedTableHeadings().getAttribute("heading");
+            return chaisePage.recordPage.getRelatedTableTitles();
         }).then(function(headings) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
@@ -171,10 +171,10 @@ exports.testPresentation = function (tableParams) {
                         // Because this spec is reused in multiple recordedit tests, this if-else branching just ensures the correct expectation is used depending on which table is encountered
                         if (displayName == tableParams.related_table_name_with_page_size_annotation) {
                         // The annotation_image table has more rows than the page_size, so its heading will have a + after the row count
-                            expect(headings[i]).toBe("- " + displayName + " (" + rowCount + "+)");
+                            expect(headings[i]).toBe(displayName + " (" + rowCount + "+)");
                         } else {
                         // All other tables should not have the + at the end its heading
-                            expect(headings[i]).toBe("- " + displayName + " (" + rowCount + ")");
+                            expect(headings[i]).toBe(displayName + " (" + rowCount + ")");
                         }
                     });
                 })(i, displayName);
@@ -202,9 +202,9 @@ exports.testPresentation = function (tableParams) {
         var tableHeading = chaisePage.recordPage.getRelatedTableHeading(displayName),
             tableElement = chaisePage.recordPage.getRelatedTable(displayName);
 
-        tableHeading.getAttribute("heading").then(function(heading) {
+        tableHeading.element(by.css('.glyphicon')).getAttribute('class').then(function(cssClass) {
             // related table should be open by default
-            expect(heading.indexOf('-')).toBeGreaterThan(-1);
+            expect(cssClass).toContain('glyphicon-chevron-down');
 
             return tableHeading.getAttribute("class");
         }).then(function(attribute) {
@@ -215,7 +215,7 @@ exports.testPresentation = function (tableParams) {
             return tableHeading.getAttribute("heading");
         }).then(function(heading) {
             // related table should be closed now and a '+' should be shown instead of a '-'
-            expect(heading.indexOf('+')).toBeGreaterThan(-1);
+            expect(tableHeading.element(by.css('.glyphicon')).getAttribute('class')).toContain('glyphicon-chevron-right');
             return tableHeading.getAttribute("class");
         }).then(function(attribute) {
             expect(attribute).not.toMatch("panel-open");
@@ -299,7 +299,7 @@ exports.testDeleteButton = function () {
 
 exports.relatedTablesDefaultOrder = function (tableParams) {
     it("should have the tables in default order.", function() {
-        chaisePage.recordPage.getRelatedTableHeadings().getAttribute("heading").then(function(headings) {
+        chaisePage.recordPage.getRelatedTableTitles().then(function(headings) {
             // tables should be in order based on the default order because no visible foreign keys annotation is defined
             // Headings have a '-' when page loads, and a count after them
             expect(headings).toEqual(tableParams.tables_order);
