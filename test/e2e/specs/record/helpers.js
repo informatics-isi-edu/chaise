@@ -316,7 +316,10 @@ exports.relatedTablesDefaultOrder = function (tableParams) {
     });
 };
 
-exports.relatedTableLinks = function (tableParams) {
+exports.relatedTableLinks = function (testParams, tableParams) {
+
+    var allWindows;
+
     it("should create a functional link for table rows with links in them.", function() {
         var relatedTableName = tableParams.related_table_name_with_link_in_table;
 
@@ -330,7 +333,7 @@ exports.relatedTableLinks = function (tableParams) {
         });
     });
 
-    it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
+    it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,
             addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
@@ -340,7 +343,6 @@ exports.relatedTableLinks = function (tableParams) {
 
         expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
 
-        var allWindows;
         addRelatedRecordLink.click().then(function() {
             // This Add link opens in a new tab so we have to track the windows in the browser...
             return browser.getAllWindowHandles();
@@ -352,31 +354,47 @@ exports.relatedTableLinks = function (tableParams) {
             // ... and then get the url from this new tab...
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
-            browser.close();
-            browser.switchTo().window(allWindows[0]);
-            expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
-            expect(url.indexOf(relatedTableName)).toBeGreaterThan(-1);
+
+            var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
+            expect(url.indexOf(result)).toBeGreaterThan(-1);
             expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
+
+            // set the required fields
+            browser.sleep(1000);
+            return chaisePage.recordsetPage.getInputForAColumn("price")
+        }).then(function(input) {
+
+            input.sendKeys(testParams.price);
+            var nowBtn = element.all(by.css('button[name="booking_date"]')).get(1);
+            return nowBtn.click();
+        }).then(function() {
+            return chaisePage.recordEditPage.submitForm();
+        }).then(function() {
+            done();
         });
     });
 
-    it("should have a View More link for a related table that redirects to recordset.", function() {
+    it("should have a new record, View More link for a related table that redirects to recordset.", function(done) {
+
+        browser.sleep(1000);
+        browser.close();
+        browser.switchTo().window(allWindows[0]);
+
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,
             relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
-
         browser.wait(EC.elementToBeClickable(relatedTableLink), 10000);
 
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(count) {
-            expect(count).toBe(tableParams.booking_count);
+            expect(count).toBe(tableParams.booking_count + 1);
 
             expect(relatedTableLink.isDisplayed()).toBeTruthy();
             return relatedTableLink.click();
         }).then(function() {
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            expect(url.indexOf('recordset')).toBeGreaterThan(-1);
+            expect(url.indexOf('recordset')).toBeGreaterThan(-1)
+            done();
         });
     });
 };

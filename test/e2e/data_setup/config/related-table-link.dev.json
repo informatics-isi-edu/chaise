@@ -25,6 +25,9 @@
     "cleanup" : true,
     "tests" : {
         "params": {
+            "schemaName" : "product-unordered-related-tables",
+            "price" : "247.00",
+            "booking_date": "2/10/2016, 12:00:00 AM",
             "tuples" : [{
                 "table_name" : "accommodation",
                 "related_table_name_with_more_results" : "booking",
