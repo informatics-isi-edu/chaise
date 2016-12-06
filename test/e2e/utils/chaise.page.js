@@ -535,6 +535,10 @@ var recordPage = function() {
         return element.all(by.css(".related-table-heading"));
     };
 
+    this.getRelatedTableTitles = function() {
+        return browser.executeScript("return $('.related-table-heading .panel-title').map(function(i, a) { return a.textContent.trim(); });");
+    }
+
     this.getRelatedTableHeading = function(displayName) {
         return element(by.id("rt-heading-" + displayName));
     };

@@ -22,3 +22,91 @@
 #record-bookmark-container > * {
     display: inline-block;
 }
+
+
+/******Related Entities**************/
+
+.panel{
+    box-shadow: none;
+}
+
+.panel-group .panel{
+    border: none;
+    border-bottom: 1px solid #ddd !important;
+    border-radius: 0px;
+}
+
+.panel-title>a:hover, .panel-title>a:focus{
+    text-decoration: none;
+    color: rgb(63, 124, 184);
+}
+
+.panel-default>.panel-heading{
+    text-transform: inherit;
+    padding: 8px 8px 8px 0px;
+    color: inherit;
+    border: none;
+}
+
+.panel-group .panel+.panel{
+    border: none;
+}
+
+.panel-default>.panel-heading+.panel-collapse>.panel-body{
+    padding-left: 0px;
+}
+
+.reference-views {
+    padding-left: 0;
+}
+.reference-views li{
+    float: left;
+}
+.reference-views > li:nth-child(2){
+    border-right: 1px solid black;
+}
+
+.reference-views .reference-view-title{
+    padding: 3px 1px 5px 0;
+    text-transform: uppercase;
+}
+
+.transpose-toggle{
+    display: inline-block;
+    padding: 1px 17px;
+    border-radius: 3px;
+    cursor: pointer;
+    background: #fff;
+    width: 81px;
+}
+
+.panel-title {
+    font-size: inherit;
+}
+
+.transpose-toggle:hover, .transpose-toggle:focus, .transpose-toggle:active{
+    color: #2364AB;
+}
+
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+    max-width: 500px;
+    word-wrap: break-word;
+}
+
+#detailed-bookmark-container{
+    text-align: right;
+    position: absolute;
+    top: 20px;
+}
+
+.panel a.accordion-toggle span {
+    color: #999;
+    font-weight: normal;
+    font-size: 17px;
+}
+
+.panel-title >a:hover span, .panel-title>a:focus span{
+    color: rgb(63, 124, 184);
+}
