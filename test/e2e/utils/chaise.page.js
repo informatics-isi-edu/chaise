@@ -625,7 +625,21 @@ var recordsetPage = function() {
 
     this.getSearchClearButton = function() {
         return element(by.id("search-clear"));
-    }
+    };
+
+    this.getAddRecordButton = function() {
+        return element(by.id("add-record-btn"));
+    };
+
+    this.getInputForAColumn = function(name, index) {
+        index = index || 0;
+        return browser.executeScript("return $('td.entity-value input[name=\"" + name + "\"]')[" + index + "];");
+    };
+
+    this.getModalPopupBtn = function(index) {
+        index = index || 0;
+        return browser.executeScript("return $('.modal-popup-btn')[" + index + "];");
+    };
 };
 
 function chaisePage() {
