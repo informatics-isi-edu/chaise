@@ -536,7 +536,11 @@
         // so that it doesn't scrolls due to the margin-left applied before extra padding
         function onResize(doNotInvokeEvent) {
             var elemWidth = formContainerEl.outerWidth();
-            vm.formEditDivMarginLeft.width = elemWidth - captionColumWidth - 30 - 30 - 5;
+            vm.formEditDivMarginLeft.width = elemWidth - captionColumWidth - 30;
+
+            if (!editMode) {
+                vm.formEditDivMarginLeft.width = vm.formEditDivMarginLeft.width -30 -5
+            }
             if (!doNotInvokeEvent) scope.$digest();
         }
         onResize(true);
