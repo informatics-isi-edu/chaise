@@ -208,7 +208,7 @@ a.cardlink.delete {
   background-color: #18558E;
 }
 
-.btn.pick:hover, .btn.pick:focus, .btn.pick:active {
+.btn.pick:hover {
     background-color: #002D73;
     border-color: #1E4E9A;
 }
