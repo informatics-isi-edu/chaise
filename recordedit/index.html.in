@@ -73,7 +73,7 @@
                             </div>
                         </div>
                         <div class="row form-container">
-                            <div class="col-xs-12" id="formEdit" ng-style="form.formEditDivMarginLeft">
+                            <div class="col-xs-12" id="formEdit" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
                                 <table ng-form="form.formContainer" class="table">
                                     <tr ng-if="!form.editMode">
                                         <td ng-style="form.firstHeaderStyle">Record Number</td>

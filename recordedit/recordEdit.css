@@ -172,10 +172,17 @@ td.entity-value {
   border-left: 1px solid #ddd;
 }
 
+#formEdit.createMode table tr:first-child td {
+  height: 48px !important;
+}
+
+#formEdit.editMode table tr:first-child td {
+  padding-top: 7px;
+}
+
 #formEdit table tr:first-child td {
   border-top: 1px solid #ddd;
   margin-top: 0px;
-  height: 48px !important;
   color: #999;
   font-weight: normal;
   font-size: 1em;
@@ -207,9 +214,11 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
   color: #999;
 }
 
-#formEdit table tr:first-child td:first-child {
+#formEdit.createMode table tr:first-child td:first-child {
   height: 49px !important;
 }
+
+#formEdit.editMode table tr:first-child td:first-child {}
 
 .form-control[disabled] {
   color: #888888;
