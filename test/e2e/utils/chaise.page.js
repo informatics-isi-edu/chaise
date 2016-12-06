@@ -348,7 +348,6 @@ var recordEditPage = function() {
         return element.all(by.css(".modal-popup-btn"));
     };
 
-
     this.getModalPopupBtnsUsingScript = function() {
         return browser.executeScript("return $('.modal-popup-btn')");
     };
@@ -479,6 +478,30 @@ var recordEditPage = function() {
     this.getSubmitRecordButton = function () {
         return element(by.id("submit-record-button"));
     };
+
+    this.getMultiFormInputOpenButton = function () {
+        return element(by.id("copy-x-rows-btn"));
+    };
+
+    this.getMultiFormInputOpenButtonScript = function () {
+        return browser.executeScript("return $('#copy-x-rows-btn')");
+    };
+
+    this.getMultiFormInput = function () {
+        return element(by.id("copy-rows-input"));
+    };
+
+    this.getMultiFormInputSubmitButton = function () {
+        return element(by.id("copy-rows-submit"));
+    };
+
+    this.getMultiFormInputSubmitButtonScript = function () {
+        return browser.executeScript("return $('#copy-rows-submit')");
+    };
+
+    this.getInputById = function (index, displayName) {
+        return element(by.id("form-" + index + '-' + displayName + "-input"));
+    };
 };
 
 var recordPage = function() {
@@ -534,6 +557,10 @@ var recordPage = function() {
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-heading"));
     };
+
+    this.getRelatedTableTitles = function() {
+        return browser.executeScript("return $('.related-table-heading .panel-title').map(function(i, a) { return a.textContent.trim(); });");
+    }
 
     this.getRelatedTableHeading = function(displayName) {
         return element(by.id("rt-heading-" + displayName));
@@ -625,7 +652,21 @@ var recordsetPage = function() {
 
     this.getSearchClearButton = function() {
         return element(by.id("search-clear"));
-    }
+    };
+
+    this.getAddRecordButton = function() {
+        return element(by.id("add-record-btn"));
+    };
+
+    this.getInputForAColumn = function(name, index) {
+        index = index || 0;
+        return browser.executeScript("return $('td.entity-value input[name=\"" + name + "\"]')[" + index + "];");
+    };
+
+    this.getModalPopupBtn = function(index) {
+        index = index || 0;
+        return browser.executeScript("return $('.modal-popup-btn')[" + index + "];");
+    };
 };
 
 function chaisePage() {

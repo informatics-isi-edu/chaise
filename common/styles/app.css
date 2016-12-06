@@ -544,6 +544,10 @@ tbody{
     display: inline
 }
 
+.hideContent .markdown-container > p, .showContent .markdown-container > p {
+    margin-bottom: 0px;
+}
+
 /************* custom buttons **************/
 .btn-no-focus:focus {
     outline: none;

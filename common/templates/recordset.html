@@ -20,24 +20,26 @@
                 </span>
         </div>
     </div>
-    <div class="col-lg-2 col-md-2 col-sm-2 pull-right" align="right">
+    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4 pull-right" align="right">
         <!-- pagination -->
-        <div>
-            <span class="dropdown" style="margin-left: 5px">
-                <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
-                    <span class="caret"></span></button>
-                <ul class="dropdown-menu dropdown-menu-right">
-                    <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
-                        <span class="glyphicon glyphicon-ok"></span>
-                        {{ vm.pageLimit }} (Custom)</a>
-                    </li>
-                    <li ng-repeat="limit in pageLimits"><a href ng-click="setPageLimit(limit)">
-                        <span class="glyphicon" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
-                        {{ limit }}</a>
-                    </li>
-                </ul>
-            </span>
-        </div>
+        <span class="dropdown" style="margin-left: 5px">
+            <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
+                <span class="caret"></span></button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
+                    <span class="glyphicon glyphicon-ok"></span>
+                    {{ vm.pageLimit }} (Custom)</a>
+                </li>
+                <li ng-repeat="limit in pageLimits"><a href ng-click="setPageLimit(limit)">
+                    <span class="glyphicon" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
+                    {{ limit }}</a>
+                </li>
+            </ul>
+        </span>
+        <!-- add record -->
+        <button id="add-record-btn" type="button" class="btn btn-primary" ng-click="addRecord()">
+            <span class="glyphicon glyphicon-plus"></span>
+        </button>
     </div>
 </div>
 

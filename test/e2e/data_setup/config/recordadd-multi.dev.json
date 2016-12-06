@@ -8,34 +8,28 @@
                 ]
             },
             "schema": {
-                "name": "product",
+                "name": "multi-add",
                 "createNew": true,
-                "path": "test/e2e/data_setup/schema/product.json"
+                "path": "test/e2e/data_setup/schema/multi-add.json"
             },
             "tables": {
                 "createNew": true
-            },
-            "entities": {
-                "createNew": true,
-                "path": "test/e2e/data_setup/data/product"
             }
         }],
-        "schema": "product"
+        "schema": "multi-add"
     },
     "cleanup" : true,
     "tests" : {
         "params" : {
-            "tables" : [{
-                "table_name" : "accommodation",
-                "records": 3
-            }, {
-                "table_name" : "booking",
-                "records": 1
-            }],
             "multi_insert" : {
-                "table_name" : "accommodation",
+                "table_name" : "multi-add-table",
                 "records" : 3,
-                "max_input_rows" : 200
+                "max_input_rows" : 200,
+                "initial_int_val" : "1",
+                "initial_text_val" : "a",
+                "input_1_text_val" : "asdfg",
+                "input_2_text_val" : "qwerty",
+                "input_3_int_val" : "17"
             }
         }
     }

@@ -209,7 +209,7 @@
             UiUtils.setBootstrapDropdownButtonBehavior();
         } catch (exception) {
             // pass to error handler
-            if (error instanceof ERMrest.UnauthorizedError)
+            if (exception instanceof ERMrest.UnauthorizedError)
                 ErrorService.catchAll(exception);
             else
                 ErrorService.errorPopup(exception.message, exception.code, "home page");
