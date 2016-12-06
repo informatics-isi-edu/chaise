@@ -136,7 +136,7 @@
         };
     }])
 
-    .directive('recordset', ['recordTableUtils', function(recordTableUtils) {
+    .directive('recordset', ['recordTableUtils', '$window', function(recordTableUtils, $window) {
 
         return {
             restrict: 'E',
@@ -147,6 +147,10 @@
                 onRowClick: '&?'         // set row click function if not using default
             },
             link: function (scope, elem, attr) {
+
+                $window.onfocus = function() {
+                    recordTableUtils.read(scope);
+                };
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
 
@@ -192,6 +196,20 @@
                         scope.search();
 
                     scope.vm.search = null;
+                };
+
+                scope.addRecord = function() {
+                    // open a new tab, once focus is back to this page, reload
+                    var newRef = scope.vm.reference.contextualize.entryCreate;
+                    var appLink = newRef.appLink;
+
+                    // open url in a new tab
+                    var window = $window.open(appLink, '_blank');
+                    if (window) {
+                        window.focus();
+                    } else {
+                        $window.location.href = appLink;
+                    }
                 };
 
             }

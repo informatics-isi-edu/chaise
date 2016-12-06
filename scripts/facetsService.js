@@ -32,6 +32,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		if (FacetsData.totalServerItems%FacetsData.pagingOptions.pageSize != 0) {
 			FacetsData.maxPages++;
 		}
+		this.renderPlot();
 		//FacetsData.progress = false;
 	};
 
@@ -473,6 +474,72 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		return ret;
 	};
 
+    // Build ermrest predicate base on JSON params
+    this.buildPredicate = function(keys, entity){
+        // Build an array of predicates for the Ermrest Filter lanaguage
+        var predicates = [];
+        if (display_columns['title'] != null && keys.contains(display_columns['title'])) {
+            predicates.push(encodeSafeURIComponent(display_columns['title']) + '=' + encodeSafeURIComponent(entity[display_columns['title']]));
+        } else {
+            for (var i = 0; i< keys.length; i++){
+            	// the PRIMARY_KEY array has the keys already encoded, so decode them in order to extract the value from the row
+                var key = decodeURIComponent(keys[i]);
+                var predicate = encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(entity[key]);
+                predicates.push(predicate);
+            }
+        }
+
+        // Join predicates with a conjunctive filter '&'
+        return predicates.join('&');
+    };
+
+
+	// Returns the path for a given row
+    this.rowPath = function(row){
+        var prefix = window.location.href;
+
+        // match /search/ of /search/index.html in the url
+        // everything before /search/ is the base url
+        var index = prefix.indexOf('\/search\/index.html');
+        if (index == -1) {
+        	index = prefix.indexOf('\/search\/');
+        }
+        if (index != -1) {
+            prefix = prefix.substring(0, index);
+        }
+        // in case we have a view, we want the "original" table in the detail
+        var table_name = getTableAnnotation(FacetsData.table, TABLES_MAP_URI, 'originalTable');
+        if (table_name == null) {
+        	table_name = FacetsData.table;
+        }
+
+        // defaults
+        var resource = "record/";
+        var mode = 'tag:isrd.isi.edu,2016:recordlink/fragmentfilter';
+
+        // schema Record Link overwrites the defaults
+        var recordLink = getSchemaAnnotation(SCHEMA, SCHEMA_RECORD_LINK_URI);
+        if (recordLink != null) {
+        	resource = recordLink['resource'];
+        	mode = recordLink['mode'];
+        }
+
+        // table Record Link overwrites the defaults or schema Record Link
+        recordLink = getTableAnnotationValue(table_name, TABLE_RECORD_LINK_URI);
+        if (recordLink != null) {
+        	resource = recordLink['resource'];
+        	mode = recordLink['mode'];
+        }
+
+        var suffix = '';
+        if (mode == 'tag:isrd.isi.edu,2016:recordlink/fragmentfilter') {
+        	suffix = '#' + CATALOG + '/' + SCHEMA + ':' +  encodeSafeURIComponent(table_name) + '/' + this.buildPredicate(PRIMARY_KEY, row);
+        }
+
+        var detailPath = prefix + '/' + resource + suffix;
+        return detailPath;
+    };
+
 	this.updateExportFormats = function updateExportFormats() {
 		FacetsData.exportOptions.format = JSON.parse(JSON.stringify(FacetsData.exportOptions.defaultFormat));
 		FacetsData.exportOptions.supportedFormats = JSON.parse(JSON.stringify(FacetsData.exportOptions.defaultFormats));
@@ -661,6 +728,196 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				break;
 			default:
 				alert("Unsupported export format: " + exportOpts.format["type"]);
+		}
+	};
+
+	this.updatePlotFormatOptions = function updatePlotFormatOptions() {
+		this.updatePlotCoordinateOptions();
+	};
+
+	this.updatePlotCoordinateOptions = function updatePlotCoordinateOptions()
+	{
+		var coordinates = FacetsData.plotOptions.coordinates;
+
+		coordinates.x.display = this.display(FacetsData.table, coordinates.x.column);
+		coordinates.y.display = this.display(FacetsData.table, coordinates.y.column);
+		coordinates.z.display = this.display(FacetsData.table, coordinates.z.column);
+
+		this.renderPlot();
+	};
+
+	this.canRenderPlot = function canRenderPlot() {
+		var canRender = false;
+		var coordinates = FacetsData.plotOptions.coordinates;
+		var formatCoordinates = FacetsData.plotOptions.format.coordinates;
+
+		if ((formatCoordinates.length == 3) &&
+			(formatCoordinates.contains('x') && coordinates.x.column) &&
+			(formatCoordinates.contains('y') && coordinates.y.column) &&
+			(formatCoordinates.contains('z') && coordinates.z.column)) {
+			canRender = true;
+		} else if ((formatCoordinates.length == 2) &&
+			(formatCoordinates.contains('x') && coordinates.x.column) &&
+			(formatCoordinates.contains('y') && coordinates.y.column)) {
+			canRender = true;
+		} else if ((formatCoordinates.length == 1) &&
+			(formatCoordinates.contains('x') && coordinates.x.column)) {
+			canRender = true;
+		}
+		return canRender;
+	};
+
+	this.renderPlot = function renderPlot() {
+		if (!((FacetsData.view=='plot') && (this.canRenderPlot()))) {
+			return;
+		}
+
+		var plotOpts = FacetsData.plotOptions;
+		var plotUrl = plotOpts.dataUrl;
+		var plotKeys = plotOpts.keys;
+		var coordinates = plotOpts.coordinates;
+		plotUrl += '/$A/';
+        for (var k=0; k < plotKeys.length; k++) {
+			if (k > 0) {
+				plotUrl += ',';
+			}
+			plotUrl += 'A:' + plotKeys[k];
+		}
+		if (coordinates.x.column != null) {
+			plotUrl += ',x:=A:' + coordinates.x.column;
+		}
+		if (coordinates.y.column != null) {
+			plotUrl += ',y:=A:' + coordinates.y.column;
+		}
+		if (coordinates.z.column != null) {
+			plotUrl += ',z:=A:' + coordinates.z.column;
+		}
+		plotUrl += '?limit=none';
+		ERMREST.GET(plotUrl, 'application/x-www-form-urlencoded; charset=UTF-8',this.successGetPlotData, null, this);
+
+	};
+
+	this.successGetPlotData = function (data, textStatus, jqXHR, facetService) {
+		var plotOpts = FacetsData.plotOptions;
+		var plotKeys = plotOpts.keys;
+		var xDisplay = plotOpts.coordinates.x.display;
+		var yDisplay = plotOpts.coordinates.y.display;
+		var zDisplay = plotOpts.coordinates.z.display;
+		var layout = JSON.parse(JSON.stringify(plotOpts.format.layout));
+		var formatCoordinates = FacetsData.plotOptions.format.coordinates;
+
+		plotOpts.data = data;
+
+		layout["xaxis"] = {
+			title: (xDisplay != null) ? xDisplay : '',
+			showline:true
+		};
+		layout["yaxis"] = {
+			title: (yDisplay != null) ? yDisplay : "Count",
+			tickangle:40,
+			showline:true
+		};
+		layout["zaxis"] = {title: (zDisplay != null) ? zDisplay : ''};
+
+		var unpackPlotData = function unpackPlotData(key, data, callback) {
+			var value;
+			var result = [];
+			$.each(data, function (i, datum) {
+				value = datum[key] != null ? datum[key] : 'N/A';
+				if (callback) {
+					value = callback(value);
+				}
+				result[i] = value;
+			});
+			return result;
+		};
+
+		var l, x, y, z = null;
+
+		if (!((formatCoordinates.length == 1) && (formatCoordinates.contains('x')))) {
+			for (var k=0; k < plotKeys.length; k++) {
+				l = unpackPlotData(plotKeys[k], data, function (value) {
+					return plotOpts.keyLabels[k] + ": " + value + '\n';
+				});
+			}
+		}
+
+		if (formatCoordinates.contains('x')) {
+			x = unpackPlotData('x', data);
+		}
+		if (formatCoordinates.contains('y')) {
+			y = unpackPlotData('y', data);
+		}
+		if (formatCoordinates.contains('z')) {
+			z = unpackPlotData('z', data);
+		}
+
+		var plotData = [
+			{
+				x: x,
+				y: y,
+				z: z,
+				text: l,
+				type: plotOpts.format.type,
+				mode: plotOpts.format.mode,
+				marker: plotOpts.format.marker
+			}
+		];
+		Plotly.newPlot('results-plot-view', plotData, layout, {displaylogo: false});
+
+        var node = document.getElementById('results-plot-view');
+		// click handler
+		if (node) {
+			node.on('plotly_click', function (data) {
+                if (!data) {
+                    return;
+                }
+				var pointData;
+				for (var i = 0; i < data.points.length; i++) {
+					pointData = FacetsData.plotOptions.data[data.points[i].pointNumber];
+					if (pointData) {
+						var url = facetService.rowPath(pointData);
+						window.open(url, '_blank');
+					}
+				}
+			});
+		}
+
+		// select handler
+		if (node) {
+			node.on('plotly_selected', function (data) {
+                if (!data) {
+                    return;
+                }
+				var urlFrag = '';
+                var pointData;
+                var count = 0;
+				for (var i = 0; i < data.points.length; i++) {
+                    if (!(data.points[i].x && data.points[i].y)) {
+                        continue;
+                    }
+					pointData = FacetsData.plotOptions.data[data.points[i].pointNumber];
+					if (pointData) {
+                        urlFrag += (count) ? ';(' : '(';
+                        for (var k = 0; k < plotOpts.keys.length; k++) {
+                            if (k > 0) {
+                                urlFrag += '&';
+                            }
+                            urlFrag += plotOpts.keys[k] + '=' + pointData[plotOpts.keys[k]]
+                        }
+                        urlFrag += ')';
+                        count++;
+					}
+				}
+				if (!count) {
+                    return;
+                }
+				var baseUrl = window.location.href;
+                baseUrl = baseUrl.replace('search', 'recordset');
+                baseUrl = baseUrl.substring(0, baseUrl.indexOf('?'));
+                var url = baseUrl + '/' + urlFrag;
+                window.open(url, '_blank');
+			});
 		}
 	}
 }]);

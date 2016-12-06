@@ -30,312 +30,89 @@
             </div>
         </div>
         <div class="row">
+            <!-- CONTROLLER: OSDController -->
+            <div ng-controller="OSDController as osd" id="viewer" class="col-md-12">
+                <div id="viewer-header" class="row">
+                    <div class="col-md-8 pull-left">
+                        <span class="entity-title">
+                            {{osd.image.entity.slide_id || 'No Slide ID'}}
+                        </span>
+                    </div>
+                    <div class="col-md-10 pull-right">
+                        <span class="glyphicon glyphicon-info-sign pull-right" data-toggle="tooltip" title="<p class='text-left'><strong>Recommended browsers:</strong> Firefox and Chrome<br><br><strong>Safari users:</strong> The screenshot will be saved as 'Unknown.jpg'.</p>"></span>
+                        <div class="btn-group btn-group-sm pull-right" role="group">
+                            <button ng-click="osd.toggleAnnotations();" class="btn btn-success" type="button" role="button" title="hide or show annotations" id="hide-btn">
+                                <span class="glyphicon glyphicon-eye-close"></span> Hide</span> 
+<!--
+                                <span class="glyphicon" ng-class="{'glyphicon-eye-open': osd.annotationsAreHidden, 'glyphicon-eye-close': !osd.annotationsAreHidden}"></span>
+                                <span ng-show="osd.annotationsAreHidden">Show</span><span ng-show="!osd.annotationsAreHidden">Hide</span>
+-->
+                            </button>
+                            <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button" title="zoom in" id="zoomin-btn">
+                                <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
+                            </button>
+                            <button ng-click="osd.zoomOutView();" class="btn btn-success" type="button" role="button" title="zoom out" id="zoomout-btn">
+                                <span class="glyphicon glyphicon-zoom-out"></span> Zoom Out
+                            </button>
+                            <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button" title="go home" id="gohome-btn">
+                                <span class="glyphicon glyphicon-home"></span> Reset
+                            </button>
+                            <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" role="button" title="edit annotations" id="edit-btn">
+                                <span class="glyphicon glyphicon-edit"></span> Annotations
+                            </button>
+                            <button ng-click="osd.filterChannels();" class="btn btn-success" type="button" role="button" title="channel filtering" id="filter-btn">
+                                <span class="glyphicon glyphicon-tasks"></span> Channels
+                            </button>
+                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button" title="download as a file">
+                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <iframe id="osd" width="100%" src="about:blank" frameBorder="0" style="height:90vh;">
+                            &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
+                        </iframe>
+                    </div>
+                </div>
+            </div> <!-- CONTROLLER: OSDController -->
             <!-- CONTROLLER: SidebarController -->
             <div ng-controller="SidebarController as sidebar" id="sidebar" class="col-md-3">
-                <div class="row">
-                    <ul class="nav nav-tabs">
+                <div class="row" >
+                    <ul class="nav nav-tabs" style="display:none">
                         <li ng-repeat="panel in sidebar.sidebars" ng-class="{active: sidebar.sidebar == panel}" role="presentation">
+                            <a id={{panel}}-panel-title>{{panel | toTitleCase}}</a>
+<!--
                             <a ng-click="sidebar.setSidebar(panel);">{{panel | toTitleCase}}</a>
+-->
                         </li>
                     </ul>
-                </div>
-                <br>
-                <!-- CONTROLLER: ImageMetadataController-->
-                <div ng-show="sidebar.sidebar == 'metadata'" ng-controller="ImageMetadataController as metadata" id="metadata-panel" class="row">
-                    <div class="col-md-12">
-                        <div ng-if="metadata.allowEdit();" class="row">
-                            <div class="col-md-12">
-                                <button ng-show="!metadata.editMode" ng-click="metadata.edit();" class="btn btn-sm btn-success form-control" type="button" role="button">
-                                    <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;&nbsp;Edit Metadata
-                                </button>
-                                <button ng-show="metadata.editMode" ng-click="metadata.save();" class="btn btn-sm btn-success form-control" type="button" role="button">
-                                    <span class="glyphicon glyphicon-ok"></span>&nbsp;&nbsp;&nbsp;Save Metadata
-                                </button>
-                            </div>
-                            <br>
-                        </div>
-                        <table class="table">
-                            <tbody>
-                                <tr>
-                                    <td class="entity-key col-md-2">Slide ID</td>
-                                    <td class="entity-value col-md-10">
-                                        <span ng-if="metadata.image.entity.slide_id">{{metadata.image.entity.slide_id}}</span>
-                                        <span ng-if="!metadata.image.entity.slide_id" class="text-muted">No data</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Status</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.status">{{metadata.image.entity.status}}</span>
-                                            <span ng-if="!metadata.image.entity.status" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <ui-select ng-model="metadata.image.entity.status" theme="select2" ng-disabled="disabled" style="width: 175px;">
-                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.status}}</ui-select-match>
-                                                <ui-select-choices repeat="status in (metadata.statuses | filter: $select.search) track by status">
-                                                    <div ng-bind-html="status | highlight: $select.search"></div>
-                                                </ui-select-choices>
-                                            </ui-select>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Description</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.description">{{metadata.image.entity.description}}</span>
-                                            <span ng-if="!metadata.image.entity.description" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <textarea ng-model="metadata.image.entity.description" class="form-control" rows="5"></textarea>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Submitter</td>
-                                    <td class="entity-value col-md-10">
-                                        <span ng-if="metadata.image.entity.submitter">{{metadata.image.entity.submitter}}</span>
-                                        <span ng-if="!metadata.image.entity.submitter" class="text-muted">No data</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Submitted</td>
-                                    <td class="entity-value col-md-10">
-                                        <span ng-if="metadata.image.entity.submitted">{{metadata.image.entity.submitted}}</span>
-                                        <span ng-if="!metadata.image.entity.submitted" class="text-muted">No data</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <br>
-                        <h4>Tags</h4>
-                        <table class="table">
-                            <tbody>
-                                <tr>
-                                    <td class="entity-key col-md-2">Tissue</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.tissue">{{metadata.image.entity.tissue}}</span>
-                                            <span ng-if="!metadata.image.entity.tissue" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <ui-select ng-model="metadata.image.entity.tissue" theme="select2" ng-disabled="disabled" style="width: 175px;">
-                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.tissue}}</ui-select-match>
-                                                <ui-select-choices repeat="tissue in (metadata.vocabs.tissue | filter: $select.search) track by tissue">
-                                                    <div ng-bind-html="tissue | highlight: $select.search"></div>
-                                                </ui-select-choices>
-                                            </ui-select>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Gender</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.gender">{{metadata.image.entity.gender}}</span>
-                                            <span ng-if="!metadata.image.entity.gender" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <ui-select ng-model="metadata.image.entity.gender" theme="select2" ng-disabled="disabled" style="width: 175px;">
-                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.gender}}</ui-select-match>
-                                                <ui-select-choices repeat="gender in (metadata.vocabs.gender | filter: $select.search) track by gender">
-                                                    <div ng-bind-html="gender | highlight: $select.search"></div>
-                                                </ui-select-choices>
-                                            </ui-select>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Age Stage</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.age_stage">{{metadata.image.entity.age_stage}}</span>
-                                            <span ng-if="!metadata.image.entity.age_stage" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <ui-select ng-model="metadata.image.entity.age_stage" theme="select2" ng-disabled="disabled" style="width: 175px;">
-                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.age_stage}}</ui-select-match>
-                                                <ui-select-choices repeat="age_stage in (metadata.vocabs.age_stage | filter: $select.search) track by age_stage">
-                                                    <div ng-bind-html="age_stage | highlight: $select.search"></div>
-                                                </ui-select-choices>
-                                            </ui-select>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Embedding Medium</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.embedding_medium">{{metadata.image.entity.embedding_medium}}</span>
-                                            <span ng-if="!metadata.image.entity.embedding_medium" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <ui-select ng-model="metadata.image.entity.embedding_medium" theme="select2" ng-disabled="disabled" style="width: 175px;">
-                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.embedding_medium}}</ui-select-match>
-                                                <ui-select-choices repeat="embedding_medium in (metadata.vocabs.embedding_medium | filter: $select.search) track by embedding_medium">
-                                                    <div ng-bind-html="embedding_medium | highlight: $select.search"></div>
-                                                </ui-select-choices>
-                                            </ui-select>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Specimen Fixation</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.specimen_fixation">{{metadata.image.entity.specimen_fixation}}</span>
-                                            <span ng-if="!metadata.image.entity.specimen_fixation" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <ui-select ng-model="metadata.image.entity.specimen_fixation" theme="select2" ng-disabled="disabled" style="width: 175px;">
-                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.specimen_fixation}}</ui-select-match>
-                                                <ui-select-choices repeat="specimen_fixation in (metadata.vocabs.specimen_fixation | filter: $select.search) track by specimen_fixation">
-                                                    <div ng-bind-html="specimen_fixation | highlight: $select.search"></div>
-                                                </ui-select-choices>
-                                            </ui-select>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Staining Protocol</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.staining_protocol">{{metadata.image.entity.staining_protocol}}</span>
-                                            <span ng-if="!metadata.image.entity.staining_protocol" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <ui-select ng-model="metadata.image.entity.staining_protocol" theme="select2" ng-disabled="disabled" style="width: 175px;">
-                                                <ui-select-match placeholder="Select a term">{{metadata.image.entity.staining_protocol}}</ui-select-match>
-                                                <ui-select-choices repeat="staining_protocol in (metadata.vocabs.staining_protocol | filter: $select.search) track by staining_protocol">
-                                                    <div ng-bind-html="staining_protocol | highlight: $select.search"></div>
-                                                </ui-select-choices>
-                                            </ui-select>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <br>
-                        <h4>File Details</h4>
-                        <table class="table">
-                            <tbody>
-                                <tr>
-                                    <td class="entity-key col-md-2">Filename</td>
-                                    <td class="entity-value col-md-10">
-                                        <span ng-if="metadata.image.entity.filename">{{metadata.image.entity.filename}}</span>
-                                        <span ng-if="!metadata.image.entity.filename" class="text-muted">No data</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Resolution</td>
-                                    <td class="entity-value col-md-10">
-                                        <span ng-if="metadata.image.entity.resolution">{{metadata.image.entity.resolution}}</span>
-                                        <span ng-if="!metadata.image.entity.resolution" class="text-muted">No data</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">Bytes</td>
-                                    <td class="entity-value col-md-10">
-                                        <span ng-if="metadata.image.entity.bytes">{{metadata.image.entity.bytes}}</span>
-                                        <span ng-if="!metadata.image.entity.bytes" class="text-muted">No data</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <br>
-                        <h4>Identifiers</h4>
-                        <table class="table">
-                            <tbody>
-                                <tr>
-                                    <td class="entity-key col-md-2">Accession Number</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.accession_number">{{metadata.image.entity.accession_number}}</span>
-                                            <span ng-if="!metadata.image.entity.accession_number" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <input ng-model="metadata.image.entity.accession_number" type="text" class="form-control">
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">DOI</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.doi">{{metadata.image.entity.doi}}</span>
-                                            <span ng-if="!metadata.image.entity.doi" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <input ng-model="metadata.image.entity.doi" type="text" class="form-control">
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="entity-key col-md-2">ARK</td>
-                                    <td class="entity-value col-md-10">
-                                        <div ng-show="!metadata.editMode">
-                                            <span ng-if="metadata.image.entity.ark">{{metadata.image.entity.ark}}</span>
-                                            <span ng-if="!metadata.image.entity.ark" class="text-muted">No data</span>
-                                        </div>
-                                        <div ng-show="metadata.editMode" class="form-inline">
-                                            <input ng-model="metadata.image.entity.ark" type="text" class="form-control">
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
                 <!-- CONTROLLER: AnnotationsController-->
                 <div ng-show="sidebar.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
                     <div class="col-md-12">
                         <div ng-if="annotations.allowCreate();" class="row">
                             <div class="btn-group col-md-12 new-annotation">
-                                <button type="button" role="button" class="btn btn-sm btn-success dropdown-toggle form-control" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Create New Annotation&nbsp;&nbsp;<span class="caret"></span>
+                                <button ng-click="annotations.drawAnnotation('rectangle');" class="btn btn-sm btn-success" id="create-annotation-btn">
+                                    Create New Annotation&nbsp;&nbsp;<span></span>
                                 </button>
-                                <ul class="dropdown-menu">
-                                    <li><a ng-click="annotations.drawAnnotation('section');">Section of Interest</a></li>
-                                    <li><a ng-click="annotations.drawAnnotation('rectangle');">Rectangle Annotation</a></li>
-                                    <li><a ng-click="annotations.drawAnnotation('arrow');">Arrow Annotation</a></li>
-                                </ul>
                             </div>
                         </div>
                         <br>
                         <div class="row">
                             <div class="col-md-12">
                                 <form class="input-group searchbar">
-                                    <input ng-model="annotations.query" ng-model-options="{updateOn: 'submit'}" class="form-control" type="search" placeholder="Search annotations...">
+                                    <input ng-model="annotations.query" ng-model-options="{updateOn: 'submit'}" class="form-control" type="search" placeholder="Search">
                                     <span class="input-group-btn">
                                         <button class="btn btn-success" type="submit" role="button">
                                             &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                                         </button>
-                                        <button ng-click="annotations.resetSearch();" class="btn btn-success" type="button" role="button">
+                                        <button ng-click="annotations.resetSearch();" class="btn btn-success" type="button" role="button" title="reset the search result">
                                             Reset
                                         </button>
                                     </span>
                                 </form>
-                                <div class="checkbox row">
-                                    <div class="col-md-2">
-                                        <strong>Show:&nbsp;&nbsp;</strong>
-                                    </div>
-                                    <div class="col-md-10">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <label for="showSections">
-                                                    <input ng-model="annotations.filterByType.section" ng-change="annotations.setTypeVisibility('section');" id="showSections" type="checkbox">Sections&nbsp;&nbsp;
-                                                </label>
-                                                <label for="showRectangles">
-                                                    <input ng-model="annotations.filterByType.rectangle" ng-change="annotations.setTypeVisibility('rectangle');" id="showRectangles" type="checkbox">Rectangles&nbsp;&nbsp;
-                                                </label>
-                                                <label for="showArrows">
-                                                    <input ng-model="annotations.filterByType.arrow" ng-change="annotations.setTypeVisibility('arrow');" id="showArrows" type="checkbox">Arrows&nbsp;&nbsp;
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <br>
@@ -392,7 +169,7 @@
                             </div>
                         </form>
                         <!-- Annotations List -->
-                        <div class="h5 text-muted text-center">{{annotations.numVisibleAnnotations}} annotation<span ng-show="annotations.numVisibleAnnotations != 1">s</span> found.</div>
+                        <div class="h5 text-success text-center">{{annotations.numVisibleAnnotations}} annotation<span ng-show="annotations.numVisibleAnnotations != 1">s</span> found.</div>
                         <div id="annotations-list">
                             <div ng-repeat="annotation in annotations.annotations | orderBy:[annotations.sortSectionsFirst, 'anatomy', 'id'] | filter:annotations.filterAnnotations track by $index"
                             ng-class="{highlighted: annotations.highlightedAnnotation == (annotation.table + '-' + annotation.id), section: annotation.type == 'section'}"
@@ -433,7 +210,7 @@
                                         <!-- Annotation Author, Date & Comment Icon -->
                                         <div class="row">
                                             <div class="col-md-8">
-                                                <small class="text-muted">{{annotations.authorName(annotation.author)}} &mdash; {{annotation.created | date:'MMM d, y'}}</small>
+                                                <small class="text-success">{{annotations.authorName(annotation.author)}} &mdash; {{annotation.created | date:'MMM d, y'}}</small>
                                             </div>
                                             <div ng-if="annotation.type != 'section'" class="col-md-4">
                                                 <small class="pull-right">
@@ -450,7 +227,7 @@
                                                 <div ng-repeat="comment in comments.comments[annotation.id] | orderBy: ['created', 'id'] track by $index" class="row">
                                                     <div class="col-md-12 comment">
                                                         <strong>{{annotations.authorName(comment.author)}}</strong>
-                                                        <small><span class="text-muted pull-right">{{comment.created | date:'MMM d, y'}}</span></small>
+                                                        <small><span class="text-success pull-right">{{comment.created | date:'MMM d, y'}}</span></small>
                                                         <div ng-if="comments.editedComment == (comment.table + '-' + comment.id)">
                                                             <div class="input-group input-group-sm" id="edit-comment-form">
                                                                 <input ng-focus="annotations.centerAnnotation(annotation);" ng-model="comment.comment" type="text" class="form-control">
@@ -584,44 +361,6 @@
                     </div>
                 </div>
             </div><!--/ end SidebarController -->
-            <!-- CONTROLLER: OSDController -->
-            <div ng-controller="OSDController as osd" id="viewer" class="col-md-9">
-                <div id="viewer-header" class="row">
-                    <div class="col-md-6">
-                        <span class="entity-title">
-                            {{osd.image.entity.slide_id || 'No Slide ID'}}
-                        </span>
-                    </div>
-                    <div class="col-md-6">
-                        <span class="glyphicon glyphicon-info-sign pull-right" data-toggle="tooltip" title="<p class='text-left'><strong>Recommended browsers:</strong> Firefox and Chrome<br><br><strong>Safari users:</strong> The screenshot will be saved as 'Unknown.jpg'.</p>"></span>
-                        <div class="btn-group btn-group-sm pull-right" role="group">
-                            <button ng-click="osd.toggleAnnotations();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon" ng-class="{'glyphicon-eye-open': osd.annotationsAreHidden, 'glyphicon-eye-close': !osd.annotationsAreHidden}"></span>
-                                <span ng-show="osd.annotationsAreHidden">Show</span><span ng-show="!osd.annotationsAreHidden">Hide</span>
-                            </button>
-                            <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
-                            </button>
-                            <button ng-click="osd.zoomOutView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-zoom-out"></span> Zoom Out
-                            </button>
-                            <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-home"></span> Reset
-                            </button>
-                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button">
-                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <iframe id="osd" width="100%" src="about:blank" frameBorder="0" style="height:90vh;">
-                            &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
-                        </iframe>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </body>

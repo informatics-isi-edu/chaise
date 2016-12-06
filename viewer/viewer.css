@@ -142,3 +142,75 @@ a.cardlink.delete {
 .new-annotation .dropdown-menu {
     left: 15px;
 }
+
+#annotations-panel {
+    background: #f9f9f9;
+    position:relative;
+    top:80px;
+/*
+    background: yellow;
+*/
+    opacity: 0;
+    left:0px;
+}
+
+#sidebar {
+   position:absolute;
+}
+
+#create-annotation-btn {
+   margin-top:10px;
+}
+
+#viewer-header {
+  margin:10px;
+}
+
+@-webkit-keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.9; left:0; } }
+@-moz-keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.9; left:0; } }
+@keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.9; left:0; } }
+
+.fade-in {
+	-webkit-animation:fadeIn ease-in 1;  
+	-moz-animation:fadeIn ease-in 1;
+	animation:fadeIn ease-in 1;
+
+	-webkit-animation-fill-mode:forwards;  
+	-moz-animation-fill-mode:forwards;
+	animation-fill-mode:forwards;
+
+	-webkit-animation-duration:0.6s;
+	-moz-animation-duration:0.6s;
+	animation-duration:0.6s;
+}
+
+
+@-webkit-keyframes fadeOut { from { opacity:0.9; left:0; } to { opacity:0; left:-200; } }
+@-moz-keyframes fadeOut { from { opacity:0.9; left:0; } to { opacity:0; left:-200; } }
+@keyframes fadeOut { from { opacity:0.9; left:0; } to { opacity:0; left:-200; } }
+
+.fade-out {
+	-webkit-animation:fadeOut ease-in 1;  
+	-moz-animation:fadeOut ease-in 1;
+	animation:fadeOut ease-in 1;
+
+	-webkit-animation-fill-mode:forwards;  
+	-moz-animation-fill-mode:forwards;
+	animation-fill-mode:forwards;
+
+	-webkit-animation-duration:0.4s;
+	-moz-animation-duration:0.4s;
+	animation-duration:0.4s;
+}
+
+
+.btn.pick {
+  background-color: #18558E;
+}
+
+.btn.pick:hover, .btn.pick:focus, .btn.pick:active {
+    background-color: #002D73;
+    border-color: #1E4E9A;
+}
+
+

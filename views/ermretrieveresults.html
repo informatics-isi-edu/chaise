@@ -197,18 +197,21 @@
                                     <button data-toggle="tooltip" data-placement="top" title="Card" ng-click="facetResults.selectView($event, 'card');" type="button" class="btn btn-default">
                                         <i class="md-view-module md-lg" aria-hidden="true"></i>
                                     </button>
+                                    <button data-toggle="tooltip" data-placement="top" title="Plot" ng-if="facetResults.plotViewEnabled()" ng-click="facetResults.selectView($event, 'plot');" type="button" class="btn btn-default">
+                                        <i class="md-trending-up md-lg" aria-hidden="true"></i>
+                                    </button>
                                 </div>
                             </div>
                             <div class="pull-right">
                                 <span class="btn btn-label">Download:</span>
-                                <ui-select ng-model="FacetsData.exportOptions.format" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onExportFormatSelect($event)">
+                                <ui-select ng-model="FacetsData.exportOptions.format" theme="select2" style="min-width: 250px; white-space: normal;" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onExportFormatSelect($event)">
                                     <ui-select-match placeholder="CSV">{{FacetsData.exportOptions.format.name}}</ui-select-match>
                                     <ui-select-choices repeat="format in FacetsData.exportOptions.supportedFormats">{{format.name}}</ui-select-choices>
                                 </ui-select>
                                 <button data-toggle="tooltip" data-placement="top" title="Download" ng-click="facetResults.onExportClick();" type="button" class="btn btn-default">
                                     <i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i>
                                 </button>
-    						</div>
+                            </div>
                         </div>
 					</div>
 					<div id="resultstable" class="row" ng-show="facetResults.showupResults()">
@@ -355,8 +358,51 @@
 								</div>
 							</div>
 						</div>
+                        <div ng-if="FacetsData.view=='plot' && FacetsData.ermrestData.length>0" class="ng-hide" ng-show="FacetsData.view=='plot' && FacetsData.ermrestData.length>0">
+                            <div class="form-inline row col-xs-12 " style="float: none;">
+                                <div class="form-group col-xs-3">
+                                    <label for="plot-type-select">Plot type:</label>
+                                    <ui-select id="plot-type-select" ng-model="FacetsData.plotOptions.format" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onPlotFormatUpdate($event)">
+                                        <ui-select-match placeholder="FacetsData.plotOptions.defaultFormat.name">{{FacetsData.plotOptions.format.name}}</ui-select-match>
+                                        <ui-select-choices repeat="format in FacetsData.plotOptions.supportedFormats">{{format.name}}</ui-select-choices>
+                                    </ui-select>
+                                </div>
+                                <div class="form-group col-xs-3" ng-show="facetResults.plotFormatSupportsCoordinate('x')">
+                                    <label for="plot-coord-x">X Axis:</label>
+                                    <ui-select id="plot-coord-x" ng-model="FacetsData.plotOptions.coordinates.x.column" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" on-select="facetResults.onPlotCoordinateUpdate($event)">
+                                        <ui-select-match placeholder="Select an attribute">{{facetResults.display(FacetsData.table, FacetsData.plotOptions.coordinates.x.column)}}</ui-select-match>
+                                        <ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}</ui-select-choices>
+                                    </ui-select>
+                                </div>
+                                <div class="form-group col-xs-3" ng-show="facetResults.plotFormatSupportsCoordinate('y')">
+                                    <label for="plot-coord-y">Y Axis:</label>
+                                    <ui-select id="plot-coord-y" ng-model="FacetsData.plotOptions.coordinates.y.column" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" on-select="facetResults.onPlotCoordinateUpdate($event)">
+                                        <ui-select-match placeholder="Select an attribute">{{facetResults.display(FacetsData.table, FacetsData.plotOptions.coordinates.y.column)}}</ui-select-match>
+                                        <ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}</ui-select-choices>
+                                    </ui-select>
+                                </div>
+                                <div class="form-group col-xs-3" ng-show="facetResults.plotFormatSupportsCoordinate('z')">
+                                    <label for="plot-coord-z">Z Axis:</label>
+                                    <ui-select id="plot-coord-z" ng-model="FacetsData.plotOptions.coordinates.z.column" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" on-select="facetResults.onPlotCoordinateUpdate($event)">
+                                        <ui-select-match placeholder="Select an attribute">{{facetResults.display(FacetsData.table, FacetsData.plotOptions.coordinates.z.column)}}</ui-select-match>
+                                        <ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}</ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                            <div class="col-md-12" ng-show="FacetsData.plotOptions.coordinates.x.column == null">
+                                <div class="jumbotron text-center" style="margin: 20px">
+                                    <p class="lead">Use the dropdown menu(s) to select attributes for use as plot coordinates.</p>
+                                </div>
+                            </div>
+                            <div id="results-plot" ng-show="FacetsData.plotOptions.coordinates.x.column != null">
+                                <div id="results-plot-fullscreen">
+                                    <div id="results-plot-view" ng-init="facetResults.onPlotFormatUpdate()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 					</div>
-					<div class="row bottompgr" ng-show="facetResults.showupResults()">
+					<div class="row bottompgr" ng-show="FacetsData.view!='plot' && facetResults.showupResults()">
 						<div class="form-group col-md-12">
 							<ul class="pagination bottompagination">
 								<li class="ng-hide" ng-show="FacetsData.pageNavigation" class="prev"><a href="#"
