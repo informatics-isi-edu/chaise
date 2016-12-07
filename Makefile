@@ -306,13 +306,13 @@ RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
 RECSET_ASSETS=recordset
 
 RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
-    $(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(DETAILED_ASSETS)/lib/angular-animate.min.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \

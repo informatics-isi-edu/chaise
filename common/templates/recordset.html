@@ -37,7 +37,7 @@
             </ul>
         </span>
         <!-- add record -->
-        <button id="add-record-btn" type="button" class="btn btn-primary" ng-click="addRecord()">
+        <button id="add-record-btn" type="button" class="btn btn-primary" ng-if="vm.reference.canCreate" ng-click="addRecord()">
             <span class="glyphicon glyphicon-plus"></span>
         </button>
     </div>

@@ -379,6 +379,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         browser.sleep(1000);
         browser.close();
         browser.switchTo().window(allWindows[0]);
+        browser.sleep(1000);
 
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,

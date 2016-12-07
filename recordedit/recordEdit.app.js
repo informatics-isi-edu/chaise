@@ -67,13 +67,14 @@
             }).then(function getReference(reference) {
                 $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = session;
+                $rootScope.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);
 
                 // Case for creating an entity, with prefilled values
-                if (context.prefill) {
+                if (context.queryParams.prefill) {
                     // get the cookie with the prefill value
-                    var cookie = $cookies.getObject(context.prefill);
+                    var cookie = $cookies.getObject(context.queryParams.prefill);
                     if (cookie) {
                         // Update view model
                         recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname;

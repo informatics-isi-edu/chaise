@@ -67,7 +67,7 @@
                 clearOnBlur: false
             }
         };
-        vm.prefillCookie = $cookies.getObject(context.prefill);
+        vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
 
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
@@ -218,18 +218,18 @@
                 $rootScope.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     if (vm.prefillCookie) {
+                        $cookies.remove(context.queryParams.prefill);
+                    }
 
-                        $cookies.remove(context.prefill);
-
-                        // cookie indicating record added
-                        // only do this if came from record->relatedTable->add, We can tell from having prefill
-                        // use the prefill id as cookie name
-                        $cookies.put(context.prefill, model.submissionRows.length,
+                    // add cookie indicating record added
+                    if (context.queryParams.invalidate) {
+                        $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
                             {
                                 expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
                             }
                         );
                     }
+
                     vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
@@ -277,6 +277,7 @@
 
             // pass the reference as a param for the modal
             params.reference = column.reference.contextualize.compactSelect;
+            params.reference.session = $rootScope.session;
 
             var modalInstance = $uibModal.open({
                 animation: false,
