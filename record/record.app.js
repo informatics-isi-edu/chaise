@@ -61,6 +61,7 @@
                     $log.info("Reference: ", $rootScope.reference);
 
                     $rootScope.relatedReferences = $rootScope.reference.related;
+                    console.log('Related refs', $rootScope.relatedReferences);
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
                 }, function error(exception) {
@@ -109,7 +110,8 @@
                                     sortby: null,               // column name, user selected or null
                                     sortOrder: null,            // asc (default) or desc
                                     rowValues: [],              // array of rows values
-                                    search: null                // search term
+                                    search: null,                // search term
+                                    displayType: $rootScope.relatedReferences[i].display.type
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 $rootScope.tableModels[i] = model;
