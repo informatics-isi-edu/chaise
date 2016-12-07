@@ -57,11 +57,11 @@
                             <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button" title="go home" id="gohome-btn">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}"
+                            <button ng-click="osd.openAnnotations($event);" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}"
 role="button" title="edit annotations" id="edit-btn">
                                 <span class="glyphicon glyphicon-edit"></span> Annotations
                             </button>
-                            <button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':!osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
+                            <button ng-click="osd.filterChannels($event);" class="btn btn-success" ng-class="{'pick':!osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
                                 <span class="glyphicon glyphicon-tasks"></span> Channels
                             </button>
                             <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button" title="download as a file">

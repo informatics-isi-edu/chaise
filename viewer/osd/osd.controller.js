@@ -61,7 +61,7 @@
             vm.annotationsAreHidden = !vm.annotationsAreHidden;
         }
 
-        function openAnnotations($event) {
+        function openAnnotations(event) {
             event.currentTarget.blur();
             var btnptr = $('#edit-btn');
             var panelptr=$('#annotations-panel');
@@ -89,14 +89,14 @@
             return covered;
         }
 
-        function filterChannels($event) {
-            event.currentTarget.blur();
+        function filterchannels(event) {
+            event.currenttarget.blur();
             var btnptr = $('#filter-btn');
             var sidebarptr=$('#sidebar');
   
-            if(vm.filterChannelsAreHidden) {
-//              btnptr.addClass('pick');
-              if(!vm.annotationsSidebarAreHidden) { // annotation is up
+            if(vm.filterchannelsarehidden) {
+//              btnptr.addclass('pick');
+              if(!vm.annotationssidebararehidden) { // annotation is up
                 openAnnotations(); // close it
               }
               if(covered())
