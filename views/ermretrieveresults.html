@@ -197,7 +197,7 @@
                                     <button data-toggle="tooltip" data-placement="top" title="Card" ng-click="facetResults.selectView($event, 'card');" type="button" class="btn btn-default">
                                         <i class="md-view-module md-lg" aria-hidden="true"></i>
                                     </button>
-                                    <button data-toggle="tooltip" data-placement="top" title="Plot" ng-if="facetResults.plotViewEnabled()" ng-click="facetResults.selectView($event, 'plot');" type="button" class="btn btn-default">
+                                    <button data-toggle="tooltip" data-placement="top" title="Plot" ng-show="facetResults.plotViewEnabled()" ng-click="facetResults.selectView($event, 'plot');" type="button" class="btn btn-default">
                                         <i class="md-trending-up md-lg" aria-hidden="true"></i>
                                     </button>
                                 </div>

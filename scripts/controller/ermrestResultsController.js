@@ -577,17 +577,6 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	};
 
 	this.plotViewEnabled = function plotViewEnabled() {
-		if (!chaiseConfig['plotViewEnabled']) {
-			return false;
-		}
-
-		// resize handler
-		window.onresize = function () {
-			var node = document.getElementById('results-plot-view');
-			if (node) {
-				Plotly.Plots.resize(node);
-			}
-		};
-		return true;
+		return (chaiseConfig['plotViewEnabled']);
 	};
 }]);

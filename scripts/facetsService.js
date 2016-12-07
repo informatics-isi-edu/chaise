@@ -863,9 +863,23 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				marker: plotOpts.format.marker
 			}
 		];
-		Plotly.newPlot('results-plot-view', plotData, layout, {displaylogo: false});
+        var plotDiv = 'results-plot-view';
+		Plotly.newPlot(plotDiv, plotData, layout, {displaylogo: false});
+        facetService.hookPlotEvents(plotDiv)
+	};
 
-        var node = document.getElementById('results-plot-view');
+	this.hookPlotEvents = function hookPlotEvents(plotDiv) {
+        var that = this;
+        var plotOpts = FacetsData.plotOptions;
+        // resize handler
+		window.onresize = function () {
+			var node = document.getElementById(plotDiv);
+			if (node) {
+				Plotly.Plots.resize(node);
+			}
+		};
+
+        var node = document.getElementById(plotDiv);
 		// click handler
 		if (node) {
 			node.on('plotly_click', function (data) {
@@ -876,7 +890,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				for (var i = 0; i < data.points.length; i++) {
 					pointData = FacetsData.plotOptions.data[data.points[i].pointNumber];
 					if (pointData) {
-						var url = facetService.rowPath(pointData);
+						var url = that.rowPath(pointData);
 						window.open(url, '_blank');
 					}
 				}
@@ -919,5 +933,5 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
                 window.open(url, '_blank');
 			});
 		}
-	}
+    }
 }]);
