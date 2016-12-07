@@ -26,7 +26,7 @@ describe('View existing record,', function() {
 
                 describe("Show the related entity tables,", function() {
 					var params = recordHelpers.relatedTablesDefaultOrder(tupleParams);
-					var params = recordHelpers.relatedTableLinks(tupleParams);
+					var params = recordHelpers.relatedTableLinks(testParams, tupleParams);
 				});
 
     		});
