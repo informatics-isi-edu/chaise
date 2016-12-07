@@ -89,14 +89,14 @@
             return covered;
         }
 
-        function filterchannels(event) {
-            event.currenttarget.blur();
+        function filterChannels(event) {
+            event.currentTarget.blur();
             var btnptr = $('#filter-btn');
             var sidebarptr=$('#sidebar');
   
-            if(vm.filterchannelsarehidden) {
+            if(vm.filterChannelsAreHidden) {
 //              btnptr.addclass('pick');
-              if(!vm.annotationssidebararehidden) { // annotation is up
+              if(!vm.annotationsSidebarAreHidden) { // annotation is up
                 openAnnotations(); // close it
               }
               if(covered())
