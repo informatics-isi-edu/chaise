@@ -46,24 +46,18 @@
             iframe.postMessage({messageType: 'homeView'}, origin);
         }
 
-        function toggleAnnotations(event) {
-            event.currentTarget.blur();
+        function toggleAnnotations() {
+            var btnptr = $('#hide-btn');
+            btnptr.blur();
+//            event.currentTarget.blur();
             var messageType = vm.annotationsAreHidden ? 'showAllAnnotations' : 'hideAllAnnotations';
             iframe.postMessage({messageType: messageType}, origin);
-            var btnptr = $('#hide-btn');
-/*
-            if(vm.annotationsAreHidden) {
-              btnptr.removeClass('pick');
-              } else {
-                btnptr.addClass('pick');
-            }
-*/
             vm.annotationsAreHidden = !vm.annotationsAreHidden;
         }
 
-        function openAnnotations(event) {
-            event.currentTarget.blur();
+        function openAnnotations() {
             var btnptr = $('#edit-btn');
+            btnptr.blur();
             var panelptr=$('#annotations-panel');
             var sidebarptr=$('#sidebar');
             if(vm.annotationsSidebarAreHidden) {
@@ -71,10 +65,8 @@
                 filterChannels();
               }
               sidebarptr.css("display","");
-//              btnptr.addClass('pick');
               panelptr.removeClass('fade-out').addClass('fade-in');
               } else {
- //               btnptr.removeClass('pick');
                 panelptr.removeClass('fade-in').addClass('fade-out');
             }
             vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
@@ -89,20 +81,17 @@
             return covered;
         }
 
-        function filterChannels(event) {
-            event.currentTarget.blur();
+        function filterChannels() {
             var btnptr = $('#filter-btn');
+            btnptr.blur();
             var sidebarptr=$('#sidebar');
   
             if(vm.filterChannelsAreHidden) {
-//              btnptr.addclass('pick');
               if(!vm.annotationsSidebarAreHidden) { // annotation is up
                 openAnnotations(); // close it
               }
               if(covered())
                   sidebarptr.css("display","none");
-              } else {
-//                btnptr.removeClass('pick');
             }
             iframe.postMessage({messageType: 'filterChannels'}, origin);
             vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
