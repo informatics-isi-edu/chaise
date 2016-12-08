@@ -61,7 +61,6 @@
                     $log.info("Reference: ", $rootScope.reference);
 
                     $rootScope.relatedReferences = $rootScope.reference.related;
-                    console.log('Related refs', $rootScope.relatedReferences);
                     // There should only ever be one entity related to this reference
                     return $rootScope.reference.read(1);
                 }, function error(exception) {
