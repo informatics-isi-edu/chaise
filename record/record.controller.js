@@ -89,7 +89,6 @@
         };
 
         vm.toggleRelatedTableDisplayType = function(i) {
-            console.log($rootScope.tableModels[i]);
             if ($rootScope.tableModels[i].displayType == 'markdown') {
                 $rootScope.tableModels[i].displayType = 'table';
             } else {
