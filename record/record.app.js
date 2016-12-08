@@ -109,7 +109,8 @@
                                     sortby: null,               // column name, user selected or null
                                     sortOrder: null,            // asc (default) or desc
                                     rowValues: [],              // array of rows values
-                                    search: null                // search term
+                                    search: null,                // search term
+                                    displayType: $rootScope.relatedReferences[i].display.type
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 $rootScope.tableModels[i] = model;

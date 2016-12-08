@@ -82,7 +82,7 @@
 						  </div>
 							<div class="filter-container">
 								<div class="filter-item" ng-if="facetResults.hasSelectedFacets()">
-									<a href="#" ng-click="facetResults.resetSearch($event)"><span class="filter-item-field" title="Click here to clear all selected filters.">Clear All Filters<span></a>
+									<a href="#" ng-click="facetResults.resetSearch($event)"><span class="filter-item-field" title="Click here to clear all selected filters.">Clear All Filters</span></a>
 								</div>
               	<div class="filter-item" ng-repeat="facet in FacetsData.facets" ng-show="facetResults.showChiclet(facet)">
                   <a href="#" class="filter-link-cancel" ng-click="facetResults.removeFilter($event, facet);"><i class="md-cancel md-lg"></i></a>
@@ -360,33 +360,53 @@
 						</div>
                         <div ng-if="FacetsData.view=='plot' && FacetsData.ermrestData.length>0" class="ng-hide" ng-show="FacetsData.view=='plot' && FacetsData.ermrestData.length>0">
                             <div class="form-inline row col-xs-12 " style="float: none;">
-                                <div class="form-group col-xs-3">
+                                <div class="form-group col-xs-4">
                                     <label for="plot-type-select">Plot type:</label>
                                     <ui-select id="plot-type-select" ng-model="FacetsData.plotOptions.format" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" ng-disabled="disabled" on-select="facetResults.onPlotFormatUpdate($event)">
                                         <ui-select-match placeholder="FacetsData.plotOptions.defaultFormat.name">{{FacetsData.plotOptions.format.name}}</ui-select-match>
                                         <ui-select-choices repeat="format in FacetsData.plotOptions.supportedFormats">{{format.name}}</ui-select-choices>
                                     </ui-select>
                                 </div>
-                                <div class="form-group col-xs-3" ng-show="facetResults.plotFormatSupportsCoordinate('x')">
+                                <div class="form-group col-xs-4" ng-show="facetResults.plotFormatSupportsCoordinate('x')">
                                     <label for="plot-coord-x">X Axis:</label>
                                     <ui-select id="plot-coord-x" ng-model="FacetsData.plotOptions.coordinates.x.column" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" on-select="facetResults.onPlotCoordinateUpdate($event)">
                                         <ui-select-match placeholder="Select an attribute">{{facetResults.display(FacetsData.table, FacetsData.plotOptions.coordinates.x.column)}}</ui-select-match>
                                         <ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}</ui-select-choices>
                                     </ui-select>
                                 </div>
-                                <div class="form-group col-xs-3" ng-show="facetResults.plotFormatSupportsCoordinate('y')">
+                                <div class="form-group col-xs-4" ng-show="facetResults.plotFormatSupportsCoordinate('y')">
                                     <label for="plot-coord-y">Y Axis:</label>
                                     <ui-select id="plot-coord-y" ng-model="FacetsData.plotOptions.coordinates.y.column" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" on-select="facetResults.onPlotCoordinateUpdate($event)">
                                         <ui-select-match placeholder="Select an attribute">{{facetResults.display(FacetsData.table, FacetsData.plotOptions.coordinates.y.column)}}</ui-select-match>
                                         <ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}</ui-select-choices>
                                     </ui-select>
                                 </div>
+                            </div>
+<!--
                                 <div class="form-group col-xs-3" ng-show="facetResults.plotFormatSupportsCoordinate('z')">
                                     <label for="plot-coord-z">Z Axis:</label>
                                     <ui-select id="plot-coord-z" ng-model="FacetsData.plotOptions.coordinates.z.column" theme="select2" style="min-width: 150px; white-space: normal;" search-enabled="false" on-select="facetResults.onPlotCoordinateUpdate($event)">
                                         <ui-select-match placeholder="Select an attribute">{{facetResults.display(FacetsData.table, FacetsData.plotOptions.coordinates.z.column)}}</ui-select-match>
                                         <ui-select-choices repeat="option in FacetsData.sortColumns">{{facetResults.display(FacetsData.table, option)}}</ui-select-choices>
                                     </ui-select>
+                                </div>
+-->
+                            <div class="form-inline row col-xs-12 " style="float: none;">
+                                <div class="form-group col-xs-4" style="margin-top: 21px">
+                                    <label for="plot-auto-trace">Auto Trace:</label>
+                                    <input id="plot-auto-trace" data-toggle="tooltip" title="Automatically creates a new trace every time the facet list changes." style="vertical-align: top" type="checkbox" ng-model="FacetsData.plotOptions.autoTrace" class="check"/><b class="b switch"></b>
+                                </div>
+                                <div class="form-group col-xs-4" style="margin-top: 15px">
+                                    <label for="plot-trace">Trace:</label>
+                                    <button id="plot-trace" data-toggle="tooltip"  ng-disabled="FacetsData.plotOptions.autoTrace" data-placement="top" title="Add a new trace based on the currently selected facets." ng-click="facetResults.onRenderPlot();" type="button" class="btn btn-default">
+                                        <i class="glyphicon glyphicon-pushpin" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <div class="form-group col-xs-4" style="margin-top: 15px">
+                                    <label for="plot-trace-reset">Reset Traces:</label>
+                                    <button id="plot-trace-reset" data-toggle="tooltip" data-placement="top" title="Remove all traces and set the new initial trace to data based on the currently selected facets." ng-click="facetResults.onResetPlot();" type="button" class="btn btn-default">
+                                        <i class="glyphicon glyphicon-erase" aria-hidden="true"></i>
+                                    </button>
                                 </div>
                             </div>
                             <div class="col-md-12" ng-show="FacetsData.plotOptions.coordinates.x.column == null">
