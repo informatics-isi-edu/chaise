@@ -5,7 +5,7 @@ html, body {
 
 body {
     font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-	background-color: #FFF;
+    background-color: #FFF;
 }
 
 li{
@@ -544,7 +544,7 @@ tbody{
     display: inline
 }
 
-.hideContent .markdown-container > p, .showContent .markdown-container > p {
+.markdown-container > p:last-child {
     margin-bottom: 0px;
 }
 
