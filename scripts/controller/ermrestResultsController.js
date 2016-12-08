@@ -561,10 +561,12 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	};
 
 	this.onPlotFormatUpdate = function onPlotFormatUpdate(event) {
+		FacetsData.plotOptions.reset = true;
 		FacetsService.updatePlotFormatOptions();
 	};
 
 	this.onPlotCoordinateUpdate = function onPlotCoordinateUpdate(event) {
+		FacetsData.plotOptions.reset = true;
 		FacetsService.updatePlotCoordinateOptions();
 	};
 
@@ -573,6 +575,11 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	};
 
 	this.onRenderPlot = function onRenderPlot() {
+		FacetsService.renderPlot();
+	};
+
+	this.onResetPlot = function onResetPlot() {
+		FacetsData.plotOptions.reset = true;
 		FacetsService.renderPlot();
 	};
 
