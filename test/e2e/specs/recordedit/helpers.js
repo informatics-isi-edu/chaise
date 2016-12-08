@@ -78,11 +78,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 					var col = columns.find(function(cl) { return txt == cl.displayName });
 					expect(txt).toBe(col ? col.displayName : " should not have underline");
 					if (col) {
-						chaisePage.recordEditPage.getColumnComment(c).then(function(comment) {
-							var exists = comment ? true : undefined;
-							expect(exists).toBeDefined();
-							expect(comment.getInnerHtml()).toBe(col.comment);
-						});
+						expect(c.getAttribute("uib-tooltip")).toBe(col.comment);
 					}
 				});
 			});

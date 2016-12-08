@@ -89,7 +89,7 @@
                                     <tr class="entity" ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
                                         <td ng-style="form.captionColumWidth" class="entity-key col-xs-1" ng-class="{'coltooltip': column.comment}">
                                             <span ng-if="::form.isRequired(column);" class="text-danger">*</span>
-                                            <span ng-class="{'coltooltiplabel': column.comment}" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="{{::column.comment}}">{{::column.displayname}}</span>
+                                            <span ng-class="{'coltooltiplabel': column.comment}" tooltip-placement="right" tooltip-append-to-body=true uib-tooltip="{{::column.comment}}">{{::column.displayname}}</span>
                                         </td>
                                         <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.columnToDisplayType(column);">
                                             <!-- date input-->
