@@ -544,7 +544,7 @@ tbody{
     display: inline
 }
 
-.hideContent .markdown-container > p, .showContent .markdown-container > p {
+.markdown-container > p:last-child {
     margin-bottom: 0px;
 }
 
