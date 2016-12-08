@@ -33,6 +33,14 @@
             }
         };
 
+        vm.copyRecord = function() {
+            var referenceFilter = $rootScope.reference.location.filter;
+            var newRef = $rootScope.reference.contextualize.entryEdit;
+
+            var appLink = newRef.appLink + "?copy=true";
+            $window.location.href = appLink;
+        };
+
         vm.deleteRecord = function() {
             $rootScope.reference.delete().then(function deleteSuccess() {
                  var location = $rootScope.reference.location;
@@ -87,7 +95,6 @@
                 return false;
             }
         };
-
 
         vm.toggleRelatedTables = function() {
             vm.showEmptyRelatedTables = !vm.showEmptyRelatedTables;

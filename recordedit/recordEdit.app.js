@@ -65,7 +65,8 @@
                 // do nothing but return without a session
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
-                $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
+                console.log(context.filter && !context.copy);
+                $rootScope.reference = ((context.filter && !context.copy) ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);
@@ -152,6 +153,7 @@
                                         break;
                                 }
 
+                                console.log(value);
                                 recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
                             }
                             $log.info('Model: ', recordEditModel);

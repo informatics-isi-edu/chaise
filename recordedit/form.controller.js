@@ -7,7 +7,7 @@
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
-        vm.editMode = context.filter || false;
+        vm.editMode = (context.filter && !context.copy) || false;
         vm.showDeleteButton = chaiseConfig.showDeleteButton === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -183,6 +183,7 @@
                 });
             }
 
+            console.log(vm.editMode);
             if (vm.editMode) {
                 // Check whether there has been any changes since to model.rows since app initialization
                 var hasNoChanges = model.rows.every(function(element, index, array) {
