@@ -73,10 +73,11 @@ facetsModel.factory('FacetsData', function() {
 		},
 		'pageRange': [],
 		'plotOptions': {
+			reset: false,
+			autoTrace: true,
 			keys:[],
-			keyLabels:[],
-			data:[],
-			dataUrl:'',
+			traceKeys:[],
+			queryUrl:'',
 			format: defaultPlotFormats[0],
 			supportedFormats: defaultPlotFormats,
 			coordinates: {
@@ -119,17 +120,19 @@ var defaultPlotFormats =
 	{
 		name:"Histogram",
 		type:"histogram",
+	    histnorm: "count",
+		autobinx: true,
 		marker: {
-			color: 'rgba(50,250,50,0.7)'
+			opacity: 0.85
 		},
 		coordinates:['x'],
 		layout:{
 			hovermode: 'closest',
 			margin: { t: 0, l: 30, r: 0, b: 30 },
-			bargap: 0.05,
+			bargap: 0.2,
 			bargroupgap: 0.2,
-			barmode: "overlay",
-			showlegend: false,
+			barmode: "stack",
+			showlegend: true,
 			autosize: true
 		}
 	},
@@ -137,13 +140,13 @@ var defaultPlotFormats =
 		name:"Histogram 2D",
 		type:"histogram2dcontour",
 		marker: {
-			color: 'red'
+			color: 'reds'
 		},
 		coordinates:['x','y'],
 		layout:{
 			hovermode: 'closest',
 			margin: { t: 0, l: 30, r: 0, b: 30 },
-			showlegend: false,
+			showlegend: true,
 			autosize: true
 		}
 	},
@@ -152,14 +155,13 @@ var defaultPlotFormats =
 		type:"scatter",
 		mode:"markers",
 		marker: {
-			color: 'rgba(1,1,255,0.7)',
-			outliercolor: 'red'
+			opacity: 0.85
 		},
 		coordinates:['x', 'y'],
 		layout:{
 			hovermode: 'closest',
 			margin: { t: 0, l: 30, r: 0, b: 30 },
-			showlegend: false,
+			showlegend: true,
 			autosize: true
 		}
 	},
@@ -168,7 +170,7 @@ var defaultPlotFormats =
 		type:"bar",
 		mode:"markers",
 		marker: {
-			color: 'rgba(1,1,255,0.4)'
+			opacity: 0.85
 		},
 		coordinates:['x','y'],
 		layout:{
@@ -176,8 +178,7 @@ var defaultPlotFormats =
 			margin: { t: 0, l: 30, r: 0, b: 30 },
 			bargap: 0.1,
 			bargroupgap: 0.5,
-			barmode: "overlay",
-			showlegend: false,
+			showlegend: true,
 			autosize: true
 		}
 	}
