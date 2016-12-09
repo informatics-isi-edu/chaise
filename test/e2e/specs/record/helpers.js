@@ -397,13 +397,16 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         }).then(function() {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
+            // wait until redirected to record page
+            var EC = protractor.ExpectedConditions,
+                title = chaisePage.recordPage.getEntityTitleById();
+            browser.wait(EC.elementToBeClickable(title), 10000);
             done();
         });
     });
 
     it("should have a new record, View More link for a related table that redirects to recordset.", function(done) {
 
-        browser.sleep(1000);
         browser.close();
         browser.switchTo().window(allWindows[0]);
         browser.sleep(1000);
