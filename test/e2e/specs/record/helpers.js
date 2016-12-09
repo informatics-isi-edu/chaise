@@ -333,6 +333,33 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         });
     });
 
+    it('should have a link to toggle between markdown and tabular views for markdown tables', function() {
+        var EC = protractor.ExpectedConditions,
+        markdownRelatedTable = tableParams.related_table_name_with_row_markdown_pattern, // "media"
+        markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(markdownRelatedTable);
+
+        browser.wait(EC.elementToBeClickable(markdownToggleLink), 10000);
+
+        // expect the markdown table to display this link
+        expect(markdownToggleLink.isDisplayed()).toBeTruthy();
+
+        // Expect initial display to be markdown by searching for a .markdown-container
+        var initialMarkdownDisplay = element(by.id('rt-heading-' + markdownRelatedTable)).element(by.css('.markdown-container'));
+        expect(initialMarkdownDisplay.isDisplayed()).toBeTruthy();
+
+        markdownToggleLink.click().then(function() {
+            // After clicking toggle link, the table should now be displayed as a regular table (which would have an id of "rt-media")
+            var tableDisplay = element(by.id('rt-' + markdownRelatedTable));
+            expect(tableDisplay.isDisplayed()).toBeTruthy();
+            return markdownToggleLink.click();
+        }).then(function() {
+            // After clicking the toggle link once more, expect the related table to revert to its markdown display
+            expect(initialMarkdownDisplay.isDisplayed()).toBeTruthy();
+        }).catch(function(error) {
+            console.log(error);
+        });
+    });
+
     it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,

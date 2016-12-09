@@ -584,6 +584,11 @@ var recordPage = function() {
         return element(by.id("rt-heading-" + displayName)).element(by.css(".add-records-link"));
     };
 
+    this.getToggleDisplayLink = function(displayName) {
+        // the link is not a child of the table, rather one of the accordion group
+        return element(by.id("rt-heading-" + displayName)).element(by.css(".toggle-display-link"));
+    };
+
     this.getRelatedTableRowValues = function(displayName) {
         return that.getRelatedTableRows(displayName).all(by.tagName("td"));
     };

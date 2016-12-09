@@ -510,17 +510,17 @@
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
         var captionColumWidth = 130;
-        var marginLeft = captionColumWidth - 5;
-
+        var marginLeft = captionColumWidth + 10;
+        
         // Sets a fixed width for the columns, as they're positioned absolute
         vm.captionColumWidth = { 'width' : captionColumWidth + "px" };
 
         // Sets margin-left for the formedit div as the first columns are positioned absolute
         // to avoid overlap between them
-        vm.formEditDivMarginLeft = { 'margin-left': marginLeft + "px", 'padding-right': '0px' };
+        vm.formEditDivMarginLeft = { 'margin-left': marginLeft + "px", 'padding-right': '0px', 'padding-left': '0px' };
 
         // Sets a fixed header height to match the border for the columns
-        var headerHeight = 46;
+        var headerHeight = 47;
         vm.headerHeight = { 'height' : headerHeight + "px" };
 
         // Adds height and width to the first empty heading of the first row
@@ -547,7 +547,11 @@
         // so that it doesn't scrolls due to the margin-left applied before extra padding
         function onResize(doNotInvokeEvent) {
             var elemWidth = formContainerEl.outerWidth();
-            vm.formEditDivMarginLeft.width = elemWidth - captionColumWidth - 30 - 15;
+            vm.formEditDivMarginLeft.width = elemWidth - captionColumWidth - 30;
+
+            if (!editMode) {
+                vm.formEditDivMarginLeft.width = vm.formEditDivMarginLeft.width -30 -5
+            }
             if (!doNotInvokeEvent) scope.$digest();
         }
         onResize(true);
@@ -556,6 +560,8 @@
         angular.element($window).bind('resize', function() {
             onResize();
         });
+
+        var editMode = vm.editMode;
 
         // This function is called whenever the height of formEdit div changes
         // This might be because of selecting/clearing something from the popup for foreighn keys
@@ -590,6 +596,8 @@
                     }
 
                     var valuetdHeight = trs[i].children[1].offsetHeight;
+
+                    if (editMode && i==0) valuetdHeight++;
 
                     // If keytdHeight is greater than valuetdHeight
                     // then set valuetdHeight

@@ -100,7 +100,7 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
 
             it('should show ' + filter.entityCount + ' results for filters ' + filter.content.join(','), function () {
                 if (filter.entityCount != undefined) {
-                    browser.sleep(1000);
+                    browser.sleep(2000);
                     var allResults = chaisePage.resultContent.getAllResultRows();
                     expect(allResults.count()).toBe(filter.entityCount);
                 }

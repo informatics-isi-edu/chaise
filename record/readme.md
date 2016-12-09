@@ -9,7 +9,8 @@
 
 ### [Contexts](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md#context-names)
 The `detailed` context pertains to the record itself and the way that the record data will be displayed on the page.
-The `compact` context pertains to the data inside the related tables that are loaded after the record itself.
+The `compact` context pertains to the data inside the related tables that are loaded after the record itself. 
+See additional information [here](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md#context-names).
 
 ### [Annotations](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md)
 The following annotations are used to affect how information is displayed:
