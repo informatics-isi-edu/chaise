@@ -41,12 +41,11 @@
             if (hash.indexOf('?') !== -1) {
                 var queries = hash.match(/\?(.+)/)[1].split("&"); // get the query params
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
-                var char = "?";
                 for (var i = 0; i < queries.length; i++) { // add back only the valid queries
                     var query = queries[i];
                     if (query.indexOf("limit=") === 0) {
-                        hash = hash + char + query;
-                        char = "&";
+                        hash = hash + "?" + query;
+                        break; // right now only 'limit' is valid
                     }
                 }
             }
