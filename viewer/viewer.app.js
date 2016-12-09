@@ -120,7 +120,7 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['headInjector', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'statuses', 'vocabs', 'user', function runApp(headInjector, $window, context, image, annotations, comments, anatomies, statuses, vocabs) {
+    .run(['headInjector', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', function runApp(headInjector, $window, context, image, annotations, comments, anatomies) {
         headInjector.addTitle();
         headInjector.addCustomCSS();
         var origin = $window.location.origin;
