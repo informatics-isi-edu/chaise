@@ -166,9 +166,9 @@ a.cardlink.delete {
   margin:10px;
 }
 
-@-webkit-keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.9; left:0; } }
-@-moz-keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.9; left:0; } }
-@keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.9; left:0; } }
+@-webkit-keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.95; left:0; } }
+@-moz-keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.95; left:0; } }
+@keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.95; left:0; } }
 
 .fade-in {
 	-webkit-animation:fadeIn ease-in 1;  
@@ -185,9 +185,9 @@ a.cardlink.delete {
 }
 
 
-@-webkit-keyframes fadeOut { from { opacity:0.9; left:0; } to { opacity:0; left:-200; } }
-@-moz-keyframes fadeOut { from { opacity:0.9; left:0; } to { opacity:0; left:-200; } }
-@keyframes fadeOut { from { opacity:0.9; left:0; } to { opacity:0; left:-200; } }
+@-webkit-keyframes fadeOut { from { opacity:0.95; left:0; } to { opacity:0; left:-200; } }
+@-moz-keyframes fadeOut { from { opacity:0.95; left:0; } to { opacity:0; left:-200; } }
+@keyframes fadeOut { from { opacity:0.95; left:0; } to { opacity:0; left:-200; } }
 
 .fade-out {
 	-webkit-animation:fadeOut ease-in 1;  
