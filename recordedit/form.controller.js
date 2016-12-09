@@ -183,7 +183,6 @@
                 });
             }
 
-            console.log(vm.editMode);
             if (vm.editMode) {
                 // Check whether there has been any changes since to model.rows since app initialization
                 var hasNoChanges = model.rows.every(function(element, index, array) {

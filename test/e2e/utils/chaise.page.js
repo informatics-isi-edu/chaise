@@ -596,6 +596,10 @@ var recordPage = function() {
         return element(by.id("edit-record"));
     };
 
+    this.getCopyRecordButton = function() {
+        return element(by.id("copy-record"));
+    };
+
     this.getDeleteRecordButton = function () {
         return element(by.id("delete-record"));
     };

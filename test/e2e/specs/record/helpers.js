@@ -3,6 +3,7 @@ var mustache = require('../../../../../ermrestjs/vendor/mustache.min.js');
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
+        browser.sleep(100);
 		chaisePage.recordPage.getEntityTitle().then(function(txt) {
 			expect(txt).toBe(tableParams.title);
 		});
