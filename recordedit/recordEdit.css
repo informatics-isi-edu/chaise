@@ -132,6 +132,8 @@ img.spinner{
   height: auto !important;
   max-height: 5.35em !important;
   z-index: 0;
+  border-radius: 5px !important;
+  padding-right: 0px;
 }
 
 .modal-popup .input-group-addon {
@@ -141,18 +143,21 @@ img.spinner{
   vertical-align: top;
 }
 
-td.entity-key {
-  min-width: 130px;
-}
-
 td.entity-value {
   min-width: 250px;
 }
 
 #formEdit {
   position: static;
-  overflow-x: scroll;
-  overflow-y: visible;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding-right: 0px;
+  margin-bottom: 20px;
+}
+
+#formEdit > table {
+  overflow: hidden;
+  margin-bottom: 0px;
 }
 
 #formEdit table tr td:first-child {
@@ -163,10 +168,33 @@ td.entity-value {
   margin-top: 1px;
   background: white;
   z-index: 10;
+  border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
 }
 
-#formEdit table tr td:last-child {
-  padding-right:0px;
+#formEdit.createMode table tr:first-child td {
+  height: 48px !important;
+}
+
+#formEdit.editMode table tr:first-child td {
+  padding-top: 7px;
+}
+
+#formEdit table tr:first-child td {
+  border-top: 1px solid #ddd;
+  margin-top: 0px;
+  color: #999;
+  font-weight: normal;
+  font-size: 1em;
+}
+
+#formEdit td {
+  border-right:1px solid #ddd;
+}
+
+
+td.entity-key, #formEdit table tr:first-child td:first-child {
+  min-width: 130px;
 }
 
 .add-button {
@@ -174,4 +202,51 @@ td.entity-value {
   right: 15px;
   top: auto;
   float: right;
+}
+
+.modal-popup {
+  width: 100%;
+}
+
+.record-number {
+  font-size: 14px;
+  margin-left: 10px;
+  color: #999;
+}
+
+#formEdit.createMode table tr:first-child td:first-child {
+  height: 49px !important;
+}
+
+#formEdit.editMode table tr:first-child td:first-child {}
+
+.form-control[disabled] {
+  color: #888888;
+  cursor: not-allowed !important;
+}
+
+#formEdit.editMode table tr td:last-child {
+  border-right: 0px;
+}
+
+/* Chrome only: */
+@media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) { 
+  #formEdit {
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+  }
+
+  #formEdit table {
+    margin-bottom: -1px !important;
+  }
+}
+
+@-moz-document url-prefix() {
+  #formEdit table tr td:first-child {
+    margin-top: 0px;  
+  }
+
+  #formEdit table tr:first-child td:first-child {
+    margin-top: -1px;
+  }
 }

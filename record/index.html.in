@@ -57,21 +57,22 @@
                     </uib-accordion-heading>
 
                     <!-- for different elements inside the accordion -->
-                    <div ng-switch on="relatedRef.display.type">
-
-                        <div class="pull-right" style="margin-top:-25px;">
-                            <span ng-if="relatedRef.canCreate && ctrl.modifyRecord"><a class="add-records-link" ng-click="ctrl.addRelatedRecord(relatedRef)">Add</a> |</span>
-                            <a class="more-results-link pull-right" ng-click="ctrl.toRecordSet(relatedRef)">View More</a>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <div ng-switch-when="markdown">
-                                    <span class="markdown-container" bind-html-unsafe="tableModels[$index].page.content"></span>
-                                </div>
-                                <!-- ng-switch-when="table" is also the default case -->
-                                <div ng-switch-default>
-                                    <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]" default-row-linking="true"></record-table>
-                                </div>
+                    <div class="pull-right" style="margin-top:-25px;">
+                        <span ng-if="::relatedRef.display.type == 'markdown'">
+                            <a class="toggle-display-link" ng-click="ctrl.toggleRelatedTableDisplayType($index)">
+                                <span ng-show="tableModels[$index].displayType == 'markdown'">Table</span>
+                                <span ng-show="tableModels[$index].displayType != 'markdown'">Revert</span>
+                            Display</a>&nbsp;|</span>
+                        <span ng-if="relatedRef.canCreate && ctrl.modifyRecord"><a class="add-records-link" ng-click="ctrl.addRelatedRecord(relatedRef)">Add</a>&nbsp;|</span>
+                        <span><a class="more-results-link" ng-click="ctrl.toRecordSet(relatedRef)">View More</a></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div ng-show="tableModels[$index].displayType == 'markdown'">
+                                <span class="markdown-container" bind-html-unsafe="tableModels[$index].page.content"></span>
+                            </div>
+                            <div ng-show="tableModels[$index].displayType != 'markdown'">
+                                <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]" default-row-linking="true"></record-table>
                             </div>
                         </div>
                     </div>

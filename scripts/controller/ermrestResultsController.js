@@ -561,10 +561,12 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	};
 
 	this.onPlotFormatUpdate = function onPlotFormatUpdate(event) {
+		FacetsData.plotOptions.reset = true;
 		FacetsService.updatePlotFormatOptions();
 	};
 
 	this.onPlotCoordinateUpdate = function onPlotCoordinateUpdate(event) {
+		FacetsData.plotOptions.reset = true;
 		FacetsService.updatePlotCoordinateOptions();
 	};
 
@@ -576,18 +578,12 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 		FacetsService.renderPlot();
 	};
 
-	this.plotViewEnabled = function plotViewEnabled() {
-		if (!chaiseConfig['plotViewEnabled']) {
-			return false;
-		}
+	this.onResetPlot = function onResetPlot() {
+		FacetsData.plotOptions.reset = true;
+		FacetsService.renderPlot();
+	};
 
-		// resize handler
-		window.onresize = function () {
-			var node = document.getElementById('results-plot-view');
-			if (node) {
-				Plotly.Plots.resize(node);
-			}
-		};
-		return true;
+	this.plotViewEnabled = function plotViewEnabled() {
+		return (chaiseConfig['plotViewEnabled']);
 	};
 }]);

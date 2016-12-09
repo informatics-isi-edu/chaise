@@ -1503,17 +1503,8 @@ function successGetPagePredicate(data, textStatus, jqXHR, param) {
 			exportUrl += predicatePath;
 		}
 
-		param['options']['plotOptions']['dataUrl'] = exportUrl.replace('entity', 'attribute');
+		param['options']['plotOptions']['queryUrl'] = exportUrl.replace('entity', 'attribute');
 		param['options']['plotOptions']['keys'] = PRIMARY_KEY;
-        var keyLabels = [];
-        for (var k=0; k < PRIMARY_KEY.length; k++) {
-            var keyLabel = getColumnAnnotation(param['options']['table'], PRIMARY_KEY[k], 'description', 'display');
-            if (!keyLabel) {
-                keyLabel = getColumnDisplayName(PRIMARY_KEY[k]);
-            }
-            keyLabels.push(keyLabel);
-        }
-		param['options']['plotOptions']['keyLabels'] = keyLabels;
 
 		exportUrl += '/$A';
 		var sortClause = '@sort(' + PRIMARY_KEY.join(',') + ')';

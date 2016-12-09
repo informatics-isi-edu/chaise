@@ -32,7 +32,9 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		if (FacetsData.totalServerItems%FacetsData.pagingOptions.pageSize != 0) {
 			FacetsData.maxPages++;
 		}
-		this.renderPlot();
+		if ((FacetsData.plotOptions.autoTrace) || ('histogram2dcontour' == FacetsData.plotOptions.format.type))  {
+			this.renderPlot();
+		}
 		//FacetsData.progress = false;
 	};
 
@@ -773,7 +775,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		}
 
 		var plotOpts = FacetsData.plotOptions;
-		var plotUrl = plotOpts.dataUrl;
+		var plotUrl = plotOpts.queryUrl;
 		var plotKeys = plotOpts.keys;
 		var coordinates = plotOpts.coordinates;
 		plotUrl += '/$A/';
@@ -797,27 +799,28 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 
 	};
 
-	this.successGetPlotData = function (data, textStatus, jqXHR, facetService) {
+	this.successGetPlotData = function (rows, textStatus, jqXHR, facetService) {
 		var plotOpts = FacetsData.plotOptions;
-		var plotKeys = plotOpts.keys;
 		var xDisplay = plotOpts.coordinates.x.display;
 		var yDisplay = plotOpts.coordinates.y.display;
 		var zDisplay = plotOpts.coordinates.z.display;
 		var layout = JSON.parse(JSON.stringify(plotOpts.format.layout));
 		var formatCoordinates = FacetsData.plotOptions.format.coordinates;
 
-		plotOpts.data = data;
+		if ('histogram2dcontour' == plotOpts.format.type) {
+			plotOpts.reset = true;
+		}
 
 		layout["xaxis"] = {
 			title: (xDisplay != null) ? xDisplay : '',
 			showline:true
 		};
 		layout["yaxis"] = {
-			title: (yDisplay != null) ? yDisplay : "Count",
+			title: ((formatCoordinates.contains('y') && yDisplay != null)) ? yDisplay : "Count",
 			tickangle:40,
 			showline:true
 		};
-		layout["zaxis"] = {title: (zDisplay != null) ? zDisplay : ''};
+		layout["zaxis"] = {title: ((formatCoordinates.contains('z') && zDisplay != null)) ? zDisplay : ''};
 
 		var unpackPlotData = function unpackPlotData(key, data, callback) {
 			var value;
@@ -832,40 +835,74 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			return result;
 		};
 
-		var l, x, y, z = null;
-
-		if (!((formatCoordinates.length == 1) && (formatCoordinates.contains('x')))) {
-			for (var k=0; k < plotKeys.length; k++) {
-				l = unpackPlotData(plotKeys[k], data, function (value) {
-					return plotOpts.keyLabels[k] + ": " + value + '\n';
-				});
-			}
-		}
-
+		var x, y, z = null;
 		if (formatCoordinates.contains('x')) {
-			x = unpackPlotData('x', data);
+			x = unpackPlotData('x', rows);
 		}
 		if (formatCoordinates.contains('y')) {
-			y = unpackPlotData('y', data);
+			y = unpackPlotData('y', rows);
 		}
 		if (formatCoordinates.contains('z')) {
-			z = unpackPlotData('z', data);
+			z = unpackPlotData('z', rows);
 		}
+
+		var labels = [];
+		var traceKeys = [];
+		$.each(rows, function (i, row) {
+			delete row['x'];
+			delete row['y'];
+			delete row['z'];
+			traceKeys[i] = row;
+			$.each(row, function(key, value) {
+				var plotLabel = '';
+				var keyLabel = getColumnAnnotation(FacetsData.table, key, 'description', 'display');
+				if (!keyLabel) {
+					keyLabel = getColumnDisplayName(key);
+				}
+				if (!((formatCoordinates.length == 1) && (formatCoordinates.contains('x')))) {
+					plotLabel = keyLabel + ": " + value + '</br>';
+				}
+				plotLabel += facetService.getPlotFacetDescriptions();
+				labels.push(plotLabel);
+			});
+		});
 
 		var plotData = [
 			{
 				x: x,
 				y: y,
 				z: z,
-				text: l,
+				text: labels,
 				type: plotOpts.format.type,
 				mode: plotOpts.format.mode,
 				marker: plotOpts.format.marker
 			}
 		];
-		Plotly.newPlot('results-plot-view', plotData, layout, {displaylogo: false});
+        var plotDiv = 'results-plot-view';
+		if (plotOpts.reset) {
+			plotOpts.traceKeys.empty();
+			plotOpts.traceKeys.push(traceKeys);
+			Plotly.newPlot(plotDiv, plotData, layout, {displaylogo: false});
+			plotOpts.reset = false;
+		} else {
+			plotOpts.traceKeys.push(traceKeys);
+			Plotly.plot(plotDiv, plotData, layout, {displaylogo: false});
+		}
+        facetService.hookPlotEvents(plotDiv)
+	};
 
-        var node = document.getElementById('results-plot-view');
+	this.hookPlotEvents = function hookPlotEvents(plotDiv) {
+        var that = this;
+        var plotOpts = FacetsData.plotOptions;
+        // resize handler
+		window.onresize = function () {
+			var node = document.getElementById(plotDiv);
+			if (node) {
+				Plotly.Plots.resize(node);
+			}
+		};
+
+        var node = document.getElementById(plotDiv);
 		// click handler
 		if (node) {
 			node.on('plotly_click', function (data) {
@@ -874,9 +911,9 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
                 }
 				var pointData;
 				for (var i = 0; i < data.points.length; i++) {
-					pointData = FacetsData.plotOptions.data[data.points[i].pointNumber];
+					pointData = plotOpts.traceKeys[data.points[i].curveNumber][data.points[i].pointNumber];
 					if (pointData) {
-						var url = facetService.rowPath(pointData);
+						var url = that.rowPath(pointData);
 						window.open(url, '_blank');
 					}
 				}
@@ -896,7 +933,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
                     if (!(data.points[i].x && data.points[i].y)) {
                         continue;
                     }
-					pointData = FacetsData.plotOptions.data[data.points[i].pointNumber];
+					pointData = plotOpts.traceKeys[data.points[i].curveNumber][data.points[i].pointNumber];
 					if (pointData) {
                         urlFrag += (count) ? ';(' : '(';
                         for (var k = 0; k < plotOpts.keys.length; k++) {
@@ -919,5 +956,30 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
                 window.open(url, '_blank');
 			});
 		}
+    };
+
+    this.getPlotFacetDescriptions = function getPlotFacetDescriptions() {
+		var that = this;
+		var desc = '';
+		$.each(FacetsData.facets, function(i, facet) {
+			if (!that.showChiclet(facet)) {
+				return true;
+			}
+			var facetName = getColumnAnnotation(FacetsData.table,  facet['name'], 'description', 'display');
+			if (!facetName) {
+				facetName = getColumnDisplayName(facet['name']);
+			}
+			desc += facetName + ": ";
+			if ((that.if_type(facet, 'slider') || that.if_type(facet, 'date'))) {
+				desc += FacetsData.box[facet['table']][facet['name']]['min'] + ' - ' +
+					FacetsData.box[facet['table']][facet['name']]['max'];
+			} else if (that.if_type(facet, 'text')) {
+				desc += FacetsData.box[facet['table']][facet['name']]['value'];
+			} else if (that.if_type(facet, 'enum')) {
+				desc += that.displayTitle(facet);
+			}
+			desc += '</br>';
+		});
+		return desc;
 	}
 }]);
