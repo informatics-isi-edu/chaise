@@ -154,7 +154,9 @@
                                         break;
                                 }
 
-                                recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
+                                if (!column.getInputDisabled(context.appContext)) {
+                                    recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
+                                }
                             }
                             $log.info('Model: ', recordEditModel);
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
