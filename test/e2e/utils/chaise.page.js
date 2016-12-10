@@ -510,7 +510,7 @@ var recordPage = function() {
         return browser.executeScript("return $('#entity-title').text();");
     };
 
-    this.getEntityTitleById = function() {
+    this.getEntityTitleElement = function() {
         return element(by.id("entity-title"));
     };
 

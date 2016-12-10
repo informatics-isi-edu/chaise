@@ -66,8 +66,8 @@ describe('Recordset add record,', function() {
             }).then(function() {
                 // wait until redirected to record page
                 var EC = protractor.ExpectedConditions,
-                    title = chaisePage.recordPage.getEntityTitleById();
-                browser.wait(EC.elementToBeClickable(title), 10000);
+                    title = chaisePage.recordPage.getEntityTitleElement();
+                browser.wait(EC.presenceOf(title), 10000);
                 done();
             });
 
