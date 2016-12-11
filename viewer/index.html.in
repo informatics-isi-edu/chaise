@@ -42,11 +42,7 @@
                         <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="<p class='text-left'><strong>Recommended browsers:</strong> Firefox and Chrome<br><br><strong>Safari users:</strong> The screenshot will be saved as 'Unknown.jpg'.</p>"></span>
                         <div class="btn-group btn-group-sm pull-left" role="group">
                             <button ng-click="osd.toggleAnnotations();" class="btn btn-success" ng-class="{'pick': osd.annotationsAreHidden}" type="button" role="button" title="hide or show annotations" id="hide-btn">
-                                <span class="glyphicon glyphicon-eye-close"></span> Hide</span> 
-<!--
-                                <span class="glyphicon" ng-class="{'glyphicon-eye-open': osd.annotationsAreHidden, 'glyphicon-eye-close': !osd.annotationsAreHidden}"></span>
-                                <span ng-show="osd.annotationsAreHidden">Show</span><span ng-show="!osd.annotationsAreHidden">Hide</span>
--->
+                                <span class="glyphicon glyphicon-eye-close"></span> Hide
                             </button>
                             <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button" title="zoom in" id="zoomin-btn">
                                 <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
@@ -93,11 +89,16 @@ role="button" title="edit annotations" id="edit-btn">
                 <!-- CONTROLLER: AnnotationsController-->
                 <div ng-show="sidebar.sidebar == 'annotations'" ng-controller="AnnotationsController as annotations" id="annotations-panel" class="row">
                     <div class="col-md-12">
-                        <div ng-if="annotations.allowCreate();" class="row">
-                            <div class="btn-group col-md-12 new-annotation">
-                                <button ng-click="annotations.drawAnnotation('rectangle');" class="btn btn-sm btn-success" id="create-annotation-btn">
-                                    Create New Annotation&nbsp;&nbsp;<span></span>
-                                </button>
+                        <div class="row">
+                           <div class="pull-right">
+                               <a ng-click="annotations.closeAnnotations();"  title="dismiss" id="dismiss-btn"><span class="glyphicon glyphicon-remove" style="margin:20px; color:black"</span> </a>
+                            </div>
+                            <div ng-if="annotations.allowCreate();">
+                                <div class="btn-group col-md-6 new-annotation">
+                                    <button ng-click="annotations.drawAnnotation('rectangle');" class="btn btn-sm btn-success" id="create-annotation-btn" style="margin-top:10px">
+                                        Create New Annotation<span></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <br>

@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['image', '$window', function OSDController(image, $window) {
+    .controller('OSDController', ['image', '$window', '$rootScope', function OSDController(image, $window, $rootScope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -21,6 +21,10 @@
 
         vm.annotationsSidebarAreHidden = true;
         vm.openAnnotations = openAnnotations;
+
+        $rootScope.$on("dismissEvent", function () {
+            openAnnotations();
+        });
 
         function downloadView() {
             var filename = vm.image.entity.slide_id;

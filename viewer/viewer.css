@@ -146,7 +146,6 @@ a.cardlink.delete {
 #annotations-panel {
     background: #f9f9f9;
     position:relative;
-    top:80px;
 /*
     background: yellow;
 */
@@ -156,6 +155,7 @@ a.cardlink.delete {
 
 #sidebar {
    position:absolute;
+   top:80px;
 }
 
 #create-annotation-btn {
