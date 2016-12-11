@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', '$window', '$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, $window, $scope, $timeout, $uibModal, AlertsService) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', '$window', '$rootScope','$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, $window, $rootScope, $scope, $timeout, $uibModal, AlertsService) {
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;
@@ -307,8 +307,7 @@
         }
 
         function closeAnnotations() {
-            var btnptr = $('#filter-btn');
-            btnptr.click();
+            $rootScope.$emit("dismissEvent");
         }
 
     }]);
