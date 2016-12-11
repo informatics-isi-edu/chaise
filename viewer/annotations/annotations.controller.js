@@ -17,6 +17,7 @@
         vm.sortSectionsFirst = sortSectionsFirst;
         vm.setTypeVisibility = setTypeVisibility;
         vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
+        vm.closeAnnotations = closeAnnotations;
         vm.numVisibleAnnotations = 0;
         vm.updateAnnotationVisibility = updateAnnotationVisibility;
 
@@ -303,6 +304,11 @@
                 }
             }
             return vm.numVisibleAnnotations = counter;
+        }
+
+        function closeAnnotations() {
+            var btnptr = $('#filter-btn');
+            btnptr.click();
         }
 
     }]);
