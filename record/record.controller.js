@@ -34,7 +34,6 @@
         };
 
         vm.copyRecord = function() {
-            var referenceFilter = $rootScope.reference.location.filter;
             var newRef = $rootScope.reference.contextualize.entryEdit;
 
             var appLink = newRef.appLink + "?copy=true";
