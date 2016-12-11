@@ -62,7 +62,7 @@ describe('Edit existing record,', function() {
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
-							browser.sleep(3000);
+							browser.sleep(5000);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
 						    });
@@ -84,10 +84,10 @@ describe('Edit existing record,', function() {
             browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
             browser.sleep(3000);
             chaisePage.recordEditPage.submitForm();
-            browser.sleep(3000);
         });
 
         it('should also redirect to the correct Record page', function() {
+            browser.sleep(5000);
             browser.driver.getCurrentUrl().then(function(url) {
                 var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
                 redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
