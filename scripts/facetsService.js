@@ -783,16 +783,16 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			if (k > 0) {
 				plotUrl += ',';
 			}
-			plotUrl += 'A:' + plotKeys[k];
+			plotUrl += 'A:' + fixedEncodeURIComponent(plotKeys[k]);
 		}
 		if (coordinates.x.column != null) {
-			plotUrl += ',x:=A:' + coordinates.x.column;
+			plotUrl += ',x:=A:' + fixedEncodeURIComponent(coordinates.x.column);
 		}
 		if (coordinates.y.column != null) {
-			plotUrl += ',y:=A:' + coordinates.y.column;
+			plotUrl += ',y:=A:' + fixedEncodeURIComponent(coordinates.y.column);
 		}
 		if (coordinates.z.column != null) {
-			plotUrl += ',z:=A:' + coordinates.z.column;
+			plotUrl += ',z:=A:' + fixedEncodeURIComponent(coordinates.z.column);
 		}
 		plotUrl += '?limit=none';
 		ERMREST.GET(plotUrl, 'application/x-www-form-urlencoded; charset=UTF-8',this.successGetPlotData, null, this);
@@ -813,6 +813,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 
 		layout["xaxis"] = {
 			title: (xDisplay != null) ? xDisplay : '',
+			tickangle:20,
 			showline:true
 		};
 		layout["yaxis"] = {

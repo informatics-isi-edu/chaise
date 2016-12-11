@@ -123,12 +123,11 @@ var defaultPlotFormats =
 	    histnorm: "count",
 		autobinx: true,
 		marker: {
-			opacity: 0.85
+			opacity: 0.75
 		},
 		coordinates:['x'],
 		layout:{
 			hovermode: 'closest',
-			margin: { t: 0, l: 30, r: 0, b: 30 },
 			bargap: 0.2,
 			bargroupgap: 0.2,
 			barmode: "stack",
@@ -145,7 +144,6 @@ var defaultPlotFormats =
 		coordinates:['x','y'],
 		layout:{
 			hovermode: 'closest',
-			margin: { t: 0, l: 30, r: 0, b: 30 },
 			showlegend: true,
 			autosize: true
 		}
@@ -155,12 +153,11 @@ var defaultPlotFormats =
 		type:"scatter",
 		mode:"markers",
 		marker: {
-			opacity: 0.85
+			opacity: 0.75
 		},
 		coordinates:['x', 'y'],
 		layout:{
 			hovermode: 'closest',
-			margin: { t: 0, l: 30, r: 0, b: 30 },
 			showlegend: true,
 			autosize: true
 		}
@@ -170,12 +167,11 @@ var defaultPlotFormats =
 		type:"bar",
 		mode:"markers",
 		marker: {
-			opacity: 0.85
+			opacity: 0.75
 		},
 		coordinates:['x','y'],
 		layout:{
 			hovermode: 'closest',
-			margin: { t: 0, l: 30, r: 0, b: 30 },
 			bargap: 0.1,
 			bargroupgap: 0.5,
 			showlegend: true,
