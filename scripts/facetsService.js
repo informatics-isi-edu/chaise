@@ -737,6 +737,17 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		this.updatePlotCoordinateOptions();
 	};
 
+	this.resetPlotCoordinateOptions = function resetPlotCoordinateOptions()
+	{
+		var coordinates = FacetsData.plotOptions.coordinates;
+		coordinates.x.column= null;
+		coordinates.x.display = null;
+		coordinates.y.column= null;
+		coordinates.y.display = null;
+		coordinates.z.column= null;
+		coordinates.z.display = null;
+	};
+
 	this.updatePlotCoordinateOptions = function updatePlotCoordinateOptions()
 	{
 		var coordinates = FacetsData.plotOptions.coordinates;
@@ -854,18 +865,18 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			delete row['y'];
 			delete row['z'];
 			traceKeys[i] = row;
+			var plotLabel = '';
 			$.each(row, function(key, value) {
-				var plotLabel = '';
 				var keyLabel = getColumnAnnotation(FacetsData.table, key, 'description', 'display');
 				if (!keyLabel) {
 					keyLabel = getColumnDisplayName(key);
 				}
 				if (!((formatCoordinates.length == 1) && (formatCoordinates.contains('x')))) {
-					plotLabel = keyLabel + ": " + value + '</br>';
+					plotLabel += keyLabel + ": " + value + '</br>';
 				}
-				plotLabel += facetService.getPlotFacetDescriptions();
-				labels.push(plotLabel);
 			});
+			plotLabel += facetService.getPlotFacetDescriptions();
+			labels.push(plotLabel);
 		});
 
 		var plotData = [

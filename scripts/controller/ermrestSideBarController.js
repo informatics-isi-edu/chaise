@@ -471,6 +471,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	this.searchCollection = function searchCollection(event, data) {
 		if (!$(event.target).is('span')) {
 			$scope.selectedCollection = data['display'];
+			FacetsService.resetPlotCoordinateOptions();
 	    	FacetsService.getEntityResults(event, data, $scope.successGetMetadata);
 	    	if ($('#collectionsTree').hasClass('open')) {
 	    		setTimeout(function () {
