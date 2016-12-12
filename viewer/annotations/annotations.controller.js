@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', '$window', '$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, $window, $scope, $timeout, $uibModal, AlertsService) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', '$window', '$rootScope','$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, $window, $rootScope, $scope, $timeout, $uibModal, AlertsService) {
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;
@@ -17,6 +17,7 @@
         vm.sortSectionsFirst = sortSectionsFirst;
         vm.setTypeVisibility = setTypeVisibility;
         vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
+        vm.closeAnnotations = closeAnnotations;
         vm.numVisibleAnnotations = 0;
         vm.updateAnnotationVisibility = updateAnnotationVisibility;
 
@@ -303,6 +304,10 @@
                 }
             }
             return vm.numVisibleAnnotations = counter;
+        }
+
+        function closeAnnotations() {
+            $rootScope.$emit("dismissEvent");
         }
 
     }]);

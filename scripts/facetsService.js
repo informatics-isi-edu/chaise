@@ -737,6 +737,17 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		this.updatePlotCoordinateOptions();
 	};
 
+	this.resetPlotCoordinateOptions = function resetPlotCoordinateOptions()
+	{
+		var coordinates = FacetsData.plotOptions.coordinates;
+		coordinates.x.column= null;
+		coordinates.x.display = null;
+		coordinates.y.column= null;
+		coordinates.y.display = null;
+		coordinates.z.column= null;
+		coordinates.z.display = null;
+	};
+
 	this.updatePlotCoordinateOptions = function updatePlotCoordinateOptions()
 	{
 		var coordinates = FacetsData.plotOptions.coordinates;
@@ -783,16 +794,16 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			if (k > 0) {
 				plotUrl += ',';
 			}
-			plotUrl += 'A:' + plotKeys[k];
+			plotUrl += 'A:' + fixedEncodeURIComponent(plotKeys[k]);
 		}
 		if (coordinates.x.column != null) {
-			plotUrl += ',x:=A:' + coordinates.x.column;
+			plotUrl += ',x:=A:' + fixedEncodeURIComponent(coordinates.x.column);
 		}
 		if (coordinates.y.column != null) {
-			plotUrl += ',y:=A:' + coordinates.y.column;
+			plotUrl += ',y:=A:' + fixedEncodeURIComponent(coordinates.y.column);
 		}
 		if (coordinates.z.column != null) {
-			plotUrl += ',z:=A:' + coordinates.z.column;
+			plotUrl += ',z:=A:' + fixedEncodeURIComponent(coordinates.z.column);
 		}
 		plotUrl += '?limit=none';
 		ERMREST.GET(plotUrl, 'application/x-www-form-urlencoded; charset=UTF-8',this.successGetPlotData, null, this);
@@ -813,6 +824,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 
 		layout["xaxis"] = {
 			title: (xDisplay != null) ? xDisplay : '',
+			tickangle:20,
 			showline:true
 		};
 		layout["yaxis"] = {
@@ -853,18 +865,18 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			delete row['y'];
 			delete row['z'];
 			traceKeys[i] = row;
+			var plotLabel = '';
 			$.each(row, function(key, value) {
-				var plotLabel = '';
 				var keyLabel = getColumnAnnotation(FacetsData.table, key, 'description', 'display');
 				if (!keyLabel) {
 					keyLabel = getColumnDisplayName(key);
 				}
 				if (!((formatCoordinates.length == 1) && (formatCoordinates.contains('x')))) {
-					plotLabel = keyLabel + ": " + value + '</br>';
+					plotLabel += keyLabel + ": " + value + '</br>';
 				}
-				plotLabel += facetService.getPlotFacetDescriptions();
-				labels.push(plotLabel);
 			});
+			plotLabel += facetService.getPlotFacetDescriptions();
+			labels.push(plotLabel);
 		});
 
 		var plotData = [

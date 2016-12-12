@@ -6,20 +6,27 @@
     padding-right: 15px;
 }
 
-.add-rows-input-row {
-    padding-right: 30px;
-    position: absolute;
-}
-
 span.space-1::before {
     content: '\00A0';
+}
+
+.chaise-visible {
+    visibility: visible;
+}
+
+.chaise-hidden {
+    visibility: hidden;
 }
 
 .add-rows-input {
     z-index: 2;
     padding: 5px;
     background-color: #D6DBDF;
-    width: 10%;
+    width: 125px;
+}
+
+#copy-rows-input {
+    height: 30px;
 }
 
 textarea {
@@ -230,7 +237,7 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
 }
 
 /* Chrome only: */
-@media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) { 
+@media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) {
   #formEdit {
     border-bottom: 1px solid #ddd;
     border-right: 1px solid #ddd;
@@ -243,7 +250,7 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
 
 @-moz-document url-prefix() {
   #formEdit table tr td:first-child {
-    margin-top: 0px;  
+    margin-top: 0px;
   }
 
   #formEdit table tr:first-child td:first-child {
