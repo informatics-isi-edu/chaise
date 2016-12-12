@@ -173,7 +173,12 @@
                                  * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
                                  * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
                                 **/
-                                model.submissionRows[j][referenceColumn.name] = ((vm.editMode || context.copy) ? $rootScope.tuples[j].data[referenceColumn.name] : null);
+                                if (vm.editMode) {
+                                    model.submissionRows[j][referenceColumn.name] = (vm.editMode ? $rootScope.tuples[j].data[referenceColumn.name] : null);
+                                } else if (context.copy) {
+                                    // in the cocpy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
+                                    model.submissionRows[j][referenceColumn.name] = (vm.editMode ? $rootScope.tuples[0].data[referenceColumn.name] : null);
+                                }
                             }
                         }
                     // not pseudo, column.name is sufficient for the keys
