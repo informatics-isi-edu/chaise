@@ -60,8 +60,11 @@ role="button" title="edit annotations" id="edit-btn">
                             <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button" title="go home" id="gohome-btn">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button" title="download as a file">
-                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot
+<span ng-if="{{osd.deviceData.browser}} != 'safari'">
+       <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button">
+         <span class="glyphicon glyphicon-camera"></span> Take a Screenshot
+       </button>
+</span>
                             </button>
                         </div>
                     </div>
