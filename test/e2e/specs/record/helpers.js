@@ -409,7 +409,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
 
         browser.close();
         browser.switchTo().window(allWindows[0]);
-        browser.sleep(10000);
+        browser.sleep(30000);
 
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,
@@ -424,7 +424,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         }).then(function() {
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            expect(url.indexOf('recordset')).toBeGreaterThan(-1)
+            expect(url.indexOf('recordset')).toBeGreaterThan(-1);
             done();
         });
     });
