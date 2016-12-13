@@ -3,6 +3,8 @@
     <title>Image Viewer</title>
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     %ASSETS%
+<script src='../scripts/vendor/ng-device-detector.js></script>
+<script src='../scripts/vendor/re-tree.js></script>
     <!--
         IE8 support, see AngularJS Internet Explorer Compatibility http://docs.angularjs.org/guide/ie
         For Firefox 3.6, you will also need to include jQuery and ECMAScript 5 shim
