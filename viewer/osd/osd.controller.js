@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.viewer')
+    angular.module('chaise.viewer',["ng.deviceDetector"])
 
     .controller('OSDController', ['image', '$window', '$rootScope', function OSDController(image, $window, $rootScope) {
         var vm = this;
@@ -21,6 +21,9 @@
 
         vm.annotationsSidebarAreHidden = true;
         vm.openAnnotations = openAnnotations;
+
+        vm.device = deviceDetector;
+        vm.deviceData = JSON.stringify(vm.device, null, 2);
 
         $rootScope.$on("dismissEvent", function () {
             openAnnotations();

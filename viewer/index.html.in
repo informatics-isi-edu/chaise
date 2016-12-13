@@ -3,6 +3,8 @@
     <title>Image Viewer</title>
     <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     %ASSETS%
+<script src='../scripts/vendor/ng-device-detector.js'></script>
+<script src='../scripts/vendor/re-tree.js'></script>
     <!--
         IE8 support, see AngularJS Internet Explorer Compatibility http://docs.angularjs.org/guide/ie
         For Firefox 3.6, you will also need to include jQuery and ECMAScript 5 shim
@@ -39,7 +41,6 @@
                         </span>
                     </div>
                     <div class="col-md-10 pull-left">
-                        <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="<p class='text-left'><strong>Recommended browsers:</strong> Firefox and Chrome<br><br><strong>Safari users:</strong> The screenshot will be saved as 'Unknown.jpg'.</p>"></span>
                         <div class="btn-group btn-group-sm pull-left" role="group">
                             <button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':!osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
                                 <span class="glyphicon glyphicon-tasks"></span> Channels
@@ -60,9 +61,10 @@ role="button" title="edit annotations" id="edit-btn">
                             <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button" title="go home" id="gohome-btn">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button" title="download as a file">
-                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot
-                            </button>
+<button ng-if="{{osd.deviceData.browser}} != 'safari'"
+    ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button">
+    <span class="glyphicon glyphicon-camera"></span> Take a Screenshot
+</button>
                         </div>
                     </div>
                 </div>
