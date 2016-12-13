@@ -13,7 +13,8 @@
         'chaise.delete',
         'chaise.modal',
         'ui.select',
-        'ui.bootstrap'
+        'ui.bootstrap',
+        'ng.deviceDetector'
     ])
 
     // Configure the context info from the URI
