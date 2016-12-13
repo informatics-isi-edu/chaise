@@ -23,6 +23,7 @@
         <navbar></navbar>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
         <div ng-controller="FormController as form" class="row">
+            <div ng-hide="form.resultset">
             <div class="col-xs-12">
             <!-- Alerts section -->
                 <div ng-repeat="alert in form.alerts" class="row">
@@ -228,6 +229,10 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            </div>
+            <div ng-show=form.resulset>
+                <record-table></record-table>
             </div>
         </div>
         </div>

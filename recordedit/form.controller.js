@@ -224,7 +224,9 @@
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
                     } else {
-                        //set values for the view to flip to recordedit resultset view    
+                        //set values for the view to flip to recordedit resultset view
+                        console.log(page);
+                        vm.resultset = true; 
                     }
 
                 }, function error(response) {
