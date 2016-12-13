@@ -3,7 +3,7 @@ var recordEditHelpers = require('../../helpers.js');
 
 describe('Edit existing record,', function() {
 
-	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params, EC = protractor.ExpectedConditions;
 
     for (var i=0; i< testParams.tables.length; i++) {
 
@@ -62,7 +62,7 @@ describe('Edit existing record,', function() {
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
-							browser.sleep(5000);
+                            browser.wait(EC.visibilityOf(chaisePage.recordPage.getEntityTitle), 10000);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
 						    });
@@ -87,7 +87,7 @@ describe('Edit existing record,', function() {
         });
 
         it('should also redirect to the correct Record page', function() {
-            browser.sleep(5000);
+            browser.wait(EC.visibilityOf(chaisePage.recordPage.getEntityTitle), 10000);
             browser.driver.getCurrentUrl().then(function(url) {
                 var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
                 redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
