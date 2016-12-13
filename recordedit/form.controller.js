@@ -195,7 +195,7 @@
                     vm.redirectAfterSubmission();
                 } else {
                     // loop through model.submissionRows
-                    // there should only be 1 row for editing
+                    // there should only be 1 row for editing but we want to account for it for future development
                     for (var i = 0; i < model.submissionRows.length; i++) {
                         var row = model.submissionRows[i];
                         var data = $rootScope.tuples[i].data;
@@ -220,7 +220,13 @@
                     if (vm.prefillCookie) {
                         $cookies.remove(context.prefill);
                     }
-                    vm.redirectAfterSubmission(page);
+
+                    if (model.rows.length == 1) {
+                        vm.redirectAfterSubmission(page);
+                    } else {
+                        //set values for the view to flip to recordedit resultset view    
+                    }
+
                 }, function error(response) {
                     vm.showSubmissionError(response);
                     vm.submissionButtonDisabled = false;
@@ -500,7 +506,7 @@
 
         var captionColumWidth = 130;
         var marginLeft = captionColumWidth + 10;
-        
+
         // Sets a fixed width for the columns, as they're positioned absolute
         vm.captionColumWidth = { 'width' : captionColumWidth + "px" };
 
