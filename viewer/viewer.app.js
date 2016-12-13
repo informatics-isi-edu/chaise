@@ -230,7 +230,15 @@
                     if (annotoriousReady && chaiseReady) {
                         iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                     }
+                } else if (event.data.messageType == 'dismissChannels') {
+window.console.log("XXX pull off the channels filtering pullout..");
+/*
+<button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':!osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
+*/
+                  var btnptr = $('#filter-btn');
+                  btnptr.click();
                 }
+                // should really capture the 'unhandled' message type here..
             } else {
                 console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
             }
