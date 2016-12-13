@@ -78,7 +78,7 @@ describe('Recordset add record,', function() {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
         browser.close();
         browser.switchTo().window(allWindows[0]);
-        browser.sleep(1000);
+        browser.sleep(10000);
 
         chaisePage.recordsetPage.getRows().then(function(rows) {
             expect(rows.length).toBe(rowCount+1);

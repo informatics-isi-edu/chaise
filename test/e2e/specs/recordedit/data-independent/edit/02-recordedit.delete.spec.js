@@ -61,7 +61,7 @@ describe('Edit existing record,', function() {
 
                             return chaisePage.recordPage.getConfirmDeleteButton().click();
                         }).then(function () {
-                            browser.driver.sleep(1000);
+                            browser.driver.sleep(5000);
 
                             return browser.driver.getCurrentUrl();
                         }).then(function(url) {
