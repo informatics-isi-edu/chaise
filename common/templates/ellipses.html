@@ -1,7 +1,7 @@
 <td ng-repeat="val in rowValues track by $index">
     <div ng-switch="val.isHTML">
         <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" ng-style="maxHeightStyle">
-            <span ng-switch-when="true" class="markdown-container" ng-bind-html="val.value"></span>
+            <span ng-switch-when="true" class="markdown-container" bind-html-unsafe="val.value"></span>
             <span ng-switch-default ng-bind="val.value"></span>
         </div>
         <div ng-if="overflow[$index]" style="display:inline;">
