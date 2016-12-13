@@ -7,7 +7,7 @@
                    ng-model="vm.search"
                    class="form-control"
                    on-enter="search(vm.search)"
-                   placeholder="search {{vm.tableDisplayName}}"
+                   placeholder="Search {{vm.tableDisplayName}}"
                     autofocus>
                 <span class="input-group-btn">
                     <button id="search-submit" class="btn btn-primary" ng-click="search(vm.search)" role="button">
@@ -24,7 +24,7 @@
     <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
         <!-- pagination -->
         <span class="dropdown" style="margin-left: 5px">
-            <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
                 <span class="caret"></span></button>
             <ul class="dropdown-menu dropdown-menu-right">
                 <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
