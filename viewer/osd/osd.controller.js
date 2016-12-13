@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['image', '$window', '$rootScope', function OSDController(image, $window, $rootScope) {
+    .controller('OSDController', ['deviceDetector', 'image', '$window', '$rootScope', function OSDController(deviceDetector, image, $window, $rootScope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -21,6 +21,10 @@
 
         vm.annotationsSidebarAreHidden = true;
         vm.openAnnotations = openAnnotations;
+
+        vm.device = deviceDetector;
+        vm.isSafari = false;
+        testSafari();
 
         $rootScope.$on("dismissEvent", function () {
             openAnnotations();
@@ -99,6 +103,16 @@
             }
             iframe.postMessage({messageType: 'filterChannels'}, origin);
             vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
+        }
+
+        function testSafari() {
+//            var deviceData = JSON.stringify(vm.device, null, 2);
+            var browser=vm.device.browser;
+            if(browser=='safari') {
+               vm.isSafari = true;
+               } else {
+                   vm.isSafari = false;
+            }
         }
     }]);
 })();
