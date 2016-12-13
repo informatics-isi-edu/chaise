@@ -167,7 +167,6 @@
                             var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
                             // check if value is set in submission data yet
                             if (!model.submissionRows[j][referenceColumn.name]) {
-
                                 /**
                                  * User didn't change the foreign key, copy the value over to the submission data with the proper column name
                                  * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)

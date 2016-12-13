@@ -112,8 +112,6 @@
                                 values = tuple.values;
 
                             $rootScope.tuples = page.tuples;
-
-                            // TODO if copy mode, use reference.displayname
                             $rootScope.displayname = (context.copy ? $rootScope.reference.displayname : tuple.displayname);
 
                             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
