@@ -226,6 +226,8 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
+	$(COMMON)/vendor/re-tree.js \
+	$(COMMON)/vendor/ng-device-detector.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js
