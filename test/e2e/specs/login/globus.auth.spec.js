@@ -8,27 +8,27 @@ describe('Globus login module', function() {
         	url = u;
         	var login_link = browser.driver.findElement(by.id('login_link'));
 	        login_link.click();
-	        browser.sleep(2000);
+	        browser.sleep(browser.params.defaultTimeout);
 	        done();
-        }); 
+        });
     });
 
 	it('allows the user to login', function () {
 
 	    // at this point our server redirects to globus auth page, so let's enter the institution name and press continue bitton
 	    browser.driver.executeScript('$("#identity_provider").selectize()[0].selectize.setValue($("#identity_provider").selectize()[0].selectize.search("University of southern california").items[0].id);');
-	    
+
 	    var continueButton = browser.driver.findElement(by.id('login-btn'));
-	    
+
 	    continueButton.click();
 
-	    browser.sleep(2000);
+	    browser.sleep(browser.params.defaultTimeout);
 
 	    var logonButton = browser.driver.findElement(by.id('wayflogonbutton'));
 	    logonButton.click();
 
 	    browser.ignoreSynchronization = true;
-	    browser.sleep(3000);
+	    browser.sleep(browser.params.defaultTimeout);
 
 	    // at this point our server redirects to USC auth page, so let's log in
 	    var emailInput = browser.driver.findElement(by.id('j_username'));
@@ -40,7 +40,7 @@ describe('Globus login module', function() {
 	    var signInButton = element(by.css("#loginform button[type='submit']"));
 	    signInButton.click();
 
-	    browser.sleep(10000);
+	    browser.sleep(browser.params.defaultTimeout);
 
 	    it("and redirect to original page", function() {
 		    expect(browser.getCurrentUrl()).toEqual(url);

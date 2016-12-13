@@ -17,7 +17,7 @@ describe('View recordset,', function() {
                     });
                     browser.ignoreSynchronization=true;
                     browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
-                    browser.sleep(2000);
+                    browser.sleep(browser.params.defaultTimeout);
                 });
 
                 describe("Presentation ,", function() {
@@ -37,7 +37,7 @@ describe('View recordset,', function() {
             keys.push(key.name + key.operator + key.value);
         });
         browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
-        browser.sleep(3000);
+        browser.sleep(browser.params.defaultTimeout);
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');

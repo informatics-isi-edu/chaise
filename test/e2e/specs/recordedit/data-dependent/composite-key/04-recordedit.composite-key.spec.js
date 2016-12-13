@@ -17,7 +17,7 @@ describe('Add a record,', function() {
 					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					browser.sleep(3000);
+					browser.sleep(browser.params.defaultTimeout);
 			    });
 
                 describe("Presentation and validation for an entity with a composite key,", function() {
@@ -31,7 +31,7 @@ describe('Add a record,', function() {
                             return chaisePage.clickButton(popupBtns[3]);
                         }).then(function() {
                             // wait for the modal to open
-                            browser.wait(EC.visibilityOf(modalTitle), 5000);
+                            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
 
                             return modalTitle.getText();
                         }).then(function(text) {
@@ -47,7 +47,7 @@ describe('Add a record,', function() {
                             var index = Math.floor(Math.random() * ct);
                             return rows.get(index).click();
                         }).then(function() {
-                            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
+                            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
                             var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue("Person", 0);
                             expect(foreignKeyInput.getAttribute("value")).toBeDefined();
@@ -79,14 +79,14 @@ describe('Add a record,', function() {
 						if (!hasErrors) {
                             var EC = protractor.ExpectedConditions;
 
-							browser.sleep(3000);
+							browser.sleep(browser.params.defaultTimeout);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
 
                                 for (var i = 0; i < tableParams.column_names.length; i++) {
                                     var columnName = tableParams.column_names[i];
                                     var column = chaisePage.recordPage.getColumnValue(columnName);
-                                    browser.wait(EC.visibilityOf(column), 1000);
+                                    browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
                                     expect(column.getAttribute("value")).toBeDefined();
                                 }
 						    });

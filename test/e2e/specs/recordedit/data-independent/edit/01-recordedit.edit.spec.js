@@ -22,7 +22,7 @@ describe('Edit existing record,', function() {
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 
-					browser.sleep(3000);
+					browser.sleep(browser.params.defaultTimeout);
 			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {
@@ -33,7 +33,7 @@ describe('Edit existing record,', function() {
 			        		}
 			        	});
 			        });
-			        browser.sleep(100);
+			        browser.sleep(browser.params.defaultTimeout);
 			    });
 
 
@@ -62,7 +62,7 @@ describe('Edit existing record,', function() {
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
-							browser.sleep(3000);
+							browser.sleep(browser.params.defaultTimeout);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
 						    });
@@ -82,9 +82,9 @@ describe('Edit existing record,', function() {
             });
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
-            browser.sleep(3000);
+            browser.sleep(browser.params.defaultTimeout);
             chaisePage.recordEditPage.submitForm();
-            browser.sleep(3000);
+            browser.sleep(browser.params.defaultTimeout);
         });
 
         it('should also redirect to the correct Record page', function() {

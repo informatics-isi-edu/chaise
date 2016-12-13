@@ -31,7 +31,7 @@ describe('Chaise initial sidebar,', function () {
         var numOfAttrs, ranInt;
         it('should show the initial sidebar', function () {
             var sidebar = element(by.id('sidebar'));
-            browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
+            browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout).then(function () {
                 expect(sidebar.isDisplayed()).toBe(true);
             });
         });
@@ -173,7 +173,7 @@ describe('Chaise initial sidebar,', function () {
                 viewAll.click();
                 chaisePage.moreFilter.clickMorefilterAttrByName(previousCheckedText);
                 chaisePage.moreFilter.clickMorefilterAttrByName(previousUncheckedText);
-                browser.sleep(100);
+                browser.sleep(browser.params.defaultTimeout);
                 chaisePage.moreFilter.goBackToSidebar();
             });
             it('should show previously unchecked attribute', function () {

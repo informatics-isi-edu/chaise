@@ -55,7 +55,7 @@ exports.parameterize = function(config, configParams) {
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
           browser.get(process.env.CHAISE_BASE_URL + "/login/");
-          browser.sleep(3000);
+          browser.sleep(browser.params.defaultTimeout);
           browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"'));
         }
 
@@ -79,9 +79,9 @@ exports.parameterize = function(config, configParams) {
         if (testConfiguration.authCookie) {
           console.log("setting up cookie");
           browser.get(process.env.CHAISE_BASE_URL + "/login/");
-          browser.sleep(3000);
+          browser.sleep(browser.params.defaultTimeout);
           browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"'));
-          browser.sleep(100);
+          browser.sleep(browser.params.defaultTimeout);
         }
 
         // Set the base url to the page that we are running the tests for

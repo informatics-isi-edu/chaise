@@ -20,11 +20,11 @@ describe('Record Add', function() {
         beforeAll(function () {
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + ":" + testParams.table_name);
-            browser.sleep(3000);
+            browser.sleep(browser.params.defaultTimeout);
         });
 
         it("should click the button and show an input box.", function() {
-            browser.wait(EC.elementToBeClickable(multiFormOpenButton), 10000);
+            browser.wait(EC.elementToBeClickable(multiFormOpenButton), browser.params.defaultTimeout);
 
             chaisePage.recordEditPage.getMultiFormInputOpenButtonScript().then(function(openBtn) {
                 return chaisePage.clickButton(openBtn);
@@ -53,7 +53,7 @@ describe('Record Add', function() {
                 return chaisePage.clickButton(openBtn)
             }).then(function() {
                 chaisePage.recordEditPage.clearInput(multiFormInput);
-                browser.sleep(10);
+                browser.sleep(browser.params.defaultTimeout);
                 multiFormInput.sendKeys(numberGreaterThanMax);
 
                 return chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript();
@@ -77,7 +77,7 @@ describe('Record Add', function() {
             textInput.sendKeys(textVal);
 
             chaisePage.recordEditPage.clearInput(multiFormInput);
-            browser.sleep(10);
+            browser.sleep(browser.params.defaultTimeout);
             multiFormInput.sendKeys(testParams.records-1);
 
             chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript().then(function(submitBtn) {
@@ -138,7 +138,7 @@ describe('Record Add', function() {
             });
 
             it("should be redirected to recordset page and verify the count.", function() {
-                browser.sleep(3000);
+                browser.sleep(browser.params.defaultTimeout);
                 browser.driver.getCurrentUrl().then(function(url) {
                     expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset/")).toBe(true);
 
