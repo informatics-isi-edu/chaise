@@ -59,7 +59,7 @@ role="button" title="edit annotations" id="edit-btn">
                             <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button" title="go home" id="gohome-btn">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-<button ng-if="!osd.isSafari"
+<button ng-if="(!osd.isSafari && !osd.isRetina)"
     ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button">
    <span class="glyphicon glyphicon-camera"></span> Take a Screenshot </button>
                         </div>
