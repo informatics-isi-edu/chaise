@@ -367,6 +367,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                // make sure modal opened
 	                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
 
+									browser.sleep(5000);
 	                                rows = chaisePage.recordsetPage.getRows();
 	                                // count is needed for clicking a random row
 	                                return rows.count();
@@ -386,27 +387,6 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                     });
 
                 });
-
-				it("should have a `create new` button that opens a new tab", function(){
-                    var handles;
-					var createBtns = chaisePage.recordEditPage.getCreateBtns();
-					expect(createBtns.count()).toBe(columns.length * (recordIndex + 1));
-                    var fkc = columns[0];
-                    browser.executeScript('arguments[0].click();', createBtns.get(recordIndex)).then(function(){
-                        return browser.getAllWindowHandles();
-                    }).then(function(h){
-                        handles = h;
-                        return browser.switchTo().window(handles[1]);
-                    }).then(function(){
-                        return browser.getCurrentUrl();
-                    }).then(function(currentUrl) {
-                        var url = '/recordedit/#' + browser.params.catalogId + "/" + fkc.referencedColumn.schema_name + ":" + fkc.referencedColumn.table_name;
-                        expect(currentUrl.indexOf(url)).toBeGreaterThan(-1);
-                        return browser.close();
-                    }).then(function() {
-                        browser.switchTo().window(handles[0]);
-                    });
-				});
 			});
 
 			describe("Date fields,", function() {
