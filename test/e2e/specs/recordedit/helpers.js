@@ -367,6 +367,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                // make sure modal opened
 	                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
 
+									browser.sleep(5000);
 	                                rows = chaisePage.recordsetPage.getRows();
 	                                // count is needed for clicking a random row
 	                                return rows.count();
