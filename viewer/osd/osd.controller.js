@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['image', '$window', '$rootScope', function OSDController(image, $window, $rootScope) {
+    .controller('OSDController', ['deviceDetector', 'image', '$window', '$rootScope', function OSDController(deviceDetector, image, $window, $rootScope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -21,6 +21,12 @@
 
         vm.annotationsSidebarAreHidden = true;
         vm.openAnnotations = openAnnotations;
+
+        vm.device = deviceDetector;
+        vm.isSafari = false;
+        testSafari();
+        vm.isRetina = false;
+        testRetina();
 
         $rootScope.$on("dismissEvent", function () {
             openAnnotations();
@@ -99,6 +105,28 @@
             }
             iframe.postMessage({messageType: 'filterChannels'}, origin);
             vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
+        }
+
+        function testSafari() {
+//            var deviceData = JSON.stringify(vm.device, null, 2);
+            var browser=vm.device.browser;
+            if(browser=='safari') {
+               vm.isSafari = true;
+               } else {
+                   vm.isSafari = false;
+            }
+        }
+        function testRetina() {
+//https://coderwall.com/p/q2z2uw/detect-hidpi-retina-displays-in-javascript
+            var mediaQuery = "(-webkit-min-device-pixel-ratio: 1.5),\
+                               (min--moz-device-pixel-ratio: 1.5),\
+                               (-o-min-device-pixel-ratio: 3/2),\
+                               (min-resolution: 1.5dppx)";
+
+            if ((window.devicePixelRatio > 1) || 
+                 (window.matchMedia && window.matchMedia(mediaQuery).matches)) {
+                vm.isRetina=true;
+            }
         }
     }]);
 })();
