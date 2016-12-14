@@ -387,10 +387,9 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
 
             // set the required fields
-            browser.sleep(1000);
+            browser.sleep(10000);
             return chaisePage.recordsetPage.getInputForAColumn("price")
         }).then(function(input) {
-
             input.sendKeys(testParams.price);
             var nowBtn = element.all(by.css('button[name="booking_date"]')).get(1);
             return nowBtn.click();
@@ -409,7 +408,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
 
         browser.close();
         browser.switchTo().window(allWindows[0]);
-        browser.sleep(30000);
+        browser.sleep(10000);
 
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,
