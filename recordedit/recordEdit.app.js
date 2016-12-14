@@ -13,6 +13,7 @@
         'chaise.record.table',
         'chaise.utils',
         'chaise.validators',
+        'chaise.html',
         'ermrestjs',
         'ngCookies',
         'ngMessages',
