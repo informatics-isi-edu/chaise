@@ -231,8 +231,8 @@
                 </div>
             </div>
             </div>
-            <div ng-show=form.resulset>
-                <record-table></record-table>
+            <div ng-show=form.resultset>
+                <record-table vm="form.resultsetModel" default-row-linking="false"></record-table>
             </div>
         </div>
         </div>

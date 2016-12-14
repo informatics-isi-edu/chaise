@@ -3,11 +3,12 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$uibModal', '$window', '$timeout', function FormController(AlertsService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $uibModal, $window, $timeout) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window', function FormController(AlertsService, DataUtils, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
         vm.editMode = context.filter || false;
+        vm.resultset = false;
         vm.showDeleteButton = chaiseConfig.showDeleteButton === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -226,7 +227,20 @@
                     } else {
                         //set values for the view to flip to recordedit resultset view
                         console.log(page);
-                        vm.resultset = true; 
+                        vm.resultsetModel = {
+                            hasLoaded: true,
+                            reference: page.reference,
+                            tableDisplayName: page.reference.displayname,
+                            columns: page.reference.columns,
+                            sortby: null,
+                            sortOrder: null,
+                            page: page,
+                            pageLimit: model.rows.length,
+                            rowValues: [],
+                            search: null
+                        }
+                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        vm.resultset = true;
                     }
 
                 }, function error(response) {
