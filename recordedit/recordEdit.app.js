@@ -152,7 +152,7 @@
                                         break;
                                 }
 
-                                if (!column.getInputDisabled(context.appContext)) {
+                                if (!context.copy || !column.getInputDisabled(context.appContext)) {
                                     recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
                                 }
                             }

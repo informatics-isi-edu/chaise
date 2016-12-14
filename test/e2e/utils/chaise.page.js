@@ -764,6 +764,18 @@ function chaisePage() {
     };
 
     this.dataUtils = new (require('./page.utils.js'))();
+
+    this.waitForUrl = function(expectedUrlFragment, timeout) {  
+        return browser.wait(function() {
+            return browser.driver.getCurrentUrl().then(function(url) {
+              return new RegExp(expectedUrlFragment).test(url);
+            });
+        }, timeout | 5000);
+    };
+
+    this.waitForElement = function (locator, timeout) {  
+        return browser.wait(protractor.ExpectedConditions.visibilityOf(locator), 5000);
+    };
 };
 
 module.exports = new chaisePage();
