@@ -22,7 +22,7 @@ var chaiseConfig = {
     recordUiGridExportCSVEnabled: true,
     recordUiGridExportPDFEnabled: true,
     editRecord: true,
-    showDeleteButton: true,
+    deleteRecord: true,
     tour: {
       pickRandom: false,
       searchInputAttribute: "Data",
