@@ -175,7 +175,7 @@
                                 if (vm.editMode) {
                                     model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[j].data[referenceColumn.name] || null;
                                 } else if (context.copy) {
-                                    // in the cocpy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
+                                    // in the copy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
                                     model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[0].data[referenceColumn.name] || null;
                                 } else {
                                     model.submissionRows[j][referenceColumn.name] = null;
