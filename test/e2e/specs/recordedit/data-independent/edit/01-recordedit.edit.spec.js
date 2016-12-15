@@ -63,9 +63,19 @@ describe('Edit existing record,', function() {
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
-							browser.sleep(3000);
-							browser.driver.getCurrentUrl().then(function(url) {
-						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
+                            var keys = [];
+                            tableParams.keys.forEach(function(key) {
+                                keys.push(key.name + key.operator + key.value);
+                            });
+
+                            var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
+                            redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
+
+                            chaisePage.waitForUrl(redirectUrl, 10000).then(function() {
+                                expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
+                            }, function() {
+                            	console.log("          Timed out while waiting for the url to be the new one");
+                            	expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
 						    });
 						}
 					});
@@ -86,14 +96,14 @@ describe('Edit existing record,', function() {
             chaisePage.waitForElement(element(by.id("submit-record-button")), 10000).then(function() {
             	chaisePage.recordEditPage.submitForm();
             });
-            
+
         });
 
         it('should also redirect to the correct Record page', function() {
         	var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
             redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
-            
-        	chaisePage.waitForUrl(redirectUrl).then(function() {
+
+        	chaisePage.waitForUrl(redirectUrl, 10000).then(function() {
                 expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
             }, function() {
             	console.log("          Timed out while waiting for the url to be the new one");
