@@ -66,7 +66,7 @@
                 // do nothing but return without a session
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
-                $rootScope.reference = ((context.filter && !context.copy) ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
+                $rootScope.reference = ((context.filter && !context.queryParams.copy) ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = session;
                 $rootScope.session = session;
 
@@ -114,7 +114,7 @@
                                 values = tuple.values;
 
                             $rootScope.tuples = page.tuples;
-                            $rootScope.displayname = (context.copy ? $rootScope.reference.displayname : tuple.displayname);
+                            $rootScope.displayname = (context.queryParams.copy ? $rootScope.reference.displayname : tuple.displayname);
 
                             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                 column = $rootScope.reference.columns[i];
@@ -154,7 +154,7 @@
                                         break;
                                 }
 
-                                if (!context.copy || !column.getInputDisabled(context.appContext)) {
+                                if (!context.queryParams.copy || !column.getInputDisabled(context.appContext)) {
                                     recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
                                 }
                             }

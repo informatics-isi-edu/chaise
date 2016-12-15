@@ -7,7 +7,7 @@
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
-        vm.editMode = (context.filter && !context.copy) || false;
+        vm.editMode = (context.filter && !context.queryParams.copy) || false;
         vm.showDeleteButton = chaiseConfig.showDeleteButton === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -174,7 +174,7 @@
                                 **/
                                 if (vm.editMode) {
                                     model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[j].data[referenceColumn.name] || null;
-                                } else if (context.copy) {
+                                } else if (context.queryParams.copy) {
                                     // in the copy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
                                     model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[0].data[referenceColumn.name] || null;
                                 } else {

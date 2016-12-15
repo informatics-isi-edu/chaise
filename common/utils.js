@@ -50,17 +50,6 @@
                 }
             }
 
-            // If hash has ?copy or &copy parameter, remove it
-            if (hash.indexOf('copy=') !== -1) {
-                var startIndex = hash.indexOf('copy=');
-                var stopIndex = hash.indexOf('&', startIndex);
-                if (stopIndex !== -1) {
-                    hash = hash.substring(0, startIndex) + hash.substring(stopIndex + 1);
-                } else {
-                    hash = hash.substring(0, startIndex - 1);
-                }
-            }
-
             // If the hash is empty, check for defaults
             if (hash == '' || hash === undefined || hash.length == 1) {
                 if (chaiseConfig.defaultCatalog) {
