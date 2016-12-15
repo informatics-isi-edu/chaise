@@ -13,6 +13,7 @@
         'chaise.record.table',
         'chaise.utils',
         'chaise.validators',
+        'chaise.html',
         'ermrestjs',
         'ngCookies',
         'ngMessages',
@@ -65,7 +66,7 @@
                 // do nothing but return without a session
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
-                $rootScope.reference = (context.filter ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
+                $rootScope.reference = ((context.filter && !context.copy) ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);
@@ -112,7 +113,7 @@
                                 values = tuple.values;
 
                             $rootScope.tuples = page.tuples;
-                            $rootScope.displayname = tuple.displayname;
+                            $rootScope.displayname = (context.copy ? $rootScope.reference.displayname : tuple.displayname);
 
                             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                 column = $rootScope.reference.columns[i];
@@ -152,7 +153,9 @@
                                         break;
                                 }
 
-                                recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
+                                if (!context.copy || !column.getInputDisabled(context.appContext)) {
+                                    recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
+                                }
                             }
                             $log.info('Model: ', recordEditModel);
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
