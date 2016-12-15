@@ -510,6 +510,10 @@ var recordPage = function() {
         return browser.executeScript("return $('#entity-title').text();");
     };
 
+    this.getEntityTitleElem = function() {
+        return element(by.css(".entity-title"));
+    };
+
     this.getEntitySubTitle = function() {
         return browser.executeScript("return $('#entity-subtitle').text();");
     };
@@ -599,6 +603,10 @@ var recordPage = function() {
 
     this.getEditRecordButton = function() {
         return element(by.id("edit-record"));
+    };
+
+    this.getCopyRecordButton = function() {
+        return element(by.id("copy-record"));
     };
 
     this.getDeleteRecordButton = function () {

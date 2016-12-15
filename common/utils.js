@@ -48,6 +48,17 @@
                 }
             }
 
+            // If hash has ?copy or &copy parameter, remove it
+            if (hash.indexOf('copy=') !== -1) {
+                var startIndex = hash.indexOf('copy=');
+                var stopIndex = hash.indexOf('&', startIndex);
+                if (stopIndex !== -1) {
+                    hash = hash.substring(0, startIndex) + hash.substring(stopIndex + 1);
+                } else {
+                    hash = hash.substring(0, startIndex - 1);
+                }
+            }
+
             // If the hash is empty, check for defaults
             if (hash == '' || hash === undefined || hash.length == 1) {
                 if (chaiseConfig.defaultCatalog) {
@@ -162,8 +173,9 @@
                 return context;
             }
 
-            // parse out modifiers, expects in order of sort, paging, limit, and prefill
-            var modifiers = ["@sort(", "@before(", "@after", "?limit=", "?prefill=", "&prefill="];
+            // parse out modifiers, expects in order of sort, paging, limit, prefill, and copy
+            // copy will always be followed by a colname and val modifier
+            var modifiers = ["@sort(", "@before(", "@after", "?limit=", "?prefill=", "&prefill=", "?copy", "&copy"];
             for (i = 0; i < modifiers.length; i++) {
                 if (hash.indexOf(modifiers[i]) !== -1) {
                     hash = hash.split(modifiers[i])[0]; // remove modifiers from uri
@@ -242,6 +254,20 @@
                             context.prefill = modifierPath.substring(startIndex, stopIndex);
                         } else {
                             context.prefill = modifierPath.substring(startIndex);
+                        }
+                    }
+                });
+
+                // extract ?copy or &copy
+                var copies = ["?copy=", "&copy="];
+                copies.forEach(function(copy) {
+                    if (modifierPath.indexOf(copy) !== -1) {
+                        var startIndex = modifierPath.indexOf(copy) + copy.length;
+                        var stopIndex = modifierPath.indexOf('&', startIndex);
+                        if (stopIndex !== -1) {
+                            context.copy = modifierPath.substring(startIndex, stopIndex);
+                        } else {
+                            context.copy = modifierPath.substring(startIndex);
                         }
                     }
                 });

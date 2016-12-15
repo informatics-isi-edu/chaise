@@ -7,7 +7,7 @@
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
-        vm.editMode = context.filter || false;
+        vm.editMode = (context.filter && !context.copy) || false;
         vm.showDeleteButton = chaiseConfig.showDeleteButton === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -172,13 +172,20 @@
                                  * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
                                  * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
                                 **/
-                                model.submissionRows[j][referenceColumn.name] = (vm.editMode ? $rootScope.tuples[j].data[referenceColumn.name] : null);
+                                if (vm.editMode) {
+                                    model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[j].data[referenceColumn.name] || null;
+                                } else if (context.copy) {
+                                    // in the copy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
+                                    model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[0].data[referenceColumn.name] || null;
+                                } else {
+                                    model.submissionRows[j][referenceColumn.name] = null;
+                                }
                             }
                         }
                     // not pseudo, column.name is sufficient for the keys
                     } else {
                         // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                        model.submissionRows[j][column.name] = (transformedRow[column.name] ? transformedRow[column.name] : null);
+                        model.submissionRows[j][column.name] = transformedRow[column.name] || null;
                     }
                 });
             }
@@ -204,7 +211,6 @@
                             data[key] = (row[key] === '' ? null : row[key]);
                         }
                     }
-
                     // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                     $rootScope.reference.update($rootScope.tuples).then(function success(page) {
                         vm.readyToSubmit = false; // form data has already been submitted to ERMrest
@@ -500,7 +506,7 @@
 
         var captionColumWidth = 130;
         var marginLeft = captionColumWidth + 10;
-        
+
         // Sets a fixed width for the columns, as they're positioned absolute
         vm.captionColumWidth = { 'width' : captionColumWidth + "px" };
 
