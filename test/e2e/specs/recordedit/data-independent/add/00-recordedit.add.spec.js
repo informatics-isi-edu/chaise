@@ -43,7 +43,7 @@ describe('Record Add', function() {
 						it("click any delete button", function() {
 							chaisePage.recordEditPage.getDeleteRowButton(randomNo).then(function(button)	 {
 								chaisePage.clickButton(button);
-								browser.sleep(browser.params.defaultTimeout);
+								browser.sleep(50);
 								chaisePage.recordEditPage.getDeleteModalButton().then(function(modalBtn) {
 									chaisePage.clickButton(modalBtn);
 									browser.sleep(50);

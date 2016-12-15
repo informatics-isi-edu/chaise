@@ -10,7 +10,7 @@ exports.parameterize = function(config, configParams) {
   testConfiguration.authCookie = process.env.AUTH_COOKIE;
   var pImport = require('../utils/protractor.import.js');
 
-  var catalogId = null, Q = require('q'); 
+  var catalogId = null, Q = require('q');
 
   if (process.env.TRAVIS) {
     console.log("In TRAVIS");
@@ -49,8 +49,8 @@ exports.parameterize = function(config, configParams) {
            // Set the base url to the page that we are running the tests for
           browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
           browser.params.url = browser.baseUrl + "/#" + catalogId + "/schema/" + data.schema.name;
-        } 
-        
+        }
+
 
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
@@ -81,12 +81,12 @@ exports.parameterize = function(config, configParams) {
           browser.get(process.env.CHAISE_BASE_URL + "/login/");
           browser.sleep(browser.params.defaultTimeout);
           browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"'));
-          browser.sleep(browser.params.defaultTimeout);
+          browser.sleep(100);
         }
 
         // Set the base url to the page that we are running the tests for
         browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
-        
+
         // set the url for testcases to stat using the catalogId and schema that was mentioned in the configuration
         if (typeof configParams.setBaseUrl == 'function') configParams.setBaseUrl(browser, data);
         else browser.params.url = browser.baseUrl + "/#" + data.catalogId + "/schema/" + data.defaultSchema.name;
@@ -118,7 +118,7 @@ config.onPrepare = function() {
           body: 'username=test1&password=dummypassword'
       }, function(error, response, body) {
           if (!error && response.statusCode == 200) {
-            var cookies = require('set-cookie-parser').parse(response); 
+            var cookies = require('set-cookie-parser').parse(response);
             cookies.forEach(function(c) {
               if (c.name == "webauthn") testConfiguration.authCookie = c.name + "=" + c.value + ";";
             });
@@ -143,7 +143,7 @@ config.afterLaunch = function(exitCode) {
   if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) return pImport.tear(testConfiguration, catalogId);
 };
 
-// If an uncaught exception is caught then simply call cleanup 
+// If an uncaught exception is caught then simply call cleanup
 // to remove the created schema/catalog/tables if catalogId is not null
 process.on('uncaughtException', function (err) {
   console.log("in error : catalogId " + catalogId);
@@ -155,7 +155,7 @@ process.on('uncaughtException', function (err) {
   };
   if (!process.catalogDeleted && testConfiguration.cleanup && testConfiguration.setup && catalogId != null)  pImport.tear(testConfiguration, catalogId).then(cb, cb);
   else cb();
-  
+
 });
 
 process.on('SIGINT', function(code) {

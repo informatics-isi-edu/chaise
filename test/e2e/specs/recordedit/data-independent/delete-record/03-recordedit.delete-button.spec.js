@@ -33,7 +33,7 @@ describe('Delete existing record,', function() {
 			        		}
 			        	});
 			        });
-			        browser.sleep(browser.params.defaultTimeout);
+			        browser.sleep(100);
 			    });
 
                 describe("delete existing record ", function () {

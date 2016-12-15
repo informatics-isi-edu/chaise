@@ -33,7 +33,7 @@ describe('Edit existing record,', function() {
 			        		}
 			        	});
 			        });
-			        browser.sleep(browser.params.defaultTimeout);
+			        browser.sleep(100);
 			    });
 
 

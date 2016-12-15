@@ -53,7 +53,7 @@ describe('Record Add', function() {
                 return chaisePage.clickButton(openBtn)
             }).then(function() {
                 chaisePage.recordEditPage.clearInput(multiFormInput);
-                browser.sleep(browser.params.defaultTimeout);
+                browser.sleep(10);
                 multiFormInput.sendKeys(numberGreaterThanMax);
 
                 return chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript();
@@ -77,7 +77,7 @@ describe('Record Add', function() {
             textInput.sendKeys(textVal);
 
             chaisePage.recordEditPage.clearInput(multiFormInput);
-            browser.sleep(browser.params.defaultTimeout);
+            browser.sleep(10);
             multiFormInput.sendKeys(testParams.records-1);
 
             chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript().then(function(submitBtn) {

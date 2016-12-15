@@ -167,7 +167,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							}
 
 							chaisePage.recordEditPage.clearInput(txtArea);
-							browser.sleep(browser.params.defaultTimeout);
+							browser.sleep(10);
 
 							txtArea.column = c;
 							var text = chance.paragraph();
@@ -196,7 +196,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							}
 
 							chaisePage.recordEditPage.clearInput(txtInput);
-							browser.sleep(browser.params.defaultTimeout);
+							browser.sleep(10);
 
 							var text = (chaisePage.dataUtils.editInputs.isUrl(c)) ? chance.url() : chance.sentence({ words: 5 });
 							c._value = text;
@@ -274,7 +274,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 						} */
 						dropdown.column._value = value;
 						chaisePage.recordEditPage.selectDropdownValue(dropdown, value).then(function() {
-							browser.sleep(browser.params.defaultTimeout);
+							browser.sleep(10);
 							expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(value.length == 0 ? 'Select a value' : (value + ""));
 						});
 					});
@@ -471,7 +471,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				it("should render open datepicker on click", function() {
 					datePickerFields.forEach(function(dp) {
 						chaisePage.clickButton(dp);
-						browser.sleep(browser.params.defaultTimeout);
+						browser.sleep(10);
 						chaisePage.recordEditPage.getDatePickerForAnInput(dp).then(function(datePicker) {
 							if (datePicker) {
 								expect(true).toBeDefined();
@@ -486,7 +486,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				it("should select a date , and check the value", function() {
 					datePickerFields.forEach(function(dateInput) {
 						chaisePage.clickButton(dateInput);
-						browser.sleep(browser.params.defaultTimeout);
+						browser.sleep(10);
 						chaisePage.recordEditPage.getDayButtonsForDatePicker(dateInput.datePicker).then(function(dayBtns) {
 							var day = chaisePage.recordEditPage.getRandomInt(1, dayBtns.length);
 							console.log(dayBtns.length);

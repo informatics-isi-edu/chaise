@@ -32,7 +32,7 @@ describe('Add a record,', function() {
 
                     chaisePage.recordEditPage.getInputForAColumn("id", 0).then(function(idInput) {
                         chaisePage.recordEditPage.clearInput(idInput);
-                        browser.sleep(browser.params.defaultTimeout);
+                        browser.sleep(10);
 
                         idInput.sendKeys("2001");
                         expect(idInput.getAttribute('value')).toBe("2001");

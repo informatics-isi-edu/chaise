@@ -173,7 +173,7 @@ describe('Chaise initial sidebar,', function () {
                 viewAll.click();
                 chaisePage.moreFilter.clickMorefilterAttrByName(previousCheckedText);
                 chaisePage.moreFilter.clickMorefilterAttrByName(previousUncheckedText);
-                browser.sleep(browser.params.defaultTimeout);
+                browser.sleep(100);
                 chaisePage.moreFilter.goBackToSidebar();
             });
             it('should show previously unchecked attribute', function () {

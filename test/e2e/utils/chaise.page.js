@@ -316,7 +316,7 @@ var recordEditPage = function() {
             var defer = Q.defer();
             if (txt.trim() !== value) {
                 browser.executeScript(" $(arguments[0]).find('.select2-choice').click();", el);
-                browser.sleep(browser.params.defaultTimeout);
+                browser.sleep(100);
                 browser.executeScript("return $(arguments[0]).find('.select2-result-single li');", el).then(function(items) {
                     if (value != undefined) {
                         browser.executeScript("$(arguments[0]).data().$uiSelectController.select('" + value + "');", el);
@@ -415,7 +415,7 @@ var recordEditPage = function() {
     this.clearInput = function(el) {
         return el.getAttribute('value').then(function(value) {
             el.sendKeys(Array(value.length + 1).join(protractor.Key.BACK_SPACE));
-            browser.sleep(browser.params.defaultTimeout);
+            browser.sleep(10);
         });
     };
 
