@@ -1,0 +1,54 @@
+{
+    "schema_name": "editable-id",
+    "tables": {
+        "multi-add-table": {
+            "comment": "Table to represent adding multiple entities",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "editable-id-table",
+            "schema_name": "editable-id",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int"
+                    },
+                    "annotations": {
+                        "comment": [
+                            "hidden"
+                        ]
+                    }
+                }, {
+                    "name": "text",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "int",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ],
+            "annotations": {}
+        }
+    },
+    "table_names": [
+        "editable-id-table"
+    ],
+    "comment": null,
+    "annotations": {}
+}
