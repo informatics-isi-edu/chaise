@@ -90,7 +90,12 @@ describe('Record Add', function() {
 							browser.sleep(3000);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        if (tableParams.records > 1) {
-						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset/")).toBe(true);
+                                    // doesn't redirect
+						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
+
+                                    return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                        expect(ct).toBe(tableParams.records);
+                                    });
 						        } else {
 						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
 						        }
