@@ -232,12 +232,12 @@
                         vm.redirectAfterSubmission(page);
                     } else {
                         //set values for the view to flip to recordedit resultset view
-                        console.log(page);
                         vm.resultsetModel = {
                             hasLoaded: true,
                             reference: page.reference,
                             tableDisplayName: page.reference.displayname,
                             columns: page.reference.columns,
+                            enableSort: false,
                             sortby: null,
                             sortOrder: null,
                             page: page,

@@ -178,8 +178,13 @@ describe('Record Add', function() {
                 }).then(function(submitBtn) {
                     return chaisePage.clickButton(submitBtn);
                 }).then(function() {
-                    //wait 5 seconds because it takes some time to create 200 forms and render them to the DOM
-                    browser.sleep(5000);
+                    // wait for dom to finish rendering the forms
+                    browser.wait(function() {
+                        return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                            return (ct == 201);
+                        });
+                    }, 5000);
+
                     chaisePage.recordEditPage.submitForm();
 
                     return browser.driver.getCurrentUrl();

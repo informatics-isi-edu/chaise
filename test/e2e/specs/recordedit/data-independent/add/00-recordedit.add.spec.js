@@ -93,7 +93,7 @@ describe('Record Add', function() {
                                     // doesn't redirect
 						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
 
-                                    return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                    chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                         expect(ct).toBe(tableParams.records);
                                     });
 						        } else {

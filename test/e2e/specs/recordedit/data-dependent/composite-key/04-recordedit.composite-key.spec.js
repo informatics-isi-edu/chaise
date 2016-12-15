@@ -79,9 +79,12 @@ describe('Add a record,', function() {
 						if (!hasErrors) {
                             var EC = protractor.ExpectedConditions;
 
-							browser.sleep(3000);
-							browser.driver.getCurrentUrl().then(function(url) {
-						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
+                            // will be the first entity for this table, you can assume the id=1
+                            var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
+                            redirectUrl += ':' + tableParams.table_name + "/id=1";
+
+                        	chaisePage.waitForUrl(redirectUrl, 10000).then(function() {
+                                expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
 
                                 for (var i = 0; i < tableParams.column_names.length; i++) {
                                     var columnName = tableParams.column_names[i];
@@ -89,7 +92,10 @@ describe('Add a record,', function() {
                                     browser.wait(EC.visibilityOf(column), 1000);
                                     expect(column.getAttribute("value")).toBeDefined();
                                 }
-						    });
+						    }, function() {
+                            	console.log("          Timed out while waiting for the url to be the new one");
+                            	expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
+                            });
 						}
 					});
 				});

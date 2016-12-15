@@ -23,7 +23,7 @@
         <navbar></navbar>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
         <div ng-controller="FormController as form" class="row">
-            <div ng-hide="form.resultset">
+            <div ng-show="!form.resultset">
             <div class="col-xs-12">
             <!-- Alerts section -->
                 <div ng-repeat="alert in form.alerts" class="row">
@@ -79,7 +79,7 @@
                                 <table ng-form="form.formContainer" class="table">
                                     <tr ng-if="!form.editMode">
                                         <td ng-style="form.firstHeaderStyle">Record Number</td>
-                                        <td ng-style="form.headerHeight" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
+                                        <td ng-style="form.headerHeight" class="form-header" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
                                             <div class="row">
                                                 <div class="col-xs-12">
                                                     <div class="pull-left" ng-bind="rowIndex + 1"></div>
