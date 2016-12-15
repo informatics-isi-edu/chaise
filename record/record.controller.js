@@ -33,6 +33,13 @@
             }
         };
 
+        vm.copyRecord = function() {
+            var newRef = $rootScope.reference.contextualize.entryEdit;
+
+            var appLink = newRef.appLink + "?copy=true";
+            $window.location.href = appLink;
+        };
+
         vm.deleteRecord = function() {
             $rootScope.reference.delete().then(function deleteSuccess() {
                  var location = $rootScope.reference.location;

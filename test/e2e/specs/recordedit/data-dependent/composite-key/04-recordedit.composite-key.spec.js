@@ -97,18 +97,6 @@ describe('Add a record,', function() {
                                 console.log("          Timed out while waiting for the url to be the new one");
                                 expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
                             });
-
-							// browser.sleep(browser.params.defaultTimeout);
-							// browser.driver.getCurrentUrl().then(function(url) {
-						    //     expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
-                            //
-                                // for (var i = 0; i < tableParams.column_names.length; i++) {
-                                //     var columnName = tableParams.column_names[i];
-                                //     var column = chaisePage.recordPage.getColumnValue(columnName);
-                                //     browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
-                                //     expect(column.getAttribute("value")).toBeDefined();
-                                // }
-						    // });
 						}
 					});
 				});
