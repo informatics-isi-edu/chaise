@@ -10,8 +10,6 @@ branches:
     - master
 
 addons:
-  hosts:
-    - dev.isrd.isi.edu
   sauce_connect: true
   postgresq: '9.4'
 
