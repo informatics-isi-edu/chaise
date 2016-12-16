@@ -6,7 +6,7 @@ var chaiseConfig = {
     navbarBrand: '/',
     feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
     editRecord: true,
-    showDeleteButton: true,
+    deleteRecord: true,
     confirmDelete: true,
     showBadgeCounts: false,
     recordUiGridEnabled: false,
