@@ -27,11 +27,11 @@ exports.getConfig = function(options) {
       print: function() {}
     },
     params: {
-        // defaultTimeout: Used in tests where Protractor needs to wait for an element or where 
+        // defaultTimeout: Used in tests where Protractor needs to wait for an element or where
         // the browser needs to do nothing for a while. Should not be >= 90000 since
         // Sauce Labs wil end the a session if it hasn't received a command from
         // test script in 90 seconds.
-        defaultTimeout: 30000
+        defaultTimeout: 15000
     }
   };
 
