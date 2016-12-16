@@ -36,6 +36,9 @@
         headInjector.addTitle();
         headInjector.addCustomCSS();
 
+        $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
+        $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
+
         try {
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
@@ -113,6 +116,12 @@
                                     displayType: $rootScope.relatedReferences[i].display.type
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
+                                model.config = {
+                                    viewable: true,
+                                    editable: $rootScope.modifyRecord,
+                                    deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
+                                    selectable: false
+                                };
                                 $rootScope.tableModels[i] = model;
                             }, function readFail() {
                                 var model = {

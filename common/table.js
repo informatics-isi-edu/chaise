@@ -6,16 +6,16 @@
     /**
      * Ways to use recordTable directive:
      *
-     * 1. Table only, default row click action (go to record)
+     * 1. Table only
      *    <record-table vm="vm" default-row-linking="true"></record-table>
      *
-     * 2. Table only, customized row click function
+     * 2. Selectable table only with select function
      *    <record-table vm="vm" on-row-click="gotoRowLink(tuple)"></record-table>
      *
-     * 3. Table with search, page size, previous/next, default row click action (go to record)
-     *    <recordset vm="vm" default-row-linking="true"></recordset>
+     * 3. Table with search, page size, previous/next
+     *    <recordset vm="vm"></recordset>
      *
-     * 4. Table with search, page size, previous/next, customized row click function
+     * 4. Selectable table with search, page size, previous/next
      *    <recordset vm="vm" on-row-click="gotoRowLink(tuple)"></recordset>
      *
      *
@@ -30,7 +30,8 @@
      *        page,         // current page object
      *        pageLimit,    // number of rows per page
      *        rowValues,    // array of rows values, each value has this structure {isHTML:boolean, value:value}
-     *        search: null  // search term
+     *        search: null, // search term
+     *        config: '='   // {viewable, editable, deletable, selectable}
      *       }
      *
      *
@@ -84,9 +85,8 @@
             templateUrl: '../common/templates/table.html',
             scope: {
                 vm: '=',
-                defaultRowLinking: "=?", // set to true to use default row click action (go to record)
                 onRowClickBind: '=?',    // used by the recordset template to pass down on click function
-                onRowClick: '&?'      // set row click function if not using default
+                onRowClick: '&?'      // set row click function
             },
             link: function (scope, elem, attr) {
 
@@ -106,32 +106,6 @@
                     recordTableUtils.read(scope);
                 };
 
-                scope.gotoRowLink = function(index) {
-                    var tuple = scope.vm.page.tuples[index];
-                    var appUrl = tuple.reference.contextualize.detailed.appLink;
-                    if (appUrl)
-                        location.assign(appUrl);
-                    else {
-                        AlertsService.addAlert({type: "error", message: "Application Error: row linking undefined for " + tuple.reference.location.compactPath});
-                    }
-                };
-
-                scope.rowClickAction = function(event, index) {
-                    var el = event.target || event.srcElement;
-                    if (el.nodeName.toLowerCase() === 'a' || el.nodeName.toLowerCase() === 'button' || el.classList.contains("readmore")) {
-                        return false;
-                    }
-
-                    var args = {"tuple": scope.vm.page.tuples[index]};
-                    if (scope.defaultRowLinking !== undefined && scope.defaultRowLinking === true) {
-                        scope.gotoRowLink(index);
-                    } else if (scope.onRowClickBind) {
-                        scope.onRowClickBind(args);
-                    } else if (scope.onRowClick) {
-                        scope.onRowClick(args);
-                    }
-                }
-
             }
         };
     }])
@@ -143,8 +117,7 @@
             templateUrl: '../common/templates/recordset.html',
             scope: {
                 vm: '=',
-                defaultRowLinking: "=?", // set true to use default row click action (link to record)
-                onRowClick: '&?'         // set row click function if not using default
+                onRowClick: '&?'         // set row click function
             },
             link: function (scope, elem, attr) {
 
