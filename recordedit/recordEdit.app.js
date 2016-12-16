@@ -183,6 +183,16 @@
                 } else {
                     if ($rootScope.reference.canCreate) {
                         $rootScope.displayname = $rootScope.reference.displayname;
+
+                        // populate defaults
+                        angular.forEach($rootScope.reference.columns, function(column) {
+                            console.log(column);
+                            // typeof column.default !== "function"
+                            if (column.default) {
+                                recordEditModel.rows[0][column.name] = column.default;
+                            }
+                        });
+
                     } else if (session) {
                         var forbiddenMessage = "You are not authorized to Create entities.";
                         var forbiddenError = new Error(forbiddenMessage);
