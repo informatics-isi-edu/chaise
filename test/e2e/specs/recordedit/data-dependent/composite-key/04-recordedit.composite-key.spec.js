@@ -9,7 +9,7 @@ describe('Add a record,', function() {
 
     	(function(tableParams, index) {
 
-    		describe("For table " + table.table_name + ",", function() {
+    		describe("For table " + tableParams.table_name + ",", function() {
 
     			var table, record;
 
@@ -78,12 +78,12 @@ describe('Add a record,', function() {
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
                             var EC = protractor.ExpectedConditions;
-                            var keys = [];
-                            tableParams.keys.forEach(function(key) {
-                                keys.push(key.name + key.operator + key.value);
-                            });
+
+                            // After submitting 1 record in RecordEdit, the expected record
+                            // page url will have a id of 1 because it'll always be the first
+                            // row of this table in the new catalog created by this set of composite key tests.
                             var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
-                            redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
+                            redirectUrl += ":" + tableParams.table_name + '/id=1';
 
                             chaisePage.waitForUrl(redirectUrl, browser.params.defaultTimeout).then(function() {
                                 expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
@@ -91,7 +91,7 @@ describe('Add a record,', function() {
                                     var columnName = tableParams.column_names[i];
                                     var column = chaisePage.recordPage.getColumnValue(columnName);
                                     browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
-                                    expect(column.getAttribute("value")).toBeDefined();
+                                    expect(column.getText()).toBeDefined();
                                 }
                             }, function() {
                                 console.log("          Timed out while waiting for the url to be the new one");

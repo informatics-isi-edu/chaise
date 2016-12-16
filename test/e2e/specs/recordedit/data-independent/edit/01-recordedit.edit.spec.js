@@ -70,7 +70,7 @@ describe('Edit existing record,', function() {
                             var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
                             redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
 
-                            chaisePage.waitForUrl(redirectUrl, 10000).then(function() {
+                            chaisePage.waitForUrl(redirectUrl, browser.params.defaultTimeout).then(function() {
                                 expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
                             }, function() {
                             	console.log("          Timed out while waiting for the url to be the new one");
@@ -93,7 +93,7 @@ describe('Edit existing record,', function() {
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 
-            chaisePage.waitForElement(element(by.id("submit-record-button")), 10000).then(function() {
+            chaisePage.waitForElement(element(by.id("submit-record-button")), browser.params.defaultTimeout).then(function() {
             	chaisePage.recordEditPage.submitForm();
             });
         });
@@ -102,7 +102,7 @@ describe('Edit existing record,', function() {
         	var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
             redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
 
-        	chaisePage.waitForUrl(redirectUrl, 10000).then(function() {
+        	chaisePage.waitForUrl(redirectUrl, browser.params.defaultTimeout).then(function() {
                 expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
             }, function() {
             	console.log("          Timed out while waiting for the url to be the new one");

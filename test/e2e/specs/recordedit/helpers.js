@@ -366,7 +366,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                            }).then(function(text) {
 	                                // make sure modal opened
 	                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
-
+                                    // TODO: What is this 5-sec sleep for? To make sure all rows are loaded?
 									browser.sleep(5000);
 	                                rows = chaisePage.recordsetPage.getRows();
 	                                // count is needed for clicking a random row
@@ -782,8 +782,14 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 						// Invalid text value
 						var text = "1j2yu.5", actualValue = "12.5";
-						floatInput.sendKeys(text);
-						expect(floatInput.getAttribute('value')).toBe(actualValue);
+						floatInput.sendKeys(text).then(function() {
+                            return floatInput.getAttribute('value');
+                        }).then(function(value) {
+                            expect(value).toBe(actualValue);
+                        }).catch(function(error) {
+                            console.log('ERROR:', error);
+                            expect('Something went wrong in this promise chain to check the value of an input field.').toBe('See error msg for more info.')
+                        });
 
 						// Required Error message should disappear;
 						chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required').then(function(err) {
