@@ -22,7 +22,7 @@ describe('Add a record,', function() {
 					browser.ignoreSynchronization = true;
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					browser.sleep(3000);
+					browser.sleep(browser.params.defaultTimeout);
 			    });
 
                 xit("the delete button should be disabled during submission and re-enabled after a conflict error.", function() {
@@ -43,11 +43,11 @@ describe('Add a record,', function() {
                         chaisePage.recordEditPage.submitForm();
 
                         // expect(submitBtn.isEnabled()).toBe(false);
-                        browser.wait(EC.not(EC.elementToBeClickable(deleteBtn)), 1000);
+                        browser.wait(EC.not(EC.elementToBeClickable(deleteBtn)), browser.params.defaultTimeout);
                         expect(deleteBtn.isEnabled()).toBe(false);
 
 
-                        // browser.wait(EC.elementToBeClickable(submitBtn), 1000);
+                        // browser.wait(EC.elementToBeClickable(submitBtn), browser.params.defaultTimeout);
                         // expect(submitBtn.isEnabled()).toBeTruthy();
                         // expect(deleteBtn.isEnabled()).toBeTruthy();
                     });

@@ -9,7 +9,7 @@ describe('Recordset add record,', function() {
     beforeAll(function () {
         browser.ignoreSynchronization = true;
         browser.get(browser.params.url + ":" + testParams.table_name);
-        browser.sleep(3000);
+        browser.sleep(browser.params.defaultTimeout);
 
         chaisePage.recordsetPage.getRows().then(function(rows) {
             rowCount = rows.length;
@@ -21,7 +21,7 @@ describe('Recordset add record,', function() {
 
         var EC = protractor.ExpectedConditions;
         var e = element(by.id('add-record-btn'));
-        browser.wait(EC.presenceOf(e), 2000);
+        browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
         chaisePage.recordsetPage.getAddRecordButton().click().then(function() {
             // This Add link opens in a new tab so we have to track the windows in the browser...
@@ -40,7 +40,7 @@ describe('Recordset add record,', function() {
 
 
             // set the required fields
-            browser.sleep(1000);
+            browser.sleep(browser.params.defaultTimeout);
             chaisePage.recordsetPage.getInputForAColumn("title").then(function(input) {
 
                 input.sendKeys(testParams.title);
@@ -49,7 +49,7 @@ describe('Recordset add record,', function() {
             }).then(function(btn) {
                 return btn.click();
             }).then(function() {
-                browser.sleep(1000);
+                browser.sleep(browser.params.defaultTimeout);
                 var rows = chaisePage.recordsetPage.getRows();
                 return rows.get(0).click();
             }).then(function() {
@@ -78,8 +78,7 @@ describe('Recordset add record,', function() {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
         browser.close();
         browser.switchTo().window(allWindows[0]);
-        browser.sleep(10000);
-
+        browser.sleep(browser.params.defaultTimeout);
         chaisePage.recordsetPage.getRows().then(function(rows) {
             expect(rows.length).toBe(rowCount+1);
         });
