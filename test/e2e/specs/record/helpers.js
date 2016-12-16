@@ -30,10 +30,10 @@ exports.testPresentation = function (tableParams) {
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
-        browser.wait(EC.elementToBeClickable(editButton), 10000);
-        browser.wait(EC.elementToBeClickable(createButton), 10000);
-        browser.wait(EC.elementToBeClickable(deleteButton), 10000);
-        browser.wait(EC.elementToBeClickable(showAllRTButton), 10000);
+        browser.wait(EC.elementToBeClickable(editButton), browser.params.defaultTimeout);
+        browser.wait(EC.elementToBeClickable(createButton), browser.params.defaultTimeout);
+        browser.wait(EC.elementToBeClickable(deleteButton), browser.params.defaultTimeout);
+        browser.wait(EC.elementToBeClickable(showAllRTButton), browser.params.defaultTimeout);
 
         editButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -245,7 +245,7 @@ exports.testEditButton = function () {
         var EC = protractor.ExpectedConditions,
             editButton = chaisePage.recordPage.getEditRecordButton();
 
-        browser.wait(EC.elementToBeClickable(editButton), 10000);
+        browser.wait(EC.elementToBeClickable(editButton), browser.params.defaultTimeout);
 
         editButton.click().then(function() {
             return browser.driver.getCurrentUrl();
@@ -260,7 +260,7 @@ exports.testCreateButton = function () {
         var EC = protractor.ExpectedConditions,
             createButton = chaisePage.recordPage.getCreateRecordButton();
 
-        browser.wait(EC.elementToBeClickable(createButton), 10000);
+        browser.wait(EC.elementToBeClickable(createButton), browser.params.defaultTimeout);
 
         createButton.click().then(function() {
             return browser.driver.getCurrentUrl();
@@ -281,7 +281,7 @@ exports.testDeleteButton = function () {
 
             return chaisePage.recordPage.getDeleteRecordButton().click()
         }).then(function () {
-            browser.wait(EC.visibilityOf(modalTitle), 5000);
+            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
             // expect modal to open
             return modalTitle.getText();
         }).then(function (text) {
@@ -336,7 +336,7 @@ exports.relatedTableLinks = function (tableParams) {
         markdownRelatedTable = tableParams.related_table_name_with_row_markdown_pattern, // "media"
         markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(markdownRelatedTable);
 
-        browser.wait(EC.elementToBeClickable(markdownToggleLink), 10000);
+        browser.wait(EC.elementToBeClickable(markdownToggleLink), browser.params.defaultTimeout);
 
         // expect the markdown table to display this link
         expect(markdownToggleLink.isDisplayed()).toBeTruthy();
@@ -364,7 +364,7 @@ exports.relatedTableLinks = function (tableParams) {
             addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
 
         // Should make sure user is logged in
-        browser.wait(EC.elementToBeClickable(addRelatedRecordLink), 10000);
+        browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
 
         expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
 
@@ -394,7 +394,7 @@ exports.relatedTableLinks = function (tableParams) {
             relatedTableName = tableParams.related_table_name_with_more_results,
             relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
 
-        browser.wait(EC.elementToBeClickable(relatedTableLink), 10000);
+        browser.wait(EC.elementToBeClickable(relatedTableLink), browser.params.defaultTimeout);
 
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(count) {
             expect(count).toBe(tableParams.booking_count);

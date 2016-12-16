@@ -22,7 +22,7 @@ describe('Delete existing record,', function() {
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 
-					browser.sleep(3000);
+					browser.sleep(browser.params.defaultTimeout);
 			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {

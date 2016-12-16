@@ -25,6 +25,13 @@ exports.getConfig = function(options) {
       showColors: true,
       defaultTimeoutInterval: 120000,
       print: function() {}
+    },
+    params: {
+        // defaultTimeout: Used in tests where Protractor needs to wait for an element or where 
+        // the browser needs to do nothing for a while. Should not be >= 90000 since
+        // Sauce Labs wil end the a session if it hasn't received a command from
+        // test script in 90 seconds.
+        defaultTimeout: 30000
     }
   };
 
@@ -41,7 +48,7 @@ exports.getConfig = function(options) {
   var dataSetup = require('./protractor.parameterize.js');
 
   var dateSetupOptions = {
-    testConfiguration: testConfiguration, 
+    testConfiguration: testConfiguration,
     page: options.page
   };
 
@@ -49,7 +56,7 @@ exports.getConfig = function(options) {
   if (typeof options.setBaseUrl == 'function') {
     dateSetupOptions.setBaseUrl = function(browser, data) {
       options.setBaseUrl(browser, data);
-    } 
+    }
   }
   var chaiseFilePath  = "chaise-config-sample.js";
   if (typeof options.chaiseConfigFilePath === 'string') {
@@ -57,10 +64,10 @@ exports.getConfig = function(options) {
       var fs = require('fs');
       fs.accessSync(process.env.PWD + "/" + options.chaiseConfigFilePath);
       chaiseFilePath = options.chaiseConfigFilePath;
-    } catch (e) { 
+    } catch (e) {
       console.log("Config file " + options.chaiseConfigFilePath  + " doesn't exists");
     }
-  } 
+  }
 
   var execSync = require('child_process').execSync;
   var remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;

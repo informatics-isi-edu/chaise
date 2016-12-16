@@ -15,7 +15,6 @@ var config = pConfig.getConfig({
       browser.params.url = process.env.CHAISE_BASE_URL + "/search";
       return browser.params.url;
     },
-
 	// Specify chaiseConfigPath
     chaiseConfigFilePath: 'test/e2e/specs/navbar/base-config/chaise-config.js'
 });

@@ -3,13 +3,12 @@ var chaisePage = require('../../../utils/chaise.page.js');
 describe('Search result columns,', function () {
 
     var EC = protractor.ExpectedConditions;
-    var timeout  = 10000;
     beforeAll(function (done) {
         browser.ignoreSynchronization = true;
         browser.get('');
         var sidebar = element(by.id('sidebar'));
         browser.ignoreSynchronization = true;
-        browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
+        browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout).then(function () {
             done();
         });
     });
@@ -19,7 +18,7 @@ describe('Search result columns,', function () {
         allAttrs.count().then(function (num) {
             var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
             var ranAttr = allAttrs.get(ranInt);
-            browser.wait(EC.elementToBeClickable(ranAttr), timeout).then(function() {
+            browser.wait(EC.elementToBeClickable(ranAttr), browser.params.defaultTimeout).then(function() {
                 ranAttr.click();
             }, function() {
                 console.log('Waiting for element to click sidebar' + '\' timed out');
@@ -33,7 +32,7 @@ describe('Search result columns,', function () {
             var ranInt = chaisePage.tools.getRandomInt(0, num - 1);
             var ranAttr = allFilters.get(ranInt);
             var randAttrLabel = ranAttr.$('label');
-            browser.wait(EC.elementToBeClickable(randAttrLabel), timeout).then(function() {
+            browser.wait(EC.elementToBeClickable(randAttrLabel), browser.params.defaultTimeout).then(function() {
                 randAttrLabel.click();
             }, function() {
                 console.log('Waiting for element to check one filter in sidebar' + '\' timed out');
@@ -42,7 +41,7 @@ describe('Search result columns,', function () {
     });
 
     it('should show >0 results', function () {
-        browser.sleep(3000);
+        browser.sleep(browser.params.defaultTimeout);
         var allResults = chaisePage.resultContent.getAllResultRows();
         expect(allResults.count()).toBeGreaterThan(0);
     });

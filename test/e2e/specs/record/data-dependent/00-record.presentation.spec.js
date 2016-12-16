@@ -50,7 +50,7 @@ describe('View existing record,', function() {
             keys.push(key.name + key.operator + key.value);
         });
         browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
-        browser.sleep(3000);
+        browser.sleep(browser.params.defaultTimeout);
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');

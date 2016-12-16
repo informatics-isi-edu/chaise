@@ -11,7 +11,7 @@ exports.testPresentation = function (tableParams) {
 	it("should use annotated page size", function() {
 		var EC = protractor.ExpectedConditions;
 		var e = element(by.id('custom-page-size'));
-		browser.wait(EC.presenceOf(e), 2000);
+		browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 		chaisePage.recordsetPage.getCustomPageSize().then(function(text) {
 			expect(text).toBe("15 (Custom)");
 		})
@@ -70,7 +70,7 @@ exports.testPresentation = function (tableParams) {
 		var searchBox = chaisePage.recordsetPage.getSearchBox();
 		searchBox.sendKeys('Super 8 North Hollywood Motel');
 		chaisePage.recordsetPage.getSearchSubmitButton().click().then(function() {
-			browser.sleep(1000);
+			browser.sleep(browser.params.defaultTimeout);
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
 			expect(rows.length).toBe(1);
@@ -78,7 +78,7 @@ exports.testPresentation = function (tableParams) {
 			// clear search
 			return chaisePage.recordsetPage.getSearchClearButton().click();
 		}).then(function() {
-			browser.sleep(1000);
+			browser.sleep(browser.params.defaultTimeout);
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
 			expect(rows.length).toBe(4);
@@ -88,7 +88,7 @@ exports.testPresentation = function (tableParams) {
 
 			return chaisePage.recordsetPage.getSearchSubmitButton().click();
 		}).then(function() {
-			browser.sleep(1000);
+			browser.sleep(browser.params.defaultTimeout);
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
 			expect(rows.length).toBe(1);
@@ -100,7 +100,7 @@ exports.testPresentation = function (tableParams) {
 	});
 
 	it("click on row should redirect to record app", function() {
-        browser.sleep(1000);
+        browser.sleep(browser.params.defaultTimeout);
 		chaisePage.recordsetPage.getRows().then(function(rows) {
 			rows[0].click().then(function() {
                 browser.driver.sleep(1000);
