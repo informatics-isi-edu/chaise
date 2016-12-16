@@ -31,12 +31,14 @@
                     }
                 }, {
                     "name": "text",
+                    "default": "default text",
                     "nullok": true,
                     "type": {
                         "typename": "text"
                     }
                 }, {
                     "name": "int",
+                    "default": 100,
                     "nullok": true,
                     "type": {
                         "typename": "int"
