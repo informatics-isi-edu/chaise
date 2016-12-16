@@ -7,7 +7,7 @@ describe('Search result detail page,', function () {
         browser.ignoreSynchronization = true;
         browser.get('');
         var sidebar = element(by.id('sidebar'));
-        browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
+        browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout).then(function () {
             done();
         });
         browser.executeScript('document.cookie = "ermrest=C6KFIQn2JS37CGovofWnjKfu;path=/;secure;"');
@@ -67,7 +67,7 @@ describe('Search result detail page,', function () {
                             browser.rootEl = "#recordApp";
                             browser.ignoreSynchronization = true;
                             var newPageTitleEle = element(by.id('detailed-bookmark-container'));
-                            browser.wait(EC.visibilityOf(newPageTitleEle), 5000).then(function () {
+                            browser.wait(EC.visibilityOf(newPageTitleEle), browser.params.defaultTimeout).then(function () {
                                 done();
                             });
                         });

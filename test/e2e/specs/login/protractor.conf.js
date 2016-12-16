@@ -14,7 +14,7 @@ exports.config = {
   ],
   jasmineNodeOpts: {
     showColors: true,
-    defaultTimeoutInterval: 30000
+    defaultTimeoutInterval: 120000
   },
   // If ng-app attribute is in a descendant <body>, tell Protractor where ng-app is
   rootElement: '#loginApp',

@@ -21,7 +21,7 @@ describe('View existing record,', function() {
 					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
-					browser.sleep(2000);
+					browser.sleep(browser.params.defaultTimeout);
 			    });
 
                 describe("Show the related entity tables,", function() {

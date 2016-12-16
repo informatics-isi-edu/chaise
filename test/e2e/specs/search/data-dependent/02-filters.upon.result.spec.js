@@ -45,7 +45,7 @@ var testAttributes = function(attr, attrCount) {
 
         it('should show ' + attr.totalEntityCount + ' results in all for attribute ' + attr.text, function () {
             if (attr.totalEntityCount != undefined) {
-                browser.sleep(1000);
+                browser.sleep(browser.params.defaultTimeout);
                 var allResults = chaisePage.resultContent.getAllResultRows();
                 expect(allResults.count()).toBe(attr.totalEntityCount);
             }
@@ -81,7 +81,7 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
         });
 
         it('should show the \'Clear All Filters\' button', function () {
-            browser.sleep(2000);
+            browser.sleep(browser.params.defaultTimeout);
             var clearAllBtn = filterObj.clearAllBtn;
             expect(clearAllBtn.isDisplayed()).toBe(true);
         });
@@ -100,7 +100,7 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
 
             it('should show ' + filter.entityCount + ' results for filters ' + filter.content.join(','), function () {
                 if (filter.entityCount != undefined) {
-                    browser.sleep(2000);
+                    browser.sleep(browser.params.defaultTimeout);
                     var allResults = chaisePage.resultContent.getAllResultRows();
                     expect(allResults.count()).toBe(filter.entityCount);
                 }
@@ -233,7 +233,7 @@ var determineFiltersUnchecked = function(attr) {
         var EC = protractor.ExpectedConditions,
             sidebar = element(by.id("sidebar"));
 
-        browser.wait(EC.visibilityOf(sidebar), 10000);
+        browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout);
 
         chaisePage.sidebar.clickSidebarAttr(attr.text);
         filter.content.forEach(function(c) {
@@ -250,7 +250,7 @@ describe('Filters on top of the records,', function () {
     beforeAll(function (done) {
         browser.get(browser.params.url || "");
         var sidebar = element(by.id('sidebar'));
-        browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
+        browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout).then(function () {
             done();
         });
     });
@@ -275,7 +275,7 @@ describe('Filters on top of the records,', function () {
 
         it('should click on tour button to start the tour', function() {
             tourButton.click().then(function() {
-                browser.sleep(5000);
+                browser.sleep(browser.params.defaultTimeout);
                 expect(chaisePage.tourBox.isDisplayed()).toBe(true);
             });
         });

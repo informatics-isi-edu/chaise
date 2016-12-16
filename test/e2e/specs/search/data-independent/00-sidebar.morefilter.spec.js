@@ -9,18 +9,16 @@
 
 var chaisePage = require('../../../utils/chaise.page.js');
 
-describe('Chaise initial sidebar,', function () {
+describe('The initial sidebar,', function () {
 
-    var EC = protractor.ExpectedConditions;
-
-    var spinner = element(by.id('spinner'));
+    var EC = protractor.ExpectedConditions, spinner = element(by.id('spinner'));
     describe('when initializing,', function () {
 
-        beforeAll(function () {
+        beforeAll(function() {
             browser.get(browser.params.url || "");
         });
 
-        it('should show the spinner', function () {
+        it('should show the spinner', function() {
             //so icon can be tested before everything settles down(settling down means img is no longer there)
             expect(spinner.isDisplayed()).toBe(true);
         });
@@ -31,7 +29,7 @@ describe('Chaise initial sidebar,', function () {
         var numOfAttrs, ranInt;
         it('should show the initial sidebar', function () {
             var sidebar = element(by.id('sidebar'));
-            browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
+            browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout).then(function () {
                 expect(sidebar.isDisplayed()).toBe(true);
             });
         });

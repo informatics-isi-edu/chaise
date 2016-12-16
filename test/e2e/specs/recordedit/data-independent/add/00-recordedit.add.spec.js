@@ -17,7 +17,7 @@ describe('Record Add', function() {
 					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					browser.sleep(3000);
+					browser.sleep(browser.params.defaultTimeout);
 			    });
 
 				describe("Presentation and validation,", function() {
@@ -87,7 +87,7 @@ describe('Record Add', function() {
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
-							browser.sleep(3000);
+							browser.sleep(browser.params.defaultTimeout);
 							browser.driver.getCurrentUrl().then(function(url) {
 						        if (tableParams.records > 1) {
 						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset/")).toBe(true);
@@ -108,7 +108,7 @@ describe('Record Add', function() {
     it('should load custom CSS and document title defined in chaise-config.js', function() {
         var chaiseConfig;
         browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
-        browser.sleep(3000);
+        browser.sleep(browser.params.defaultTimeout);
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
@@ -125,7 +125,7 @@ describe('Record Add', function() {
         beforeAll(function() {
             // Refresh the page
             browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
-            browser.sleep(3000);
+            browser.sleep(browser.params.defaultTimeout);
 
             // Write a dummy cookie for creating a record in Accommodation table
             testCookie = {
@@ -137,7 +137,7 @@ describe('Record Add', function() {
 
             // Reload the page with prefill query param in url
             browser.get(browser.params.url + ":" + testParams.tables[0].table_name + '?prefill=test');
-            browser.sleep(3000);
+            browser.sleep(browser.params.defaultTimeout);
         });
 
         it('should pre-fill fields from the prefill cookie', function() {

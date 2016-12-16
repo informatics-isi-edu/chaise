@@ -14,7 +14,7 @@ var beforeTestRun = function(EC) {
             var url = process.env.CHAISE_BASE_URL + '/search';
 
             chaisePage.setAuthCookie(url, testConfiguration.authCookie);
-            
+
             if (data.catalogId) {
 
                 catalogId = data.catalogId;
@@ -53,7 +53,7 @@ describe('Sidebar top search input,', function () {
     var EC = protractor.ExpectedConditions;
 
     beforeTestRun(EC);
-    
+
     var searchBox = chaisePage.sidebar.searchInput;
     var displayedAttrs = chaisePage.sidebar.sidebarAttrsDisplayed;
 

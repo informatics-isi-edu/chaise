@@ -22,7 +22,7 @@ describe('Edit existing record,', function() {
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 
-					browser.sleep(3000);
+					browser.sleep(browser.params.defaultTimeout);
 			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {
@@ -33,7 +33,7 @@ describe('Edit existing record,', function() {
 			        		}
 			        	});
 			        });
-			        browser.sleep(100);
+			        browser.sleep(browser.params.defaultTimeout);
 			    });
 
                 describe("delete existing record ", function () {
@@ -53,7 +53,7 @@ describe('Edit existing record,', function() {
                             config = chaiseConfig;
                             return chaisePage.recordEditPage.getDeleteRecordButton().click()
                         }).then(function () {
-                            browser.wait(EC.visibilityOf(modalTitle), 5000);
+                            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                             // expect modal to open
                             return modalTitle.getText();
                         }).then(function (text) {

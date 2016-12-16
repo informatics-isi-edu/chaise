@@ -18,7 +18,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 		it("should have edit record title", function() {
             var EC = protractor.ExpectedConditions;
 
-            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
+            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
 			chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
 				expect(txt).toBe("Edit " + tableParams.edit_entity_displayname + " Records");
@@ -36,7 +36,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 		it("should have create record title", function() {
             var EC = protractor.ExpectedConditions;
 
-            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
+            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
 			chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
 				expect(txt).toBe("Create " + chaisePage.dataUtils.editInputs.getDisplayName(table, 'table_name', false) + " Records");
@@ -107,7 +107,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				it("should click add record button", function() {
 					chaisePage.recordEditPage.getAddRowButton().then(function(button) {
 						chaisePage.clickButton(button);
-						browser.sleep(2000);
+						browser.sleep(browser.params.defaultTimeout);
 					});
 				});
 			};
@@ -338,7 +338,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                         	return chaisePage.clickButton(popupBtns[0]);
                         }).then(function() {
                             // wait for the modal to open
-                            browser.wait(EC.visibilityOf(modalClose), 5000);
+                            browser.wait(EC.visibilityOf(modalClose), browser.params.defaultTimeout);
                             return modalClose.click();
                         }).then(function() {
                             var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].displayName, recordIndex);
@@ -360,13 +360,13 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                            var rows;
 	                            chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]).then(function() {
 	                                // wait for the modal to open
-	                                browser.wait(EC.visibilityOf(modalTitle), 5000);
+	                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
 
 	                                return modalTitle.getText();
 	                            }).then(function(text) {
 	                                // make sure modal opened
 	                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
-
+                                    // TODO: What is this 5-sec sleep for? To make sure all rows are loaded?
 									browser.sleep(5000);
 	                                rows = chaisePage.recordsetPage.getRows();
 	                                // count is needed for clicking a random row
@@ -377,7 +377,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                var index = Math.floor(Math.random() * ct);
 	                                return rows.get(index).click();
 	                            }).then(function() {
-	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), 5000);
+	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
 	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
 	                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
@@ -782,8 +782,14 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 						// Invalid text value
 						var text = "1j2yu.5", actualValue = "12.5";
-						floatInput.sendKeys(text);
-						expect(floatInput.getAttribute('value')).toBe(actualValue);
+						floatInput.sendKeys(text).then(function() {
+                            return floatInput.getAttribute('value');
+                        }).then(function(value) {
+                            expect(value).toBe(actualValue);
+                        }).catch(function(error) {
+                            console.log('ERROR:', error);
+                            expect('Something went wrong in this promise chain to check the value of an input field.').toBe('See error msg for more info.')
+                        });
 
 						// Required Error message should disappear;
 						chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required').then(function(err) {
