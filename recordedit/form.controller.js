@@ -9,7 +9,7 @@
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
         vm.editMode = (context.filter && !context.copy) || false;
-        vm.showDeleteButton = chaiseConfig.showDeleteButton === true ? true : false;
+        vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
         vm.mdHelpLinks = { // Links to Markdown references to be used in help text

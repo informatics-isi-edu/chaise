@@ -20,11 +20,11 @@ describe('Record Add', function() {
         beforeAll(function () {
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + ":" + testParams.table_name);
-            browser.sleep(3000);
+            browser.sleep(browser.params.defaultTimeout);
         });
 
         it("should click the button and show an input box.", function() {
-            browser.wait(EC.elementToBeClickable(multiFormOpenButton), 10000);
+            browser.wait(EC.elementToBeClickable(multiFormOpenButton), browser.params.defaultTimeout);
 
             chaisePage.recordEditPage.getMultiFormInputOpenButtonScript().then(function(openBtn) {
                 return chaisePage.clickButton(openBtn);
@@ -138,7 +138,13 @@ describe('Record Add', function() {
             });
 
             it("should change the view to the resultset table and verify the count.", function() {
-                browser.sleep(3000);
+                // Make sure the table shows up with the expected # of rows
+                browser.wait(function() {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return (ct == testParams.records);
+                    });
+                }, browser.params.defaultTimeout);
+
                 browser.driver.getCurrentUrl().then(function(url) {
                     expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
 
@@ -158,11 +164,10 @@ describe('Record Add', function() {
             beforeAll(function () {
                 browser.ignoreSynchronization=true;
                 browser.get(browser.params.url + ":" + testParams.table_name);
-                browser.sleep(3000);
             });
 
             it("should show a resultset table with 201 entities.", function() {
-                browser.wait(EC.elementToBeClickable(multiFormOpenButton), 10000);
+                browser.wait(EC.elementToBeClickable(multiFormOpenButton), browser.params.defaultTimeout);
 
                 var intInput = chaisePage.recordEditPage.getInputById(0, "int");
                 intInput.sendKeys("1");
@@ -183,7 +188,7 @@ describe('Record Add', function() {
                         return chaisePage.recordEditPage.getForms().count().then(function(ct) {
                             return (ct == 201);
                         });
-                    }, 5000);
+                    }, browser.params.defaultTimeout);
 
                     chaisePage.recordEditPage.submitForm();
 
@@ -192,7 +197,12 @@ describe('Record Add', function() {
                     expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
 
                     // so DOM can render table
-                    browser.sleep(100);
+                    browser.wait(function() {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return (ct == 201);
+                        });
+                    }, browser.params.defaultTimeout);
+                    
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function(ct) {
                     expect(ct).toBe(201);

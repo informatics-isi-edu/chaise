@@ -10,7 +10,7 @@ describe('Sidebar top search input,', function () {
     beforeAll(function (done) {
         browser.get(browser.params.url || "");
         var sidebar = element(by.id('sidebar'));
-        browser.wait(EC.visibilityOf(sidebar), 10000).then(function () {
+        browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout).then(function () {
             done();
         });
 

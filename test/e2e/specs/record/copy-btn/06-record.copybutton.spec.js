@@ -16,7 +16,7 @@ describe('View existing record,', function() {
             });
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
-            browser.sleep(2000);
+            browser.sleep(browser.params.defaultTimeout);
         });
 
         it("should load chaise-config.js and have editRecord=true", function() {
@@ -30,7 +30,7 @@ describe('View existing record,', function() {
                 copyButton = chaisePage.recordPage.getCopyRecordButton();
 
             it("should show when the page loads.", function() {
-                browser.wait(EC.elementToBeClickable(copyButton), 10000);
+                browser.wait(EC.elementToBeClickable(copyButton), browser.params.defaultTimeout);
                 copyButton.isDisplayed().then(function (bool) {
                     expect(bool).toBeTruthy();
                 });

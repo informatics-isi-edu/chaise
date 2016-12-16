@@ -8,7 +8,7 @@ describe('Navbar ', function() {
         menu = element(by.id('navbar-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
-            return browser.wait(EC.presenceOf(navbar), 5000);
+            return browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
         }).then(function() {
             done();
         });
@@ -51,7 +51,7 @@ describe('Navbar ', function() {
     // e.g. On Travis, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
     xit('should have a "Log In" link', function() {
         var actualLink = element(by.id('login-link'));
-        browser.wait(EC.elementToBeClickable(actualLink), 10000).then(function() {
+        browser.wait(EC.elementToBeClickable(actualLink), browser.params.defaultTimeout).then(function() {
             expect(actualLink.isDisplayed()).toBeTruthy();
         });
     }).pend("Pending until we handle tests logging in via Globus/other services");
@@ -62,7 +62,7 @@ describe('Navbar ', function() {
 
     xit('should display a "Log Out" link', function(done) {
         var logOutLink = element(by.id('logout-link'));
-        browser.wait(EC.elementToBeClickable(logOutLink), 10000).then(function() {
+        browser.wait(EC.elementToBeClickable(logOutLink), browser.params.defaultTimeout).then(function() {
             browser.ignoreSynchronization = true;
             expect(logOutLink.isDisplayed()).toBeTruthy();
             done();

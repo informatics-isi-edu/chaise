@@ -1,4 +1,4 @@
-var recordsetHelpers = require('../helpers.js');
+var recordsetHelpers = require('../helpers.js'), chaisePage = require('../../../utils/chaise.page.js');;
 
 describe('View recordset,', function() {
 
@@ -17,7 +17,7 @@ describe('View recordset,', function() {
                     });
                     browser.ignoreSynchronization=true;
                     browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
-                    browser.sleep(2000);
+                    browser.sleep(browser.params.defaultTimeout);
                 });
 
                 describe("Presentation ,", function() {
@@ -36,9 +36,11 @@ describe('View recordset,', function() {
         tupleParams.keys.forEach(function(key) {
             keys.push(key.name + key.operator + key.value);
         });
-        browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
-        browser.sleep(3000);
-        browser.executeScript('return chaiseConfig').then(function(config) {
+        var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")";
+        browser.get(url);
+        chaisePage.waitForElement(element(by.id('page-title')), browser.params.defaultTimeout).then(function() {
+            return browser.executeScript('return chaiseConfig');
+        }).then(function(config) {
             chaiseConfig = config;
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
         }).then(function(elemArray) {
@@ -46,6 +48,10 @@ describe('View recordset,', function() {
             return browser.getTitle();
         }).then(function(title) {
             expect(title).toEqual(chaiseConfig.headTitle);
+        }).catch(function(error) {
+            console.log('ERROR:', error);
+            // Fail the test
+            expect('There was an error in this promise chain.').toBe('See the error msg for more info.');
         });
     });
 

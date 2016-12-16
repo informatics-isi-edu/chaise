@@ -710,7 +710,7 @@ function chaisePage() {
         if (url && authCookie) {
             // Visit the default page and set the authorization cookie if required
             browser.get(url);
-            browser.sleep(3000);
+            browser.sleep(browser.params.defaultTimeout);
             browser.driver.executeScript('document.cookie="' + authCookie + 'path=/;secure;"');
         }
     };
@@ -774,11 +774,11 @@ function chaisePage() {
             return browser.driver.getCurrentUrl().then(function(url) {
               return new RegExp(expectedUrlFragment).test(url);
             });
-        }, timeout | 5000);
+        }, timeout || 5000);
     };
 
     this.waitForElement = function (locator, timeout) {
-        return browser.wait(protractor.ExpectedConditions.visibilityOf(locator), 5000);
+        return browser.wait(protractor.ExpectedConditions.visibilityOf(locator), timeout || 5000);
     };
 };
 

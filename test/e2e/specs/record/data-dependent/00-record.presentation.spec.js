@@ -23,9 +23,9 @@ describe('View existing record,', function() {
 					table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
 			    });
 
-                it('should load document title defined in chaise-config.js and have showDeleteButton=true', function(done) {
+                it('should load document title defined in chaise-config.js and have deleteRecord=true', function(done) {
                     browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                        expect(chaiseConfig.showDeleteButton).toBe(true);
+                        expect(chaiseConfig.deleteRecord).toBe(true);
                         if (chaiseConfig.headTitle) {
                             browser.getTitle().then(function(title) {
                                 expect(title).toEqual(chaiseConfig.headTitle);
@@ -50,7 +50,7 @@ describe('View existing record,', function() {
             keys.push(key.name + key.operator + key.value);
         });
         browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
-        browser.sleep(3000);
+        browser.sleep(browser.params.defaultTimeout);
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
