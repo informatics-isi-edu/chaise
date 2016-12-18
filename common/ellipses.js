@@ -24,12 +24,12 @@
                     }
 
                     // If chaiseconfig contains maxRecordSetHeight then only apply more-less styling
-                    if (chaiseConfig.maxRecordsetRowHeight) {
+                    if (chaiseConfig.maxRecordsetRowHeight != false ) {
 
                         // 1em = 14px
                         // 7.25em = 101.5px
                         var moreButtonHeight = 20;
-                        var maxHeight = chaiseConfig.maxRecordsetRowHeight;
+                        var maxHeight = chaiseConfig.maxRecordsetRowHeight || 160;
                         var maxHeightStyle = { "max-height": (maxHeight - moreButtonHeight) + "px" }
 
                         scope.readmore = function() {
