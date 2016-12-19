@@ -462,27 +462,31 @@ testdetailed:
 #Rule to run record app tests
 .PHONY: testrecord
 testrecord:
-	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordRelatedTable)
+	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordCopy)
 
 #Rule to run record add app tests
 .PHONY: testrecordadd
 testrecordadd:
-	$(BIN)/protractor $(E2EDIrecordAdd)
+	$(BIN)/protractor $(E2EDIrecordAdd) && E2EDIrecordMultiAdd
 
 #Rule to run recordset app tests
 .PHONY: testrecordset
 testrecordset:
 	$(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd)
 
-
 .PHONY: testrecordedit
 testrecordedit:
-	$(BIN)/protractor $(E2EDIrecordEdit)
+	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled)
 
 #Rule to run viewer app tests
 .PHONY: testviewer
 testviewer:
 	$(BIN)/protractor $(E2EDviewer)
+
+#Rule to run detailed app tests
+.PHONY: testlogin
+testdetailed:
+	$(BIN)/protractor $(E2Elogin)
 
 # Rule to make html
 .PHONY: html

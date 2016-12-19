@@ -8,7 +8,7 @@
   "scripts": {
     "build": "make build",
     "pretest": "make build",
-    "test": "make testall",
+    "test": "make testnavbar && make testrecord && make testrecordset && make testrecordadd && make testrecordedit && make testviewer && make testsearch && make testlogin",
     "docs": "make doc"
   },
   "repository": {
