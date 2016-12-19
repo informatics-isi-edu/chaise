@@ -230,19 +230,15 @@
                         $cookies.remove(context.queryParams.prefill);
                     }
 
-<<<<<<< HEAD
-                    // add cookie indicating record added
-                    if (context.queryParams.invalidate) {
-                        $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
-                            {
-                                expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-                            }
-                        );
-                    }
-
-                    vm.redirectAfterSubmission(page);
-=======
                     if (model.rows.length == 1) {
+                        // add cookie indicating record added
+                        if (context.queryParams.invalidate) {
+                            $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
+                                {
+                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                                }
+                            );
+                        }
                         vm.redirectAfterSubmission(page);
                     } else {
                         AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
@@ -266,7 +262,6 @@
                         vm.resultset = true;
                     }
 
->>>>>>> master
                 }, function error(response) {
                     vm.showSubmissionError(response);
                     vm.submissionButtonDisabled = false;
