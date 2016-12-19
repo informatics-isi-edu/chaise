@@ -27,6 +27,13 @@
         $cookiesProvider.defaults.secure = true;
     }])
 
+    // Configure all tooltips to be attached to the body by default. To attach a
+    // tooltip on the element instead, set the `tooltip-append-to-body` attribute
+    // to `false` on the element.
+    .config(['$uibTooltipProvider', function($uibTooltipProvider) {
+        $uibTooltipProvider.options({appendToBody: true});
+    }])
+
     .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
         function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 

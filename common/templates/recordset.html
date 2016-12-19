@@ -13,9 +13,9 @@
                     <button id="search-submit" class="btn btn-primary" ng-click="search(vm.search)" role="button">
                         &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                     </button>
-                    <button type="button" tabIndex="-1" class="btn btn-primary btn-no-focus coltooltip">
+                    <button type="button" tabIndex="-1" class="btn btn-primary btn-no-focus" tooltip-placement="bottom"
+                    uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>usc 1234</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
                         <span class="glyphicon glyphicon-question-sign"></span>
-                        <span class="coltooltiptext paragraph"><p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing "usc" and "1234".</p><p><i><b>usc|1234</b></i> returns all records containing "usc" or "1234".</b></i></p><p><i><b>"usc 1234"</b></i> returns all records containing "usc 1234".</span>
                     </button>
                     <button id="search-clear" class="btn btn-primary" ng-disabled="!vm.reference.location.searchTerm" ng-click="clearSearch()" type="button">Reset</button>
                 </span>
@@ -40,7 +40,7 @@
     </div>
     <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 pull-right" align="right">
         <!-- add record -->
-        <button id="add-record-btn" type="button" class="btn btn-primary" ng-click="addRecord()"  tooltip-placement="bottom" tooltip-append-to-body="true" uib-tooltip="Create new record">
+        <button id="add-record-btn" type="button" class="btn btn-primary" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
             <span class="glyphicon glyphicon-plus"></span>
         </button>
     </div>

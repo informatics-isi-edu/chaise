@@ -1,7 +1,4 @@
-<div ng-class="{'coltooltip': tooltip}">
-    <button ng-click="deleteFn();" class="btn btn-primary" ng-class="{'btn-lg': buttonSize == 'lg', 'btn-sm': buttonSize == 'sm', 'btn-xs': buttonSize == 'xs'}">
-        <span ng-if="icon" class="glyphicon glyphicon-trash"></span>
-        <span ng-if="label">{{label}}</span>
-    </button>
-    <span ng-if="tooltip" class="coltooltiptext">{{tooltip}}</span>
-</div>
+<button ng-click="deleteFn();" class="btn btn-primary" ng-class="{'btn-lg': buttonSize == 'lg', 'btn-sm': buttonSize == 'sm', 'btn-xs': buttonSize == 'xs'}" ng-attr-uib-tooltip="{{(false) ? tooltip : undefined}}" ng-attr-tooltip-placement="{{(false) ? 'top' : undefined}}">
+    <span ng-if="icon" class="glyphicon glyphicon-trash"></span>
+    <span ng-if="label">{{label}}</span>
+</button>
