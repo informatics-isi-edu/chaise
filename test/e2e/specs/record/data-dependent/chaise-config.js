@@ -23,7 +23,6 @@ var chaiseConfig = {
     recordUiGridExportPDFEnabled: true,
     editRecord: true,
     deleteRecord: true,
-    maxRecordsetRowHeight: 160,
     tour: {
       pickRandom: false,
       searchInputAttribute: "Data",
