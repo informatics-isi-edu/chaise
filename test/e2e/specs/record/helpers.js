@@ -371,6 +371,8 @@ exports.relatedTableLinks = function (testParams, tableParams) {
 
         expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
 
+        console.log(browser.driver.executeScript('return document.cookie;'));
+
         addRelatedRecordLink.click().then(function() {
             // This Add link opens in a new tab so we have to track the windows in the browser...
             return browser.getAllWindowHandles();
@@ -386,6 +388,8 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
             expect(url.indexOf(result)).toBeGreaterThan(-1);
             expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
+
+            console.log(browser.driver.executeScript('return document.cookie;'));
 
             // set the required fields
             browser.sleep(10000);
