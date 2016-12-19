@@ -6,6 +6,11 @@
     padding-right: 15px;
 }
 
+.side-padding-15 {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
 span.space-1::before {
     content: '\00A0';
 }
