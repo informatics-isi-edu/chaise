@@ -90,7 +90,7 @@ describe('Add a record,', function() {
                                 for (var i = 0; i < tableParams.column_names.length; i++) {
                                     var columnName = tableParams.column_names[i];
                                     var column = chaisePage.recordPage.getColumnValue(columnName);
-                                    browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
+                                    // browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
                                     expect(column.getText()).toBeDefined();
                                 }
                             }, function() {
