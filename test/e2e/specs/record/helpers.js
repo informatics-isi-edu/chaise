@@ -389,12 +389,12 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
                 expect(url.indexOf(result)).toBeGreaterThan(-1);
                 expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
-
+                // set the required fields
+                browser.sleep(10000);
                 return browser.driver.executeScript('return document.cookie;');
             }).then(function(cookie) {
                 console.log("After cookie " + cookie);
-                // set the required fields
-                browser.sleep(10000);
+                
                 return chaisePage.recordsetPage.getInputForAColumn("price")
             }).then(function(input) {
                 input.sendKeys(testParams.price);
