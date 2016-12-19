@@ -121,8 +121,8 @@ input[type=number]::-webkit-outer-spin-button {
   padding: 14px 0;
   position: absolute;
   height: 100%;
-  top: 10vh;
-  left: 10vh;
+  top: 75px;
+  left: 75px;
   z-index: 10;
   border: none;
   border-radius: 0px;
