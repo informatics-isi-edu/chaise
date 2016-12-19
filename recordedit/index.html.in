@@ -23,6 +23,7 @@
         <navbar></navbar>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
         <div ng-controller="FormController as form" class="row">
+            <div ng-show="!form.resultset">
             <div class="col-xs-12">
             <!-- Alerts section -->
                 <div ng-repeat="alert in form.alerts" class="row">
@@ -78,7 +79,7 @@
                                 <table ng-form="form.formContainer" class="table">
                                     <tr ng-if="!form.editMode">
                                         <td ng-style="form.firstHeaderStyle">Record Number</td>
-                                        <td ng-style="form.headerHeight" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
+                                        <td ng-style="form.headerHeight" class="form-header" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
                                             <div class="row">
                                                 <div class="col-xs-12">
                                                     <div class="pull-left" ng-bind="rowIndex + 1"></div>
@@ -224,6 +225,14 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            </div>
+            <div ng-show=form.resultset class="container-fluid">
+                <h2 class="entity-title">Created {{ form.resultsetModel.pageLimit }} records for table <a ng-href="{{form.recordsetLink}}">{{ form.resultsetModel.tableDisplayName }}</a></h2>
+
+                <div class="side-padding-15">
+                    <record-table vm="form.resultsetModel" default-row-linking="false"></record-table>
                 </div>
             </div>
         </div>
