@@ -8,7 +8,7 @@
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
-        vm.editMode = (context.filter && !context.copy) || false;
+        vm.editMode = (context.filter && !context.queryParams.copy) || false;
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -68,7 +68,7 @@
                 clearOnBlur: false
             }
         };
-        vm.prefillCookie = $cookies.getObject(context.prefill);
+        vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
 
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
@@ -175,7 +175,7 @@
                                 **/
                                 if (vm.editMode) {
                                     model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[j].data[referenceColumn.name] || null;
-                                } else if (context.copy) {
+                                } else if (context.queryParams.copy) {
                                     // in the copy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
                                     model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[0].data[referenceColumn.name] || null;
                                 } else {
@@ -225,10 +225,18 @@
                 $rootScope.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     if (vm.prefillCookie) {
-                        $cookies.remove(context.prefill);
+                        $cookies.remove(context.queryParams.prefill);
                     }
 
                     if (model.rows.length == 1) {
+                        // add cookie indicating record added
+                        if (context.queryParams.invalidate) {
+                            $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
+                                {
+                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                                }
+                            );
+                        }
                         vm.redirectAfterSubmission(page);
                     } else {
                         AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
@@ -251,7 +259,6 @@
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
                     }
-
                 }, function error(response) {
                     vm.showSubmissionError(response);
                     vm.submissionButtonDisabled = false;
@@ -298,6 +305,7 @@
 
             // pass the reference as a param for the modal
             params.reference = column.reference.contextualize.compactSelect;
+            params.reference.session = $rootScope.session;
 
             var modalInstance = $uibModal.open({
                 animation: false,
