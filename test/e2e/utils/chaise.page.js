@@ -364,10 +364,6 @@ var recordEditPage = function() {
             return element(by.css(".modal-close"));
     };
 
-    this.getForms = function() {
-        return element.all(by.css(".form-header"));
-    };
-
     this.getFormTitle = function() {
         return element(by.id("entity-title"));
     };

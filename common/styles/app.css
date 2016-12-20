@@ -548,10 +548,6 @@ tbody{
     margin-bottom: 0px;
 }
 
-.recordset-table td .markdown-container img {
-    overflow-x: hidden;
-}
-
 /************* custom buttons **************/
 .btn-no-focus:focus {
     outline: none;

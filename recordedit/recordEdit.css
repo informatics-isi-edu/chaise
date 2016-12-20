@@ -6,11 +6,6 @@
     padding-right: 15px;
 }
 
-.side-padding-15 {
-    padding-right: 15px;
-    padding-left: 15px;
-}
-
 span.space-1::before {
     content: '\00A0';
 }
@@ -121,8 +116,8 @@ input[type=number]::-webkit-outer-spin-button {
   padding: 14px 0;
   position: absolute;
   height: 100%;
-  top: 75px;
-  left: 75px;
+  top: 10vh;
+  left: 10vh;
   z-index: 10;
   border: none;
   border-radius: 0px;

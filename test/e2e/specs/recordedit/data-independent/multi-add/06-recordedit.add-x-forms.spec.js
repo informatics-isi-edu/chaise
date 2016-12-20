@@ -137,77 +137,16 @@ describe('Record Add', function() {
                 chaisePage.recordEditPage.submitForm();
             });
 
-            it("should change the view to the resultset table and verify the count.", function() {
-                // Make sure the table shows up with the expected # of rows
-                browser.wait(function() {
-                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                        return (ct == testParams.records);
-                    });
-                }, browser.params.defaultTimeout);
-
+            it("should be redirected to recordset page and verify the count.", function() {
+                browser.sleep(browser.params.defaultTimeout);
                 browser.driver.getCurrentUrl().then(function(url) {
-                    expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
+                    expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset/")).toBe(true);
 
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function(ct) {
                     expect(ct).toBe(testParams.records);
                 });
             });
-        });
-
-        describe("for when the user adds the maximum amount of forms, ", function() {
-            var EC = protractor.ExpectedConditions,
-                multiFormOpenButton = chaisePage.recordEditPage.getMultiFormInputOpenButton(),
-                multiFormInput = chaisePage.recordEditPage.getMultiFormInput(),
-                multiFormSubmitButton = chaisePage.recordEditPage.getMultiFormInputSubmitButton();
-
-            beforeAll(function () {
-                browser.ignoreSynchronization=true;
-                browser.get(browser.params.url + ":" + testParams.table_name);
-            });
-
-            it("should show a resultset table with 201 entities.", function() {
-                browser.wait(EC.elementToBeClickable(multiFormOpenButton), browser.params.defaultTimeout);
-
-                var intInput = chaisePage.recordEditPage.getInputById(0, "int");
-                intInput.sendKeys("1");
-
-                chaisePage.recordEditPage.getMultiFormInputOpenButtonScript().then(function(openBtn) {
-                    return chaisePage.clickButton(openBtn);
-                }).then(function() {
-                    chaisePage.recordEditPage.clearInput(multiFormInput);
-                    browser.sleep(10);
-                    multiFormInput.sendKeys(200);
-
-                    return chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript();
-                }).then(function(submitBtn) {
-                    return chaisePage.clickButton(submitBtn);
-                }).then(function() {
-                    // wait for dom to finish rendering the forms
-                    browser.wait(function() {
-                        return chaisePage.recordEditPage.getForms().count().then(function(ct) {
-                            return (ct == 201);
-                        });
-                    }, browser.params.defaultTimeout);
-
-                    chaisePage.recordEditPage.submitForm();
-
-                    return browser.driver.getCurrentUrl();
-                }).then(function(url) {
-                    expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
-
-                    // so DOM can render table
-                    browser.wait(function() {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return (ct == 201);
-                        });
-                    }, browser.params.defaultTimeout);
-                    
-                    return chaisePage.recordsetPage.getRows().count();
-                }).then(function(ct) {
-                    expect(ct).toBe(201);
-                });
-            })
         });
     });
 });
