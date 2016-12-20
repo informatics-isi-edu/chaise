@@ -405,7 +405,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         });
     });
 
-    xit("should have a new record, View More link for a related table that redirects to recordset.", function(done) {
+    it("should have a new record, View More link for a related table that redirects to recordset.", function(done) {
 
         browser.close();
         browser.switchTo().window(allWindows[0]);
