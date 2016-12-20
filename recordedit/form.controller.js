@@ -8,7 +8,7 @@
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
-        vm.editMode = (context.filter && !context.copy) || false;
+        vm.editMode = (context.filter && !context.queryParams.copy) || false;
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
