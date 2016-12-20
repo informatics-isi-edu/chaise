@@ -3,11 +3,14 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$uibModal', '$window', '$timeout', function FormController(AlertsService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $uibModal, $window, $timeout) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window', function FormController(AlertsService, DataUtils, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
-        vm.editMode = (context.filter && !context.queryParams.copy) || false;
+
+        vm.resultset = false;
+        vm.editMode = (context.filter && !context.copy) || false;
+
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -202,7 +205,7 @@
                     vm.redirectAfterSubmission();
                 } else {
                     // loop through model.submissionRows
-                    // there should only be 1 row for editing
+                    // there should only be 1 row for editing but we want to account for it for future development
                     for (var i = 0; i < model.submissionRows.length; i++) {
                         var row = model.submissionRows[i];
                         var data = $rootScope.tuples[i].data;
@@ -227,16 +230,38 @@
                         $cookies.remove(context.queryParams.prefill);
                     }
 
-                    // add cookie indicating record added
-                    if (context.queryParams.invalidate) {
-                        $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
-                            {
-                                expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-                            }
-                        );
+                    if (model.rows.length == 1) {
+                        // add cookie indicating record added
+                        if (context.queryParams.invalidate) {
+                            $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
+                                {
+                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                                }
+                            );
+                        }
+                        vm.redirectAfterSubmission(page);
+                    } else {
+                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        // can't use page.reference because it reflects the specific values that were inserted
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        //set values for the view to flip to recordedit resultset view
+                        vm.resultsetModel = {
+                            hasLoaded: true,
+                            reference: page.reference,
+                            tableDisplayName: page.reference.displayname,
+                            columns: page.reference.columns,
+                            enableSort: false,
+                            sortby: null,
+                            sortOrder: null,
+                            page: page,
+                            pageLimit: model.rows.length,
+                            rowValues: [],
+                            search: null
+                        }
+                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        vm.resultset = true;
                     }
 
-                    vm.redirectAfterSubmission(page);
                 }, function error(response) {
                     vm.showSubmissionError(response);
                     vm.submissionButtonDisabled = false;

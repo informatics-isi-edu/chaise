@@ -371,37 +371,46 @@ exports.relatedTableLinks = function (testParams, tableParams) {
 
         expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
 
-        addRelatedRecordLink.click().then(function() {
-            // This Add link opens in a new tab so we have to track the windows in the browser...
-            return browser.getAllWindowHandles();
-        }).then(function(handles) {
-            allWindows = handles;
-            // ... and switch to the new tab here...
-            return browser.switchTo().window(allWindows[1]);
-        }).then(function() {
-            // ... and then get the url from this new tab...
-            return browser.driver.getCurrentUrl();
-        }).then(function(url) {
+        browser.driver.executeScript('return document.cookie;').then(function(cookie) {
+            console.log(cookie);
+        
+            addRelatedRecordLink.click().then(function() {
+                // This Add link opens in a new tab so we have to track the windows in the browser...
+                return browser.getAllWindowHandles();
+            }).then(function(handles) {
+                allWindows = handles;
+                // ... and switch to the new tab here...
+                return browser.switchTo().window(allWindows[1]);
+            }).then(function() {
+                // ... and then get the url from this new tab...
+                return browser.driver.getCurrentUrl();
+            }).then(function(url) {
 
-            var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
-            expect(url.indexOf(result)).toBeGreaterThan(-1);
-            expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
+                var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
+                expect(url.indexOf(result)).toBeGreaterThan(-1);
+                expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
 
-            // set the required fields
-            browser.sleep(10000);
-            return chaisePage.recordsetPage.getInputForAColumn("price")
-        }).then(function(input) {
-            input.sendKeys(testParams.price);
-            var nowBtn = element.all(by.css('button[name="booking_date"]')).get(1);
-            return nowBtn.click();
-        }).then(function() {
-            return chaisePage.recordEditPage.submitForm();
-        }).then(function() {
-            // wait until redirected to record page
-            var EC = protractor.ExpectedConditions,
-                title = chaisePage.recordPage.getEntityTitleElement();
-            browser.wait(EC.presenceOf(title), 10000);
-            done();
+                
+                // set the required fields
+                browser.sleep(10000);
+                return browser.driver.executeScript('return document.cookie;');
+            }).then(function(cookie) {
+                console.log("After cookie " + cookie);
+                
+                return chaisePage.recordsetPage.getInputForAColumn("price")
+            }).then(function(input) {
+                input.sendKeys(testParams.price);
+                var nowBtn = element.all(by.css('button[name="booking_date"]')).get(1);
+                return nowBtn.click();
+            }).then(function() {
+                return chaisePage.recordEditPage.submitForm();
+            }).then(function() {
+                // wait until redirected to record page
+                var EC = protractor.ExpectedConditions,
+                    title = chaisePage.recordPage.getEntityTitleElement();
+                browser.wait(EC.presenceOf(title), 10000);
+                done();
+            });
         });
     });
 
