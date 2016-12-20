@@ -192,7 +192,7 @@
 
                 var inputChangedPromise;
                 scope.inputChanged = function() {
-                    if (scope.vm.enableAutoSearch) {}
+                    if (scope.vm.enableAutoSearch) {
 
                         if (inputChangedPromise) {
                             $timeout.cancel(inputChangedPromise);
