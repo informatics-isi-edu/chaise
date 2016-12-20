@@ -3,10 +3,11 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$uibModal', '$window', '$timeout', function FormController(AlertsService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $uibModal, $window, $timeout) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window', function FormController(AlertsService, DataUtils, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
+        vm.resultset = false;
         vm.editMode = (context.filter && !context.copy) || false;
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
@@ -202,7 +203,7 @@
                     vm.redirectAfterSubmission();
                 } else {
                     // loop through model.submissionRows
-                    // there should only be 1 row for editing
+                    // there should only be 1 row for editing but we want to account for it for future development
                     for (var i = 0; i < model.submissionRows.length; i++) {
                         var row = model.submissionRows[i];
                         var data = $rootScope.tuples[i].data;
@@ -226,7 +227,31 @@
                     if (vm.prefillCookie) {
                         $cookies.remove(context.prefill);
                     }
-                    vm.redirectAfterSubmission(page);
+
+                    if (model.rows.length == 1) {
+                        vm.redirectAfterSubmission(page);
+                    } else {
+                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        // can't use page.reference because it reflects the specific values that were inserted
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        //set values for the view to flip to recordedit resultset view
+                        vm.resultsetModel = {
+                            hasLoaded: true,
+                            reference: page.reference,
+                            tableDisplayName: page.reference.displayname,
+                            columns: page.reference.columns,
+                            enableSort: false,
+                            sortby: null,
+                            sortOrder: null,
+                            page: page,
+                            pageLimit: model.rows.length,
+                            rowValues: [],
+                            search: null
+                        }
+                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        vm.resultset = true;
+                    }
+
                 }, function error(response) {
                     vm.showSubmissionError(response);
                     vm.submissionButtonDisabled = false;
