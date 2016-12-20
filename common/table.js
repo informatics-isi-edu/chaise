@@ -62,7 +62,8 @@
                 scope.vm.page = page;
                 scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
                 scope.vm.hasLoaded = true;
-
+                scope.vm.foregoundSearch = false;
+                
                 // tell parent controller data updated
                 scope.$emit('recordset-update');
 
@@ -137,7 +138,7 @@
         };
     }])
 
-    .directive('recordset', ['recordTableUtils', '$window', function(recordTableUtils, $window) {
+    .directive('recordset', ['recordTableUtils', '$window', '$timeout', function(recordTableUtils, $window, $timeout) {
 
         return {
             restrict: 'E',
@@ -150,20 +151,20 @@
             link: function (scope, elem, attr) {
 
                 $window.onfocus = function() {
-                    scope.vm.inputChanged = false;
+                    scope.vm.backgroundSearch = false;
                     recordTableUtils.read(scope);
                 };
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
 
                 scope.setPageLimit = function(limit) {
-                    scope.vm.inputChanged = false;
+                    scope.vm.backgroundSearch = false;
                     scope.vm.pageLimit = limit;
                     recordTableUtils.read(scope);
                 };
 
                 scope.before = function() {
-                    scope.vm.inputChanged = false;
+                    scope.vm.backgroundSearch = false;
                     var previous = scope.vm.page.previous;
                     if (previous) {
 
@@ -174,7 +175,7 @@
                 };
 
                 scope.after = function() {
-                    scope.vm.inputChanged = false;
+                    scope.vm.backgroundSearch = false;
                     var next = scope.vm.page.next;
                     if (next) {
 
@@ -185,14 +186,26 @@
                 };
 
 
-                scope.inputChanged = function() {
-                    scope.vm.inputChanged = true;
-                    scope.search(vm.search);
+                var inputChangedPromise;
+                scope.inputChanged = function(){
+                    if (inputChangedPromise) {
+                        $timeout.cancel(inputChangedPromise);
+                    }
+
+                    inputChangedPromise = $timeout(function() {
+                        inputChangedPromise = null;
+
+                        if (!scope.vm.foregoundSearch) {
+                            scope.vm.backgroundSearch = true;
+                            scope.search(scope.vm.search);
+                        }
+                    }, 200);
                 };
 
                 scope.enterPressed = function() {
-                    scope.vm.inputChanged = false;
-                    scope.search(vm.search);
+                    scope.vm.backgroundSearch = false;
+                    scope.vm.foregoundSearch = true;
+                    scope.search(scope.vm.search);
                 };
 
                 scope.search = function(term) {
@@ -206,7 +219,7 @@
                 };
 
                 scope.clearSearch = function() {
-                    scope.vm.inputChanged = false;
+                    scope.vm.backgroundSearch = false;
                     if (scope.vm.reference.location.searchTerm)
                         scope.search();
 
