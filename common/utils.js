@@ -37,25 +37,16 @@
                 ermrestUri = {},
                 catalogId;
 
-            // If hash has ?prefill or &prefill parameter, remove it
-            if (hash.indexOf('prefill=') !== -1) {
-                var startIndex = hash.indexOf('prefill=');
-                var stopIndex = hash.indexOf('&', startIndex);
-                if (stopIndex !== -1) {
-                    hash = hash.substring(0, startIndex) + hash.substring(stopIndex + 1);
-                } else {
-                    hash = hash.substring(0, startIndex - 1);
-                }
-            }
-
-            // If hash has ?copy or &copy parameter, remove it
-            if (hash.indexOf('copy=') !== -1) {
-                var startIndex = hash.indexOf('copy=');
-                var stopIndex = hash.indexOf('&', startIndex);
-                if (stopIndex !== -1) {
-                    hash = hash.substring(0, startIndex) + hash.substring(stopIndex + 1);
-                } else {
-                    hash = hash.substring(0, startIndex - 1);
+            // remove query params other than limit
+            if (hash.indexOf('?') !== -1) {
+                var queries = hash.match(/\?(.+)/)[1].split("&"); // get the query params
+                hash = hash.slice(0, hash.indexOf('?')); // remove queries
+                for (var i = 0; i < queries.length; i++) { // add back only the valid queries
+                    var query = queries[i];
+                    if (query.indexOf("limit=") === 0) {
+                        hash = hash + "?" + query;
+                        break; // right now only 'limit' is valid
+                    }
                 }
             }
 
@@ -173,9 +164,8 @@
                 return context;
             }
 
-            // parse out modifiers, expects in order of sort, paging, limit, prefill, and copy
-            // copy will always be followed by a colname and val modifier
-            var modifiers = ["@sort(", "@before(", "@after", "?limit=", "?prefill=", "&prefill=", "?copy", "&copy"];
+            // parse out modifiers, expects in order of sort, paging, then query params
+            var modifiers = ["@sort(", "@before(", "@after", "?"];
             for (i = 0; i < modifiers.length; i++) {
                 if (hash.indexOf(modifiers[i]) !== -1) {
                     hash = hash.split(modifiers[i])[0]; // remove modifiers from uri
@@ -185,6 +175,8 @@
 
             context.mainURI = hash; // uri without modifiers
             var modifierPath = uri.split(hash)[1];
+
+            context.queryParams = {};
 
             if (modifierPath) {
 
@@ -239,38 +231,15 @@
                     }
                 }
 
-                // extract ?limit
-                if (modifierPath.indexOf("?limit=") !== -1) {
-                    context.limit = parseInt(modifierPath.match(/\?limit=([0-9]*)/)[1]);
+                // extract query parameters
+                if (modifierPath.indexOf("?") !== -1) {
+                    var queries = modifierPath.match(/\?(.+)/)[1].split("&");
+                    for (i = 0; i < queries.length; i++) {
+                        var q_parts = queries[i].split("=");
+                        context.queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
+                    }
                 }
 
-                // extract ?prefill or &prefill
-                var prefills = ['?prefill=', '&prefill='];
-                prefills.forEach(function(query) {
-                    if (modifierPath.indexOf(query) !== -1) {
-                        var startIndex = modifierPath.indexOf(query) + query.length;
-                        var stopIndex = modifierPath.indexOf('&', startIndex);
-                        if (stopIndex !== -1) {
-                            context.prefill = modifierPath.substring(startIndex, stopIndex);
-                        } else {
-                            context.prefill = modifierPath.substring(startIndex);
-                        }
-                    }
-                });
-
-                // extract ?copy or &copy
-                var copies = ["?copy=", "&copy="];
-                copies.forEach(function(copy) {
-                    if (modifierPath.indexOf(copy) !== -1) {
-                        var startIndex = modifierPath.indexOf(copy) + copy.length;
-                        var stopIndex = modifierPath.indexOf('&', startIndex);
-                        if (stopIndex !== -1) {
-                            context.copy = modifierPath.substring(startIndex, stopIndex);
-                        } else {
-                            context.copy = modifierPath.substring(startIndex);
-                        }
-                    }
-                });
             }
 
             // TODO With Reference API, we don't need the code below?
@@ -613,6 +582,17 @@
         }
     }])
 
+    .factory("MathUtils", [function() {
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+        return {
+            getRandomInt: getRandomInt
+        }
+    }])
 
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {
