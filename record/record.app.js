@@ -109,6 +109,7 @@
                                     hasNext: page.hasNext,      // used to determine if a link should be shown
                                     hasLoaded: true,            // used to determine if the current table and next table should be rendered
                                     open: true,                 // to define if the accordion is open or closed
+                                    enableSort: true,           // allow sorting on table
                                     sortby: null,               // column name, user selected or null
                                     sortOrder: null,            // asc (default) or desc
                                     rowValues: [],              // array of rows values

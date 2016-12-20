@@ -80,6 +80,18 @@ before_script:
   - sudo -H -u webauthn webauthn2-manage addattr admin
   - sudo -H -u webauthn webauthn2-manage assign test1 admin
 
+
+script: 
+  - make build
+  - make testnavbar
+  - make testrecord 
+  - make testrecordset 
+  - make testrecordadd 
+  - make testrecordedit 
+  - make testviewer 
+  - make testsearch 
+  - make testlogin
+
 after_failure:
   - sudo ls -lR /etc/apache2
   - sudo ls -lR /var/run/apache2
