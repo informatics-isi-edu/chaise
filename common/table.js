@@ -53,7 +53,7 @@
      *          ErrorService.catchAll(exception);
      *      });
      */
-    .factory('recordTableUtils', ['DataUtils', function(DataUtils) {
+    .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
         function read(scope) {
             scope.vm.hasLoaded = false;
 
@@ -62,8 +62,12 @@
                 scope.vm.page = page;
                 scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
                 scope.vm.hasLoaded = true;
-                scope.vm.foregoundSearch = false;
+
+                $timeout(function() {
+                    scope.vm.foregoundSearch = false;
+                }, 200);
                 
+
                 // tell parent controller data updated
                 scope.$emit('recordset-update');
 
