@@ -150,18 +150,20 @@
             link: function (scope, elem, attr) {
 
                 $window.onfocus = function() {
+                    scope.vm.inputChanged = false;
                     recordTableUtils.read(scope);
                 };
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
 
                 scope.setPageLimit = function(limit) {
+                    scope.vm.inputChanged = false;
                     scope.vm.pageLimit = limit;
                     recordTableUtils.read(scope);
                 };
 
                 scope.before = function() {
-
+                    scope.vm.inputChanged = false;
                     var previous = scope.vm.page.previous;
                     if (previous) {
 
@@ -172,7 +174,7 @@
                 };
 
                 scope.after = function() {
-
+                    scope.vm.inputChanged = false;
                     var next = scope.vm.page.next;
                     if (next) {
 
@@ -180,6 +182,17 @@
                         recordTableUtils.read(scope);
                     }
 
+                };
+
+
+                scope.inputChanged = function() {
+                    scope.vm.inputChanged = true;
+                    scope.search(vm.search);
+                };
+
+                scope.enterPressed = function() {
+                    scope.vm.inputChanged = false;
+                    scope.search(vm.search);
                 };
 
                 scope.search = function(term) {
@@ -193,6 +206,7 @@
                 };
 
                 scope.clearSearch = function() {
+                    scope.vm.inputChanged = false;
                     if (scope.vm.reference.location.searchTerm)
                         scope.search();
 

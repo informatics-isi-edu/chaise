@@ -6,11 +6,13 @@
                    id="search-input"
                    ng-model="vm.search"
                    class="form-control"
-                   on-enter="search(vm.search)"
+                   on-enter="enterPressed(vm.search)"
+                   ng-change="inputChanged()" 
+                   ng-model-options="{debounce:1000}"
                    placeholder="Search {{vm.tableDisplayName}}"
                     autofocus>
                 <span class="input-group-btn">
-                    <button id="search-submit" class="btn btn-primary" ng-click="search(vm.search)" role="button">
+                    <button id="search-submit" class="btn btn-primary" ng-click="enterPressed(vm.search)" role="button">
                         &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                     </button>
                     <button type="button" tabIndex="-1" class="btn btn-primary btn-no-focus coltooltip">
