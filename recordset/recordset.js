@@ -51,6 +51,7 @@
         columns: [],
         sortby: null,       // column name, user selected or null
         sortOrder: null,    // asc (default) or desc
+        enableAutoSearch: false,
         enableSort: true,   // allow sorting
         page: null,         // current page
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}

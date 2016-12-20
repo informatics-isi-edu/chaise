@@ -44,6 +44,7 @@
             sortBy:             null,
             sortOrder:          null,
             enableSort:         true,
+            enableAutoSearch:   true,
             pageLimit:          25,
             search:             null
         };

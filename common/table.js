@@ -191,19 +191,22 @@
 
 
                 var inputChangedPromise;
-                scope.inputChanged = function(){
-                    if (inputChangedPromise) {
-                        $timeout.cancel(inputChangedPromise);
-                    }
+                scope.inputChanged = function() {
+                    if (scope.vm.enableAutoSearch) {}
 
-                    inputChangedPromise = $timeout(function() {
-                        inputChangedPromise = null;
-
-                        if (!scope.vm.foregoundSearch) {
-                            scope.vm.backgroundSearch = true;
-                            scope.search(scope.vm.search);
+                        if (inputChangedPromise) {
+                            $timeout.cancel(inputChangedPromise);
                         }
-                    }, 200);
+
+                        inputChangedPromise = $timeout(function() {
+                            inputChangedPromise = null;
+
+                            if (!scope.vm.foregoundSearch) {
+                                scope.vm.backgroundSearch = true;
+                                scope.search(scope.vm.search);
+                            }
+                        }, 200);
+                    }
                 };
 
                 scope.enterPressed = function() {
