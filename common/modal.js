@@ -46,7 +46,8 @@
             enableSort:         true,
             pageLimit:          25,
             search:             null,
-            config:             {viewable: false, editable: false, deletable: false, selectable: true}
+            config:             {viewable: false, editable: false, deletable: false, selectable: true},
+            context:            params.context
         };
 
         // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings

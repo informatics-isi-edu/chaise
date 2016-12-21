@@ -12,6 +12,7 @@
                 scope: {
                     tuple: '=',
                     rowValues: '=', // tuple's values
+                    context: "=",
                     config: '=',    // {viewable, editable, deletable, selectable}
                     onRowClickBind: '=?'
                 },
@@ -22,7 +23,7 @@
                     scope.linkText = "more";
                     scope.maxHeightStyle = { };
                     // TODO jchen make _context and _derivedAssociationRef available
-                    scope.isAssociation = (scope.tuple.reference._context === "compact/brief") && (scope.tuple.reference._derivedAssociationRef !== undefined);
+                    scope.isAssociation = (scope.context === "compact/brief") && (scope.tuple.reference._derivedAssociationRef !== undefined);
 
                     if (scope.config.viewable)
                         scope.viewLink = scope.tuple.reference.contextualize.detailed.appLink;
@@ -39,9 +40,9 @@
                             // delete the linking
                             // WATCH OUT! Using tuple's reference's context, which is current the same as its table's reference
                             // Just case this logic changes in ErmrestJs
-                            // TODO jchen make _context and _derivedAssociationRef available
+                            // TODO jchen make _derivedAssociationRef available
                             // TODO _derivedAssociationRef is wrong!!!! It's a table, not a row
-                            if (scope.tuple.reference._context === "compact/brief" && scope.tuple.reference._derivedAssociationRef)
+                            if (scope.context === "compact/brief" && scope.tuple.reference._derivedAssociationRef)
                                 deleteReference = scope.tuple.reference._derivedAssociationRef;
                             else
                                 deleteReference = scope.tuple.reference;

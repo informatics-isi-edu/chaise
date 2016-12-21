@@ -174,6 +174,7 @@
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
                 recordsetModel.reference = reference.contextualize.compact;
+                recordsetModel.context = "compact";
                 recordsetModel.reference.session = session;
 
                 $log.info("Reference:", recordsetModel.reference);

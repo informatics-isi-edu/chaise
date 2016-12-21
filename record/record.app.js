@@ -113,7 +113,8 @@
                                     sortOrder: null,            // asc (default) or desc
                                     rowValues: [],              // array of rows values
                                     search: null,                // search term
-                                    displayType: $rootScope.relatedReferences[i].display.type
+                                    displayType: $rootScope.relatedReferences[i].display.type,
+                                    context: "compact/brief"
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 model.config = {

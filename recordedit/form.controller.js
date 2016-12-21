@@ -306,6 +306,7 @@
             // pass the reference as a param for the modal
             params.reference = column.reference.contextualize.compactSelect;
             params.reference.session = $rootScope.session;
+            params.context = "compact/select";
 
             var modalInstance = $uibModal.open({
                 animation: false,

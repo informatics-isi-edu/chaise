@@ -31,8 +31,9 @@
      *        page,         // current page object
      *        pageLimit,    // number of rows per page
      *        rowValues,    // array of rows values, each value has this structure {isHTML:boolean, value:value}
-     *        search: null, // search term
-     *        config: '='   // {viewable, editable, deletable, selectable}
+     *        search:       // search term, null for none
+     *        config,       // {viewable, editable, deletable, selectable, context}
+     *        context       // reference's context
      *       }
      *
      *

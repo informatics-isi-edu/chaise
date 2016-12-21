@@ -7,7 +7,7 @@
             <span class="glyphicon glyphicon-pencil" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Edit"></span>
         </a>
         <button ng-if="config.deletable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canDelete" ng-click="delete()" ng-switch="isAssociation">
-            <span ng-switch-when="true" class="glyphicon glyphicon-scissors" style="color: black" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Unlink"></span>
+            <span ng-switch-when="true" class="glyphicon glyphicon-remove-circle" style="color: black" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Unlink"></span>
             <span ng-switch-default class="glyphicon glyphicon-trash" style="color: black" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Delete"></span>
         </button>
         <button ng-if="config.selectable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-click="onSelect()">
