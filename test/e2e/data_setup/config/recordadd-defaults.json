@@ -18,10 +18,13 @@
         }],
         "schema": "defaults"
     },
-    "cleanup" : true,
-    "tests" : {
-        "params" : {
-            "table_name" : "defaults-table"
+    "cleanup": true,
+    "tests": {
+        "params": {
+            "table_name": "defaults-table",
+            "column_names": ["text", "int"],
+            "text_value": "default",
+            "int_value": "25"
         }
     }
 }

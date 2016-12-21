@@ -830,3 +830,12 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	};
 
 };
+
+exports.testRecordAppValuesAfterSubmission = function(params) {
+    for (var i = 0; i < params.column_names.length; i++) {
+        var columnName = params.column_names[i];
+        var column = chaisePage.recordPage.getColumnValue(columnName);
+        browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
+        expect(column.getText()).toBeDefined();
+    }
+}
