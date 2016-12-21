@@ -91,6 +91,12 @@
             },
             link: function (scope, elem, attr) {
 
+                // row data has been modified (from ellipses)
+                // do a read
+                scope.$on('record-modified', function() {
+                    recordTableUtils.read(scope);
+                });
+
                 scope.sortby = function(column) {
                     if (scope.vm.sortby !== column) {
                         scope.vm.sortby = column;

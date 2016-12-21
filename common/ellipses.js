@@ -40,6 +40,7 @@
                             // WATCH OUT! Using tuple's reference's context, which is current the same as its table's reference
                             // Just case this logic changes in ErmrestJs
                             // TODO jchen make _context and _derivedAssociationRef available
+                            // TODO _derivedAssociationRef is wrong!!!! It's a table, not a row
                             if (scope.tuple.reference._context === "compact/brief" && scope.tuple.reference._derivedAssociationRef)
                                 deleteReference = scope.tuple.reference._derivedAssociationRef;
                             else
@@ -57,25 +58,29 @@
                                     return deleteReference.delete();
                                 }).then(function deleteSuccess() {
 
-                                    // TODO jchen reload table?? send message to parent??
+                                    // tell parent controller data updated
+                                    scope.$emit('record-modified');
 
                                 }, function deleteFailure(response) {
                                     if (response != "cancel") {
-                                        AlertsService.addAlert({type: 'error', message: response.message});
+                                        scope.$emit('error', response);
                                         $log.warn(response);
                                     }
                                 }).catch(function (error) {
                                     $log.info(error);
+                                    scope.$emit('error', response);
                                 });
                             } else {
                                 deleteReference.delete().then(function deleteSuccess() {
 
-                                    // TODO jchen reload table?? send message to parent?? (recordset directive, or record app)
+                                    // tell parent controller data updated
+                                    scope.$emit('record-modified');
 
                                 }, function deleteFailure(response) {
-                                    AlertsService.addAlert({type: 'error', message: response.message});
+                                    scope.$emit('error', response);
                                     $log.warn(response);
                                 }).catch(function (error) {
+                                    scope.$emit('error', response);
                                     $log.info(error);
                                 });
                             }
