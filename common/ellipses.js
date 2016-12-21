@@ -42,11 +42,11 @@
                                 scope.linkText = "more";
                                 scope.maxHeightStyle =  maxHeightStyle;
                             }
-                        }
+                        };
 
                         var timerCount = 0, containsOverflow = false, oldHeights = [];
 
-                        function resizeRow() {
+                        var resizeRow = function() {
                             if (containsOverflow == false && timerCount ++ < 500) {
                                 
                                 for (var i = 0; i < element[0].children.length; i++) {

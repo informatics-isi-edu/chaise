@@ -54,9 +54,10 @@
         reference: null,
         tableDisplayName: null,
         columns: [],
-        sortby: null,     // column name, user selected or null
-        sortOrder: null,  // asc (default) or desc
-        page: null,        // current page
+        sortby: null,       // column name, user selected or null
+        sortOrder: null,    // asc (default) or desc
+        enableSort: true,   // allow sorting
+        page: null,         // current page
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
         search: null,       // search term
         pageLimit: 25       // number of rows per page
