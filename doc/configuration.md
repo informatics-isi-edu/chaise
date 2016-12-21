@@ -23,6 +23,7 @@ The below table explains the usage of the default parameters:
 | navbarBrandText | A string | Chaise | "navbarBrandText":\<value\> | N/A | The value to be displayed in the navigation bar. |
 | navbarBrandImage | An URL | N/A | "navbarBrandImage":\<value\> | N/A | The URL for an image to be displayed in the navigation bar. |
 | logoutURL | An URL | /chaise/logout | "logoutURL":\<value\> | N/A | The URL to the logout page. |
+| maxRecordsetRowHeight | A boolean/number | 160 | "maxRecordsetRowHeight":\<value\> | N/A | Set this property to false if you don't want content to be clipped in tables else set it to a number which represent the maximum row height when not expanded. |
 | dataBrowser | An URL | /chaise/search | "dataBrowser":\<value\> | N/A | The URL to continue after a logout. |
 | defaultAnnotationColor | red, orange, gold, green, blue, purple | red | "defaultAnnotationColor":\<value\> | N/A | In `/chaise/viewer`, annotations' borders and colors will default to this value. |
 | confirmDelete | A boolean | true | "confirmDelete":\<value\> | N/A | If `false`, the user will **not** be prompted by a modal when deleting an item |
