@@ -28,7 +28,12 @@
         'chaise.html',
         'chaise.record.table',
         'ui.bootstrap',
+        'ngCookies',
         'ngSanitize'])
+
+    .config(['$cookiesProvider', function($cookiesProvider) {
+        $cookiesProvider.defaults.path = '/';
+    }])
 
     // Register the 'context' object which can be accessed by config and other
     // services.
@@ -165,8 +170,8 @@
 
                 $log.info("Reference:", recordsetModel.reference);
 
-                if (p_context.limit)
-                    recordsetModel.pageLimit = p_context.limit;
+                if (p_context.queryParams.limit)
+                    recordsetModel.pageLimit = parseInt(p_context.queryParams.limit);
                 else if (recordsetModel.reference.display.defaultPageSize)
                     recordsetModel.pageLimit = recordsetModel.reference.display.defaultPageSize;
                 else

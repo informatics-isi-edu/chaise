@@ -50,6 +50,7 @@ describe('Edit existing record,', function() {
 					var hasErrors = false;
 
 					it("should have no errors, and should be redirected", function() {
+						browser.sleep(5000);
 						chaisePage.recordEditPage.getAlertError().then(function(err) {
 							if (err) {
 								expect("Page has errors").toBe("No errors");

@@ -514,8 +514,8 @@ var recordPage = function() {
         return browser.executeScript("return $('#entity-title').text();");
     };
 
-    this.getEntityTitleElem = function() {
-        return element(by.css(".entity-title"));
+    this.getEntityTitleElement = function() {
+        return element(by.id("entity-title"));
     };
 
     this.getEntitySubTitle = function() {
