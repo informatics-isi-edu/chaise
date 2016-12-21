@@ -24,7 +24,6 @@
 
     .config(['$cookiesProvider', function($cookiesProvider) {
         $cookiesProvider.defaults.path = '/';
-        $cookiesProvider.defaults.secure = true;
     }])
 
     // Configure all tooltips to be attached to the body by default. To attach a

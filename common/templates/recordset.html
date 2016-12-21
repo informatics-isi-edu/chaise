@@ -40,7 +40,7 @@
     </div>
     <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 pull-right" align="right">
         <!-- add record -->
-        <button id="add-record-btn" type="button" class="btn btn-primary" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
+        <button id="add-record-btn" type="button" class="btn btn-primary" ng-if="vm.reference.canCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
             <span class="glyphicon glyphicon-plus"></span>
         </button>
     </div>
