@@ -40,7 +40,7 @@ exports.testPresentation = function (tableParams) {
 	it("should show " + tableParams.columns.length + " columns", function() {
 		chaisePage.recordsetPage.getColumns().getInnerHtml().then(function(columnNames) {
 			for (var j = 0; j < columnNames.length; j++) {
-				expect(columnNames[j]).toBe(tableParams.columns[j]);
+				expect(columnNames[j]).toBe(tableParams.columns[j].title);
 
 			}
 		});
@@ -59,8 +59,8 @@ exports.testPresentation = function (tableParams) {
 					var exists = actualComment ? true : undefined;
 					expect(exists).toBeDefined();
 
-					// Check comment is same
-					expect(actualComment.getInnerHtml()).toBe(comment);
+                    // Check comment is same
+                    expect(actualComment).toBe(comment);
 				});
 			});
 		});
