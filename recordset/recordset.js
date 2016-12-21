@@ -33,7 +33,6 @@
 
     .config(['$cookiesProvider', function($cookiesProvider) {
         $cookiesProvider.defaults.path = '/';
-        $cookiesProvider.defaults.secure = true;
     }])
 
     // Register the 'context' object which can be accessed by config and other

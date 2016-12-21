@@ -24,7 +24,6 @@
 
     .config(['$cookiesProvider', function($cookiesProvider) {
         $cookiesProvider.defaults.path = '/';
-        $cookiesProvider.defaults.secure = true;
     }])
 
     .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
