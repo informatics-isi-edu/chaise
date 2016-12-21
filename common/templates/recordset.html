@@ -1,4 +1,4 @@
-<div class="row" style="margin-bottom: 10px;">
+<div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
     <div class="col-lg-4 col-md-5 col-sm-6 col-xs-7">
         <!-- search box -->
         <div class="input-group">
@@ -53,7 +53,7 @@
 </div>
 
 <!-- bottom pagination -->
-<div class="pager">
+<div class="pager" ng-show="vm.hasLoaded && !vm.backgroundSearch && !vm.foreroundSearch">
     <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
         <span class="glyphicon glyphicon-chevron-left"></span>
     </button>
