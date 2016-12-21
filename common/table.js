@@ -142,7 +142,7 @@
         };
     }])
 
-    .directive('recordset', ['recordTableUtils', '$window', '$timeout', function(recordTableUtils, $window, $timeout) {
+    .directive('recordset', ['recordTableUtils', '$window', '$cookies', 'MathUtils', 'UriUtils','$timeout', function(recordTableUtils, $window, $cookies, MathUtils, UriUtils, $timeout) {
 
         return {
             restrict: 'E',
@@ -154,10 +154,7 @@
             },
             link: function (scope, elem, attr) {
 
-                $window.onfocus = function() {
-                    scope.vm.backgroundSearch = false;
-                    recordTableUtils.read(scope);
-                };
+                var addRecordRequests = {};
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
 
@@ -234,19 +231,42 @@
                 };
 
                 scope.addRecord = function() {
-                    // open a new tab, once focus is back to this page, reload
+
+                    // Generate a unique id for this request
+                    // append it to the URL
+                    var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+                    addRecordRequests[referrer_id] = 0;
+
+                    // open a new tab
                     var newRef = scope.vm.reference.contextualize.entryCreate;
                     var appLink = newRef.appLink;
+                    appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
+                        'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
 
                     // open url in a new tab
-                    var window = $window.open(appLink, '_blank');
-                    if (window) {
-                        window.focus();
-                    } else {
-                        $window.location.href = appLink;
-                    }
+                    $window.open(appLink, '_blank');
                 };
 
+                // on window focus, if has pending add record requests
+                // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
+                $window.onfocus = function() {
+
+                    scope.vm.backgroundSearch = false;
+
+                    var completed = 0;
+                    for (var id in addRecordRequests) {
+                        var cookie = $cookies.getObject(id);
+                        if (cookie) {
+                            delete addRecordRequests[id];
+                            $cookies.remove(id);
+                            completed += 1;
+                        }
+                    }
+
+                    // read
+                    if (completed > 0)
+                        recordTableUtils.read(scope);
+                };
             }
         };
     }]);
