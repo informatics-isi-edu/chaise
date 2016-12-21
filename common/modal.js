@@ -43,6 +43,7 @@
             columns:            reference.columns,
             sortBy:             null,
             sortOrder:          null,
+            enableSort:         true,
             pageLimit:          25,
             search:             null
         };

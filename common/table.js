@@ -25,6 +25,7 @@
      *        reference,    // reference object
      *        tableDisplayName,
      *        columns,      // array of Column objects
+     *        enableSort,   // boolean whether sorting should be enabled
      *        sortby,       // column name, user selected or null
      *        sortOrder,    // asc (default) or desc
      *        page,         // current page object
