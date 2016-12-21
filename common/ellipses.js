@@ -67,7 +67,14 @@
                             }
                         };      
 
-                        resizeRow();
+                        scope.$watchCollection('rowValues', function (v) {
+                            $timeout(function() {
+                                timerCount = 0;
+                                containsOverflow = false, oldHeights = [];
+                                resizeRow();
+                            }, 10);
+                           
+                        });
                     }
                 }
             };
