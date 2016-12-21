@@ -468,7 +468,7 @@ testrecord:
 #Rule to run record add app tests
 .PHONY: testrecordadd
 testrecordadd:
-	$(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordMultiAdd)
+	$(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordDefaults)
 
 #Rule to run recordset app tests
 .PHONY: testrecordset

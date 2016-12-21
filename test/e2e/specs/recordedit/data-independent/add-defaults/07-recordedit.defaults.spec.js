@@ -36,7 +36,7 @@ describe('Record Add with defaults', function() {
                 // page url will have a id of 1 because it'll always be the first
                 // row of this table in the new catalog created by the defaults tests.
                 var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
-                redirectUrl += ":" + tableParams.table_name + '/id=1';
+                redirectUrl += ":" + testParams.table_name + '/id=1';
 
                 chaisePage.waitForUrl(redirectUrl).then(function() {
                     expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
