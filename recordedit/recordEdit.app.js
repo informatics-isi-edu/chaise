@@ -186,8 +186,7 @@
 
                         // populate defaults
                         angular.forEach($rootScope.reference.columns, function(column) {
-                            // typeof column.default !== "function"
-                            if (column.default) {
+                            if (column.default && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
                                 recordEditModel.rows[0][column.name] = column.default;
                             }
                         });
