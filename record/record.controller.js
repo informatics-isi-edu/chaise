@@ -3,8 +3,9 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', '$rootScope', '$window', function RecordController(AlertsService, $cookies, $log, UriUtils, $rootScope, $window) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window) {
         var vm = this;
+        var addRecordRequests = {}; // <generated unique id : reference of related table>
 
         vm.alerts = AlertsService.alerts;
         vm.showEmptyRelatedTables = false;
@@ -123,29 +124,56 @@
                 cookie.keys[fromColumn.name] = $rootScope.tuple.data[toColumn.name];
             });
             // 2. Generate a unique cookie name and set it to expire after 24hrs.
-            var COOKIE_NAME = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+            var COOKIE_NAME = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
             $cookies.putObject(COOKIE_NAME, cookie, {
                 expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
             });
-            // 3. Get appLink, append ?prefill=[COOKIE_NAME]
-            var appLink = newRef.appLink + '?prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME);
+
+            // Generate a unique id for this request
+            // append it to the URL
+            var referrer_id = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+            addRecordRequests[referrer_id] = ref.uri;
+
+            // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
+            var appLink = newRef.appLink;
+            appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
+                'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
+                '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
+
             // 4. Redirect to the url in a new tab
-            var window = $window.open(appLink, '_blank');
-            if (window) {
-                // Browser allowed the window to be opened, switch to it.
-                window.focus();
-            } else {
-                // Browser blocked the popup/new window/new tab. TODO: Just redirect in same window?
-                $window.location.href = appLink;
-            }
+            $window.open(appLink, '_blank');
         };
 
-        // Refactor this out to common folder if other apps need it
-        function getRandomInt(min, max) {
-          min = Math.ceil(min);
-          max = Math.floor(max);
-          return Math.floor(Math.random() * (max - min)) + min;
-        }
+        // When page gets focus, check cookie for completed requests
+        // re-read the records for that table
+        $window.onfocus = function() {
 
+            var completed = {};
+            for (var id in addRecordRequests) {
+                var cookie = $cookies.getObject(id);
+                if (cookie) { // add request has been completed
+                    completed[addRecordRequests[id]] = true;
+
+                    // remove cookie and request
+                    $cookies.remove(id);
+                    delete addRecordRequests[id];
+                }
+            }
+
+            // read updated tables
+            if (Object.keys(completed).length > 0) {
+                for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+                    var relatedTableReference = $rootScope.relatedReferences[i];
+                    if (completed[relatedTableReference.uri]) {
+                        (function (i) {
+                            relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
+                                $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
+                            });
+                        })(i);
+                    }
+                }
+            }
+
+        };
     }]);
 })();
