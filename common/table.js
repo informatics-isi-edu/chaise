@@ -64,10 +64,9 @@
                 scope.vm.hasLoaded = true;
 
                 $timeout(function() {
-                    scope.vm.foregoundSearch = false;
+                    scope.vm.foregroundSearch = false;
                 }, 200);
                 
-
                 // tell parent controller data updated
                 scope.$emit('recordset-update');
 
@@ -198,7 +197,7 @@
                         inputChangedPromise = $timeout(function() {
                             inputChangedPromise = null;
 
-                            if (!scope.vm.foregoundSearch) {
+                            if (!scope.vm.foregroundSearch) {
                                 scope.vm.backgroundSearch = true;
                                 scope.search(scope.vm.search);
                             }
@@ -208,7 +207,7 @@
 
                 scope.enterPressed = function() {
                     scope.vm.backgroundSearch = false;
-                    scope.vm.foregoundSearch = true;
+                    scope.vm.foregroundSearch = true;
                     scope.search(scope.vm.search);
                 };
 
