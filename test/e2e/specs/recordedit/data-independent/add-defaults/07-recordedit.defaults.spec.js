@@ -18,7 +18,7 @@ describe('Record Add with defaults', function() {
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 textInput = chaisePage.recordEditPage.getInputById(0, "text");
                 intInput = chaisePage.recordEditPage.getInputById(0, "int");
-                
+
                 expect(textInput.getAttribute("value")).toBe(testParams.text_value);
                 expect(intInput.getAttribute("value")).toBe(testParams.int_value);
             });
