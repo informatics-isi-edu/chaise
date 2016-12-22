@@ -780,6 +780,10 @@ function chaisePage() {
     this.waitForElement = function (locator, timeout) {
         return browser.wait(protractor.ExpectedConditions.visibilityOf(locator), timeout || browser.params.defaultTimeout);
     };
+
+    this.waitForElementCondition = function(condition, timeout) {
+        return browser.wait(condition, timeout || browser.params.defaultTimeout);
+    };
 };
 
 module.exports = new chaisePage();
