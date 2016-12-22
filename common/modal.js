@@ -44,6 +44,7 @@
             sortBy:             null,
             sortOrder:          null,
             enableSort:         true,
+            enableAutoSearch:   true,
             pageLimit:          25,
             search:             null
         };
@@ -51,6 +52,7 @@
         // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
         reference.read(25).then(function getPseudoData(page) {
             vm.tableModel.hasLoaded = true;
+            vm.tableModel.initialized = true;
             vm.tableModel.page = page;
             vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
         });

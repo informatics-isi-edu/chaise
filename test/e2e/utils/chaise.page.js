@@ -774,11 +774,11 @@ function chaisePage() {
             return browser.driver.getCurrentUrl().then(function(url) {
               return new RegExp(expectedUrlFragment).test(url);
             });
-        }, timeout || 5000);
+        }, timeout || browser.params.defaultTimeout);
     };
 
     this.waitForElement = function (locator, timeout) {
-        return browser.wait(protractor.ExpectedConditions.visibilityOf(locator), timeout || 5000);
+        return browser.wait(protractor.ExpectedConditions.visibilityOf(locator), timeout || browser.params.defaultTimeout);
     };
 };
 

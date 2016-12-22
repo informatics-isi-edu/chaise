@@ -44,14 +44,13 @@
                             }
                         };
 
-                        var timerCount = 0, containsOverflow = false, oldHeights = [];
+                        var timerCount = 0, containsOverflow = false;
 
                         var resizeRow = function() {
                             if (containsOverflow == false && timerCount ++ < 500) {
                                 
                                 for (var i = 0; i < element[0].children.length; i++) {
                                     var height = element[0].children[i].children[0].clientHeight;
-                                    if (height < oldHeights[i]) continue;
                                     if (height > maxHeight) {
                                         scope.overflow[i] = true;
                                         scope.hideContent = true;
@@ -67,7 +66,14 @@
                             }
                         };      
 
-                        resizeRow();
+                        scope.$watchCollection('rowValues', function (v) {
+                            $timeout(function() {
+                                timerCount = 0;
+                                containsOverflow = false;
+                                resizeRow();
+                            }, 10);
+                           
+                        });
                     }
                 }
             };
