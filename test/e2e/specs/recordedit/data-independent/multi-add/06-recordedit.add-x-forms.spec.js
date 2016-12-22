@@ -20,7 +20,6 @@ describe('Record Add', function() {
         beforeAll(function () {
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + ":" + testParams.table_name);
-            browser.sleep(browser.params.defaultTimeout);
         });
 
         it("should click the button and show an input box.", function() {
@@ -202,7 +201,7 @@ describe('Record Add', function() {
                             return (ct == 201);
                         });
                     }, browser.params.defaultTimeout);
-                    
+
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function(ct) {
                     expect(ct).toBe(201);

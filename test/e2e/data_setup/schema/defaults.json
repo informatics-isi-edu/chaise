@@ -1,8 +1,8 @@
 {
-    "schema_name": "editable-id",
+    "schema_name": "defaults",
     "tables": {
         "multi-add-table": {
-            "comment": "Table to represent adding multiple entities",
+            "comment": "Table to represent adding an entity with defaults.",
             "kind": "table",
             "keys": [
                 {
@@ -14,31 +14,33 @@
                 }
             ],
             "foreign_keys": [],
-            "table_name": "editable-id-table",
-            "schema_name": "editable-id",
+            "table_name": "defaults-table",
+            "schema_name": "defaults",
             "column_definitions": [
                 {
                     "name": "id",
                     "default": null,
                     "nullok": false,
                     "type": {
-                        "typename": "int"
+                        "typename": "serial4"
                     },
                     "annotations": {
                         "comment": [
                             "hidden"
-                        ]
+                        ],
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "text",
-                    "default": "default text",
+                    "default": "default",
                     "nullok": true,
                     "type": {
                         "typename": "text"
                     }
                 }, {
                     "name": "int",
-                    "default": 100,
+                    "default": 25,
                     "nullok": true,
                     "type": {
                         "typename": "int"
@@ -49,7 +51,7 @@
         }
     },
     "table_names": [
-        "editable-id-table"
+        "defaults-table"
     ],
     "comment": null,
     "annotations": {}
