@@ -6,6 +6,7 @@
     .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
+        var updated = {};
 
         vm.alerts = AlertsService.alerts;
         vm.showEmptyRelatedTables = false;
@@ -161,12 +162,14 @@
             }
 
             // read updated tables
-            if (Object.keys(completed).length > 0) {
+            if (Object.keys(completed).length > 0 || updated !== {}) {
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                     var relatedTableReference = $rootScope.relatedReferences[i];
-                    if (completed[relatedTableReference.uri]) {
+                    if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
+                        delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
                         (function (i) {
                             relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
+                                $rootScope.tableModels[i].page = page;
                                 $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
                             });
                         })(i);
@@ -175,5 +178,9 @@
             }
 
         };
+
+        window.updated = function(schemaName, tableName) {
+            updated[schemaName + ":" + tableName] = true;
+        }
     }]);
 })();

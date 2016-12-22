@@ -121,7 +121,8 @@
                                     viewable: true,
                                     editable: $rootScope.modifyRecord,
                                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                                    selectable: false
+                                    selectable: false,
+                                    isLink: (page.reference._derivedAssociationRef !== undefined) // TODO make _derivedAssociationRef available
                                 };
                                 $rootScope.tableModels[i] = model;
                             }, function readFail() {

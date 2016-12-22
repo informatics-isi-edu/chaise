@@ -3,10 +3,10 @@
         <a ng-if="config.viewable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-href="{{::viewLink}}">
             <span class="glyphicon glyphicon-eye-open" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="View"></span>
         </a>
-        <a ng-if="config.editable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canUpdate" ng-href="{{::editLink}}">
+        <a ng-if="config.editable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canUpdate" ng-href="{{::editLink}}" target="_blank">
             <span class="glyphicon glyphicon-pencil" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Edit"></span>
         </a>
-        <button ng-if="config.deletable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canDelete" ng-click="delete()" ng-switch="isAssociation">
+        <button ng-if="config.deletable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canDelete" ng-click="delete()" ng-switch="config.isLink">
             <span ng-switch-when="true" class="glyphicon glyphicon-remove-circle" style="color: black" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Unlink"></span>
             <span ng-switch-default class="glyphicon glyphicon-trash" style="color: black" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Delete"></span>
         </button>

@@ -198,6 +198,9 @@
                 });
 
                 if (hasNoChanges) {
+                    if (window.opener && window.opener.updated) {
+                        window.opener.updated($rootScope.reference.location.schemaName, $rootScope.reference.location.tableName);
+                    }
                     // Redirect to record without PUT'ing to ERMrest
                     vm.readyToSubmit = false;
                     vm.redirectAfterSubmission();
@@ -214,6 +217,9 @@
                     }
                     // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                     $rootScope.reference.update($rootScope.tuples).then(function success(page) {
+                        if (window.opener && window.opener.updated) {
+                            window.opener.updated($rootScope.reference.location.schemaName, $rootScope.reference.location.tableName);
+                        }
                         vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                         vm.redirectAfterSubmission(page);
                     }, function error(response) {

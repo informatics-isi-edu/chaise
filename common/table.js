@@ -133,7 +133,8 @@
             },
             link: function (scope, elem, attr) {
 
-                var addRecordRequests = {};
+                var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
+                var updated = false; // table refresh used by ellipses' edit action (new method)
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
 
@@ -232,7 +233,7 @@
 
                     scope.vm.backgroundSearch = false;
 
-                    var completed = 0;
+                    var completed = 0; // completed add record requests
                     for (var id in addRecordRequests) {
                         var cookie = $cookies.getObject(id);
                         if (cookie) {
@@ -243,9 +244,17 @@
                     }
 
                     // read
-                    if (completed > 0)
+                    if (completed > 0 || updated) {
+                        updated = false;
                         recordTableUtils.read(scope);
+                    }
+
                 };
+
+                // allow child window to call to indicate table has been updated
+                window.updated = function() {
+                    updated = true;
+                }
             }
         };
     }]);
