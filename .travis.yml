@@ -6,7 +6,7 @@ sudo: required
 dist: trusty
 
 branches:
-  only: 
+  only:
     - master
 
 addons:
@@ -83,15 +83,14 @@ before_script:
   - sudo -H -u webauthn webauthn2-manage assign test1 admin
 
 
-script: 
+script:
   - make build
   - make testnavbar
-  - make testrecord 
-  - make testrecordset 
-  - make testrecordadd 
-  - make testrecordedit 
-  - make testviewer 
-  - make testsearch 
+  - make testrecord
+  - make testrecordset
+  - make testrecordadd
+  - make testrecordedit
+  - make testviewer
   - make testlogin
 
 after_failure:

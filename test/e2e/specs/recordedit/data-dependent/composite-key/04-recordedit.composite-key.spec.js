@@ -87,12 +87,8 @@ describe('Add a record,', function() {
 
                             chaisePage.waitForUrl(redirectUrl, browser.params.defaultTimeout).then(function() {
                                 expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
-                                for (var i = 0; i < tableParams.column_names.length; i++) {
-                                    var columnName = tableParams.column_names[i];
-                                    var column = chaisePage.recordPage.getColumnValue(columnName);
-                                    browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
-                                    expect(column.getText()).toBeDefined();
-                                }
+
+                                recordEditHelpers.testRecordAppValuesAfterSubmission(tableParams);
                             }, function() {
                                 console.log("          Timed out while waiting for the url to be the new one");
                                 expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
