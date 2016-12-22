@@ -25,7 +25,6 @@
 
     .config(['$cookiesProvider', function($cookiesProvider) {
         $cookiesProvider.defaults.path = '/';
-        $cookiesProvider.defaults.secure = true;
     }])
 
     .run(['ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
@@ -66,15 +65,16 @@
                 // do nothing but return without a session
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
-                $rootScope.reference = ((context.filter && !context.copy) ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
+                $rootScope.reference = ((context.filter && !context.queryParams.copy) ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
                 $rootScope.reference.session = session;
+                $rootScope.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);
 
                 // Case for creating an entity, with prefilled values
-                if (context.prefill) {
+                if (context.queryParams.prefill) {
                     // get the cookie with the prefill value
-                    var cookie = $cookies.getObject(context.prefill);
+                    var cookie = $cookies.getObject(context.queryParams.prefill);
                     if (cookie) {
                         // Update view model
                         recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname;
@@ -113,7 +113,7 @@
                                 values = tuple.values;
 
                             $rootScope.tuples = page.tuples;
-                            $rootScope.displayname = (context.copy ? $rootScope.reference.displayname : tuple.displayname);
+                            $rootScope.displayname = (context.queryParams.copy ? $rootScope.reference.displayname : tuple.displayname);
 
                             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                 column = $rootScope.reference.columns[i];
@@ -153,7 +153,7 @@
                                         break;
                                 }
 
-                                if (!context.copy || !column.getInputDisabled(context.appContext)) {
+                                if (!context.queryParams.copy || !column.getInputDisabled(context.appContext)) {
                                     recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
                                 }
                             }
