@@ -56,6 +56,7 @@
         columns: [],
         sortby: null,       // column name, user selected or null
         sortOrder: null,    // asc (default) or desc
+        enableAutoSearch: true,
         enableSort: true,   // allow sorting
         page: null,         // current page
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
@@ -186,7 +187,7 @@
             }).then(function getPage(page) {
                 recordsetModel.page = page;
                 recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-
+                recordsetModel.initialized = true;
                 recordsetModel.hasLoaded = true;
             }, function error(response) {
                 throw response;
