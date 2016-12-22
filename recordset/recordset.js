@@ -45,7 +45,12 @@
         chaiseBaseURL: null
     })
 
-
+    // Configure all tooltips to be attached to the body by default. To attach a
+    // tooltip on the element instead, set the `tooltip-append-to-body` attribute
+    // to `false` on the element.
+    .config(['$uibTooltipProvider', function($uibTooltipProvider) {
+        $uibTooltipProvider.options({appendToBody: true});
+    }])
 
     // Register the 'recordsetModel' object, which can be accessed by other
     // services, but cannot be access by providers (and config, apparently).

@@ -88,7 +88,7 @@ exports.testPresentation = function (tableParams) {
 					expect(exists).toBeDefined();
 
 					// Check comment is same
-					expect(actualComment.getInnerHtml()).toBe(comment);
+                    expect(actualComment).toBe(comment);
 				});
 			});
 		});

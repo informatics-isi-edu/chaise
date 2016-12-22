@@ -268,11 +268,11 @@ var recordEditPage = function() {
     };
 
     this.getAllColumnCaptions = function() {
-        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"]');");
+        return browser.executeScript("return $('td.entity-key > span.column-displayname')");
     };
 
     this.getColumnsWithUnderline = function() {
-        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"].coltooltiplabel');");
+        return browser.executeScript("return $('td.entity-key > span.column-displayname[uib-tooltip]')");
     };
 
     this.getColumnWithAsterisk = function(el) {
@@ -280,7 +280,7 @@ var recordEditPage = function() {
     };
 
     this.getColumnComment = function(el) {
-        return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
+        return el.getAttribute('uib-tooltip');
     };
 
     this.getInputForAPageColumn = function(el, index) {
@@ -527,11 +527,11 @@ var recordPage = function() {
     };
 
     this.getAllColumnCaptions = function() {
-        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"]');");
+        return browser.executeScript("return $('td.entity-key > span.column-displayname')");
     };
 
     this.getColumnsWithUnderline = function() {
-        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"].coltooltiplabel');");
+        return browser.executeScript("return $('td.entity-key > span.column-displayname[uib-tooltip]')");
     };
 
     this.getColumnWithAsterisk = function(el) {
@@ -539,7 +539,7 @@ var recordPage = function() {
     };
 
     this.getColumnComment = function(el) {
-        return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
+        return el.getAttribute('uib-tooltip');
     };
 
     this.getColumnValueElements = function() {
@@ -652,11 +652,11 @@ var recordsetPage = function() {
     };
 
     this.getColumnsWithUnderline = function() {
-        return browser.executeScript("return $('td.entity-key').find('span[ng-class=\"{\\'coltooltiplabel\\': column.comment}\"].coltooltiplabel');");
+        return browser.executeScript("return $('span.table-column-displayname[uib-tooltip]')");
     };
 
     this.getColumnComment = function(el) {
-        return browser.executeScript("return $(arguments[0]).next('.coltooltiptext')[0];", el);
+        return el.getAttribute('uib-tooltip');
     };
 
     this.getSearchBox = function() {

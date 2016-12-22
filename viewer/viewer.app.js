@@ -39,6 +39,13 @@
         // TODO: Check if context has everything it needs before proceeding. If not, Bad Request
     }])
 
+    // Configure all tooltips to be attached to the body by default. To attach a
+    // tooltip on the element instead, set the `tooltip-append-to-body` attribute
+    // to `false` on the element.
+    .config(['$uibTooltipProvider', function($uibTooltipProvider) {
+        $uibTooltipProvider.options({appendToBody: true});
+    }])
+
     // Get a client connection to ERMrest
     // Note: Only Providers and Constants can be dependencies in .config blocks. So
     // if you want to use a factory or service (e.g. $window or your custom one)
