@@ -1,4 +1,4 @@
-<div class="row" style="margin-bottom: 10px;">
+<div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
     <div class="col-lg-4 col-md-5 col-sm-6 col-xs-7">
         <!-- search box -->
         <div class="input-group">
@@ -6,11 +6,12 @@
                    id="search-input"
                    ng-model="vm.search"
                    class="form-control"
-                   on-enter="search(vm.search)"
+                   on-enter="enterPressed()"
+                   ng-change="inputChanged()" 
                    placeholder="Search {{vm.tableDisplayName}}"
                     autofocus>
                 <span class="input-group-btn">
-                    <button id="search-submit" class="btn btn-primary" ng-click="search(vm.search)" role="button">
+                    <button id="search-submit" class="btn btn-primary" ng-click="enterPressed(vm.search)" role="button">
                         &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                     </button>
                     <button type="button" tabIndex="-1" class="btn btn-primary btn-no-focus coltooltip">
@@ -52,7 +53,7 @@
 </div>
 
 <!-- bottom pagination -->
-<div class="pager">
+<div class="pager" ng-show="vm.initialized && vm.hasLoaded && (vm.page.hasPrevious || vm.page.hasNext)">
     <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
         <span class="glyphicon glyphicon-chevron-left"></span>
     </button>

@@ -5,6 +5,7 @@ IMMUTABLE = "tag:isrd.isi.edu,2016:immutable",
 GENERATED = "tag:isrd.isi.edu,2016:generated";
 var chance = require('chance').Chance();
 var moment = require('moment');
+var EC = protractor.ExpectedConditions;
 
 exports.testPresentationAndBasicValidation = function(tableParams) {
 
@@ -830,3 +831,13 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	};
 
 };
+
+// params must include the names of the columns that you want to check for values of
+exports.testRecordAppValuesAfterSubmission = function(params) {
+    for (var i = 0; i < params.column_names.length; i++) {
+        var columnName = params.column_names[i];
+        var column = chaisePage.recordPage.getColumnValue(columnName);
+        browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
+        expect(column.getText()).toBeDefined();
+    }
+}
