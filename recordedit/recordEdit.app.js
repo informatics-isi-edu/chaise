@@ -186,11 +186,14 @@
 
                         // populate defaults
                         angular.forEach($rootScope.reference.columns, function(column) {
+                            // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
+                            // only want to set values in the input fields so make sure it isn't a function
+                            // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
                             if (column.default && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
                                 recordEditModel.rows[0][column.name] = column.default;
                             }
                         });
-
+                    // if there is a session, user isn't allowed to create
                     } else if (session) {
                         var forbiddenMessage = "You are not authorized to Create entities.";
                         var forbiddenError = new Error(forbiddenMessage);
@@ -198,6 +201,7 @@
                         forbiddenError.code = errorNames.forbidden;
 
                         throw forbiddenError;
+                    // user isn't logged in and neds permissions to create
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
