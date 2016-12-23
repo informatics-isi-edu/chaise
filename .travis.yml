@@ -92,6 +92,7 @@ script:
   - make testrecordedit
   - make testviewer
   - make testlogin
+  - make testsearch
 
 after_failure:
   - sudo ls -lR /etc/apache2
