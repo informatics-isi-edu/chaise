@@ -55,16 +55,21 @@
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
         function read(scope) {
+            
             scope.vm.hasLoaded = false;
 
+            var isBackground = !scope.vm.foregroundSearch && scope.vm.backgroundSearch;
+
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
+
+                if (scope.vm.foregroundSearch && isBackground) return;
 
                 scope.vm.page = page;
                 scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
                 scope.vm.hasLoaded = true;
 
                 $timeout(function() {
-                    scope.vm.foregroundSearch = false;
+                    if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 }, 200);
                 
                 // tell parent controller data updated
@@ -73,7 +78,6 @@
             }, function error(response) {
                 scope.vm.hasLoaded = true;
                 scope.$emit('error', response);
-
             })
         }
 
@@ -187,6 +191,7 @@
 
 
                 var inputChangedPromise;
+                
                 scope.inputChanged = function() {
                     if (scope.vm.enableAutoSearch) {
 
@@ -206,6 +211,7 @@
                 };
 
                 scope.enterPressed = function() {
+                    $timeout.cancel(inputChangedPromise);
                     scope.vm.backgroundSearch = false;
                     scope.vm.foregroundSearch = true;
                     scope.search(scope.vm.search);
