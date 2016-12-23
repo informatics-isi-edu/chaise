@@ -58,8 +58,8 @@ input[type=number]::-webkit-outer-spin-button {
     min-width: 112px;
 }
 
-.form-control-feedback.coltooltip > .coltooltiptext{
-    padding: 0;
+.form-control-feedback > span.foreignkey-remove {
+    border-bottom: none;
 }
 
 /*******Bootstrap  Modal styling *********/

@@ -45,6 +45,11 @@ a:hover, a:focus{
 button .glyphicon-trash {
     color: #fff;
 }
+
+span[uib-tooltip] {
+    border-bottom: 1px dotted black;
+}
+
 /****************** HEADER ******************/
 
 #header{
@@ -65,37 +70,6 @@ button .glyphicon-trash {
     font-size: 14px;
     margin: 0px 0 12px 0;
 }
-
-/****************** Entity Table ******************/
-
-.coltooltiplabel {
-    border-bottom: 1px dotted black;
-}
-
-.coltooltip .coltooltiptext {
-    display: none;
-    width: 100px;
-    background-color: #454545;
-    color: #f0f0f0;
-    text-align: center;
-    padding: 5px 5px;
-    border-radius: 6px;
-    font-size: 11px;
-    position: absolute;
-    z-index: 3;
-    text-transform: none;
-    white-space: normal;
-}
-
-.coltooltip .paragraph{
-    width: 200px;
-    text-align: left;
-}
-
-.coltooltip:hover .coltooltiptext {
-    display: inline-block;
-}
-
 
 /****************** ACCORDION ******************/
 

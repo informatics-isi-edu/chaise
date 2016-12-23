@@ -16,9 +16,7 @@
 * @param {String} label - If defined, this is the text to display on the UI control.
 * @param {String} button-size - Customize with 'xs', 'sm', or 'lg'. If undefined, the
 * default is the regular Bootstrap button size.
-* @param {String} tooltip - If defined, the UI control will display this tooltip
-* text when the user hovers over the control.
-* @example <delete-link button-size="sm" tooltip="Click to delete." icon="true" display="button" callback="ctrl.removeItem(item);"></delete-link>
+* @example <delete-link button-size="sm" icon="true" display="button" callback="ctrl.removeItem(item);"></delete-link>
 */
 
 (function() {
@@ -44,7 +42,6 @@
                 label: '@',
                 display: '@',
                 callback: '&',
-                tooltip: '@',
                 buttonSize: '@'
             },
             link: function(scope) {

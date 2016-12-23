@@ -544,11 +544,11 @@
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
-        var captionColumWidth = 130;
-        var marginLeft = captionColumWidth + 10;
+        var captionColumnWidth = 130;
+        var marginLeft = captionColumnWidth + 10;
 
         // Sets a fixed width for the columns, as they're positioned absolute
-        vm.captionColumWidth = { 'width' : captionColumWidth + "px" };
+        vm.captionColumnWidth = { 'width' : captionColumnWidth + "px" };
 
         // Sets margin-left for the formedit div as the first columns are positioned absolute
         // to avoid overlap between them
@@ -561,7 +561,7 @@
         // Adds height and width to the first empty heading of the first row
         // to make it uniform
         vm.firstHeaderStyle = {
-            'width' : captionColumWidth + "px",
+            'width' : captionColumnWidth + "px",
             'height' : headerHeight + "px"
         };
 
@@ -582,7 +582,7 @@
         // so that it doesn't scrolls due to the margin-left applied before extra padding
         function onResize(doNotInvokeEvent) {
             var elemWidth = formContainerEl.outerWidth();
-            vm.formEditDivMarginLeft.width = elemWidth - captionColumWidth - 30;
+            vm.formEditDivMarginLeft.width = elemWidth - captionColumnWidth - 30;
 
             if (!editMode) {
                 vm.formEditDivMarginLeft.width = vm.formEditDivMarginLeft.width -30 -5

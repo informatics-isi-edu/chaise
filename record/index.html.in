@@ -11,30 +11,26 @@
     <div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
             <div id="record-bookmark-container" class="col-xs-12 meta-icons">
-                <a id="create-record" class="coltooltip" ng-click="::ctrl.createRecord()" ng-if="reference && reference.canCreate && modifyRecord">
+                <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="reference && reference.canCreate && modifyRecord" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
-                    <span class="coltooltiptext">Click here to create a record</span>
                 </a>&nbsp;&nbsp;
-                <a id="edit-record" class="coltooltip" ng-click="::ctrl.editRecord()" ng-if="reference && reference.canUpdate && modifyRecord">
+                <a id="edit-record" ng-click="::ctrl.editRecord()" ng-if="reference && reference.canUpdate && modifyRecord" uib-tooltip="Click here to edit this record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
-                    <span class="coltooltiptext">Click here to edit this record</span>
                 </a>&nbsp;&nbsp;
-                <a id="copy-record" ng-click="::ctrl.copyRecord()" ng-if="reference && reference.canUpdate && modifyRecord">
+                <a id="copy-record" ng-click="::ctrl.copyRecord()" ng-if="reference && reference.canUpdate && modifyRecord" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-copy"></span> <strong>Copy</strong>
                 </a>&nbsp;&nbsp;
-                <delete-link id="delete-record" ng-if="reference && reference.canDelete && modifyRecord && showDeleteButton" label="Delete" tooltip="Click here to delete this record" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
-                <a id="show-all-related-tables" class="coltooltip" ng-click="ctrl.toggleRelatedTables();">
+                <delete-link id="delete-record" ng-if="reference && reference.canDelete && modifyRecord && showDeleteButton" label="Delete" uib-tooltip="Click here to delete this record." tooltip-placement="bottom" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
+                <a id="show-all-related-tables" ng-click="ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((ctrl.showEmptyRelatedTables) ? 'show empty related entities too.' : 'hide empty related entities.')}}" tooltip-placement="bottom">
                     <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
                     <strong>
                         <span ng-show="!ctrl.showEmptyRelatedTables">Show All</span>
                         <span ng-show="ctrl.showEmptyRelatedTables">Hide Empty</span>
                          Related Records
                     </strong>
-                    <span class="coltooltiptext">Click here to show empty related entities too.</span>
                 </a>&nbsp;&nbsp;
-                <a id="permalink" class="coltooltip" ng-href="{{ctrl.permalink()}}">
+                <a id="permalink" ng-href="{{ctrl.permalink()}}" uib-tooltip="This link stores your search criteria as a URL. Right click and save." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-bookmark"></span><strong> Permalink</strong>
-                    <span class="coltooltiptext">This link stores your search criteria as a URL. Right click and save.</span>
                 </a>
             </div>
             <alerts alerts="ctrl.alerts"></alerts>
