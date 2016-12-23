@@ -9,13 +9,13 @@ describe('Recordset add record,', function() {
     beforeAll(function () {
         browser.ignoreSynchronization = true;
         browser.get(browser.params.url + ":" + testParams.table_name);
-        browser.sleep(browser.params.defaultTimeout);
-
-        chaisePage.recordsetPage.getRows().then(function(rows) {
+        chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function() {
+            return chaisePage.recordsetPage.getRows();
+        }).then(function(rows) {
             rowCount = rows.length;
         });
+        
     });
-
 
     it("click on the add button should open a new tab to recordedit", function(done) {
 
@@ -38,10 +38,10 @@ describe('Recordset add record,', function() {
             var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
             expect(url.indexOf(result)).toBeGreaterThan(-1);
 
-
-            // set the required fields
-            browser.sleep(browser.params.defaultTimeout);
-            chaisePage.recordsetPage.getInputForAColumn("title").then(function(input) {
+            chaisePage.waitForElement(element(by.id('submit-record-button'))).then(function() {
+                // set the required fields
+                return chaisePage.recordsetPage.getInputForAColumn("title")
+            }).then(function(input) {
 
                 input.sendKeys(testParams.title);
                 return chaisePage.recordsetPage.getModalPopupBtn();
@@ -49,7 +49,8 @@ describe('Recordset add record,', function() {
             }).then(function(btn) {
                 return btn.click();
             }).then(function() {
-                browser.sleep(browser.params.defaultTimeout);
+                return chaisePage.waitForElement(element(by.id("divRecordSet")))
+            }).then(function() {
                 var rows = chaisePage.recordsetPage.getRows();
                 return rows.get(0).click();
             }).then(function() {
@@ -65,9 +66,8 @@ describe('Recordset add record,', function() {
                 return chaisePage.recordEditPage.submitForm();
             }).then(function() {
                 // wait until redirected to record page
-                var EC = protractor.ExpectedConditions,
-                    title = chaisePage.recordPage.getEntityTitleElement();
-                browser.wait(EC.presenceOf(title), 10000);
+                return chaisePage.waitForElement(element(by.id("tblRecord")));
+            }).finally(function() {
                 done();
             });
 
@@ -77,9 +77,11 @@ describe('Recordset add record,', function() {
     it("go back to recordset should refresh the table with the new record", function() {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
         browser.close();
-        browser.switchTo().window(allWindows[0]);
-        browser.sleep(browser.params.defaultTimeout);
-        chaisePage.recordsetPage.getRows().then(function(rows) {
+        browser.switchTo().window(allWindows[0]).then(function() {
+            return chaisePage.waitForElementInverse(element(by.id("spinner")));
+        }).then(function() {
+            return chaisePage.recordsetPage.getRows();
+        }).then(function(rows) {
             expect(rows.length).toBe(rowCount+1);
         });
     });

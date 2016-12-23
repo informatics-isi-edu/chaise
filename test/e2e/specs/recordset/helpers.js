@@ -70,15 +70,16 @@ exports.testPresentation = function (tableParams) {
 		var searchBox = chaisePage.recordsetPage.getSearchBox();
 		searchBox.sendKeys('Super 8 North Hollywood Motel');
 		chaisePage.recordsetPage.getSearchSubmitButton().click().then(function() {
-			browser.sleep(browser.params.defaultTimeout);
-			return chaisePage.recordsetPage.getRows();
+			return chaisePage.waitForElementInverse(element(by.id("spinner")));
+		}).then(function() {
+			return chaisePage.recordsetPage.getRows()
 		}).then(function(rows) {
 			expect(rows.length).toBe(1);
-
 			// clear search
 			return chaisePage.recordsetPage.getSearchClearButton().click();
 		}).then(function() {
-			browser.sleep(browser.params.defaultTimeout);
+			return chaisePage.waitForElementInverse(element(by.id("spinner")));
+		}).then(function() {
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
 			expect(rows.length).toBe(4);
@@ -88,7 +89,8 @@ exports.testPresentation = function (tableParams) {
 
 			return chaisePage.recordsetPage.getSearchSubmitButton().click();
 		}).then(function() {
-			browser.sleep(browser.params.defaultTimeout);
+			return chaisePage.waitForElementInverse(element(by.id("spinner")));
+		}).then(function() {
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
 			expect(rows.length).toBe(1);
@@ -100,16 +102,15 @@ exports.testPresentation = function (tableParams) {
 	});
 
 	it("click on row should redirect to record app", function() {
-        browser.sleep(browser.params.defaultTimeout);
-		chaisePage.recordsetPage.getRows().then(function(rows) {
-			rows[0].click().then(function() {
-                browser.driver.sleep(1000);
+        chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
+        	return chaisePage.recordsetPage.getRows();
+        }).then(function(rows) {
+        	rows[0].click();
 
-				return browser.driver.getCurrentUrl();
-			}).then(function(url) {
-				var result = '/record/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
-				expect(url.indexOf(result)).toBeGreaterThan(-1);
-			})
+        	var result = '/record/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
+        	chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
+                expect(browser.driver.getCurrentUrl()).toContain(result);
+            });
 		});
 
 	});
