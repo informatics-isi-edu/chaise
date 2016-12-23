@@ -9,13 +9,13 @@ describe('Recordset add record,', function() {
     beforeAll(function () {
         browser.ignoreSynchronization = true;
         browser.get(browser.params.url + ":" + testParams.table_name);
-        browser.sleep(browser.params.defaultTimeout);
-
-        chaisePage.recordsetPage.getRows().then(function(rows) {
+        chaisePage.waitForElement(element(by.id("divRecordSet"))).finally(function() {
+            return chaisePage.recordsetPage.getRows();
+        }).then(function(rows) {
             rowCount = rows.length;
         });
+        
     });
-
 
     it("click on the add button should open a new tab to recordedit", function(done) {
 
