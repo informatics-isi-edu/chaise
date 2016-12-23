@@ -13,15 +13,18 @@ describe('View existing record,', function() {
 
     			var table, record;
 
-				beforeAll(function () {
+				beforeAll(function(done) {
 					var keys = [];
 					tupleParams.keys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
 					});
 					browser.ignoreSynchronization=true;
-					browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
+                    var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
+					browser.get(url);
 					table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
-					browser.sleep(browser.params.defaultTimeout);
+					chaisePage.waitForUrl(url, browser.params.defaultTimeout).then(function() {
+                        done();
+                    });
 			    });
 
                 describe("Show the related entity tables,", function() {
