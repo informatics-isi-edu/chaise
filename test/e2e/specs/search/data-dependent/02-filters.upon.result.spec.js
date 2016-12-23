@@ -45,9 +45,15 @@ var testAttributes = function(attr, attrCount) {
 
         it('should show ' + attr.totalEntityCount + ' results in all for attribute ' + attr.text, function () {
             if (attr.totalEntityCount != undefined) {
-                browser.sleep(browser.params.defaultTimeout);
-                var allResults = chaisePage.resultContent.getAllResultRows();
-                expect(allResults.count()).toBe(attr.totalEntityCount);
+
+                browser.wait(function() {
+                    return chaisePage.resultContent.getAllResultRows().count().then(function(count) {
+                      return count == attr.totalEntityCount;
+                    });
+                }, browser.params.defaultTimeout).finally(function() {
+                    expect(chaisePage.resultContent.getAllResultRows().count()).toBe(attr.totalEntityCount);
+                });
+
             }
         });
 
@@ -81,9 +87,12 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
         });
 
         it('should show the \'Clear All Filters\' button', function () {
-            browser.sleep(browser.params.defaultTimeout);
             var clearAllBtn = filterObj.clearAllBtn;
-            expect(clearAllBtn.isDisplayed()).toBe(true);
+
+            chaisePage.waitForElementCondition(filterObj.clearAllBtn.isDisplayed()).finally(function() {
+                expect(clearAllBtn.isDisplayed()).toBe(true);
+            });
+            
         });
 
         it('should show \'' + attr.text + '\' wrapper', function () {
@@ -100,9 +109,13 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
 
             it('should show ' + filter.entityCount + ' results for filters ' + filter.content.join(','), function () {
                 if (filter.entityCount != undefined) {
-                    browser.sleep(browser.params.defaultTimeout);
-                    var allResults = chaisePage.resultContent.getAllResultRows();
-                    expect(allResults.count()).toBe(filter.entityCount);
+                    browser.wait(function() {
+                        return chaisePage.resultContent.getAllResultRows().count().then(function(count) {
+                          return count == filter.entityCount;
+                        });
+                    }, browser.params.defaultTimeout).finally(function() {
+                        expect(chaisePage.resultContent.getAllResultRows().count()).toBe(filter.entityCount);
+                    });
                 }
             });
 
@@ -132,6 +145,7 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
                 var el = chaisePage.resultContent.numOfRecords
                 el.getText().then(function(txt) {
                     expect(parseInt(txt)).toBe(filter.entityCount);
+                    //browser.pause();
                 });
             });
 
@@ -275,8 +289,9 @@ describe('Filters on top of the records,', function () {
 
         it('should click on tour button to start the tour', function() {
             tourButton.click().then(function() {
-                browser.sleep(browser.params.defaultTimeout);
-                expect(chaisePage.tourBox.isDisplayed()).toBe(true);
+                chaisePage.waitForElement(chaisePage.tourBox).finally(function() {
+                    expect(chaisePage.tourBox.isDisplayed()).toBe(true);
+                });
             });
         });
     });

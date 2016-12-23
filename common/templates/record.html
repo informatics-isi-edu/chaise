@@ -1,4 +1,4 @@
-<table class="table">
+<table class="table" id="tblRecord">
     <tr ng-repeat="column in columns" ng-if="::values[$index].value != null" id="{{'row-' + column.name}}">
         <td class="entity-key col-xs-2">
             <span class="column-displayname" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}">{{::column.displayname}}</span>
