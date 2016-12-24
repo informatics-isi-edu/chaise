@@ -17,7 +17,7 @@ describe('View existing record,', function() {
             browser.ignoreSynchronization=true;
             var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            chaisePage.waitForUrl(url).then(function() {
+            chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
                 done();
             });
         });
@@ -41,7 +41,7 @@ describe('View existing record,', function() {
 
             it("should redirect to recordedit when clicked.", function() {
                 copyButton.click().then(function() {
-                    return chaisePage.waitForUrl('recordedit');
+                    return chaisePage.waitForElement(element(by.id('submit-record-button')));
                 }).then(function() {
                     return browser.driver.getCurrentUrl();
                 }).then(function(url) {

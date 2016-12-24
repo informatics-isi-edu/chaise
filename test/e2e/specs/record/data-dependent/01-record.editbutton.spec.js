@@ -22,7 +22,7 @@ describe('View existing record,', function() {
                     var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
 					browser.get(url);
 					table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
-                    chaisePage.waitForUrl(url, browser.params.defaultTimeout).then(function() {
+                    chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
                         done();
                     });
 			    });
