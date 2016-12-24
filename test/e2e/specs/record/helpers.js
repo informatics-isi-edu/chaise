@@ -380,7 +380,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         }).then(function() {
             // ... wait for the page to load ...
             newTabUrl = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
-            chaisePage.waitForUrl(newTabUrl, browser.params.defaultTimeout);
+            return chaisePage.waitForElement(element(by.id('submit-record-button')));
         }).then(function() {
             // ... and then get the url from this new tab...
             return browser.driver.getCurrentUrl();
@@ -413,9 +413,9 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             relatedTableName = tableParams.related_table_name_with_more_results,
             relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
 
-        browser.wait(EC.elementToBeClickable(relatedTableLink), browser.params.defaultTimeout);
-
-        chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(count) {
+        browser.wait(EC.elementToBeClickable(relatedTableLink), browser.params.defaultTimeout).then(function() {
+            return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count();
+        }).then(function(count) {
             expect(count).toBe(tableParams.booking_count + 1);
             expect(relatedTableLink.isDisplayed()).toBeTruthy();
             return relatedTableLink.click();
