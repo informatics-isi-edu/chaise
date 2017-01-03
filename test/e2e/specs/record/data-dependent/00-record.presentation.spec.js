@@ -13,14 +13,20 @@ describe('View existing record,', function() {
 
     			var table, record;
 
-				beforeAll(function () {
+				beforeAll(function(done) {
 					var keys = [];
 					tupleParams.keys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
 					});
                     browser.ignoreSynchronization=true;
-					browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
+                    var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
+					browser.get(url);
 					table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
+                    var start = (new Date()).getTime();
+                    chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
+                        console.log((new Date()).getTime() - start);
+                        done();
+                    });
 			    });
 
                 it('should load document title defined in chaise-config.js and have deleteRecord=true', function(done) {
@@ -49,9 +55,11 @@ describe('View existing record,', function() {
         tupleParams.keys.forEach(function(key) {
             keys.push(key.name + key.operator + key.value);
         });
-        browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
-        browser.sleep(browser.params.defaultTimeout);
-        browser.executeScript('return chaiseConfig').then(function(config) {
+        var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
+        browser.get(url);
+        chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
+            return browser.executeScript('return chaiseConfig');
+        }).then(function(config) {
             chaiseConfig = config;
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
         }).then(function(elemArray) {

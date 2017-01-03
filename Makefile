@@ -486,7 +486,7 @@ testviewer:
 
 #Rule to run detailed app tests
 .PHONY: testlogin
-testdetailed:
+testlogin:
 	$(BIN)/protractor $(E2Elogin)
 
 # Rule to make html
@@ -730,3 +730,7 @@ usage:
 	@echo "    testrecordadd 	- runs data entry app add e2e tests"
 	@echo "    testrecordedit 	- runs data entry app edit e2e tests"
 	@echo "	   testrecord 		- runs record app e2e tests"
+	@echo "	   testrecordset 	- runs recordset app e2e tests"
+	@echo "	   testviewer   	- runs viewer app e2e tests"
+	@echo "	   testnavbar   	- runs navbar e2e tests"
+	@echo "	   testlogin    	- runs login app e2e tests"

@@ -53,23 +53,31 @@
      *          ErrorService.catchAll(exception);
      *      });
      */
-    .factory('recordTableUtils', ['DataUtils', function(DataUtils) {
+    .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
         function read(scope) {
+            
             scope.vm.hasLoaded = false;
 
+            var isBackground = !scope.vm.foregroundSearch && scope.vm.backgroundSearch;
+
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
+
+                if (scope.vm.foregroundSearch && isBackground) return;
 
                 scope.vm.page = page;
                 scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
                 scope.vm.hasLoaded = true;
 
+                $timeout(function() {
+                    if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+                }, 200);
+                
                 // tell parent controller data updated
                 scope.$emit('recordset-update');
 
             }, function error(response) {
                 scope.vm.hasLoaded = true;
                 scope.$emit('error', response);
-
             })
         }
 
@@ -137,7 +145,7 @@
         };
     }])
 
-    .directive('recordset', ['recordTableUtils', '$window', '$cookies', 'MathUtils', 'UriUtils', function(recordTableUtils, $window, $cookies, MathUtils, UriUtils) {
+    .directive('recordset', ['recordTableUtils', '$window', '$cookies', 'MathUtils', 'UriUtils','$timeout', function(recordTableUtils, $window, $cookies, MathUtils, UriUtils, $timeout) {
 
         return {
             restrict: 'E',
@@ -154,12 +162,13 @@
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
 
                 scope.setPageLimit = function(limit) {
+                    scope.vm.backgroundSearch = false;
                     scope.vm.pageLimit = limit;
                     recordTableUtils.read(scope);
                 };
 
                 scope.before = function() {
-
+                    scope.vm.backgroundSearch = false;
                     var previous = scope.vm.page.previous;
                     if (previous) {
 
@@ -170,7 +179,7 @@
                 };
 
                 scope.after = function() {
-
+                    scope.vm.backgroundSearch = false;
                     var next = scope.vm.page.next;
                     if (next) {
 
@@ -178,6 +187,34 @@
                         recordTableUtils.read(scope);
                     }
 
+                };
+
+
+                var inputChangedPromise;
+                
+                scope.inputChanged = function() {
+                    if (scope.vm.enableAutoSearch) {
+
+                        if (inputChangedPromise) {
+                            $timeout.cancel(inputChangedPromise);
+                        }
+
+                        inputChangedPromise = $timeout(function() {
+                            inputChangedPromise = null;
+
+                            if (!scope.vm.foregroundSearch) {
+                                scope.vm.backgroundSearch = true;
+                                scope.search(scope.vm.search);
+                            }
+                        }, 200);
+                    }
+                };
+
+                scope.enterPressed = function() {
+                    $timeout.cancel(inputChangedPromise);
+                    scope.vm.backgroundSearch = false;
+                    scope.vm.foregroundSearch = true;
+                    scope.search(scope.vm.search);
                 };
 
                 scope.search = function(term) {
@@ -191,6 +228,7 @@
                 };
 
                 scope.clearSearch = function() {
+                    scope.vm.backgroundSearch = false;
                     if (scope.vm.reference.location.searchTerm)
                         scope.search();
 
@@ -217,6 +255,9 @@
                 // on window focus, if has pending add record requests
                 // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
                 $window.onfocus = function() {
+
+                    scope.vm.backgroundSearch = false;
+
                     var completed = 0;
                     for (var id in addRecordRequests) {
                         var cookie = $cookies.getObject(id);

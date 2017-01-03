@@ -22,8 +22,9 @@ describe('Edit existing record,', function() {
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 
-					browser.sleep(browser.params.defaultTimeout);
-			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
+                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+                        return chaisePage.recordEditPage.getRecordModelRows()
+                    }).then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {
 			        		if (record[c.name]) {
@@ -33,7 +34,6 @@ describe('Edit existing record,', function() {
 			        		}
 			        	});
 			        });
-			        browser.sleep(browser.params.defaultTimeout);
 			    });
 
                 describe("delete existing record ", function () {
@@ -47,7 +47,7 @@ describe('Edit existing record,', function() {
                     it("from recordedit page and redirect to data browser.", function () {
                         var EC = protractor.ExpectedConditions,
                             modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
-                            config;
+                            config, redirectUrl;
 
                         browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
                             config = chaiseConfig;
@@ -61,11 +61,17 @@ describe('Edit existing record,', function() {
 
                             return chaisePage.recordPage.getConfirmDeleteButton().click();
                         }).then(function () {
-                            browser.driver.sleep(5000);
+                            redirectUrl = process.env.CHAISE_BASE_URL + "/search/";
+
+                            browser.wait(function () {
+                                return browser.driver.getCurrentUrl().then(function(url) {
+                                    return url.startsWith(redirectUrl);
+                                })
+                            });
 
                             return browser.driver.getCurrentUrl();
-                        }).then(function(url) {
-                            expect(url.indexOf('/search/')).toBeGreaterThan(-1);
+                        }).then(function (url) {
+                            expect(url.startsWith(redirectUrl)).toBe(true);
                         });
                     });
                 });

@@ -55,11 +55,22 @@ exports.parameterize = function(config, configParams) {
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
           browser.get(process.env.CHAISE_BASE_URL + "/login/");
-          browser.sleep(browser.params.defaultTimeout);
-          browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"'));
-        }
+          browser.ignoreSynchronization = true;
+          
+          browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
+            browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
+              browser.ignoreSynchronization = false;
+              defer.resolve();
+            });
+          
+          }, function() {
+            defer.reject();
+          });
 
-        defer.resolve();
+        } else {
+          defer.resolve();
+        }
+        
       }, function(err) {
         catalogId = err.catalogId;
         console.log(err);
@@ -75,15 +86,6 @@ exports.parameterize = function(config, configParams) {
         browser.params.defaultTable = data.defaultTable;
         browser.params.catalogId = data.catalogId;
 
-        // Visit the default page and set the authorization cookie if required
-        if (testConfiguration.authCookie) {
-          console.log("setting up cookie");
-          browser.get(process.env.CHAISE_BASE_URL + "/login/");
-          browser.sleep(browser.params.defaultTimeout);
-          browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"'));
-          browser.sleep(100);
-        }
-
         // Set the base url to the page that we are running the tests for
         browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
 
@@ -93,7 +95,25 @@ exports.parameterize = function(config, configParams) {
 
         console.log(browser.params.baseUrl);
 
-        defer.resolve();
+        // Visit the default page and set the authorization cookie if required
+        if (testConfiguration.authCookie) {
+          console.log("setting up cookie");
+          browser.get(process.env.CHAISE_BASE_URL + "/login/");
+          browser.ignoreSynchronization = true;
+          
+          browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))),browser.params.defaultTimeout).then(function() {
+            browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
+              browser.ignoreSynchronization = false;
+              defer.resolve();
+            });
+          
+            
+          }, function() {
+            defer.reject();
+          });
+        } else {
+          defer.resolve();
+        }
       }, function(err) {
         catalogId = err.catalogId;
         defer.reject(new Error(err));

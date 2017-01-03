@@ -45,7 +45,12 @@
         chaiseBaseURL: null
     })
 
-
+    // Configure all tooltips to be attached to the body by default. To attach a
+    // tooltip on the element instead, set the `tooltip-append-to-body` attribute
+    // to `false` on the element.
+    .config(['$uibTooltipProvider', function($uibTooltipProvider) {
+        $uibTooltipProvider.options({appendToBody: true});
+    }])
 
     // Register the 'recordsetModel' object, which can be accessed by other
     // services, but cannot be access by providers (and config, apparently).
@@ -56,6 +61,7 @@
         columns: [],
         sortby: null,       // column name, user selected or null
         sortOrder: null,    // asc (default) or desc
+        enableAutoSearch: true,
         enableSort: true,   // allow sorting
         page: null,         // current page
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
@@ -186,7 +192,7 @@
             }).then(function getPage(page) {
                 recordsetModel.page = page;
                 recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-
+                recordsetModel.initialized = true;
                 recordsetModel.hasLoaded = true;
             }, function error(response) {
                 throw response;
