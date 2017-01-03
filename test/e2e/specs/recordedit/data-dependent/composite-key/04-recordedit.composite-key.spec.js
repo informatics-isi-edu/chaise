@@ -11,13 +11,11 @@ describe('Add a record,', function() {
 
     		describe("For table " + tableParams.table_name + ",", function() {
 
-    			var table, record;
+    			var record;
 
 				beforeAll(function () {
 					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
-					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					browser.sleep(browser.params.defaultTimeout);
 			    });
 
                 describe("Presentation and validation for an entity with a composite key,", function() {
@@ -26,7 +24,11 @@ describe('Add a record,', function() {
                         var modalTitle = chaisePage.recordEditPage.getModalTitle(),
                         	EC = protractor.ExpectedConditions;
 
-                        chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+                        // make sure recordedit is loaded
+                        chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+
+                            return chaisePage.recordEditPage.getModalPopupBtnsUsingScript();
+                        }).then(function(popupBtns) {
 
                             return chaisePage.clickButton(popupBtns[3]);
                         }).then(function() {
