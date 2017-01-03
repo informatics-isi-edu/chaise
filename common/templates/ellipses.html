@@ -1,29 +1,29 @@
 <td ng-if="config.viewable || config.editable || config.deletable || config.selectable" class="block" style="width: 1px; white-space: nowrap">
     <div class="btn-group" style="display: flex">
-        <a ng-if="config.viewable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-href="{{::viewLink}}">
-            <span class="glyphicon glyphicon-eye-open" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="View"></span>
+        <a ng-if="config.viewable" type="button" class="view-action-button btn btn-xs btn-default btn-no-focus" ng-href="{{::viewLink}}" tooltip-placement="bottom" uib-tooltip="View">
+            <span class="glyphicon glyphicon-eye-open"></span>
         </a>
-        <a ng-if="config.editable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canUpdate" ng-href="{{::editLink}}" target="_blank">
-            <span class="glyphicon glyphicon-pencil" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Edit"></span>
+        <a ng-if="config.editable" type="button" class="edit-action-button btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canUpdate" ng-href="{{::editLink}}" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
+            <span class="glyphicon glyphicon-pencil"></span>
         </a>
-        <button ng-if="config.deletable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canDelete" ng-click="delete()" ng-switch="config.isLink">
-            <span ng-switch-when="true" class="glyphicon glyphicon-remove-circle" style="color: black" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Unlink"></span>
-            <span ng-switch-default class="glyphicon glyphicon-trash" style="color: black" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Delete"></span>
+        <button ng-if="config.deletable" type="button" class="delete-action-button btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canDelete" ng-click="delete()" ng-switch="config.isLink">
+            <span ng-switch-when="true" class="glyphicon glyphicon-remove-circle" style="border-bottom:none;" tooltip-placement="bottom" uib-tooltip="Unlink"></span>
+            <span ng-switch-default class="glyphicon glyphicon-trash" style="color: black; border-bottom: none" tooltip-placement="bottom" uib-tooltip="Delete"></span>
         </button>
-        <button ng-if="config.selectable" type="button" class="btn btn-xs btn-default btn-no-focus" ng-click="onSelect()">
-            <span class="glyphicon glyphicon-check" tooltip-placement="bottom" tooltip-append-to-body=true uib-tooltip="Select"></span>
+        <button ng-if="config.selectable" type="button" class="select-action-button btn btn-xs btn-default btn-no-focus" ng-click="onSelect()" tooltip-placement="bottom" uib-tooltip="Select" >
+            <span class="glyphicon glyphicon-check"></span>
         </button>
     </div>
 </td>
 <td ng-repeat="val in rowValues track by $index">
     <div ng-switch="val.isHTML">
-        <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" ng-style="overflow[$index] && maxHeightStyle">
+        <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" ng-style="overflow[$index+1] && maxHeightStyle">
             <span ng-switch-when="true" class="markdown-container" bind-html-unsafe="val.value"></span>
             <span ng-switch-default ng-bind="val.value"></span>
         </div>
-        <div ng-if="overflow[$index]" style="display:inline;">
+        <div ng-if="overflow[$index+1]" style="display:inline;">
             ...
-            <span style="display:inline-block; text-decoration: underline" class="text-primary readmore" ng-click="readmore($index)">{{linkText}}</span>
+            <span style="display:inline-block; text-decoration: underline" class="text-primary readmore" ng-click="readmore($index+1)">{{linkText}}</span>
         </div>
     </div>
 </td>
