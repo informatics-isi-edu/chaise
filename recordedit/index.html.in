@@ -89,7 +89,7 @@
                                         </td>
                                     </tr>
                                     <tr class="entity" ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
-                                        <td ng-style="form.captionColumWidth" class="entity-key col-xs-1">
+                                        <td ng-style="form.captionColumnWidth" class="entity-key col-xs-1">
                                             <span ng-if="::form.isRequired(column);" class="text-danger">*</span>
                                             <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">{{::column.displayname}}</span>
                                         </td>
