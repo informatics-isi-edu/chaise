@@ -171,7 +171,6 @@ describe('The initial sidebar,', function () {
                 viewAll.click();
                 chaisePage.moreFilter.clickMorefilterAttrByName(previousCheckedText);
                 chaisePage.moreFilter.clickMorefilterAttrByName(previousUncheckedText);
-                browser.sleep(100);
                 chaisePage.moreFilter.goBackToSidebar();
             });
             it('should show previously unchecked attribute', function () {

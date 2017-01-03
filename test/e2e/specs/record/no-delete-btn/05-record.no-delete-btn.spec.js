@@ -13,15 +13,18 @@ describe('View existing record,', function() {
 
     			var table, record;
 
-				beforeAll(function () {
+				beforeAll(function(done) {
 					var keys = [];
 					tupleParams.deleteKeys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
 					});
 					browser.ignoreSynchronization=true;
-					browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
+                    var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
+					browser.get(url);
 					table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
-					browser.sleep(browser.params.defaultTimeout);
+					chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
+                        done();
+                    });
 			    });
 
 			    it("should load chaise-config.js and have confirmDelete=true and dataBrowser=''", function() {

@@ -2,6 +2,13 @@
 
 var chaiseRecordApp = angular.module("chaiseRecordApp", ['ngResource', 'ngRoute', 'ui.bootstrap','ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.grid.selection', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.grouping', 'ui.grid.infiniteScroll', 'ngCookies', 'ngSanitize', 'chaise.utils', 'chaise.navbar']);
 
+// Configure all tooltips to be attached to the body by default. To attach a
+// tooltip on the element instead, set the `tooltip-append-to-body` attribute
+// to `false` on the element.
+chaiseRecordApp.config(['$tooltipProvider', function($tooltipProvider) {
+    $tooltipProvider.options({appendToBody: true});
+}]);
+
 // Refreshes page when fragment identifier changes
 setTimeout(function(){
 

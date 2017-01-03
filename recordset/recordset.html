@@ -16,12 +16,12 @@
         </div>
 
         <!-- loading spinner -->
-        <div ng-show="!vm.hasLoaded" id="spinner">
+        <div ng-show="!vm.hasLoaded && !vm.backgroundSearch" id="spinner">
             <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
             <div style="margin-top: 15px;">Loading...</div>
         </div>
 
-        <div ng-show="vm.hasLoaded">
+        <div>
             <recordset vm="vm" default-row-linking="true"></recordset>
         </div>
 

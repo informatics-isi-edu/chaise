@@ -3,7 +3,6 @@ var mustache = require('../../../../../ermrestjs/vendor/mustache.min.js');
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
-        browser.sleep(100);
 		chaisePage.recordPage.getEntityTitle().then(function(txt) {
 			expect(txt).toBe(tableParams.title);
 		});
@@ -88,7 +87,7 @@ exports.testPresentation = function (tableParams) {
 					expect(exists).toBeDefined();
 
 					// Check comment is same
-					expect(actualComment.getInnerHtml()).toBe(comment);
+                    expect(actualComment).toBe(comment);
 				});
 			});
 		});
@@ -362,7 +361,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
     });
 
     it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
-        var EC = protractor.ExpectedConditions,
+        var EC = protractor.ExpectedConditions, newTabUrl,
             relatedTableName = tableParams.related_table_name_with_more_results,
             addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
 
@@ -379,17 +378,16 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             // ... and switch to the new tab here...
             return browser.switchTo().window(allWindows[1]);
         }).then(function() {
+            // ... wait for the page to load ...
+            newTabUrl = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
+            return chaisePage.waitForElement(element(by.id('submit-record-button')));
+        }).then(function() {
             // ... and then get the url from this new tab...
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-
-            var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
-            expect(url.indexOf(result)).toBeGreaterThan(-1);
+            expect(url.indexOf(newTabUrl)).toBeGreaterThan(-1);
             expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
-
-            // set the required fields
-            browser.sleep(10000);
-            return chaisePage.recordsetPage.getInputForAColumn("price")
+            return chaisePage.recordsetPage.getInputForAColumn("price");
         }).then(function(input) {
             input.sendKeys(testParams.price);
             var nowBtn = element.all(by.css('button[name="booking_date"]')).get(1);
@@ -398,28 +396,27 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page
-            var EC = protractor.ExpectedConditions,
-                title = chaisePage.recordPage.getEntityTitleElement();
-            browser.wait(EC.presenceOf(title), 10000);
+            var title = chaisePage.recordPage.getEntityTitleElement();
+            browser.wait(EC.presenceOf(title), browser.params.defaultTimeout);
             done();
+        }).catch(function(error) {
+            console.log(error);
+            expect('There was an error in this promise chain').toBe('Please see error message.');
         });
     });
 
     it("should have a new record, View More link for a related table that redirects to recordset.", function(done) {
-
         browser.close();
         browser.switchTo().window(allWindows[0]);
-        browser.sleep(10000);
 
         var EC = protractor.ExpectedConditions,
             relatedTableName = tableParams.related_table_name_with_more_results,
             relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
 
-        browser.wait(EC.elementToBeClickable(relatedTableLink), browser.params.defaultTimeout);
-
-        chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(count) {
+        browser.wait(EC.elementToBeClickable(relatedTableLink), browser.params.defaultTimeout).then(function() {
+            return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count();
+        }).then(function(count) {
             expect(count).toBe(tableParams.booking_count + 1);
-
             expect(relatedTableLink.isDisplayed()).toBeTruthy();
             return relatedTableLink.click();
         }).then(function() {
