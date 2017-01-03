@@ -9,16 +9,17 @@
                    on-enter="enterPressed()"
                    ng-change="inputChanged()" 
                    placeholder="Search {{vm.tableDisplayName}}"
-                    autofocus>
+                    autofocus
+                   ng-disabled="!vm.hasLoaded && !vm.backgroundSearch">
                 <span class="input-group-btn">
-                    <button id="search-submit" class="btn btn-primary" ng-click="enterPressed(vm.search)" role="button">
+                    <button id="search-submit" class="btn btn-primary" ng-click="enterPressed(vm.search)" role="button" ng-disabled="!vm.hasLoaded && !vm.backgroundSearch">
                         &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                     </button>
                     <button type="button" tabIndex="-1" class="btn btn-primary btn-no-focus" tooltip-placement="bottom"
                     uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>usc 1234</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
                         <span class="glyphicon glyphicon-question-sign"></span>
                     </button>
-                    <button id="search-clear" class="btn btn-primary" ng-disabled="!vm.reference.location.searchTerm" ng-click="clearSearch()" type="button">Reset</button>
+                    <button id="search-clear" class="btn btn-primary" ng-disabled="!vm.reference.location.searchTerm || (!vm.hasLoaded && !vm.backgroundSearch)" ng-click="clearSearch()" type="button">Reset</button>
                 </span>
         </div>
     </div>
