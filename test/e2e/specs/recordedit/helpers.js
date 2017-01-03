@@ -108,7 +108,11 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				it("should click add record button", function() {
 					chaisePage.recordEditPage.getAddRowButton().then(function(button) {
 						chaisePage.clickButton(button);
-						browser.sleep(browser.params.defaultTimeout);
+                        browser.wait(function() {
+                            return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                                return (ct == recordIndex + 1);
+                            });
+                        }, browser.params.defaultTimeout);
 					});
 				});
 			};
@@ -367,8 +371,12 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                            }).then(function(text) {
 	                                // make sure modal opened
 	                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
-                                    // TODO: What is this 5-sec sleep for? To make sure all rows are loaded?
-									browser.sleep(5000);
+
+                                    browser.wait(function () {
+                                        return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                            return (ct > 0);
+                                        });
+                                    });
 	                                rows = chaisePage.recordsetPage.getRows();
 	                                // count is needed for clicking a random row
 	                                return rows.count();
