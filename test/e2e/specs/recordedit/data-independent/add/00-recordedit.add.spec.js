@@ -1,4 +1,4 @@
-var chaisePage = require('../../../../utils/chaise.page.js'), IGNORE = "tag:isrd.isi.edu,2016:ignore", HIDDEN = "tag:misd.isi.edu,2015:hidden";
+var chaisePage = require('../../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../helpers.js'), chance = require('chance').Chance();
 
 describe('Record Add', function() {
@@ -8,20 +8,20 @@ describe('Record Add', function() {
     for (var i=0; i< testParams.tables.length; i++) {
 
     	(function(tableParams, index) {
-    		var table;
 
     		describe("======================================================================= \n    "
     			+ tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
 
-				beforeAll(function () {
+				beforeAll(function (done) {
 					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
-					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					browser.sleep(browser.params.defaultTimeout);
+                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+                        done();
+                    });
 			    });
 
 				describe("Presentation and validation,", function() {
-					var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
+                    var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
 				});
 
 				describe("delete record, ", function() {
@@ -87,34 +87,48 @@ describe('Record Add', function() {
 
 					it("should be redirected to record page", function() {
 						if (!hasErrors) {
-							browser.sleep(browser.params.defaultTimeout);
-							browser.driver.getCurrentUrl().then(function(url) {
-						        if (tableParams.records > 1) {
-                                    // doesn't redirect
-						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
+                            // doesn't redirect to record
+                            if (tableParams.records > 1) {
+                                // wait for url change
+                                browser.wait(function () {
+                                    return browser.driver.getCurrentUrl().then(function(url) {
+                                        return url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/");
+                                    });
+                                }, browser.params.defaultTimeout);
+                                // verify url and ct
+                                browser.driver.getCurrentUrl().then(function(url) {
+    						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
 
                                     chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                         expect(ct).toBe(tableParams.records);
                                     });
-						        } else {
-						        	expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
-						        }
-						    });
+                                });
+                            // redirects to record
+						    } else {
+                                // wait for url change
+                                browser.wait(function () {
+                                    return browser.driver.getCurrentUrl().then(function(url) {
+                                        return url.startsWith(process.env.CHAISE_BASE_URL + "/record/");
+                                    });
+                                }, browser.params.defaultTimeout);
+                                // cerify url
+                                browser.driver.getCurrentUrl().then(function(url) {
+                                    expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
+                                });
+						    }
 						}
 					});
-
 				});
     		});
-
     	})(testParams.tables[i], i);
-
     }
 
     it('should load custom CSS and document title defined in chaise-config.js', function() {
         var chaiseConfig;
         browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
-        browser.sleep(browser.params.defaultTimeout);
-        browser.executeScript('return chaiseConfig').then(function(config) {
+        chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+            return browser.executeScript('return chaiseConfig');
+        }).then(function(config) {
             chaiseConfig = config;
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
         }).then(function(elemArray) {
@@ -130,7 +144,7 @@ describe('Record Add', function() {
         beforeAll(function() {
             // Refresh the page
             browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
-            browser.sleep(browser.params.defaultTimeout);
+            browser.sleep(100);
 
             // Write a dummy cookie for creating a record in Accommodation table
             testCookie = {
@@ -142,11 +156,12 @@ describe('Record Add', function() {
 
             // Reload the page with prefill query param in url
             browser.get(browser.params.url + ":" + testParams.tables[0].table_name + '?prefill=test');
-            browser.sleep(browser.params.defaultTimeout);
         });
 
         it('should pre-fill fields from the prefill cookie', function() {
-            browser.manage().getCookie('test').then(function(cookie) {
+            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+                return browser.manage().getCookie('test');
+            }).then(function(cookie) {
                 if (cookie) {
                     var field = element.all(by.css('.popup-select-value')).first();
                     expect(field.getText()).toBe(testCookie.rowname);

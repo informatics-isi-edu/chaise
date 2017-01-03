@@ -11,7 +11,7 @@ describe('Add a record,', function() {
 
     		describe("For table " + table.table_name + ",", function() {
 
-    			var table, record;
+    			var record;
 
 				beforeAll(function () {
                     var keys = [];
@@ -21,8 +21,6 @@ describe('Add a record,', function() {
 
 					browser.ignoreSynchronization = true;
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
-					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-					browser.sleep(browser.params.defaultTimeout);
 			    });
 
                 xit("the delete button should be disabled during submission and re-enabled after a conflict error.", function() {
@@ -30,7 +28,10 @@ describe('Add a record,', function() {
                         deleteBtn = chaisePage.recordEditPage.getDeleteRecordButton(),
                         submitBtn = chaisePage.recordEditPage.getSubmitRecordButton();
 
-                    chaisePage.recordEditPage.getInputForAColumn("id", 0).then(function(idInput) {
+                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+
+                        return chaisePage.recordEditPage.getInputForAColumn("id", 0);
+                    }).then(function(idInput) {
                         chaisePage.recordEditPage.clearInput(idInput);
                         browser.sleep(10);
 

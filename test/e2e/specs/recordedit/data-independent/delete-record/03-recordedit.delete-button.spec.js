@@ -22,8 +22,9 @@ describe('Delete existing record,', function() {
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 
-					browser.sleep(browser.params.defaultTimeout);
-			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
+                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+                        return chaisePage.recordEditPage.getRecordModelRows()
+                    }).then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {
 			        		if (record[c.name]) {
@@ -33,7 +34,6 @@ describe('Delete existing record,', function() {
 			        		}
 			        	});
 			        });
-			        browser.sleep(100);
 			    });
 
                 describe("delete existing record ", function () {

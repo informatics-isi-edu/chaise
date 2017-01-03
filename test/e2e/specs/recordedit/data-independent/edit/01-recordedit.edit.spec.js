@@ -22,8 +22,9 @@ describe('Edit existing record,', function() {
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
 					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 
-					browser.sleep(browser.params.defaultTimeout);
-			        chaisePage.recordEditPage.getRecordModelRows().then(function(records) {
+                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+                        return chaisePage.recordEditPage.getRecordModelRows();
+                    }).then(function(records) {
 			        	browser.params.record = record = records[0];
 			        	table.column_definitions.forEach(function(c) {
 			        		if (record[c.name]) {
@@ -33,7 +34,6 @@ describe('Edit existing record,', function() {
 			        		}
 			        	});
 			        });
-			        browser.sleep(100);
 			    });
 
 
@@ -50,7 +50,6 @@ describe('Edit existing record,', function() {
 					var hasErrors = false;
 
 					it("should have no errors, and should be redirected", function() {
-						browser.sleep(5000);
 						chaisePage.recordEditPage.getAlertError().then(function(err) {
 							if (err) {
 								expect("Page has errors").toBe("No errors");
