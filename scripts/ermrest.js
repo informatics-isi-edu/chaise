@@ -435,7 +435,8 @@ function getTableColumns(options, successCallback) {
 	};
 
 	PRIMARY_KEY = [];
-	if (metadata['keys'] != null) {
+	getPreferedPrimaryKey(metadata);
+	if (PRIMARY_KEY.length == 0 && metadata['keys'] != null) {
 		var unique_columns = [];
 		$.each(metadata['keys'], function(i, key) {
 			if (key['unique_columns'] != null) {
@@ -1370,7 +1371,7 @@ function getSortQuery(sortOption, isAttribute) {
 function getSortClause(table, sortOption, sortOrder, isAttribute) {
 	var field = encodeSafeURIComponent(sortOption);
 	var rankColumn = getSortColumn(table, sortOption, 'rank');
-	var sortField = rankColumn;
+	var sortField = encodeSafeURIComponent(rankColumn);
 	
 	if (sortOrder == 'desc') {
 		sortField += '::desc::';
@@ -3980,14 +3981,14 @@ function getSortPredicate(data, sortColumn, sortOrder, page, pageSize) {
 		var offsetPredicate = [];
 		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
 		$.each(PRIMARY_KEY, function(i, primaryCol) {
-			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + (data[(page-1)*pageSize][primaryCol] == null ? '::null::' : ('::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]))));
 		});
 		sortPredicate.push(offsetPredicate.join('&'));
 	} else {
 		var offsetPredicate = [];
 		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
 		$.each(PRIMARY_KEY, function(i, primaryCol) {
-			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + (data[(page-1)*pageSize][primaryCol] == null ? '::null::' : ('::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]))));
 		});
         sortPredicate.push(offsetPredicate.join('&'));
 		sortPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
@@ -4172,3 +4173,24 @@ function getColumnAnnotation(table_name, column_name, annotation, key) {
 	return ret;
 }
 
+function getPreferedPrimaryKey(metadata) {
+	if (metadata['keys'] != null) {
+		var column_definitions = metadata['column_definitions'];
+		$.each(metadata['keys'], function(i, key) {
+			if (key['unique_columns'] != null && key['unique_columns'].length == 1) {
+				var column_name = key['unique_columns'][0];
+				$.each(column_definitions, function(j, col) {
+					if (col['name'] ==  column_name) {
+						if (col['nullok'] == false) {
+							PRIMARY_KEY.push(encodeSafeURIComponent(column_name));
+						}
+						return false;
+					}
+				});
+				if (PRIMARY_KEY.length > 0) {
+					return false;
+				}
+			}
+		});
+	}
+}

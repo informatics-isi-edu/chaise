@@ -14,7 +14,7 @@ describe('Record Add with defaults', function() {
         });
 
         it("should prefill simple input fields with the default value.", function() {
-            // good way to know recordedit has loaded
+            // way to know recordedit has loaded
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 textInput = chaisePage.recordEditPage.getInputById(0, "text");
                 intInput = chaisePage.recordEditPage.getInputById(0, "int");
