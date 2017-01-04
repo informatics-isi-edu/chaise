@@ -34,20 +34,6 @@
                         if (scope.config.deletable) {
                             scope.delete = function () {
 
-                                var deleteReference;
-
-                                // if table is compact/brief and is based on binary association table
-                                // delete the linking
-                                // WATCH OUT! Using tuple's reference's context, which is current the same as its table's reference
-                                // Just case this logic changes in ErmrestJs
-                                // TODO jchen make _derivedAssociationRef available
-                                // TODO _derivedAssociationRef is wrong!!!! It's a table, not a row
-                                if (scope.context === "compact/brief" && scope.tuple.reference._derivedAssociationRef)
-                                    deleteReference = scope.tuple.reference._derivedAssociationRef;
-                                else
-                                    deleteReference = scope.tuple.reference;
-
-                                // else
                                 if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                                     $uibModal.open({
                                         templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -56,7 +42,15 @@
                                         size: "sm"
                                     }).result.then(function success() {
                                         // user accepted prompt to delete
-                                        return deleteReference.delete();
+
+                                        // if table is compact/brief and is based on binary association table
+                                        // delete the linking
+                                        if (scope.context === "compact/brief" && scope.config.isLink) {
+                                            return scope.tuple.unlinkAssociation();
+                                        } else {
+                                            return scope.tuple.reference.delete();
+                                        }
+
                                     }).then(function deleteSuccess() {
 
                                         // tell parent controller data updated
@@ -72,18 +66,36 @@
                                         scope.$emit('error', response);
                                     });
                                 } else {
-                                    deleteReference.delete().then(function deleteSuccess() {
 
-                                        // tell parent controller data updated
-                                        scope.$emit('record-modified');
+                                    // if table is compact/brief and is based on binary association table
+                                    // delete the linking
+                                    if (scope.context === "compact/brief" && scope.config.isLink) {
+                                        scope.tuple.unlinkAssociation().then(function deleteSuccess() {
 
-                                    }, function deleteFailure(response) {
-                                        scope.$emit('error', response);
-                                        $log.warn(response);
-                                    }).catch(function (error) {
-                                        scope.$emit('error', response);
-                                        $log.info(error);
-                                    });
+                                            // tell parent controller data updated
+                                            scope.$emit('record-modified');
+
+                                        }, function deleteFailure(response) {
+                                            scope.$emit('error', response);
+                                            $log.warn(response);
+                                        }).catch(function (error) {
+                                            scope.$emit('error', response);
+                                            $log.info(error);
+                                        });
+                                    } else {
+                                        scope.tuple.reference.delete().then(function deleteSuccess() {
+
+                                            // tell parent controller data updated
+                                            scope.$emit('record-modified');
+
+                                        }, function deleteFailure(response) {
+                                            scope.$emit('error', response);
+                                            $log.warn(response);
+                                        }).catch(function (error) {
+                                            scope.$emit('error', response);
+                                            $log.info(error);
+                                        });
+                                    }
                                 }
                             };
                         }
