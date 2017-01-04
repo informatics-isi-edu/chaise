@@ -1371,7 +1371,7 @@ function getSortQuery(sortOption, isAttribute) {
 function getSortClause(table, sortOption, sortOrder, isAttribute) {
 	var field = encodeSafeURIComponent(sortOption);
 	var rankColumn = getSortColumn(table, sortOption, 'rank');
-	var sortField = rankColumn;
+	var sortField = encodeSafeURIComponent(rankColumn);
 	
 	if (sortOrder == 'desc') {
 		sortField += '::desc::';
