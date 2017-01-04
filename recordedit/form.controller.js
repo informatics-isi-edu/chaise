@@ -510,10 +510,6 @@
             if (!vm.recordEditModel.rows[modelIndex][columnName]) {
                 vm.recordEditModel.rows[modelIndex][columnName] = {meridiem: 'AM'};
             }
-            // If timestamp model object exists, but meridiem prop doesn't, assign a default meridiem
-            if (!vm.recordEditModel.rows[modelIndex][columnName].meridiem) {
-                vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'AM';
-            }
             // Do the toggling
             var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem;
             if (meridiem.charAt(0).toLowerCase() === 'a') {
