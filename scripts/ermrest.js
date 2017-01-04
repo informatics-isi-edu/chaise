@@ -435,7 +435,8 @@ function getTableColumns(options, successCallback) {
 	};
 
 	PRIMARY_KEY = [];
-	if (metadata['keys'] != null) {
+	getPreferedPrimaryKey(metadata);
+	if (PRIMARY_KEY.length == 0 && metadata['keys'] != null) {
 		var unique_columns = [];
 		$.each(metadata['keys'], function(i, key) {
 			if (key['unique_columns'] != null) {
@@ -4172,3 +4173,24 @@ function getColumnAnnotation(table_name, column_name, annotation, key) {
 	return ret;
 }
 
+function getPreferedPrimaryKey(metadata) {
+	if (metadata['keys'] != null) {
+		var column_definitions = metadata['column_definitions'];
+		$.each(metadata['keys'], function(i, key) {
+			if (key['unique_columns'] != null && key['unique_columns'].length == 1) {
+				var column_name = key['unique_columns'][0];
+				$.each(column_definitions, function(j, col) {
+					if (col['name'] ==  column_name) {
+						if (col['nullok'] == false) {
+							PRIMARY_KEY.push(encodeSafeURIComponent(column_name));
+						}
+						return false;
+					}
+				});
+				if (PRIMARY_KEY.length > 0) {
+					return false;
+				}
+			}
+		});
+	}
+}
