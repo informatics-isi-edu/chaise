@@ -70,7 +70,7 @@ window.hatrac = window.hatrac || {};
         // if the header value has the string ": " in it.
         var index = headerPair.indexOf('\u003a\u0020');
         if (index > 0) {
-          var key = headerPair.substring(0, index);
+          var key = headerPair.substring(0, index).toLowerCase();
           var val = headerPair.substring(index + 2);
           headers[key] = val;
         }
@@ -85,7 +85,7 @@ window.hatrac = window.hatrac || {};
         if (!onSuccess || !(typeof onSuccess == 'function')) onSuccess = function() {};
         if (!onError || !(typeof onError == 'function')) onError = function() {};
 
-        var xhr = new _xmlHttpRequest();
+        var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
                 xhr.headers = parseResponseHeaders(xhr.getAllResponseHeaders());
@@ -111,14 +111,62 @@ window.hatrac = window.hatrac || {};
 
     var blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
 
+    if (!window.atob) {
+        var tableStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        var table = tableStr.split("");
+
+        window.atob = function (base64) {
+            if (/(=[^=]+|={3,})$/.test(base64)) throw new Error("String contains an invalid character");
+            base64 = base64.replace(/=/g, "");
+            var n = base64.length & 3;
+            if (n === 1) throw new Error("String contains an invalid character");
+            for (var i = 0, j = 0, len = base64.length / 4, bin = []; i < len; ++i) {
+                var a = tableStr.indexOf(base64[j++] || "A"), b = tableStr.indexOf(base64[j++] || "A");
+                var c = tableStr.indexOf(base64[j++] || "A"), d = tableStr.indexOf(base64[j++] || "A");
+                if ((a | b | c | d) < 0) throw new Error("String contains an invalid character");
+                bin[bin.length] = ((a << 2) | (b >> 4)) & 255;
+                bin[bin.length] = ((b << 4) | (c >> 2)) & 255;
+                bin[bin.length] = ((c << 6) | d) & 255;
+            };
+            return String.fromCharCode.apply(null, bin).substr(0, bin.length + n - 4);
+        };
+
+        window.btoa = function (bin) {
+            for (var i = 0, j = 0, len = bin.length / 3, base64 = []; i < len; ++i) {
+                var a = bin.charCodeAt(j++), b = bin.charCodeAt(j++), c = bin.charCodeAt(j++);
+                if ((a | b | c) > 255) throw new Error("String contains an invalid character");
+                base64[base64.length] = table[a >> 2] + table[((a << 4) & 63) | (b >> 4)] +
+                                      (isNaN(b) ? "=" : table[((b << 2) & 63) | (c >> 6)]) +
+                                      (isNaN(b + c) ? "=" : table[c & 63]);
+            }
+            return base64.join("");
+        };
+
+    }
+
+    var checkHex = function(n) {
+        return/^[0-9A-Fa-f]{1,64}$/.test(n)
+    };
+
+    var Hex2Bin = function(n) { 
+        if (!checkHex(n)) return 0;
+        return parseInt(n,16).toString(2); 
+    };
+
+    var hexToBase64 = function (str) {
+      return btoa(String.fromCharCode.apply(null,
+        str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
+      );
+    }
+
     var ChecksumMD5 = function(file, options) {
-        this.file = self;
+        this.file = file;
         this.options = options || {};
     };
 
-    ChecksumMD5.prototype.hash = function(onSuccess, onError) {
+    ChecksumMD5.prototype.calculate = function(onSuccess, onError) {
 
-        var self = this;
+        var self = this, file = this.file;
         if (!onSuccess || !(typeof onSuccess == 'function')) onSuccess = function() {};
         if (!onError || !(typeof onError == 'function')) onError = function() {};
 
@@ -135,8 +183,9 @@ window.hatrac = window.hatrac || {};
             if (currentChunk < chunks)
                 loadNext();
             else {
-                self.checksum = spark.end();
-                console.log("\nFinished loading :)\n\nComputed hash:\n" + self.checksum + "!\n");
+                self.hash = spark.end();
+                self.checksum = hexToBase64(self.hash);
+                console.log("\nFinished loading :)\n\nComputed hash: " + self.hash + "\n\nComputed Checksum: "  + self.checksum + "\n!");
                 onSuccess(self.checksum, self);
             }
         };
@@ -147,7 +196,7 @@ window.hatrac = window.hatrac || {};
             fileReader.onerror = onError;
             var start = currentChunk * chunkSize,
                 end = ((start + chunkSize) >= file.size) ? file.size : start + chunkSize;
-            fileReader.readAsArrayBuffer(blobSlice.call(file, start, end));
+            fileReader.readAsArrayBuffer(blobSlice.call(self.file, start, end));
         };
         
         loadNext();
@@ -224,7 +273,7 @@ window.hatrac = window.hatrac || {};
 
         var self = this;
 
-        this.md5.hash(function(checksum) {
+        this.md5.calculate(function(checksum) {
             self.url = self.SERVER_LOC + "/" + checksum;
             self.fileExists();
         }, function(err) {
@@ -236,17 +285,19 @@ window.hatrac = window.hatrac || {};
     };
 
     upload.prototype.fileExists = function() {
+        var self = this;
+
         var request = new module.HttpRequest({
             url: this.url,
-            method: 'GET'   
+            method: 'HEAD'   
         });
 
         request.send(function() {
             self.onUploadCompleted(self.url);
         }, function(status, response, xhr) {
-            if (status == 404) {
+            if (status == 404 || status == 409) {
                 if (self.isMultipartUpload) {
-                    self.createMultipartUpload(0);
+                    self.createMultipartUpload();
                 } else {
                     self.uploadFull();
                 }
@@ -294,23 +345,23 @@ window.hatrac = window.hatrac || {};
         var self = this;
 
         xhr.onreadystatechange = function() {
-            if (request.readyState === 4) {
+            if (xhr.readyState === 4) {
                 self.uploadXHR = null;
                 self.progress[0] = 100;
-                if (request.status !== 200) {
+                if (xhr.status !== 204) {
                     self.updateProgressBar();
                     if (!self.isPaused)
-                        self.onUploadError(request);
+                        self.onUploadError(xhr);
                     return;
                 }
-                self.uploadedSize += blob.size;
+                self.uploadedSize += self.file.size;
                 self.updateProgressBar();
             }
         };
 
-        request.upload.onprogress = function(e) {
+        xhr.upload.onprogress = function(e) {
             if (e.lengthComputable) {
-                self.progress[0] = e.loaded / size;
+                self.progress[0] = e.loaded / self.file.size;
                 self.updateProgressBar();
             }
         };
@@ -321,23 +372,24 @@ window.hatrac = window.hatrac || {};
         xhr.setRequestHeader('Content-MD5', this.md5.checksum);
         xhr.setRequestHeader('Content-Disposition', "filename*=UTF-8''" + this.file.name);
 
-        xhr.send(file);
+        xhr.send(this.file);
     };
 
     /** private */
     upload.prototype.uploadPart = function(partNum) {
         var start = 0;
-        var end, blob;
+        var blob;
 
         this.curUploadInfo.partNum = partNum;
 
         var index = 0
 
         while (start < this.file.size) {
-            start = this.PART_SIZE * this.curUploadInfo.partNum++;
             end = Math.min(start + this.PART_SIZE, this.file.size);
             blob = this.file.slice(start, end);
-            this.sendToHatrac(blob, index++);            
+            this.progress[index] = 0;
+            this.sendToHatrac(blob, index++);  
+            start = end;          
         }
 
     };
@@ -350,7 +402,7 @@ window.hatrac = window.hatrac || {};
         request.onreadystatechange = function() {
             if (request.readyState === 4) {
                 self.progress[index] = 100;
-                if (request.status !== 200) {
+                if (request.status !== 204) {
                     self.uploadXHR = null;
                     self.updateProgressBar();
                     if (!self.isPaused)
@@ -368,8 +420,8 @@ window.hatrac = window.hatrac || {};
                 self.updateProgressBar();
             }
         };
-        request.open('PUT', this.chunkUrl + "/" index);
-        request.setRequestHeader("content-type", application/octet-stream);
+        request.open('PUT', this.chunkUrl + "/" + index);
+        request.setRequestHeader("content-type", "application/octet-stream");
         
         request.send(blob);
     };
@@ -443,8 +495,13 @@ window.hatrac = window.hatrac || {};
 
         this.onProgressChanged(this.uploadingSize, total, this.file.size);
 
-        if (total == 100) {
-            this.completeMultipartUpload();
+        if (total == 100 && this.uploadXHR) {
+            this.uploadXHR = null;
+            if (this.isMultipartUpload) {
+                this.completeMultipartUpload();
+            } else {
+                this.onUploadCompleted(this.url);
+            }
         }
     };
 

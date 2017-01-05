@@ -3,8 +3,9 @@
     <head>
         <title>Upload To Hatrac</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
         <script type="text/javascript" src="sparkMD5.min.js"></script>
-        <script type="text/javascript" src="hatrac.min.js"></script>
+        <script type="text/javascript" src="hatrac.js"></script>
     </head>
     <body>
         <p>
@@ -26,8 +27,7 @@
             <progress id="summed_progress" value="0" max="100"></progress>
             <- Uploading + Uploaded Progress Bar
         </p>
-        <script src="jquery-1.9.1.min.js"></script>
-        <script src="upload.js"></script>
+        
         <script>
                 var hatracUpload = null;
 
@@ -59,19 +59,23 @@
                     hatracUpload = new hatrac.Upload(file, { url: "https://dev.isrd.isi.edu/hatrac/test" });
 
                     hatracUpload.onServerError = function(command, jqXHR, textStatus, errorThrown) {
-                        if (jqXHR.status === 403) {
+                        hatracUpload = null;
+                        if (jqXHR.status === 401) {
                             alert("Sorry you are not allowed to upload");
                         } else {
+                            alert(jqXHR.status + "  " + errorThrown);
                             console.log("Our server is not responding correctly");
                         }
                     };
 
                     hatracUpload.onUploadError = function(xhr) {
-                       alert(xhr.status + " : "  + xhr.responseText)
+                        hatracUpload = null;
+                        alert(xhr.status + " : "  + xhr.responseText)
                     };
 
                     hatracUpload.onError = function(err) {
-                       alert(err.message);
+                        hatracUpload = null;
+                        alert(err.message);
                     };
 
 
@@ -87,6 +91,7 @@
                     };
 
                     hatracUpload.onUploadCompleted = function(url) {
+                        hatracUpload = null;
                         alert("Congratz, upload is complete now \n" + url);
                     };
 
