@@ -513,9 +513,11 @@
 
         // Toggle between AM/PM for a time input's model
         function toggleMeridiem(modelIndex, columnName) {
+            // If the entire timestamp model doesn't exist, initialize it with a default meridiem
             if (!vm.recordEditModel.rows[modelIndex][columnName]) {
                 vm.recordEditModel.rows[modelIndex][columnName] = {meridiem: 'AM'};
             }
+            // Do the toggling
             var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem;
             if (meridiem.charAt(0).toLowerCase() === 'a') {
                 return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'PM';

@@ -141,7 +141,7 @@
                                             value = {
                                                 date: null,
                                                 time: null,
-                                                meridiem: null
+                                                meridiem: 'AM'
                                             };
                                         }
                                         break;
