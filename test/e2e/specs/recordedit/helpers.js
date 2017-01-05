@@ -133,10 +133,10 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                     disabledCols[annotationKey].forEach(function(column) {
                         if (column.type.typename == 'timestamp' || column.type.typename == 'timestamptz') {
                             var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex);
-                            var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemInput = timeInputs.meridiem;
+                            var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemBtn = timeInputs.meridiem;
                             expect(dateInput.isEnabled()).toBe(false);
                             expect(timeInput.isEnabled()).toBe(false);
-                            expect(meridiemInput.isEnabled()).toBe(false);
+                            expect(meridiemBtn.isEnabled()).toBe(false);
                         } else {
                             chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(input) {
                                 expect(input.isEnabled()).toBe(false);
@@ -513,11 +513,36 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                     columns = chaisePage.dataUtils.editInputs.getTimestampTypeColumns(table, [IGNORE, HIDDEN]);
                     columns.forEach(function(column) {
                         var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex);
-                        var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemInput = timeInputs.meridiem;
+                        var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemBtn = timeInputs.meridiem;
 
                         expect(dateInput).toBeDefined();
                         expect(timeInput).toBeDefined();
-                        expect(meridiemInput).toBeDefined();
+                        expect(meridiemBtn).toBeDefined();
+
+                        // Test toggling of meridiem button
+                        // Testing meridiem before the time input test because toggling btn should work
+                        // with or without input in the other fields (i.e. date and time input fields).
+                        var initialMeridiem = '';
+                        meridiemBtn.getText().then(function(text) {
+                            initialMeridiem = text;
+                            return meridiemBtn.click();
+                        }).then(function() {
+                            return meridiemBtn.getText();
+                        }).then(function(newText) {
+                            if (initialMeridiem == 'AM') {
+                                expect(newText).toEqual('PM');
+                            } else {
+                                expect(newText).toEqual('AM');
+                            }
+                            return meridiemBtn.click();
+                        }).then(function() {
+                            return meridiemBtn.getText();
+                        }).then(function(newText) {
+                            expect(newText).toEqual(initialMeridiem);
+                        }).catch(function(error) {
+                            console.log(error);
+                            expect('There was an error in this promise chain.').toBe('Please see the error message.');
+                        });
 
                         // Test time input validation; date input tested in earlier describe block
                         var defaultTimeValue = '12:00:00';
@@ -528,7 +553,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                         timeInputFields.push({
                             date: dateInput,
                             time: timeInput,
-                            meridiem: meridiemInput,
+                            meridiem: meridiemBtn,
                             column: column
                         });
                     });
