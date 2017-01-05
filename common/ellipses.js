@@ -14,7 +14,8 @@
                     rowValues: '=', // tuple's values
                     context: "=",
                     config: '=',    // {viewable, editable, deletable, selectable}
-                    onRowClickBind: '=?'
+                    onRowClickBind: '=?',
+                    fromTuple: "=?"
                 },
                 link: function (scope, element) {
                     scope.overflow = []; // for each cell in the row
@@ -25,15 +26,18 @@
 
                     var init = function() {
 
+                        if (scope.fromTuple)
+                            scope.associationRef = scope.tuple.getAssociationRef(scope.fromTuple.data);
+
                         if (scope.config.viewable)
                             scope.viewLink = scope.tuple.reference.contextualize.detailed.appLink;
 
                         if (scope.config.editable)
                             scope.editLink = scope.tuple.reference.contextualize.entryEdit.appLink;
 
-                        if (scope.config.deletable) {
-                            scope.delete = function () {
-
+                        // define unlink function
+                        if (scope.config.deletable && scope.context === "compact/brief" && scope.associationRef) {
+                            scope.unlink = function () {
                                 if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                                     $uibModal.open({
                                         templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -43,13 +47,7 @@
                                     }).result.then(function success() {
                                         // user accepted prompt to delete
 
-                                        // if table is compact/brief and is based on binary association table
-                                        // delete the linking
-                                        if (scope.context === "compact/brief" && scope.config.isLink) {
-                                            return scope.tuple.unlinkAssociation();
-                                        } else {
-                                            return scope.tuple.reference.delete();
-                                        }
+                                        return scope.associationRef.delete();
 
                                     }).then(function deleteSuccess() {
 
@@ -67,35 +65,65 @@
                                     });
                                 } else {
 
-                                    // if table is compact/brief and is based on binary association table
-                                    // delete the linking
-                                    if (scope.context === "compact/brief" && scope.config.isLink) {
-                                        scope.tuple.unlinkAssociation().then(function deleteSuccess() {
+                                    scope.associationRef.delete().then(function deleteSuccess() {
 
-                                            // tell parent controller data updated
-                                            scope.$emit('record-modified');
+                                        // tell parent controller data updated
+                                        scope.$emit('record-modified');
 
-                                        }, function deleteFailure(response) {
+                                    }, function deleteFailure(response) {
+                                        scope.$emit('error', response);
+                                        $log.warn(response);
+                                    }).catch(function (error) {
+                                        scope.$emit('error', response);
+                                        $log.info(error);
+                                    });
+                                }
+                            }
+                        }
+
+                        // define delete function
+                        else if (scope.config.deletable) {
+                            scope.delete = function () {
+
+                                if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+                                    $uibModal.open({
+                                        templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
+                                        controller: "ConfirmDeleteController",
+                                        controllerAs: "ctrl",
+                                        size: "sm"
+                                    }).result.then(function success() {
+                                        // user accepted prompt to delete
+
+                                        return scope.tuple.reference.delete();
+
+                                    }).then(function deleteSuccess() {
+
+                                        // tell parent controller data updated
+                                        scope.$emit('record-modified');
+
+                                    }, function deleteFailure(response) {
+                                        if (response != "cancel") {
                                             scope.$emit('error', response);
                                             $log.warn(response);
-                                        }).catch(function (error) {
-                                            scope.$emit('error', response);
-                                            $log.info(error);
-                                        });
-                                    } else {
-                                        scope.tuple.reference.delete().then(function deleteSuccess() {
+                                        }
+                                    }).catch(function (error) {
+                                        $log.info(error);
+                                        scope.$emit('error', response);
+                                    });
+                                } else {
 
-                                            // tell parent controller data updated
-                                            scope.$emit('record-modified');
+                                    scope.tuple.reference.delete().then(function deleteSuccess() {
 
-                                        }, function deleteFailure(response) {
-                                            scope.$emit('error', response);
-                                            $log.warn(response);
-                                        }).catch(function (error) {
-                                            scope.$emit('error', response);
-                                            $log.info(error);
-                                        });
-                                    }
+                                        // tell parent controller data updated
+                                        scope.$emit('record-modified');
+
+                                    }, function deleteFailure(response) {
+                                        scope.$emit('error', response);
+                                        $log.warn(response);
+                                    }).catch(function (error) {
+                                        scope.$emit('error', response);
+                                        $log.info(error);
+                                    });
                                 }
                             };
                         }

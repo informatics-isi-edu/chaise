@@ -144,8 +144,7 @@
                 viewable: true,
                 editable: modifyEnabled,
                 deletable: modifyEnabled && deleteEnabled,
-                selectable: false,
-                isLink: false
+                selectable: false
             };
 
             $rootScope.alerts = AlertsService.alerts;

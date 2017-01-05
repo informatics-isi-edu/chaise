@@ -121,15 +121,15 @@
                                     rowValues: [],              // array of rows values
                                     search: null,                // search term
                                     displayType: $rootScope.relatedReferences[i].display.type,
-                                    context: "compact/brief"
+                                    context: "compact/brief",
+                                    fromTuple: $rootScope.tuple
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
                                 model.config = {
                                     viewable: true,
                                     editable: $rootScope.modifyRecord,
                                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                                    selectable: false,
-                                    isLink: (page.reference._derivedAssociationRef !== undefined) // TODO make _derivedAssociationRef available
+                                    selectable: false
                                 };
                                 $rootScope.tableModels[i] = model;
                             }, function readFail() {

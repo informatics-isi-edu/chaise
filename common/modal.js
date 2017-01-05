@@ -47,7 +47,7 @@
             enableAutoSearch:   true,
             pageLimit:          25,
             search:             null,
-            config:             {viewable: false, editable: false, deletable: false, selectable: true, isLink: false},
+            config:             {viewable: false, editable: false, deletable: false, selectable: true},
             context:            params.context
         };
 
