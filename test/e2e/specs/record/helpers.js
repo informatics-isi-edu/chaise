@@ -495,7 +495,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
         var e = element(by.id('rt-' + relatedTableName));
         browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
-        var table = chaisePage.recordPage.getRelatedTable(relatedTableDisplayName);
+        var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
         table.all(by.css(".delete-action-button")).then(function(deleteButtons) {
             count = deleteButtons.length;
             deleteButton = deleteButtons[count-1];
@@ -510,7 +510,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
             var EC = protractor.ExpectedConditions;
             browser.wait(EC.stalenessOf(deleteButton), browser.params.defaultTimeout);
         }).then(function() {
-            return chaisePage.recordPage.getRelatedTableRows(relatedTableDisplayName);
+            return chaisePage.recordPage.getRelatedTableRows(relatedTableName);
         }).then(function(rows) {
             expect(rows.length).toBe(count - 1);
             done();
