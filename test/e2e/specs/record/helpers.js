@@ -489,14 +489,24 @@ exports.relatedTableActions = function (testParams, tableParams) {
     it("action columns should show delete button that deletes record", function(done) {
         var deleteButton;
         var relatedTableName = tableParams.related_regular_table;
-        var count;
+        var count, rowCells, oldValue;
 
         var EC = protractor.ExpectedConditions;
         var e = element(by.id('rt-' + relatedTableName));
         browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
         var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
-        table.all(by.css(".delete-action-button")).then(function(deleteButtons) {
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            count = rows.length;
+            return rows[count - 1].all(by.tagName("td"));
+        }).then(function(cells) {
+            rowCells = cells;
+            return cells[1].getInnerHtml();
+        }).then(function(cell) {
+            oldValue = cell;
+            return table.all(by.css(".delete-action-button"));
+        }).then(function(deleteButtons) {
             count = deleteButtons.length;
             deleteButton = deleteButtons[count-1];
             return deleteButton.click();
@@ -507,28 +517,33 @@ exports.relatedTableActions = function (testParams, tableParams) {
 
             return confirmButton.click();
         }).then(function() {
-            var EC = protractor.ExpectedConditions;
-            browser.wait(EC.stalenessOf(deleteButton), browser.params.defaultTimeout);
-        }).then(function() {
-            return chaisePage.recordPage.getRelatedTableRows(relatedTableName);
-        }).then(function(rows) {
-            expect(rows.length).toBe(count - 1);
+            browser.wait(function() {
+                return chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+                    return (rows.length < count || rowCells[1].getInnerHtml() !== oldValue);
+                });
+            }, browser.params.defaultTimeout);
             done();
-        });
+        })
     });
 
-    xit("action columns should show unlink button that unlinks", function(done) {
+    it("action columns should show unlink button that unlinks", function(done) {
         var deleteButton;
         var relatedTableName = tableParams.related_associate_table;
-        var count;
-
-        var EC = protractor.ExpectedConditions;
-        var e = element(by.id('rt-' + relatedTableName));
-        browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
+        var count, rowCells, oldValue;
 
         var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
-        table.all(by.css(".delete-action-button")).then(function(deleteButtons) {
-            count = deleteButtons.length;
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            count = rows.length;
+            return rows[count - 1].all(by.tagName("td"));
+        }).then(function(cells) {
+            rowCells = cells;
+            return cells[1].getInnerHtml();
+        }).then(function(cell) {
+            oldValue = cell;
+            return table.all(by.css(".delete-action-button"))
+        }).then(function(deleteButtons) {
+            var count = deleteButtons.length;
             deleteButton = deleteButtons[count-1];
             return deleteButton.click();
         }).then(function() {
@@ -538,14 +553,13 @@ exports.relatedTableActions = function (testParams, tableParams) {
 
             return confirmButton.click();
         }).then(function() {
-            var EC = protractor.ExpectedConditions;
-            browser.wait(EC.stalenessOf(deleteButton), browser.params.defaultTimeout);
-        }).then(function() {
-            return chaisePage.recordPage.getRelatedTableRows(relatedTableName);
-        }).then(function(rows) {
-            expect(rows.length).toBe(count - 1);
+            browser.wait(function() {
+                return chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+                    return (rows.length < count || rowCells[1].getInnerHtml() !== oldValue);
+                });
+            }, browser.params.defaultTimeout);
             done();
-        });
+        })
     });
 
 };
