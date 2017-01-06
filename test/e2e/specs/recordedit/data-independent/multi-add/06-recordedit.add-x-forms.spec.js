@@ -165,7 +165,7 @@ describe('Record Add', function() {
                 browser.get(browser.params.url + ":" + testParams.table_name);
             });
 
-            it("should show a resultset table with 201 entities.", function() {
+            it("should show a resultset table with " + tableParams.max_input_rows+1 + " entities.", function() {
                 browser.wait(EC.elementToBeClickable(multiFormOpenButton), browser.params.defaultTimeout);
 
                 var intInput = chaisePage.recordEditPage.getInputById(0, "int");
@@ -176,7 +176,7 @@ describe('Record Add', function() {
                 }).then(function() {
                     chaisePage.recordEditPage.clearInput(multiFormInput);
                     browser.sleep(10);
-                    multiFormInput.sendKeys(200);
+                    multiFormInput.sendKeys(testParams.max_input_rows);
 
                     return chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript();
                 }).then(function(submitBtn) {
@@ -185,7 +185,7 @@ describe('Record Add', function() {
                     // wait for dom to finish rendering the forms
                     browser.wait(function() {
                         return chaisePage.recordEditPage.getForms().count().then(function(ct) {
-                            return (ct == 201);
+                            return (ct == tableParams.max_input_rows+1);
                         });
                     }, browser.params.defaultTimeout);
 
@@ -198,13 +198,13 @@ describe('Record Add', function() {
                     // so DOM can render table
                     browser.wait(function() {
                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return (ct == 201);
+                            return (ct == tableParams.max_input_rows+1);
                         });
                     }, browser.params.defaultTimeout);
 
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function(ct) {
-                    expect(ct).toBe(201);
+                    expect(ct).toBe(tableParams.max_input_rows+1);
                 });
             })
         });

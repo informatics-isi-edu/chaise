@@ -218,7 +218,6 @@
                         if (model.rows.length == 1) {
                             vm.redirectAfterSubmission(page);
                         } else {
-                            console.log(page);
                             AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
                             // can't use page.reference because it reflects the specific values that were inserted
                             vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink

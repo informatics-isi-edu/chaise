@@ -30,6 +30,14 @@
                 "input_1_text_val" : "asdfg",
                 "input_2_text_val" : "qwerty",
                 "input_3_int_val" : "17"
+            },
+            "multi_edit" : {
+                "table_name" : "multi-add-table",
+                "keys_2" : [{ "name": "id", "value": "2001", "operator" : "=" },
+                            { "name": "id", "value": "2002", "operator" : "=" }],
+                "keys_3" : [{ "name": "id", "value": "2002", "operator" : "=" },
+                            { "name": "id", "value": "2003", "operator" : "=" },
+                            { "name": "id", "value": "2004", "operator" : "=" }]
             }
         }
     }
