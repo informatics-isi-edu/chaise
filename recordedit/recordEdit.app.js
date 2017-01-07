@@ -148,7 +148,7 @@
                                                 value = {
                                                     date: null,
                                                     time: null,
-                                                    meridiem: null
+                                                    meridiem: 'AM'
                                                 };
                                             }
                                             break;
@@ -216,7 +216,7 @@
                         forbiddenError.code = errorNames.forbidden;
 
                         throw forbiddenError;
-                    // user isn't logged in and neds permissions to create
+                    // user isn't logged in and needs permissions to create
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);

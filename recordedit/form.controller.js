@@ -250,15 +250,16 @@
                         $cookies.remove(context.queryParams.prefill);
                     }
 
+                    // add cookie indicating record added
+                    if (context.queryParams.invalidate) {
+                        $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
+                            {
+                                expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                            }
+                        );
+                    }
+
                     if (model.rows.length == 1) {
-                        // add cookie indicating record added
-                        if (context.queryParams.invalidate) {
-                            $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
-                                {
-                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-                                }
-                            );
-                        }
                         vm.redirectAfterSubmission(page);
                     } else {
                         AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
@@ -528,9 +529,11 @@
 
         // Toggle between AM/PM for a time input's model
         function toggleMeridiem(modelIndex, columnName) {
+            // If the entire timestamp model doesn't exist, initialize it with a default meridiem
             if (!vm.recordEditModel.rows[modelIndex][columnName]) {
                 vm.recordEditModel.rows[modelIndex][columnName] = {meridiem: 'AM'};
             }
+            // Do the toggling
             var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem;
             if (meridiem.charAt(0).toLowerCase() === 'a') {
                 return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'PM';
