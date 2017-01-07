@@ -14,6 +14,10 @@
             },
             "tables": {
                 "createNew": true
+            },
+            "entities": {
+            	"createNew": true,
+                "path": "test/e2e/data_setup/data/multi-add"
             }
         }],
         "schema": "multi-add"
@@ -33,11 +37,13 @@
             },
             "multi_edit" : {
                 "table_name" : "multi-add-table",
-                "keys_2" : [{ "name": "id", "value": "2001", "operator" : "=" },
-                            { "name": "id", "value": "2002", "operator" : "=" }],
-                "keys_3" : [{ "name": "id", "value": "2002", "operator" : "=" },
-                            { "name": "id", "value": "2003", "operator" : "=" },
-                            { "name": "id", "value": "2004", "operator" : "=" }]
+                "int_column_name" : "int",
+                "text_column_name" : "text",
+                "keys_2" : [{ "name": "id", "value": "1000", "operator" : "=" },
+                            { "name": "id", "value": "1001", "operator" : "=" }],
+                "keys_3" : [{ "name": "id", "value": "1000", "operator" : "=" },
+                            { "name": "id", "value": "1001", "operator" : "=" },
+                            { "name": "id", "value": "1002", "operator" : "=" }]
             }
         }
     }

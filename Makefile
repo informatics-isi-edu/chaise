@@ -29,6 +29,7 @@ E2EDIrecordDefaults=test/e2e/specs/recordedit/data-independent/add-defaults/prot
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
 E2EDIrecordEditDeleteRecord=test/e2e/specs/recordedit/data-independent/delete-record/protractor.conf.js
 E2EDIrecordMultiAdd=test/e2e/specs/recordedit/data-independent/multi-add/protractor.conf.js
+E2EDIrecordMultiEdit=test/e2e/specs/recordedit/data-independent/multi-edit/protractor.conf.js
 E2EDrecordEditCompositeKey=test/e2e/specs/recordedit/data-dependent/composite-key/protractor.conf.js
 E2EDrecordEditSubmissionDisabled=test/e2e/specs/recordedit/data-dependent/submission-disabled/protractor.conf.js
 # Record tests
@@ -432,7 +433,8 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	#$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) &&
+	$(BIN)/protractor $(E2EDIrecordMultiEdit) #&& $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -443,7 +445,7 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run navbar tests
 .PHONY: testnavbar
@@ -477,7 +479,7 @@ testrecordset:
 
 .PHONY: testrecordedit
 testrecordedit:
-	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled)
+	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled)
 
 #Rule to run viewer app tests
 .PHONY: testviewer
