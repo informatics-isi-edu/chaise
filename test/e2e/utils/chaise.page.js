@@ -471,8 +471,12 @@ var recordEditPage = function() {
         return browser.executeScript("return $('.alert-danger:visible')[0];");
     };
 
-    this.getRecordModelRows = function() {
+    this.getViewModelRows = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
+    };
+
+    this.getSubmissionModelRows = function() {
+        return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.submissionRows;");
     };
 
     this.getDeleteRecordButton = function () {

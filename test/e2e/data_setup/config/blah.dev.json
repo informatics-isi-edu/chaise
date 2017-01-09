@@ -1,0 +1,57 @@
+{
+    "setup": {
+        "schemaConfigurations": [{
+            "catalog": {
+                "acls": [
+                    {"name": "content_write_user", "user": "*" },
+                    {"name": "content_read_user", "user": "*" }
+                ]
+            },
+            "schema": {
+                "name": "blah",
+                "createNew": true,
+                "path": "test/e2e/data_setup/schema/blah.json"
+            },
+            "tables": {
+                "createNew": true
+            },
+            "entities": {
+                "createNew": true,
+                "path": "test/e2e/data_setup/data/blah"
+            }
+        }],
+        "schema": "blah"
+    },
+    "cleanup": true,
+    "tests": {
+        "params": {
+            "rows": [
+                {
+                    "int2_null_col": null,
+                    "int2_col": 32767,
+                    "int4_null_col": null,
+                    "int4_col": -2147483648,
+                    "int8_null_col": null,
+                    "int8_col": 9007199254740991,
+                    "float4_null_col": null,
+                    "float4_col": 4.6123,
+                    "float8_null_col": null,
+                    "float8_col": 234523523.023045230450245,
+                    "text_null_col": null,
+                    "text_col": "sample",
+                    "longtext_null_col": null,
+                    "longtext_col": "asjdf;laksjdf;laj ;lkajsd;f lkajsdf;lakjs f;lakjs df;lasjd f;ladsjf;alskdjfa ;lskdjf a;lsdkjf a;lskdfjal;sdkfj as;ldfkj as;dlf kjasl;fkaj;lfkjasl;fjas;ldfkjals;dfkjas;dlkfja;sldkfjasl;dkfjas;dlfkjasl;dfkja; lsdjfk a;lskdjf a;lsdfj as;ldfja;sldkfja;lskjdfa;lskdjfa;lsdkfja;sldkfjas;ldfkjas;dlfkjas;lfkja;sldkjf a;lsjf ;laskj fa;slk jfa;sld fjas;l js;lfkajs;lfkasjf;alsja;lk ;l kja",
+                    "bool_null_col": null,
+                    "bool_true_col": true,
+                    "bool_false_col": false,
+                    "timestamp_null_col": null,
+                    "timestamp_col": "2016-01-18T00:00:00-08:00",
+                    "date_null_col": null,
+                    "date_col": "2016-08-15",
+                    "fk_null_col": null,
+                    "fk_col": "Jessie Wong"
+                }
+            ]
+        }
+    }
+}
