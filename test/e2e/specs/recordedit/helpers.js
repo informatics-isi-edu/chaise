@@ -384,7 +384,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                expect(ct).toBeGreaterThan(0);
 
 	                                var index = Math.floor(Math.random() * ct);
-	                                return rows.get(index).click();
+	                                return rows.get(index).all(by.css(".select-action-button"));
+								}).then(function(selectButtons) {
+									selectButtons[0].click();
 	                            }).then(function() {
 	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
