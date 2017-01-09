@@ -489,7 +489,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
     it("action columns should show delete button that deletes record", function(done) {
         var deleteButton;
         var relatedTableName = tableParams.related_regular_table;
-        var count, rowCells, oldValue;
+        var count, rowCells, oldValue, allRows;
 
         var EC = protractor.ExpectedConditions;
         var e = element(by.id('rt-' + relatedTableName));
@@ -499,6 +499,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
 
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
             count = rows.length;
+            allRows = rows;
             return rows[count - 1].all(by.tagName("td"));
         }).then(function(cells) {
             rowCells = cells;
@@ -518,9 +519,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
             return confirmButton.click();
         }).then(function() {
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
-                    return (rows.length < count || rowCells[1].getInnerHtml() !== oldValue);
-                });
+                return allRows.length < count || rowCells[1].getInnerHtml() !== oldValue;
             }, browser.params.defaultTimeout);
             done();
         })
@@ -529,12 +528,13 @@ exports.relatedTableActions = function (testParams, tableParams) {
     it("action columns should show unlink button that unlinks", function(done) {
         var deleteButton;
         var relatedTableName = tableParams.related_associate_table;
-        var count, rowCells, oldValue;
+        var count, rowCells, oldValue, allRows;
 
         var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
 
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
             count = rows.length;
+            allRows = rows;
             return rows[count - 1].all(by.tagName("td"));
         }).then(function(cells) {
             rowCells = cells;
@@ -554,9 +554,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
             return confirmButton.click();
         }).then(function() {
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
-                    return (rows.length < count || rowCells[1].getInnerHtml() !== oldValue);
-                });
+                return (allRows.length < count || rowCells[1].getInnerHtml() !== oldValue);
             }, browser.params.defaultTimeout);
             done();
         })
