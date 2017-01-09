@@ -102,13 +102,19 @@
                 // Case for editing an entity
                 if (context.filter) {
                     if ($rootScope.reference.canUpdate) {
-                        // check id range before reading?
                         $rootScope.reference.read(context.filter.filters.length).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
-                                var filter = context.filter;
-                                var noDataMessage = "No entity exists with " + filter.column + filter.operator + filter.value;
+
+                                var filters = context.filter.filters;
+                                var noDataMessage = "No entity exists with ";
+                                for (var k = 0; k < filters.length; k++) {
+                                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
+                                    if (k != filters.length-1) {
+                                        noDataMessage += " or ";
+                                    }
+                                }
                                 var noDataError = new Error(noDataMessage);
                                 noDataError.code = errorNames.notFound;
 
