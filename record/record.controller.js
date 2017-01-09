@@ -3,9 +3,10 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', '$scope', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window, $scope) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
+        var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
 
         vm.alerts = AlertsService.alerts;
@@ -145,6 +146,10 @@
             $window.open(appLink, '_blank');
         };
 
+        $scope.$on("edit-request", function(event, args) {
+            editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
+        });
+
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
@@ -179,8 +184,9 @@
 
         };
 
-        window.updated = function(schemaName, tableName) {
-            updated[schemaName + ":" + tableName] = true;
+        window.updated = function(id) {
+            updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
+            delete editRecordRequests[id];
         }
     }]);
 })();

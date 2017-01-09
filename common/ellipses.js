@@ -4,7 +4,8 @@
     angular.module('chaise.ellipses', [])
 
 
-        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', '$uibModal', '$log', function($sce, $timeout, AlertsService, $uibModal, $log) {
+        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', '$uibModal', '$log', 'MathUtils', 'UriUtils', '$window',
+            function($sce, $timeout, AlertsService, $uibModal, $log, MathUtils, UriUtils, $window) {
 
             return {
                 restrict: 'AE',
@@ -26,14 +27,28 @@
 
                     var init = function() {
 
+                        var editLink = null;
+
                         if (scope.fromTuple)
                             scope.associationRef = scope.tuple.getAssociationRef(scope.fromTuple.data);
 
                         if (scope.config.viewable)
                             scope.viewLink = scope.tuple.reference.contextualize.detailed.appLink;
 
-                        if (scope.config.editable)
-                            scope.editLink = scope.tuple.reference.contextualize.entryEdit.appLink;
+                        if (scope.config.editable && scope.associationRef)
+                            editLink = scope.associationRef.contextualize.entryEdit.appLink;
+
+                        else if (scope.config.editable)
+                            editLink = scope.tuple.reference.contextualize.entryEdit.appLink;
+
+                        if (editLink) {
+                            scope.edit = function () {
+                                var id = MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+                                var link = editLink + '?invalidate=' + UriUtils.fixedEncodeURIComponent(id);
+                                $window.open(link, '_blank');
+                                scope.$emit("edit-request", {"id": id, "schema": scope.tuple.reference.location.schemaName, "table": scope.tuple.reference.location.tableName});
+                            }
+                        }
 
                         // define unlink function
                         if (scope.config.deletable && scope.context === "compact/brief" && scope.associationRef) {
