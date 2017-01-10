@@ -229,10 +229,10 @@
             </div>
             </div>
             <div ng-show=form.resultset class="container-fluid">
-                <h2 class="entity-title">Created {{ form.resultsetModel.pageLimit }} records for table <a ng-href="{{form.recordsetLink}}">{{ form.resultsetModel.tableDisplayName }}</a></h2>
+                <h2 class="entity-title"><span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Edited</span> {{ form.resultsetModel.pageLimit }} records for table <a ng-href="{{form.recordsetLink}}">{{ form.resultsetModel.tableDisplayName }}</a></h2>
 
                 <div class="side-padding-15">
-                    <record-table vm="form.resultsetModel" default-row-linking="false"></record-table>
+                    <record-table vm="form.resultsetModel" default-row-linking="true"></record-table>
                 </div>
             </div>
         </div>
