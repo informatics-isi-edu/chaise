@@ -518,7 +518,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
             return confirmButton.click();
         }).then(function() {
             browser.wait(
-                function() {return !rowCells[1].isPresent() || rowCells[1].getInnerHtml() !== oldValue},
+                EC.stalenessOf(rowCells[1]),
                 browser.params.defaultTimeout);
             done();
         })
@@ -529,7 +529,6 @@ exports.relatedTableActions = function (testParams, tableParams) {
         var relatedTableName = tableParams.related_associate_table;
         var count, rowCells, oldValue;
 
-        var EC = protractor.ExpectedConditions;
         var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
 
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
@@ -553,7 +552,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
             return confirmButton.click();
         }).then(function() {
             browser.wait(
-                function() {return !rowCells[1].isPresent() || rowCells[1].getInnerHtml() !== oldValue},
+                function() {return rowCells[1].getInnerHtml() !== oldValue},
                 browser.params.defaultTimeout);
             done();
         })
