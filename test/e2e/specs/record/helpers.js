@@ -326,7 +326,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
             return rows[0].all(by.tagName("td"));
         }).then(function(cells) {
-            return cells[2].getInnerHtml();
+            return cells[3].getInnerHtml();
         }).then(function(cell) {
             // check that an element was created inside the td with an href attribute
             expect(cell.indexOf("href")).toBeGreaterThan(-1);
@@ -426,4 +426,138 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             done();
         });
     });
+};
+
+
+exports.relatedTableActions = function (testParams, tableParams) {
+
+    var allWindows;
+
+    it("action columns should show view button that redirects to the record page", function(done) {
+
+        var relatedTableName = tableParams.related_associate_table; // association table
+        var linkedToTableName = tableParams.related_linked_table; // linked to table
+        var linkedToTableFilter = tableParams.related_linked_table_key_filter;
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            return rows[0].all(by.tagName("td"));
+        }).then(function(cell){
+            return cell[0].all(by.css(".view-action-button"));
+        }).then(function(actionButtons) {
+            return actionButtons[0].click();
+        }).then(function() {
+            var result = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + linkedToTableName + "/" + linkedToTableFilter;
+            chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
+                expect(browser.driver.getCurrentUrl()).toContain(result);
+                browser.navigate().back().then(function() {
+                    done();
+                });
+            });
+        });
+    });
+
+    it("action columns should show edit button that redirects to the recordedit page", function(done) {
+
+        var relatedTableName = tableParams.related_regular_table;
+        var relatedTableKey = tableParams.related_regular_table_key_filter;
+
+        var EC = protractor.ExpectedConditions;
+        var e = element(by.id('rt-' + relatedTableName));
+        browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            return rows[0].all(by.tagName("td"));
+        }).then(function(cell) {
+            return cell[0].all(by.css(".edit-action-button"));
+        }).then(function(editButtons) {
+            return editButtons[0].click();
+        }).then(function() {
+            return browser.getAllWindowHandles();
+        }).then(function(handles) {
+            allWindows = handles;
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function() {
+            var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName + "/" + relatedTableKey;
+            expect(browser.driver.getCurrentUrl()).toContain(result);
+            browser.close();
+            return browser.switchTo().window(allWindows[0]);
+        }).then(function() {
+            done();
+        });
+    });
+
+    it("action columns should show delete button that deletes record", function(done) {
+        var deleteButton;
+        var relatedTableName = tableParams.related_regular_table;
+        var count, rowCells, oldValue, allRows;
+
+        var EC = protractor.ExpectedConditions;
+        var e = element(by.id('rt-' + relatedTableName));
+        browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
+
+        var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            count = rows.length;
+            allRows = rows;
+            return rows[count - 1].all(by.tagName("td"));
+        }).then(function(cells) {
+            rowCells = cells;
+            return cells[1].getInnerHtml();
+        }).then(function(cell) {
+            oldValue = cell;
+            return table.all(by.css(".delete-action-button"));
+        }).then(function(deleteButtons) {
+            count = deleteButtons.length;
+            deleteButton = deleteButtons[count-1];
+            return deleteButton.click();
+        }).then(function() {
+            var EC = protractor.ExpectedConditions;
+            var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
+            browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+
+            return confirmButton.click();
+        }).then(function() {
+            browser.wait(function() {
+                return allRows.length < count || rowCells[1].getInnerHtml() !== oldValue;
+            }, browser.params.defaultTimeout);
+            done();
+        })
+    });
+
+    it("action columns should show unlink button that unlinks", function(done) {
+        var deleteButton;
+        var relatedTableName = tableParams.related_associate_table;
+        var count, rowCells, oldValue, allRows;
+
+        var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            count = rows.length;
+            allRows = rows;
+            return rows[count - 1].all(by.tagName("td"));
+        }).then(function(cells) {
+            rowCells = cells;
+            return cells[1].getInnerHtml();
+        }).then(function(cell) {
+            oldValue = cell;
+            return table.all(by.css(".delete-action-button"))
+        }).then(function(deleteButtons) {
+            var count = deleteButtons.length;
+            deleteButton = deleteButtons[count-1];
+            return deleteButton.click();
+        }).then(function() {
+            var EC = protractor.ExpectedConditions;
+            var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
+            browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+
+            return confirmButton.click();
+        }).then(function() {
+            browser.wait(function() {
+                return (allRows.length < count || rowCells[1].getInnerHtml() !== oldValue);
+            }, browser.params.defaultTimeout);
+            done();
+        })
+    });
+
 };
