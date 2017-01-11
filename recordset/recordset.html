@@ -7,9 +7,16 @@
         <alerts alerts="alerts"></alerts>
 
         <div class="row">
-            <!-- permalink -->
-            <a id="permalink" class="pull-right" ng-href="{{ permalink() }}">
-                <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong></a>
+            <div id="recordset-bookmark-container" class="col-xs-12">
+                <!-- edit -->
+                <a id="edit" ng-if="vm.reference" ng-disabled="vm.pageLimit > vm.RECORDEDIT_MAX_ROWS" ng-href="{{ edit() }}">
+                    <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
+                </a>&nbsp;&nbsp;
+                <!-- permalink -->
+                <a id="permalink" ng-href="{{ permalink() }}">
+                    <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
+                </a>
+            </div>
 
             <h2 id="page-title">{{ vm.tableDisplayName }}</h2>
 
