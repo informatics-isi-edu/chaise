@@ -314,14 +314,19 @@ var recordEditPage = function() {
     this.selectDropdownValue = function(el, value) {
         return this.getDropdownText(el).then(function(txt) {
             var defer = Q.defer();
+            // if the existing selection isn't the desired value,
             if (txt.trim() !== value) {
+                // Click open the dropdown
                 browser.executeScript(" $(arguments[0]).find('.select2-choice').click();", el);
                 browser.sleep(100);
+                // Get all the possible choices in the dropdown
                 browser.executeScript("return $(arguments[0]).find('.select2-result-single li');", el).then(function(items) {
-                    if (value != undefined) {
+                    // If a value is specified
+                    if (value !== undefined) {
                         browser.executeScript("$(arguments[0]).data().$uiSelectController.select('" + value + "');", el);
                         defer.resolve(value);
                     } else {
+                        // else if a value is unspecified, pick a random choice
                         var index = that.getRandomInt(0, items.length - 1);
                         try {
                              items[index].click();
@@ -379,6 +384,11 @@ var recordEditPage = function() {
     this.getInputValue = function(columnName, index) {
         index = index || 0;
         return element(by.model('form.recordEditModel.rows[' + index + ']["' + columnName + '"]'));
+    };
+
+    this.getDateInputForAColumn = function(name, index) {
+        index = index || 0;
+        return element.all(by.css('input[name="' + name + '"][date]')).first();
     };
 
     this.getDatePickerForAnInput = function(el) {

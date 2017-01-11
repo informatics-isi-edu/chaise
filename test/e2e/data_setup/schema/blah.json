@@ -161,6 +161,26 @@
                     "annotations": {}
                 },
                 {
+                    "comment": "A markdown column with an initial value of null",
+                    "name": "markdown_null_col",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "markdown"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": "A markdown column with an initial non-null value",
+                    "name": "markdown_col",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "markdown"
+                    },
+                    "annotations": {}
+                },
+                {
                     "comment": "A boolean column with an initial value of null",
                     "name": "bool_null_col",
                     "default": null,
