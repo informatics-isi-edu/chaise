@@ -414,6 +414,13 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
 
         browser.wait(EC.elementToBeClickable(relatedTableLink), browser.params.defaultTimeout).then(function() {
+            // waits until the count is what we expect, so we know the refresh occured
+            browser.wait(function() {
+                return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(ct) {
+                    return (ct == tableParams.booking_count + 1);
+                });
+            }, browser.params.defaultTimeout);
+
             return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count();
         }).then(function(count) {
             expect(count).toBe(tableParams.booking_count + 1);
