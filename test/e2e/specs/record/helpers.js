@@ -61,7 +61,7 @@ exports.testPresentation = function (tableParams) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
 			pageColumns.forEach(function(c) {
-				c.getInnerHtml().then(function(txt) {
+				c.getAttribute('innerHTML').then(function(txt) {
 					txt = txt.trim();
 					var col = columns[index++];
 					expect(col).toBeDefined();
@@ -111,7 +111,7 @@ exports.testPresentation = function (tableParams) {
                         expect(aTag.getText()).toEqual(column.value);
                     });
                 } else {
-                    expect(el.getInnerHtml()).toBe(column.value);
+                    expect(el.getAttribute('innerHTML')).toBe(column.value);
                 }
 			});
 		});
@@ -158,7 +158,7 @@ exports.testPresentation = function (tableParams) {
 
                 // verify all columns are present
                 (function(i, displayName) {
-                    chaisePage.recordPage.getRelatedTableColumnNamesByTable(displayName).getInnerHtml().then(function(columnNames) {
+                    chaisePage.recordPage.getRelatedTableColumnNamesByTable(displayName).getAttribute('innerHTML').then(function(columnNames) {
                         for (var j = 0; j < columnNames.length; j++) {
                             expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
                         }
@@ -326,7 +326,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
             return rows[0].all(by.tagName("td"));
         }).then(function(cells) {
-            return cells[3].getInnerHtml();
+            return cells[3].getAttribute('innerHTML');
         }).then(function(cell) {
             // check that an element was created inside the td with an href attribute
             expect(cell.indexOf("href")).toBeGreaterThan(-1);
@@ -413,7 +413,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             relatedTableName = tableParams.related_table_name_with_more_results,
             relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
 
-        browser.wait(EC.elementToBeClickable(relatedTableLink), browser.params.defaultTimeout).then(function() {
+        browser.wait(EC.visibilityOf(relatedTableLink), browser.params.defaultTimeout).then(function() {
             // waits until the count is what we expect, so we know the refresh occured
             browser.wait(function() {
                 return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(ct) {
@@ -477,6 +477,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
         }).then(function(cell) {
             return cell[0].all(by.css(".edit-action-button"));
         }).then(function(editButtons) {
+            browser.sleep(1000);
             return editButtons[0].click();
         }).then(function() {
             return browser.getAllWindowHandles();
@@ -509,7 +510,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
             return rows[count - 1].all(by.tagName("td"));
         }).then(function(cells) {
             rowCells = cells;
-            return cells[1].getInnerHtml();
+            return cells[1].getAttribute('innerHTML');
         }).then(function(cell) {
             oldValue = cell;
             return table.all(by.css(".delete-action-button"));
@@ -543,7 +544,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
             return rows[count - 1].all(by.tagName("td"));
         }).then(function(cells) {
             rowCells = cells;
-            return cells[1].getInnerHtml();
+            return cells[1].getAttribute('innerHTML');
         }).then(function(cell) {
             oldValue = cell;
             return table.all(by.css(".delete-action-button"))
@@ -559,7 +560,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
             return confirmButton.click();
         }).then(function() {
             browser.wait(
-                function() {return rowCells[1].getInnerHtml() !== oldValue},
+                function() {return rowCells[1].getAttribute('innerHTML') !== oldValue},
                 browser.params.defaultTimeout);
             done();
         })
