@@ -11,16 +11,16 @@
     <div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
             <div id="record-bookmark-container" class="col-xs-12 meta-icons">
-                <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="reference && reference.canCreate && ctrl.modifyRecord" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
+                <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="reference && reference.canCreate && modifyRecord" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
                 </a>&nbsp;&nbsp;
-                <a id="edit-record" ng-click="::ctrl.editRecord()" ng-if="reference && reference.canUpdate && ctrl.modifyRecord" uib-tooltip="Click here to edit this record." tooltip-placement="bottom">
+                <a id="edit-record" ng-click="::ctrl.editRecord()" ng-if="reference && reference.canUpdate && modifyRecord" uib-tooltip="Click here to edit this record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                 </a>&nbsp;&nbsp;
-                <a id="copy-record" ng-click="::ctrl.copyRecord()" ng-if="reference && reference.canUpdate && ctrl.modifyRecord" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
+                <a id="copy-record" ng-click="::ctrl.copyRecord()" ng-if="reference && reference.canUpdate && modifyRecord" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-copy"></span> <strong>Copy</strong>
                 </a>&nbsp;&nbsp;
-                <delete-link id="delete-record" ng-if="reference && reference.canDelete && ctrl.modifyRecord && ctrl.showDeleteButton" label="Delete" uib-tooltip="Click here to delete this record." tooltip-placement="bottom" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
+                <delete-link id="delete-record" ng-if="reference && reference.canDelete && modifyRecord && showDeleteButton" label="Delete" uib-tooltip="Click here to delete this record." tooltip-placement="bottom" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
                 <a id="show-all-related-tables" ng-click="ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((ctrl.showEmptyRelatedTables) ? 'show empty related entities too.' : 'hide empty related entities.')}}" tooltip-placement="bottom">
                     <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
                     <strong>
@@ -59,7 +59,7 @@
                                 <span ng-show="tableModels[$index].displayType == 'markdown'">Table</span>
                                 <span ng-show="tableModels[$index].displayType != 'markdown'">Revert</span>
                             Display</a>&nbsp;|</span>
-                        <span ng-if="relatedRef.canCreate && ctrl.modifyRecord"><a class="add-records-link" ng-click="ctrl.addRelatedRecord(relatedRef)">Add</a>&nbsp;|</span>
+                        <span ng-if="relatedRef.canCreate && modifyRecord"><a class="add-records-link" ng-click="ctrl.addRelatedRecord(relatedRef)">Add</a>&nbsp;|</span>
                         <span><a class="more-results-link" ng-click="ctrl.toRecordSet(relatedRef)">View More</a></span>
                     </div>
                     <div class="row">
@@ -68,7 +68,7 @@
                                 <span class="markdown-container" bind-html-unsafe="tableModels[$index].page.content"></span>
                             </div>
                             <div ng-show="tableModels[$index].displayType != 'markdown'">
-                                <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]" default-row-linking="true"></record-table>
+                                <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
                             </div>
                         </div>
                     </div>

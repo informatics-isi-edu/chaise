@@ -6,16 +6,16 @@
     /**
      * Ways to use recordTable directive:
      *
-     * 1. Table only, default row click action (go to record)
+     * 1. Table only
      *    <record-table vm="vm" default-row-linking="true"></record-table>
      *
-     * 2. Table only, customized row click function
+     * 2. Selectable table only with select function
      *    <record-table vm="vm" on-row-click="gotoRowLink(tuple)"></record-table>
      *
-     * 3. Table with search, page size, previous/next, default row click action (go to record)
-     *    <recordset vm="vm" default-row-linking="true"></recordset>
+     * 3. Table with search, page size, previous/next
+     *    <recordset vm="vm"></recordset>
      *
-     * 4. Table with search, page size, previous/next, customized row click function
+     * 4. Selectable table with search, page size, previous/next
      *    <recordset vm="vm" on-row-click="gotoRowLink(tuple)"></recordset>
      *
      *
@@ -31,7 +31,9 @@
      *        page,         // current page object
      *        pageLimit,    // number of rows per page
      *        rowValues,    // array of rows values, each value has this structure {isHTML:boolean, value:value}
-     *        search: null  // search term
+     *        search:       // search term, null for none
+     *        config,       // {viewable, editable, deletable, selectable, context}
+     *        context       // reference's context
      *       }
      *
      *
@@ -93,11 +95,16 @@
             templateUrl: '../common/templates/table.html',
             scope: {
                 vm: '=',
-                defaultRowLinking: "=?", // set to true to use default row click action (go to record)
                 onRowClickBind: '=?',    // used by the recordset template to pass down on click function
-                onRowClick: '&?'      // set row click function if not using default
+                onRowClick: '&?'      // set row click function
             },
             link: function (scope, elem, attr) {
+
+                // row data has been modified (from ellipses)
+                // do a read
+                scope.$on('record-modified', function() {
+                    recordTableUtils.read(scope);
+                });
 
                 scope.sortby = function(column) {
                     if (scope.vm.sortby !== column) {
@@ -115,32 +122,6 @@
                     recordTableUtils.read(scope);
                 };
 
-                scope.gotoRowLink = function(index) {
-                    var tuple = scope.vm.page.tuples[index];
-                    var appUrl = tuple.reference.contextualize.detailed.appLink;
-                    if (appUrl)
-                        location.assign(appUrl);
-                    else {
-                        AlertsService.addAlert({type: "error", message: "Application Error: row linking undefined for " + tuple.reference.location.compactPath});
-                    }
-                };
-
-                scope.rowClickAction = function(event, index) {
-                    var el = event.target || event.srcElement;
-                    if (el.nodeName.toLowerCase() === 'a' || el.nodeName.toLowerCase() === 'button' || el.classList.contains("readmore")) {
-                        return false;
-                    }
-
-                    var args = {"tuple": scope.vm.page.tuples[index]};
-                    if (scope.defaultRowLinking !== undefined && scope.defaultRowLinking === true) {
-                        scope.gotoRowLink(index);
-                    } else if (scope.onRowClickBind) {
-                        scope.onRowClickBind(args);
-                    } else if (scope.onRowClick) {
-                        scope.onRowClick(args);
-                    }
-                }
-
             }
         };
     }])
@@ -152,12 +133,12 @@
             templateUrl: '../common/templates/recordset.html',
             scope: {
                 vm: '=',
-                defaultRowLinking: "=?", // set true to use default row click action (link to record)
-                onRowClick: '&?'         // set row click function if not using default
+                onRowClick: '&?'         // set row click function
             },
             link: function (scope, elem, attr) {
 
-                var addRecordRequests = {};
+                var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
+                var updated = false; // table refresh used by ellipses' edit action (new method)
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
 
@@ -258,7 +239,7 @@
 
                     scope.vm.backgroundSearch = false;
 
-                    var completed = 0;
+                    var completed = 0; // completed add record requests
                     for (var id in addRecordRequests) {
                         var cookie = $cookies.getObject(id);
                         if (cookie) {
@@ -269,9 +250,17 @@
                     }
 
                     // read
-                    if (completed > 0)
+                    if (completed > 0 || updated) {
+                        updated = false;
                         recordTableUtils.read(scope);
+                    }
+
                 };
+
+                // allow child window to call to indicate table has been updated
+                window.updated = function() {
+                    updated = true;
+                }
             }
         };
     }]);

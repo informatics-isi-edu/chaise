@@ -3,13 +3,13 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', '$scope', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window, $scope) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
+        var editRecordRequests = {}; // generated id: {schemaName, tableName}
+        var updated = {};
 
         vm.alerts = AlertsService.alerts;
-        vm.modifyRecord = chaiseConfig.editRecord === false ? false : true;
-        vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         vm.showEmptyRelatedTables = false;
 
         vm.createRecord = function() {
@@ -146,6 +146,10 @@
             $window.open(appLink, '_blank');
         };
 
+        $scope.$on("edit-request", function(event, args) {
+            editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
+        });
+
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
@@ -163,12 +167,14 @@
             }
 
             // read updated tables
-            if (Object.keys(completed).length > 0) {
+            if (Object.keys(completed).length > 0 || updated !== {}) {
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                     var relatedTableReference = $rootScope.relatedReferences[i];
-                    if (completed[relatedTableReference.uri]) {
+                    if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
+                        delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
                         (function (i) {
                             relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
+                                $rootScope.tableModels[i].page = page;
                                 $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
                             });
                         })(i);
@@ -177,5 +183,10 @@
             }
 
         };
+
+        window.updated = function(id) {
+            updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
+            delete editRecordRequests[id];
+        }
     }]);
 })();

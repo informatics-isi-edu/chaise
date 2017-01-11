@@ -42,6 +42,9 @@
         headInjector.addTitle();
         headInjector.addCustomCSS();
 
+        $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
+        $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
+
         try {
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
@@ -117,9 +120,17 @@
                                     sortOrder: null,            // asc (default) or desc
                                     rowValues: [],              // array of rows values
                                     search: null,                // search term
-                                    displayType: $rootScope.relatedReferences[i].display.type
+                                    displayType: $rootScope.relatedReferences[i].display.type,
+                                    context: "compact/brief",
+                                    fromTuple: $rootScope.tuple
                                 };
                                 model.rowValues = DataUtils.getRowValuesFromPage(page);
+                                model.config = {
+                                    viewable: true,
+                                    editable: $rootScope.modifyRecord,
+                                    deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
+                                    selectable: false
+                                };
                                 $rootScope.tableModels[i] = model;
                             }, function readFail() {
                                 var model = {
