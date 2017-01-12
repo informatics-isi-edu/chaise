@@ -15,7 +15,7 @@ describe('When editing a record', function() {
         browser.ignoreSynchronization = true;
     });
 
-    xdescribe('if the user made no edits, the app', function() {
+    describe('if the user made no edits, the app', function() {
         var url;
         beforeAll(function(done) {
             url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/' + browser.params.schema.name + ':' + testParams.tableName + '/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
@@ -25,7 +25,7 @@ describe('When editing a record', function() {
             });
         });
 
-        it('should have submitted the right data to the DB', function() {
+        it('should submit the right data to the DB', function() {
             recordEditPage.submitForm().then(function() {
                 return recordEditPage.getAlertError();
             }).then(function(alert) {

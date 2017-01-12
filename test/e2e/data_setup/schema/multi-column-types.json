@@ -1,11 +1,11 @@
 {
-    "schema_name": "blah",
+    "schema_name": "multi-column-types",
     "comment": "A schema composed of 2 tables: a main table (table_1) that has nearly all types of columns for testing in RecordEdit app, and another table (table_2) that supplies a foreign key to this main table.",
     "tables": {
         "table_1": {
             "table_name": "table_1",
             "comment": "The main table with different columns that map to a different input controls in RecordEdit",
-            "schema_name": "blah",
+            "schema_name": "multi-column-types",
             "kind": "table",
             "column_definitions": [
                 {
@@ -286,14 +286,14 @@
                     "foreign_key_columns": [
                         {
                             "table_name": "table_1",
-                            "schema_name": "blah",
+                            "schema_name": "multi-column-types",
                             "column_name": "fk_null_col"
                         }
                     ],
                     "referenced_columns": [
                         {
                             "table_name": "table_2",
-                            "schema_name": "blah",
+                            "schema_name": "multi-column-types",
                             "column_name": "id"
                         }
                     ],
@@ -304,14 +304,14 @@
                     "foreign_key_columns": [
                         {
                             "table_name": "table_1",
-                            "schema_name": "blah",
+                            "schema_name": "multi-column-types",
                             "column_name": "fk_col"
                         }
                     ],
                     "referenced_columns": [
                         {
                             "table_name": "table_2",
-                            "schema_name": "blah",
+                            "schema_name": "multi-column-types",
                             "column_name": "id"
                         }
                     ],
@@ -323,7 +323,7 @@
         "table_2": {
             "table_name": "table_2",
             "comment": "The secondary table that supplies the columns for a fk relationship to the main table (table_1).",
-            "schema_name": "blah",
+            "schema_name": "multi-column-types",
             "kind": "table",
             "column_definitions": [
                 {

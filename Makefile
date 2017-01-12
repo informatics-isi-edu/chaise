@@ -25,7 +25,7 @@ E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
 E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 # Recordedit tests
 E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
-E2EDIrecordBlah=test/e2e/specs/recordedit/data-independent/blah/protractor.conf.js
+E2EDIrecordEditMultiColTypes=test/e2e/specs/recordedit/data-independent/edit-multi-col-types/protractor.conf.js
 E2EDIrecordDefaults=test/e2e/specs/recordedit/data-independent/add-defaults/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
 E2EDIrecordEditDeleteRecord=test/e2e/specs/recordedit/data-independent/delete-record/protractor.conf.js
@@ -479,12 +479,7 @@ testrecordset:
 # Rule to run record edit app tests
 .PHONY: testrecordedit
 testrecordedit:
-	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled)
-
-# Rule to run blah tests
-.PHONY: testblah
-testblah:
-	$(BIN)/protractor $(E2EDIrecordBlah)
+	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes)
 
 #Rule to run viewer app tests
 .PHONY: testviewer

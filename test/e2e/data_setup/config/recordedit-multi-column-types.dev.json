@@ -8,19 +8,19 @@
                 ]
             },
             "schema": {
-                "name": "blah",
+                "name": "multi-column-types",
                 "createNew": true,
-                "path": "test/e2e/data_setup/schema/blah.json"
+                "path": "test/e2e/data_setup/schema/multi-column-types.json"
             },
             "tables": {
                 "createNew": true
             },
             "entities": {
                 "createNew": true,
-                "path": "test/e2e/data_setup/data/blah"
+                "path": "test/e2e/data_setup/data/multi-column-types"
             }
         }],
-        "schema": "blah"
+        "schema": "multi-column-types"
     },
     "cleanup": true,
     "tests": {
