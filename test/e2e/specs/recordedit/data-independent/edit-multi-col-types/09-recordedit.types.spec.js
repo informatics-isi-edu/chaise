@@ -1,15 +1,16 @@
 // The goal of this spec is to test whether RecordEdit app correctly converts data for different column types for submission to ERMrest.
-
+var testParams = browser.params.configuration.tests.params;
 var chaisePage = require('../../../../utils/chaise.page.js');
 var recordEditPage = chaisePage.recordEditPage;
-var authCookie = process.env.AUTH_COOKIE;
+// var authCookie = process.env.AUTH_COOKIE;
+var authCookie = browser.params.configuration.authCookie;
 var ermRestUrl = process.env.ERMREST_URL;
 var ermRest = require('../../../../../../../ermrestjs/build/ermrest.js');
 ermRest.setUserCookie(authCookie);
 
 // When editing a record, the app should reliably submit the right data to ERMrest
 describe('When editing a record', function() {
-    var testParams = browser.params.configuration.tests.params;
+    // var testParams = browser.params.configuration.tests.params;
 
     beforeAll(function() {
         browser.ignoreSynchronization = true;
