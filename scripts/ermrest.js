@@ -4194,3 +4194,55 @@ function getPreferedPrimaryKey(metadata) {
 		});
 	}
 }
+
+function getSearchFilter(options) {
+	/*
+	var page = options['pagingOptions']['currentPage'];
+	var pageSize = options['pagingOptions']['pageSize'];
+	var limit = page * pageSize;
+	console.log('limit: ' + limit);
+	var sortOption = options['sortFacet'];
+	var sortOrder = options['sortOrder'];
+	var url = ERMREST_DATA_HOME + '/entity/' + getQueryPredicate(options);
+	var predicate = getPredicate(options, null, null, null, null);
+	if (predicate.length > 0) {
+		url += '/' + predicate.join('/');
+	}
+	url += '/$A'
+	if (sortOption != null && sortOption != '') {
+		url += getSortClause(options['table'], sortOption, sortOrder, false);
+	}
+	url += '?limit=' + limit;
+	*/
+	var page = options['pagingOptions']['currentPage'];
+	var pageSize = options['pagingOptions']['pageSize'];
+	var limit = page * pageSize;
+	var sortOption = options['sortFacet'];
+	var sortOrder = options['sortOrder'];
+	var sortClause = '';
+	if (options.ermrestData.length < limit) {
+		limit = options.ermrestData.length;
+	}
+	if (sortOption != null && sortOption != '') {
+		sortOption = getSortClause(options['table'], sortOption, sortOrder, false);
+		var index = sortOption.lastIndexOf('@sort(');
+		if (index > 0) {
+			sortOption = sortOption.substr(index);
+		}
+	}
+	var predicate = [];
+	$.each(options.ermrestData, function(i, row) {
+		var terms = [];
+		$.each(PRIMARY_KEY, function(i, col) {
+			terms.push(col + '=' + encodeSafeURIComponent(row[decodeURIComponent(col)]));
+		});
+		predicate.push(terms.join('&'));
+	});
+	var url = HOME + '/chaise/recordedit/#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(options.table) + '/' + predicate.join(';') + sortOption + '?limit=' + limit;
+	return url;
+}
+
+function getRecordEditURL(options) {
+	var url = getSearchFilter(options);
+	return url;
+}

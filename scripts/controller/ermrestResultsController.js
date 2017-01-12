@@ -556,6 +556,11 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 		FacetsService.updateExportFormatOptions();
 	};
 
+	this.onEdittClick = function onEdittClick() {
+		var url = getRecordEditURL($scope.FacetsData);
+		window.location.href = url;
+	};
+
 	this.onExportClick = function onExportClick() {
 		FacetsService.doExport();
 	};
