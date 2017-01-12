@@ -100,9 +100,15 @@
                 }
 
                 // Case for editing an entity
-                if (context.filter) {
+                if (context.filter || context.queryParams.limit) {
                     if ($rootScope.reference.canUpdate) {
-                        $rootScope.reference.read(context.filter.filters.length).then(function getPage(page) {
+                        var numberRowsToRead;
+                        if (context.queryParams.limit) {
+                            numberRowsToRead = Number(context.queryParams.limit);
+                        } else {
+                            numberRowsToRead = context.filter.filters.length;
+                        }
+                        $rootScope.reference.read(numberRowsToRead).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {

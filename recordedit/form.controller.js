@@ -8,7 +8,7 @@
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
-        vm.editMode = (context.filter && !context.queryParams.copy) || false;
+        vm.editMode = ((context.filter || context.queryParams.limit) && !context.queryParams.copy) || false;
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -239,7 +239,8 @@
                                 page: page,
                                 pageLimit: model.rows.length,
                                 rowValues: [],
-                                search: null
+                                search: null,
+                                config: {}
                             }
                             vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                             vm.resultset = true;
@@ -283,7 +284,8 @@
                             page: page,
                             pageLimit: model.rows.length,
                             rowValues: [],
-                            search: null
+                            search: null,
+                            config: {}
                         }
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
