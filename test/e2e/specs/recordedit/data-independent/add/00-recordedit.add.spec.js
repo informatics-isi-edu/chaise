@@ -152,7 +152,7 @@ describe('Record Add', function() {
                 rowname: chance.sentence(),
                 keys: {id: 1}
             };
-            browser.manage().addCookie({name: 'test', value: JSON.stringify(testCookie)});
+            browser.manage().addCookie('test', JSON.stringify(testCookie));
 
             // Reload the page with prefill query param in url
             browser.get(browser.params.url + ":" + testParams.tables[0].table_name + '?prefill=test');
@@ -160,17 +160,15 @@ describe('Record Add', function() {
 
         it('should pre-fill fields from the prefill cookie', function() {
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                return browser.manage().getCookies();
-            }).then(function(cookies) {
-                var cookie = {name: "no cookie"};
-                for (var i = 0; i < cookies.length; i++) {
-                    if (cookies[i].name === "test") {
-                        cookie = cookies[i];
-                    }
+                return browser.manage().getCookie('test');
+            }).then(function(cookie) {
+                if (cookie) {
+                    var field = element.all(by.css('.popup-select-value')).first();
+                    expect(field.getText()).toBe(testCookie.rowname);
+                } else {
+                    // Fail the test
+                    expect('Cookie did not load').toEqual('but cookie should have loaded');
                 }
-                expect(cookie.name).toBe("test");
-                var field = element.all(by.css('.popup-select-value')).first();
-                expect(field.getText()).toBe(testCookie.rowname);
             });
         });
 
