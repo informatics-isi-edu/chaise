@@ -221,7 +221,29 @@
                             window.opener.updated(context.queryParams.invalidate);
                         }
                         vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                        vm.redirectAfterSubmission(page);
+                        if (model.rows.length == 1) {
+                            vm.redirectAfterSubmission(page);
+                        } else {
+                            AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                            // can't use page.reference because it reflects the specific values that were inserted
+                            vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                            //set values for the view to flip to recordedit resultset view
+                            vm.resultsetModel = {
+                                hasLoaded: true,
+                                reference: page.reference,
+                                tableDisplayName: page.reference.displayname,
+                                columns: page.reference.columns,
+                                enableSort: false,
+                                sortby: null,
+                                sortOrder: null,
+                                page: page,
+                                pageLimit: model.rows.length,
+                                rowValues: [],
+                                search: null
+                            }
+                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                            vm.resultset = true;
+                        }
                     }, function error(response) {
                         vm.showSubmissionError(response);
                         vm.submissionButtonDisabled = false;

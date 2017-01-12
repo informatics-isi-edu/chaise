@@ -49,7 +49,7 @@
     "mocha": "x",
     "moment": "^2.15.1",
     "phantomjs-prebuilt": "x",
-    "protractor": "x",
+    "protractor": "4.0.14",
     "q": "^1.4.1",
     "request": "x",
     "set-cookie-parser": "x",

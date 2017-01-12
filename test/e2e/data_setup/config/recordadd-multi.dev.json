@@ -14,6 +14,10 @@
             },
             "tables": {
                 "createNew": true
+            },
+            "entities": {
+            	"createNew": true,
+                "path": "test/e2e/data_setup/data/multi-add"
             }
         }],
         "schema": "multi-add"
@@ -30,6 +34,16 @@
                 "input_1_text_val" : "asdfg",
                 "input_2_text_val" : "qwerty",
                 "input_3_int_val" : "17"
+            },
+            "multi_edit" : {
+                "table_name" : "multi-add-table",
+                "int_column_name" : "int",
+                "text_column_name" : "text",
+                "keys_2" : [{ "name": "id", "value": "1000", "operator" : "=" },
+                            { "name": "id", "value": "1001", "operator" : "=" }],
+                "keys_3" : [{ "name": "id", "value": "1000", "operator" : "=" },
+                            { "name": "id", "value": "1001", "operator" : "=" },
+                            { "name": "id", "value": "1002", "operator" : "=" }]
             }
         }
     }

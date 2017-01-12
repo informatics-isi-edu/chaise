@@ -38,7 +38,7 @@ exports.testPresentation = function (tableParams) {
 	});
 
 	it("should have " + tableParams.columns.length + " columns", function() {
-		chaisePage.recordsetPage.getColumns().getInnerHtml().then(function(columnNames) {
+		chaisePage.recordsetPage.getColumns().getAttribute('innerHTML').then(function(columnNames) {
 			for (var j = 0; j < columnNames.length; j++) {
 				expect(columnNames[j]).toBe(tableParams.columns[j].title);
 			}

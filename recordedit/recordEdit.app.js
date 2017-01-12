@@ -102,66 +102,80 @@
                 // Case for editing an entity
                 if (context.filter) {
                     if ($rootScope.reference.canUpdate) {
-                        // check id range before reading?
-                        $rootScope.reference.read(1).then(function getPage(page) {
+                        $rootScope.reference.read(context.filter.filters.length).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
-                                var filter = context.filter;
-                                var noDataMessage = "No entity exists with " + filter.column + filter.operator + filter.value;
+
+                                var filters = context.filter.filters;
+                                var noDataMessage = "No entity exists with ";
+                                for (var k = 0; k < filters.length; k++) {
+                                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
+                                    if (k != filters.length-1) {
+                                        noDataMessage += " or ";
+                                    }
+                                }
                                 var noDataError = new Error(noDataMessage);
                                 noDataError.code = errorNames.notFound;
 
                                 throw noDataError;
                             }
 
-                            var column, value,
-                                tuple = page.tuples[0],
-                                values = tuple.values;
+                            var column, value;
 
                             $rootScope.tuples = page.tuples;
-                            $rootScope.displayname = (context.queryParams.copy ? $rootScope.reference.displayname : tuple.displayname);
+                            $rootScope.displayname = ((context.queryParams.copy && page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
 
-                            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
-                                column = $rootScope.reference.columns[i];
+                            for (var j = 0; j < page.tuples.length; j++) {
+                                // initialize row objects {column-name: value,...}
+                                recordEditModel.rows[j] = {};
+                                // needs to be initialized so foreign keys can be set
+                                recordEditModel.submissionRows[j] = {};
 
-                                switch (column.type.name) {
-                                    case "timestamp":
-                                    case "timestamptz":
-                                        if (values[i]) {
-                                            // Cannot ensure that all timestamp values are formatted in ISO 8601
-                                            // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
-                                            var ts = moment(values[i]);
-                                            value = {
-                                                date: ts.format('YYYY-MM-DD'),
-                                                time: ts.format('hh:mm:ss'),
-                                                meridiem: ts.format('A')
-                                            };
-                                        } else {
-                                            value = {
-                                                date: null,
-                                                time: null,
-                                                meridiem: 'AM'
-                                            };
-                                        }
-                                        break;
-                                    case "int2":
-                                    case "int4":
-                                    case "int8":
-                                        value = (values[i] ? parseInt(values[i], 10) : '');
-                                        break;
-                                    case "float4":
-                                    case "float8":
-                                    case "numeric":
-                                        value = (values[i] ? parseFloat(values[i]) : '');
-                                        break;
-                                    default:
-                                        value = values[i];
-                                        break;
-                                }
+                                var tuple = page.tuples[j],
+                                    values = tuple.values;
 
-                                if (!context.queryParams.copy || !column.getInputDisabled(context.appContext)) {
-                                    recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
+                                for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+                                    column = $rootScope.reference.columns[i];
+
+                                    switch (column.type.name) {
+                                        case "timestamp":
+                                        case "timestamptz":
+                                            if (values[i]) {
+                                                // Cannot ensure that all timestamp values are formatted in ISO 8601
+                                                // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
+                                                var ts = moment(values[i]);
+                                                value = {
+                                                    date: ts.format('YYYY-MM-DD'),
+                                                    time: ts.format('hh:mm:ss'),
+                                                    meridiem: ts.format('A')
+                                                };
+                                            } else {
+                                                value = {
+                                                    date: null,
+                                                    time: null,
+                                                    meridiem: 'AM'
+                                                };
+                                            }
+                                            break;
+                                        case "int2":
+                                        case "int4":
+                                        case "int8":
+                                            value = (values[i] ? parseInt(values[i], 10) : '');
+                                            break;
+                                        case "float4":
+                                        case "float8":
+                                        case "numeric":
+                                            value = (values[i] ? parseFloat(values[i]) : '');
+                                            break;
+                                        default:
+                                            value = values[i];
+                                            break;
+                                    }
+
+                                    if (!context.queryParams.copy || !column.getInputDisabled(context.appContext)) {
+                                        recordEditModel.rows[j][column.name] = value;
+                                    }
                                 }
                             }
                             $log.info('Model: ', recordEditModel);
@@ -208,7 +222,7 @@
                         forbiddenError.code = errorNames.forbidden;
 
                         throw forbiddenError;
-                    // user isn't logged in and neds permissions to create
+                    // user isn't logged in and needs permissions to create
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
