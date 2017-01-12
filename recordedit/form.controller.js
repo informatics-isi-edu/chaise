@@ -198,6 +198,9 @@
                 });
 
                 if (hasNoChanges) {
+                    if (window.opener && window.opener.updated) {
+                        window.opener.updated(context.queryParams.invalidate);
+                    }
                     // Redirect to record without PUT'ing to ERMrest
                     vm.readyToSubmit = false;
                     vm.redirectAfterSubmission();
@@ -214,6 +217,9 @@
                     }
                     // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                     $rootScope.reference.update($rootScope.tuples).then(function success(page) {
+                        if (window.opener && window.opener.updated) {
+                            window.opener.updated(context.queryParams.invalidate);
+                        }
                         vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                         vm.redirectAfterSubmission(page);
                     }, function error(response) {
@@ -228,15 +234,16 @@
                         $cookies.remove(context.queryParams.prefill);
                     }
 
+                    // add cookie indicating record added
+                    if (context.queryParams.invalidate) {
+                        $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
+                            {
+                                expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                            }
+                        );
+                    }
+
                     if (model.rows.length == 1) {
-                        // add cookie indicating record added
-                        if (context.queryParams.invalidate) {
-                            $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
-                                {
-                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-                                }
-                            );
-                        }
                         vm.redirectAfterSubmission(page);
                     } else {
                         AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
@@ -306,6 +313,7 @@
             // pass the reference as a param for the modal
             params.reference = column.reference.contextualize.compactSelect;
             params.reference.session = $rootScope.session;
+            params.context = "compact/select";
 
             var modalInstance = $uibModal.open({
                 animation: false,
@@ -506,9 +514,11 @@
 
         // Toggle between AM/PM for a time input's model
         function toggleMeridiem(modelIndex, columnName) {
+            // If the entire timestamp model doesn't exist, initialize it with a default meridiem
             if (!vm.recordEditModel.rows[modelIndex][columnName]) {
                 vm.recordEditModel.rows[modelIndex][columnName] = {meridiem: 'AM'};
             }
+            // Do the toggling
             var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem;
             if (meridiem.charAt(0).toLowerCase() === 'a') {
                 return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'PM';

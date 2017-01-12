@@ -16,6 +16,7 @@
       "foreign_keys": [
         {
           "comment": null,
+          "names": [["product-unordered-related-tables", "fk_category"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
@@ -34,6 +35,7 @@
         },
         {
           "comment": null,
+          "names": [["product-unordered-related-tables", "fk_thumbnail"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
@@ -54,6 +56,7 @@
         },
         {
           "comment": null,
+          "names": [["product-unordered-related-tables", "fk_cover"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
@@ -332,7 +335,7 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", "title", "website", "category", "rating", "summary", "description", "no_of_rooms", "cover", "thumbnail", "opened_on", "luxurious"]
+          "detailed" : ["id", "title", "website", ["product-unordered-related-tables", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-unordered-related-tables", "fk_cover"], ["product-unordered-related-tables", "fk_thumbnail"], "opened_on", "luxurious"]
         }
       }
     },

@@ -3,6 +3,7 @@
         <!-- sortable column header -->
         <thead class="table-heading">
             <tr>
+                <th ng-if="vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectable">Actions</th>
                 <th nowrap ng-repeat="col in vm.columns track by $index">
                     <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.comment) ? col.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.comment) ? 'top' : undefined}}" title="{{col.comment}}" ng-click="!col.isPseudo && vm.enableSort && sortby(col.name)">{{::col.displayname}}</span>
                     <span ng-show="!col.isPseudo && vm.enableSort && vm.sortby==col.name && vm.sortOrder=='asc'" ng-click="toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes" ng-style="{'cursor': 'pointer'}"></span>
@@ -14,7 +15,7 @@
 
         <!-- rows -->
         <tbody>
-            <tr class="table-row" ellipses ng-repeat="row in vm.rowValues track by $index" row-values="row" ng-click="rowClickAction($event, $index)" ng-style="{'cursor': 'pointer'}">
+            <tr class="table-row" ellipses ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" config="vm.config" context="vm.context" on-row-click-bind="onRowClickBind">
             </tr>
         </tbody>
     </table>

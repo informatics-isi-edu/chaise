@@ -698,6 +698,27 @@ var recordsetPage = function() {
         index = index || 0;
         return browser.executeScript("return $('.modal-popup-btn')[" + index + "];");
     };
+
+    this.getViewActionButtons = function() {
+        return element.all(by.css('.view-action-button'));
+    };
+
+    this.getEditActionButtons = function() {
+        return element.all(by.css('.edit-action-button'));
+    };
+
+    this.getDeleteActionButtons = function() {
+        return element.all(by.css('.delete-action-button'));
+    };
+
+    this.getConfirmDeleteTitle = function() {
+        return element(by.css(".modal-title"));
+    };
+
+    this.getConfirmDeleteButton = function () {
+        return element(by.id("delete-confirmation"));
+    }
+
 };
 
 function chaisePage() {

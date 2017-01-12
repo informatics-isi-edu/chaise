@@ -66,14 +66,14 @@
         page: null,         // current page
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
         search: null,       // search term
-        pageLimit: 25       // number of rows per page
+        pageLimit: 25,       // number of rows per page
+        config: {}
     })
 
     // Register the recordset controller
     .controller('recordsetController', ['$scope', '$rootScope', 'context', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService',  function($scope, $rootScope, context, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService) {
 
         $scope.vm = recordsetModel;
-
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
@@ -138,6 +138,14 @@
             UriUtils.setOrigin();
 
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
+            var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
+            var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
+            recordsetModel.config = {
+                viewable: true,
+                editable: modifyEnabled,
+                deletable: modifyEnabled && deleteEnabled,
+                selectable: false
+            };
 
             $rootScope.alerts = AlertsService.alerts;
 
@@ -172,6 +180,7 @@
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
                 recordsetModel.reference = reference.contextualize.compact;
+                recordsetModel.context = "compact";
                 recordsetModel.reference.session = session;
 
                 $log.info("Reference:", recordsetModel.reference);
