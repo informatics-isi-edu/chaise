@@ -152,7 +152,7 @@ describe('Record Add', function() {
                 rowname: chance.sentence(),
                 keys: {id: 1}
             };
-            browser.manage().addCookie({name: 'test', value: JSON.stringify(testCookie)});
+            browser.manage().addCookie(name: 'test', value: JSON.stringify(testCookie));
 
             // Reload the page with prefill query param in url
             browser.get(browser.params.url + ":" + testParams.tables[0].table_name + '?prefill=test');
