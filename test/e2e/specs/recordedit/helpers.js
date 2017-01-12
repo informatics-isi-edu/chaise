@@ -57,7 +57,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 		chaisePage.recordEditPage.getAllColumnCaptions().then(function(pageColumns) {
 			expect(pageColumns.length).toBe(columns.length);
 			pageColumns.forEach(function(c) {
-				c.getInnerHtml().then(function(txt) {
+				c.getAttribute('innerHTML').then(function(txt) {
 					txt = txt.trim();
 					var col = columns.find(function(cl) { return txt == cl.displayName });
 					expect(col).toBeDefined();
@@ -224,7 +224,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 					chaisePage.recordEditPage.getAllColumnCaptions().then(function(pcs) {
 						pcs.forEach(function(pc) {
-							pc.getInnerHtml().then(function(txt) {
+							pc.getAttribute('innerHTML').then(function(txt) {
 								txt = txt.trim();
 								var col = columns.find(function(cl) { return txt == cl.displayName });
 								if (col) {
@@ -296,7 +296,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 					chaisePage.recordEditPage.getAllColumnCaptions().then(function(pcs) {
 						pcs.forEach(function(pc) {
-							pc.getInnerHtml().then(function(txt) {
+							pc.getAttribute('innerHTML').then(function(txt) {
 								txt = txt.trim();
 								var col = columns.find(function(cl) { return txt == cl.displayName });
 								if (col) {
