@@ -53,8 +53,8 @@ describe('When editing a record', function() {
 
     // If the user does make an edit, make sure the app correctly converted the submission data for ERMrest.
     // We test this conversion on a per-column-type basis, with 2 test cases for each type:
-    // 1. Converting from null to non-null
-    // 2. Converting from non-null to null
+    // 1. Converting from null to non-null (e.g. "int2_null_col" will be changed from null to 32767)
+    // 2. Converting from non-null to null (e.g. "int2_col" will be changed from 32767 to null)
     // Except boolean type gets 3 cases (null to true, true to false, false to null).
     describe('if the user did make edits, the app', function() {
         var url, newRowData;
@@ -62,7 +62,7 @@ describe('When editing a record', function() {
             url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/' + browser.params.schema.name + ':' + testParams.tableName + '/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
             // These will be the new values we expect the row to have in ERMrest after editing this row in the app
             newRowData = {
-                "id": 1, // Leave this one alone
+                "id": 1,
                 "int2_null_col": 32767,
                 "int2_col": null,
                 "int4_null_col": -2147483648,
@@ -104,18 +104,18 @@ describe('When editing a record', function() {
                         case 'serial4':
                             break;
                         case 'popup-select':
-                            // Clear the foreign key field for fk_col
+                            // Clear the foreign key field for fk_col b/c fk_col needs to be null
                             if (column.name === 'fk_col') {
                                 var clearBtns = element.all(by.css('.foreignkey-remove'));
                                 chaisePage.clickButton(clearBtns.get(1));
                             }
-
-                            // Select a non-null value for fk_null_col
+                            // Select a non-null value for fk_null_col b/c fk_null_col needs to be non-null
                             if (column.name === 'fk_null_col') {
                                 element.all(by.css('.modal-popup-btn')).first().click().then(function() {
                                     return chaisePage.waitForElement(element.all(by.id('divRecordSet')).first());
                                 }).then(function() {
-                                    chaisePage.recordsetPage.getRows().first().click();
+                                    // Get the first row in the modal popup table, find the row's select-action-buttons, and click the 1st one.
+                                    chaisePage.recordsetPage.getRows().first().all(by.css('.select-action-button')).first().click();
                                 }).catch(function(error) {
                                     console.log(error);
                                     expect('Something went wrong in this promise chain.').toBe('Please see error message.');
