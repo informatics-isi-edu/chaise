@@ -482,10 +482,6 @@ testrecordset:
 testrecordedit:
 	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes)
 
-.PHONY: blah
-blah:
-	$(BIN)/protractor $(E2EDIrecordEditMultiColTypes)
-
 #Rule to run viewer app tests
 .PHONY: testviewer
 testviewer:
