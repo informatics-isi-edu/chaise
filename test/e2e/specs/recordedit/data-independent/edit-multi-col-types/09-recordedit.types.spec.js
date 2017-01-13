@@ -10,7 +10,6 @@ var recordEditPage = chaisePage.recordEditPage;
 
 // When editing a record, the app should reliably submit the right data to ERMrest
 describe('When editing a record', function() {
-    var session, server;
 
     beforeAll(function() {
         browser.ignoreSynchronization = true;
@@ -18,18 +17,6 @@ describe('When editing a record', function() {
 
     beforeEach(function() {
         ermRest.setUserCookie(authCookie);
-        server = ermRest.ermrestFactory.getServer(ermRestUrl);
-        // require('request')(process.env.ERMREST_URL.replace('ermrest', 'authn') + '/session', function(error, response, body) {
-        //     if (!error && response.statusCode == 200) {
-        //         console.log('THE SESSION', body);
-        //     }
-        // });
-        // server.session.get().then(function(_session) {
-        //     session = _session;
-        // }, function(error) {
-        //     console.log('No session found:');
-        //     console.log(error);
-        // });
     });
 
     describe('if the user made no edits, the app', function() {
@@ -51,7 +38,6 @@ describe('When editing a record', function() {
                 return ermRest.resolve(url, {cid: 'chaise-e2e-test'});
             // Fetch a reference to this row from ERMrest
             }).then(function(ref) {
-                ref.session = session;
                 return ref.contextualize.entryEdit.read(1);
             }).then(function(page) {
                 // Compare tuple data with expected data
@@ -211,7 +197,6 @@ describe('When editing a record', function() {
                 // Fetch a reference to this row from ERMrest
                 return ermRest.resolve(url, {cid: 'chaise-e2e-test'});
             }).then(function(ref) {
-                ref.session = session;
                 return ref.contextualize.entryEdit.read(1);
             }).then(function(page) {
                 // Compare tuple data with expected data
