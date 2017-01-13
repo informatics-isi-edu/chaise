@@ -49,7 +49,7 @@ describe('When editing a record', function() {
                     // The expected value for timestamp_col is in Pacific time. Since Travis is in UTC,
                     // the expected value must be UTC as well because ERMrest stores timestamps as the current timezone it's in.
                     if (process.env.CI && column.name === 'timestamp_col') {
-                        colValue = '2016-01-18T00:00:00-08:00';
+                        colValue = '2016-01-18T08:00:00+00:00';
                     }
                     // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
                     expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + column.value);
