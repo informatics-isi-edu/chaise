@@ -52,7 +52,7 @@ describe('When editing a record', function() {
                         colValue = '2016-01-18T08:00:00+00:00';
                     }
                     // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
-                    expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + column.value);
+                    expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + colValue);
                 });
             }).catch(function(error) {
                 console.log(error);
