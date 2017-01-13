@@ -1,0 +1,60 @@
+{
+    "setup": {
+        "schemaConfigurations": [{
+            "catalog": {
+                "acls": [
+                    {"name": "content_write_user", "user": "*" },
+                    {"name": "content_read_user", "user": "*" }
+                ]
+            },
+            "schema": {
+                "name": "multi-column-types",
+                "createNew": true,
+                "path": "test/e2e/data_setup/schema/multi-column-types.json"
+            },
+            "tables": {
+                "createNew": true
+            },
+            "entities": {
+                "createNew": true,
+                "path": "test/e2e/data_setup/data/multi-column-types"
+            }
+        }],
+        "schema": "multi-column-types"
+    },
+    "cleanup": true,
+    "tests": {
+        "params": {
+            "tableName": "table_1",
+            "key": {"columnName": "id", "value": 1, "operator": "="},
+            "row": [
+                {"name": "id", "value": 1, "displayType": "serial4"},
+                {"name": "int2_null_col", "value": null, "displayType": "int2"},
+                {"name": "int2_col", "value": 32767, "displayType": "int2"},
+                {"name": "int4_null_col", "value": null, "displayType": "int4"},
+                {"name": "int4_col", "value": -2147483648, "displayType": "int4"},
+                {"name": "int8_null_col", "value": null, "displayType": "int8"},
+                {"name": "int8_col", "value": 9007199254740991, "displayType": "int8"},
+                {"name": "float4_null_col", "value": null, "displayType": "float4"},
+                {"name": "float4_col", "value": 4.6123, "displayType": "float4"},
+                {"name": "float8_null_col", "value": null, "displayType": "float8"},
+                {"name": "float8_col", "value": 234523523.023045, "displayType": "float8"},
+                {"name": "text_null_col", "value": null, "displayType": "text"},
+                {"name": "text_col", "value": "sample", "displayType": "text"},
+                {"name": "longtext_null_col", "value": null, "displayType": "longtext"},
+                {"name": "longtext_col", "value": "asjdf;laksjdf;laj ;lkajsd;f lkajsdf;lakjs f;lakjs df;lasjd f;ladsjf;alskdjfa ;lskdjf a;lsdkjf a;lskdfjal;sdkfj as;ldfkj as;dlf kjasl;fkaj;lfkjasl;fjas;ldfkjals;dfkjas;dlkfja;sldkfjasl;dkfjas;dlfkjasl;dfkja; lsdjfk a;lskdjf a;lsdfj as;ldfja;sldkfja;lskjdfa;lskdjfa;lsdkfja;sldkfjas;ldfkjas;dlfkjas;lfkja;sldkjf a;lsjf ;laskj fa;slk jfa;sld fjas;l js;lfkajs;lfkasjf;alsja;lk ;l kja", "displayType": "longtext"},
+                {"name": "markdown_null_col", "value": null, "displayType": "markdown"},
+                {"name": "markdown_col", "value": "<strong>Sample</strong>", "displayType": "markdown"},
+                {"name": "bool_null_col", "value": null, "displayType": "boolean"},
+                {"name": "bool_true_col", "value": true, "displayType": "boolean"},
+                {"name": "bool_false_col", "value": false, "displayType": "boolean"},
+                {"name": "timestamp_null_col", "value": null, "displayType": "timestamptz"},
+                {"name": "timestamp_col", "value": "2016-01-18T00:00:00-08:00", "displayType": "timestamptz"},
+                {"name": "date_null_col", "value": null, "displayType": "date"},
+                {"name": "date_col", "value": "2016-08-15", "displayType": "date"},
+                {"name": "fk_null_col", "value": null, "displayType": "popup-select"},
+                {"name": "fk_col", "value": "1", "displayType": "popup-select"}
+            ]
+        }
+    }
+}

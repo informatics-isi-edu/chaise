@@ -186,7 +186,7 @@
                     // not pseudo, column.name is sufficient for the keys
                     } else {
                         // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                        model.submissionRows[j][column.name] = transformedRow[column.name] || null;
+                        model.submissionRows[j][column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
                     }
                 });
             }
