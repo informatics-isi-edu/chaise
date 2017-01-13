@@ -45,13 +45,8 @@ describe('When editing a record', function() {
                 var row = testParams.row;
                 expect(Object.keys(tuple).length).toEqual(row.length);
                 row.forEach(function(column) {
-                    // var colValue = column.value;
-                    // // Convert timestamp values to UTC if in Travis because ERMrest converts timestamps to its current timezone (Travis is in UTC).
-                    // if (process.env.CI && column.displayType === 'timestamptz') {
-                    //     colValue = '2016-01-18T08:00:00+00:00';
-                    // }
                     // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
-                    expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + colValue);
+                    expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + column.value);
                 });
             }).catch(function(error) {
                 console.log(error);
