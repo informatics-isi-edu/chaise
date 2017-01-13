@@ -88,7 +88,7 @@ describe('When editing a record', function() {
                 "bool_false_col": null,
                 // If testing in Travis, set expected timestamp value to UTC. Otherwise, set it to Pacific time for local tests
                 // because ERMrest converts timestamps to its current timezone.
-                "timestamp_null_col": process.env.CI ? : "2016-01-18T08:00:00+00:00" : "2016-01-18T13:00:00-08:00",
+                "timestamp_null_col": process.env.CI ? "2016-01-18T08:00:00+00:00" : "2016-01-18T13:00:00-08:00",
                 "timestamp_col": null,
                 "date_null_col": "2016-08-15",
                 "date_col": null,
