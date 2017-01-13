@@ -85,6 +85,7 @@ before_script:
 
 script:
   - make build
+  - make blah
   - make testnavbar
   - make testrecord
   - make testrecordset
