@@ -45,6 +45,12 @@ describe('When editing a record', function() {
                 var row = testParams.row;
                 expect(Object.keys(tuple).length).toEqual(row.length);
                 row.forEach(function(column) {
+                    var colValue = column.value;
+                    // The expected value for timestamp_col is in Pacific time. Since Travis is in UTC,
+                    // the expected value must be UTC as well because ERMrest stores timestamps as the current timezone it's in.
+                    if (process.env.CI && column.name === 'timestamp_col') {
+                        colValue = '2016-01-18T00:00:00-08:00';
+                    }
                     // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
                     expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + column.value);
                 });
@@ -102,7 +108,7 @@ describe('When editing a record', function() {
         });
 
         // Test each column type to check that the app converts the submission data correctly for each type
-        it('should submit the right data to the DB', function() {
+        it('should submit the right data to the DB', function(done) {
             // Edit each column with the new row data
             testParams.row.forEach(function(column, index, array) {
                 (function(column) {
@@ -208,9 +214,11 @@ describe('When editing a record', function() {
                     // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
                     expect(colName + ': ' + tuple[colName]).toBe(colName + ': ' + newRowData[colName]);
                 }
+                done();
             }).catch(function(error) {
                 console.log(error);
                 expect('Something went wrong in this promise chain.').toBe('Please see error message.');
+                done.fail();
             });
         });
     });
