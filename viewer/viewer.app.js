@@ -28,7 +28,7 @@
         // should we allow for improper URLs here?
         // what if there are 2 filters and the id filter is the second one.
         // Is that improper or should it be parsed and ignore the other filter?
-        var filter = context.filter;
+        var filter = context.filter.filters[0];
         if (filter.type === "BinaryPredicate" &&
             filter.operator === "=" &&
             filter.column.toLowerCase() === "id") {

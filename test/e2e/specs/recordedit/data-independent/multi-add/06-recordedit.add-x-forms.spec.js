@@ -82,7 +82,7 @@ describe('Record Add', function() {
             chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript().then(function(submitBtn) {
                 return chaisePage.clickButton(submitBtn);
             }).then(function() {
-                return chaisePage.recordEditPage.getRecordModelRows();
+                return chaisePage.recordEditPage.getViewModelRows();
             }).then(function(rows) {
                 expect(rows.length).toBe(testParams.records);
             });
