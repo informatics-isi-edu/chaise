@@ -32,7 +32,7 @@
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
 
-        vm.MAX_ROWS_TO_ADD = 201;
+        vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
         vm.numberRowsToAdd = 1;
         vm.showMultiInsert = false;
         vm.copyFormRow = copyFormRow;

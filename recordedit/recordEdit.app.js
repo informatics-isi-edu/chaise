@@ -62,6 +62,7 @@
 
             context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
             context.appName = "recordedit";
+            context.MAX_ROWS_TO_ADD = 201;
 
             Session.getSession().then(function getSession(_session) {
                 session = _session;
@@ -106,7 +107,7 @@
                         if (context.queryParams.limit) {
                             numberRowsToRead = Number(context.queryParams.limit);
                         } else {
-                            numberRowsToRead = context.filter.filters.length;
+                            numberRowsToRead = context.MAX_ROWS_TO_ADD;
                         }
                         $rootScope.reference.read(numberRowsToRead).then(function getPage(page) {
                             $log.info("Page: ", page);

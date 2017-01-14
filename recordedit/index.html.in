@@ -77,13 +77,13 @@
                         <div class="row form-container">
                             <div class="col-xs-12" id="formEdit" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
                                 <table ng-form="form.formContainer" class="table">
-                                    <tr ng-if="!form.editMode">
+                                    <tr>
                                         <td ng-style="form.firstHeaderStyle">Record Number</td>
                                         <td ng-style="form.headerHeight" class="form-header" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
                                             <div class="row">
                                                 <div class="col-xs-12">
                                                     <div class="pull-left" ng-bind="rowIndex + 1"></div>
-                                                    <delete-link class="pull-right" ng-show="form.recordEditModel.rows.length > 1" button-size="sm"  tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
+                                                    <delete-link ng-if="!form.editMode" class="pull-right" ng-show="form.recordEditModel.rows.length > 1" button-size="sm"  tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
                                                 </div>
                                             </div>
                                         </td>
