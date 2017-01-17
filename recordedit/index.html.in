@@ -83,7 +83,7 @@
                                             <div class="row">
                                                 <div class="col-xs-12">
                                                     <div class="pull-left" ng-bind="rowIndex + 1"></div>
-                                                    <delete-link ng-if="!form.editMode" class="pull-right" ng-show="form.recordEditModel.rows.length > 1" button-size="sm"  tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
+                                                    <delete-link ng-if="::!form.editMode" class="pull-right" ng-show="form.recordEditModel.rows.length > 1" button-size="sm"  tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form." icon="true" display="button" callback="form.removeFormRow(rowIndex);"></delete-link>
                                                 </div>
                                             </div>
                                         </td>
