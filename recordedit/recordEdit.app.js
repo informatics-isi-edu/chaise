@@ -40,6 +40,8 @@
         var session,
             context = { booleanValues: ['', true, false] };
 
+        $rootScope.displayReady = false;
+
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
@@ -108,7 +110,7 @@
                         if (context.queryParams.limit) {
                             numberRowsToRead = Number(context.queryParams.limit);
                             if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
-                                var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records."; 
+                                var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
                                 AlertsService.addAlert({type: "error", message: limitMessage})
                             }
                         } else {
@@ -191,6 +193,8 @@
                                     }
                                 }
                             }
+
+                            $rootScope.displayReady = true;
                             $log.info('Model: ', recordEditModel);
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
@@ -227,6 +231,8 @@
                                 recordEditModel.rows[0][column.name] = column.default;
                             }
                         });
+
+                        $rootScope.displayReady = true;
                     // if there is a session, user isn't allowed to create
                     } else if (session) {
                         var forbiddenMessage = "You are not authorized to Create entities.";
