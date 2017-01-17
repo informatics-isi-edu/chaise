@@ -34,8 +34,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
-        function runRecordEditApp(ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
+        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -103,12 +103,18 @@
                 // Case for editing an entity
                 if (context.filter || context.queryParams.limit) {
                     if ($rootScope.reference.canUpdate) {
+
                         var numberRowsToRead;
                         if (context.queryParams.limit) {
                             numberRowsToRead = Number(context.queryParams.limit);
+                            if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
+                                var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be added at once. Showing the first " context.MAX_ROWS_TO_ADD + "."; 
+                                AlertsService.addAlert({type: "error", message: limitMessage})
+                            }
                         } else {
                             numberRowsToRead = context.MAX_ROWS_TO_ADD;
                         }
+
                         $rootScope.reference.read(numberRowsToRead).then(function getPage(page) {
                             $log.info("Page: ", page);
 
