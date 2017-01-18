@@ -74,6 +74,7 @@
     .controller('recordsetController', ['$scope', '$rootScope', 'context', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService',  function($scope, $rootScope, context, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService) {
 
         $scope.vm = recordsetModel;
+        recordsetModel.RECORDEDIT_MAX_ROWS = 200;
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
@@ -122,6 +123,15 @@
 
             return url;
         };
+
+        $scope.edit = function() {
+            var link = recordsetModel.page.reference.contextualize.entryEdit.appLink;
+            // TODO ermrestJS needs to handle the case when no limit is defined in the URL
+            if (link.indexOf("?limit=") === -1 || link.indexOf("&limit=") === -1)
+                link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + recordsetModel.pageLimit;
+
+            return link;
+        }
 
     }])
 
