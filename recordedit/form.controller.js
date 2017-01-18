@@ -61,11 +61,11 @@
         vm.maskOptions = {
             date: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
-                clearOnBlur: false
+                clearOnBlur: true
             },
             time: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
-                clearOnBlur: false
+                clearOnBlur: true
             }
         };
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
