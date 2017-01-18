@@ -83,7 +83,7 @@
                     return moment(modelValue, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid();
                 };
                 /*
-                This parser takes the view value and inserts the appropriate colons before updating the model value.
+                The parser below takes the view value and inserts the appropriate colons before updating the model value.
                 If we decide the placeholder char for the time input's mask should be something other than
                 a valid time character (e.g. underscore or space; currently it's 0), then we need to set the model-view-value
                 attr on the time input's ui-mask to `false` and uncomment the parser below.
@@ -95,6 +95,53 @@
                 //     }
                 //     return value;
                 // });
+            }
+        };
+    })
+
+    .directive('timestamp', function() {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function(scope, elm, attr, ctrl) {
+                // attr.validateValues is a an object that models the 3 parts of a timestamp — obj.date, obj.time, obj.meridiem
+                scope.$watch(attr.validateValues, function(newObj, oldObj) {
+                    // If newObj and oldObj are identical, then this listener fn was triggered
+                    // due to app initialization, not an actual model change. Do nothing.
+                    if (newObj === oldObj) {
+                        return;
+                    }
+                    var date = newObj.date,
+                        dateIsValid = moment(date, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid(),
+                        dateIsEmpty = (date === null || date === ''),
+
+                        time = newObj.time,
+                        timeIsValid = moment(time, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid(),
+                        timeIsEmpty = (time === null || date === ''),
+
+                        meridiem = newObj.meridiem,
+                        meridiemIsValid = ((meridiem.toLowerCase() === 'am' || meridiem.toLowerCase() === 'pm') ? true : false);
+
+                    if (dateIsValid) {
+                        if (timeIsValid) {
+                            return ctrl.$setValidity('timestamp', true);
+                        } else if (timeIsEmpty) {
+                            return ctrl.$setValidity('timestamp', true);
+                        } else { // if time is bad..
+                            return ctrl.$setValidity('timestampBadTime', false);
+                        }
+                    } else if (dateIsEmpty) {
+                        if (timeIsValid) {
+                            return ctrl.$setValidity('timestampBadDate', false);
+                        } else if (timeIsEmpty) {
+                            return ctrl.$setValidity('timestamp', true);
+                        } else { // if time is bad..
+                            return ctrl.$setValidity('timestampBadDate', false);
+                        }
+                    } else { // if date is bad... the whole timestamp is bad..
+                        return ctrl.$setValidity('timestampBadDate', false);
+                    }
+                }, true);
             }
         };
     });
