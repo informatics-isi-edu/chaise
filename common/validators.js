@@ -111,36 +111,31 @@
                     if (newObj === oldObj) {
                         return;
                     }
+                    console.log(newObj);
                     var date = newObj.date,
                         dateIsValid = moment(date, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid(),
                         dateIsEmpty = (date === null || date === ''),
 
                         time = newObj.time,
                         timeIsValid = moment(time, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid(),
-                        timeIsEmpty = (time === null || date === ''),
+                        timeIsEmpty = (time === null || time === ''),
 
                         meridiem = newObj.meridiem,
                         meridiemIsValid = ((meridiem.toLowerCase() === 'am' || meridiem.toLowerCase() === 'pm') ? true : false);
 
                     if (dateIsValid) {
-                        if (timeIsValid) {
-                            return ctrl.$setValidity('timestamp', true);
-                        } else if (timeIsEmpty) {
-                            return ctrl.$setValidity('timestamp', true);
-                        } else { // if time is bad..
-                            return ctrl.$setValidity('timestampBadTime', false);
+                        if (!timeIsValid && !timeIsEmpty) {
+                            return ctrl.$setValidity('timestampTime', false);
                         }
                     } else if (dateIsEmpty) {
-                        if (timeIsValid) {
-                            return ctrl.$setValidity('timestampBadDate', false);
-                        } else if (timeIsEmpty) {
-                            return ctrl.$setValidity('timestamp', true);
-                        } else { // if time is bad..
-                            return ctrl.$setValidity('timestampBadDate', false);
+                        if (timeIsValid || !timeIsEmpty) {
+                            return ctrl.$setValidity('timestampDate', false);
                         }
                     } else { // if date is bad... the whole timestamp is bad..
-                        return ctrl.$setValidity('timestampBadDate', false);
+                        return ctrl.$setValidity('timestampDate', false);
                     }
+                    ctrl.$setValidity('timestampDate', true);
+                    ctrl.$setValidity('timestampTime', true);
                 }, true);
             }
         };

@@ -211,8 +211,8 @@
                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert">
                                                 <div ng-message="date">Please enter a date value in YYYY-MM-DD format.</div>
                                                 <div ng-message="time">Please enter a time value in 12-hr format.</div>
-                                                <div ng-message="timestampBadDate">Please enter a date value in YYYY-MM-DD format.</div>
-                                                <div ng-message="timestampBadTime">Please enter a time value in 12-hr format.</div>
+                                                <div ng-message="timestampDate">Please enter a date value in YYYY-MM-DD format.</div>
+                                                <div ng-message="timestampTime">Please enter a time value in 12-hr format.</div>
                                                 <div ng-message="integer">Please enter an integer value.</div>
                                                 <div ng-message="float">Please enter a decimal value.</div>
                                             </div>
