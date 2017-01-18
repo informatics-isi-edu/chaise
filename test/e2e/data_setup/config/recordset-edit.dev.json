@@ -1,0 +1,36 @@
+{
+    "setup": {
+        "schemaConfigurations": [{
+            "catalog": {
+                "acls": [
+                    {"name": "content_write_user", "user": "*" },
+                    {"name": "content_read_user", "user": "*" }
+                ]
+            },
+            "schema": {
+                "name": "multi-add",
+                "createNew": true,
+                "path": "test/e2e/data_setup/schema/multi-add.json"
+            },
+            "tables": {
+                "createNew": true
+            },
+            "entities": {
+            	"createNew": true,
+                "path": "test/e2e/data_setup/data/multi-add"
+            }
+        }],
+        "schema": "multi-add"
+    },
+    "cleanup" : true,
+    "tests" : {
+        "params" : {
+            "table_name" : "multi-add-table",
+            "int_column_name" : "int",
+            "text_column_name" : "text",
+            "default_page_limit" : 25,
+            "limit" : 10,
+            "int_23_count" : 11
+        }
+    }
+}
