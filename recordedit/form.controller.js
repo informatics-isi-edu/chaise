@@ -126,6 +126,7 @@
                                     rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                                 } else if (rowVal.date && rowVal.time === null) {
                                     rowVal.time = '00:00:00';
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                                 } else if (!rowVal.date || !rowVal.time || !rowVal.meridiem) {
                                     rowVal = null;
                                 }

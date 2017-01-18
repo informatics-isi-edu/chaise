@@ -111,7 +111,7 @@
                     if (newObj === oldObj) {
                         return;
                     }
-                    console.log(newObj);
+                    console.log('New', newObj);
                     var date = newObj.date,
                         dateIsValid = moment(date, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid(),
                         dateIsEmpty = (date === null || date === ''),
