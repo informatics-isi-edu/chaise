@@ -229,12 +229,20 @@
                             // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
                             if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
                                 if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
-                                    var ts = column.default;
-                                    recordEditModel.rows[0][column.name] = {
-                                        date: ts.format('YYYY-MM-DD'),
-                                        time: ts.format('hh:mm:ss'),
-                                        meridiem: ts.format('A')
-                                    };
+                                    if (column.default !== null) {
+                                        var ts = moment(column.default);
+                                        recordEditModel.rows[0][column.name] = {
+                                            date: ts.format('YYYY-MM-DD'),
+                                            time: ts.format('hh:mm:ss'),
+                                            meridiem: ts.format('A')
+                                        };
+                                    } else {
+                                        recordEditModel.rows[0][column.name] = {
+                                            date: null,
+                                            time: null,
+                                            meridiem: 'AM'
+                                        };
+                                    }
                                 }
                                 recordEditModel.rows[0][column.name] = column.default;
                             } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
