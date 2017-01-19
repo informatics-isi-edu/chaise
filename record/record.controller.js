@@ -23,6 +23,10 @@
             }
         };
 
+        vm.canEdit = function() {
+            return ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
+        }
+
         vm.editRecord = function() {
             var newRef = $rootScope.reference.contextualize.entryEdit;
             var appURL = newRef.appLink;
