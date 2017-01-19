@@ -101,7 +101,7 @@ Chaise depends on the following server- and client-side software.
 Development dependencies include:
 
 * [Make](https://en.wikipedia.org/wiki/Make_%28software%29)
-* [Node](https://nodejs.org/)
+* [Node](https://nodejs.org/) version 6.x
 * Additional dependencies specified in [package.json](./package.json)
 
 ### How to Install

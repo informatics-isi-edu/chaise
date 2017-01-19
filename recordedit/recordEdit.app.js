@@ -34,11 +34,13 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
-        function runRecordEditApp(ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
+        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
 
         var session,
             context = { booleanValues: ['', true, false] };
+
+        $rootScope.displayReady = false;
 
         UriUtils.setOrigin();
         headInjector.addTitle();
@@ -62,6 +64,7 @@
 
             context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
             context.appName = "recordedit";
+            context.MAX_ROWS_TO_ADD = 201;
 
             Session.getSession().then(function getSession(_session) {
                 session = _session;
@@ -100,9 +103,21 @@
                 }
 
                 // Case for editing an entity
-                if (context.filter) {
+                if (context.filter || context.queryParams.limit) {
                     if ($rootScope.reference.canUpdate) {
-                        $rootScope.reference.read(context.filter.filters.length).then(function getPage(page) {
+
+                        var numberRowsToRead;
+                        if (context.queryParams.limit) {
+                            numberRowsToRead = Number(context.queryParams.limit);
+                            if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
+                                var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
+                                AlertsService.addAlert({type: "error", message: limitMessage})
+                            }
+                        } else {
+                            numberRowsToRead = context.MAX_ROWS_TO_ADD;
+                        }
+
+                        $rootScope.reference.read(numberRowsToRead).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
@@ -178,6 +193,8 @@
                                     }
                                 }
                             }
+
+                            $rootScope.displayReady = true;
                             $log.info('Model: ', recordEditModel);
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
@@ -210,7 +227,7 @@
                             // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
                             // only want to set values in the input fields so make sure it isn't a function
                             // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
-                            if (column.default && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
+                            if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
                                 if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
                                     var ts = column.default;
                                     recordEditModel.rows[0][column.name] = {
@@ -229,6 +246,8 @@
                                 };
                             }
                         });
+
+                        $rootScope.displayReady = true;
                     // if there is a session, user isn't allowed to create
                     } else if (session) {
                         var forbiddenMessage = "You are not authorized to Create entities.";

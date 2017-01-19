@@ -689,6 +689,10 @@ var recordsetPage = function() {
         return element(by.id("add-record-btn"));
     };
 
+    this.getEditRecordLink = function() {
+        return element(by.id("edit-link"));
+    };
+
     this.getInputForAColumn = function(name, index) {
         index = index || 0;
         return browser.executeScript("return $('td.entity-value input[name=\"" + name + "\"]')[" + index + "];");

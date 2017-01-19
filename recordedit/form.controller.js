@@ -8,7 +8,7 @@
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
-        vm.editMode = (context.filter && !context.queryParams.copy) || false;
+        vm.editMode = ((context.filter || context.queryParams.limit) && !context.queryParams.copy) || false;
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -32,7 +32,7 @@
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
 
-        vm.MAX_ROWS_TO_ADD = 201;
+        vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
         vm.numberRowsToAdd = 1;
         vm.showMultiInsert = false;
         vm.copyFormRow = copyFormRow;
@@ -228,7 +228,8 @@
                             page: page,
                             pageLimit: model.rows.length,
                             rowValues: [],
-                            search: null
+                            search: null,
+                            config: {}
                         }
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
@@ -271,7 +272,8 @@
                             page: page,
                             pageLimit: model.rows.length,
                             rowValues: [],
-                            search: null
+                            search: null,
+                            config: {}
                         }
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
@@ -381,7 +383,7 @@
 
         function copyFormRow() {
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
-                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD-vm.recordEditModel.rows.length) + ', inclusive.'});
+                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.'});
                 return true;
             }
             // Check if the prototype row to copy has any invalid values. If it
@@ -557,7 +559,7 @@
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
-        var captionColumnWidth = 130;
+        var captionColumnWidth = 150;
         var marginLeft = captionColumnWidth + 10;
 
         // Sets a fixed width for the columns, as they're positioned absolute
