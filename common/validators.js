@@ -104,24 +104,19 @@
             restrict: 'A',
             require: 'ngModel',
             link: function(scope, elm, attr, ctrl) {
-                // attr.validateValues is a an object that models the 3 parts of a timestamp — obj.date, obj.time, obj.meridiem
+                // attr.validateValues entire timestamp object model
                 scope.$watch(attr.validateValues, function(newObj, oldObj) {
                     // If newObj and oldObj are identical, then this listener fn was triggered
                     // due to app initialization, not an actual model change. Do nothing.
                     if (newObj === oldObj) {
                         return;
                     }
-                    console.log('New', newObj);
                     var date = newObj.date,
                         dateIsValid = moment(date, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid(),
                         dateIsEmpty = (date === null || date === '' || date === undefined),
-
                         time = newObj.time,
                         timeIsValid = moment(time, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid(),
-                        timeIsEmpty = (time === null || time === '' || time === undefined),
-
-                        meridiem = newObj.meridiem,
-                        meridiemIsValid = ((meridiem.toLowerCase() === 'am' || meridiem.toLowerCase() === 'pm') ? true : false);
+                        timeIsEmpty = (time === null || time === '' || time === undefined);
 
                     if (dateIsValid) {
                         if (!timeIsValid && !timeIsEmpty) {
