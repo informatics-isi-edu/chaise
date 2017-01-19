@@ -114,11 +114,11 @@
                     console.log('New', newObj);
                     var date = newObj.date,
                         dateIsValid = moment(date, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid(),
-                        dateIsEmpty = (date === null || date === ''),
+                        dateIsEmpty = (date === null || date === '' || date === undefined),
 
                         time = newObj.time,
                         timeIsValid = moment(time, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid(),
-                        timeIsEmpty = (time === null || time === ''),
+                        timeIsEmpty = (time === null || time === '' || time === undefined),
 
                         meridiem = newObj.meridiem,
                         meridiemIsValid = ((meridiem.toLowerCase() === 'am' || meridiem.toLowerCase() === 'pm') ? true : false);
