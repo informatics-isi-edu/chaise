@@ -571,7 +571,7 @@
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
-        var captionColumnWidth = 130;
+        var captionColumnWidth = 150;
         var marginLeft = captionColumnWidth + 10;
 
         // Sets a fixed width for the columns, as they're positioned absolute
