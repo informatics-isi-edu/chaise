@@ -18,9 +18,14 @@ describe('Record Add with defaults', function() {
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 textInput = chaisePage.recordEditPage.getInputById(0, "text");
                 intInput = chaisePage.recordEditPage.getInputById(0, "int");
+                booleanTrueInput = chaisePage.recordEditPage.getInputById(0, "boolean_true");
+                booleanFalseInput = chaisePage.recordEditPage.getInputById(0, "boolean_false");
 
                 expect(textInput.getAttribute("value")).toBe(testParams.text_value);
                 expect(intInput.getAttribute("value")).toBe(testParams.int_value);
+
+                expect(chaisePage.recordEditPage.getDropdownText(booleanTrueInput)).toBe(testParams.boolean_true_value);
+                expect(chaisePage.recordEditPage.getDropdownText(booleanFalseInput)).toBe(testParams.boolean_false_value);
             });
         });
 
