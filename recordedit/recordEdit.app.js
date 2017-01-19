@@ -227,7 +227,7 @@
                             // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
                             // only want to set values in the input fields so make sure it isn't a function
                             // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
-                            if (column.default && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
+                            if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
                                 recordEditModel.rows[0][column.name] = column.default;
                             }
                         });
