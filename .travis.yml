@@ -48,6 +48,7 @@ before_install:
   - sudo make testvars
   - sudo make install
   - sudo make deploy
+  - sudo bash ./test/ubuntu-travis-setup.sh
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrest.git
   - cd ermrest
