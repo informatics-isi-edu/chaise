@@ -10,7 +10,7 @@
         var updated = {};
 
         vm.alerts = AlertsService.alerts;
-        vm.showEmptyRelatedTables = false;
+        vm.showEmptyRelatedTables = undefined;
 
         vm.createRecord = function() {
             var newRef = $rootScope.reference.contextualize.entryCreate;
@@ -24,7 +24,12 @@
         };
 
         vm.canEdit = function() {
-            return ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
+            var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
+            // If vm.showEmptyRelatedTables hasn't been set to true or false yet, set the value now.
+            if (vm.showEmptyRelatedTables !== true || vm.showEmptyRelatedTables !== false) {
+                vm.showEmptyRelatedTables = canEdit;
+            }
+            return canEdit;
         }
 
         vm.editRecord = function() {

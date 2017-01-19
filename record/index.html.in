@@ -21,7 +21,7 @@
                     <span class="glyphicon glyphicon-copy"></span> <strong>Copy</strong>
                 </a>&nbsp;&nbsp;
                 <delete-link id="delete-record" ng-if="reference && reference.canDelete && modifyRecord && showDeleteButton" label="Delete" uib-tooltip="Click here to delete this record." tooltip-placement="bottom" icon="true" callback="ctrl.deleteRecord()"></delete-link>&nbsp;&nbsp;
-                <a id="show-all-related-tables" ng-click="ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((ctrl.showEmptyRelatedTables) ? 'show empty related entities too.' : 'hide empty related entities.')}}" tooltip-placement="bottom">
+                <a id="show-all-related-tables" ng-click="ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((ctrl.showEmptyRelatedTables) ? 'hide empty related entities.' : 'show empty related entities too.')}}" tooltip-placement="bottom">
                     <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
                     <strong>
                         <span ng-show="!ctrl.showEmptyRelatedTables">Show All</span>
