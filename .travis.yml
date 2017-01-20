@@ -68,8 +68,8 @@ before_install:
   - cd ErmrestDataUtils
   - sudo npm install
   - cd ../chaise
-  - cp test/ermrest_config.json /home/ermrest/
-  - chmod a+r /home/ermrest/ermrest_config.json
+  - sudo cp test/ermrest_config.json /home/ermrest/
+  - sudo chmod a+r /home/ermrest/ermrest_config.json
   - sudo npm install
   - sudo service httpd restart
 
