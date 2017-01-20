@@ -37,7 +37,7 @@
         vm.copyRecord = function() {
             var newRef = $rootScope.reference.contextualize.entryCreate;
 
-            var appLink = newRef.appLink + "?copy=true";
+            var appLink = newRef.appLink + "?copy=true&limit=1";
             $window.location.href = appLink;
         };
 
