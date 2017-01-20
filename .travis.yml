@@ -71,7 +71,7 @@ before_install:
   - sudo cp test/ermrest_config.json /home/ermrest/
   - sudo chmod a+r /home/ermrest/ermrest_config.json
   - sudo npm install
-  - sudo service httpd restart
+  - sudo service apache2 restart
 
 install:
   - sudo make build
