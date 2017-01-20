@@ -10,7 +10,7 @@
         var updated = {};
 
         vm.alerts = AlertsService.alerts;
-        vm.showEmptyRelatedTables = null;
+        vm.showEmptyRelatedTables = false;
 
         vm.createRecord = function() {
             var newRef = $rootScope.reference.contextualize.entryCreate;
@@ -25,9 +25,10 @@
 
         vm.canEdit = function() {
             var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
-            // If vm.showEmptyRelatedTables hasn't been set yet, set the value now.
-            if (vm.showEmptyRelatedTables === null) {
-                vm.showEmptyRelatedTables = canEdit;
+            // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
+            // Otherwise, canEdit will be undefined, so no need to change anything b/c showEmptyRelatedTables is already false.
+            if (canEdit === true) {
+                vm.showEmptyRelatedTables = true;
             }
             return canEdit;
         };
