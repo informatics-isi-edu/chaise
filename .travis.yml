@@ -54,6 +54,8 @@ before_install:
   - cd ermrest
   - sudo make install PLATFORM=ubuntu1204
   - sudo make deploy PLATFORM=ubuntu1204
+  - cp test/ermrest_config.json /home/ermrest/
+  - chmod a+r /home/ermrest/ermrest_config.json
   - cd ..
   - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
   - sudo apt-get install -y nodejs
