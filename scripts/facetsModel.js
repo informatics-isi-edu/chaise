@@ -74,6 +74,7 @@ facetsModel.factory('FacetsData', function() {
 		'pageRange': [],
 		'plotOptions': {
 			reset: false,
+			traceMode: false,
 			autoTrace: true,
 			keys:[],
 			traceKeys:[],
