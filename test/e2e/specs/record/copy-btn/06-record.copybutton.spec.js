@@ -50,6 +50,11 @@ describe('View existing record,', function() {
                     return chaisePage.recordEditPage.getEntityTitle();
                 }).then(function(txt) {
                     expect(txt.indexOf('Create')).toBeGreaterThan(-1);
+
+                    return chaisePage.recordEditPage.getForms().count();
+                }).then(function(ct) {
+                    // only 1 row is copied at this time
+                    expect(ct).toBe(1);
                 }).catch(function(error) {
                     console.log(error);
                     expect('There was an error.').toBe('Please check the error message.');

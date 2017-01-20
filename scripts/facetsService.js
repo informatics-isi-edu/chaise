@@ -32,7 +32,8 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		if (FacetsData.totalServerItems%FacetsData.pagingOptions.pageSize != 0) {
 			FacetsData.maxPages++;
 		}
-		if ((FacetsData.plotOptions.autoTrace) || ('histogram2dcontour' == FacetsData.plotOptions.format.type))  {
+		if ((!FacetsData.plotOptions.traceMode) ||
+			(FacetsData.plotOptions.autoTrace) || ('histogram2dcontour' == FacetsData.plotOptions.format.type)) {
 			this.renderPlot();
 		}
 		//FacetsData.progress = false;
@@ -818,7 +819,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		var layout = JSON.parse(JSON.stringify(plotOpts.format.layout));
 		var formatCoordinates = FacetsData.plotOptions.format.coordinates;
 
-		if ('histogram2dcontour' == plotOpts.format.type) {
+		if ((!plotOpts.traceMode) || ('histogram2dcontour' == plotOpts.format.type)) {
 			plotOpts.reset = true;
 		}
 

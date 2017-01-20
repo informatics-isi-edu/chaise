@@ -48,11 +48,14 @@ before_install:
   - sudo make testvars
   - sudo make install
   - sudo make deploy
+  - sudo bash ./test/ubuntu-travis-setup.sh
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrest.git
   - cd ermrest
   - sudo make install PLATFORM=ubuntu1204
   - sudo make deploy PLATFORM=ubuntu1204
+  - cp test/ermrest_config.json /home/ermrest/
+  - chmod a+r /home/ermrest/ermrest_config.json
   - cd ..
   - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
   - sudo apt-get install -y nodejs
@@ -97,6 +100,7 @@ script:
 after_failure:
   - sudo ls -lR /etc/apache2
   - sudo ls -lR /var/run/apache2
+  - sudo cat /etc/apache2/conf.d/webauthn.conf
   - sudo cat /etc/apache2/conf.d/wsgi_webauthn2.conf
   - sudo cat /etc/apache2/conf.d/wsgi_ermrest.conf
   - sudo cat ${HTTPD_ERROR_LOG}

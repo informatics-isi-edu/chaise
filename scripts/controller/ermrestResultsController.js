@@ -591,4 +591,10 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	this.plotViewEnabled = function plotViewEnabled() {
 		return (chaiseConfig['plotViewEnabled']);
 	};
+
+	this.onPlotTraceMode = function onPlotTraceMode() {
+		if (!FacetsData.plotOptions['traceMode']) {
+			FacetsService.renderPlot();
+		}
+	}
 }]);
