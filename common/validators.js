@@ -99,12 +99,21 @@
         };
     })
 
+    /**
+    * @desc
+    * The timestamp directive is used to test if a timestamp object model is valid. It should be used
+    * in conjunction with the date and time validators by placing it on each date and time input.
+    * It accepts 1 attribute:
+    * @param {Object} validateValues - This is required. This will be the object model for timestamp fields.
+    * The object must have "date" and "time" properties.
+    * @example <input type="text" time timestamp validate-values="entireTimestampObjectModelHere">
+    * @example <input type="text" date timestamp validate-values="entireTimestampObjectModelHere">
+    */
     .directive('timestamp', function() {
         return {
             restrict: 'A',
             require: 'ngModel',
             link: function(scope, elm, attr, ctrl) {
-                // attr.validateValues entire timestamp object model
                 scope.$watch(attr.validateValues, function(newObj, oldObj) {
                     // If newObj and oldObj are identical, then this listener fn was triggered
                     // due to app initialization, not an actual model change. Do nothing.
