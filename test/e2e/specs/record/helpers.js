@@ -285,14 +285,12 @@ exports.testDeleteButton = function () {
             return modalTitle.getText();
         }).then(function (text) {
             expect(text).toBe("Confirm Delete");
-
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function () {
             browser.driver.sleep(1000);
-
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            expect(url.indexOf('/search/')).toBeGreaterThan(-1);
+            expect(url.indexOf('/recordset/')).toBeGreaterThan(-1);
         });
     });
 }
@@ -396,8 +394,8 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page
-            var title = chaisePage.recordPage.getEntityTitleElement();
-            browser.wait(EC.presenceOf(title), browser.params.defaultTimeout);
+            return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
+        }).then(function() {
             done();
         }).catch(function(error) {
             console.log(error);
