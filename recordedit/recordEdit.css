@@ -172,7 +172,7 @@ td.entity-value {
   margin-bottom: 0px;
 }
 
-#formEdit table tr td:first-child {
+#formEdit > table > tbody > tr >  td:first-child {
   position: absolute !important;
   left: 0;
   top: auto;
@@ -184,15 +184,15 @@ td.entity-value {
   border-left: 1px solid #ddd;
 }
 
-#formEdit.createMode table tr:first-child td {
+#formEdit.createMode > table > tbody >  tr:first-child >  td {
   height: 48px !important;
 }
 
-#formEdit.editMode table tr:first-child td {
+#formEdit.editMode > table > tbody >  tr:first-child >  td {
   padding-top: 7px;
 }
 
-#formEdit table tr:first-child td {
+#formEdit > table > tbody >  tr:first-child >  td {
   border-top: 1px solid #ddd;
   margin-top: 0px;
   color: #999;
@@ -200,12 +200,12 @@ td.entity-value {
   font-size: 1em;
 }
 
-#formEdit td {
+#formEdit > table > tbody > tr > td {
   border-right:1px solid #ddd;
 }
 
 
-td.entity-key, #formEdit table tr:first-child td:first-child {
+td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
   min-width: 130px;
 }
 
@@ -226,18 +226,18 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
   color: #999;
 }
 
-#formEdit.createMode table tr:first-child td:first-child {
+#formEdit.createMode >  table > tbody >  tr:first-child >  td:first-child {
   height: 49px !important;
 }
 
-#formEdit.editMode table tr:first-child td:first-child {}
+#formEdit.editMode >  table > tbody >  tr:first-child >  td:first-child {}
 
 .form-control[disabled] {
   color: #888888;
   cursor: not-allowed !important;
 }
 
-#formEdit.editMode table tr td:last-child {
+#formEdit.editMode >  table > tbody >  tr >  td:last-child {
   border-right: 0px;
 }
 
@@ -248,17 +248,17 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
     border-right: 1px solid #ddd;
   }
 
-  #formEdit table {
+  #formEdit >  table {
     margin-bottom: -1px !important;
   }
 }
 
 @-moz-document url-prefix() {
-  #formEdit table tr td:first-child {
+  #formEdit >  table > tbody >  tr >  td:first-child {
     margin-top: 0px;
   }
 
-  #formEdit table tr:first-child td:first-child {
+  #formEdit >  table > tbody >  tr:first-child >  td:first-child {
     margin-top: -1px;
   }
 }

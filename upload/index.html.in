@@ -10,38 +10,67 @@
     <body>
         <p>
             Select file and press upload<input type="file" id="file">
-            <button onclick="upload()">Upload</button>
+            <button id="upload" onclick="upload()">Upload</button>
         </p>
-        <!--<p>
-            <button onclick="pause()">Pause</button>
-            <button onclick="resume()">Resume</button>
-            <button onclick="cancel()">Cancel</button>
-        </p>-->
         <p>
-            <progress id="uploading_progress" value="0" max="100"></progress>
-            <- Uploading Progress Bar
+            <button style="display: none;" id="pause" onclick="pause()">Pause</button>
+            <button style="display: none;" id="resume" onclick="resume()">Resume</button>
+            <button style="display: none;" id="restart" onclick="restart()">Restart</button>
+            <button style="display: none;" id="cancel" onclick="cancel()">Cancel</button>
+        </p>
+        <p> 
+            <b>Checksum calculation progress</b><br>
+            <progress id="checksum_progress" value="0" ></progress>
             <br>
-            <progress id="uploaded_progress" value="0" max="100"></progress>
-            <- Uploaded Progress Bar
-            <br>
-            <progress id="summed_progress" value="0" max="100"></progress>
-            <- Uploading + Uploaded Progress Bar
+            <b>Upload progress</b><br>
+            <progress id="summed_progress" value="0" ></progress>
         </p>
         
         <script>
                 var hatracUpload = null;
 
+                $('#file').change(function() {
+                    if ($(this).val() != '') {
+                        $('#pause').hide();
+                        $('#cancel').hide();
+                        $('#resume').hide();
+                        $('#restart').hide();
+                        $('#upload').show();
+                    }
+                });
+
                 function pause() {
+                    $('#pause').hide();
+                    $('#cancel').show();
+                    $('#resume').show();
+                    $('#restart').hide();
                     hatracUpload.pause();
                 }
 
                 function resume() {
+                    $('#pause').show();
+                    $('#cancel').show();
+                    $('#resume').hide();
+                    $('#restart').hide();
                     hatracUpload.resume();
                 }
 
                 function cancel() {
+                    $('#pause').hide();
+                    $('#cancel').hide();
+                    $('#resume').hide();
+                    $('#restart').show();
+                    $('#upload').show();
+                    $('#file').removeAttr('disabled');
                     hatracUpload.cancel();
-                    hatracUpload = null;
+                }
+
+                function restart() {
+                    $('#pause').show();
+                    $('#cancel').show();
+                    $('#resume').hide();
+                    $('#restart').hide();
+                    hatracUpload.start(); 
                 }
 
                 function upload(user, pass) {
@@ -50,18 +79,21 @@
                         return;
                     }
 
-                    if (hatracUpload != null) {
-                        alert("Though it is possible to upload multiple files at once, this demonstration does not allowed to do so to demonstrate pause and resume in a simple manner. Sorry :-(");
-                        return;
-                    }
-
                     var file = $('#file')[0].files[0];
                     hatracUpload = new hatrac.Upload(file, { url: "https://dev.isrd.isi.edu/hatrac/test" });
 
+                    $('#upload').hide();
+                    $('#file').attr('disabled', 'disabled');
+
                     hatracUpload.onServerError = function(command, jqXHR, textStatus, errorThrown) {
-                        hatracUpload = null;
+                        $('#pause').hide();
+                        $('#cancel').hide();
+                        $('#resume').hide();
+                        $('#restart').show();
+                        $('#upload').show();
+                        $('#file').removeAttr('disabled');
                         if (jqXHR.status === 401) {
-                            alert("Sorry you are not allowed to upload");
+                            alert("Sorry you are not allowed to upload:" + xhr.responseText);
                         } else {
                             alert(jqXHR.status + "  " + errorThrown);
                             console.log("Our server is not responding correctly");
@@ -69,30 +101,55 @@
                     };
 
                     hatracUpload.onUploadError = function(xhr) {
-                        hatracUpload = null;
-                        alert(xhr.status + " : "  + xhr.responseText)
+                        $('#pause').hide();
+                        $('#cancel').hide();
+                        $('#resume').hide();
+                        $('#restart').show();
+                        $('#upload').show();
+                        $('#file').removeAttr('disabled');
+                        if (xhr.status === 401) {
+                            alert("Sorry you are not allowed to upload : " + xhr.responseText);
+                        } else {
+                            alert(xhr.status + "  " + xhr.responseText);
+                        }
                     };
 
                     hatracUpload.onError = function(err) {
-                        hatracUpload = null;
+                        $('#pause').hide();
+                        $('#cancel').hide();
+                        $('#resume').hide();
+                        $('#restart').hide();
+                        $('#upload').show();
+                        $('#file').removeAttr('disabled');
                         alert(err.message);
                     };
 
+                    hatracUpload.onChecksumProgressChanged = function(uploadedSize, totalSize) {
+                        $('#checksum_progress').attr('value', uploadedSize);
+                        $('#checksum_progress').attr('max', totalSize);
 
-                    hatracUpload.onProgressChanged = function(uploadingSize, uploadedSize, totalSize) {
-                        $('#uploading_progress').attr('value', uploadingSize);
-                        // $('#uploading_progress').attr('max', totalSize);
+                        if (uploadedSize >= totalSize) {
+                            $('#pause').show();
+                            $('#cancel').show();
+                        }
+                    };
 
-                        $('#uploaded_progress').attr('value', uploadedSize);
-                        // $('#uploaded_progress').attr('max', totalSize);
-
-                        $('#summed_progress').attr('value', uploadedSize + uploadingSize);
-                        // $('#summed_progress').attr('max', totalSize);
+                    hatracUpload.onProgressChanged = function(uploadedSize, totalSize) {
+                        $('#summed_progress').attr('value', uploadedSize);
+                        $('#summed_progress').attr('max', totalSize);
                     };
 
                     hatracUpload.onUploadCompleted = function(url) {
                         hatracUpload = null;
                         alert("Congratz, upload is complete now \n" + url);
+
+                        $('#file').val("");
+                        $('#pause').hide();
+                        $('#cancel').hide();
+                        $('#resume').hide();
+                        $('#restart').hide();
+                        $('#upload').show();
+                        $('#file').removeAttr('disabled');
                     };
 
                     hatracUpload.start();

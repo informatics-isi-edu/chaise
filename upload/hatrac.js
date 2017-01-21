@@ -49,6 +49,10 @@ window.hatrac = window.hatrac || {};
             }
         }
 
+        var xhr = new XMLHttpRequest();
+
+        this.xhr = xhr;
+
         this.request = request;
     };
 
@@ -80,30 +84,31 @@ window.hatrac = window.hatrac || {};
 
     module.HttpRequest.prototype.send = function(onSuccess, onError) {
 
-        var request = this.request;
+        var request = this.request, self = this;
 
         if (!onSuccess || !(typeof onSuccess == 'function')) onSuccess = function() {};
         if (!onError || !(typeof onError == 'function')) onError = function() {};
 
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-                xhr.headers = parseResponseHeaders(xhr.getAllResponseHeaders());
-                var response = xhr.responseText;
-                if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
-                    onSuccess(response, xhr);
+        this.xhr.onreadystatechange = function() {
+            if (self.xhr.readyState == 4) {
+                self.xhr.headers = parseResponseHeaders(self.xhr.getAllResponseHeaders());
+                var response = self.xhr.responseText;
+                if ((self.xhr.status >= 200 && self.xhr.status < 300) || self.xhr.status == 304) {
+                    onSuccess(response, self.xhr);
                 } else {
-                    onError(xhr.status, response, xhr);
+                    onError(self.xhr.status, response, self.xhr);
                 }
             }
         };
 
-        xhr.open(request.method, request.url, request.sync ? false : true);
+        this.xhr.open(request.method, request.url, request.sync ? false : true);
 
         for (var x = 0; x < request.headers.length; x += 1)
-            xhr.setRequestHeader(request.headers[x].key, request.headers[x].value);
+            this.xhr.setRequestHeader(request.headers[x].key, request.headers[x].value);
 
-        xhr.send(request.data);
+        this.xhr.send(request.data);
+
+        return this.xhr;
     };
 })(hatrac || {});
 
@@ -159,19 +164,28 @@ window.hatrac = window.hatrac || {};
       );
     }
 
-    var ChecksumMD5 = function(file, options) {
+    var Checksum = function(file, options) {
         this.file = file;
         this.options = options || {};
     };
 
-    ChecksumMD5.prototype.calculate = function(onSuccess, onError) {
+    Checksum.prototype.calculate = function(onProgress, onSuccess, onError) {
 
         var self = this, file = this.file;
+        if (!onProgress || !(typeof onProgress == 'function')) onProgress = function() {};
         if (!onSuccess || !(typeof onSuccess == 'function')) onSuccess = function() {};
         if (!onError || !(typeof onError == 'function')) onError = function() {};
 
 
-        var chunkSize = 5 * 1024 * 1024, // read in chunks of 5MB
+        // If checksum is already calculated then don't calculate it again
+        if (this.checksum) {
+            onProgress(this.file.size, this.file.size);
+            onSuccess(this.checksum, this);
+            return
+        }
+
+
+        var chunkSize = 50 * 1024 * 1024, // read in chunks of 5MB
         chunks = Math.ceil(file.size / chunkSize),
         currentChunk = 0,
         spark = new SparkMD5.ArrayBuffer();
@@ -180,12 +194,15 @@ window.hatrac = window.hatrac || {};
             console.log("\nRead chunk number " + parseInt(currentChunk + 1) + " of " + chunks);
             spark.append(e.target.result); // append array buffer
             currentChunk++;
+            
+            onProgress(chunkSize * currentChunk ,file.size);
+
             if (currentChunk < chunks)
                 loadNext();
             else {
-                self.hash = spark.end();
-                self.checksum = hexToBase64(self.hash);
-                console.log("\nFinished loading :)\n\nComputed hash: " + self.hash + "\n\nComputed Checksum: "  + self.checksum + "\n!");
+                self.checksum = spark.end();
+                self.md5 = hexToBase64(self.checksum);
+                console.log("\nFinished loading :)\n\nComputed hash: " + self.checksum + "\n\nComputed Checksum: "  + self.md5 + "\n!");
                 onSuccess(self.checksum, self);
             }
         };
@@ -202,7 +219,7 @@ window.hatrac = window.hatrac || {};
         loadNext();
     };
 
-    module.ChecksumMD5 = ChecksumMD5;
+    module.Checksum = Checksum;
 
 })(hatrac || {});
 
@@ -227,7 +244,7 @@ window.hatrac = window.hatrac || {};
      */
     var upload = function (file, otherInfo) {
         
-        this.PART_SIZE = 5 * 1024 * 1024; //minimum part size defined by hatrac
+        this.PART_SIZE = 50 * 1024 * 1024; //minimum part size defined by hatrac 50MB
 
         this.SERVER_LOC = otherInfo.url; //location of the server
         
@@ -243,17 +260,12 @@ window.hatrac = window.hatrac || {};
         };
         
         this.isPaused = false;
-        this.uploadXHR = null;
         this.otherInfo = otherInfo;
         
         this.uploadedSize = 0;
         this.uploadingSize = 0;
 
-        this.curUploadInfo = {
-            blob: null,
-            partNum: 0
-        };
-        this.progress = [];
+        this.chunks = [];
         this.isMultipartUpload = true;
 
         if (this.file.size <= this.PART_SIZE) {
@@ -263,27 +275,12 @@ window.hatrac = window.hatrac || {};
         this.log = console.log;
     };
 
-    /**
-     * Call this function to start uploading to server
+    /** private
+     * Call this function to determine file exists on the server
+     * If it doesn't then upload process will begin 
+     * Depending on file size it is either uploaded in chunks or fully
      *
      */
-    upload.prototype.start = function() {
-
-        this.md5 = new module.ChecksumMD5(this.file);
-
-        var self = this;
-
-        this.md5.calculate(function(checksum) {
-            self.url = self.SERVER_LOC + "/" + checksum;
-            self.fileExists();
-        }, function(err) {
-            self.onError(new Error((err && err.message) ? 
-                                        err.message : 
-                                        "Unable to calculate checksum for file " + self.file.name));
-        });
-
-    };
-
     upload.prototype.fileExists = function() {
         var self = this;
 
@@ -293,6 +290,8 @@ window.hatrac = window.hatrac || {};
         });
 
         request.send(function() {
+            self.completed = true;
+            self.onProgressChanged(self.file.size, self.file.size);
             self.onUploadCompleted(self.url);
         }, function(status, response, xhr) {
             if (status == 404 || status == 409) {
@@ -307,19 +306,22 @@ window.hatrac = window.hatrac || {};
         });
     };
 
-
-    /** private */
+    /** private 
+     * Call this function to create multipart request to ermrest
+     * It will generate a chunkupload identifier by calling ermrest and set it in the chunkUrl
+     */
     upload.prototype.createMultipartUpload = function() {
         var self = this;
 
         var request = new module.HttpRequest({
-            url: this.url + ";upload",
+            url: this.url + ";upload?parents=true",
             method: 'POST',
             data: {
                 "chunk-length" : this.PART_SIZE,
                 "content-length": this.file.size,
                 "content-type": this.file.type,
-                "content-md5": this.md5.checksum,
+                "content-md5": this.hash.md5,
+               // "content-sha256": encodeURIComponent(this.hash.sha),
                 "content-disposition": "filename*=UTF-8''" + this.file.name
             },
             headers: [{ key: 'content-type', value: 'application/json' }]
@@ -328,7 +330,7 @@ window.hatrac = window.hatrac || {};
         request.send(function(response, xhr) {
             if (xhr.headers["location"]) {
                 self.chunkUrl = xhr.headers["location"]; 
-                self.uploadPart(0);
+                self.startMultipartUpload();
             } else {
                 self.onError(new Error("Unable to start chunked Upload"));
             }
@@ -338,129 +340,69 @@ window.hatrac = window.hatrac || {};
 
     };
 
-
-    upload.prototype.uploadFull = function() {
-
-        var xhr = this.uploadXHR = new XMLHttpRequest();
-        var self = this;
-
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                self.uploadXHR = null;
-                self.progress[0] = 100;
-                if (xhr.status !== 204) {
-                    self.updateProgressBar();
-                    if (!self.isPaused)
-                        self.onUploadError(xhr);
-                    return;
-                }
-                self.uploadedSize += self.file.size;
-                self.updateProgressBar();
-            }
-        };
-
-        xhr.upload.onprogress = function(e) {
-            if (e.lengthComputable) {
-                self.progress[0] = e.loaded / self.file.size;
-                self.updateProgressBar();
-            }
-        };
-        
-        xhr.open("PUT", this.url);
-
-        xhr.setRequestHeader('Content-type', this.file.type);
-        xhr.setRequestHeader('Content-MD5', this.md5.checksum);
-        xhr.setRequestHeader('Content-Disposition', "filename*=UTF-8''" + this.file.name);
-
-        xhr.send(this.file);
-    };
-
-    /** private */
-    upload.prototype.uploadPart = function(partNum) {
-        var start = 0;
-        var blob;
-
-        this.curUploadInfo.partNum = partNum;
-
-        var index = 0
-
-        while (start < this.file.size) {
-            end = Math.min(start + this.PART_SIZE, this.file.size);
-            blob = this.file.slice(start, end);
-            this.progress[index] = 0;
-            this.sendToHatrac(blob, index++);  
-            start = end;          
-        }
-
-    };
-
-    /** private */
-    upload.prototype.sendToHatrac = function(blob, index) {
-        var self = this;
-        var size = blob.size;
-        var request = self.uploadXHR = new XMLHttpRequest();
-        request.onreadystatechange = function() {
-            if (request.readyState === 4) {
-                self.progress[index] = 100;
-                if (request.status !== 204) {
-                    self.uploadXHR = null;
-                    self.updateProgressBar();
-                    if (!self.isPaused)
-                        self.onUploadError(request);
-                    return;
-                }
-                self.uploadedSize += blob.size;
-                self.updateProgressBar();
-            }
-        };
-
-        request.upload.onprogress = function(e) {
-            if (e.lengthComputable) {
-                self.progress[index] = e.loaded / size;
-                self.updateProgressBar();
-            }
-        };
-        request.open('PUT', this.chunkUrl + "/" + index);
-        request.setRequestHeader("content-type", "application/octet-stream");
-        
-        request.send(blob);
-    };
-
-    /**
-     * Pause the upload
-     * Remember, the current progressing part will fail,
-     * that part will start from beginning (< 5MB of upload is wasted)
-     */
-    upload.prototype.pause = function() {
-        this.isPaused = true;
-        if (this.uploadXHR !== null) {
-            this.uploadXHR.abort();
-        }
-    };
-
-    /**
-     * Resumes the upload
+     /** private
+     * Call this function to start multipart upload to server
      *
      */
-    upload.prototype.resume = function() {
-        this.isPaused = false;
-
-        if (this.isMultipartUpload) {
-            // code to handle reupload
-        } else {
-            this.start();
-        }
-    };
-
-    upload.prototype.cancel = function() {
+    upload.prototype.startMultipartUpload = function(isResume) {
         var self = this;
-        self.pause();
 
-
-        //code to cancel upload
+        // If isResume is nor true, then create chunks and start uploading
+        // else directly start uploading the chunks
+        if (!isResume) {
+            var start = 0;
+            var blob;
+            var index = 0;
+            this.chunks = [];
+            while (start < this.file.size) {
+                end = Math.min(start + this.PART_SIZE, this.file.size);
+                var chunk = new Chunk(index++, start, end);
+                self.chunks.push(chunk)
+                start = end;          
+            }
+        }
+ 
+        var part = 0;
+        this.chunks.forEach(function(chunk) {
+            chunk.retryCount = 0;
+            self.uploadPart(chunk);
+            part++
+        });
     };
 
-    /** private */
+
+    /** private
+     * Call this function to start uploading to server without chunking
+     *
+     */
+    upload.prototype.uploadFull = function() {
+        var chunk = new Chunk(-1, 0, this.file.size);
+        this.chunks = [chunk];
+        chunk.sendToHatrac(this);
+    };
+
+    /** private
+    
+     */
+    upload.prototype.uploadPart = function(chunk) {
+
+        if (chunk.completed) {
+            this.updateProgressBar();
+            return;
+        } else if (chunk.xhr && !chunk.completed) {
+            if (chunk.xhr) chunk.xhr.abort();
+            chunk.xhr = null;
+            chunk.progress = 0;
+        }
+
+        chunk.sendToHatrac(this);
+    };
+
+    /** private 
+     *  This function is used to complete the chunk upload by notifying hatrac about it and calls 
+     *  onUploadCompleted with final url
+     *  else call serverError to notify about the error
+     */
     upload.prototype.completeMultipartUpload = function() {
         var self = this;
         
@@ -474,7 +416,7 @@ window.hatrac = window.hatrac || {};
             if (xhr.headers["location"]) {
                 self.onUploadCompleted(xhr.headers["location"]);
             } else {
-                self.onServerError("CompleteChunkUpload", xhr, status, "Unable to start chunked Upload");
+                self.onServerError("CompleteChunkUpload", xhr, status, "Unable to end chunked Upload");
             }
             
         }, function(status, response, xhr) {
@@ -483,25 +425,123 @@ window.hatrac = window.hatrac || {};
 
     };
 
-    /** private */
+    /** private 
+     * This function should be called to update the progress of upload
+     * It calls the onProgressChanged callback that the user subscribes
+     * In addition if the upload has been combleted then it will call onUploadCompleted for regular upload
+     * and completeMultipartUpload to complete the chunk upload
+     */
     upload.prototype.updateProgressBar = function() {
-        var progress = this.progress;
-        var length = progress.length;
-        var total = 0;
-        for (var i = 0; i < progress.length; i++) {
-            total = total + progress[i];
+        var length = this.chunks.length;
+        var done = 0;
+        for (var i = 0; i < this.chunks.length; i++) {
+            done = done + this.chunks[i].progress;
         }
-        total = total / length;
+       
+        this.onProgressChanged(done, this.file.size);
 
-        this.onProgressChanged(this.uploadingSize, total, this.file.size);
-
-        if (total == 100 && this.uploadXHR) {
-            this.uploadXHR = null;
+        if (done >= this.file.size && !this.completed) {
+            this.completed = true;
             if (this.isMultipartUpload) {
                 this.completeMultipartUpload();
             } else {
                 this.onUploadCompleted(this.url);
             }
+        }
+    };
+
+    /**
+     * Call this function to start uploading to server
+     * 1. It will first calculate the checksum for the file
+     * 2. Second it will check whether the file exists
+     *
+     */
+    upload.prototype.start = function() {
+
+        if (this.completed) {
+            this.updateProgressBar();
+            this.onUploadCompleted();
+            return;
+        }
+
+        if (!this.hash) {
+            this.hash = new module.Checksum(this.file);
+        }
+
+        var self = this;
+        this.hash.calculate(this.onChecksumProgressChanged, function(checksum) {
+            self.url = self.SERVER_LOC + "/" + checksum;
+            self.fileExists();
+        }, function(err) {
+            self.onError(new Error((err && err.message) ? 
+                                        err.message : 
+                                        "Unable to calculate checksum for file " + self.file.name));
+        });
+
+    };
+
+     /**
+     * Pause the upload
+     * Remember, the current progressing part will fail,
+     * that part will start from beginning (< 50MB of upload is wasted)
+     */
+    upload.prototype.pause = function() {
+
+        if(this.completed || this.isPaused) return;
+
+        this.isPaused = true;
+        this.chunks.forEach(function(chunk) {
+            if (chunk.xhr) chunk.xhr.abort();
+            chunk.xhr = null;
+            if (!chunk.completed) chunk.progress = 0;
+        });
+        this.updateProgressBar();
+    };
+
+    /**
+     * Resumes the upload
+     *
+     */
+    upload.prototype.resume = function() {
+        if (!this.isPaused) return;
+
+        this.isPaused = false;
+
+        if (this.isMultipartUpload) {
+            // code to handle reupload
+            this.startMultipartUpload(true);
+        } else {
+            this.start();
+        }
+    };
+
+    /**
+     * Aborts/cancels the upload
+     *
+     */
+    upload.prototype.cancel = function() {
+        if (this.completed) return;
+
+        var self = this;
+        this.isPaused = true;
+        this.completed = false;
+
+        this.chunks.forEach(function(chunk) {
+            if (chunk.xhr) chunk.xhr.abort();
+            chunk.xhr = null;
+            chunk.progress = 0;
+            chunk.completed = false;
+        });
+        this.updateProgressBar();
+        //code to cancel upload
+
+        if (this.isMultipartUpload) {
+
+            // This request will fire asynchronously
+            (new module.HttpRequest({
+                url: this.chunkUrl,
+                method: 'DELETE'
+            })).send();
         }
     };
 
@@ -517,20 +557,43 @@ window.hatrac = window.hatrac || {};
     upload.prototype.onServerError = function(command, xhr, textStatus, errorThrown) {};
 
     /**
+     * Private
+     * Call this function with error response in case of upload failures (status code 400 - 500)
+     * Depending on whether an erred is false, error callback is raised
+     * This check is done to avoid problems with err callback getting called multiple times in case of chunks
+     *
+     * @param XMLHttpRequest xhr the XMLHttpRequest object
+     */
+    upload.prototype.onUploadInternalError = function(xhr) {
+        if (!this.erred) {
+            this.erred = true;
+            this.onUploadError(xhr);
+        }
+    };
+
+    /**
      * Overrride this function to catch errors occured when uploading to Hatrac
      *
      * @param XMLHttpRequest xhr the XMLHttpRequest object
      */
-    upload.prototype.onUploadError = function(xhr) {};
+    upload.prototype.onUploadError = function(xhr) { };
+
+    /**
+     * Override this function to show user checksum update progress
+     *
+     * @param {type} readSize is the current part of the file that has been read uptil now
+     * @param {type} totalSize the total size of the uploading file
+     */
+    upload.prototype.onChecksumProgressChanged = function(readSize, totalSize) {};
+
 
     /**
      * Override this function to show user update progress
      *
      * @param {type} uploadingSize is the current upload part
-     * @param {type} uploadedSize is already uploaded part
      * @param {type} totalSize the total size of the uploading file
      */
-    upload.prototype.onProgressChanged = function(uploadingSize, uploadedSize, totalSize) {};
+    upload.prototype.onProgressChanged = function(uploadingSize, totalSize) {};
 
     /**
      * Override this method to execute something when upload finishes
@@ -543,7 +606,101 @@ window.hatrac = window.hatrac || {};
      */
     upload.prototype.onError = function(err) { };
 
-
     module.Upload = upload;
+
+    var Chunk = function(index, start, end) {
+        this.index = index;
+        this.start = start
+        this.end = end
+        this.completed = false;
+        this.xhr = null;
+        this.progress = 0;
+        this.size = end-start;
+        this.retryCount = 0;
+    };
+
+    /** private 
+     * This function will upload file/blob to the url
+     * If the index is -1, then the upload is direct else it is chunked upload
+     */
+    Chunk.prototype.sendToHatrac = function(upload) {
+
+        if (this.xhr || this.completed) {
+            self.progress = this.size;
+            upload.updateProgressBar();
+            return;
+        }
+
+        var self = this;
+
+        // If index is -1 then blob is the file else it is the 
+        // sliced version of the file from start and end index
+        var blob = (this.index == -1) ? upload.file : upload.file.slice(this.start, this.end);
+        var size = blob.size;
+        this.progress = 0;
+       
+        var headers = [];
+
+        // Set content md5,type and disposition headers if index is -1 i.e the upload is direct
+        // else set content-type to "application/octet-stream"
+        if (this.index == -1) {
+          headers.push({ key: 'Content-type', value: upload.file.type });
+          headers.push({ key: 'Content-MD5', value: upload.hash.md5 });
+          headers.push({ key: 'Content-Disposition', value: "filename*=UTF-8''" + encodeURIComponent(upload.file.name) });
+        } else {
+          headers.push({ key: "content-type", value: "application/octet-stream" });
+        }
+
+        var request = new module.HttpRequest({
+            // If index is -1 then upload it to the url or upload it to chunkUrl
+            url: (this.index == -1) ? (upload.url  + "?parents=true") : (upload.chunkUrl + "/" + this.index),
+            method: "PUT",                      
+            headers: headers,
+            data: blob
+        });
+
+        self.xhr = request.xhr;
+
+        // To track progress on upload
+        self.xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                self.progress = e.loaded;
+                upload.updateProgressBar();
+            }
+        };  
+
+        // Send the request
+        // If upload is aborted using .abort() for pause or cancel scenario
+        // then error callback will be called for which the status code would be 0
+        // else it would be in range of 400 and 500
+        request.send(function() {
+            
+            // Set progress to blob size, and set chunk completed
+            self.progress = self.size;
+            self.completed = true;
+            self.xhr = null;
+            
+            upload.updateProgressBar();
+        }, function(status, message, xhr) {
+            self.progress = 0;
+            
+            // If upload is not paused 
+            // and the status code is in range of 500 then there is a server error, keep retrying for 5 times
+            // else the error is in 400 series which is some client error
+            if (!upload.isPaused) {
+                if (status >= 500 && self.retryCount < 5) {
+                    self.retryCount++;
+                    self.sendToHatrac(upload);
+                } else {
+                    upload.updateProgressBar();
+                    upload.onUploadInternalError(xhr);
+                }
+            } else {
+                upload.updateProgressBar();
+            }
+        });
+
+       
+    };
 
 })(hatrac || {});
