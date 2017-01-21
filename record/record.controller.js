@@ -43,9 +43,9 @@
 
         vm.deleteRecord = function() {
             $rootScope.reference.delete().then(function deleteSuccess() {
-                 var location = $rootScope.reference.location;
-                //success, go to databrowser or home
-                $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
+                // Get an appLink from a reference to the table that the existing reference came from
+                var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
+                $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 AlertsService.addAlert({type: 'error', message: error.message});
                 $log.warn(error);
@@ -115,8 +115,7 @@
                 rowname: $rootScope.recordDisplayname,
                 constraintName: ref.origFKR.constraint_names[0].join(':')
             };
-            var newRef = ref.contextualize.entryCreate;
-            var mapping = newRef.origFKR.mapping;
+            var mapping = ref.contextualize.entryCreate.origFKR.mapping;
 
             // Get the column pair that form this FKR between this related table and the main entity
             cookie.keys = {};

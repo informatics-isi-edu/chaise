@@ -118,7 +118,7 @@
          * given an app tag and location object, return the full url
          * @param {string} tag
          * @param {ERMrest.Location} location
-         * @param {string} context - optional, used to determine default app is tag is null/undefined
+         * @param {string} context - optional, used to determine default app if tag is null/undefined
          * @returns {string} url
          */
         function appTagToURL(tag, location, context) {
