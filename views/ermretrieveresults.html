@@ -428,7 +428,7 @@
                             </div>
                             <div id="results-plot" ng-show="FacetsData.plotOptions.coordinates.x.column != null">
                                 <div id="results-plot-fullscreen">
-                                    <div id="results-plot-view" ng-init="facetResults.onPlotFormatUpdate()">
+                                    <div id="results-plot-view" ng-if="facetResults.showResults()" ng-init="facetResults.onPlotFormatUpdate()">
                                     </div>
                                 </div>
                             </div>
