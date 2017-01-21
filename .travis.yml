@@ -31,7 +31,6 @@ cache:
 before_install:
   - export TZ=America/Los_Angeles
   - sudo apt-get -y update
-  - sudo apt-get -y dist-upgrade
   - sudo service postgresql stop
   - sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3 apache2
   - sudo service postgresql start 9.4
