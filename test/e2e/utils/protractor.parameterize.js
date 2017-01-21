@@ -132,23 +132,30 @@ config.onPrepare = function() {
     browser.params.configuration = testConfiguration, defer = Q.defer();
 
     if (process.env.TRAVIS) {
-      require('request')({
-          url:  process.env.ERMREST_URL.replace('ermrest', 'authn') + '/session',
-          method: 'POST',
-          body: 'username=test1&password=dummypassword'
-      }, function(error, response, body) {
-          if (!error && response.statusCode == 200) {
-            var cookies = require('set-cookie-parser').parse(response);
-            cookies.forEach(function(c) {
-              if (c.name == "webauthn") testConfiguration.authCookie = c.name + "=" + c.value + ";";
-            });
-            if (testConfiguration.authCookie) onErmrestLogin(defer);
-            else defer.reject(error);
-          } else {
-            console.dir(error);
-            defer.reject(error);
-          }
-      });
+      var exec = require('child_process').exec;
+      exec("hostname", function (error, stdout, stderr) {
+          
+          process.env.ERMREST_URL = "http://" + stdout.trim() + "/ermrest";
+          process.env.CHAISE_BASE_URL = "http://" + stdout.trim() + "/chaise";
+          
+          require('request')({
+              url:  process.env.ERMREST_URL.replace('ermrest', 'authn') + '/session',
+              method: 'POST',
+              body: 'username=test1&password=dummypassword'
+          }, function(error, response, body) {
+              if (!error && response.statusCode == 200) {
+                var cookies = require('set-cookie-parser').parse(response);
+                cookies.forEach(function(c) {
+                  if (c.name == "webauthn") testConfiguration.authCookie = c.name + "=" + c.value + ";";
+                });
+                if (testConfiguration.authCookie) onErmrestLogin(defer);
+                else defer.reject(error);
+              } else {
+                console.dir(error);
+                defer.reject(error);
+              }
+          });
+        });
     } else {
       onErmrestLogin(defer);
     }
