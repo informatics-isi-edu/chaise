@@ -453,6 +453,9 @@
         ],
         "description": {
           "display": "Bookings"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", ["product", "fk_booking_accommodation"], "price", "bookin_date"]
         }
       }
     },

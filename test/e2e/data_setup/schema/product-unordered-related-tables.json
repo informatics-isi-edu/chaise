@@ -825,6 +825,9 @@
             "compact/brief": {
                 "row_markdown_pattern": "{{{accommodation_id}}}"
             }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns" : {
+            "*": ["id", ["product-unordered-related-tables", "fk_booking_accommodation"], "price", "bookin_date"]
         }
       }
     }

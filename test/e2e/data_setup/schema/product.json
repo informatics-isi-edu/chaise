@@ -455,6 +455,9 @@
         ],
         "description": {
           "display": "Bookings"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", ["product", "fk_booking_accommodation"], "price", "booking_date"]
         }
       }
     },
@@ -637,6 +640,7 @@
         },
         {
           "comment": null,
+          "names" : [["product-record", "fk_accommodation_image_2"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
@@ -695,6 +699,9 @@
         ],
         "description": {
           "display": "Accommodation Images"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [["product", "fk_accommodation_image"], ["product", "fk_accommodation_image_2"]]
         }
       }
     },
@@ -755,6 +762,9 @@
         },
         "description": {
           "display": "Categories"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "term"]
         }
       }
     }

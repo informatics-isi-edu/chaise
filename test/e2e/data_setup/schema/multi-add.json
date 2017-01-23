@@ -45,7 +45,11 @@
                     }
                 }
             ],
-            "annotations": {}
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "*": ["id", "text", "int"]
+                }
+            }
         }
     },
     "table_names": [
