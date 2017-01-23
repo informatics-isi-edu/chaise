@@ -251,7 +251,7 @@
                     });
                 }
             } else {
-                $rootScope.reference.create(model.submissionRows).then(function success(page) {
+                $rootScope.reference.table.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     if (vm.prefillCookie) {
                         $cookies.remove(context.queryParams.prefill);
