@@ -212,7 +212,7 @@
                                     <i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i>
                                 </button>
                             </div>
-                            <div class="pull-right">
+                            <div class="pull-right" ng-show="facetResults.showEdit()">
                                 <span class="btn btn-label">Edit:</span>
                                 <button data-toggle="tooltip" data-placement="top" title="Edit" ng-click="facetResults.onEdittClick();" type="button" class="btn btn-default">
                                     <i class="glyphicon glyphicon-edit" aria-hidden="true"></i>
@@ -428,7 +428,7 @@
                             </div>
                             <div id="results-plot" ng-show="FacetsData.plotOptions.coordinates.x.column != null">
                                 <div id="results-plot-fullscreen">
-                                    <div id="results-plot-view" ng-init="facetResults.onPlotFormatUpdate()">
+                                    <div id="results-plot-view" ng-if="facetResults.showResults()" ng-init="facetResults.onPlotFormatUpdate()">
                                     </div>
                                 </div>
                             </div>
