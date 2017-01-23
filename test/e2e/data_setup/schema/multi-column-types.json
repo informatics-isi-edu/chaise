@@ -216,13 +216,33 @@
                     "default": null,
                     "nullok": true,
                     "type": {
-                        "typename": "timestamptz"
+                        "typename": "timestamp"
                     },
                     "annotations": {}
                 },
                 {
                     "comment": "A timestamp column with an initial non-null value",
                     "name": "timestamp_col",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "timestamp"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": "A timestamptz column with an initial value of null",
+                    "name": "timestamptz_null_col",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "timestamptz"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": "A timestamptz column with an initial non-null value",
+                    "name": "timestamptz_col",
                     "default": null,
                     "nullok": true,
                     "type": {

@@ -13,7 +13,7 @@
         vm.showEmptyRelatedTables = false;
 
         vm.createRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryCreate;
+            var newRef = $rootScope.reference.table.reference.contextualize.entryCreate;
             var appURL = newRef.appLink;
             if (!appURL) {
                 AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
@@ -45,7 +45,7 @@
         };
 
         vm.copyRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryEdit;
+            var newRef = $rootScope.reference.contextualize.entryCreate;
 
             var appLink = newRef.appLink + "?copy=true&limit=1";
             $window.location.href = appLink;
@@ -53,9 +53,9 @@
 
         vm.deleteRecord = function() {
             $rootScope.reference.delete().then(function deleteSuccess() {
-                 var location = $rootScope.reference.location;
-                //success, go to databrowser or home
-                $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
+                // Get an appLink from a reference to the table that the existing reference came from
+                var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
+                $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 AlertsService.addAlert({type: 'error', message: error.message});
                 $log.warn(error);
@@ -125,8 +125,7 @@
                 rowname: $rootScope.recordDisplayname,
                 constraintName: ref.origFKR.constraint_names[0].join(':')
             };
-            var newRef = ref.contextualize.entryCreate;
-            var mapping = newRef.origFKR.mapping;
+            var mapping = ref.contextualize.entryCreate.origFKR.mapping;
 
             // Get the column pair that form this FKR between this related table and the main entity
             cookie.keys = {};
@@ -147,7 +146,7 @@
             addRecordRequests[referrer_id] = ref.uri;
 
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
-            var appLink = newRef.appLink;
+            var appLink = ref.table.reference.contextualize.entryCreate.appLink;
             appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
                 'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
                 '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);

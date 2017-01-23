@@ -228,7 +228,30 @@
                             // only want to set values in the input fields so make sure it isn't a function
                             // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
                             if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
+                                if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
+                                    if (column.default !== null) {
+                                        var ts = moment(column.default);
+                                        recordEditModel.rows[0][column.name] = {
+                                            date: ts.format('YYYY-MM-DD'),
+                                            time: ts.format('hh:mm:ss'),
+                                            meridiem: ts.format('A')
+                                        };
+                                    } else {
+                                        recordEditModel.rows[0][column.name] = {
+                                            date: null,
+                                            time: null,
+                                            meridiem: 'AM'
+                                        };
+                                    }
+                                }
                                 recordEditModel.rows[0][column.name] = column.default;
+                            } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
+                                // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
+                                recordEditModel.rows[0][column.name] = {
+                                    date: null,
+                                    time: null,
+                                    meridiem: 'AM'
+                                };
                             }
                         });
 

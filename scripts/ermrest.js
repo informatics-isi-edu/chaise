@@ -9,6 +9,8 @@ var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 var USER = null;
+var USER_ATTRIBUTES = [];
+var CONTENT_WRITE_USER = [];
 var CHAISE_DATA = {};
 var DISPLAY_ERROR = null;
 
@@ -1921,6 +1923,15 @@ function getSession(param) {
 function successGetSession(data, textStatus, jqXHR, param) {
 	//alert(JSON.stringify(data, null, 4));
 	if (data['client'] != null) {
+		USER_ATTRIBUTES = [];
+		$.each(data['attributes'], function(i, attr) {
+			USER_ATTRIBUTES.push(attr['id']);
+		});
+
+		// send the meta request to get the content_write_user
+		var url = HOME + '/ermrest/catalog/' + CATALOG + '/meta/content_write_user';
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetMeta, errorErmrest, null);
+		
         // New webauthen sends back a client Object
         // Check for display_name first
 		if (data['client']['display_name'] !== undefined) {
@@ -1956,6 +1967,10 @@ function successGetSession(data, textStatus, jqXHR, param) {
 			$('#logout_link').show();
 		}
 	}
+}
+
+function successGetMeta(data, textStatus, jqXHR, param) {
+	CONTENT_WRITE_USER = data;
 }
 
 function setUserFromCookie() {
@@ -3392,12 +3407,17 @@ function setBookmark(options) {
 		parameters.push('facets='+filter);
 	}
 	parameters.push('layout='+options.view);
+	if (options.view == 'plot') {
+		if (options.plotOptions.bookmarkParams) {
+			parameters.push(options.plotOptions.bookmarkParams)
+		}
+	}
 	parameters.push('page='+options.pagingOptions.currentPage);
 	options.bookmark = prefix + '#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' +options.table + '?' + parameters.join('&');
 	if (!loadPage && !suppressBookmark && options.filter == null) {
 		assignBookmark = true;
 		window.location.assign(options.bookmark);
-		setTimeout(function() {assignBookmark = false;}, 1);
+		setTimeout(function() {assignBookmark = false;}, 100);
 	}
 	loadPage = false;
 }
@@ -4245,4 +4265,39 @@ function getSearchFilter(options) {
 function getRecordEditURL(options) {
 	var url = getSearchFilter(options);
 	return url;
+}
+
+function existsTableAnnotation(table_name, annotation) {
+	var ret = false;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name'] && table['annotations'] != null &&
+			table['annotations'].hasOwnProperty(annotation)) {
+			ret = true;
+			return false;
+		}
+	});
+	return ret;
+}
+
+function userCanEdit() {
+	var ret = false;
+	$.each(CONTENT_WRITE_USER, function(i, userId) {
+		if (USER_ATTRIBUTES.contains(userId)) {
+			ret = true;
+			return false;
+		}
+	});
+	return ret;
+}
+
+function canEdit(options) {
+	var ret = false;
+	if (chaiseConfig['editRecord'] == true && SCHEMA != null && DEFAULT_TABLE != null && CATALOG_SCHEMAS[SCHEMA] != null &&
+			!CATALOG_SCHEMAS[SCHEMA]['annotations'].hasOwnProperty('tag:isrd.isi.edu,2016:generated') &&
+			!CATALOG_SCHEMAS[SCHEMA]['annotations'].hasOwnProperty('tag:isrd.isi.edu,2016:immutable') &&
+			!existsTableAnnotation(DEFAULT_TABLE, 'tag:isrd.isi.edu,2016:generated') && 
+			!existsTableAnnotation(DEFAULT_TABLE, 'tag:isrd.isi.edu,2016:immutable') && userCanEdit()) {
+		ret = true;
+	}
+	return ret;
 }

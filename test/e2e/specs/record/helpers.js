@@ -280,14 +280,12 @@ exports.testDeleteButton = function () {
             return modalTitle.getText();
         }).then(function (text) {
             expect(text).toBe("Confirm Delete");
-
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function () {
             browser.driver.sleep(1000);
-
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            expect(url.indexOf('/search/')).toBeGreaterThan(-1);
+            expect(url.indexOf('/recordset/')).toBeGreaterThan(-1);
         });
     });
 }
@@ -354,7 +352,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             console.log(error);
         });
     });
-
+    
     it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
         var EC = protractor.ExpectedConditions, newTabUrl,
             relatedTableName = tableParams.related_table_name_with_more_results,
@@ -391,8 +389,8 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page
-            var title = chaisePage.recordPage.getEntityTitleElement();
-            browser.wait(EC.presenceOf(title), browser.params.defaultTimeout);
+            return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
+        }).then(function() {
             done();
         }).catch(function(error) {
             console.log(error);

@@ -48,6 +48,9 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	  	  	if (searchQuery['layout'] != null) {
 	  	  		$scope.FacetsData.view = searchQuery['layout'];
 	  	  	}
+	  	  	if (searchQuery['plot'] != null) {
+	  	  		$scope.FacetsData.plotOptions.bookmarkParams = searchQuery['plot'];
+	  	  	}
 	  		$.each($scope.FacetsData.box, function(table,columns) {
 	  			var colsDescr = $scope.FacetsData['colsDescr'][table];
 	  			$.each(columns, function(key, value) {
@@ -470,8 +473,10 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 
 	this.searchCollection = function searchCollection(event, data) {
 		if (!$(event.target).is('span')) {
+			if ($scope.selectedCollection && ($scope.selectedCollection != data['display'])) {
+				FacetsService.resetPlotCoordinateOptions();
+			}
 			$scope.selectedCollection = data['display'];
-			FacetsService.resetPlotCoordinateOptions();
 	    	FacetsService.getEntityResults(event, data, $scope.successGetMetadata);
 	    	if ($('#collectionsTree').hasClass('open')) {
 	    		setTimeout(function () {

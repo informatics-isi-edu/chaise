@@ -561,6 +561,10 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 		window.location.href = url;
 	};
 
+	this.showEdit = function showEdit() {
+		return canEdit();
+	};
+
 	this.onExportClick = function onExportClick() {
 		FacetsService.doExport();
 	};
