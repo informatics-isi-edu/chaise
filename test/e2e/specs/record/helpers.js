@@ -151,7 +151,7 @@ exports.testPresentation = function (tableParams) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
             expect(headings).toEqual(tableParams.tables_order);
-
+            
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
                 displayName = relatedTables[i].title;
@@ -180,11 +180,6 @@ exports.testPresentation = function (tableParams) {
                 })(i, displayName);
             }
         });
-    });
-
-    // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
-    it("should not show a related table with zero values.", function() {
-        expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
     });
 
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
@@ -226,13 +221,13 @@ exports.testPresentation = function (tableParams) {
     it("should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities", function() {
         var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
         showAllRTButton.click().then(function() {
-            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
-            return showAllRTButton.click();
-        }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
             return showAllRTButton.click();
         }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
+            return showAllRTButton.click();
+        }).then(function() {
+            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
         }).catch(function(error) {
             console.log(error);
         });

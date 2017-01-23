@@ -31,7 +31,7 @@
                 "deleteKeys" : [{ "name": "id", "value": "4004", "operator": "="}],
                 "title" : "Sherathon Hotel",
                 "subTitle" : "Accommodations",
-                "tables_order" : ["booking (2)", "accommodation_image (2+)"],
+                "tables_order" : ["booking (2)", "accommodation_image (2+)", "media (0)"],
                 "related_table_name_with_page_size_annotation" : "accommodation_image",
                 "page_size" : 2,
                 "related_tables" : [
@@ -50,6 +50,11 @@
                             { "id" : 3005, "filename" : "Four Points Sherathon 1", "uri" : "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_190_z.jpg", "content_type" : "image/jpeg", "bytes" : 0, "timestamp" : "2016-01-18T00:00:00-08:00", "image_width" : null, "image_height" : null, "preview" : null },
                             { "id" : 3006, "filename" : "Four Points Sherathon 2", "uri" : "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_190_z.jpg", "content_type" : "image/jpeg", "bytes" : 0, "timestamp" : "2016-06-05T00:00:00-07:00", "image_width" : null, "image_height" : null, "preview" : null }
                         ]
+                    },
+                    {
+                        "title" : "media",
+                        "columns" : [ "id" ],
+                        "data" : []
                     }
                 ],
                 "columns" : [

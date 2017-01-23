@@ -23,6 +23,16 @@
             }
         };
 
+        vm.canEdit = function() {
+            var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
+            // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
+            // Otherwise, canEdit will be undefined, so no need to change anything b/c showEmptyRelatedTables is already false.
+            if (canEdit === true) {
+                vm.showEmptyRelatedTables = true;
+            }
+            return canEdit;
+        };
+
         vm.editRecord = function() {
             var newRef = $rootScope.reference.contextualize.entryEdit;
             var appURL = newRef.appLink;
