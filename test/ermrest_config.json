@@ -1,0 +1,62 @@
+{
+    "registry" : {
+      "type" : "postgres",
+      "dsn": "dbname=ermrest",
+      "acls": {
+          "create_catalog_permit": [ "admin" ]
+      }
+    },
+    
+    "catalog_factory": {
+      "type" : "postgres",
+      "dsn": "dbname=ermrest",
+      "_comment": "Postgres template params are based on libpq args (e.g., host, user, password)]",
+      "template": {
+        "type": "postgres",
+        "dbname": "PROVIDED BY FACTORY"
+      }
+    },
+    
+    "column_types": {
+        "boolean": { "aliases": [ "bool" ] },
+        "date": null,
+        "float4": { "aliases": [ "real" ] },
+        "float8": { "aliases": [ "double precision" ] },
+        "int2": { "aliases": [ "smallint" ] },
+        "int4": { "aliases": [ "integer", "int" ] },
+        "int8": { "aliases": [ "bigint" ] },
+        "interval": null,
+	"longtext": null,
+	"markdown": null,
+	"gene_sequence": null,
+        "serial2": { "aliases": [ "smallserial" ] },
+        "serial4": { "aliases": [ "serial" ] },
+        "serial8": { "aliases": [ "bigserial" ] },
+        "text": { "aliases": [ "character varying" ] },
+        "timestamptz": { "aliases": [ "timestamptz", "timestamp with time zone" ] },
+        "uuid": null,
+	"json": null,
+	"jsonb": null,
+        "timestamp": { "aliases": [ "timestamp without time zone" ] }
+    },
+    
+    "column_types_readonly": {
+        "json": null,
+        "numeric": null,
+        "text": {
+            "aliases": [ "char", "bpchar", "varchar" ],
+            "regexps": [ "(text|character)( +varying)?( *[(][0-9]+[)])?$" ]
+            },
+        "time": { "aliases": [ "time with time zone", "time without time zone" ] }
+    },
+
+    "change_notification": {
+	"AMQP": {
+	    "connection": {"host": "localhost"},
+	    "exchange": "ermrest_changes",
+	    "routing_key": ""
+	}
+    },
+    
+    "default_limit" : 100
+}

@@ -74,10 +74,12 @@ facetsModel.factory('FacetsData', function() {
 		'pageRange': [],
 		'plotOptions': {
 			reset: false,
+			traceMode: false,
 			autoTrace: true,
 			keys:[],
 			traceKeys:[],
 			queryUrl:'',
+			bookmarkParams:'',
 			format: defaultPlotFormats[0],
 			supportedFormats: defaultPlotFormats,
 			coordinates: {
