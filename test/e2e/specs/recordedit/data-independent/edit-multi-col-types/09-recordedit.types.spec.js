@@ -46,14 +46,20 @@ describe('When editing a record', function() {
                 var row = testParams.row;
                 expect(Object.keys(tuple).length).toEqual(row.length);
                 row.forEach(function(column) {
-                    var colValue = column.value;
-                    // The expected value for timestamptz columns depends on the testing platform's time zone, since
-                    // ERMrest produces timestamptz values in the time zone that's it deployed it.
+                    var expectedValue = column.value;
+                    // Convert both the ERMrest value and expected value to the same time zone to test.
+                    // If you just convert the expected value to the local time zone, you could get a mistmatch because ERMrest
+                    // will return a value in the time zone that the db was deployed in (on Travis, that seems to be UTC) but our
+                    // Travis yml sets the time zone to Los Angeles.
                     if (column.name === 'timestamptz_col') {
-                        colValue = moment("2016-01-18T00:00:00-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                        var tupleValue = moment(tuple[column.name], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                        expectedValue = moment("2016-01-18T00:00:00-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                        // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
+                        expect(column.name + ': ' + tupleValue).toBe(column.name + ': ' + expectedValue);
+                    } else {
+                        // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
+                        expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + expectedValue);
                     }
-                    // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
-                    expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + colValue);
                 });
             }).catch(function(error) {
                 console.log(error);
@@ -215,8 +221,13 @@ describe('When editing a record', function() {
                 var tuple = page.tuples[0].data;
                 expect(Object.keys(tuple).length).toBe(Object.keys(newRowData).length);
                 for (var colName in newRowData) {
-                    // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
-                    expect(colName + ': ' + tuple[colName]).toBe(colName + ': ' + newRowData[colName]);
+                    if (colName === 'timestamptz_null_col') {
+                        var tupleValue = moment(tuple[colName], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                        expect(colName + ': ' + tupleValue).toBe(colName + ': ' + newRowData[colName]);
+                    } else {
+                        // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
+                        expect(colName + ': ' + tuple[colName]).toBe(colName + ': ' + newRowData[colName]);
+                    }
                 }
                 done();
             }).catch(function(error) {
