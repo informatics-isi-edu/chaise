@@ -61,11 +61,11 @@
         vm.maskOptions = {
             date: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
-                clearOnBlur: false
+                clearOnBlur: true
             },
             time: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
-                clearOnBlur: false
+                clearOnBlur: true
             }
         };
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
@@ -123,7 +123,10 @@
                         case "timestamptz":
                             if (vm.readyToSubmit) {
                                 if (rowVal.date && rowVal.time && rowVal.meridiem) {
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                } else if (rowVal.date && rowVal.time === null) {
+                                    rowVal.time = '00:00:00';
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                                 } else if (!rowVal.date || !rowVal.time || !rowVal.meridiem) {
                                     rowVal = null;
                                 }
@@ -138,7 +141,6 @@
                 }
                 row[col.name] = rowVal;
             }
-
             return row;
         }
 
@@ -192,64 +194,50 @@
             }
 
             if (vm.editMode) {
-                // Check whether there has been any changes since to model.rows since app initialization
-                var hasNoChanges = model.rows.every(function(element, index, array) {
-                    return angular.equals(element, model.oldRows[index]);
-                });
-
-                if (hasNoChanges) {
+                // loop through model.submissionRows
+                // there should only be 1 row for editing but we want to account for it for future development
+                for (var i = 0; i < model.submissionRows.length; i++) {
+                    var row = model.submissionRows[i];
+                    var data = $rootScope.tuples[i].data;
+                    // assign each value from the form to the data object on tuple
+                    for (var key in row) {
+                        data[key] = (row[key] === '' ? null : row[key]);
+                    }
+                }
+                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
+                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
                     if (window.opener && window.opener.updated) {
                         window.opener.updated(context.queryParams.invalidate);
                     }
-                    // Redirect to record without PUT'ing to ERMrest
-                    vm.readyToSubmit = false;
-                    vm.redirectAfterSubmission();
-                } else {
-                    // loop through model.submissionRows
-                    // there should only be 1 row for editing but we want to account for it for future development
-                    for (var i = 0; i < model.submissionRows.length; i++) {
-                        var row = model.submissionRows[i];
-                        var data = $rootScope.tuples[i].data;
-                        // assign each value from the form to the data object on tuple
-                        for (var key in row) {
-                            data[key] = (row[key] === '' ? null : row[key]);
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                    if (model.rows.length == 1) {
+                        vm.redirectAfterSubmission(page);
+                    } else {
+                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        // can't use page.reference because it reflects the specific values that were inserted
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        //set values for the view to flip to recordedit resultset view
+                        vm.resultsetModel = {
+                            hasLoaded: true,
+                            reference: page.reference,
+                            tableDisplayName: page.reference.displayname,
+                            columns: page.reference.columns,
+                            enableSort: false,
+                            sortby: null,
+                            sortOrder: null,
+                            page: page,
+                            pageLimit: model.rows.length,
+                            rowValues: [],
+                            search: null,
+                            config: {}
                         }
+                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        vm.resultset = true;
                     }
-                    // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
-                    $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-                        if (window.opener && window.opener.updated) {
-                            window.opener.updated(context.queryParams.invalidate);
-                        }
-                        vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                        if (model.rows.length == 1) {
-                            vm.redirectAfterSubmission(page);
-                        } else {
-                            AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
-                            // can't use page.reference because it reflects the specific values that were inserted
-                            vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
-                            //set values for the view to flip to recordedit resultset view
-                            vm.resultsetModel = {
-                                hasLoaded: true,
-                                reference: page.reference,
-                                tableDisplayName: page.reference.displayname,
-                                columns: page.reference.columns,
-                                enableSort: false,
-                                sortby: null,
-                                sortOrder: null,
-                                page: page,
-                                pageLimit: model.rows.length,
-                                rowValues: [],
-                                search: null,
-                                config: {}
-                            }
-                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                            vm.resultset = true;
-                        }
-                    }, function error(response) {
-                        vm.showSubmissionError(response);
-                        vm.submissionButtonDisabled = false;
-                    });
-                }
+                }, function error(response) {
+                    vm.showSubmissionError(response);
+                    vm.submissionButtonDisabled = false;
+                });
             } else {
                 $rootScope.reference.table.reference.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
