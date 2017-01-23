@@ -151,7 +151,7 @@ exports.testPresentation = function (tableParams) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
             expect(headings).toEqual(tableParams.tables_order);
-
+            
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
                 displayName = relatedTables[i].title;
@@ -180,11 +180,6 @@ exports.testPresentation = function (tableParams) {
                 })(i, displayName);
             }
         });
-    });
-
-    // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
-    it("should not show a related table with zero values.", function() {
-        expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
     });
 
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
@@ -226,13 +221,13 @@ exports.testPresentation = function (tableParams) {
     it("should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities", function() {
         var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
         showAllRTButton.click().then(function() {
-            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
-            return showAllRTButton.click();
-        }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
             return showAllRTButton.click();
         }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
+            return showAllRTButton.click();
+        }).then(function() {
+            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
         }).catch(function(error) {
             console.log(error);
         });
@@ -285,14 +280,12 @@ exports.testDeleteButton = function () {
             return modalTitle.getText();
         }).then(function (text) {
             expect(text).toBe("Confirm Delete");
-
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function () {
             browser.driver.sleep(1000);
-
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            expect(url.indexOf('/search/')).toBeGreaterThan(-1);
+            expect(url.indexOf('/recordset/')).toBeGreaterThan(-1);
         });
     });
 }
@@ -359,7 +352,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             console.log(error);
         });
     });
-
+    
     it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
         var EC = protractor.ExpectedConditions, newTabUrl,
             relatedTableName = tableParams.related_table_name_with_more_results,
@@ -396,8 +389,8 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page
-            var title = chaisePage.recordPage.getEntityTitleElement();
-            browser.wait(EC.presenceOf(title), browser.params.defaultTimeout);
+            return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
+        }).then(function() {
             done();
         }).catch(function(error) {
             console.log(error);

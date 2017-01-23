@@ -57,7 +57,7 @@
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
         function read(scope) {
-            
+
             scope.vm.hasLoaded = false;
 
             var isBackground = !scope.vm.foregroundSearch && scope.vm.backgroundSearch;
@@ -73,7 +73,7 @@
                 $timeout(function() {
                     if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 }, 200);
-                
+
                 // tell parent controller data updated
                 scope.$emit('recordset-update');
 
@@ -172,7 +172,7 @@
 
 
                 var inputChangedPromise;
-                
+
                 scope.inputChanged = function() {
                     if (scope.vm.enableAutoSearch) {
 
@@ -224,7 +224,7 @@
                     addRecordRequests[referrer_id] = 0;
 
                     // open a new tab
-                    var newRef = scope.vm.reference.contextualize.entryCreate;
+                    var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
                     var appLink = newRef.appLink;
                     appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
                         'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);

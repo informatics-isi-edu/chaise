@@ -4,6 +4,7 @@ var testParams = testConfiguration.tests.params;
 var authCookie = testConfiguration.authCookie || process.env.AUTH_COOKIE;
 var ermRestUrl = testConfiguration.setup.url || process.env.ERMREST_URL;
 var ermRest = require('../../../../../../../ermrestjs/build/ermrest.js');
+var moment = require('moment');
 
 var chaisePage = require('../../../../utils/chaise.page.js');
 var recordEditPage = chaisePage.recordEditPage;
@@ -45,14 +46,20 @@ describe('When editing a record', function() {
                 var row = testParams.row;
                 expect(Object.keys(tuple).length).toEqual(row.length);
                 row.forEach(function(column) {
-                    var colValue = column.value;
-                    // The expected value for timestamp_col is in Pacific time. Since Travis is in UTC,
-                    // the expected value must be UTC as well because ERMrest stores timestamps as the current timezone it's in.
-                    if (process.env.CI && column.name === 'timestamp_col') {
-                        colValue = '2016-01-18T08:00:00+00:00';
+                    var expectedValue = column.value;
+                    // Convert both the ERMrest value and expected value to the same time zone to test.
+                    // If you just convert the expected value to the local time zone, you could get a mistmatch because ERMrest
+                    // will return a value in the time zone that the db was deployed in (on Travis, that seems to be UTC) but our
+                    // Travis yml sets the time zone to Los Angeles.
+                    if (column.name === 'timestamptz_col') {
+                        var tupleValue = moment(tuple[column.name], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                        expectedValue = moment("2016-01-18T00:00:00-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                        // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
+                        expect(column.name + ': ' + tupleValue).toBe(column.name + ': ' + expectedValue);
+                    } else {
+                        // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
+                        expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + expectedValue);
                     }
-                    // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
-                    expect(column.name + ': ' + tuple[column.name]).toBe(column.name + ': ' + colValue);
                 });
             }).catch(function(error) {
                 console.log(error);
@@ -92,10 +99,12 @@ describe('When editing a record', function() {
                 "bool_null_col": true,
                 "bool_true_col": false,
                 "bool_false_col": null,
-                // If testing in Travis, set expected timestamp value to UTC. Otherwise, set it to Pacific time for local tests
-                // because ERMrest converts timestamps to its current timezone.
-                "timestamp_null_col": process.env.CI ? "2016-01-18T21:00:00+00:00" : "2016-01-18T13:00:00-08:00",
+                "timestamp_null_col": "2016-01-18T13:00:00",
                 "timestamp_col": null,
+                // The expected value for timestamptz columns depends on the testing platform's time zone, since
+                // ERMrest produces timestamptz values in the time zone that's it deployed it.
+                "timestamptz_null_col": moment("2016-01-18T13:00:00-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ"),
+                "timestamptz_col": null,
                 "date_null_col": "2016-08-15",
                 "date_col": null,
                 "fk_null_col": 1,
@@ -134,6 +143,7 @@ describe('When editing a record', function() {
                                 });
                             }
                             break;
+                        case 'timestamp':
                         case 'timestamptz':
                             var inputs = recordEditPage.getTimestampInputsForAColumn(column.name, 0);
                             var dateInput = inputs.date, timeInput = inputs.time, meridiemBtn = inputs.meridiem;
@@ -211,8 +221,14 @@ describe('When editing a record', function() {
                 var tuple = page.tuples[0].data;
                 expect(Object.keys(tuple).length).toBe(Object.keys(newRowData).length);
                 for (var colName in newRowData) {
-                    // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
-                    expect(colName + ': ' + tuple[colName]).toBe(colName + ': ' + newRowData[colName]);
+                    if (colName === 'timestamptz_null_col') {
+                        var tupleValue = moment(tuple[colName], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                        // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
+                        expect(colName + ': ' + tupleValue).toBe(colName + ': ' + newRowData[colName]);
+                    } else {
+                        // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
+                        expect(colName + ': ' + tuple[colName]).toBe(colName + ': ' + newRowData[colName]);
+                    }
                 }
                 done();
             }).catch(function(error) {
