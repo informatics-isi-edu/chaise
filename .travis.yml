@@ -32,14 +32,17 @@ before_install:
   - export TZ=America/Los_Angeles
   - sudo apt-get -y update
   - sudo service postgresql stop
-  - sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3
+  - sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3 apache2
   - sudo service postgresql start 9.4
+  - sudo apt-get -y install apache2-mpm-prefork
   - sudo apt-get -y install libpq-dev postgresql-server-dev-9.4 python-dev
-  - sudo apt-get -y install apache2 apache2-dev libjson-c-dev ssl-cert libapache2-mod-wsgi python python-dateutil python-ply python-tz
+  - sudo apt-get -y install apache2-prefork-dev libjson-c-dev ssl-cert libapache2-mod-wsgi python python-dateutil python-ply python-tz
   - sudo apt-get -y purge python-psycopg2
   - sudo pip install web.py
   - sudo pip install psycopg2
   - sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
+  - sudo a2dismod mpm_event
+  - sudo a2enmod mpm_prefork
   - sudo a2enmod ssl
   - sudo a2ensite default-ssl
   - cd ..
@@ -99,12 +102,12 @@ script:
   - make testsearch
 
 after_failure:
+  - sudo cat ${HTTPD_ERROR_LOG}
   - sudo ls -lR /etc/apache2
   - sudo ls -lR /var/run/apache2
   - sudo cat /etc/apache2/conf.d/webauthn.conf
   - sudo cat /etc/apache2/conf.d/wsgi_webauthn2.conf
   - sudo cat /etc/apache2/conf.d/wsgi_ermrest.conf
-  - sudo cat ${HTTPD_ERROR_LOG}
 
 env:
   global:

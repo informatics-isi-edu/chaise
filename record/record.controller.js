@@ -13,7 +13,7 @@
         vm.showEmptyRelatedTables = false;
 
         vm.createRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryCreate;
+            var newRef = $rootScope.reference.table.reference.contextualize.entryCreate;
             var appURL = newRef.appLink;
             if (!appURL) {
                 AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
@@ -35,7 +35,7 @@
         };
 
         vm.copyRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryEdit;
+            var newRef = $rootScope.reference.contextualize.entryCreate;
 
             var appLink = newRef.appLink + "?copy=true&limit=1";
             $window.location.href = appLink;
@@ -137,7 +137,7 @@
             addRecordRequests[referrer_id] = ref.uri;
 
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
-            var appLink = newRef.appLink;
+            var appLink = ref.table.reference.contextualize.entryCreate.appLink;
             appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
                 'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
                 '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);

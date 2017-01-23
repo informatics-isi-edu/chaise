@@ -79,6 +79,7 @@ facetsModel.factory('FacetsData', function() {
 			keys:[],
 			traceKeys:[],
 			queryUrl:'',
+			bookmarkParams:'',
 			format: defaultPlotFormats[0],
 			supportedFormats: defaultPlotFormats,
 			coordinates: {
