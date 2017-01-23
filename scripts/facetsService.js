@@ -32,7 +32,8 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		if (FacetsData.totalServerItems%FacetsData.pagingOptions.pageSize != 0) {
 			FacetsData.maxPages++;
 		}
-		if ((FacetsData.plotOptions.autoTrace) || ('histogram2dcontour' == FacetsData.plotOptions.format.type))  {
+		if ((!FacetsData.plotOptions.traceMode) ||
+			(FacetsData.plotOptions.autoTrace) || ('histogram2dcontour' == FacetsData.plotOptions.format.type)) {
 			this.renderPlot();
 		}
 		//FacetsData.progress = false;
@@ -733,12 +734,55 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		}
 	};
 
+	this.updatePlotFormatOptionsFromBookmarkParams = function updatePlotFormatOptionsFromBookmarkParams() {
+		var bookmarkParams = FacetsData.plotOptions.bookmarkParams;
+		if (!bookmarkParams) {
+			return;
+		}
+		bookmarkParams = bookmarkParams.replace(/["'()]/g,"");
+		var params = {};
+		$.each(bookmarkParams.substring(0,bookmarkParams.length).split(','), function(i, param) {
+			var paramItem = param.split(':');
+			if (paramItem.length == 2) {
+				params[decodeURIComponent(paramItem[0])] = decodeURIComponent(paramItem[1]);
+			}
+		});
+		var coordinates = FacetsData.plotOptions.coordinates;
+		coordinates.x.column = params['x'] ? params['x'] : null;
+		coordinates.y.column = params['y'] ? params['y'] : null;
+		coordinates.z.column = params['z'] ? params['z'] : null;
+
+		$.each(FacetsData.plotOptions.supportedFormats, function(i, format) {
+			if (params['type'] == format['type']) {
+				FacetsData.plotOptions.format = format;
+				return false;
+			}
+		});
+	};
+
+	this.updatePlotBookmarkParamsFromPlotOpts = function updatePlotBookmarkParamsFromPlotOpts() {
+		var coordinates = FacetsData.plotOptions.coordinates;
+		var formatCoordinates = FacetsData.plotOptions.format.coordinates;
+		var plotBookmarkParams =
+			"plot=(type:" + FacetsData.plotOptions.format['type'] +
+			",x:" + fixedEncodeURIComponent(coordinates.x.column);
+		if ((coordinates.y.column != null) && (formatCoordinates.contains('y'))){
+			plotBookmarkParams += ',y:' + fixedEncodeURIComponent(coordinates.y.column);
+		}
+		if ((coordinates.z.column != null) && (formatCoordinates.contains('z'))){
+			plotBookmarkParams += ',z:' + fixedEncodeURIComponent(coordinates.z.column);
+		}
+		plotBookmarkParams += ')';
+		FacetsData.plotOptions.bookmarkParams = plotBookmarkParams;
+	};
+
 	this.updatePlotFormatOptions = function updatePlotFormatOptions() {
 		this.updatePlotCoordinateOptions();
 	};
 
 	this.resetPlotCoordinateOptions = function resetPlotCoordinateOptions()
 	{
+		FacetsData.plotOptions.bookmarkParams = '';
 		var coordinates = FacetsData.plotOptions.coordinates;
 		coordinates.x.column= null;
 		coordinates.x.display = null;
@@ -755,6 +799,8 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		coordinates.x.display = this.display(FacetsData.table, coordinates.x.column);
 		coordinates.y.display = this.display(FacetsData.table, coordinates.y.column);
 		coordinates.z.display = this.display(FacetsData.table, coordinates.z.column);
+		this.updatePlotBookmarkParamsFromPlotOpts();
+		setBookmark(FacetsData);
 
 		this.renderPlot();
 	};
@@ -806,8 +852,17 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			plotUrl += ',z:=A:' + fixedEncodeURIComponent(coordinates.z.column);
 		}
 		plotUrl += '?limit=none';
-		ERMREST.GET(plotUrl, 'application/x-www-form-urlencoded; charset=UTF-8',this.successGetPlotData, null, this);
+		ERMREST.GET(plotUrl,
+					'application/x-www-form-urlencoded; charset=UTF-8',
+				    this.successGetPlotData,
+			 		this.errorGetPlotData,
+					this);
 
+	};
+
+	this.errorGetPlotData = function (jqXHR, textStatus, errorThrown, url, param)
+	{
+		handleError(jqXHR, textStatus, errorThrown, url);
 	};
 
 	this.successGetPlotData = function (rows, textStatus, jqXHR, facetService) {
@@ -818,13 +873,13 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		var layout = JSON.parse(JSON.stringify(plotOpts.format.layout));
 		var formatCoordinates = FacetsData.plotOptions.format.coordinates;
 
-		if ('histogram2dcontour' == plotOpts.format.type) {
+		if ((!plotOpts.traceMode) || ('histogram2dcontour' == plotOpts.format.type)) {
 			plotOpts.reset = true;
 		}
-
+		layout['title'] = FacetsData.selectedEntity.display;
 		layout["xaxis"] = {
 			title: (xDisplay != null) ? xDisplay : '',
-			tickangle:20,
+			tickangle:30,
 			showline:true
 		};
 		layout["yaxis"] = {
@@ -891,16 +946,17 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			}
 		];
         var plotDiv = 'results-plot-view';
+		var plotlyParams = {displaylogo: false, showLink: false, modeBarButtonsToRemove:['sendDataToCloud']};
 		if (plotOpts.reset) {
 			plotOpts.traceKeys.empty();
 			plotOpts.traceKeys.push(traceKeys);
-			Plotly.newPlot(plotDiv, plotData, layout, {displaylogo: false});
+			Plotly.newPlot(plotDiv, plotData, layout, plotlyParams);
 			plotOpts.reset = false;
 		} else {
 			plotOpts.traceKeys.push(traceKeys);
-			Plotly.plot(plotDiv, plotData, layout, {displaylogo: false});
+			Plotly.plot(plotDiv, plotData, layout, plotlyParams);
 		}
-        facetService.hookPlotEvents(plotDiv)
+        facetService.hookPlotEvents(plotDiv);
 	};
 
 	this.hookPlotEvents = function hookPlotEvents(plotDiv) {

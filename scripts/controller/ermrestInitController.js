@@ -143,6 +143,9 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 		$scope.FacetsData.view = chaiseConfig['layout'];
 	}
 
+	$scope.FacetsData.plotOptions.bookmarkParams = searchQuery['plot'];
+	FacetsService.updatePlotFormatOptionsFromBookmarkParams();
+
 	this.html = function (errorMessage) {
 		return errorMessage != null ? $sce.trustAsHtml(errorMessage.replace(/\n/g, '<br/>')) : '';
 	};

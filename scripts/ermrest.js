@@ -3392,12 +3392,17 @@ function setBookmark(options) {
 		parameters.push('facets='+filter);
 	}
 	parameters.push('layout='+options.view);
+	if (options.view == 'plot') {
+		if (options.plotOptions.bookmarkParams) {
+			parameters.push(options.plotOptions.bookmarkParams)
+		}
+	}
 	parameters.push('page='+options.pagingOptions.currentPage);
 	options.bookmark = prefix + '#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' +options.table + '?' + parameters.join('&');
 	if (!loadPage && !suppressBookmark && options.filter == null) {
 		assignBookmark = true;
 		window.location.assign(options.bookmark);
-		setTimeout(function() {assignBookmark = false;}, 1);
+		setTimeout(function() {assignBookmark = false;}, 100);
 	}
 	loadPage = false;
 }
