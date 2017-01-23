@@ -432,10 +432,6 @@ clean:
 distclean: clean
 	rm -rf $(MODULES)
 
-.PHONY: blah
-blah:
-	$(BIN)/protractor $(E2EDIrecordEditMultiColTypes)
-	
 # Rule to run tests
 .PHONY: test
 test:

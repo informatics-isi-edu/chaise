@@ -92,15 +92,14 @@ before_script:
 
 script:
   - make build
-  - make blah
-  # - make testnavbar
-  # - make testrecord
-  # - make testrecordset
-  # - make testrecordadd
-  # - make testrecordedit
-  # - make testviewer
-  # - make testlogin
-  # - make testsearch
+  - make testnavbar
+  - make testrecord
+  - make testrecordset
+  - make testrecordadd
+  - make testrecordedit
+  - make testviewer
+  - make testlogin
+  - make testsearch
 
 after_failure:
   - sudo cat ${HTTPD_ERROR_LOG}

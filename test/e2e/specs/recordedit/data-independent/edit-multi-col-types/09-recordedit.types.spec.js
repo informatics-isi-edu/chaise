@@ -223,6 +223,7 @@ describe('When editing a record', function() {
                 for (var colName in newRowData) {
                     if (colName === 'timestamptz_null_col') {
                         var tupleValue = moment(tuple[colName], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                        // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
                         expect(colName + ': ' + tupleValue).toBe(colName + ': ' + newRowData[colName]);
                     } else {
                         // Added the column name in expect clauses so that if an expectation fails, we can quickly see which column type failed in error output.
