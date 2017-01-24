@@ -212,6 +212,12 @@
                                     <i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i>
                                 </button>
                             </div>
+                            <div class="pull-right" ng-show="facetResults.showEdit()">
+                                <span class="btn btn-label">Edit:</span>
+                                <button data-toggle="tooltip" data-placement="top" title="Edit" ng-click="facetResults.onEdittClick();" type="button" class="btn btn-default">
+                                    <i class="glyphicon glyphicon-edit" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
 					</div>
 					<div id="resultstable" class="row" ng-show="facetResults.showupResults()">
@@ -392,17 +398,23 @@
                                 </div>
 -->
                             <div class="form-inline row col-xs-12 " style="float: none;">
-                                <div class="form-group col-xs-4" style="margin-top: 21px">
-                                    <label for="plot-auto-trace">Auto Trace:</label>
-                                    <input id="plot-auto-trace" data-toggle="tooltip" title="Automatically creates a new trace every time the facet list changes." style="vertical-align: top" type="checkbox" ng-model="FacetsData.plotOptions.autoTrace" class="check"/><b class="b switch"></b>
+                                <div class="form-group col-xs-3" style="margin-top: 21px">
+                                    <label for="plot-trace-mode">Trace Mode:</label>
+                                    <input id="plot-trace-mode" data-toggle="tooltip" title="Enable trace overlays (Advanced)" style="vertical-align: top" type="checkbox" ng-model="FacetsData.plotOptions.traceMode" ng-click="facetResults.onPlotTraceMode();" class="check"/>
+                                    <b class="b switch"></b>
                                 </div>
-                                <div class="form-group col-xs-4" style="margin-top: 15px">
-                                    <label for="plot-trace">Trace:</label>
+                                <div class="form-group col-xs-3" ng-show="FacetsData.plotOptions.traceMode" style="margin-top: 21px">
+                                    <label for="plot-auto-trace">Auto Trace:</label>
+                                    <input id="plot-auto-trace" data-toggle="tooltip" title="Automatically creates a new trace every time the facet list changes." style="vertical-align: top" type="checkbox" ng-model="FacetsData.plotOptions.autoTrace" class="check"/>
+                                    <b class="b switch"></b>
+                                </div>
+                                <div class="form-group col-xs-3" ng-show="FacetsData.plotOptions.traceMode" style="margin-top: 15px">
+                                    <label for="plot-trace">Add Trace:</label>
                                     <button id="plot-trace" data-toggle="tooltip"  ng-disabled="FacetsData.plotOptions.autoTrace" data-placement="top" title="Add a new trace based on the currently selected facets." ng-click="facetResults.onRenderPlot();" type="button" class="btn btn-default">
                                         <i class="glyphicon glyphicon-pushpin" aria-hidden="true"></i>
                                     </button>
                                 </div>
-                                <div class="form-group col-xs-4" style="margin-top: 15px">
+                                <div class="form-group col-xs-3" ng-show="FacetsData.plotOptions.traceMode" style="margin-top: 15px">
                                     <label for="plot-trace-reset">Reset Traces:</label>
                                     <button id="plot-trace-reset" data-toggle="tooltip" data-placement="top" title="Remove all traces and set the new initial trace to data based on the currently selected facets." ng-click="facetResults.onResetPlot();" type="button" class="btn btn-default">
                                         <i class="glyphicon glyphicon-erase" aria-hidden="true"></i>
@@ -416,7 +428,7 @@
                             </div>
                             <div id="results-plot" ng-show="FacetsData.plotOptions.coordinates.x.column != null">
                                 <div id="results-plot-fullscreen">
-                                    <div id="results-plot-view" ng-init="facetResults.onPlotFormatUpdate()">
+                                    <div id="results-plot-view" ng-if="facetResults.showResults()" ng-init="facetResults.onPlotFormatUpdate()">
                                     </div>
                                 </div>
                             </div>

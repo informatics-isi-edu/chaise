@@ -52,7 +52,9 @@ describe('Recordset add record,', function() {
                 return chaisePage.waitForElement(element(by.id("divRecordSet")))
             }).then(function() {
                 var rows = chaisePage.recordsetPage.getRows();
-                return rows.get(0).click();
+                return rows.get(0).all(by.css(".select-action-button"));
+            }).then(function(selectButtons) {
+                selectButtons[0].click();
             }).then(function() {
                 return chaisePage.recordsetPage.getInputForAColumn("rating");
             }).then(function(input) {

@@ -9,6 +9,8 @@ var ERMREST_SCHEMA_HOME = null;
 var ERMREST_DATA_HOME = null;
 var URL_ESCAPE = new String("~!()'");
 var USER = null;
+var USER_ATTRIBUTES = [];
+var CONTENT_WRITE_USER = [];
 var CHAISE_DATA = {};
 var DISPLAY_ERROR = null;
 
@@ -435,7 +437,8 @@ function getTableColumns(options, successCallback) {
 	};
 
 	PRIMARY_KEY = [];
-	if (metadata['keys'] != null) {
+	getPreferedPrimaryKey(metadata);
+	if (PRIMARY_KEY.length == 0 && metadata['keys'] != null) {
 		var unique_columns = [];
 		$.each(metadata['keys'], function(i, key) {
 			if (key['unique_columns'] != null) {
@@ -1370,7 +1373,7 @@ function getSortQuery(sortOption, isAttribute) {
 function getSortClause(table, sortOption, sortOrder, isAttribute) {
 	var field = encodeSafeURIComponent(sortOption);
 	var rankColumn = getSortColumn(table, sortOption, 'rank');
-	var sortField = rankColumn;
+	var sortField = encodeSafeURIComponent(rankColumn);
 	
 	if (sortOrder == 'desc') {
 		sortField += '::desc::';
@@ -1920,6 +1923,15 @@ function getSession(param) {
 function successGetSession(data, textStatus, jqXHR, param) {
 	//alert(JSON.stringify(data, null, 4));
 	if (data['client'] != null) {
+		USER_ATTRIBUTES = [];
+		$.each(data['attributes'], function(i, attr) {
+			USER_ATTRIBUTES.push(attr['id']);
+		});
+
+		// send the meta request to get the content_write_user
+		var url = HOME + '/ermrest/catalog/' + CATALOG + '/meta/content_write_user';
+		ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetMeta, errorErmrest, null);
+		
         // New webauthen sends back a client Object
         // Check for display_name first
 		if (data['client']['display_name'] !== undefined) {
@@ -1955,6 +1967,10 @@ function successGetSession(data, textStatus, jqXHR, param) {
 			$('#logout_link').show();
 		}
 	}
+}
+
+function successGetMeta(data, textStatus, jqXHR, param) {
+	CONTENT_WRITE_USER = data;
 }
 
 function setUserFromCookie() {
@@ -3391,12 +3407,17 @@ function setBookmark(options) {
 		parameters.push('facets='+filter);
 	}
 	parameters.push('layout='+options.view);
+	if (options.view == 'plot') {
+		if (options.plotOptions.bookmarkParams) {
+			parameters.push(options.plotOptions.bookmarkParams)
+		}
+	}
 	parameters.push('page='+options.pagingOptions.currentPage);
 	options.bookmark = prefix + '#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' +options.table + '?' + parameters.join('&');
 	if (!loadPage && !suppressBookmark && options.filter == null) {
 		assignBookmark = true;
 		window.location.assign(options.bookmark);
-		setTimeout(function() {assignBookmark = false;}, 1);
+		setTimeout(function() {assignBookmark = false;}, 100);
 	}
 	loadPage = false;
 }
@@ -3980,14 +4001,14 @@ function getSortPredicate(data, sortColumn, sortOrder, page, pageSize) {
 		var offsetPredicate = [];
 		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + '::null::');
 		$.each(PRIMARY_KEY, function(i, primaryCol) {
-			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + (data[(page-1)*pageSize][primaryCol] == null ? '::null::' : ('::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]))));
 		});
 		sortPredicate.push(offsetPredicate.join('&'));
 	} else {
 		var offsetPredicate = [];
 		offsetPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::geq::' : '::leq::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
 		$.each(PRIMARY_KEY, function(i, primaryCol) {
-			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + '::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]));
+			offsetPredicate.push(encodeSafeURIComponent(primaryCol) + (data[(page-1)*pageSize][primaryCol] == null ? '::null::' : ('::geq::' + encodeSafeURIComponent(data[(page-1)*pageSize][primaryCol]))));
 		});
         sortPredicate.push(offsetPredicate.join('&'));
 		sortPredicate.push(encodeSafeURIComponent(sortColumn) + (sortOrder == 'asc' ? '::gt::' : '::lt::') + encodeSafeURIComponent(data[(page-1)*pageSize][sortColumn]));
@@ -4172,3 +4193,111 @@ function getColumnAnnotation(table_name, column_name, annotation, key) {
 	return ret;
 }
 
+function getPreferedPrimaryKey(metadata) {
+	if (metadata['keys'] != null) {
+		var column_definitions = metadata['column_definitions'];
+		$.each(metadata['keys'], function(i, key) {
+			if (key['unique_columns'] != null && key['unique_columns'].length == 1) {
+				var column_name = key['unique_columns'][0];
+				$.each(column_definitions, function(j, col) {
+					if (col['name'] ==  column_name) {
+						if (col['nullok'] == false) {
+							PRIMARY_KEY.push(encodeSafeURIComponent(column_name));
+						}
+						return false;
+					}
+				});
+				if (PRIMARY_KEY.length > 0) {
+					return false;
+				}
+			}
+		});
+	}
+}
+
+function getSearchFilter(options) {
+	/*
+	var page = options['pagingOptions']['currentPage'];
+	var pageSize = options['pagingOptions']['pageSize'];
+	var limit = page * pageSize;
+	console.log('limit: ' + limit);
+	var sortOption = options['sortFacet'];
+	var sortOrder = options['sortOrder'];
+	var url = ERMREST_DATA_HOME + '/entity/' + getQueryPredicate(options);
+	var predicate = getPredicate(options, null, null, null, null);
+	if (predicate.length > 0) {
+		url += '/' + predicate.join('/');
+	}
+	url += '/$A'
+	if (sortOption != null && sortOption != '') {
+		url += getSortClause(options['table'], sortOption, sortOrder, false);
+	}
+	url += '?limit=' + limit;
+	*/
+	var page = options['pagingOptions']['currentPage'];
+	var pageSize = options['pagingOptions']['pageSize'];
+	var limit = page * pageSize;
+	var sortOption = options['sortFacet'];
+	var sortOrder = options['sortOrder'];
+	var sortClause = '';
+	if (options.ermrestData.length < limit) {
+		limit = options.ermrestData.length;
+	}
+	if (sortOption != null && sortOption != '') {
+		sortOption = getSortClause(options['table'], sortOption, sortOrder, false);
+		var index = sortOption.lastIndexOf('@sort(');
+		if (index > 0) {
+			sortOption = sortOption.substr(index);
+		}
+	}
+	var predicate = [];
+	$.each(options.ermrestData, function(i, row) {
+		var terms = [];
+		$.each(PRIMARY_KEY, function(i, col) {
+			terms.push(col + '=' + encodeSafeURIComponent(row[decodeURIComponent(col)]));
+		});
+		predicate.push(terms.join('&'));
+	});
+	var url = HOME + '/chaise/recordedit/#' + CATALOG + '/' + encodeSafeURIComponent(SCHEMA) + ':' + encodeSafeURIComponent(options.table) + '/' + predicate.join(';') + sortOption + '?limit=' + limit;
+	return url;
+}
+
+function getRecordEditURL(options) {
+	var url = getSearchFilter(options);
+	return url;
+}
+
+function existsTableAnnotation(table_name, annotation) {
+	var ret = false;
+	$.each(SCHEMA_METADATA, function(i, table) {
+		if (table_name == table['table_name'] && table['annotations'] != null &&
+			table['annotations'].hasOwnProperty(annotation)) {
+			ret = true;
+			return false;
+		}
+	});
+	return ret;
+}
+
+function userCanEdit() {
+	var ret = false;
+	$.each(CONTENT_WRITE_USER, function(i, userId) {
+		if (USER_ATTRIBUTES.contains(userId)) {
+			ret = true;
+			return false;
+		}
+	});
+	return ret;
+}
+
+function canEdit(options) {
+	var ret = false;
+	if (chaiseConfig['editRecord'] == true && SCHEMA != null && DEFAULT_TABLE != null && CATALOG_SCHEMAS[SCHEMA] != null &&
+			!CATALOG_SCHEMAS[SCHEMA]['annotations'].hasOwnProperty('tag:isrd.isi.edu,2016:generated') &&
+			!CATALOG_SCHEMAS[SCHEMA]['annotations'].hasOwnProperty('tag:isrd.isi.edu,2016:immutable') &&
+			!existsTableAnnotation(DEFAULT_TABLE, 'tag:isrd.isi.edu,2016:generated') && 
+			!existsTableAnnotation(DEFAULT_TABLE, 'tag:isrd.isi.edu,2016:immutable') && userCanEdit()) {
+		ret = true;
+	}
+	return ret;
+}

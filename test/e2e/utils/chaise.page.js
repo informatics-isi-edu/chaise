@@ -302,10 +302,6 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
     };
 
-    this.getInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
-    };
-
     this.getDropdown = function(el, index) {
         index = index || 0;
         return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container')[" + index + "];", el);
@@ -314,14 +310,19 @@ var recordEditPage = function() {
     this.selectDropdownValue = function(el, value) {
         return this.getDropdownText(el).then(function(txt) {
             var defer = Q.defer();
+            // if the existing selection isn't the desired value,
             if (txt.trim() !== value) {
+                // Click open the dropdown
                 browser.executeScript(" $(arguments[0]).find('.select2-choice').click();", el);
                 browser.sleep(100);
+                // Get all the possible choices in the dropdown
                 browser.executeScript("return $(arguments[0]).find('.select2-result-single li');", el).then(function(items) {
-                    if (value != undefined) {
+                    // If a value is specified
+                    if (value !== undefined) {
                         browser.executeScript("$(arguments[0]).data().$uiSelectController.select('" + value + "');", el);
                         defer.resolve(value);
                     } else {
+                        // else if a value is unspecified, pick a random choice
                         var index = that.getRandomInt(0, items.length - 1);
                         try {
                              items[index].click();
@@ -381,6 +382,11 @@ var recordEditPage = function() {
         return element(by.model('form.recordEditModel.rows[' + index + ']["' + columnName + '"]'));
     };
 
+    this.getDateInputForAColumn = function(name, index) {
+        index = index || 0;
+        return element.all(by.css('input[name="' + name + '"][date]')).first();
+    };
+
     this.getDatePickerForAnInput = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().find('.ng-scope._720kb-datepicker-open')[0];", el);
     };
@@ -414,6 +420,10 @@ var recordEditPage = function() {
 
     this.getDateInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parent().siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
+    this.getTimestampInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"timestamp\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
     this.clearInput = function(el) {
@@ -471,8 +481,12 @@ var recordEditPage = function() {
         return browser.executeScript("return $('.alert-danger:visible')[0];");
     };
 
-    this.getRecordModelRows = function() {
+    this.getViewModelRows = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
+    };
+
+    this.getSubmissionModelRows = function() {
+        return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.submissionRows;");
     };
 
     this.getDeleteRecordButton = function () {
@@ -675,6 +689,10 @@ var recordsetPage = function() {
         return element(by.id("add-record-btn"));
     };
 
+    this.getEditRecordLink = function() {
+        return element(by.id("edit-link"));
+    };
+
     this.getInputForAColumn = function(name, index) {
         index = index || 0;
         return browser.executeScript("return $('td.entity-value input[name=\"" + name + "\"]')[" + index + "];");
@@ -684,6 +702,27 @@ var recordsetPage = function() {
         index = index || 0;
         return browser.executeScript("return $('.modal-popup-btn')[" + index + "];");
     };
+
+    this.getViewActionButtons = function() {
+        return element.all(by.css('.view-action-button'));
+    };
+
+    this.getEditActionButtons = function() {
+        return element.all(by.css('.edit-action-button'));
+    };
+
+    this.getDeleteActionButtons = function() {
+        return element.all(by.css('.delete-action-button'));
+    };
+
+    this.getConfirmDeleteTitle = function() {
+        return element(by.css(".modal-title"));
+    };
+
+    this.getConfirmDeleteButton = function () {
+        return element(by.id("delete-confirmation"));
+    }
+
 };
 
 function chaisePage() {

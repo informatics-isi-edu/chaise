@@ -45,9 +45,27 @@
                     "type": {
                         "typename": "int"
                     }
+                }, {
+                    "name": "boolean_true",
+                    "default": "true",
+                    "nullok": true,
+                    "type": {
+                        "typename": "boolean"
+                    }
+                }, {
+                    "name": "boolean_false",
+                    "default": "false",
+                    "nullok": true,
+                    "type": {
+                        "typename": "boolean"
+                    }
                 }
             ],
-            "annotations": {}
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "*": ["id", "text", "int", "boolean_true", "boolean_false"]
+                }
+            }
         }
     },
     "table_names": [

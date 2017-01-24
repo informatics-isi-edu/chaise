@@ -23,25 +23,24 @@ exports.testPresentation = function (tableParams) {
 			for (var i = 0; i < rows.length; i++) {
 				(function(index) {
 					rows[index].all(by.tagName("td")).then(function (cells) {
-						expect(cells.length).toBe(tableParams.columns.length);
-						expect(cells[0].getText()).toBe(tableParams.data[index].title);
-						expect(cells[1].element(by.tagName("a")).getAttribute("href")).toBe(tableParams.data[index].website);
-						expect(cells[1].element(by.tagName("a")).getText()).toBe("Link to Website");
-						expect(cells[2].getText()).toBe(tableParams.data[index].rating);
-						expect(cells[3].getText()).toBe(tableParams.data[index].summary);
-						expect(cells[4].getText()).toBe(tableParams.data[index].opened_on);
-						expect(cells[5].getText()).toBe(tableParams.data[index].luxurious);
+						expect(cells.length).toBe(tableParams.columns.length + 1);
+						expect(cells[1].getText()).toBe(tableParams.data[index].title);
+						expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(tableParams.data[index].website);
+						expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website");
+						expect(cells[3].getText()).toBe(tableParams.data[index].rating);
+						expect(cells[4].getText()).toBe(tableParams.data[index].summary);
+						expect(cells[5].getText()).toBe(tableParams.data[index].opened_on);
+						expect(cells[6].getText()).toBe(tableParams.data[index].luxurious);
 					});
 				}(i))
 			}
 		});
 	});
 
-	it("should show " + tableParams.columns.length + " columns", function() {
-		chaisePage.recordsetPage.getColumns().getInnerHtml().then(function(columnNames) {
+	it("should have " + tableParams.columns.length + " columns", function() {
+		chaisePage.recordsetPage.getColumns().getAttribute('innerHTML').then(function(columnNames) {
 			for (var j = 0; j < columnNames.length; j++) {
 				expect(columnNames[j]).toBe(tableParams.columns[j].title);
-
 			}
 		});
 	});
@@ -66,7 +65,11 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
-	it("apply different searches, ", function() {
+	it("apply different searches, ", function(done) {
+		var EC = protractor.ExpectedConditions;
+		var e = element(by.id('custom-page-size'));
+		browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
+
 		var searchBox = chaisePage.recordsetPage.getSearchBox();
 		searchBox.sendKeys('Super 8 North Hollywood Motel');
 		chaisePage.recordsetPage.getSearchSubmitButton().click().then(function() {
@@ -96,22 +99,76 @@ exports.testPresentation = function (tableParams) {
 			expect(rows.length).toBe(1);
 
 			// clear search
-			return chaisePage.recordsetPage.getSearchClearButton().click();
+			chaisePage.recordsetPage.getSearchClearButton().click().then(function() {
+				done();
+			});
 		});
 
 	});
 
-	it("click on row should redirect to record app", function() {
-        chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
-        	return chaisePage.recordsetPage.getRows();
-        }).then(function(rows) {
-        	rows[0].click();
-
-        	var result = '/record/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
-        	chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
-                expect(browser.driver.getCurrentUrl()).toContain(result);
-            });
+	it("action columns should show view button that redirects to the record page", function(done) {
+		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
+			return chaisePage.recordsetPage.getViewActionButtons();
+		}).then(function(viewButtons) {
+			expect(viewButtons.length).toBe(4);
+			return viewButtons[0].click();
+		}).then(function() {
+			var result = '/record/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
+			chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
+				expect(browser.driver.getCurrentUrl()).toContain(result);
+				browser.navigate().back().then(function() {
+					done();
+				});
+			});
 		});
-
 	});
+
+	it("action columns should show delete button that deletes record", function(done) {
+		var deleteButton;
+		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
+			return chaisePage.recordsetPage.getDeleteActionButtons();
+		}).then(function(deleteButtons) {
+			expect(deleteButtons.length).toBe(4);
+			deleteButton = deleteButtons[3];
+			return deleteButton.click();
+		}).then(function() {
+			var EC = protractor.ExpectedConditions;
+			var confirmButton = chaisePage.recordsetPage.getConfirmDeleteButton();
+			browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+
+			return confirmButton.click();
+		}).then(function() {
+			var EC = protractor.ExpectedConditions;
+			browser.wait(EC.stalenessOf(deleteButton), browser.params.defaultTimeout);
+		}).then(function() {
+			return chaisePage.recordsetPage.getRows();
+		}).then(function(rows) {
+			expect(rows.length).toBe(3);
+			done();
+		});
+	});
+
+	it("action columns should show edit button that redirects to the recordedit page", function(done) {
+
+		var allWindows;
+		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
+			return chaisePage.recordsetPage.getEditActionButtons();
+		}).then(function(editButtons) {
+			expect(editButtons.length).toBe(3);
+			return editButtons[0].click();
+		}).then(function() {
+			return browser.getAllWindowHandles();
+		}).then(function(handles) {
+			allWindows = handles;
+			return browser.switchTo().window(allWindows[1]);
+		}).then(function() {
+			var result = '/recordedit/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
+			expect(browser.driver.getCurrentUrl()).toContain(result);
+			browser.close();
+			return browser.switchTo().window(allWindows[0]);
+		}).then(function() {
+			done();
+		});
+	});
+
 };

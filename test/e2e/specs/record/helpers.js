@@ -61,7 +61,7 @@ exports.testPresentation = function (tableParams) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
 			pageColumns.forEach(function(c) {
-				c.getInnerHtml().then(function(txt) {
+				c.getAttribute('innerHTML').then(function(txt) {
 					txt = txt.trim();
 					var col = columns[index++];
 					expect(col).toBeDefined();
@@ -111,7 +111,7 @@ exports.testPresentation = function (tableParams) {
                         expect(aTag.getText()).toEqual(column.value);
                     });
                 } else {
-                    expect(el.getInnerHtml()).toBe(column.value);
+                    expect(el.getAttribute('innerHTML')).toBe(column.value);
                 }
 			});
 		});
@@ -151,14 +151,14 @@ exports.testPresentation = function (tableParams) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
             expect(headings).toEqual(tableParams.tables_order);
-
+            
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
                 displayName = relatedTables[i].title;
 
                 // verify all columns are present
                 (function(i, displayName) {
-                    chaisePage.recordPage.getRelatedTableColumnNamesByTable(displayName).getInnerHtml().then(function(columnNames) {
+                    chaisePage.recordPage.getRelatedTableColumnNamesByTable(displayName).getAttribute('innerHTML').then(function(columnNames) {
                         for (var j = 0; j < columnNames.length; j++) {
                             expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
                         }
@@ -180,11 +180,6 @@ exports.testPresentation = function (tableParams) {
                 })(i, displayName);
             }
         });
-    });
-
-    // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
-    it("should not show a related table with zero values.", function() {
-        expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
     });
 
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
@@ -226,13 +221,13 @@ exports.testPresentation = function (tableParams) {
     it("should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities", function() {
         var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
         showAllRTButton.click().then(function() {
-            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
-            return showAllRTButton.click();
-        }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
             return showAllRTButton.click();
         }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
+            return showAllRTButton.click();
+        }).then(function() {
+            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
         }).catch(function(error) {
             console.log(error);
         });
@@ -285,14 +280,12 @@ exports.testDeleteButton = function () {
             return modalTitle.getText();
         }).then(function (text) {
             expect(text).toBe("Confirm Delete");
-
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function () {
             browser.driver.sleep(1000);
-
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
-            expect(url.indexOf('/search/')).toBeGreaterThan(-1);
+            expect(url.indexOf('/recordset/')).toBeGreaterThan(-1);
         });
     });
 }
@@ -326,7 +319,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
             return rows[0].all(by.tagName("td"));
         }).then(function(cells) {
-            return cells[2].getInnerHtml();
+            return cells[3].getAttribute('innerHTML');
         }).then(function(cell) {
             // check that an element was created inside the td with an href attribute
             expect(cell.indexOf("href")).toBeGreaterThan(-1);
@@ -359,7 +352,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             console.log(error);
         });
     });
-
+    
     it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
         var EC = protractor.ExpectedConditions, newTabUrl,
             relatedTableName = tableParams.related_table_name_with_more_results,
@@ -396,8 +389,8 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page
-            var title = chaisePage.recordPage.getEntityTitleElement();
-            browser.wait(EC.presenceOf(title), browser.params.defaultTimeout);
+            return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
+        }).then(function() {
             done();
         }).catch(function(error) {
             console.log(error);
@@ -413,7 +406,14 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             relatedTableName = tableParams.related_table_name_with_more_results,
             relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
 
-        browser.wait(EC.elementToBeClickable(relatedTableLink), browser.params.defaultTimeout).then(function() {
+        browser.wait(EC.visibilityOf(relatedTableLink), browser.params.defaultTimeout).then(function() {
+            // waits until the count is what we expect, so we know the refresh occured
+            browser.wait(function() {
+                return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(ct) {
+                    return (ct == tableParams.booking_count + 1);
+                });
+            }, browser.params.defaultTimeout);
+
             return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count();
         }).then(function(count) {
             expect(count).toBe(tableParams.booking_count + 1);
@@ -426,4 +426,137 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             done();
         });
     });
+};
+
+
+exports.relatedTableActions = function (testParams, tableParams) {
+
+    var allWindows;
+
+    it("action columns should show view button that redirects to the record page", function(done) {
+
+        var relatedTableName = tableParams.related_associate_table; // association table
+        var linkedToTableName = tableParams.related_linked_table; // linked to table
+        var linkedToTableFilter = tableParams.related_linked_table_key_filter;
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            return rows[0].all(by.tagName("td"));
+        }).then(function(cell){
+            return cell[0].all(by.css(".view-action-button"));
+        }).then(function(actionButtons) {
+            return actionButtons[0].click();
+        }).then(function() {
+            var result = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + linkedToTableName + "/" + linkedToTableFilter;
+            chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
+                expect(browser.driver.getCurrentUrl()).toContain(result);
+                browser.navigate().back().then(function() {
+                    done();
+                });
+            });
+        });
+    });
+
+    it("action columns should show edit button that redirects to the recordedit page", function(done) {
+
+        var relatedTableName = tableParams.related_regular_table;
+        var relatedTableKey = tableParams.related_regular_table_key_filter;
+
+        var EC = protractor.ExpectedConditions;
+        var e = element(by.id('rt-' + relatedTableName));
+        browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            return rows[0].all(by.tagName("td"));
+        }).then(function(cell) {
+            return cell[0].all(by.css(".edit-action-button"));
+        }).then(function(editButtons) {
+            browser.sleep(1000);
+            return editButtons[0].click();
+        }).then(function() {
+            return browser.getAllWindowHandles();
+        }).then(function(handles) {
+            allWindows = handles;
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function() {
+            var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName + "/" + relatedTableKey;
+            expect(browser.driver.getCurrentUrl()).toContain(result);
+            browser.close();
+            return browser.switchTo().window(allWindows[0]);
+        }).then(function() {
+            done();
+        });
+    });
+
+    it("action columns should show delete button that deletes record", function(done) {
+        var deleteButton;
+        var relatedTableName = tableParams.related_regular_table;
+        var count, rowCells, oldValue;
+
+        var EC = protractor.ExpectedConditions;
+        var e = element(by.id('rt-' + relatedTableName));
+        browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
+
+        var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            count = rows.length;
+            return rows[count - 1].all(by.tagName("td"));
+        }).then(function(cells) {
+            rowCells = cells;
+            return cells[1].getAttribute('innerHTML');
+        }).then(function(cell) {
+            oldValue = cell;
+            return table.all(by.css(".delete-action-button"));
+        }).then(function(deleteButtons) {
+            count = deleteButtons.length;
+            deleteButton = deleteButtons[count-1];
+            return deleteButton.click();
+        }).then(function() {
+            var EC = protractor.ExpectedConditions;
+            var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
+            browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+
+            return confirmButton.click();
+        }).then(function() {
+            browser.wait(
+                EC.stalenessOf(rowCells[1]),
+                browser.params.defaultTimeout);
+            done();
+        })
+    });
+
+    it("action columns should show unlink button that unlinks", function(done) {
+        var deleteButton;
+        var relatedTableName = tableParams.related_associate_table;
+        var count, rowCells, oldValue;
+
+        var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
+
+        chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+            count = rows.length;
+            return rows[count - 1].all(by.tagName("td"));
+        }).then(function(cells) {
+            rowCells = cells;
+            return cells[1].getAttribute('innerHTML');
+        }).then(function(cell) {
+            oldValue = cell;
+            return table.all(by.css(".delete-action-button"))
+        }).then(function(deleteButtons) {
+            var count = deleteButtons.length;
+            deleteButton = deleteButtons[count-1];
+            return deleteButton.click();
+        }).then(function() {
+            var EC = protractor.ExpectedConditions;
+            var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
+            browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+
+            return confirmButton.click();
+        }).then(function() {
+            browser.wait(
+                function() {return rowCells[1].getAttribute('innerHTML') !== oldValue},
+                browser.params.defaultTimeout);
+            done();
+        })
+    });
+
 };

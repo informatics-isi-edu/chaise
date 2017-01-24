@@ -16,6 +16,7 @@
       "foreign_keys": [
         {
           "comment": null,
+          "names": [["product", "fk_category"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
@@ -34,6 +35,7 @@
         },
         {
           "comment": null,
+          "names": [["product", "fk_thumbnail"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
@@ -54,6 +56,7 @@
         },
         {
           "comment": null,
+          "names": [["product", "fk_cover"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
@@ -334,7 +337,7 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", "category", "website", "rating", "summary", "description", "thumbnail", "opened_on", "luxurious"],
+          "detailed" : ["id", ["product", "fk_category"], "website", "rating", "summary", "description", ["product", "fk_thumbnail"], "opened_on", "luxurious"],
           "compact" : ["title", "website", "rating", "summary", "opened_on", "luxurious"]
         },
 
@@ -452,6 +455,9 @@
         ],
         "description": {
           "display": "Bookings"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", ["product", "fk_booking_accommodation"], "price", "booking_date"]
         }
       }
     },
@@ -634,6 +640,7 @@
         },
         {
           "comment": null,
+          "names" : [["product-record", "fk_accommodation_image_2"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
@@ -692,6 +699,9 @@
         ],
         "description": {
           "display": "Accommodation Images"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [["product", "fk_accommodation_image"], ["product", "fk_accommodation_image_2"]]
         }
       }
     },
@@ -752,6 +762,9 @@
         },
         "description": {
           "display": "Categories"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "term"]
         }
       }
     }

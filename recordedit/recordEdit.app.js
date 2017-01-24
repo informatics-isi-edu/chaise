@@ -34,11 +34,13 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
-        function runRecordEditApp(ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
+        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
 
         var session,
             context = { booleanValues: ['', true, false] };
+
+        $rootScope.displayReady = false;
 
         UriUtils.setOrigin();
         headInjector.addTitle();
@@ -62,6 +64,7 @@
 
             context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
             context.appName = "recordedit";
+            context.MAX_ROWS_TO_ADD = 201;
 
             Session.getSession().then(function getSession(_session) {
                 session = _session;
@@ -100,70 +103,98 @@
                 }
 
                 // Case for editing an entity
-                if (context.filter) {
+                if (context.filter || context.queryParams.limit) {
                     if ($rootScope.reference.canUpdate) {
-                        // check id range before reading?
-                        $rootScope.reference.read(1).then(function getPage(page) {
+
+                        var numberRowsToRead;
+                        if (context.queryParams.limit) {
+                            numberRowsToRead = Number(context.queryParams.limit);
+                            if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
+                                var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
+                                AlertsService.addAlert({type: "error", message: limitMessage})
+                            }
+                        } else {
+                            numberRowsToRead = context.MAX_ROWS_TO_ADD;
+                        }
+
+                        $rootScope.reference.read(numberRowsToRead).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
-                                var filter = context.filter;
-                                var noDataMessage = "No entity exists with " + filter.column + filter.operator + filter.value;
+
+                                var filters = context.filter.filters;
+                                var noDataMessage = "No entity exists with ";
+                                for (var k = 0; k < filters.length; k++) {
+                                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
+                                    if (k != filters.length-1) {
+                                        noDataMessage += " or ";
+                                    }
+                                }
                                 var noDataError = new Error(noDataMessage);
                                 noDataError.code = errorNames.notFound;
 
                                 throw noDataError;
                             }
 
-                            var column, value,
-                                tuple = page.tuples[0],
-                                values = tuple.values;
+                            var column, value;
 
                             $rootScope.tuples = page.tuples;
-                            $rootScope.displayname = (context.queryParams.copy ? $rootScope.reference.displayname : tuple.displayname);
+                            $rootScope.displayname = ((context.queryParams.copy && page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
 
-                            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
-                                column = $rootScope.reference.columns[i];
+                            for (var j = 0; j < page.tuples.length; j++) {
+                                // initialize row objects {column-name: value,...}
+                                recordEditModel.rows[j] = {};
+                                // needs to be initialized so foreign keys can be set
+                                recordEditModel.submissionRows[j] = {};
 
-                                switch (column.type.name) {
-                                    case "timestamp":
-                                    case "timestamptz":
-                                        if (values[i]) {
-                                            // Cannot ensure that all timestamp values are formatted in ISO 8601
-                                            // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
-                                            var ts = moment(values[i]);
-                                            value = {
-                                                date: ts.format('YYYY-MM-DD'),
-                                                time: ts.format('hh:mm:ss'),
-                                                meridiem: ts.format('A')
-                                            };
-                                        } else {
-                                            value = {
-                                                date: null,
-                                                time: null,
-                                                meridiem: null
-                                            };
-                                        }
-                                        break;
-                                    case "int2":
-                                    case "int4":
-                                    case "int8":
-                                        value = (values[i] ? parseInt(values[i], 10) : '');
-                                        break;
-                                    case "float4":
-                                    case "float8":
-                                    case "numeric":
-                                        value = (values[i] ? parseFloat(values[i]) : '');
-                                        break;
-                                    default:
-                                        value = values[i];
-                                        break;
-                                }
+                                var tuple = page.tuples[j],
+                                    values = tuple.values;
 
-                                if (!context.queryParams.copy || !column.getInputDisabled(context.appContext)) {
-                                    recordEditModel.rows[recordEditModel.rows.length - 1][column.name] = value;
+                                for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+                                    column = $rootScope.reference.columns[i];
+
+                                    switch (column.type.name) {
+                                        case "timestamp":
+                                        case "timestamptz":
+                                            if (values[i]) {
+                                                // Cannot ensure that all timestamp values are formatted in ISO 8601
+                                                // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
+                                                var ts = moment(values[i]);
+                                                value = {
+                                                    date: ts.format('YYYY-MM-DD'),
+                                                    time: ts.format('hh:mm:ss'),
+                                                    meridiem: ts.format('A')
+                                                };
+                                            } else {
+                                                value = {
+                                                    date: null,
+                                                    time: null,
+                                                    meridiem: 'AM'
+                                                };
+                                            }
+                                            break;
+                                        case "int2":
+                                        case "int4":
+                                        case "int8":
+                                            value = (values[i] ? parseInt(values[i], 10) : '');
+                                            break;
+                                        case "float4":
+                                        case "float8":
+                                        case "numeric":
+                                            value = (values[i] ? parseFloat(values[i]) : '');
+                                            break;
+                                        default:
+                                            value = values[i];
+                                            break;
+                                    }
+
+                                    if (!context.queryParams.copy || !column.getInputDisabled(context.appContext)) {
+                                        recordEditModel.rows[j][column.name] = value;
+                                    }
                                 }
                             }
+
+                            $rootScope.displayReady = true;
                             $log.info('Model: ', recordEditModel);
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
@@ -196,10 +227,35 @@
                             // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
                             // only want to set values in the input fields so make sure it isn't a function
                             // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
-                            if (column.default && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
+                            if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
+                                if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
+                                    if (column.default !== null) {
+                                        var ts = moment(column.default);
+                                        recordEditModel.rows[0][column.name] = {
+                                            date: ts.format('YYYY-MM-DD'),
+                                            time: ts.format('hh:mm:ss'),
+                                            meridiem: ts.format('A')
+                                        };
+                                    } else {
+                                        recordEditModel.rows[0][column.name] = {
+                                            date: null,
+                                            time: null,
+                                            meridiem: 'AM'
+                                        };
+                                    }
+                                }
                                 recordEditModel.rows[0][column.name] = column.default;
+                            } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
+                                // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
+                                recordEditModel.rows[0][column.name] = {
+                                    date: null,
+                                    time: null,
+                                    meridiem: 'AM'
+                                };
                             }
                         });
+
+                        $rootScope.displayReady = true;
                     // if there is a session, user isn't allowed to create
                     } else if (session) {
                         var forbiddenMessage = "You are not authorized to Create entities.";
@@ -208,7 +264,7 @@
                         forbiddenError.code = errorNames.forbidden;
 
                         throw forbiddenError;
-                    // user isn't logged in and neds permissions to create
+                    // user isn't logged in and needs permissions to create
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);

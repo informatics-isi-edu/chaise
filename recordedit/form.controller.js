@@ -8,7 +8,7 @@
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
-        vm.editMode = (context.filter && !context.queryParams.copy) || false;
+        vm.editMode = ((context.filter || context.queryParams.limit) && !context.queryParams.copy) || false;
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -32,7 +32,7 @@
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
 
-        vm.MAX_ROWS_TO_ADD = 201;
+        vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
         vm.numberRowsToAdd = 1;
         vm.showMultiInsert = false;
         vm.copyFormRow = copyFormRow;
@@ -61,11 +61,11 @@
         vm.maskOptions = {
             date: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
-                clearOnBlur: false
+                clearOnBlur: true
             },
             time: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
-                clearOnBlur: false
+                clearOnBlur: true
             }
         };
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
@@ -123,7 +123,10 @@
                         case "timestamptz":
                             if (vm.readyToSubmit) {
                                 if (rowVal.date && rowVal.time && rowVal.meridiem) {
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                } else if (rowVal.date && rowVal.time === null) {
+                                    rowVal.time = '00:00:00';
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                                 } else if (!rowVal.date || !rowVal.time || !rowVal.meridiem) {
                                     rowVal = null;
                                 }
@@ -138,7 +141,6 @@
                 }
                 row[col.name] = rowVal;
             }
-
             return row;
         }
 
@@ -186,57 +188,29 @@
                     // not pseudo, column.name is sufficient for the keys
                     } else {
                         // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                        model.submissionRows[j][column.name] = transformedRow[column.name] || null;
+                        model.submissionRows[j][column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
                     }
                 });
             }
 
             if (vm.editMode) {
-                // Check whether there has been any changes since to model.rows since app initialization
-                var hasNoChanges = model.rows.every(function(element, index, array) {
-                    return angular.equals(element, model.oldRows[index]);
-                });
-
-                if (hasNoChanges) {
-                    // Redirect to record without PUT'ing to ERMrest
-                    vm.readyToSubmit = false;
-                    vm.redirectAfterSubmission();
-                } else {
-                    // loop through model.submissionRows
-                    // there should only be 1 row for editing but we want to account for it for future development
-                    for (var i = 0; i < model.submissionRows.length; i++) {
-                        var row = model.submissionRows[i];
-                        var data = $rootScope.tuples[i].data;
-                        // assign each value from the form to the data object on tuple
-                        for (var key in row) {
-                            data[key] = (row[key] === '' ? null : row[key]);
-                        }
+                // loop through model.submissionRows
+                // there should only be 1 row for editing but we want to account for it for future development
+                for (var i = 0; i < model.submissionRows.length; i++) {
+                    var row = model.submissionRows[i];
+                    var data = $rootScope.tuples[i].data;
+                    // assign each value from the form to the data object on tuple
+                    for (var key in row) {
+                        data[key] = (row[key] === '' ? null : row[key]);
                     }
-                    // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
-                    $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-                        vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                        vm.redirectAfterSubmission(page);
-                    }, function error(response) {
-                        vm.showSubmissionError(response);
-                        vm.submissionButtonDisabled = false;
-                    });
                 }
-            } else {
-                $rootScope.reference.create(model.submissionRows).then(function success(page) {
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    if (vm.prefillCookie) {
-                        $cookies.remove(context.queryParams.prefill);
+                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
+                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
+                    if (window.opener && window.opener.updated) {
+                        window.opener.updated(context.queryParams.invalidate);
                     }
-
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     if (model.rows.length == 1) {
-                        // add cookie indicating record added
-                        if (context.queryParams.invalidate) {
-                            $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
-                                {
-                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-                                }
-                            );
-                        }
                         vm.redirectAfterSubmission(page);
                     } else {
                         AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
@@ -254,7 +228,52 @@
                             page: page,
                             pageLimit: model.rows.length,
                             rowValues: [],
-                            search: null
+                            search: null,
+                            config: {}
+                        }
+                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        vm.resultset = true;
+                    }
+                }, function error(response) {
+                    vm.showSubmissionError(response);
+                    vm.submissionButtonDisabled = false;
+                });
+            } else {
+                $rootScope.reference.table.reference.create(model.submissionRows).then(function success(page) {
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                    if (vm.prefillCookie) {
+                        $cookies.remove(context.queryParams.prefill);
+                    }
+
+                    // add cookie indicating record added
+                    if (context.queryParams.invalidate) {
+                        $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
+                            {
+                                expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                            }
+                        );
+                    }
+
+                    if (model.rows.length == 1) {
+                        vm.redirectAfterSubmission(page);
+                    } else {
+                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        // can't use page.reference because it reflects the specific values that were inserted
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        //set values for the view to flip to recordedit resultset view
+                        vm.resultsetModel = {
+                            hasLoaded: true,
+                            reference: page.reference,
+                            tableDisplayName: page.reference.displayname,
+                            columns: page.reference.columns,
+                            enableSort: false,
+                            sortby: null,
+                            sortOrder: null,
+                            page: page,
+                            pageLimit: model.rows.length,
+                            rowValues: [],
+                            search: null,
+                            config: {}
                         }
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
@@ -306,6 +325,7 @@
             // pass the reference as a param for the modal
             params.reference = column.reference.contextualize.compactSelect;
             params.reference.session = $rootScope.session;
+            params.context = "compact/select";
 
             var modalInstance = $uibModal.open({
                 animation: false,
@@ -363,7 +383,7 @@
 
         function copyFormRow() {
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
-                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD-vm.recordEditModel.rows.length) + ', inclusive.'});
+                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.'});
                 return true;
             }
             // Check if the prototype row to copy has any invalid values. If it
@@ -506,9 +526,11 @@
 
         // Toggle between AM/PM for a time input's model
         function toggleMeridiem(modelIndex, columnName) {
+            // If the entire timestamp model doesn't exist, initialize it with a default meridiem
             if (!vm.recordEditModel.rows[modelIndex][columnName]) {
                 vm.recordEditModel.rows[modelIndex][columnName] = {meridiem: 'AM'};
             }
+            // Do the toggling
             var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem;
             if (meridiem.charAt(0).toLowerCase() === 'a') {
                 return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'PM';
@@ -537,7 +559,7 @@
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
-        var captionColumnWidth = 130;
+        var captionColumnWidth = 150;
         var marginLeft = captionColumnWidth + 10;
 
         // Sets a fixed width for the columns, as they're positioned absolute

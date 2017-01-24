@@ -16,6 +16,7 @@
       "foreign_keys": [
         {
           "comment": null,
+          "names": [["product-record", "fk_category"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
@@ -34,6 +35,7 @@
         },
         {
           "comment": null,
+          "names": [["product-record", "fk_thumbnail"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
@@ -54,6 +56,7 @@
         },
         {
           "comment": null,
+          "names": [["product-record", "fk_cover"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
@@ -332,7 +335,7 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", "title", "website", "category", "rating", "summary", "description", "no_of_rooms", "cover", "thumbnail", "opened_on", "luxurious"]
+          "detailed" : ["id", "title", "website", ["product-record", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-record", "fk_cover"], ["product-record", "fk_thumbnail"], "opened_on", "luxurious"]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
@@ -443,6 +446,9 @@
         ],
         "description": {
           "display": "Bookings"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns" : {
+          "*": ["id", ["product-record", "fk_booking_accommodation"], "price", "bookin_date"]
         }
       }
     },
@@ -635,6 +641,7 @@
         },
         {
           "comment": null,
+          "names" : [["product-record", "fk_accommodation_image_2"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
@@ -693,6 +700,9 @@
         ],
         "description": {
           "display": "Accommodation Images"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [["product-record", "fk_accommodation_image"], ["product-record", "fk_accommodation_image_2"]]
         }
       }
     },
@@ -753,6 +763,9 @@
         },
         "description": {
           "display": "Categories"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns" : {
+          "*": ["id", "term"]
         }
       }
     },
@@ -825,6 +838,9 @@
         ],
         "description": {
           "display": "Media"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", ["product-record", "fk_media_accommodation"]]
         }
       }
     }

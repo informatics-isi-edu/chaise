@@ -83,7 +83,7 @@
                     return moment(modelValue, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid();
                 };
                 /*
-                This parser takes the view value and inserts the appropriate colons before updating the model value.
+                The parser below takes the view value and inserts the appropriate colons before updating the model value.
                 If we decide the placeholder char for the time input's mask should be something other than
                 a valid time character (e.g. underscore or space; currently it's 0), then we need to set the model-view-value
                 attr on the time input's ui-mask to `false` and uncomment the parser below.
@@ -95,6 +95,52 @@
                 //     }
                 //     return value;
                 // });
+            }
+        };
+    })
+
+    /**
+    * @desc
+    * The timestamp directive is used to test if a timestamp object model is valid. It should be used
+    * in conjunction with the date and time validators by placing it on each date and time input.
+    * It accepts 1 attribute:
+    * @param {Object} validateValues - This is required. This will be the object model for timestamp fields.
+    * The object must have "date" and "time" properties.
+    * @example <input type="text" time timestamp validate-values="entireTimestampObjectModelHere">
+    * @example <input type="text" date timestamp validate-values="entireTimestampObjectModelHere">
+    */
+    .directive('timestamp', function() {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function(scope, elm, attr, ctrl) {
+                scope.$watch(attr.validateValues, function(newObj, oldObj) {
+                    // If newObj and oldObj are identical, then this listener fn was triggered
+                    // due to app initialization, not an actual model change. Do nothing.
+                    if (newObj === oldObj) {
+                        return;
+                    }
+                    var date = newObj.date,
+                        dateIsValid = moment(date, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid(),
+                        dateIsEmpty = (date === null || date === '' || date === undefined),
+                        time = newObj.time,
+                        timeIsValid = moment(time, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid(),
+                        timeIsEmpty = (time === null || time === '' || time === undefined);
+
+                    if (dateIsValid) {
+                        if (!timeIsValid && !timeIsEmpty) {
+                            return ctrl.$setValidity('timestampTime', false);
+                        }
+                    } else if (dateIsEmpty) {
+                        if (timeIsValid || !timeIsEmpty) {
+                            return ctrl.$setValidity('timestampDate', false);
+                        }
+                    } else { // if date is bad... the whole timestamp is bad..
+                        return ctrl.$setValidity('timestampDate', false);
+                    }
+                    ctrl.$setValidity('timestampDate', true);
+                    ctrl.$setValidity('timestampTime', true);
+                }, true);
             }
         };
     });

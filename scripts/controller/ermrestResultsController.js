@@ -556,6 +556,15 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 		FacetsService.updateExportFormatOptions();
 	};
 
+	this.onEdittClick = function onEdittClick() {
+		var url = getRecordEditURL($scope.FacetsData);
+		window.location.href = url;
+	};
+
+	this.showEdit = function showEdit() {
+		return canEdit();
+	};
+
 	this.onExportClick = function onExportClick() {
 		FacetsService.doExport();
 	};
@@ -586,4 +595,10 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	this.plotViewEnabled = function plotViewEnabled() {
 		return (chaiseConfig['plotViewEnabled']);
 	};
+
+	this.onPlotTraceMode = function onPlotTraceMode() {
+		if (!FacetsData.plotOptions['traceMode']) {
+			FacetsService.renderPlot();
+		}
+	}
 }]);

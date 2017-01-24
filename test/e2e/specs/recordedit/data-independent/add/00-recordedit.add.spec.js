@@ -148,7 +148,7 @@ describe('Record Add', function() {
 
             // Write a dummy cookie for creating a record in Accommodation table
             testCookie = {
-                constraintName: 'product:accommodation_category_fkey1', // A FK that Accommodation table has with Category table
+                constraintName: 'product:fk_category', // A FK that Accommodation table has with Category table
                 rowname: chance.sentence(),
                 keys: {id: 1}
             };

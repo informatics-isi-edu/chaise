@@ -206,7 +206,7 @@ td.entity-value {
 
 
 td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
-  min-width: 130px;
+  min-width: 150px;
 }
 
 .add-button {

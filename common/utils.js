@@ -118,7 +118,7 @@
          * given an app tag and location object, return the full url
          * @param {string} tag
          * @param {ERMrest.Location} location
-         * @param {string} context - optional, used to determine default app is tag is null/undefined
+         * @param {string} context - optional, used to determine default app if tag is null/undefined
          * @returns {string} url
          */
         function appTagToURL(tag, location, context) {
@@ -268,13 +268,14 @@
                 // split by ';' and '&'
                 var regExp = new RegExp('(;|&|[^;&]+)', 'g');
                 var items = parts[2].match(regExp);
+                var filters = [];
 
                 // if a single filter
                 if (items.length === 1) {
-                    context.filter = processSingleFilterString(items[0]);
+                    filters.push(processSingleFilterString(items[0]));
+                    context.filter = {filters: filters};
 
                 } else {
-                    var filters = [];
                     var type = null;
                     for (var i = 0; i < items.length; i++) {
                         // process anything that's inside () first
