@@ -208,6 +208,31 @@
                                                     <small><a ng-href="{{form.mdHelpLinks.cheatsheet}}" target="_blank">Markdown reference sheet</a> | <a ng-href="{{form.mdHelpLinks.editor}}" target="_blank">Live preview editor</a>.</small>
                                                 </span>
                                             </div>
+
+                                            <!-- File input -->
+                                            <div ng-switch-when="file">
+                                                <table class="table" style="margin-bottom: 0px;">
+                                                    <tbody> 
+                                                        <tr ng-hide><td ng-model="form.recordEditModel.rows[rowIndex][column.filename]"></td><tr>   
+                                                        <tr>
+                                                            <td colspan="2" style="padding: 0px;">
+                                                                <div class="form-group" style="margin-bottom: 8px;">
+                                                                    <input type="file" tabindex="-1" style="position: absolute; clip: rect(0px 0px 0px 0px);">
+                                                                    <div class="input-group input-group-sm" style="width: 100%;">
+                                                                        <input type="text" class="form-control" placeholder="" disabled=""> 
+                                                                        <span class="input-group-btn" tabindex="0">
+                                                                            <label for="BSbtninfo" class="btn btn-primary ">
+                                                                                <span class="icon-span-filestyle glyphicon glyphicon-folder-open"></span> <span class="buttonText"> Select a File</span>
+                                                                            </label>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
                                             <!-- shorttext/default text input -->
                                             <input ng-switch-default id="form-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                 name="{{::column.name}}" type="text" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>

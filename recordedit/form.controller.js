@@ -461,7 +461,13 @@
                         break;
                     case 'shorttext':
                     default:
-                        displayType = 'text';
+
+                        //TODO: needs to be a part of ermrestjs for determining file upload type
+                        if (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
+                            displayType = 'file';
+                        } else {
+                            displayType = 'text';
+                        }
                         break;
                 }
             }
