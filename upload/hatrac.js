@@ -312,7 +312,8 @@ window.hatrac = window.hatrac || {};
      */
     upload.prototype.createMultipartUpload = function() {
         var self = this;
-
+        this.erred = false;
+        
         var request = new module.HttpRequest({
             url: this.url + ";upload?parents=true",
             method: 'POST',
@@ -457,7 +458,8 @@ window.hatrac = window.hatrac || {};
      *
      */
     upload.prototype.start = function() {
-
+        this.erred = false;
+        
         if (this.completed) {
             this.updateProgressBar();
             this.onUploadCompleted();
@@ -506,6 +508,7 @@ window.hatrac = window.hatrac || {};
         if (!this.isPaused) return;
 
         this.isPaused = false;
+        this.erred = false;
 
         if (this.isMultipartUpload) {
             // code to handle reupload
@@ -567,6 +570,7 @@ window.hatrac = window.hatrac || {};
     upload.prototype.onUploadInternalError = function(xhr) {
         if (!this.erred) {
             this.erred = true;
+            this.paused = true;
             this.onUploadError(xhr);
         }
     };

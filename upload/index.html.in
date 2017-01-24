@@ -80,7 +80,7 @@
                     }
 
                     var file = $('#file')[0].files[0];
-                    hatracUpload = new hatrac.Upload(file, { url: "https://dev.isrd.isi.edu/hatrac/test" });
+                    hatracUpload = new hatrac.Upload(file, { url: "https://dev.isrd.isi.edu/hatrac/test1" });
 
                     $('#upload').hide();
                     $('#file').attr('disabled', 'disabled');
@@ -93,7 +93,7 @@
                         $('#upload').show();
                         $('#file').removeAttr('disabled');
                         if (jqXHR.status === 401) {
-                            alert("Sorry you are not allowed to upload:" + xhr.responseText);
+                            alert("Sorry you are not allowed to upload:" + jqXHR.responseText);
                         } else {
                             alert(jqXHR.status + "  " + errorThrown);
                             console.log("Our server is not responding correctly");
