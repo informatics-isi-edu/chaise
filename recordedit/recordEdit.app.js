@@ -10,6 +10,7 @@
         'chaise.filters',
         'chaise.modal',
         'chaise.navbar',
+        'chaise.upload',
         'chaise.record.table',
         'chaise.utils',
         'chaise.validators',

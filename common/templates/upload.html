@@ -1,15 +1,18 @@
 <table class="table" style="margin-bottom: 0px;">
     <tbody> 
         <tr>
-            <td style="padding: 0px;">
+            <td style="padding: 0px; border-bottom:none;">
                 <div class="form-group" style="margin-bottom: 8px;">
-                    <input type="file" tabindex="-1" style="position: absolute; clip: rect(0px 0px 0px 0px);">
+                    <input type="file" tabindex="-1" id="{{fileElId}}" style="position: absolute; clip: rect(0px 0px 0px 0px);">
                     <div class="input-group input-group-sm" style="width: 100%;">
-                        <input type="text" class="form-control" placeholder="" disabled="" ng-bind="fileName"> 
-                        <span class="input-group-btn" tabindex="0">
-                            <label for="BSbtninfo" class="btn btn-primary ">
+                        <input type="text" class="form-control" placeholder="" disabled="" ng-model="fileName" style="padding-right: 25px;"/> 
+                        <div class="form-control-feedback coltooltip" ng-click="clear()" ng-hide="fileName == ''" style="cursor: pointer;right: 30px;pointer-events: all;">
+                            <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="form.clearForeignKey(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                        <span class="input-group-btn" tabindex="0" tooltip-placement="bottom" uib-tooltip="Select file">
+                            <label for="{{fileElId}}" class="btn btn-primary ">
                                 <span class="icon-span-filestyle glyphicon glyphicon-folder-open"></span> 
-                                <span class="buttonText"> Select a File</span>
+                                <span class="buttonText"></span>
                             </label>
                         </span>
                     </div>

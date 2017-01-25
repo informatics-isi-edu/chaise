@@ -15,10 +15,15 @@
                 },
                 link: function (scope, element,attrs, ngModel) {
                     scope.fileName = "";
+                    scope.fileEl;
 
                     $timeout(function() {
 
-                        angular.element(elem.querySelector('input[type="file"]'))
+                        scope.fileEl = angular.element(element[0].querySelector('input[type="file"]'));
+
+                        scope.fileElId = Math.round(Math.random() * 100000);
+
+                        scope.fileEl
                             .bind('change', function (event) {
                                 scope.file = event.target.files[0];
                                 scope.fileName = scope.file.name;
@@ -26,6 +31,13 @@
                             });
 
                     }, 10);
+
+
+                    scope.clear = function() {
+                        scope.fileName = "";
+                        scope.file = "";
+                        scope.fileEl.val("");
+                    };
 
                 }
             };

@@ -211,26 +211,7 @@
 
                                             <!-- File input -->
                                             <div ng-switch-when="file">
-                                                <table class="table" style="margin-bottom: 0px;">
-                                                    <tbody> 
-                                                        <tr ng-hide><td ng-model="form.recordEditModel.rows[rowIndex][column.filename]"></td><tr>   
-                                                        <tr>
-                                                            <td colspan="2" style="padding: 0px;">
-                                                                <div class="form-group" style="margin-bottom: 8px;">
-                                                                    <input type="file" tabindex="-1" style="position: absolute; clip: rect(0px 0px 0px 0px);">
-                                                                    <div class="input-group input-group-sm" style="width: 100%;">
-                                                                        <input type="text" class="form-control" placeholder="" disabled=""> 
-                                                                        <span class="input-group-btn" tabindex="0">
-                                                                            <label for="BSbtninfo" class="btn btn-primary ">
-                                                                                <span class="icon-span-filestyle glyphicon glyphicon-folder-open"></span> <span class="buttonText"> Select a File</span>
-                                                                            </label>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
+                                                <upload column="column" values="form.recordEditModel.rows[rowIndex]"></upload>
                                             </div>
 
                                             <!-- shorttext/default text input -->
