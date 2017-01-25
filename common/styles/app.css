@@ -440,19 +440,6 @@ tbody{
     font-family: "Lucida Console", Courier, monospace;
 }
 
-/****** Embed iFrames ******/
-
-.embed-block {
-    background: #f4f4f4;
-    padding: 10px;
-    margin-bottom: 40px;
-    display: inline-block;
-}
-
-.embed-caption {
-    margin-top: 5px;
-    margin-bottom: 15px;
-}
 
 /************ Error Notification **************/
 #notification {
@@ -498,10 +485,6 @@ tbody{
 
 .markdown-container img {
     margin : 5px 5px 5px 0px;
-}
-
-.markdown-container .embed-block {
-    margin: 10px 10px 10px 0px;
 }
 
 /***************** ellipses ***************/
