@@ -12,6 +12,10 @@
         vm.alerts = AlertsService.alerts;
         vm.showEmptyRelatedTables = false;
 
+        vm.canCreate = function() {
+            return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
+        };
+
         vm.createRecord = function() {
             var newRef = $rootScope.reference.table.reference.contextualize.entryCreate;
             var appURL = newRef.appLink;
@@ -49,6 +53,10 @@
 
             var appLink = newRef.appLink + "?copy=true&limit=1";
             $window.location.href = appLink;
+        };
+
+        vm.canDelete = function() {
+            return ($rootScope.reference && $rootScope.reference.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton);
         };
 
         vm.deleteRecord = function() {
@@ -116,6 +124,10 @@
 
         vm.toggleRelatedTables = function() {
             vm.showEmptyRelatedTables = !vm.showEmptyRelatedTables;
+        };
+
+        vm.canCreateRelated = function(relatedRef) {
+            return (relatedRef.canCreate && $rootScope.modifyRecord);
         };
 
         // Send user to RecordEdit to create a new row in this related table

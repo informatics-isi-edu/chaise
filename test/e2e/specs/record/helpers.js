@@ -141,6 +141,12 @@ exports.testPresentation = function (tableParams) {
         var displayName, tableCount,
             relatedTables = tableParams.related_tables;
 
+        browser.wait(function() {
+            return chaisePage.recordPage.getRelatedTables().count().then(function(ct) {
+                return (ct=relatedTables.length);
+            });
+        }, browser.params.defaultTimeout);
+
         chaisePage.recordPage.getRelatedTables().count().then(function(count) {
             expect(count).toBe(relatedTables.length);
             tableCount = count;
@@ -151,7 +157,7 @@ exports.testPresentation = function (tableParams) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
             expect(headings).toEqual(tableParams.tables_order);
-            
+
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
                 displayName = relatedTables[i].title;
@@ -162,10 +168,10 @@ exports.testPresentation = function (tableParams) {
                         for (var j = 0; j < columnNames.length; j++) {
                             expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
                         }
-                    });
 
-                    // verify all rows are present
-                    chaisePage.recordPage.getRelatedTableRows(displayName).count().then(function(rowCount) {
+                        // verify all rows are present
+                        return chaisePage.recordPage.getRelatedTableRows(displayName).count();
+                    }).then(function(rowCount) {
                         expect(rowCount).toBe(relatedTables[i].data.length);
 
                         // Because this spec is reused in multiple recordedit tests, this if-else branching just ensures the correct expectation is used depending on which table is encountered
@@ -352,7 +358,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             console.log(error);
         });
     });
-    
+
     it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
         var EC = protractor.ExpectedConditions, newTabUrl,
             relatedTableName = tableParams.related_table_name_with_more_results,
