@@ -495,7 +495,10 @@
             "description": {
               "display": "Date of Booking"
             },
-            "facetOrder": ["5"]
+            "facetOrder": ["5"],
+            "tag:isrd.isi.edu,2016:visible-columns" : {
+              "*": ["id", ["product-person", "fk_booking_accommodation"], "price", "bookin_date"]
+            }
           }
         }
       ],
