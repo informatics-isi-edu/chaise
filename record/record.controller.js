@@ -57,7 +57,7 @@
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
-                AlertsService.addAlert({type: 'error', message: error.message});
+                ErrorService.catchAll(error);
                 $log.warn(error);
             });
         };
