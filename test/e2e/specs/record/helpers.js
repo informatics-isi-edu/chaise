@@ -151,7 +151,7 @@ exports.testPresentation = function (tableParams) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
             expect(headings).toEqual(tableParams.tables_order);
-            
+
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
                 displayName = relatedTables[i].title;
@@ -265,6 +265,41 @@ exports.testCreateButton = function () {
 };
 
 exports.testDeleteButton = function () {
+    var allWindows;
+    // Set up a mismatching ETag scenario before attempting delete to ensure that
+    // that the delete operation doesn't throw a 412 error even when ETags are mismatching.
+    beforeAll(function(done) {
+        // Edit the current record in a new tab in order to change the ETag
+        // - Grab current url, change record to recordedit, open this new url in a new tab
+        browser.driver.getCurrentUrl().then(function(url) {
+            url = url.replace('/record/', '/recordedit/');
+            return browser.executeScript('window.open(arguments[0]);', url);
+        }).then(function() {
+            return browser.getAllWindowHandles();
+        }).then(function(handles) {
+            allWindows = handles;
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function() {
+            return chaisePage.waitForElement(element(by.id("submit-record-button")));
+        }).then(function() {
+        // - Change a small thing. Submit.
+            var input = chaisePage.recordEditPage.getInputById(0, 'User Rating');
+            input.clear();
+            input.sendKeys('0.5');
+            return chaisePage.recordEditPage.getSubmitRecordButton().click();
+        }).then(function(handles) {
+        // - Go back to initial Record page
+            browser.close();
+            browser.switchTo().window(allWindows[0]);
+            done();
+        }).catch(function(error) {
+            console.log(error);
+            expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+            done.fail();
+        });
+        // Browser will click delete in next spec.
+    });
+
     it("should redirect to data browser.", function () {
         var EC = protractor.ExpectedConditions,
             modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
@@ -352,7 +387,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             console.log(error);
         });
     });
-    
+
     it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
         var EC = protractor.ExpectedConditions, newTabUrl,
             relatedTableName = tableParams.related_table_name_with_more_results,
