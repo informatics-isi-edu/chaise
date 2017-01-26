@@ -121,7 +121,6 @@
                     scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
                     recordTableUtils.read(scope);
                 };
-
             }
         };
     }])
