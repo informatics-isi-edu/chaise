@@ -11,6 +11,7 @@
 
         vm.alerts = AlertsService.alerts;
         vm.showEmptyRelatedTables = false;
+        vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         vm.createRecord = function() {
             var newRef = $rootScope.reference.table.reference.contextualize.entryCreate;

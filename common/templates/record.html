@@ -1,7 +1,10 @@
 <table class="table" id="tblRecord">
     <tr ng-repeat="column in columns" ng-if="::values[$index].value != null" id="{{'row-' + column.name}}">
         <td class="entity-key col-xs-2">
-            <span class="column-displayname" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}">{{::column.displayname}}</span>
+            <span class="column-displayname" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}">
+                <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
+                <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
+            </span>
         </td>
         <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML">
             <span ng-switch-when="true" class="markdown-container" bind-html-unsafe="::values[$index].value"></span>

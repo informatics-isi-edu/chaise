@@ -36,8 +36,14 @@
             <alerts alerts="ctrl.alerts"></alerts>
 
             <div ng-if="reference">
-                <div id="entity-title" ng-bind-html="recordDisplayname"></div>
-                <div id="entity-subtitle">{{ reference.displayname }}</div>
+                <div id="entity-title" ng-if="::recordDisplayname.isHTML">
+                    <span ng-if="::recordDisplayname.isHTML" ng-bind-html="recordDisplayname.value"></span>
+                    <span ng-if="::!recordDisplayname.isHTML" ng-bind="recordDisplayname.value"></span>
+                </div>
+                <div id="entity-subtitle">
+                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value"></span>
+                    <span ng-if="::!reference.displayname.isHTML" ng-bind="reference.displayname.value"></span>
+                </div>
             </div>
 
             <!-- defined on $rootScope in run function -->
@@ -46,10 +52,10 @@
             </div>
 
             <uib-accordion close-others="false">
-                <div uib-accordion-group class="related-table-heading" id="rt-heading-{{relatedRef.displayname}}" ng-repeat="relatedRef in relatedReferences track by $index" ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
+                <div uib-accordion-group class="related-table-heading" id="rt-heading-{{ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index" ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
                     <uib-accordion-heading>
                         <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': tableModels[$index].open, 'glyphicon-chevron-right': !tableModels[$index].open}"></i>
-                        {{relatedRef.displayname}} ({{tableModels[$index].rowValues.length}}{{tableModels[$index].hasNext ? '+' : ''}})
+                        {{relatedRef.displayname.value}} ({{tableModels[$index].rowValues.length}}{{tableModels[$index].hasNext ? '+' : ''}})
                     </uib-accordion-heading>
 
                     <!-- for different elements inside the accordion -->
@@ -74,7 +80,7 @@
                                 <span class="markdown-container" bind-html-unsafe="tableModels[$index].page.content"></span>
                             </div>
                             <div ng-show="tableModels[$index].displayType != 'markdown'">
-                                <record-table class="related-table" id="rt-{{relatedRef.displayname}}" vm="tableModels[$index]"></record-table>
+                                <record-table class="related-table" id="rt-{{ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="tableModels[$index]"></record-table>
                             </div>
                         </div>
                     </div>
