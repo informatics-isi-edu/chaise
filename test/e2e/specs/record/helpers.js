@@ -151,7 +151,7 @@ exports.testPresentation = function (tableParams) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
             expect(headings).toEqual(tableParams.tables_order);
-            
+
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
                 displayName = relatedTables[i].title;
@@ -352,8 +352,8 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             console.log(error);
         });
     });
-    
-    it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
+
+    it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
         var EC = protractor.ExpectedConditions, newTabUrl,
             relatedTableName = tableParams.related_table_name_with_more_results,
             addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
@@ -372,14 +372,27 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             return browser.switchTo().window(allWindows[1]);
         }).then(function() {
             // ... wait for the page to load ...
-            newTabUrl = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
+            newTabUrl = process.env.CHAISE_BASE_URL + '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + tableParams.table_name;
             return chaisePage.waitForElement(element(by.id('submit-record-button')));
         }).then(function() {
+
+            browser.wait(function () {
+                return browser.driver.getCurrentUrl().then(function(url) {
+                    return url.startsWith(newTabUrl);
+                });
+            });
             // ... and then get the url from this new tab...
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
             expect(url.indexOf(newTabUrl)).toBeGreaterThan(-1);
             expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
+            expect(url.indexOf(relatedTableName)).toBeGreaterThan(-1);
+
+            return chaisePage.recordEditPage.getFormTitle().getText();
+        }).then(function(text) {
+            var title = "Create " + relatedTableName + " Record";
+            expect(text).toBe(title);
+
             return chaisePage.recordsetPage.getInputForAColumn("price");
         }).then(function(input) {
             input.sendKeys(testParams.price);
@@ -390,15 +403,13 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         }).then(function() {
             // wait until redirected to record page
             return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
-        }).then(function() {
-            done();
         }).catch(function(error) {
             console.log(error);
             expect('There was an error in this promise chain').toBe('Please see error message.');
         });
     });
 
-    it("should have a new record, View More link for a related table that redirects to recordset.", function(done) {
+    it("should have a new record, View More link for a related table that redirects to recordset.", function() {
         browser.close();
         browser.switchTo().window(allWindows[0]);
 
@@ -423,7 +434,6 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             return browser.driver.getCurrentUrl();
         }).then(function(url) {
             expect(url.indexOf('recordset')).toBeGreaterThan(-1);
-            done();
         });
     });
 };
@@ -433,7 +443,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
 
     var allWindows;
 
-    it("action columns should show view button that redirects to the record page", function(done) {
+    it("action columns should show view button that redirects to the record page", function() {
 
         var relatedTableName = tableParams.related_associate_table; // association table
         var linkedToTableName = tableParams.related_linked_table; // linked to table
@@ -449,14 +459,12 @@ exports.relatedTableActions = function (testParams, tableParams) {
             var result = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + linkedToTableName + "/" + linkedToTableFilter;
             chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
                 expect(browser.driver.getCurrentUrl()).toContain(result);
-                browser.navigate().back().then(function() {
-                    done();
-                });
+                browser.navigate().back();
             });
         });
     });
 
-    it("action columns should show edit button that redirects to the recordedit page", function(done) {
+    it("action columns should show edit button that redirects to the recordedit page", function() {
 
         var relatedTableName = tableParams.related_regular_table;
         var relatedTableKey = tableParams.related_regular_table_key_filter;
@@ -481,13 +489,12 @@ exports.relatedTableActions = function (testParams, tableParams) {
             var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName + "/" + relatedTableKey;
             expect(browser.driver.getCurrentUrl()).toContain(result);
             browser.close();
+
             return browser.switchTo().window(allWindows[0]);
-        }).then(function() {
-            done();
         });
     });
 
-    it("action columns should show delete button that deletes record", function(done) {
+    it("action columns should show delete button that deletes record", function() {
         var deleteButton;
         var relatedTableName = tableParams.related_regular_table;
         var count, rowCells, oldValue;
@@ -518,14 +525,11 @@ exports.relatedTableActions = function (testParams, tableParams) {
 
             return confirmButton.click();
         }).then(function() {
-            browser.wait(
-                EC.stalenessOf(rowCells[1]),
-                browser.params.defaultTimeout);
-            done();
-        })
+            browser.wait(EC.stalenessOf(rowCells[1]), browser.params.defaultTimeout);
+        });
     });
 
-    it("action columns should show unlink button that unlinks", function(done) {
+    it("action columns should show unlink button that unlinks", function() {
         var deleteButton;
         var relatedTableName = tableParams.related_associate_table;
         var count, rowCells, oldValue;
@@ -552,10 +556,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
 
             return confirmButton.click();
         }).then(function() {
-            browser.wait(
-                function() {return rowCells[1].getAttribute('innerHTML') !== oldValue},
-                browser.params.defaultTimeout);
-            done();
+            browser.wait(function() {return rowCells[1].getAttribute('innerHTML') !== oldValue}, browser.params.defaultTimeout);
         })
     });
 

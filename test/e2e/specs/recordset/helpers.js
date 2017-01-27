@@ -65,7 +65,7 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
-	it("apply different searches, ", function(done) {
+	it("apply different searches, ", function() {
 		var EC = protractor.ExpectedConditions;
 		var e = element(by.id('custom-page-size'));
 		browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
@@ -99,14 +99,12 @@ exports.testPresentation = function (tableParams) {
 			expect(rows.length).toBe(1);
 
 			// clear search
-			chaisePage.recordsetPage.getSearchClearButton().click().then(function() {
-				done();
-			});
+			chaisePage.recordsetPage.getSearchClearButton().click();
 		});
 
 	});
 
-	it("action columns should show view button that redirects to the record page", function(done) {
+	it("action columns should show view button that redirects to the record page", function() {
 		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
 			return chaisePage.recordsetPage.getViewActionButtons();
 		}).then(function(viewButtons) {
@@ -116,14 +114,12 @@ exports.testPresentation = function (tableParams) {
 			var result = '/record/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
 			chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
 				expect(browser.driver.getCurrentUrl()).toContain(result);
-				browser.navigate().back().then(function() {
-					done();
-				});
+				browser.navigate().back();
 			});
 		});
 	});
 
-	it("action columns should show delete button that deletes record", function(done) {
+	it("action columns should show delete button that deletes record", function() {
 		var deleteButton;
 		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
 			return chaisePage.recordsetPage.getDeleteActionButtons();
@@ -144,11 +140,10 @@ exports.testPresentation = function (tableParams) {
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
 			expect(rows.length).toBe(3);
-			done();
 		});
 	});
 
-	it("action columns should show edit button that redirects to the recordedit page", function(done) {
+	it("action columns should show edit button that redirects to the recordedit page", function() {
 
 		var allWindows;
 		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
@@ -165,9 +160,7 @@ exports.testPresentation = function (tableParams) {
 			var result = '/recordedit/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
 			expect(browser.driver.getCurrentUrl()).toContain(result);
 			browser.close();
-			return browser.switchTo().window(allWindows[0]);
-		}).then(function() {
-			done();
+			browser.switchTo().window(allWindows[0]);
 		});
 	});
 
