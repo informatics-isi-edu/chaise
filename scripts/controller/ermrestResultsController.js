@@ -433,7 +433,7 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 				vals.push(getUrlText(table, column, val));
 				var urlPattern = getUrlPattern(table, column, 'url_pattern');
 				if (urlPattern != null) {
-					val = urlPattern.replace('{value}', val);
+					val = urlPattern.replace('{value}', val).replace('{encode.value}', encodeSafeURIComponent(val));
 				}
 				vals.push(val);
 				ret.push(vals);
