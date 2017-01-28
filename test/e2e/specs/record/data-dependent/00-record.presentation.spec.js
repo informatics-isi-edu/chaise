@@ -13,7 +13,7 @@ describe('View existing record,', function() {
 
     			var table, record;
 
-				beforeAll(function(done) {
+				beforeAll(function() {
 					var keys = [];
 					tupleParams.keys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
@@ -25,7 +25,6 @@ describe('View existing record,', function() {
                     var start = (new Date()).getTime();
                     chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
                         console.log((new Date()).getTime() - start);
-                        done();
                     });
 			    });
 

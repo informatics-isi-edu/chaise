@@ -12,12 +12,10 @@ describe('Record Add', function() {
     		describe("======================================================================= \n    "
     			+ tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
 
-				beforeAll(function (done) {
+				beforeAll(function () {
 					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
-                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        done();
-                    });
+                    chaisePage.waitForElement(element(by.id("submit-record-button")));
 			    });
 
 				describe("Presentation and validation,", function() {
