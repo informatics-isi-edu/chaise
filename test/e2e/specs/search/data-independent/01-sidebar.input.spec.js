@@ -29,8 +29,13 @@ describe('Sidebar top search input,', function () {
     it('should input meaningless text and wait for seconds', function () {
         searchBox.sendKeys(meaninglessTxt);
         searchBox.sendKeys(protractor.Key.BACK_SPACE);
-        browser.sleep(100);
-        browser.pause();
+
+        browser.wait(function() {
+            return displayedAttrs.count().then(function(ct) {
+                return ct == 0;
+            });
+        }, browser.params.defaultTimeout);
+
         expect(displayedAttrs.count()).toBe(0);
     });
 
@@ -39,7 +44,13 @@ describe('Sidebar top search input,', function () {
             //hit back space several times to clear input and wait for AJAX
             searchBox.sendKeys(protractor.Key.BACK_SPACE);
         };
-        browser.sleep(100);
+
+        browser.wait(function() {
+            return displayedAttrs.count().then(function(ct) {
+                return ct == initAttrNum;
+            });
+        }, browser.params.defaultTimeout);
+
         expect(displayedAttrs.count()).toBe(initAttrNum);
     });
 
