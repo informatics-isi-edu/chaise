@@ -36,10 +36,7 @@
             <alerts alerts="ctrl.alerts"></alerts>
 
             <div ng-if="reference">
-                <div id="entity-title" ng-if="::recordDisplayname.isHTML">
-                    <span ng-if="::recordDisplayname.isHTML" ng-bind-html="recordDisplayname.value"></span>
-                    <span ng-if="::!recordDisplayname.isHTML" ng-bind="recordDisplayname.value"></span>
-                </div>
+                <div id="entity-title" ng-bind="recordDisplayname"></div>
                 <div id="entity-subtitle">
                     <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value"></span>
                     <span ng-if="::!reference.displayname.isHTML" ng-bind="reference.displayname.value"></span>
@@ -64,11 +61,11 @@
                             <a class="toggle-display-link" ng-click="ctrl.toggleRelatedTableDisplayType($index)">
                                 <span ng-show="tableModels[$index].displayType == 'markdown'">
                                     <span ng-if="::ctrl.canEdit()">Edit</span>
-                                    <span ng-if="!::ctrl.canEdit()">Table Display</span>
+                                    <span ng-if="::!ctrl.canEdit()">Table Display</span>
                                 </span>
                                 <span ng-show="tableModels[$index].displayType != 'markdown'">
                                     <span ng-if="::ctrl.canEdit()">Display</span>
-                                    <span ng-if="!::ctrl.canEdit()">Revert Display</span>
+                                    <span ng-if="::!ctrl.canEdit()">Revert Display</span>
                                 </span>
                             </a>&nbsp;|</span>
                         <span ng-if="relatedRef.canCreate && modifyRecord"><a class="add-records-link" ng-click="ctrl.addRelatedRecord(relatedRef)">Add</a>&nbsp;|</span>

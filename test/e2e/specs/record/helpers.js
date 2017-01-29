@@ -3,15 +3,13 @@ var mustache = require('../../../../../ermrestjs/vendor/mustache.min.js');
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
-		chaisePage.recordPage.getEntityTitle().then(function(txt) {
-			expect(txt).toBe(tableParams.title);
-		});
+        var title = chaisePage.recordPage.getEntityTitleElement();
+        expect(title.getText()).toEqual(tableParams.title);
 	});
 
-	it("should have '" + tableParams.subTitle +"' as subTitle", function() {
-		chaisePage.recordPage.getEntitySubTitle().then(function(txt) {
-			expect(txt).toBe(tableParams.subTitle);
-		});
+	it("should have '" + tableParams.subTitle.toUpperCase() +"' as subTitle", function() {
+        var subtitle = chaisePage.recordPage.getEntitySubTitleElement();
+        expect(subtitle.getText()).toEqual(tableParams.subTitle.toUpperCase());
 	});
 
 	it("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
@@ -61,14 +59,8 @@ exports.testPresentation = function (tableParams) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
 			pageColumns.forEach(function(c) {
-				c.getAttribute('innerHTML').then(function(txt) {
-					txt = txt.trim();
-					var col = columns[index++];
-					expect(col).toBeDefined();
-
-					// Check title is same
-					expect(txt).toBe(col.title);
-				});
+                var col = columns[index++];
+                expect(c.getText()).toEqual(col.title);
 			});
 		});
 	});
@@ -151,7 +143,7 @@ exports.testPresentation = function (tableParams) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
             expect(headings).toEqual(tableParams.tables_order);
-            
+
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
                 displayName = relatedTables[i].title;
@@ -352,7 +344,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             console.log(error);
         });
     });
-    
+
     it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function(done) {
         var EC = protractor.ExpectedConditions, newTabUrl,
             relatedTableName = tableParams.related_table_name_with_more_results,
@@ -407,7 +399,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
 
         browser.wait(EC.visibilityOf(relatedTableLink), browser.params.defaultTimeout).then(function() {
-            // waits until the count is what we expect, so we know the refresh occured
+            // waits until the count is what we expect, so we know the refresh occurred
             browser.wait(function() {
                 return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(ct) {
                     return (ct == tableParams.booking_count + 1);

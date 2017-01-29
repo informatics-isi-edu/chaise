@@ -235,7 +235,7 @@
                 </div>
             </div>
             </div>
-            <div ng-show=form.resultset class="container-fluid">
+            <div ng-show="form.resultset" class="container-fluid">
                 <h2 class="entity-title"><span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Edited</span> {{ form.resultsetModel.pageLimit }} records for table
                     <a ng-href="{{form.recordsetLink}}">
                         <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="form.resultsetModel.tableDisplayName.value"></span>

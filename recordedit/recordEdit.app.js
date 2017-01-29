@@ -176,12 +176,12 @@
                                         case "int2":
                                         case "int4":
                                         case "int8":
-                                            value = (values[i] ? parseInt(values[i], 10) : '');
+                                            value = (values[i] ? parseInt(values[i], 10) : null);
                                             break;
                                         case "float4":
                                         case "float8":
                                         case "numeric":
-                                            value = (values[i] ? parseFloat(values[i]) : '');
+                                            value = (values[i] ? parseFloat(values[i]) : null);
                                             break;
                                         default:
                                             value = values[i];

@@ -536,12 +536,16 @@ var recordPage = function() {
         return browser.executeScript("return $('#entity-subtitle').text();");
     };
 
+    this.getEntitySubTitleElement = function() {
+        return element(by.id("entity-subtitle"));
+    };
+
     this.getColumns = function() {
         return browser.executeScript("return $('tr[ng-repeat=\"column in columns\"]')");
     };
 
     this.getAllColumnCaptions = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname')");
+        return element.all(by.css('td.entity-key > span.column-displayname > span'));
     };
 
     this.getColumnsWithUnderline = function() {
@@ -589,7 +593,7 @@ var recordPage = function() {
     };
 
     this.getRelatedTableColumnNamesByTable = function(displayName) {
-        return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname"));
+        return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
     };
 
     this.getRelatedTableRows = function(displayName) {
