@@ -351,7 +351,7 @@
                     vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
                 }
 
-                vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
+                vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname;
             }, function noDataSelected() {
                 // do nothing
             });

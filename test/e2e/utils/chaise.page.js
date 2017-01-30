@@ -267,6 +267,10 @@ var recordEditPage = function() {
         return browser.executeScript("return $('#entity-title').text();");
     };
 
+    this.getEntityTitleElement = function() {
+        return element(by.id('entity-title'));
+    };
+
     this.getAllColumnCaptions = function() {
         return browser.executeScript("return $('td.entity-key > span.column-displayname')");
     };
@@ -374,6 +378,7 @@ var recordEditPage = function() {
     };
 
     this.getForeignKeyInputValue = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
         return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
     };
 
@@ -518,6 +523,7 @@ var recordEditPage = function() {
     };
 
     this.getInputById = function (index, displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return element(by.id("form-" + index + '-' + displayName + "-input"));
     };
 };
@@ -526,10 +532,6 @@ var recordPage = function() {
     var that = this;
     this.getEntityTitle = function() {
         return browser.executeScript("return $('#entity-title').text();");
-    };
-
-    this.getEntityTitleElement = function() {
-        return element(by.id("entity-title"));
     };
 
     this.getEntitySubTitle = function() {
@@ -732,6 +734,18 @@ var recordsetPage = function() {
     }
 
 };
+
+// Makes a string safe and valid for use in an HTML element's id attribute.
+// Commonly used for column displaynames.
+function makeSafeIdAttr(string) {
+    return String(string)
+        .replace(/&/g, '&amp;')
+        .replace(/\s/g, '&nbsp;') // any whitespace
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 function chaisePage() {
     this.sidebar = new sidebar();

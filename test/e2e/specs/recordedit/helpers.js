@@ -20,10 +20,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
             var EC = protractor.ExpectedConditions;
 
             browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-
-			chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
-				expect(txt).toBe("Edit " + tableParams.edit_entity_displayname + " Records");
-			});
+            var title = chaisePage.recordEditPage.getFormTitle();
+            expect(title.getText()).toEqual("Edit " + tableParams.edit_entity_displayname + " Record");
 		});
 
 		it("should not allow to add new rows/columns", function() {
@@ -353,7 +351,6 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				}
 
                 it("should open a modal search and select a foreign key value.", function () {
-
                     chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
                     	var modalTitle = chaisePage.recordEditPage.getModalTitle(),
                         	EC = protractor.ExpectedConditions;
@@ -389,7 +386,6 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 									selectButtons[0].click();
 	                            }).then(function() {
 	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-
 	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
 	                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
 	                            });
