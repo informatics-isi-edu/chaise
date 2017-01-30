@@ -10,17 +10,15 @@ describe('View recordset,', function() {
 
             describe("For table " + tupleParams.table_name + ",", function() {
 
-                beforeAll(function (done) {
+                beforeAll(function () {
                     var keys = [];
                     tupleParams.keys.forEach(function(key) {
                         keys.push(key.name + key.operator + key.value);
                     });
                     browser.ignoreSynchronization=true;
                     browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
-                    
-                    chaisePage.waitForElement(element(by.id("divRecordSet"))).finally(function() {
-                        done();
-                    });
+
+                    chaisePage.waitForElement(element(by.id("divRecordSet")));
                 });
 
                 describe("Presentation ,", function() {

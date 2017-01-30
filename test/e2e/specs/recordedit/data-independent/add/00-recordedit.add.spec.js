@@ -12,12 +12,10 @@ describe('Record Add', function() {
     		describe("======================================================================= \n    "
     			+ tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
 
-				beforeAll(function (done) {
+				beforeAll(function () {
 					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
-                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        done();
-                    });
+                    chaisePage.waitForElement(element(by.id("submit-record-button")));
 			    });
 
 				describe("Presentation and validation,", function() {
@@ -73,7 +71,7 @@ describe('Record Add', function() {
 
 					var hasErrors = false;
 
-					it("should have no errors, and should be redirected", function(done) {
+					it("should have no errors, and should be redirected", function() {
 						chaisePage.recordEditPage.getAlertError().then(function(err) {
 							if (err) {
 								expect("Page has errors").toBe("No errors");
@@ -82,7 +80,6 @@ describe('Record Add', function() {
 								expect(true).toBe(true);
 							}
 						});
-                        done();
 					});
 
 					it("should be redirected to record page", function() {

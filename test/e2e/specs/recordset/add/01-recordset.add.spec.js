@@ -17,7 +17,7 @@ describe('Recordset add record,', function() {
 
     });
 
-    it("click on the add button should open a new tab to recordedit", function(done) {
+    it("click on the add button should open a new tab to recordedit", function() {
 
         var EC = protractor.ExpectedConditions;
         var e = element(by.id('add-record-btn'));
@@ -66,11 +66,8 @@ describe('Recordset add record,', function() {
                 return chaisePage.recordEditPage.submitForm();
             }).then(function() {
                 // wait until redirected to record page
-                return chaisePage.waitForElement(element(by.id("tblRecord")));
-            }).finally(function() {
-                done();
-            });
-
+                chaisePage.waitForElement(element(by.id("tblRecord")));
+            })
         });
     });
 

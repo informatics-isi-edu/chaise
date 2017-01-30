@@ -9,7 +9,7 @@ describe('View existing record,', function() {
 
         var table, record;
 
-        beforeAll(function(done) {
+        beforeAll(function() {
             var keys = [];
             tupleParams.keys.forEach(function(key) {
                 keys.push(key.name + key.operator + key.value);
@@ -17,9 +17,7 @@ describe('View existing record,', function() {
             browser.ignoreSynchronization=true;
             var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
-                done();
-            });
+            chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
         it("should load chaise-config.js and have editRecord=true", function() {

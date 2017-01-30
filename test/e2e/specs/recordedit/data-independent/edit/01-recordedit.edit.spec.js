@@ -66,17 +66,15 @@ describe('Edit existing record,', function() {
 						});
 					});
 
-					it("should redirect to Record page", function(done) {
+					it("should redirect to Record page", function() {
 						if (!hasErrors) {
                             var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
                             redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
                             // Wait for #tblRecord on Record page to appear
                             chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
                                 expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
-                                done();
                             }, function() {
                                 expect('Expected Record page to load an entity table').toBe('but the wait timed out.');
-                                done();
                             });
 						}
 					});

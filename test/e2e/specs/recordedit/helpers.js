@@ -383,7 +383,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                var index = Math.floor(Math.random() * ct);
 	                                return rows.get(index).all(by.css(".select-action-button"));
 								}).then(function(selectButtons) {
-									selectButtons[0].click();
+									return selectButtons[0].click();
 	                            }).then(function() {
 	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);

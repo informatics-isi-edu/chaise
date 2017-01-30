@@ -66,6 +66,31 @@
             context.appName = "recordedit";
             context.MAX_ROWS_TO_ADD = 201;
 
+            // modes = create, edit, copy
+            // create is contextualized to entry/create
+            // edit is contextualized to entry/edit
+            // copy is contextualized to entry/create
+            // NOTE: copy is technically creating an entity so it needs the proper visible column list as well as the data for the record associated with the given filter
+
+            context.modes = {
+                COPY: "copy",
+                CREATE: "create",
+                EDIT: "edit"
+            }
+            // mode defaults to create
+            context.mode = context.modes.CREATE;
+
+            // Mode can be any 3 with a filter
+            if (context.filter) {
+                // prefill always means create
+                // copy means copy regardless of a limit defined
+                // edit is everything else with a filter
+                context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
+            } else if (context.queryParams.limit) {
+                context.mode = context.modes.EDIT;
+            }
+
+
             Session.getSession().then(function getSession(_session) {
                 session = _session;
                 ERMrest.appLinkFn(UriUtils.appTagToURL);
@@ -75,7 +100,13 @@
                 // do nothing but return without a session
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
-                $rootScope.reference = ((context.filter && !context.queryParams.copy) ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
+                //contextualize the reference based on the mode (determined above) recordedit is in
+                if (context.mode == context.modes.EDIT) {
+                    $rootScope.reference = reference.contextualize.entryEdit;
+                } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
+                    $rootScope.reference = reference.contextualize.entryCreate;
+                }
+
                 $rootScope.reference.session = session;
                 $rootScope.session = session;
 
@@ -103,7 +134,7 @@
                 }
 
                 // Case for editing an entity
-                if (context.filter || context.queryParams.limit) {
+                if (context.mode == context.modes.EDIT || context.mode == context.modes.COPY) {
                     if ($rootScope.reference.canUpdate) {
 
                         var numberRowsToRead;
@@ -220,7 +251,7 @@
 
                         throw notAuthorizedError;
                     }
-                } else {
+                } else if (context.mode == context.modes.CREATE) {
                     if ($rootScope.reference.canCreate) {
                         $rootScope.displayname = $rootScope.reference.displayname;
 

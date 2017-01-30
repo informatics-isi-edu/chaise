@@ -61,11 +61,11 @@
                             <a class="toggle-display-link" ng-click="ctrl.toggleRelatedTableDisplayType($index)">
                                 <span ng-show="tableModels[$index].displayType == 'markdown'">
                                     <span ng-if="::ctrl.canEdit()">Edit</span>
-                                    <span ng-if="::!ctrl.canEdit()">Table Display</span>
+                                    <span ng-if="::(!ctrl.canEdit())">Table Display</span>
                                 </span>
                                 <span ng-show="tableModels[$index].displayType != 'markdown'">
                                     <span ng-if="::ctrl.canEdit()">Display</span>
-                                    <span ng-if="::!ctrl.canEdit()">Revert Display</span>
+                                    <span ng-if="::(!ctrl.canEdit())">Revert Display</span>
                                 </span>
                             </a>&nbsp;|</span>
                         <span ng-if="relatedRef.canCreate && modifyRecord"><a class="add-records-link" ng-click="ctrl.addRelatedRecord(relatedRef)">Add</a>&nbsp;|</span>
