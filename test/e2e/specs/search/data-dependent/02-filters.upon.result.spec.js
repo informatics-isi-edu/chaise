@@ -92,7 +92,7 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
             chaisePage.waitForElementCondition(filterObj.clearAllBtn.isDisplayed()).finally(function() {
                 expect(clearAllBtn.isDisplayed()).toBe(true);
             });
-            
+
         });
 
         it('should show \'' + attr.text + '\' wrapper', function () {
@@ -261,12 +261,11 @@ var determineFiltersUnchecked = function(attr) {
 describe('Filters on top of the records,', function () {
     var EC = protractor.ExpectedConditions;
 
-    beforeAll(function (done) {
+    beforeAll(function () {
+        browser.ignoreSynchronization=true;
         browser.get(browser.params.url || "");
         var sidebar = element(by.id('sidebar'));
-        browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout).then(function () {
-            done();
-        });
+        browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout);
     });
 
     if (!config || !config.attributes || !config.attributes.length ) return;
