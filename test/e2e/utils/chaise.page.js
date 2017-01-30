@@ -534,6 +534,10 @@ var recordPage = function() {
         return browser.executeScript("return $('#entity-title').text();");
     };
 
+    this.getEntityTitleElement = function() {
+        return element(by.id('entity-title'));
+    };
+
     this.getEntitySubTitle = function() {
         return browser.executeScript("return $('#entity-subtitle').text();");
     };

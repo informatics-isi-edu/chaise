@@ -430,8 +430,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 // check entity title is for related table
                 return chaisePage.waitForElement(element(by.id("divRecordSet")));
             }).then(function() {
-                expect(chaisePage.recordsetPage.getPageTitle()).toBe(relatedTableName);
-
+                expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(relatedTableName);
                 browser.navigate().back();
             });
         });
@@ -553,7 +552,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 // check entity title is for related table, not asociation table
                 return chaisePage.waitForElement(element(by.id("divRecordSet")));
             }).then(function() {
-                expect(chaisePage.recordsetPage.getPageTitle()).toBe(relatedTableNameOnRecordset);
+                expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(relatedTableNameOnRecordset);
             });
         });
     });
