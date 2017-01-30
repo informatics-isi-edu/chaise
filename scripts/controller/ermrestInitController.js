@@ -130,6 +130,9 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 	$window.addEventListener('popstate', function(event) {
     event.stopPropagation();
 		event.preventDefault();
+		if (assignBookmark == false) {
+			window.location.reload(true);
+		}
 		$scope.FacetsData.isDetail = false;
 		if (!$scope.$$phase) {
 			$scope.$apply();

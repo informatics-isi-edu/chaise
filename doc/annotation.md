@@ -140,7 +140,7 @@ The below tables explains the meaning of the possible values for the two keys.
 |-------|---------|
 | display | The name with which the column will be displayed. | 
 | rank | The column by whose values it will be sorted. | 
-| url_pattern | The column contains an URL with a pattern. The URL will be build by replacing the **{value}** string from the pattern with the column value. Example of url_pattern value: ```"http://www.ncbi.nlm.nih.gov/pubmed/{value}"``` | 
+| url_pattern | The column contains an URL with the **{value}** and/or **{encode.value}** patterns. The URL will be build by replacing the **{value}** and **{encode.value}** patterns with the column value, respectively encoded URI value of the column. Example of url_pattern value: ```"http://www.ncbi.nlm.nih.gov/pubmed/{value}"``` or ```"http://www.ncbi.nlm.nih.gov/guide/{encode.value}"``` | 
 | url_text | The text that will be displayed by a column that represents an URL link. | 
 
 - **facet** _key_ _values_
