@@ -14,7 +14,7 @@ describe('Recordset add record,', function() {
         }).then(function(rows) {
             rowCount = rows.length;
         });
-        
+
     });
 
     it("click on the add button should open a new tab to recordedit", function(done) {
@@ -42,10 +42,8 @@ describe('Recordset add record,', function() {
                 // set the required fields
                 return chaisePage.recordsetPage.getInputForAColumn("title")
             }).then(function(input) {
-
                 input.sendKeys(testParams.title);
                 return chaisePage.recordsetPage.getModalPopupBtn();
-
             }).then(function(btn) {
                 return btn.click();
             }).then(function() {

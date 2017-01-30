@@ -657,12 +657,16 @@ var recordsetPage = function() {
         return browser.executeScript("return $('#page-title').text();");
     };
 
+    this.getPageTitleElement = function() {
+        return element(by.id('page-title'));
+    }
+
     this.getCustomPageSize = function() {
         return browser.executeScript("return $('#custom-page-size').text().trim();");
     };
 
-    this.getColumns = function() {
-        return element.all(by.css(".table-column-displayname"));
+    this.getColumnNames = function() {
+        return element.all(by.css(".table-column-displayname > span"));
     };
 
     this.getRows = function() {
