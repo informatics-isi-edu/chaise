@@ -1,7 +1,6 @@
 <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
     <div class="col-lg-4 col-md-5 col-sm-6 col-xs-7">
         <!-- search box -->
-        <!-- TODO: tableDisplayName could be an HTML value which wouldn't display well in an input.. what do? -->
         <div class="input-group">
             <input type="text"
                    id="search-input"
@@ -51,7 +50,7 @@
 
 <!-- record table -->
 <div ng-if="vm.rowValues.length > 0">
-    <record-table id="rs-{{vm.tableDisplayName.value}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
+    <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
 </div>
 
 <!-- bottom pagination -->
