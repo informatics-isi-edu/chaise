@@ -39,7 +39,7 @@
                     <div class="col-xs-12">
                         <div class="row">
                             <div class="col-xs-7">
-                                <div id="entity-title"><span ng-if="::!form.editMode">Create</span><span ng-if="::form.editMode">Edit</span> <span ng-bind-html="displayname"></span> Record<span ng-show="form.recordEditModel.rows.length > 1">s</span></div>
+                                <div id="entity-title"><span ng-if="::!form.editMode">Create</span><span ng-if="::form.editMode">Edit</span> <span ng-if="::displayname.isHTML" ng-bind-html="displayname.value"></span><span ng-if="::!displayname.isHTML" ng-bind="displayname.value || displayname"></span> Record<span ng-show="form.recordEditModel.rows.length > 1">s</span></div>
                                 <span class="text-danger">*</span> indicates required field
                             </div>
                             <div class="col-xs-5 padding-top-10">
@@ -96,7 +96,7 @@
                                     <tr class="entity" ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
                                         <td ng-style="form.captionColumnWidth" class="entity-key col-xs-1">
                                             <span ng-if="::form.isRequired(column);" class="text-danger">*</span>
-                                            <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">{{::column.displayname}}</span>
+                                            <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">{{::column.displayname.value}}</span>
                                         </td>
                                         <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.columnToDisplayType(column);">
                                             <!-- date input-->
@@ -159,11 +159,11 @@
                                                     </button>
                                                 </span>
                                                 <!-- So that the foreign key input can be validated -->
-                                                <input type="hidden" id="row-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(column);" />
+                                                <input type="hidden" id="row-{{rowIndex}}-{{form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(column);" />
                                             </div>
 
                                             <!-- int2 input -->
-                                            <input ng-switch-when="integer2" id="form-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
+                                            <input ng-switch-when="integer2" id="form-{{rowIndex}}-{{form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                 name="{{column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{form.int2min}}" max="{{form.int2max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
                                                 <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int2'">
                                                     <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
@@ -172,7 +172,7 @@
                                             </input>
 
                                             <!-- int4 input -->
-                                            <input ng-switch-when="integer4" id="form-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
+                                            <input ng-switch-when="integer4" id="form-{{rowIndex}}-{{form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                 name="{{column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{form.int4min}}" max="{{form.int4max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
                                                 <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int4'">
                                                     <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
@@ -181,7 +181,7 @@
                                             </input>
 
                                             <!-- int8 input -->
-                                            <input ng-switch-when="integer8" id="form-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
+                                            <input ng-switch-when="integer8" id="form-{{rowIndex}}-{{form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                 name="{{column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{form.int8min}}" max="{{form.int8max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
                                                 <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="column.type.name == 'int8'">
                                                     <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
@@ -189,11 +189,11 @@
                                                 </div>
                                             </input>
                                             <!-- float/decimal/numeric -->
-                                            <input ng-switch-when="number" id="form-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
+                                            <input ng-switch-when="number" id="form-{{rowIndex}}-{{form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                 name="{{column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" float>
                                             <!-- boolean input -->
                                             <div ng-switch-when="boolean">
-                                                <ui-select id="form-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="::form.isDisabled(column);">
+                                                <ui-select id="form-{{rowIndex}}-{{form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" theme="select2" ng-disabled="::form.isDisabled(column);">
                                                     <ui-select-match name="{{column.name}}" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}">{{$select.selected}}</ui-select-match>
                                                     <ui-select-choices repeat="domainValue in form.booleanValues | filter: $select.search" >
                                                         <div ng-bind-html="domainValue | highlight: $select.search"></div>
@@ -202,14 +202,14 @@
                                             </div>
                                             <!-- longtext/textarea input -->
                                             <div ng-switch-when="longtext">
-                                                <textarea id="form-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
+                                                <textarea id="form-{{rowIndex}}-{{form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
                                                     name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></textarea>
                                                 <span ng-if="::column.type.name === 'markdown'" class="help-block">
                                                     <small><a ng-href="{{form.mdHelpLinks.cheatsheet}}" target="_blank">Markdown reference sheet</a> | <a ng-href="{{form.mdHelpLinks.editor}}" target="_blank">Live preview editor</a>.</small>
                                                 </span>
                                             </div>
                                             <!-- shorttext/default text input -->
-                                            <input ng-switch-default id="form-{{rowIndex}}-{{column.displayname}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
+                                            <input ng-switch-default id="form-{{rowIndex}}-{{form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                 name="{{::column.name}}" type="text" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>
 
                                             <!-- Validation error messages to show when the form field is touched -->
@@ -235,8 +235,13 @@
                 </div>
             </div>
             </div>
-            <div ng-show=form.resultset class="container-fluid">
-                <h2 class="entity-title"><span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Edited</span> {{ form.resultsetModel.pageLimit }} records for table <a ng-href="{{form.recordsetLink}}">{{ form.resultsetModel.tableDisplayName }}</a></h2>
+            <div ng-show="form.resultset" class="container-fluid">
+                <h2 class="entity-title"><span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Edited</span> {{ form.resultsetModel.pageLimit }} records for table
+                    <a ng-href="{{form.recordsetLink}}">
+                        <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="form.resultsetModel.tableDisplayName.value"></span>
+                        <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="form.resultsetModel.tableDisplayName.value"></span>
+                    </a>
+                </h2>
 
                 <div class="side-padding-15">
                     <record-table vm="form.resultsetModel" default-row-linking="true"></record-table>

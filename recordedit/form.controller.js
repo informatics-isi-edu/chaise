@@ -69,6 +69,7 @@
             }
         };
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
+        vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
@@ -264,7 +265,7 @@
                         vm.resultsetModel = {
                             hasLoaded: true,
                             reference: page.reference,
-                            tableDisplayName: page.reference.displayname,
+                            tableDisplayName: page.reference.displayname.value,
                             columns: page.reference.columns,
                             enableSort: false,
                             sortby: null,

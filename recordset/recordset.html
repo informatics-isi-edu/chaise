@@ -19,7 +19,10 @@
                 </a>
             </div>
 
-            <h2 id="page-title">{{ vm.tableDisplayName }}</h2>
+            <h2 id="page-title">
+                <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value"></span>
+                <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value"></span>
+            </h2>
 
         </div>
 

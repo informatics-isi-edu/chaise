@@ -3,9 +3,8 @@ var chaisePage = require('../../utils/chaise.page.js');
 exports.testPresentation = function (tableParams) {
 
 	it("should have '" + tableParams.title +  "' as title", function() {
-		chaisePage.recordsetPage.getPageTitle().then(function(txt) {
-			expect(txt).toBe(tableParams.title);
-		});
+		var title = chaisePage.recordsetPage.getPageTitleElement();
+        expect(title.getText()).toEqual(tableParams.title);
 	});
 
 	it("should use annotated page size", function() {
@@ -38,11 +37,12 @@ exports.testPresentation = function (tableParams) {
 	});
 
 	it("should have " + tableParams.columns.length + " columns", function() {
-		chaisePage.recordsetPage.getColumns().getAttribute('innerHTML').then(function(columnNames) {
-			for (var j = 0; j < columnNames.length; j++) {
-				expect(columnNames[j]).toBe(tableParams.columns[j].title);
-			}
-		});
+        chaisePage.recordsetPage.getColumnNames().then(function(columns) {
+            expect(columns.length).toBe(tableParams.columns.length);
+            for (var i = 0; i < columns.length; i++) {
+                expect(columns[i].getText()).toEqual(tableParams.columns[i].title);
+            }
+        });
 	});
 
 	it("should show line under columns which have a comment and inspect the comment value too", function() {

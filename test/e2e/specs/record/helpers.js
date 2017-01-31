@@ -3,15 +3,13 @@ var mustache = require('../../../../../ermrestjs/vendor/mustache.min.js');
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
-		chaisePage.recordPage.getEntityTitle().then(function(txt) {
-			expect(txt).toBe(tableParams.title);
-		});
+        var title = chaisePage.recordPage.getEntityTitleElement();
+        expect(title.getText()).toEqual(tableParams.title);
 	});
 
-	it("should have '" + tableParams.subTitle +"' as subTitle", function() {
-		chaisePage.recordPage.getEntitySubTitle().then(function(txt) {
-			expect(txt).toBe(tableParams.subTitle);
-		});
+	it("should have '" + tableParams.subTitle.toUpperCase() +"' as subTitle", function() {
+        var subtitle = chaisePage.recordPage.getEntitySubTitleElement();
+        expect(subtitle.getText()).toEqual(tableParams.subTitle.toUpperCase());
 	});
 
 	it("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
@@ -61,14 +59,8 @@ exports.testPresentation = function (tableParams) {
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
 			pageColumns.forEach(function(c) {
-				c.getAttribute('innerHTML').then(function(txt) {
-					txt = txt.trim();
-					var col = columns[index++];
-					expect(col).toBeDefined();
-
-					// Check title is same
-					expect(txt).toBe(col.title);
-				});
+                var col = columns[index++];
+                expect(c.getText()).toEqual(col.title);
 			});
 		});
 	});
@@ -438,8 +430,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 // check entity title is for related table
                 return chaisePage.waitForElement(element(by.id("divRecordSet")));
             }).then(function() {
-                expect(chaisePage.recordsetPage.getPageTitle()).toBe(relatedTableName);
-
+                expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(relatedTableName);
                 browser.navigate().back();
             });
         });
@@ -561,7 +552,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 // check entity title is for related table, not asociation table
                 return chaisePage.waitForElement(element(by.id("divRecordSet")));
             }).then(function() {
-                expect(chaisePage.recordsetPage.getPageTitle()).toBe(relatedTableNameOnRecordset);
+                expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(relatedTableNameOnRecordset);
             });
         });
     });

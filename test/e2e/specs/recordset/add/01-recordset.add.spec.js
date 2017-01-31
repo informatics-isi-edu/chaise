@@ -42,10 +42,8 @@ describe('Recordset add record,', function() {
                 // set the required fields
                 return chaisePage.recordsetPage.getInputForAColumn("title")
             }).then(function(input) {
-
                 input.sendKeys(testParams.title);
                 return chaisePage.recordsetPage.getModalPopupBtn();
-
             }).then(function(btn) {
                 return btn.click();
             }).then(function() {

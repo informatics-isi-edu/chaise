@@ -126,7 +126,7 @@
         };
     }])
 
-    .directive('recordset', ['recordTableUtils', '$window', '$cookies', 'MathUtils', 'UriUtils','$timeout', function(recordTableUtils, $window, $cookies, MathUtils, UriUtils, $timeout) {
+    .directive('recordset', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils','$timeout', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout) {
 
         return {
             restrict: 'E',
@@ -141,6 +141,7 @@
                 var updated = false; // table refresh used by ellipses' edit action (new method)
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
+                scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.backgroundSearch = false;
