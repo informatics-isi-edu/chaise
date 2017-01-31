@@ -36,6 +36,7 @@
             <alerts alerts="ctrl.alerts"></alerts>
 
             <div ng-if="reference">
+                <!-- recordDisplayname is a Tuple.displayname that is always run through a Markdown parser so it doesn't have an isHTML flag -->
                 <div id="entity-title" ng-bind="recordDisplayname"></div>
                 <div id="entity-subtitle">
                     <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value"></span>
