@@ -3,13 +3,13 @@
         <a ng-if="config.viewable" type="button" class="view-action-button btn btn-xs btn-default btn-no-focus" ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View">
             <span class="glyphicon glyphicon-eye-open"></span>
         </a>
-        <button ng-if="config.editable" type="button" class="edit-action-button btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canUpdate" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
+        <button ng-if="config.editable && tuple.reference.canUpdate" type="button" class="edit-action-button btn btn-xs btn-default btn-no-focus" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
             <span class="glyphicon glyphicon-pencil"></span>
         </button>
-        <button ng-if="config.deletable && unlink" type="button" class="delete-action-button btn btn-xs btn-default btn-no-focus" ng-disabled="!associationRef.canDelete" ng-click="unlink()" tooltip-placement="bottom" uib-tooltip="Unlink">
+        <button ng-if="config.deletable && unlink && associationRef.canDelete" type="button" class="delete-action-button btn btn-xs btn-default btn-no-focus" ng-click="unlink()" tooltip-placement="bottom" uib-tooltip="Unlink">
             <span class="glyphicon glyphicon-remove-circle"></span>
         </button>
-        <button ng-if="config.deletable && delete" type="button" class="delete-action-button btn btn-xs btn-default btn-no-focus" ng-disabled="!tuple.reference.canDelete" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
+        <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button btn btn-xs btn-default btn-no-focus" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
             <span class="glyphicon glyphicon-trash" style="color: black"></span>
         </button>
         <button ng-if="config.selectable" type="button" class="select-action-button btn btn-xs btn-default btn-no-focus" ng-click="onSelect()" tooltip-placement="bottom" uib-tooltip="Select" >
