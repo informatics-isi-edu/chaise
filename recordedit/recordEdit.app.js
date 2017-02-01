@@ -118,7 +118,7 @@
                     var cookie = $cookies.getObject(context.queryParams.prefill);
                     if (cookie) {
                         // Update view model
-                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname;
+                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
 
                         // Update submission model
                         var columnNames = Object.keys(cookie.keys);

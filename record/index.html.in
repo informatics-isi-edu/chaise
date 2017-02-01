@@ -35,12 +35,14 @@
             </div>
             <alerts alerts="ctrl.alerts"></alerts>
 
-            <div ng-if="reference">
-                <!-- recordDisplayname is a Tuple.displayname that is always run through a Markdown parser so it doesn't have an isHTML flag -->
-                <div id="entity-title" ng-bind="recordDisplayname"></div>
+            <div ng-if="recordDisplayname">
+                <div id="entity-title">
+                    <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
+                    <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
+                </div>
                 <div id="entity-subtitle">
-                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value"></span>
-                    <span ng-if="::!reference.displayname.isHTML" ng-bind="reference.displayname.value"></span>
+                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value"></span>
+                    <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value"></span>
                 </div>
             </div>
 
@@ -53,7 +55,7 @@
                 <div uib-accordion-group class="related-table-heading" id="rt-heading-{{ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index" ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
                     <uib-accordion-heading>
                         <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': tableModels[$index].open, 'glyphicon-chevron-right': !tableModels[$index].open}"></i>
-                        {{relatedRef.displayname.value}} ({{tableModels[$index].rowValues.length}}{{tableModels[$index].hasNext ? '+' : ''}})
+                        <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> ({{tableModels[$index].rowValues.length}}{{tableModels[$index].hasNext ? '+' : ''}})
                     </uib-accordion-heading>
 
                     <!-- for different elements inside the accordion -->

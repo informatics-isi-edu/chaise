@@ -146,7 +146,9 @@ describe('Record Add', function() {
             // Write a dummy cookie for creating a record in Accommodation table
             testCookie = {
                 constraintName: 'product:fk_category', // A FK that Accommodation table has with Category table
-                rowname: chance.sentence(),
+                rowname: {
+                    value: chance.sentence()
+                },
                 keys: {id: 1}
             };
             browser.manage().addCookie('test', JSON.stringify(testCookie));
@@ -161,7 +163,7 @@ describe('Record Add', function() {
             }).then(function(cookie) {
                 if (cookie) {
                     var field = element.all(by.css('.popup-select-value')).first();
-                    expect(field.getText()).toBe(testCookie.rowname);
+                    expect(field.getText()).toBe(testCookie.rowname.value);
                 } else {
                     // Fail the test
                     expect('Cookie did not load').toEqual('but cookie should have loaded');

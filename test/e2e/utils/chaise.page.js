@@ -272,7 +272,7 @@ var recordEditPage = function() {
     };
 
     this.getAllColumnCaptions = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname')");
+        return browser.executeScript("return $('td.entity-key > span.column-displayname > span')");
     };
 
     this.getColumnsWithUnderline = function() {
@@ -280,7 +280,7 @@ var recordEditPage = function() {
     };
 
     this.getColumnWithAsterisk = function(el) {
-        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"::form.isRequired(column);\"].text-danger')[0];", el);
+        return browser.executeScript("return $(arguments[0]).parent().siblings('span[ng-if=\"::form.isRequired(column);\"].text-danger')[0];", el);
     };
 
     this.getColumnComment = function(el) {
