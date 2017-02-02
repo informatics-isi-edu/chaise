@@ -163,7 +163,26 @@ var defaultPlotFormats =
 			showlegend: true,
 			autosize: true
 		}
-	},
+	}
+/*
+	,
+	{
+		name:"Scatter GL",
+		type:"scattergl",
+		mode:"markers",
+		marker: {
+			opacity: 0.75
+		},
+		coordinates:['x', 'y'],
+		layout:{
+			hovermode: 'closest',
+			showlegend: true,
+			autosize: true
+		}
+	}
+*/
+/*
+	,
 	{
 		name:"Bar",
 		type:"bar",
@@ -180,4 +199,5 @@ var defaultPlotFormats =
 			autosize: true
 		}
 	}
+*/
 ];
