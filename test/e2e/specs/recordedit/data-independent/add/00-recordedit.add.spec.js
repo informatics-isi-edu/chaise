@@ -96,6 +96,12 @@ describe('Record Add', function() {
                                 browser.driver.getCurrentUrl().then(function(url) {
     						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
 
+                                    browser.wait(function () {
+                                        return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                            return (ct > 0);
+                                        });
+                                    });
+
                                     chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                         expect(ct).toBe(tableParams.records);
                                     });
