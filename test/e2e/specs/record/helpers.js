@@ -405,6 +405,11 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 var title = "Create " + relatedTableName + " Record";
                 expect(text).toBe(title);
 
+                return chaisePage.recordEditPage.getForeignKeyInputs();
+            }).then(function(inputs) {
+                expect(inputs.length).toBe(1);
+                expect(inputs[0].getText()).toBe("Super 8 North Hollywood Motel");
+
                 return chaisePage.recordEditPage.getInputById(0, "price");
             }).then(function(input) {
                 input.sendKeys(testParams.price);
@@ -457,7 +462,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
 
     describe("for a related entity without an association table", function() {
         it("should have an Add link for a related table that redirects to that related table's association table in recordedit with a prefill query parameter.", function() {
-            var EC = protractor.ExpectedConditions, newTabUrl, rows,
+            var EC = protractor.ExpectedConditions, newTabUrl, rows, foreignKeyInputs,
                 modalTitle = chaisePage.recordEditPage.getModalTitle(),
                 relatedTableName = tableParams.related_associate_table,
                 addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
@@ -496,6 +501,13 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 var title = "Create " + relatedTableName + " Record";
                 expect(text).toBe(title);
 
+                return chaisePage.recordEditPage.getForeignKeyInputs();
+            }).then(function(inputs) {
+                foreignKeyInputs = inputs;
+
+                expect(inputs.length).toBe(2);
+                expect(inputs[0].getText()).toBe("Super 8 North Hollywood Motel");
+
                 return chaisePage.recordEditPage.getModalPopupBtnsUsingScript();
             }).then(function(popupBtns) {
                 // the prefilled input is technically a foreign key input as well with a hidden popup btn
@@ -529,6 +541,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             }).then(function() {
                 browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
+                expect(foreignKeyInputs[1].getText()).toBe("30,007");
                 var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue("image_id", 0);
                 expect(foreignKeyInput.getAttribute("value")).toBeDefined();
 
