@@ -38,8 +38,8 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <div class="row">
-                            <div class="col-xs-7">
-                                <div id="entity-title"><span ng-if="::!form.editMode">Create</span><span ng-if="::form.editMode">Edit</span> <span ng-if="::displayname.isHTML" ng-bind-html="displayname.value"></span><span ng-if="::!displayname.isHTML" ng-bind="displayname.value || displayname"></span> Record<span ng-show="form.recordEditModel.rows.length > 1">s</span></div>
+                            <div ng-if="displayname" class="col-xs-7">
+                                <div id="entity-title"><span ng-if="::!form.editMode">Create</span><span ng-if="::form.editMode">Edit</span> <span ng-if="::displayname.isHTML" ng-bind-html="::displayname.value"></span><span ng-if="::!displayname.isHTML" ng-bind="::(displayname.value || displayname)"></span> Record<span ng-show="form.recordEditModel.rows.length > 1">s</span></div>
                                 <span class="text-danger">*</span> indicates required field
                             </div>
                             <div class="col-xs-5 padding-top-10">
@@ -96,7 +96,10 @@
                                     <tr class="entity" ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
                                         <td ng-style="form.captionColumnWidth" class="entity-key col-xs-1">
                                             <span ng-if="::form.isRequired(column);" class="text-danger">*</span>
-                                            <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">{{::column.displayname.value}}</span>
+                                            <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">
+                                                <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
+                                                <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
+                                            </span>
                                         </td>
                                         <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.columnToDisplayType(column);">
                                             <!-- date input-->
