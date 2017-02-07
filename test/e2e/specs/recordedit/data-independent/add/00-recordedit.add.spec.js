@@ -95,7 +95,6 @@ describe('Record Add', function() {
                                 // verify url and ct
                                 browser.driver.getCurrentUrl().then(function(url) {
     						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
-
                                     chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                         expect(ct).toBe(tableParams.records);
                                     });
@@ -145,7 +144,7 @@ describe('Record Add', function() {
 
             // Write a dummy cookie for creating a record in Accommodation table
             testCookie = {
-                constraintName: 'product:fk_category', // A FK that Accommodation table has with Category table
+                constraintName: 'product_fk_category', // A FK that Accommodation table has with Category table
                 rowname: chance.sentence(),
                 keys: {id: 1}
             };

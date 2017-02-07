@@ -27,7 +27,7 @@
         "params": {
             "tables" : [{
                 "table_name" : "accommodation",
-                "column_names": ["first_name", "last_name", "product-person:accommodation_first_name_fkey1"]
+                "column_names": ["first_name", "last_name", "product-person_accommodation_first_name_fkey1"]
             }]
         }
     }
