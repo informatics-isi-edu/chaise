@@ -1,7 +1,7 @@
 {
     "schema_name": "defaults",
     "tables": {
-        "multi-add-table": {
+        "defaults-table": {
             "comment": "Table to represent adding an entity with defaults.",
             "kind": "table",
             "keys": [
@@ -37,6 +37,11 @@
                     "nullok": true,
                     "type": {
                         "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {
+                            "markdown_name": "**text**"
+                        }
                     }
                 }, {
                     "name": "int",

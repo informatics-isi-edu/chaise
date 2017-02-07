@@ -187,7 +187,7 @@
               "3"
             ],
             "tag:misd.isi.edu,2015:display": {
-              "name": "User Rating"
+              "markdown_name": "**User Rating**"
             }
           }
         },
@@ -841,6 +841,9 @@
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
           "*": ["id", ["product-record", "fk_media_accommodation"]]
+        },
+        "tag:misd.isi.edu,2015:display": {
+          "markdown_name": "**media**"
         }
       }
     }

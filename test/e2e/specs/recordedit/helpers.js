@@ -57,7 +57,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 			pageColumns.forEach(function(c) {
 				c.getAttribute('innerHTML').then(function(txt) {
 					txt = txt.trim();
-					var col = columns.find(function(cl) { return txt == cl.displayName });
+					var col = columns.find(function(cl) {
+                        return txt == cl.displayName
+                    });
 					expect(col).toBeDefined();
 					c.column = col;
 					visibleFields.push(c);
