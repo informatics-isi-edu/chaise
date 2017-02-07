@@ -8,7 +8,7 @@
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
-        vm.editMode = ((context.filter || context.queryParams.limit) && !context.queryParams.copy) || false;
+        vm.editMode = (context.mode == context.modes.EDIT ? true : false);
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
@@ -69,6 +69,7 @@
             }
         };
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
+        vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
@@ -264,7 +265,7 @@
                         vm.resultsetModel = {
                             hasLoaded: true,
                             reference: page.reference,
-                            tableDisplayName: page.reference.displayname,
+                            tableDisplayName: page.reference.displayname.value,
                             columns: page.reference.columns,
                             enableSort: false,
                             sortby: null,
@@ -350,7 +351,7 @@
                     vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
                 }
 
-                vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname;
+                vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
             }, function noDataSelected() {
                 // do nothing
             });

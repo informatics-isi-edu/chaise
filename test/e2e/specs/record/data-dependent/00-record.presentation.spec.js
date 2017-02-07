@@ -13,7 +13,7 @@ describe('View existing record,', function() {
 
     			var table, record;
 
-				beforeAll(function(done) {
+				beforeAll(function() {
 					var keys = [];
 					tupleParams.keys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
@@ -25,11 +25,10 @@ describe('View existing record,', function() {
                     var start = (new Date()).getTime();
                     chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
                         console.log((new Date()).getTime() - start);
-                        done();
                     });
 			    });
 
-                it('should load document title defined in chaise-config.js and have deleteRecord=true', function(done) {
+                it('should load document title defined in chaise-config.js and have deleteRecord=true', function() {
                     browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                         expect(chaiseConfig.deleteRecord).toBe(true);
                         if (chaiseConfig.headTitle) {
@@ -37,7 +36,6 @@ describe('View existing record,', function() {
                                 expect(title).toEqual(chaiseConfig.headTitle);
                             });
                         }
-                        done();
                     });
                 });
 

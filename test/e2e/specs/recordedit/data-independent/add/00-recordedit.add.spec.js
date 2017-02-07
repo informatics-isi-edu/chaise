@@ -12,12 +12,10 @@ describe('Record Add', function() {
     		describe("======================================================================= \n    "
     			+ tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
 
-				beforeAll(function (done) {
+				beforeAll(function () {
 					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name);
-                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        done();
-                    });
+                    chaisePage.waitForElement(element(by.id("submit-record-button")));
 			    });
 
 				describe("Presentation and validation,", function() {
@@ -73,7 +71,7 @@ describe('Record Add', function() {
 
 					var hasErrors = false;
 
-					it("should have no errors, and should be redirected", function(done) {
+					it("should have no errors, and should be redirected", function() {
 						chaisePage.recordEditPage.getAlertError().then(function(err) {
 							if (err) {
 								expect("Page has errors").toBe("No errors");
@@ -82,7 +80,6 @@ describe('Record Add', function() {
 								expect(true).toBe(true);
 							}
 						});
-                        done();
 					});
 
 					it("should be redirected to record page", function() {
@@ -98,6 +95,12 @@ describe('Record Add', function() {
                                 // verify url and ct
                                 browser.driver.getCurrentUrl().then(function(url) {
     						        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
+
+                                    browser.wait(function () {
+                                        return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                            return (ct > 0);
+                                        });
+                                    });
 
                                     chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                         expect(ct).toBe(tableParams.records);
@@ -149,7 +152,9 @@ describe('Record Add', function() {
             // Write a dummy cookie for creating a record in Accommodation table
             testCookie = {
                 constraintName: 'product:fk_category', // A FK that Accommodation table has with Category table
-                rowname: chance.sentence(),
+                rowname: {
+                    value: chance.sentence()
+                },
                 keys: {id: 1}
             };
             browser.manage().addCookie('test', JSON.stringify(testCookie));
@@ -164,7 +169,7 @@ describe('Record Add', function() {
             }).then(function(cookie) {
                 if (cookie) {
                     var field = element.all(by.css('.popup-select-value')).first();
-                    expect(field.getText()).toBe(testCookie.rowname);
+                    expect(field.getText()).toBe(testCookie.rowname.value);
                 } else {
                     // Fail the test
                     expect('Cookie did not load').toEqual('but cookie should have loaded');

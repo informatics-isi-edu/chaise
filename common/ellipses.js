@@ -143,6 +143,9 @@
                             };
                         }
                     };
+                    
+                    // Initialize the action column btn links
+                    init();
 
                     scope.onSelect = function() {
                         var args = {"tuple": scope.tuple};
@@ -182,7 +185,7 @@
 
                         var resizeRow = function() {
                             if (containsOverflow == false && timerCount ++ < 500) {
-                                
+
                                 for (var i = 0; i < element[0].children.length; i++) {
                                     var height = element[0].children[i].children[0].clientHeight;
                                     if (height > maxHeight) {
@@ -198,7 +201,7 @@
                                     resizeRow();
                                 }, 50);
                             }
-                        };      
+                        };
 
                         scope.$watchCollection('rowValues', function (v) {
                             init();
@@ -207,7 +210,7 @@
                                 containsOverflow = false;
                                 resizeRow();
                             }, 10);
-                           
+
                         });
                     }
                 }

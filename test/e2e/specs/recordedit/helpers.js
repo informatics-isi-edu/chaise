@@ -20,10 +20,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
             var EC = protractor.ExpectedConditions;
 
             browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-
-			chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
-				expect(txt).toBe("Edit " + tableParams.edit_entity_displayname + " Records");
-			});
+            var title = chaisePage.recordEditPage.getFormTitle();
+            expect(title.getText()).toEqual("Edit " + tableParams.edit_entity_displayname + " Record");
 		});
 
 		it("should not allow to add new rows/columns", function() {
@@ -59,7 +57,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 			pageColumns.forEach(function(c) {
 				c.getAttribute('innerHTML').then(function(txt) {
 					txt = txt.trim();
-					var col = columns.find(function(cl) { return txt == cl.displayName });
+					var col = columns.find(function(cl) {
+                        return txt == cl.displayName
+                    });
 					expect(col).toBeDefined();
 					c.column = col;
 					visibleFields.push(c);
@@ -353,7 +353,6 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				}
 
                 it("should open a modal search and select a foreign key value.", function () {
-
                     chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
                     	var modalTitle = chaisePage.recordEditPage.getModalTitle(),
                         	EC = protractor.ExpectedConditions;
@@ -386,10 +385,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                var index = Math.floor(Math.random() * ct);
 	                                return rows.get(index).all(by.css(".select-action-button"));
 								}).then(function(selectButtons) {
-									selectButtons[0].click();
+									return selectButtons[0].click();
 	                            }).then(function() {
 	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-
 	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
 	                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
 	                            });

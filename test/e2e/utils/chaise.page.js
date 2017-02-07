@@ -267,8 +267,16 @@ var recordEditPage = function() {
         return browser.executeScript("return $('#entity-title').text();");
     };
 
+    this.getEntityTitleElement = function() {
+        return element(by.id('entity-title'));
+    };
+
     this.getAllColumnCaptions = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname')");
+        return browser.executeScript("return $('td.entity-key > span.column-displayname > span')");
+    };
+
+    this.getColumnCaptionsWithHtml = function() {
+        return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
     };
 
     this.getColumnsWithUnderline = function() {
@@ -276,7 +284,7 @@ var recordEditPage = function() {
     };
 
     this.getColumnWithAsterisk = function(el) {
-        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"::form.isRequired(column);\"].text-danger')[0];", el);
+        return browser.executeScript("return $(arguments[0]).parent().siblings('span[ng-if=\"::form.isRequired(column);\"].text-danger')[0];", el);
     };
 
     this.getColumnComment = function(el) {
@@ -374,7 +382,12 @@ var recordEditPage = function() {
     };
 
     this.getForeignKeyInputValue = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
         return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
+    };
+
+    this.getForeignKeyInputs = function() {
+        return element.all(by.css(".popup-select-value"));
     };
 
     this.getInputValue = function(columnName, index) {
@@ -518,6 +531,7 @@ var recordEditPage = function() {
     };
 
     this.getInputById = function (index, displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return element(by.id("form-" + index + '-' + displayName + "-input"));
     };
 };
@@ -525,15 +539,19 @@ var recordEditPage = function() {
 var recordPage = function() {
     var that = this;
     this.getEntityTitle = function() {
-        return browser.executeScript("return $('#entity-title').text();");
+        return browser.executeScript("return $('#entity-title > span').text();");
     };
 
     this.getEntityTitleElement = function() {
-        return element(by.id("entity-title"));
+        return element(by.id('entity-title'));
     };
 
     this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#entity-subtitle').text();");
+        return browser.executeScript("return $('#entity-subtitle > span').text();");
+    };
+
+    this.getEntitySubTitleElement = function() {
+        return element(by.id("entity-subtitle"));
     };
 
     this.getColumns = function() {
@@ -541,7 +559,11 @@ var recordPage = function() {
     };
 
     this.getAllColumnCaptions = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname')");
+        return element.all(by.css('td.entity-key > span.column-displayname > span'));
+    };
+
+    this.getColumnCaptionsWithHtml = function() {
+        return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
     };
 
     this.getColumnsWithUnderline = function() {
@@ -573,6 +595,7 @@ var recordPage = function() {
     };
 
     this.getRelatedTable = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName));
     };
 
@@ -585,33 +608,40 @@ var recordPage = function() {
     }
 
     this.getRelatedTableHeading = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-heading-" + displayName));
     };
 
     this.getRelatedTableColumnNamesByTable = function(displayName) {
-        return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname"));
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
     };
 
     this.getRelatedTableRows = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
     };
 
     this.getMoreResultsLink = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         // the link is not a child of the table, rather one of the accordion group
         return element(by.id("rt-heading-" + displayName)).element(by.css(".more-results-link"));
     };
 
     this.getAddRecordLink = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         // the link is not a child of the table, rather one of the accordion group
         return element(by.id("rt-heading-" + displayName)).element(by.css(".add-records-link"));
     };
 
     this.getToggleDisplayLink = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         // the link is not a child of the table, rather one of the accordion group
         return element(by.id("rt-heading-" + displayName)).element(by.css(".toggle-display-link"));
     };
 
     this.getRelatedTableRowValues = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return that.getRelatedTableRows(displayName).all(by.tagName("td"));
     };
 
@@ -653,12 +683,16 @@ var recordsetPage = function() {
         return browser.executeScript("return $('#page-title').text();");
     };
 
+    this.getPageTitleElement = function() {
+        return element(by.id('page-title'));
+    }
+
     this.getCustomPageSize = function() {
         return browser.executeScript("return $('#custom-page-size').text().trim();");
     };
 
-    this.getColumns = function() {
-        return element.all(by.css(".table-column-displayname"));
+    this.getColumnNames = function() {
+        return element.all(by.css(".table-column-displayname > span"));
     };
 
     this.getRows = function() {
@@ -724,6 +758,18 @@ var recordsetPage = function() {
     }
 
 };
+
+// Makes a string safe and valid for use in an HTML element's id attribute.
+// Commonly used for column displaynames.
+function makeSafeIdAttr(string) {
+    return String(string)
+        .replace(/&/g, '&amp;')
+        .replace(/\s/g, '&nbsp;') // any whitespace
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 function chaisePage() {
     this.sidebar = new sidebar();

@@ -11,6 +11,7 @@
 
         vm.alerts = AlertsService.alerts;
         vm.showEmptyRelatedTables = false;
+        vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
@@ -158,7 +159,7 @@
             addRecordRequests[referrer_id] = ref.uri;
 
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
-            var appLink = ref.table.reference.contextualize.entryCreate.appLink;
+            var appLink = (ref.derivedAssociationReference ? ref.derivedAssociationReference.contextualize.entryCreate.appLink : ref.contextualize.entryCreate.appLink);
             appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
                 'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
                 '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);

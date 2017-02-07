@@ -529,9 +529,28 @@
             });
         }
 
-        return {
-            getRowValuesFromPage: getRowValuesFromPage
+        /**
+        *
+        * @desc Converts the following characters to HTML entities for safe and
+        * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
+        * right angle brackets, left angle brackets, double quotes, single quotes.
+        * @param {String} string
+        * @return {String} a string suitable for use in the `id` attributes of HTML elements
+        */
+        function makeSafeIdAttr(string) {
+            return String(string)
+                .replace(/&/g, '&amp;')
+                .replace(/\s/g, '&nbsp;') // any whitespace
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
+
+        return {
+            getRowValuesFromPage: getRowValuesFromPage,
+            makeSafeIdAttr: makeSafeIdAttr
+        };
     }])
 
     .factory("UiUtils", [function() {

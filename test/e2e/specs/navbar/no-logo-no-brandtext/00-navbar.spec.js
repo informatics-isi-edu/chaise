@@ -1,16 +1,14 @@
 describe('Navbar ', function() {
     var navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
 
-    beforeAll(function (done) {
+    beforeAll(function () {
         browser.ignoreSynchronization=true;
         browser.get(browser.params.url || "");
         navbar = element(by.id('mainnav'));
         menu = element(by.id('navbar-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
-            return browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
-        }).then(function() {
-            done();
+            browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
         });
     });
 
@@ -56,16 +54,15 @@ describe('Navbar ', function() {
         });
     }).pend("Pending until we handle tests logging in via Globus/other services");
 
-    xit('should not display a "Sign Up" link', function(done) {
+    xit('should not display a "Sign Up" link', function() {
         expect(element(by.id('signup-link')).isPresent()).toBeFalsy();
     }).pend("Pending until we handle tests logging in via Globus/other services");
 
-    xit('should display a "Log Out" link', function(done) {
+    xit('should display a "Log Out" link', function() {
         var logOutLink = element(by.id('logout-link'));
         browser.wait(EC.elementToBeClickable(logOutLink), browser.params.defaultTimeout).then(function() {
             browser.ignoreSynchronization = true;
             expect(logOutLink.isDisplayed()).toBeTruthy();
-            done();
         });
     }).pend("Pending until we handle tests logging in via Globus/other services");
 
