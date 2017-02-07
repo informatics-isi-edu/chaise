@@ -34,6 +34,7 @@
         },
         {
           "comment": null,
+          "names": [["product-person", "product-person-fk"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
