@@ -18,7 +18,7 @@
 
         <!-- rows -->
         <tbody>
-            <tr class="table-row" ellipses ng-repeat="row in vm.rowValues track by $index" tuple="::vm.page.tuples[$index]" from-tuple="::vm.fromTuple" row-values="::row" config="::vm.config" context="::vm.context" on-row-click-bind="::onRowClickBind">
+            <tr class="table-row" ellipses ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" config="vm.config" context="vm.context" on-row-click-bind="onRowClickBind">
             </tr>
         </tbody>
     </table>
