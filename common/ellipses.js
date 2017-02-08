@@ -4,8 +4,8 @@
     angular.module('chaise.ellipses', [])
 
 
-        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', '$uibModal', '$log', 'MathUtils', 'UriUtils', '$window',
-            function($sce, $timeout, AlertsService, $uibModal, $log, MathUtils, UriUtils, $window) {
+        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', '$uibModal', '$log', 'MathUtils', 'UriUtils', '$window', 'UiUtils',
+            function($sce, $timeout, AlertsService, $uibModal, $log, MathUtils, UriUtils, $window, UiUtils) {
 
             return {
                 restrict: 'AE',
@@ -181,36 +181,56 @@
                             }
                         };
 
-                        var timerCount = 0, containsOverflow = false;
+                        var containsOverflow = false;
 
+                        // This function checks for height of an element in the row at an index(td'th)
+                        // and Set overflow
+                        var updateHeight = function(index ,element) {
+                            var height = element.clientHeight;
+                            if (height > maxHeight) {
+                                scope.overflow[index] = true;
+                                scope.hideContent = true;
+                                containsOverflow = true;
+                                scope.maxHeightStyle =  maxHeightStyle;
+                            } else {
+                                scope.overflow[index] = false;
+                            }
+                        }
+
+                        // Resizerow is called whenever there is a change in rowValues model
+                        // It iterates over all the td elements and extracts image and iframes from it
+                        // After which it binds onload event to adjust height
+                        // It also calls updateHeight for the same td, for any oveflown textual content
                         var resizeRow = function() {
-                            if (containsOverflow == false && timerCount ++ < 500) {
+                            if (containsOverflow == false) {
 
+                                //Iterate over table data in the row
                                 for (var i = 0; i < element[0].children.length; i++) {
-                                    var height = element[0].children[i].children[0].clientHeight;
-                                    if (height > maxHeight) {
-                                        scope.overflow[i] = true;
-                                        scope.hideContent = true;
-                                        containsOverflow = true;
-                                        scope.maxHeightStyle =  maxHeightStyle;
-                                    } else {
-                                        scope.overflow[i] = false;
-                                    }
+
+                                    // Get all images and iframes inside the td  
+                                    var imagesAndIframes = UiUtils.getImageAndIframes(element[0].children[i]);
+
+                                    // Bind onload event and updateheight for particular td index
+                                    imagesAndIframes.forEach(function(el) {
+                                        var index = i;
+                                        el.onload = function() {
+                                            updateHeight(index, el);
+                                        };
+                                    });
+
+                                    updateHeight(i, element[0].children[i].children[0]);
                                 }
-                                $timeout(function() {
-                                    resizeRow();
-                                }, 50);
                             }
                         };
 
+                        // Watch for change in rowValues, this is useful in case of pagination
+                        // As Angular just changes the content and doesnot destroys elements
                         scope.$watchCollection('rowValues', function (v) {
                             init();
                             $timeout(function() {
-                                timerCount = 0;
                                 containsOverflow = false;
                                 resizeRow();
                             }, 10);
-
                         });
                     }
                 }
