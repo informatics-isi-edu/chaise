@@ -185,7 +185,21 @@
                                             value = (values[i] ? parseFloat(values[i]) : '');
                                             break;
                                         default:
-                                            value = values[i];
+
+                                            //TODO: needs to be a part of ermrestjs for getting a file object for the column determining file upload type
+                                            if (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
+                                                if (values[i]) {
+                                                    value = {
+                                                        fileName: values[i].split('/').pop() 
+                                                    } 
+                                                } else {
+                                                    value = {
+                                                        fileName: ""
+                                                    }
+                                                }
+                                            } else {
+                                                value = values[i];
+                                            }
                                             break;
                                     }
 
@@ -244,8 +258,13 @@
                                             meridiem: 'AM'
                                         };
                                     }
+                                } else if (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
+                                    recordEditModel.rows[0][column.name] = {
+                                        fileName: ""
+                                    }
+                                } else {
+                                    recordEditModel.rows[0][column.name] = column.default;
                                 }
-                                recordEditModel.rows[0][column.name] = column.default;
                             } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
                                 // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
                                 recordEditModel.rows[0][column.name] = {

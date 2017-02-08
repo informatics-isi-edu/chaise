@@ -529,3 +529,30 @@ tbody{
 .btn-no-focus:focus {
     outline: none;
 }
+
+
+.progress {
+  margin-bottom: 0;
+  height: 30px;
+  border: 1px solid #ccc9c9;
+} 
+
+.ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.no-row-margin {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.pad0-left {
+  padding-left: 0px;
+}
+
+.pad0-right {
+  padding-right: 0px;
+}

@@ -133,6 +133,13 @@
                             }
                             break;
                         default:
+                            //TODO: needs to be a part of ermrestjs for getting a file object for the column determining file upload type
+                            if (!vm.readyToSubmit) {
+                                if (col._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
+                                    rowVal = { fileName: "" };
+                                }
+                            } 
+
                             if (rowVal === '') {
                                 rowVal = null;
                             }
@@ -142,6 +149,82 @@
                 row[col.name] = rowVal;
             }
             return row;
+        }
+
+        function uploadFiles(isUpdate, onSuccess) {
+            onSuccess();
+        }
+
+        function addRecords(isUpdate) {
+
+            //call uploadFiles which will upload files and callback on success
+            uploadFiles(isUpdate, function() {
+
+                var model = vm.recordEditModel;
+                var form = vm.formContainer;
+                
+                var fn = "create", fnScope = $rootScope.reference.table.reference, args = [model.submissionRows];
+
+                // If this is an update call 
+                if (isUpdate) {
+                    // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
+                    fn = "update", scope = $rootScope.reference, args = [$rootScope.tuples];
+                }
+
+                fnScope[fn].apply(fnScope, args).then(function success(page) {
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                    
+                    if (isUpdate) {
+                        if (window.opener && window.opener.updated) {
+                            window.opener.updated(context.queryParams.invalidate);
+                        }
+                    } else {
+
+                        if (vm.prefillCookie) {
+                            $cookies.remove(context.queryParams.prefill);
+                        }
+
+                        // add cookie indicating record added
+                        if (context.queryParams.invalidate) {
+                            $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
+                                {
+                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                                }
+                            );
+                        }
+                    }
+
+                    if (model.rows.length == 1) {
+                        vm.redirectAfterSubmission(page);
+                    } else {
+                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        // can't use page.reference because it reflects the specific values that were inserted
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        //set values for the view to flip to recordedit resultset view
+                        vm.resultsetModel = {
+                            hasLoaded: true,
+                            reference: page.reference,
+                            tableDisplayName: page.reference.displayname,
+                            columns: page.reference.columns,
+                            enableSort: false,
+                            sortby: null,
+                            sortOrder: null,
+                            page: page,
+                            pageLimit: model.rows.length,
+                            rowValues: [],
+                            search: null,
+                            config: {}
+                        }
+                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        vm.resultset = true;
+                    }
+                }, function error(response) {
+                    vm.readyToSubmit = false;
+                    vm.showSubmissionError(response);
+                    vm.submissionButtonDisabled = false;
+                });
+            });
+            
         }
 
         function submit() {
@@ -204,84 +287,9 @@
                         data[key] = (row[key] === '' ? null : row[key]);
                     }
                 }
-                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
-                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-                    if (window.opener && window.opener.updated) {
-                        window.opener.updated(context.queryParams.invalidate);
-                    }
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    if (model.rows.length == 1) {
-                        vm.redirectAfterSubmission(page);
-                    } else {
-                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
-                        // can't use page.reference because it reflects the specific values that were inserted
-                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
-                        //set values for the view to flip to recordedit resultset view
-                        vm.resultsetModel = {
-                            hasLoaded: true,
-                            reference: page.reference,
-                            tableDisplayName: page.reference.displayname,
-                            columns: page.reference.columns,
-                            enableSort: false,
-                            sortby: null,
-                            sortOrder: null,
-                            page: page,
-                            pageLimit: model.rows.length,
-                            rowValues: [],
-                            search: null,
-                            config: {}
-                        }
-                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                        vm.resultset = true;
-                    }
-                }, function error(response) {
-                    vm.showSubmissionError(response);
-                    vm.submissionButtonDisabled = false;
-                });
+                addRecords(true);
             } else {
-                $rootScope.reference.table.reference.create(model.submissionRows).then(function success(page) {
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    if (vm.prefillCookie) {
-                        $cookies.remove(context.queryParams.prefill);
-                    }
-
-                    // add cookie indicating record added
-                    if (context.queryParams.invalidate) {
-                        $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
-                            {
-                                expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-                            }
-                        );
-                    }
-
-                    if (model.rows.length == 1) {
-                        vm.redirectAfterSubmission(page);
-                    } else {
-                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
-                        // can't use page.reference because it reflects the specific values that were inserted
-                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
-                        //set values for the view to flip to recordedit resultset view
-                        vm.resultsetModel = {
-                            hasLoaded: true,
-                            reference: page.reference,
-                            tableDisplayName: page.reference.displayname,
-                            columns: page.reference.columns,
-                            enableSort: false,
-                            sortby: null,
-                            sortOrder: null,
-                            page: page,
-                            pageLimit: model.rows.length,
-                            rowValues: [],
-                            search: null,
-                            config: {}
-                        }
-                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                        vm.resultset = true;
-                    }
-                }, function error(response) {
-                    vm.showSubmissionError(response);
-                    vm.submissionButtonDisabled = false;
-                });
+                addRecords();
             }
         }
 

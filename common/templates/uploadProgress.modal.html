@@ -1,0 +1,46 @@
+<div class="modal-header">
+    <h3 class="modal-title">Uploading files</h3>
+</div>
+<div class="modal-body">
+	<div class="row no-row-margin" ng-show="!isUpload">
+    	<div class="col-md-6  pad0-left pad0-right">
+	    	<strong>Calculating and Verifying Checksum</strong>
+    	</div>
+    	<div class="col-md-6 pad0-left pad0-right text-right">
+	    	<strong>Completed: {{speed}}</strong>
+    	</div>
+	    <div class="progress">
+	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.checksumProgress + '%' }" style="width: 0%;"></div>
+	    </div>
+    </div>
+    <div class="row no-row-margin" ng-show="isUpload">
+    	<div class="col-md-6  pad0-left pad0-right">
+	    	<strong>Completed: {{ctrl.completed}}/{{ctrl.total}}</strong>
+    	</div>
+    	<div class="col-md-6 pad0-left pad0-right text-right">
+	    	<strong>Speed: {{speed}}</strong>
+    	</div>
+	    <div class="progress">
+	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.uploadProgress + '%' }" style="width: 0%;"></div>
+	    </div>
+    </div>
+	<table class=" table upload-table">
+	    <tbody ng-repeat="(rowIndex, row) in ctrl.rows track by $index" ng-show="row.length">    
+	    	<tr>
+	    		<td colspan="3">Record <span ng-bind="rowIndex+1"></span></td>
+			</tr>
+			<tr ng-repeat="item in row"> 
+	            <td>
+	    			<div class="ellipsis">
+	    				{{item.name}}
+					</div>
+				</td>
+				<td>
+	                <div class="progress">
+	                    <div class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }" style="width: 0%;"></div>
+	                </div>
+	            </td>
+	        </tr>
+	    </tbody>
+	</table>
+</div>

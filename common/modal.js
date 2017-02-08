@@ -66,5 +66,112 @@
         function cancel() {
             $uibModalInstance.dismiss("cancel");
         }
-    }]);
+    }])
+    .controller('UploadModalDialogController', ['$uibModalInstance', 'params', function UploadModalDialogController($uibModalInstance, params) {
+        var vm = this;
+        vm.rows =  [];
+
+        vm.serverError = false;
+        vm.uploadError = false;
+        vm.checksumError = false;
+
+        vm.totalSize = 0;
+        vm.noOfFiles = 0;
+
+        vm.checksumProgress = 0;
+        vm.checksumCompleted = 0;
+
+        vm.uploadProgress = 0;
+        vm.uploadCompleted = 0;
+
+        var updateChecksumProgreeBar = function() {
+
+        };
+
+        var updateUploadProgressBar = function() {
+
+        };
+
+        var onUploadComplete = function() {
+
+        };
+
+        var uploadFile = function(col, row) {
+            var file = col.file;
+            var uploadObj = col.uploadObj;
+            var item = {
+                name: file.name, 
+                size: file.size, 
+                progress: 0
+            };
+
+            uploadObj.onServerError = function(command, jqXHR, textStatus, errorThrown) {
+                if (vm.uploadError || vm.serverError || vm.checksumError) return;
+                vm.serverError = true;
+                if (jqXHR.status === 401) {
+                    alert("Sorry you are not allowed to upload:" + jqXHR.responseText);
+                } else {
+                    alert(jqXHR.status + "  " + errorThrown);
+                    console.log("Our server is not responding correctly");
+                }
+            };
+
+            uploadObj.onUploadError = function(xhr) {
+                if (vm.uploadError || vm.serverError || vm.checksumError) return;
+
+                vm.uploadError = true;
+                if (xhr.status === 401) {
+                    alert("Sorry you are not allowed to upload : " + xhr.responseText);
+                } else {
+                    alert(xhr.status + "  " + xhr.responseText);
+                }
+            };
+
+            uploadObj.onChecksumError = function(err) {
+                if (vm.uploadError || vm.serverError || vm.checksumError) return;
+                
+                vm.checksumError = true;
+            };
+
+            uploadObj.onChecksumProgressChanged = function(calculatedSize, totalSize) {
+                
+            };
+
+            uploadObj.onChecksumCompleted = function() {
+                item.checksumCompleted = true;
+                if (!item.checksumCompleted) { 
+                    vm.checksumCompleted++;
+                    onChecksumCompleted();
+                }
+            };
+
+            uploadObj.onProgressChanged = function(uploadedSize, totalSize) {
+                
+            };
+
+            uploadObj.onUploadCompleted = function(url) {
+                item.checksumProgress = file.size;
+                item.uploadCompleted = true;
+                if (!item.uploadCompleted) {
+                    vm.uploadCompleted++;
+                    onUploadCompleted();
+                }
+            };
+
+            row.push(item);
+        }
+
+        params.rows.forEach(function(row) {
+            for(var k in row) {
+                var tuple = [];
+                if (typeof row[k] == 'object' && row[k].file) {
+                    vm.noOfFiles++;
+                    vm.totalSize += row[k].file.size; 
+                    tuple.push(uploadFile(row[k]));
+                }
+                vm.rows.push(tuple);
+            }
+        });
+
+    }])
 })();

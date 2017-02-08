@@ -287,6 +287,24 @@
         },
         {
           "comment": null,
+          "name": "terms",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "description": {
+              "display": "Terms and Conditions"
+            },
+            "comment": [
+              "hidden"
+            ],
+            "tag:isrd.isi.edu,2016:asset": {}
+          }
+        },
+        {
+          "comment": null,
           "name": "opened_on",
           "default": null,
           "nullok": false,
