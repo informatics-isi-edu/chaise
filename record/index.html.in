@@ -60,7 +60,7 @@
 
                     <!-- for different elements inside the accordion -->
                     <div class="pull-right" style="margin-top:-25px;">
-                        <span ng-if="::relatedRef.display.type == 'markdown'">
+                        <span ng-if="relatedRef.display.type == 'markdown'">
                             <a class="toggle-display-link" ng-click="::ctrl.toggleRelatedTableDisplayType($index)">
                                 <span ng-show="tableModels[$index].displayType == 'markdown'">
                                     <span ng-if="::ctrl.canEdit()">Edit</span>

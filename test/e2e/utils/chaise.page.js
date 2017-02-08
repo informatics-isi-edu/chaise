@@ -637,6 +637,7 @@ var recordPage = function() {
     this.getToggleDisplayLink = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
         // the link is not a child of the table, rather one of the accordion group
+        // return browser.executeScript("return $('#rt-heading-" + displayName + " > #toggle-display-link')");
         return element(by.id("rt-heading-" + displayName)).element(by.css(".toggle-display-link"));
     };
 

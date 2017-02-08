@@ -6,6 +6,7 @@
     .controller('FormController', ['AlertsService', 'DataUtils', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window', function FormController(AlertsService, DataUtils, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
+
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
