@@ -272,7 +272,11 @@ var recordEditPage = function() {
     };
 
     this.getAllColumnCaptions = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname')");
+        return browser.executeScript("return $('td.entity-key > span.column-displayname > span')");
+    };
+
+    this.getColumnCaptionsWithHtml = function() {
+        return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
     };
 
     this.getColumnsWithUnderline = function() {
@@ -280,7 +284,7 @@ var recordEditPage = function() {
     };
 
     this.getColumnWithAsterisk = function(el) {
-        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"::form.isRequired(column);\"].text-danger')[0];", el);
+        return browser.executeScript("return $(arguments[0]).parent().siblings('span[ng-if=\"::form.isRequired(column);\"].text-danger')[0];", el);
     };
 
     this.getColumnComment = function(el) {
@@ -383,8 +387,8 @@ var recordEditPage = function() {
     };
 
     this.getForeignKeyInputs = function() {
-        return element.all(by.css('.popup-select-value'));
-    }
+        return element.all(by.css(".popup-select-value"));
+    };
 
     this.getInputValue = function(columnName, index) {
         index = index || 0;
@@ -535,7 +539,7 @@ var recordEditPage = function() {
 var recordPage = function() {
     var that = this;
     this.getEntityTitle = function() {
-        return browser.executeScript("return $('#entity-title').text();");
+        return browser.executeScript("return $('#entity-title > span').text();");
     };
 
     this.getEntityTitleElement = function() {
@@ -543,7 +547,7 @@ var recordPage = function() {
     };
 
     this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#entity-subtitle').text();");
+        return browser.executeScript("return $('#entity-subtitle > span').text();");
     };
 
     this.getEntitySubTitleElement = function() {
@@ -556,6 +560,10 @@ var recordPage = function() {
 
     this.getAllColumnCaptions = function() {
         return element.all(by.css('td.entity-key > span.column-displayname > span'));
+    };
+
+    this.getColumnCaptionsWithHtml = function() {
+        return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
     };
 
     this.getColumnsWithUnderline = function() {
@@ -587,6 +595,7 @@ var recordPage = function() {
     };
 
     this.getRelatedTable = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName));
     };
 
@@ -599,33 +608,40 @@ var recordPage = function() {
     }
 
     this.getRelatedTableHeading = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-heading-" + displayName));
     };
 
     this.getRelatedTableColumnNamesByTable = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
     };
 
     this.getRelatedTableRows = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
     };
 
     this.getMoreResultsLink = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         // the link is not a child of the table, rather one of the accordion group
         return element(by.id("rt-heading-" + displayName)).element(by.css(".more-results-link"));
     };
 
     this.getAddRecordLink = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         // the link is not a child of the table, rather one of the accordion group
         return element(by.id("rt-heading-" + displayName)).element(by.css(".add-records-link"));
     };
 
     this.getToggleDisplayLink = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         // the link is not a child of the table, rather one of the accordion group
         return element(by.id("rt-heading-" + displayName)).element(by.css(".toggle-display-link"));
     };
 
     this.getRelatedTableRowValues = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
         return that.getRelatedTableRows(displayName).all(by.tagName("td"));
     };
 

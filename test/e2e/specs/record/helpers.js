@@ -85,6 +85,23 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
+    it("should render columns based on their markdown pattern.", function() {
+        var columnDisplayTag = "tag:misd.isi.edu,2015:display";
+        var columns = tableParams.columns.filter(function(c) {
+            return (c.annotations && c.annotations[columnDisplayTag]);
+        });
+        chaisePage.recordPage.getColumnCaptionsWithHtml().then(function(pageColumns) {
+            expect(pageColumns.length).toBe(columns.length);
+            var index = 0;
+            pageColumns.forEach(function(c) {
+                var value = columns[index++].annotations[columnDisplayTag].markdown_name;
+                c.getAttribute("innerHTML").then(function(html) {
+                    expect(html).toBe(value);
+                });
+            });
+        });
+    });
+
 	it("should validate the values of each column", function() {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.recordPage.getColumnValueElements().then(function(columnEls) {
@@ -130,8 +147,14 @@ exports.testPresentation = function (tableParams) {
 	});
 
     it("should show related table names and their tables", function() {
-        var displayName, tableCount,
+        var displayName, tableCount, title,
             relatedTables = tableParams.related_tables;
+
+        browser.wait(function() {
+            return chaisePage.recordPage.getRelatedTables().count().then(function(ct) {
+                return (ct=relatedTables.length);
+            });
+        }, browser.params.defaultTimeout);
 
         chaisePage.recordPage.getRelatedTables().count().then(function(count) {
             expect(count).toBe(relatedTables.length);
@@ -146,30 +169,31 @@ exports.testPresentation = function (tableParams) {
 
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
-                displayName = relatedTables[i].title;
+                displayName = relatedTables[i].displayname;
+                title = relatedTables[i].title;
 
                 // verify all columns are present
-                (function(i, displayName) {
+                (function(i, displayName, title) {
                     chaisePage.recordPage.getRelatedTableColumnNamesByTable(displayName).getAttribute('innerHTML').then(function(columnNames) {
                         for (var j = 0; j < columnNames.length; j++) {
                             expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
                         }
-                    });
 
-                    // verify all rows are present
-                    chaisePage.recordPage.getRelatedTableRows(displayName).count().then(function(rowCount) {
+                        // verify all rows are present
+                        return chaisePage.recordPage.getRelatedTableRows(displayName).count();
+                    }).then(function(rowCount) {
                         expect(rowCount).toBe(relatedTables[i].data.length);
 
                         // Because this spec is reused in multiple recordedit tests, this if-else branching just ensures the correct expectation is used depending on which table is encountered
                         if (displayName == tableParams.related_table_name_with_page_size_annotation) {
                         // The annotation_image table has more rows than the page_size, so its heading will have a + after the row count
-                            expect(headings[i]).toBe(displayName + " (" + rowCount + "+)");
+                            expect(headings[i]).toBe(title + " (" + rowCount + "+)");
                         } else {
                         // All other tables should not have the + at the end its heading
-                            expect(headings[i]).toBe(displayName + " (" + rowCount + ")");
+                            expect(headings[i]).toBe(title + " (" + rowCount + ")");
                         }
                     });
-                })(i, displayName);
+                })(i, displayName, title);
             }
         });
     });
@@ -211,15 +235,16 @@ exports.testPresentation = function (tableParams) {
 
     // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
     it("should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities", function() {
-        var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
+        var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
+            tableDisplayname = "<strong>media</strong>";
         showAllRTButton.click().then(function() {
-            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
+            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();
             return showAllRTButton.click();
         }).then(function() {
-            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeTruthy();
+            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeTruthy();
             return showAllRTButton.click();
         }).then(function() {
-            expect(chaisePage.recordPage.getRelatedTable("media").isPresent()).toBeFalsy();
+            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();
         }).catch(function(error) {
             console.log(error);
         });
@@ -319,9 +344,9 @@ exports.relatedTableLinks = function (testParams, tableParams) {
     });
 
     it('should have a link to toggle between markdown and tabular views for markdown tables', function() {
-        var EC = protractor.ExpectedConditions,
-        markdownRelatedTable = tableParams.related_table_name_with_row_markdown_pattern, // "media"
-        markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(markdownRelatedTable);
+        var EC = protractor.ExpectedConditions, tableDisplay,
+            markdownRelatedTable = tableParams.related_table_name_with_row_markdown_pattern, // "media"
+            markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(markdownRelatedTable);
 
         browser.wait(EC.elementToBeClickable(markdownToggleLink), browser.params.defaultTimeout);
 
@@ -334,7 +359,12 @@ exports.relatedTableLinks = function (testParams, tableParams) {
 
         markdownToggleLink.click().then(function() {
             // After clicking toggle link, the table should now be displayed as a regular table (which would have an id of "rt-media")
-            var tableDisplay = element(by.id('rt-' + markdownRelatedTable));
+            tableDisplay = element(by.id('rt-' + markdownRelatedTable));
+            var viewActions = tableDisplay.all(by.css(".view-action-button"));
+            return viewActions;
+        }).then(function(btns) {
+            browser.wait(EC.elementToBeClickable(btns[0]), browser.params.defaultTimeout);
+
             expect(tableDisplay.isDisplayed()).toBeTruthy();
             return markdownToggleLink.click();
         }).then(function() {
@@ -385,6 +415,11 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             }).then(function(text) {
                 var title = "Create " + relatedTableName + " Record";
                 expect(text).toBe(title);
+
+                return chaisePage.recordEditPage.getForeignKeyInputs();
+            }).then(function(inputs) {
+                expect(inputs.length).toBe(1);
+                expect(inputs[0].getText()).toBe("Super 8 North Hollywood Motel");
 
                 return chaisePage.recordEditPage.getInputById(0, "price");
             }).then(function(input) {
@@ -438,7 +473,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
 
     describe("for a related entity without an association table", function() {
         it("should have an Add link for a related table that redirects to that related table's association table in recordedit with a prefill query parameter.", function() {
-            var EC = protractor.ExpectedConditions, newTabUrl, rows,
+            var EC = protractor.ExpectedConditions, newTabUrl, rows, foreignKeyInputs,
                 modalTitle = chaisePage.recordEditPage.getModalTitle(),
                 relatedTableName = tableParams.related_associate_table,
                 addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
@@ -477,6 +512,13 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 var title = "Create " + relatedTableName + " Record";
                 expect(text).toBe(title);
 
+                return chaisePage.recordEditPage.getForeignKeyInputs();
+            }).then(function(inputs) {
+                foreignKeyInputs = inputs;
+
+                expect(inputs.length).toBe(2);
+                expect(inputs[0].getText()).toBe("Super 8 North Hollywood Motel");
+
                 return chaisePage.recordEditPage.getModalPopupBtnsUsingScript();
             }).then(function(popupBtns) {
                 // the prefilled input is technically a foreign key input as well with a hidden popup btn
@@ -510,6 +552,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             }).then(function() {
                 browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
+                expect(foreignKeyInputs[1].getText()).toBe("30,007");
                 var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue("image_id", 0);
                 expect(foreignKeyInput.getAttribute("value")).toBeDefined();
 
@@ -568,7 +611,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
         var relatedTableName = tableParams.related_associate_table; // association table
         var linkedToTableName = tableParams.related_linked_table; // linked to table
         var linkedToTableFilter = tableParams.related_linked_table_key_filter;
-
+        
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
             return rows[0].all(by.tagName("td"));
         }).then(function(cell){

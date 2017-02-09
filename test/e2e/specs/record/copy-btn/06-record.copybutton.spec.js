@@ -5,6 +5,23 @@ describe('View existing record,', function() {
 
     var params, testConfiguration = browser.params.configuration.tests, tupleParams = testConfiguration.params.tuples[0];
 
+    describe("For table " + tupleParams.html_table_name + ",", function() {
+        beforeAll(function() {
+            var keys = [];
+            tupleParams.html_keys.forEach(function(key) {
+                keys.push(key.name + key.operator + key.value);
+            });
+            browser.ignoreSynchronization=true;
+            var url = browser.params.url + ":" + tupleParams.html_table_name + "/" + keys.join("&");
+            browser.get(url);
+            chaisePage.waitForElement(element(by.id('tblRecord')));
+        });
+
+        it("should display the entity subtitle name with html in it.", function() {
+            expect(chaisePage.recordPage.getEntitySubTitle()).toBe(tupleParams.html_table_display);
+        });
+    });
+
     describe("For table " + tupleParams.table_name + ",", function() {
 
         var table, record;
@@ -30,6 +47,21 @@ describe('View existing record,', function() {
             var EC = protractor.ExpectedConditions,
                 copyButton = chaisePage.recordPage.getCopyRecordButton();
 
+            it("should display the entity title and subtitle based on their markdown patterns.", function() {
+                var subtitleElement = chaisePage.recordPage.getEntitySubTitleElement().element(by.tagName("span")),
+                    titleElement = chaisePage.recordPage.getEntityTitleElement().element(by.tagName("span"));
+
+                subtitleElement.getAttribute("innerHTML").then(function(html) {
+                    expect(html).toBe(tupleParams.table_inner_html_display);
+                    expect(chaisePage.recordPage.getEntitySubTitle()).toBe(tupleParams.table_displayname);
+
+                    return titleElement.getAttribute("innerHTML");
+                }).then(function(html) {
+                    expect(html).toBe(tupleParams.entity_inner_html_title);
+                    expect(chaisePage.recordPage.getEntityTitle()).toBe(tupleParams.entity_title);
+                });
+            });
+
             it("should show when the page loads.", function() {
                 browser.wait(EC.elementToBeClickable(copyButton), browser.params.defaultTimeout);
                 copyButton.isDisplayed().then(function (bool) {
@@ -38,16 +70,22 @@ describe('View existing record,', function() {
             });
 
             it("should redirect to recordedit when clicked.", function() {
+                var titleElement = chaisePage.recordEditPage.getEntityTitleElement();
+
                 copyButton.click().then(function() {
                     return chaisePage.waitForElement(element(by.id('submit-record-button')));
                 }).then(function() {
                     return browser.driver.getCurrentUrl();
                 }).then(function(url) {
                     expect(url.indexOf('recordedit')).toBeGreaterThan(-1);
-                }).then(function() {
-                    return chaisePage.recordEditPage.getEntityTitle();
+
+                    return titleElement.getText();
                 }).then(function(txt) {
-                    expect(txt.indexOf('Create')).toBeGreaterThan(-1);
+                    expect(txt).toBe("Create 1 Record");
+
+                    return titleElement.element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
+                }).then(function(html) {
+                    expect(html).toBe(tupleParams.entity_inner_html_title);
 
                     return chaisePage.recordEditPage.getForms().count();
                 }).then(function(ct) {

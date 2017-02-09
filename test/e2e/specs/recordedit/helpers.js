@@ -57,7 +57,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 			pageColumns.forEach(function(c) {
 				c.getAttribute('innerHTML').then(function(txt) {
 					txt = txt.trim();
-					var col = columns.find(function(cl) { return txt == cl.displayName });
+					var col = columns.find(function(cl) {
+                        return txt == cl.displayName
+                    });
 					expect(col).toBeDefined();
 					c.column = col;
 					visibleFields.push(c);
@@ -918,10 +920,11 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 // params must include the names of the columns that you want to check for values of
 exports.testRecordAppValuesAfterSubmission = function(params) {
+    chaisePage.waitForElement(element(by.id('tblRecord')));
+
     for (var i = 0; i < params.column_names.length; i++) {
         var columnName = params.column_names[i];
         var column = chaisePage.recordPage.getColumnValue(columnName);
-        browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
         expect(column.getText()).toBeDefined();
     }
 }
