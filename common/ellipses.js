@@ -19,13 +19,14 @@
                     fromTuple: "=?"
                 },
                 link: function (scope, element) {
-                    scope.overflow = []; // for each cell in the row
-
-                    scope.hideContent = false;
-                    scope.linkText = "more";
-                    scope.maxHeightStyle = { };
 
                     var init = function() {
+
+                        scope.overflow = []; // for each cell in the row
+                        scope.hideContent = false;
+                        scope.linkText = "more";
+                        scope.maxHeightStyle = { };
+
 
                         var editLink = null;
 
@@ -223,16 +224,22 @@
                             }
                         };
 
-                        // Watch for change in rowValues, this is useful in case of pagination
-                        // As Angular just changes the content and doesnot destroys elements
-                        scope.$watchCollection('rowValues', function (v) {
-                            init();
+                    }
+
+
+                    // Watch for change in rowValues, this is useful in case of pagination
+                    // As Angular just changes the content and doesnot destroys elements
+                    scope.$watchCollection('rowValues', function (v) {
+                        init();
+
+                        // add timeout only if maxRecordsetRowHeight is not false in chaiseConfig
+                        if (chaiseConfig.maxRecordsetRowHeight != false ) {
                             $timeout(function() {
                                 containsOverflow = false;
                                 resizeRow();
-                            }, 10);
-                        });
-                    }
+                            }, 0);
+                        }
+                    });
                 }
             };
         }])
