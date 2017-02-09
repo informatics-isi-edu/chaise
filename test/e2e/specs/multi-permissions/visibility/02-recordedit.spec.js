@@ -6,14 +6,41 @@ var recordEditPage = chaisePage.recordEditPage;
 
 
 describe('When viewing RecordEdit app', function() {
-    var EC = protractor.ExpectedConditions, url;
+    var EC = protractor.ExpectedConditions, baseUrl, url;
     beforeAll(function() {
-        url = browser.params.url.replace('/record', '/recordedit');
+        baseUrl = browser.params.url.replace('/record', '/recordedit');
     });
 
-    describe('as a user who can update', function() {
+    it('as a create-only user, the app should not load the form and displays error modal instead', function() {
+        url = baseUrl + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value
+        browser.get(url);
+        chaisePage.waitForUrl(url).then(function() {
+            expect(element(by.id('entity-title')).isPresent()).toBe(false);
+            expect(element(by.css('.modal-body')).isDisplayed()).toBe(true);
+        });
+    });
+
+    it('as a read-only user, the app should not load the form and displays error modal instead', function() {
+        url = baseUrl + ':main_read_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value
+        browser.get(url);
+        chaisePage.waitForUrl(url).then(function() {
+            expect(element(by.id('entity-title')).isPresent()).toBe(false);
+            expect(element(by.css('.modal-body')).isDisplayed()).toBe(true);
+        });
+    });
+
+    it('as a delete-only user, the app should not load the form and displays error modal instead', function() {
+        url = baseUrl + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value
+        browser.get(url);
+        chaisePage.waitForUrl(url).then(function() {
+            expect(element(by.id('entity-title')).isPresent()).toBe(false);
+            expect(element(by.css('.modal-body')).isDisplayed()).toBe(true);
+        });
+    });
+
+    describe('as a user who can update (and create)', function() {
         beforeAll(function() {
-            browser.get(url + ':main_update_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            browser.get(baseUrl + ':main_update_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.waitForElement(element(by.id('entity-title'))).then(function() {
                 expect(element(by.id('entity-title')).isDisplayed()).toBe(true);
             });
@@ -22,9 +49,10 @@ describe('When viewing RecordEdit app', function() {
         it('should not display the delete button', function() {
             var button = recordEditPage.getDeleteRecordButton();
             expect(button.isPresent()).toBe(false);
+            // The inverse of this case is tested in RecordEdit presentation spec.
         });
 
-        describe('the foreign key search popup modal should have the select button the action column button and', function() {
+        describe('the FK search popup modal should have the select button in the action column button and', function() {
             var rows;
             afterEach(function() {
                 // The select button in the action column should be displayed
@@ -44,7 +72,7 @@ describe('When viewing RecordEdit app', function() {
                 });
             });
 
-            it('should not show the add [+] button in the modal for a FK-related table that only allows read access', function() {
+            it('should not show the add [+] button in the modal for a read-only table', function() {
                 var input = recordEditPage.getForeignKeyInputs().get(1);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
@@ -54,7 +82,7 @@ describe('When viewing RecordEdit app', function() {
                 });
             });
 
-            it('should show the add [+] button in the modal for a FK-related table that allows updating', function() {
+            it('should show the add [+] button in the modal for a table that allows update and create', function() {
                 var input = recordEditPage.getForeignKeyInputs().get(2);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
@@ -64,7 +92,7 @@ describe('When viewing RecordEdit app', function() {
                 });
             });
 
-            it('should not show the add [+] button in the modal for a FK-related table that only allows delete access', function() {
+            it('should not show the add [+] button in the modal for a table that only allows delete', function() {
                 var input = recordEditPage.getForeignKeyInputs().get(3);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
@@ -75,19 +103,5 @@ describe('When viewing RecordEdit app', function() {
             });
         });
 
-    });
-
-    describe('as a user who can delete', function() {
-        beforeAll(function() {
-            browser.get(url + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
-            chaisePage.waitForElement(element(by.id('entity-title'))).then(function() {
-                expect(element(by.id('entity-title')).isDisplayed()).toBe(true);
-            });
-        });
-
-        it('should display the delete button', function() {
-            var button = recordEditPage.getDeleteRecordButton();
-            expect(button.isDisplayed()).toBe(true);
-        });
     });
 });

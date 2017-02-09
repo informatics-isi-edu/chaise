@@ -267,7 +267,9 @@
                 }
             ],
             "foreign_keys": [],
-            "annotations": {}
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null
+            }
         },
         "out_create_table": {
             "table_name": "out_create_table",

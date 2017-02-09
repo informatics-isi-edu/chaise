@@ -95,7 +95,7 @@ describe('When viewing Recordset app', function() {
         });
     });
 
-    describe('as a user who can update', function() {
+    describe('as a user who can update (and create)', function() {
         beforeAll(function() {
             browser.get(url + ':main_update_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.waitForElement(element(by.id('page-title'))).then(function() {
@@ -137,7 +137,7 @@ describe('When viewing Recordset app', function() {
         });
     });
 
-    describe('as a user who can delete', function() {
+    describe('as a delete-only user', function() {
         beforeAll(function() {
             browser.get(url + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.waitForElement(element(by.id('page-title'))).then(function() {
@@ -145,14 +145,14 @@ describe('When viewing Recordset app', function() {
             });
         });
 
-        it('should display the add record [+] button', function() {
+        it('should not display the add record [+] button', function() {
             var button = recordsetPage.getAddRecordButton();
-            expect(button.isDisplayed()).toBe(true);
+            expect(button.isPresent()).toBe(false);
         });
 
-        it('should display the Edit link', function() {
+        it('should not display the Edit link', function() {
             var link = recordsetPage.getEditRecordLink();
-            expect(link.isDisplayed()).toBe(true);
+            expect(link.isPresent()).toBe(false);
         });
 
         describe('the action column', function() {
@@ -163,10 +163,10 @@ describe('When viewing Recordset app', function() {
                 // The test for whether it links to the correct url is tested in Recordset app tests.
             });
 
-            it('should display the edit button', function() {
+            it('should not display the edit button', function() {
                 var button = recordsetPage.getEditActionButtons().first();
                 // There's only 1 button because the table only has 1 row
-                expect(button.isDisplayed()).toBe(true);
+                expect(button.isPresent()).toBe(false);
                 // The test for whether it links to the correct url is tested in Recordset app tests.
             });
 

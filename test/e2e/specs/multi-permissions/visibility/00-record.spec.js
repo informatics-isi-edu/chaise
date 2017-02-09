@@ -52,7 +52,7 @@ describe('When viewing Record app', function() {
         });
     });
 
-    describe('as a user who can only create', function() {
+    describe('as a create-only user', function() {
         beforeAll(function() {
             browser.get(browser.params.url + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = element(by.id('entity-title'));
@@ -131,7 +131,7 @@ describe('When viewing Record app', function() {
         });
     });
 
-    describe('as a user who can update', function() {
+    describe('as a user who can update (and create)', function() {
         beforeAll(function() {
             browser.get(browser.params.url + ':main_update_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = element(by.id('entity-title'));
@@ -184,7 +184,7 @@ describe('When viewing Record app', function() {
         });
     });
 
-    describe('as a user who can delete', function() {
+    describe('as a delete-only user', function() {
         beforeAll(function() {
             browser.get(browser.params.url + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = element(by.id('entity-title'));
@@ -198,19 +198,19 @@ describe('When viewing Record app', function() {
             expect(permalink.isDisplayed()).toBe(true);
         });
 
-        it('should display the Create button', function() {
+        it('should not display the Create button', function() {
             var button = recordPage.getCreateRecordButton();
-            expect(button.isDisplayed()).toBe(true);
+            expect(button.isPresent()).toBe(false);
         });
 
-        it('should display the Edit button', function() {
+        it('should not display the Edit button', function() {
             var button = recordPage.getEditRecordButton();
-            expect(button.isDisplayed()).toBe(true);
+            expect(button.isPresent()).toBe(false);
         });
 
-        it('should display the Copy button', function() {
+        it('should not display the Copy button', function() {
             var button = recordPage.getCopyRecordButton();
-            expect(button.isDisplayed()).toBe(true);
+            expect(button.isPresent()).toBe(false);
         });
 
         it('should display the Delete button', function() {
@@ -218,10 +218,10 @@ describe('When viewing Record app', function() {
             expect(button.isDisplayed()).toBe(true);
         });
 
-        it('should display the related tables toggle as "Hide Empty Related Records"', function() {
+        it('should display the related tables toggle as "Show All Related Records"', function() {
             var button = recordPage.getShowAllRelatedEntitiesButton();
             expect(button.isDisplayed()).toBe(true);
-            expect(button.getText()).toBe("Hide Empty Related Records");
+            expect(button.getText()).toBe("Show All Related Records");
             // Actual toggling behavior (like does it show the right table format and whether the toggle text flips correctly is tested in Record presentation spec)
         });
     });

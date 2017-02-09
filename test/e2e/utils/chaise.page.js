@@ -382,6 +382,10 @@ var recordEditPage = function() {
         return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
     };
 
+    this.getForeignKeyInputs = function() {
+        return element.all(by.css('.popup-select-value'));
+    }
+
     this.getInputValue = function(columnName, index) {
         index = index || 0;
         return element(by.model('form.recordEditModel.rows[' + index + ']["' + columnName + '"]'));
