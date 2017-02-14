@@ -150,6 +150,12 @@ exports.testPresentation = function (tableParams) {
         var displayName, tableCount, title,
             relatedTables = tableParams.related_tables;
 
+        browser.wait(function() {
+            return chaisePage.recordPage.getRelatedTables().count().then(function(ct) {
+                return (ct=relatedTables.length);
+            });
+        }, browser.params.defaultTimeout);
+
         chaisePage.recordPage.getRelatedTables().count().then(function(count) {
             expect(count).toBe(relatedTables.length);
             tableCount = count;
@@ -172,10 +178,10 @@ exports.testPresentation = function (tableParams) {
                         for (var j = 0; j < columnNames.length; j++) {
                             expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
                         }
-                    });
 
-                    // verify all rows are present
-                    chaisePage.recordPage.getRelatedTableRows(displayName).count().then(function(rowCount) {
+                        // verify all rows are present
+                        return chaisePage.recordPage.getRelatedTableRows(displayName).count();
+                    }).then(function(rowCount) {
                         expect(rowCount).toBe(relatedTables[i].data.length);
 
                         // Because this spec is reused in multiple recordedit tests, this if-else branching just ensures the correct expectation is used depending on which table is encountered
@@ -338,9 +344,9 @@ exports.relatedTableLinks = function (testParams, tableParams) {
     });
 
     it('should have a link to toggle between markdown and tabular views for markdown tables', function() {
-        var EC = protractor.ExpectedConditions,
-        markdownRelatedTable = tableParams.related_table_name_with_row_markdown_pattern, // "media"
-        markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(markdownRelatedTable);
+        var EC = protractor.ExpectedConditions, tableDisplay,
+            markdownRelatedTable = tableParams.related_table_name_with_row_markdown_pattern, // "media"
+            markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(markdownRelatedTable);
 
         browser.wait(EC.elementToBeClickable(markdownToggleLink), browser.params.defaultTimeout);
 
@@ -353,7 +359,12 @@ exports.relatedTableLinks = function (testParams, tableParams) {
 
         markdownToggleLink.click().then(function() {
             // After clicking toggle link, the table should now be displayed as a regular table (which would have an id of "rt-media")
-            var tableDisplay = element(by.id('rt-' + markdownRelatedTable));
+            tableDisplay = element(by.id('rt-' + markdownRelatedTable));
+            var viewActions = tableDisplay.all(by.css(".view-action-button"));
+            return viewActions;
+        }).then(function(btns) {
+            browser.wait(EC.elementToBeClickable(btns[0]), browser.params.defaultTimeout);
+
             expect(tableDisplay.isDisplayed()).toBeTruthy();
             return markdownToggleLink.click();
         }).then(function() {
@@ -600,7 +611,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
         var relatedTableName = tableParams.related_associate_table; // association table
         var linkedToTableName = tableParams.related_linked_table; // linked to table
         var linkedToTableFilter = tableParams.related_linked_table_key_filter;
-
+        
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
             return rows[0].all(by.tagName("td"));
         }).then(function(cell){
