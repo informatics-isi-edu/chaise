@@ -57,8 +57,16 @@
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
 
+        // This method sets backgroundSearch states depending upon various parameters
+        // If it returns true then we should render the data
+        // else we should reject the data
         function setSearchStates(scope, isBackground, searchTerm) {
+
+            // If request is background
             if (isBackground) {
+                // If there is a term in search queue for background and there is no foreground search going on then
+                // Fire the request for the term in the queue and return false
+                // Else empty the queue and set backgroundSearch false
                 if (scope.vm.backgroundSearchQueue && !scope.vm.foregroundSearch) {
                     scope.vm.search = scope.vm.backgroundSearchQueue
                     scope.vm.backgroundSearchQueue = null;
@@ -68,6 +76,8 @@
                     scope.vm.backgroundSearch = false;
                     scope.vm.backgroundSearchQueue = null;
 
+                    // If forground search is going on or the searchterm differs from the current searchterm
+                    // then return false
                     if (scope.vm.foregroundSearch || (searchTerm != scope.vm.search)) return false;
                 }
             }
@@ -81,8 +91,11 @@
 
             scope.vm.hasLoaded = false;
 
+            // If isbackground and no foregroundsearch going on then only fire the search request
+            // Else empty the queue and return
             if (isBackground && !scope.vm.foregroundSearch) {
                 scope.vm.backgroundSearch = true;
+                return;
             } else {
                 scope.vm.backgroundSearch = false;
                 scope.vm.backgroundSearchQueue = null;
@@ -103,8 +116,6 @@
 
                 // tell parent controller data updated
                 scope.$emit('recordset-update');
-
-
 
             }, function error(response) {
                 scope.vm.hasLoaded = true;
