@@ -56,16 +56,33 @@
      *      });
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
-        function read(scope) {
+
+        function setSearchStates = function(isBackground) {
+            if (isBackground) {
+                if (scope.vm.backgroundSearchQueue && !scope.vm.foregroundSearch) {
+                    scope.vm.search = scope.vm.backgroundSearchQueue
+                    scope.vm.backgroundSearchQueue = null;
+                    read(scope, true);
+                    return false;
+                } else {
+                    scope.vm.backgroundSearch = false;
+                    scope.vm.backgroundSearchQueue = null;
+
+                    if (scope.vm.foregroundSearch) return false;
+                }
+            }
+
+            return true;
+        }
+
+        function read(scope, isBackground) {
 
             scope.vm.hasLoaded = false;
 
-            var isBackground = !scope.vm.foregroundSearch && scope.vm.backgroundSearch;
-
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
 
-                if (scope.vm.foregroundSearch && isBackground) return;
-
+                if (!setSearchStates(isBackground)) return;
+                
                 scope.vm.page = page;
                 scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
                 scope.vm.hasLoaded = true;
@@ -74,13 +91,19 @@
                     if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 }, 200);
 
+
                 // tell parent controller data updated
                 scope.$emit('recordset-update');
+
+
 
             }, function error(response) {
                 scope.vm.hasLoaded = true;
                 scope.$emit('error', response);
-            })
+                setSearchStates(isBackground);
+
+                if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+            });
         }
 
         return {
@@ -142,14 +165,14 @@
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
                 scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
+                scope.vm.backgroundSearchQueue = null;
+
                 scope.setPageLimit = function(limit) {
-                    scope.vm.backgroundSearch = false;
                     scope.vm.pageLimit = limit;
                     recordTableUtils.read(scope);
                 };
 
                 scope.before = function() {
-                    scope.vm.backgroundSearch = false;
                     var previous = scope.vm.page.previous;
                     if (previous) {
 
@@ -160,7 +183,6 @@
                 };
 
                 scope.after = function() {
-                    scope.vm.backgroundSearch = false;
                     var next = scope.vm.page.next;
                     if (next) {
 
@@ -184,32 +206,36 @@
                             inputChangedPromise = null;
 
                             if (!scope.vm.foregroundSearch) {
-                                scope.vm.backgroundSearch = true;
-                                scope.search(scope.vm.search);
+                                if (scope.vm.backgroundSearch) {
+                                    backgroundSearchQueue = scope.vm.search
+                                } else {
+                                    scope.vm.backgroundSearch = true;
+                                    scope.search(scope.vm.search, true);
+                                    backgroundSearchQueue = null;
+                                }
                             }
-                        }, 200);
+                        }, 1000);
                     }
                 };
 
                 scope.enterPressed = function() {
                     $timeout.cancel(inputChangedPromise);
-                    scope.vm.backgroundSearch = false;
                     scope.vm.foregroundSearch = true;
+                    scope.vm.backgroundSearchQueue = null;
                     scope.search(scope.vm.search);
                 };
 
-                scope.search = function(term) {
+                scope.search = function(term, isBackground) {
 
                     if (term)
                         term = term.trim();
 
                     scope.vm.search = term;
                     scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
-                    recordTableUtils.read(scope);
+                    recordTableUtils.read(scope, isBackground);
                 };
 
                 scope.clearSearch = function() {
-                    scope.vm.backgroundSearch = false;
                     if (scope.vm.reference.location.searchTerm)
                         scope.search();
 
@@ -236,8 +262,6 @@
                 // on window focus, if has pending add record requests
                 // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
                 $window.onfocus = function() {
-
-                    scope.vm.backgroundSearch = false;
 
                     var completed = 0; // completed add record requests
                     for (var id in addRecordRequests) {
