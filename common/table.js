@@ -57,7 +57,7 @@
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
 
-        function setSearchStates = function(isBackground) {
+        function setSearchStates(scope, isBackground) {
             if (isBackground) {
                 if (scope.vm.backgroundSearchQueue && !scope.vm.foregroundSearch) {
                     scope.vm.search = scope.vm.backgroundSearchQueue
@@ -81,7 +81,7 @@
 
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
 
-                if (!setSearchStates(isBackground)) return;
+                if (!setSearchStates(scope, isBackground)) return;
                 
                 scope.vm.page = page;
                 scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
@@ -100,7 +100,7 @@
             }, function error(response) {
                 scope.vm.hasLoaded = true;
                 scope.$emit('error', response);
-                setSearchStates(isBackground);
+                setSearchStates(scope, isBackground);
 
                 if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
             });
@@ -207,11 +207,11 @@
 
                             if (!scope.vm.foregroundSearch) {
                                 if (scope.vm.backgroundSearch) {
-                                    backgroundSearchQueue = scope.vm.search
+                                    scope.vm.backgroundSearchQueue = scope.vm.search
                                 } else {
                                     scope.vm.backgroundSearch = true;
                                     scope.search(scope.vm.search, true);
-                                    backgroundSearchQueue = null;
+                                    scope.vm.backgroundSearchQueue = null;
                                 }
                             }
                         }, 1000);
