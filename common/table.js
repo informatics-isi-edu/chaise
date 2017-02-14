@@ -57,7 +57,7 @@
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
 
-        function setSearchStates(scope, isBackground) {
+        function setSearchStates(scope, isBackground, searchTerm) {
             if (isBackground) {
                 if (scope.vm.backgroundSearchQueue && !scope.vm.foregroundSearch) {
                     scope.vm.search = scope.vm.backgroundSearchQueue
@@ -68,7 +68,7 @@
                     scope.vm.backgroundSearch = false;
                     scope.vm.backgroundSearchQueue = null;
 
-                    if (scope.vm.foregroundSearch) return false;
+                    if (scope.vm.foregroundSearch || (searchTerm != scope.vm.search)) return false;
                 }
             }
 
@@ -77,12 +77,21 @@
 
         function read(scope, isBackground) {
 
+            var searchTerm = scope.vm.search;
+
             scope.vm.hasLoaded = false;
+
+            if (isBackground && !scope.vm.foregroundSearch) {
+                scope.vm.backgroundSearch = true;
+            } else {
+                scope.vm.backgroundSearch = false;
+                scope.vm.backgroundSearchQueue = null;
+            }
 
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
 
-                if (!setSearchStates(scope, isBackground)) return;
-                
+                if (!setSearchStates(scope, isBackground, searchTerm)) return;
+
                 scope.vm.page = page;
                 scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
                 scope.vm.hasLoaded = true;
@@ -209,7 +218,6 @@
                                 if (scope.vm.backgroundSearch) {
                                     scope.vm.backgroundSearchQueue = scope.vm.search
                                 } else {
-                                    scope.vm.backgroundSearch = true;
                                     scope.search(scope.vm.search, true);
                                     scope.vm.backgroundSearchQueue = null;
                                 }
