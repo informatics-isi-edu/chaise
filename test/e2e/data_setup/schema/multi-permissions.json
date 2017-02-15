@@ -1,0 +1,837 @@
+{
+    "schema_name": "multi-permissions",
+    "comment": "A schema that simulates various user permission levels via tables with combinations of the '2016:generated', '2016:immutable', '2016:non-deletable' annotations",
+    "tables": {
+        "main_create_table": {
+            "table_name": "main_create_table",
+            "comment": "Table simulates create-only permissions (no update, no deletion) with inbound, outbound FK relationships",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": "A column for an outbound FK relationship to a table with create-only permissions",
+                    "name": "col_out_create",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "comment": "Describes an outbound FK relationship to out_create_table:id",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "col_out_create"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "out_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:immutable": null,
+                "tag:isrd.isi.edu,2016:non-deletable": null
+            }
+        },
+        "main_read_table": {
+            "table_name": "main_read_table",
+            "comment": "Table that simulates read-only permissions (no create, no update, no delete).",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null,
+                "tag:isrd.isi.edu,2016:non-deletable": null
+            }
+        },
+        "main_update_table": {
+            "table_name": "main_update_table",
+            "comment": "Table that simulates update-only permissions (no create, no delete). Because there is currently no annotation that prohibits update without also prohibiting create, only the '2016:non-deletable' annotation is applied.",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": null,
+                    "name": "col_out_create",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": null,
+                    "name": "col_out_read",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": null,
+                    "name": "col_out_update",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": null,
+                    "name": "col_out_delete",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "comment": "Describes an outbound FK relationship to out_create_table:id ",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main_update_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "col_out_create"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "out_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                },
+                {
+                    "comment": "Describes an outbound FK relationship to out_update_table:id ",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main_update_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "col_out_update"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "out_update_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                },
+                {
+                    "comment": "Describes an outbound FK relationship to out_read_table:id ",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main_update_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "col_out_read"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "out_read_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                },
+                {
+                    "comment": "Describes an outbound FK relationship to out_delete_table:id ",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main_update_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "col_out_delete"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "out_delete_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:non-deletable": null
+            }
+        },
+        "main_delete_table": {
+            "table_name": "main_delete_table",
+            "comment": "Table that simulates delete-only permissions (no create, no update).",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null
+            }
+        },
+        "out_create_table": {
+            "table_name": "out_create_table",
+            "comment": "Table that simulates create-only permissions. Also serves as an endpoint to inbound relationships from main_create_table and main_update_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:immutable": null,
+                "tag:isrd.isi.edu,2016:non-deletable": null
+            }
+        },
+        "out_update_table": {
+            "table_name": "out_update_table",
+            "comment": "Table that simulates update-only permissions. Also serves as an endpoint to an inbound relationship from main_update_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:non-deletable": null
+            }
+        },
+        "out_read_table": {
+            "table_name": "out_read_table",
+            "comment": "Table that simulates read-only permissions. Also serves as an endpoint to an inbound relationship from main_update_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null,
+                "tag:isrd.isi.edu,2016:non-deletable": null
+            }
+        },
+        "out_delete_table": {
+            "table_name": "out_delete_table",
+            "comment": "Table that simulates delte-only permissions. Also serves as an endpoint to an inbound relationship from main_update_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null
+            }
+        },
+        "in_create_table": {
+            "table_name": "in_create_table",
+            "comment": "Table that simulates create-only permissions. Has outbound relationship to main_create_table.",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": "Column that creates outbound relationship to main_create_table",
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "comment": "Describes outbound relationship to main_create_table",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "in_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "main_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:immutable": null,
+                "tag:isrd.isi.edu,2016:non-deletable": null
+            }
+        },
+        "in_read_table": {
+            "table_name": "in_read_table",
+            "comment": "Table that simulates read-only permissions. Has outbound relationship to main_create_table.",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": "Column that creates outbound relationship to main_create_table",
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "comment": "Describes outbound relationship to main_create_table",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "in_read_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "main_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null,
+                "tag:isrd.isi.edu,2016:non-deletable": null,
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact/brief": {
+                        "row_markdown_pattern": "{{{id}}}"
+                    }
+                }
+            }
+        },
+        "in_update_table": {
+            "table_name": "in_update_table",
+            "comment": "Table that simulates update-only permissions. Has outbound relationship to main_update_table.",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": "Column that creates outbound relationship to main_create_table",
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "comment": "Describes outbound relationship to main_create_table",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "in_update_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "main_update_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:non-deletable": null,
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact/brief": {
+                        "row_markdown_pattern": "{{{id}}}"
+                    }
+                }
+            }
+        },
+        "in_delete_table": {
+            "table_name": "in_delete_table",
+            "comment": "Table that simulates create-only permissions. Has outbound relationship to main_create_table.",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": "Column that creates outbound relationship to main_create_table",
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "comment": "Describes outbound relationship to main_create_table",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "in_delete_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "main_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null
+            }
+        },
+        "assoc_create_table": {
+            "table_name": "assoc_create_table",
+            "comment": "Association table that links main_create_table with other_create_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "fk_to_main_create_table",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": null,
+                    "name": "fk_to_other_create_table",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "fk_to_main_create_table",
+                        "fk_to_other_create_table"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "comment": "Describes outbound relationship to main_create_table",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "assoc_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "fk_to_main_create_table"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "main_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                },
+                {
+                    "comment": "Describes outbound relationship to other_create_table",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "assoc_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "fk_to_other_create_table"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "other_create_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                }
+            ],
+            "annotations": {}
+        },
+        "other_create_table": {
+            "table_name": "other_create_table",
+            "comment": "Table that simulates create-only permissions. Linked to main_create_table via assoc_create_table (association table)",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+
+                }
+            ],
+            "foreign_keys": [],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:immutable": null,
+                "tag:isrd.isi.edu,2016:non-deletable": null
+            }
+        },
+        "assoc_delete_table": {
+            "table_name": "assoc_delete_table",
+            "comment": "Association table that links main_create_table with other_delete_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "fk_to_main_delete_table",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "comment": null,
+                    "name": "fk_to_other_delete_table",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "fk_to_main_delete_table",
+                        "fk_to_other_delete_table"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "comment": "Describes outbound relationship to main_delete_table",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "assoc_delete_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "fk_to_main_delete_table"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "main_delete_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                },
+                {
+                    "comment": "Describes outbound relationship to other_delete_table",
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "assoc_delete_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "fk_to_other_delete_table"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "other_delete_table",
+                            "schema_name": "multi-permissions",
+                            "column_name": "id"
+                        }
+                    ],
+                    "annotations": {}
+                }
+            ],
+            "annotations": {}
+        },
+        "other_delete_table": {
+            "table_name": "other_delete_table",
+            "comment": "Table that simulates delete-only permissions. Linked to main_delete_table via assoc_delete_table (association table)",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "column_definitions": [
+                {
+                    "comment": null,
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+
+                }
+            ],
+            "foreign_keys": [],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null
+            }
+        }
+    },
+    "annotations": {}
+}

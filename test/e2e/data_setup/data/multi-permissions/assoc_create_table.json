@@ -1,0 +1,6 @@
+[
+    {
+        "fk_to_main_create_table": 1,
+        "fk_to_other_create_table": 1
+    }
+]
