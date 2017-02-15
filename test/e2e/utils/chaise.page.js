@@ -873,6 +873,25 @@ function chaisePage() {
     this.waitForElementCondition = function(condition, timeout) {
         return browser.wait(condition, timeout || browser.params.defaultTimeout);
     };
+
+    this.performLogin = function(cookie, defer) {
+
+        defer = defer || require('q').defer();
+
+        browser.get(process.env.CHAISE_BASE_URL + "/login/");
+        browser.ignoreSynchronization = true;
+          
+        browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
+            browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
+              browser.ignoreSynchronization = false;
+              defer.resolve();
+            });
+        }, function() {
+            defer.reject();
+        });
+
+        return defer;
+    };
 };
 
 module.exports = new chaisePage();

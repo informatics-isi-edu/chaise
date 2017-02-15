@@ -1,0 +1,9 @@
+[
+    {
+        "id": 1,
+        "col_out_create": 1,
+        "col_out_read": 1,
+        "col_out_update": 1,
+        "col_out_delete": 1
+    }
+]
