@@ -6,10 +6,11 @@
                    id="search-input"
                    ng-model="vm.search"
                    class="form-control"
+                   ng-class="{'search-progress': vm.backgroundSearch }"
                    on-enter="enterPressed()"
                    ng-change="inputChanged()"
                    placeholder="Search"
-                    autofocus
+                   autofocus
                    ng-disabled="!vm.hasLoaded && !vm.backgroundSearch">
                 <span class="input-group-btn">
                     <button id="search-submit" class="btn btn-primary" ng-click="enterPressed(vm.search)" role="button" ng-disabled="!vm.hasLoaded && !vm.backgroundSearch">
