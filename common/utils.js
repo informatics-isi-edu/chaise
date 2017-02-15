@@ -577,8 +577,40 @@
             });
         }
 
+        /**
+         * Gets all tags with only a src attribute
+         * @param element Any element from where to start the function.
+         * @returns {Array} An array of Matching element
+         */
+        function getElements(tag, element) {
+            if (!element) throw new Error("No element passed for getImageAndIframes");
+            var tags = element.querySelectorAll(tag + '[src]');//Get all tags with src attributes
+            var matches = [];
+            for (var i = 0, j = tags.length; i < j; i++) {
+                var attributes = tags[i].attributes;
+
+                if (attributes[0].name === 'src') {//if the attribute is a src attribute, add it to the matches
+                    matches.push(tags[i]);
+                }
+            }
+
+            return matches; //Matches will now just contain tags with only src attribute
+        }
+
+        /**
+         * Gets all images and iframe with only a src attribute
+         * @param element Any element from where to start the function.
+         * @returns {Array} An array of images and iframes
+         */
+        function getImageAndIframes(element) {
+            var images = getElements('img', element);
+            var iframes = getElements('iframe', element);
+            return images.concat(iframes);
+        }
+
         return {
-            setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior
+            setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
+            getImageAndIframes: getImageAndIframes
         }
     }])
 

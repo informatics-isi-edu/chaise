@@ -136,7 +136,7 @@
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
             var cookie = {
                 rowname: $rootScope.recordDisplayname,
-                constraintName: ref.origFKR.constraint_names[0].join(':')
+                constraintName: ref.origColumnName
             };
             var mapping = ref.contextualize.entryCreate.origFKR.mapping;
 
