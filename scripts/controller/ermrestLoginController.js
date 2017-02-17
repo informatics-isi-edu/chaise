@@ -4,8 +4,18 @@
 
 var ermLoginController = angular.module('ermLoginController', []);
 
-ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest',
-                                           function($sce, $scope, ermrest) {
+ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUtils',
+                                           function($sce, $scope, ermrest, uriUtils) {
+
+
+   	var queryString = uriUtils.queryStringToJSON(window.location.search);
+   	if (queryString.referrerid) {
+   		//For child window
+		window.opener.postMessage(window.location.search, window.opener.location.href);
+		window.close();
+   		return;
+   	}
+
 	$scope.error = false;
 	if (HOME == null) {
 		initLocation();
