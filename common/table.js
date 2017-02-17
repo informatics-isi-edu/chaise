@@ -144,8 +144,6 @@
                 scope.$emit('recordset-update');
 
             }, function error(exception) {
-                scope.vm.hasLoaded = true;
-
                 // If the errorcode is unauthorizederror (401) then open the login window to make the user login
                 if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
                     Session.loginInANewWindow(function() {
@@ -153,6 +151,7 @@
                         read(scope, isBackground);
                     });
                 } else {
+                    scope.vm.hasLoaded = true;
                     scope.$emit('error', exception);
                     setSearchStates(scope, isBackground);
 
