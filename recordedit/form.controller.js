@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window', function FormController(AlertsService, DataUtils, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', function FormController(AlertsService, DataUtils, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -236,9 +236,15 @@
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
                     }
-                }, function error(response) {
-                    vm.showSubmissionError(response);
-                    vm.submissionButtonDisabled = false;
+                }, function error(exception) {
+                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
+                        Session.loginInANewWindow(function() {
+                            submit();
+                        });
+                    } else {
+                        vm.showSubmissionError(exception);
+                        vm.submissionButtonDisabled = false;
+                    }
                 });
             } else {
                 $rootScope.reference.table.reference.create(model.submissionRows).then(function success(page) {
@@ -280,9 +286,15 @@
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
                     }
-                }, function error(response) {
-                    vm.showSubmissionError(response);
-                    vm.submissionButtonDisabled = false;
+                }, function error(exception) {
+                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
+                        Session.loginInANewWindow(function() {
+                            submit();
+                        });
+                    } else {
+                        vm.showSubmissionError(exception);
+                        vm.submissionButtonDisabled = false;
+                    }
                 });
             }
         }
@@ -310,8 +322,14 @@
                 $rootScope.reference.delete().then(function deleteSuccess() {
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
-                }, function deleteFailure(response) {
-                    vm.showSubmissionError(response);
+                }, function deleteFailure(exception) {
+                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
+                        Session.loginInANewWindow(function() {
+                            deleteRecord();
+                        });
+                    } else {
+                        vm.showSubmissionError(exception);
+                    }
                 }).catch(function (error) {
                     $log.info(error);
                 });

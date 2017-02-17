@@ -9,7 +9,7 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUti
 
 
    	var queryString = uriUtils.queryStringToJSON(window.location.search);
-   	if (queryString.referrerid) {
+   	if (queryString.referrerid && (typeof queryString.action == 'undefined')) {
    		//For child window
 		window.opener.postMessage(window.location.search, window.opener.location.href);
 		window.close();
@@ -53,8 +53,18 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUti
 
 	this.login = function login() {
 		var params = $scope.getParameters();
-		//console.log(JSON.stringify(params, null, 4));
-		submitLogin($scope.username, $scope.password, params['referrer'], params['action'], params['text'], params['password']);
+
+	   	//console.log(JSON.stringify(params, null, 4));
+		submitLogin($scope.username, $scope.password, params['referrer'], params['action'], params['text'], params['password'], function() {
+			if (queryString.referrerid) {
+		   		//For child window
+				window.opener.postMessage(window.location.search, window.opener.location.href);
+				window.close();
+		   		return;
+		   	}
+
+		   	window.location = params['referrer'];
+		});
 	};
 	this.cancelLogin = function cancelLogin() {
 		window.location = '#/retrieve';
