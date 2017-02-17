@@ -7,6 +7,11 @@ exports.testPresentation = function (tableParams) {
         expect(title.getText()).toEqual(tableParams.title);
 	});
 
+    it("should autofocus on search box", function() {
+        var searchBox = chaisePage.recordsetPage.getSearchBox();
+        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+    });
+
 	it("should use annotated page size", function() {
 		var EC = protractor.ExpectedConditions;
 		var e = element(by.id('custom-page-size'));

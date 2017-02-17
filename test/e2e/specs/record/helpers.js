@@ -376,7 +376,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
     });
 
     describe("for a related entity without an association table", function() {
-        it('should have an Add link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
+        it('should have an "Add" link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
             var EC = protractor.ExpectedConditions, newTabUrl,
                 relatedTableName = tableParams.related_regular_table,
                 addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
@@ -472,7 +472,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
     });
 
     describe("for a related entity without an association table", function() {
-        it("should have an Add link for a related table that redirects to that related table's association table in recordedit with a prefill query parameter.", function() {
+        it("should have a \"Link\" link for a related table that redirects to that related table's association table in recordedit with a prefill query parameter.", function() {
             var EC = protractor.ExpectedConditions, newTabUrl, rows, foreignKeyInputs,
                 modalTitle = chaisePage.recordEditPage.getModalTitle(),
                 relatedTableName = tableParams.related_associate_table,
@@ -611,7 +611,7 @@ exports.relatedTableActions = function (testParams, tableParams) {
         var relatedTableName = tableParams.related_associate_table; // association table
         var linkedToTableName = tableParams.related_linked_table; // linked to table
         var linkedToTableFilter = tableParams.related_linked_table_key_filter;
-        
+
         chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
             return rows[0].all(by.tagName("td"));
         }).then(function(cell){

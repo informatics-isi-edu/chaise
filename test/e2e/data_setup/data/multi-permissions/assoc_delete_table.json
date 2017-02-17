@@ -1,0 +1,6 @@
+[
+    {
+        "fk_to_main_delete_table": 1,
+        "fk_to_other_delete_table": 1
+    }
+]

@@ -71,7 +71,11 @@
                                     <span ng-if="::(!ctrl.canEdit())">Revert Display</span>
                                 </span>
                             </a>&nbsp;|</span>
-                        <span ng-if="::ctrl.canCreateRelated(relatedRef)"><a class="add-records-link" ng-click="::ctrl.addRelatedRecord(relatedRef)">Add</a>&nbsp;|</span>
+                        <span ng-if="::ctrl.canCreateRelated(relatedRef)">
+                            <a class="add-records-link" ng-click="::ctrl.addRelatedRecord(relatedRef)">
+                                <span ng-if="::!relatedRef.derivedAssociationReference">Add</span>
+                                <span ng-if="::relatedRef.derivedAssociationReference">Link</span>
+                            </a>&nbsp;|</span>
                         <span><a class="more-results-link" ng-click="::ctrl.toRecordSet(relatedRef)">View More</a></span>
                     </div>
                     <div class="row">
