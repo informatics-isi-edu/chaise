@@ -681,6 +681,44 @@
         };
     })
 
+    // An "autofocus" directive that applies focus on an element when it becomes visible.
+    // The HTML5 autofocus attribute (1) isn't uniformly implemented across major modern browsers;
+    // (2) doesn't focus the element beyond the first time it's loaded in DOM; and (3) works
+    // unreliably for dynamically loaded templates.
+    // Use: <input type="text" autofocus>
+    .directive('autofocus', ['$timeout', function($timeout) {
+        return {
+            restrict: 'A',
+            link: function(scope, element) {
+                var focusPromise;
+                // When element becomes visible, schedule an event to focus the element
+                var unbindWatch = scope.$watch(function() {
+                    return element.is(':visible');
+                }, function(visible) {
+                    if (visible == true) {
+                        focusPromise = $timeout(function() {
+                            element[0].focus();
+                        }, 0, false);
+                    }
+                });
+
+                // Once element has been focus, there's no need to watch its visibility anymore.
+                // So we deregister the watch.
+                element.on('focus', function() {
+                    unbindWatch();
+                });
+
+                // When this element is destroyed, cancel any scheduled focus events and deregister the watch.
+                element.on('$destroy', function() {
+                    unbindWatch();
+                    if (focusPromise) {
+                        $timeout.cancel(focusPromise);
+                    }
+                });
+            }
+        };
+    }])
+
     .service('headInjector', function() {
         function addCustomCSS() {
             if (chaiseConfig['customCSS'] !== undefined) {
