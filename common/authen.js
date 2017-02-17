@@ -80,7 +80,6 @@
                 };
 
                 window.addEventListener('message', function(args) {
-                    console.log("Inside message listener");
                     if (args && args.data && (typeof args.data == 'string')) {
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
