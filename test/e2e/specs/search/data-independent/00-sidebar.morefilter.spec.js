@@ -15,6 +15,7 @@ describe('The initial sidebar,', function () {
     describe('when initializing,', function () {
 
         beforeAll(function() {
+            browser.ignoreSynchronization=true;
             browser.get(browser.params.url || "");
         });
 

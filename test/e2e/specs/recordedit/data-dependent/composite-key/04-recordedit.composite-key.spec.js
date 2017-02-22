@@ -67,7 +67,7 @@ describe('Add a record,', function() {
 
 					var hasErrors = false;
 
-					it("should have no errors, and should be redirected", function(done) {
+					it("should have no errors, and should be redirected", function() {
 						chaisePage.recordEditPage.getAlertError().then(function(err) {
 							if (err) {
 								expect("Page has errors").toBe("No errors");
@@ -76,10 +76,9 @@ describe('Add a record,', function() {
 								expect(true).toBe(true);
 							}
 						});
-                        done();
 					});
 
-					it("should be redirected to record page", function() {
+					it("should be redirected to record page with correct values.", function() {
 						if (!hasErrors) {
                             var EC = protractor.ExpectedConditions;
 

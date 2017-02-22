@@ -54,19 +54,7 @@ exports.parameterize = function(config, configParams) {
 
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
-          browser.get(process.env.CHAISE_BASE_URL + "/login/");
-          browser.ignoreSynchronization = true;
-          
-          browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
-            browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
-              browser.ignoreSynchronization = false;
-              defer.resolve();
-            });
-          
-          }, function() {
-            defer.reject();
-          });
-
+          require('./chaise.page.js').performLogin(testConfiguration.authCookie, defer);
         } else {
           defer.resolve();
         }
@@ -98,19 +86,7 @@ exports.parameterize = function(config, configParams) {
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
           console.log("setting up cookie");
-          browser.get(process.env.CHAISE_BASE_URL + "/login/");
-          browser.ignoreSynchronization = true;
-          
-          browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))),browser.params.defaultTimeout).then(function() {
-            browser.driver.executeScript('document.cookie="' + testConfiguration.authCookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
-              browser.ignoreSynchronization = false;
-              defer.resolve();
-            });
-          
-            
-          }, function() {
-            defer.reject();
-          });
+          require('./chaise.page.js').performLogin(testConfiguration.authCookie, defer);
         } else {
           defer.resolve();
         }

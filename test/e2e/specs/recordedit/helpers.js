@@ -20,10 +20,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
             var EC = protractor.ExpectedConditions;
 
             browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-
-			chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
-				expect(txt).toBe("Edit " + tableParams.edit_entity_displayname + " Records");
-			});
+            var title = chaisePage.recordEditPage.getFormTitle();
+            expect(title.getText()).toEqual("Edit " + tableParams.edit_entity_displayname + " Record");
 		});
 
 		it("should not allow to add new rows/columns", function() {
@@ -59,7 +57,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 			pageColumns.forEach(function(c) {
 				c.getAttribute('innerHTML').then(function(txt) {
 					txt = txt.trim();
-					var col = columns.find(function(cl) { return txt == cl.displayName });
+					var col = columns.find(function(cl) {
+                        return txt == cl.displayName
+                    });
 					expect(col).toBeDefined();
 					c.column = col;
 					visibleFields.push(c);
@@ -353,7 +353,6 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				}
 
                 it("should open a modal search and select a foreign key value.", function () {
-
                     chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
                     	var modalTitle = chaisePage.recordEditPage.getModalTitle(),
                         	EC = protractor.ExpectedConditions;
@@ -366,7 +365,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                            chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]).then(function() {
 	                                // wait for the modal to open
 	                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-
+                                    // Expect search box to have focus
+                                    var searchBox = chaisePage.recordsetPage.getSearchBox();
+                                    expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
 	                                return modalTitle.getText();
 	                            }).then(function(text) {
 	                                // make sure modal opened
@@ -386,13 +387,22 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                var index = Math.floor(Math.random() * ct);
 	                                return rows.get(index).all(by.css(".select-action-button"));
 								}).then(function(selectButtons) {
-									selectButtons[0].click();
+									return selectButtons[0].click();
 	                            }).then(function() {
 	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-
 	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
 	                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-	                            });
+                                    // Open the same modal again to make sure search box is will be autofocused again
+                                    return chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]);
+	                            }).then(function() {
+                                    // Wait for the modal to open
+	                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                                    // Expect search box to have focus
+                                    var searchBox = chaisePage.recordsetPage.getSearchBox();
+                                    expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+                                    // Close the modal
+                                    chaisePage.recordEditPage.getModalCloseBtn().click();
+                                });
 	                        })(i);
 	                    }
                     });
@@ -922,10 +932,11 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 // params must include the names of the columns that you want to check for values of
 exports.testRecordAppValuesAfterSubmission = function(params) {
+    chaisePage.waitForElement(element(by.id('tblRecord')));
+
     for (var i = 0; i < params.column_names.length; i++) {
         var columnName = params.column_names[i];
         var column = chaisePage.recordPage.getColumnValue(columnName);
-        browser.wait(EC.visibilityOf(column), browser.params.defaultTimeout);
         expect(column.getText()).toBeDefined();
     }
 }

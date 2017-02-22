@@ -6,10 +6,11 @@
                    id="search-input"
                    ng-model="vm.search"
                    class="form-control"
+                   ng-class="{'search-progress': vm.backgroundSearch }"
                    on-enter="enterPressed()"
                    ng-change="inputChanged()"
-                   placeholder="Search {{vm.tableDisplayName}}"
-                    autofocus
+                   placeholder="Search"
+                   autofocus
                    ng-disabled="!vm.hasLoaded && !vm.backgroundSearch">
                 <span class="input-group-btn">
                     <button id="search-submit" class="btn btn-primary" ng-click="enterPressed(vm.search)" role="button" ng-disabled="!vm.hasLoaded && !vm.backgroundSearch">
@@ -50,7 +51,7 @@
 
 <!-- record table -->
 <div ng-if="vm.rowValues.length > 0">
-    <record-table id="rs-{{vm.tableDisplayName}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
+    <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
 </div>
 
 <!-- bottom pagination -->

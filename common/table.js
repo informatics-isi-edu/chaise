@@ -56,15 +56,80 @@
      *      });
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
-        function read(scope) {
+
+        // This method sets backgroundSearch states depending upon various parameters
+        // If it returns true then we should render the data
+        // else we should reject the data
+        function setSearchStates(scope, isBackground, searchTerm) {
+
+            // If request is background
+            if (isBackground) {
+                // If there is a term in backgroundSearchPendingTerm for background and there is no foreground search going on then
+                // Fire the request for the term in the backgroundSearchPendingTerm and return false
+                // Else empty the backgroundSearchPendingTerm and set backgroundSearch false
+                if (scope.vm.backgroundSearchPendingTerm && !scope.vm.foregroundSearch) {
+                    scope.vm.search = scope.vm.backgroundSearchPendingTerm
+                    scope.vm.backgroundSearchPendingTerm = null;
+                    read(scope, true);
+                    return false;
+                } else {
+                    scope.vm.backgroundSearch = false;
+                    scope.vm.backgroundSearchPendingTerm = null;
+
+                    // If forground search is going on or the searchterm differs from the current searchterm
+                    // then return false
+                    if (scope.vm.foregroundSearch || (searchTerm != scope.vm.search)) return false;
+                }
+            }
+
+            return true;
+        }
+
+        /*
+            This function performs a reference.read operation on search and pagination
+            It accepts 2 parameters: viz: scope and isBackground
+            The isbackground is true if the search was triggered because of a delayed search called backgroundSearch
+            It is false for other scenarios.
+
+            It uses 3 variables to determine the flow of search and perform operations
+
+            - If this is a foreground search, it is fired instantly depending on the variable vm.foregroundSearch and results are rendered once returned.
+              It also sets vm.backgroundSearch to false and empties backgroundSearchPendingTerm, to cancel any backgroundSearch.
+            - If this is a background search and there is already a foreground search in progress which can be determined from vm.foregroundSearch, 
+              we cancel this search and empty the backgroundSearchPendingTerm.
+            - If this is a background search, and there is already a background search in progress, this method will never be called,
+              as we have the restriction of having only one background search running at a time
+            - If the background search is completed successfully, and if the vm.foregroundSearch flag is true, then we reject background search results
+              and empty the backgroundSearchPendingTerm
+            - If the background search is completed successfully, and if the vm.foregroundSearch flag is false, and the backgroundSearchpendingTerm is
+              not empty then we reject these results and fire a search for that term
+            - If the background search is completed successfully, and if the vm.foregroundSearch flag is false, and the backgroundSearchpendingTerm is
+              not empty then we render the background search results and empty the backgroundSearchPendingTerm
+        */
+        function read(scope, isBackground) {
+
+            var searchTerm = scope.vm.search;
 
             scope.vm.hasLoaded = false;
 
-            var isBackground = !scope.vm.foregroundSearch && scope.vm.backgroundSearch;
+            // If isbackground and no foregroundsearch going on then only fire the search request
+            // Else empty the backgroundSearchPendingTerm
+            if (isBackground) {
+                if (!scope.vm.foregroundSearch) {
+                    scope.vm.backgroundSearch = true;
+                } else {
+                    scope.vm.backgroundSearchPendingTerm = null;
+                    scope.vm.backgroundSearch = false;
+                    return;
+                }
+            } else {
+                scope.vm.backgroundSearchPendingTerm = null;
+            }
 
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
 
-                if (scope.vm.foregroundSearch && isBackground) return;
+                // This method sets the 
+                if (!setSearchStates(scope, isBackground, searchTerm)) return;
 
                 scope.vm.page = page;
                 scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
@@ -74,13 +139,17 @@
                     if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 }, 200);
 
+
                 // tell parent controller data updated
                 scope.$emit('recordset-update');
 
             }, function error(response) {
                 scope.vm.hasLoaded = true;
                 scope.$emit('error', response);
-            })
+                setSearchStates(scope, isBackground);
+
+                if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+            });
         }
 
         return {
@@ -121,12 +190,11 @@
                     scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
                     recordTableUtils.read(scope);
                 };
-
             }
         };
     }])
 
-    .directive('recordset', ['recordTableUtils', '$window', '$cookies', 'MathUtils', 'UriUtils','$timeout', function(recordTableUtils, $window, $cookies, MathUtils, UriUtils, $timeout) {
+    .directive('recordset', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils','$timeout', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout) {
 
         return {
             restrict: 'E',
@@ -141,15 +209,16 @@
                 var updated = false; // table refresh used by ellipses' edit action (new method)
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
+                scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+
+                scope.vm.backgroundSearchPendingTerm = null;
 
                 scope.setPageLimit = function(limit) {
-                    scope.vm.backgroundSearch = false;
                     scope.vm.pageLimit = limit;
                     recordTableUtils.read(scope);
                 };
 
                 scope.before = function() {
-                    scope.vm.backgroundSearch = false;
                     var previous = scope.vm.page.previous;
                     if (previous) {
 
@@ -160,7 +229,6 @@
                 };
 
                 scope.after = function() {
-                    scope.vm.backgroundSearch = false;
                     var next = scope.vm.page.next;
                     if (next) {
 
@@ -173,43 +241,69 @@
 
                 var inputChangedPromise;
 
+                /*
+                    The search fires at most one active "background"
+                    search at a time and, i.e. for opportunistic type-ahead search. It should never send
+                    another before the previous terminates. The delay for firing the search is 
+                    1 second, when the user has stopeed typing.
+                */
+                // On change in user input
                 scope.inputChanged = function() {
                     if (scope.vm.enableAutoSearch) {
+
+                        // Cancel previous promise for background search that was queued to be called
 
                         if (inputChangedPromise) {
                             $timeout.cancel(inputChangedPromise);
                         }
 
+                        // Wait for the user to stop typing for a second and then fire the search
                         inputChangedPromise = $timeout(function() {
                             inputChangedPromise = null;
 
+                            // If there is no foregound search going currently
                             if (!scope.vm.foregroundSearch) {
-                                scope.vm.backgroundSearch = true;
-                                scope.search(scope.vm.search);
+                                // If there is a background search going on currently then 
+                                // set the search term in the backgroundSearchPendingTerm
+                                // else fire the search and empty the backgroundSearchPendingTerm
+                                if (scope.vm.backgroundSearch) {
+                                    scope.vm.backgroundSearchPendingTerm = scope.vm.search
+                                } else {
+                                    scope.search(scope.vm.search, true);
+                                    scope.vm.backgroundSearchPendingTerm = null;
+                                }
                             }
-                        }, 200);
+                        }, 1000);
                     }
                 };
 
                 scope.enterPressed = function() {
+                    /* If user has pressed enter then foreground search starts, 
+                    the input is supposed to be frozen w/ a spinner to show that it is busy doing what the user
+                    asked for. Any existing background search result completing during that time is to be discarded 
+                    to avoid confusing the UX.
+                    */
                     $timeout.cancel(inputChangedPromise);
-                    scope.vm.backgroundSearch = false;
+
+                    // Set the foregroundSearch to true and empty the backgroundSearchPendingTerm
                     scope.vm.foregroundSearch = true;
+                    scope.vm.backgroundSearchPendingTerm = null;
+
+                    // Trigger search
                     scope.search(scope.vm.search);
                 };
 
-                scope.search = function(term) {
+                scope.search = function(term, isBackground) {
 
                     if (term)
                         term = term.trim();
 
                     scope.vm.search = term;
                     scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
-                    recordTableUtils.read(scope);
+                    recordTableUtils.read(scope, isBackground);
                 };
 
                 scope.clearSearch = function() {
-                    scope.vm.backgroundSearch = false;
                     if (scope.vm.reference.location.searchTerm)
                         scope.search();
 
@@ -236,8 +330,6 @@
                 // on window focus, if has pending add record requests
                 // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
                 $window.onfocus = function() {
-
-                    scope.vm.backgroundSearch = false;
 
                     var completed = 0; // completed add record requests
                     for (var id in addRecordRequests) {

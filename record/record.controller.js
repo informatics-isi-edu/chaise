@@ -11,6 +11,11 @@
 
         vm.alerts = AlertsService.alerts;
         vm.showEmptyRelatedTables = false;
+        vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+
+        vm.canCreate = function() {
+            return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
+        };
 
         vm.createRecord = function() {
             var newRef = $rootScope.reference.table.reference.contextualize.entryCreate;
@@ -49,6 +54,10 @@
 
             var appLink = newRef.appLink + "?copy=true&limit=1";
             $window.location.href = appLink;
+        };
+
+        vm.canDelete = function() {
+            return ($rootScope.reference && $rootScope.reference.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton);
         };
 
         vm.deleteRecord = function() {
@@ -118,12 +127,16 @@
             vm.showEmptyRelatedTables = !vm.showEmptyRelatedTables;
         };
 
+        vm.canCreateRelated = function(relatedRef) {
+            return (relatedRef.canCreate && $rootScope.modifyRecord);
+        };
+
         // Send user to RecordEdit to create a new row in this related table
         vm.addRelatedRecord = function(ref) {
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
             var cookie = {
                 rowname: $rootScope.recordDisplayname,
-                constraintName: ref.origFKR.constraint_names[0].join(':')
+                constraintName: ref.origColumnName
             };
             var mapping = ref.contextualize.entryCreate.origFKR.mapping;
 
@@ -146,7 +159,7 @@
             addRecordRequests[referrer_id] = ref.uri;
 
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
-            var appLink = ref.table.reference.contextualize.entryCreate.appLink;
+            var appLink = (ref.derivedAssociationReference ? ref.derivedAssociationReference.contextualize.entryCreate.appLink : ref.contextualize.entryCreate.appLink);
             appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
                 'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
                 '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);

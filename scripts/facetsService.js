@@ -970,6 +970,10 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			}
 		};
 
+		if (!(('scatter' == plotOpts.format.type) || ('scattergl' == plotOpts.format.type))) {
+			return;
+		}
+
         var node = document.getElementById(plotDiv);
 		// click handler
 		if (node) {
