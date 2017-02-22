@@ -74,11 +74,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row form-container">
+                        <div class="row form-container" style="position:fixed;">
                             <!-- loading spinner -->
                             <div ng-show="!displayReady" id="spinner">
                                 <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
                                 <div style="margin-top: 15px;">Loading...</div>
+                            </div>
+                            <div ng-show="displayReady" class="col-xs-12" id="formEditScroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
+                                <div ng-style="form.tableWidth"></div>
                             </div>
                             <div ng-show="displayReady" class="col-xs-12" id="formEdit" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
                                 <table ng-form="form.formContainer" class="table">
