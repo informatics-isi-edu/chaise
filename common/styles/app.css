@@ -519,3 +519,8 @@ input.search-progress {
     background-size: 25px 25px;
     background-position-x: 99%;
 }
+
+/************* search input ****************/
+.form-control-feedback > span.search-remove {
+    border-bottom: none;
+}
