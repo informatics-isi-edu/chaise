@@ -438,12 +438,19 @@
                 }
                 vm.showMultiInsert = false;
                 vm.numberRowsToAdd = 1;
+
+                $timeout(function() {
+                    onResize();
+                }, 10);
             }
         }
 
         function removeFormRow(index) {
             vm.recordEditModel.rows.splice(index, 1);
             vm.recordEditModel.submissionRows.splice(index, 1);
+            $timeout(function() {
+                onResize();
+            }, 10);
         }
 
         function columnToDisplayType(column) {
@@ -608,6 +615,7 @@
             'width' : captionColumnWidth + "px",
             'height' : headerHeight + "px"
         };
+        vm.tableWidth = { width: '0px' };
 
         // Get root element
         var element = document.querySelector('.ng-scope');
@@ -618,9 +626,13 @@
         // Get the formedit div
         var elem = $rootElement.find('#formEdit');
 
+        var tableEl = elem.find('table');
+        var scrollContainer = formContainerEl.find('#formEditScroll');
+
         var elemHeight;
         var trs;
         var scope = $rootScope;
+
 
         // Set outer width of element to be less by caption column Width and add buttonWidth,
         // so that it doesn't scrolls due to the margin-left applied before extra padding
@@ -628,12 +640,32 @@
             var elemWidth = formContainerEl.outerWidth();
             vm.formEditDivMarginLeft.width = elemWidth - captionColumnWidth - 30;
 
+            if (vm.recordEditModel.rows.length > 1) {
+                vm.tableWidth.width =  (tableEl.outerWidth()) + "px";
+            } else {
+                vm.tableWidth.width =  (tableEl.outerWidth() - captionColumnWidth - 50) + "px";
+            }
+
             if (!editMode) {
-                vm.formEditDivMarginLeft.width = vm.formEditDivMarginLeft.width -30 -5
+                vm.formEditDivMarginLeft.width = vm.formEditDivMarginLeft.width -30 -5;
             }
             if (!doNotInvokeEvent) scope.$digest();
         }
         onResize(true);
+
+        // Listen to scroll event on dummy div for top horizontal bar to update recordedit div position
+        scrollContainer.on('scroll', function (e) {
+            elem.scrollLeft(scrollContainer.scrollLeft());
+        });
+
+        // Listen to scroll event on recordedit div for top horizontal bar to update dummy div position
+        var elemStopTimer;
+        elem.on('scroll', function (e) {
+            $timeout.cancel(elemStopTimer);
+            elemStopTimer = $timeout(function() {
+                scrollContainer.scrollLeft(elem.scrollLeft());
+            }, 10);
+        });
 
         // Listen to window resize event to change the width of div formEdit
         angular.element($window).bind('resize', function() {
@@ -689,6 +721,8 @@
                 }
             }
         }
+
+
 
         var TIMER_INTERVAL = 50; //play with this to get a balance of performance/responsiveness
         var timer;

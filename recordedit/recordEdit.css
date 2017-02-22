@@ -249,6 +249,17 @@ td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
   border-right: 0px;
 }
 
+#formEditScroll {
+  overflow-x: auto;
+  overflow-y:hidden;
+  height: 20px;
+}
+
+
+#formEditScroll > div {
+  height: 20px;
+}
+
 /* Chrome only: */
 @media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) {
   #formEdit {
