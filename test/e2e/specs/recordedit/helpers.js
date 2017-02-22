@@ -365,7 +365,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                            chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]).then(function() {
 	                                // wait for the modal to open
 	                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-
+                                    // Expect search box to have focus
+                                    var searchBox = chaisePage.recordsetPage.getSearchBox();
+                                    expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
 	                                return modalTitle.getText();
 	                            }).then(function(text) {
 	                                // make sure modal opened
@@ -390,7 +392,17 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
 	                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-	                            });
+                                    // Open the same modal again to make sure search box is will be autofocused again
+                                    return chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]);
+	                            }).then(function() {
+                                    // Wait for the modal to open
+	                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                                    // Expect search box to have focus
+                                    var searchBox = chaisePage.recordsetPage.getSearchBox();
+                                    expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+                                    // Close the modal
+                                    chaisePage.recordEditPage.getModalCloseBtn().click();
+                                });
 	                        })(i);
 	                    }
                     });

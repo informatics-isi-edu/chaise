@@ -71,7 +71,7 @@
                     { "title" : "Number of Rooms", "value": "23", "type": "int2"},
                     { "title" : "Cover Image", "value": "3,005" , "type": "int2", "presentation": { "type":"url", "template": "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/id=3005"} },
                     { "title" : "Thumbnail", "value": null, "type": "int4"},
-                    { "title" : "Operational Since", "value": "12/9/2008, 12:00:00 AM", "type": "timestamptz" },
+                    { "title" : "Operational Since", "value": "2008-12-09 00:00:00", "type": "timestamptz" },
                     { "title" : "Is Luxurious", "value": "true", "type": "boolean" }
                 ]
             }]
