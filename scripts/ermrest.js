@@ -330,7 +330,11 @@ function make_headers() {
 	return res;
 }
 
-function submitLogin(username, password, referrer, action, input_user, input_password) {
+function submitLogin(username, password, referrer, action, input_user, input_password, successCallback, errorCallback) {
+
+	successCallback = successCallback || successSubmitLogin;
+	errorCallback = errorCallback || errorSubmitLogin
+
 	var url = HOME + (action != null ? action : '/ermrest/authn/session');
 	var obj = {};
 
@@ -346,7 +350,7 @@ function submitLogin(username, password, referrer, action, input_user, input_pas
 	}
 	var param = {};
 	param['referrer'] = referrer;
-	ERMREST.POST(url, 'application/x-www-form-urlencoded; charset=UTF-8', true, true, obj, successSubmitLogin, errorSubmitLogin, param);
+	ERMREST.POST(url, 'application/x-www-form-urlencoded; charset=UTF-8', true, true, obj, successSubmitLogin, errorCallback, param);
 }
 
 function successSubmitLogin(data, textStatus, jqXHR, param) {
