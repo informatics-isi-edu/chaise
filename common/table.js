@@ -55,7 +55,7 @@
      *          ErrorService.catchAll(exception);
      *      });
      */
-    .factory('recordTableUtils', ['DataUtils', '$timeout', function(DataUtils, $timeout) {
+    .factory('recordTableUtils', ['DataUtils', '$timeout','Session', function(DataUtils, $timeout, Session) {
 
         // This method sets backgroundSearch states depending upon various parameters
         // If it returns true then we should render the data
@@ -143,12 +143,20 @@
                 // tell parent controller data updated
                 scope.$emit('recordset-update');
 
-            }, function error(response) {
-                scope.vm.hasLoaded = true;
-                scope.$emit('error', response);
-                setSearchStates(scope, isBackground);
+            }, function error(exception) {
+                // If the errorcode is unauthorizederror (401) then open the login window to make the user login
+                if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
+                    Session.loginInANewWindow(function() {
+                        //Once the user has logged in successfully trigger read again
+                        read(scope, isBackground);
+                    });
+                } else {
+                    scope.vm.hasLoaded = true;
+                    scope.$emit('error', exception);
+                    setSearchStates(scope, isBackground);
 
-                if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+                    if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+                }
             });
         }
 

@@ -25,7 +25,7 @@
             $uibModalInstance.close();
         }
     }])
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', function SearchPopupController($scope, $uibModalInstance, DataUtils, params) {
+    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
         var vm = this;
 
         vm.params = params;
@@ -51,13 +51,27 @@
             context:            params.context
         };
 
-        // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
-        reference.read(25).then(function getPseudoData(page) {
-            vm.tableModel.hasLoaded = true;
-            vm.tableModel.initialized = true;
-            vm.tableModel.page = page;
-            vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
-        });
+        var fetchRecords = function() {
+
+            // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
+            reference.read(25).then(function getPseudoData(page) {
+                vm.tableModel.hasLoaded = true;
+                vm.tableModel.initialized = true;
+                vm.tableModel.page = page;
+                vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
+            }, function(exception) {
+                if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
+                    Session.loginInANewWindow(function() {
+                        fetchRecords();
+                    });
+                } else {
+                    AlertsService.addAlert({type: 'error', message: response.message});
+                    $log.warn(response);
+                }
+            });
+        }
+
+        fetchRecords();
 
         function ok(tuple) {
             $uibModalInstance.close(tuple);
