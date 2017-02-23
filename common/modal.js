@@ -81,7 +81,7 @@
             $uibModalInstance.dismiss("cancel");
         }
     }])
-    .controller('UploadModalDialogController', ['$uibModalInstance', 'params', function UploadModalDialogController($uibModalInstance, params) {
+    .controller('UploadModalDialogController', ['$uibModalInstance', 'params', 'Session', function UploadModalDialogController($uibModalInstance, params, Session) {
         var vm = this;
         vm.rows =  [];
 
@@ -106,11 +106,24 @@
 
         };
 
-        var onUploadComplete = function() {
+        var onUploadCompleted = function() {
 
         };
 
-        var uploadFile = function(col, row) {
+        var onChecksumCompleted = function() {
+
+        };
+
+        var onUploadError = function(err) {
+
+        };
+
+        var onChecksumError = function(err) {
+
+        };
+
+
+        var uploadFile = function(col) {
             var file = col.file;
             var uploadObj = col.uploadObj;
             var item = {
@@ -145,6 +158,8 @@
                 if (vm.uploadError || vm.serverError || vm.checksumError) return;
                 
                 vm.checksumError = true;
+
+                onChecksumError();
             };
 
             uploadObj.onChecksumProgressChanged = function(calculatedSize, totalSize) {
@@ -172,8 +187,15 @@
                 }
             };
 
-            row.push(item);
+            return item;
         }
+
+        var abortUploads = function() {
+            params.rows.forEach(function(row) {
+                for(var k in row) {
+                }
+            });
+        };
 
         params.rows.forEach(function(row) {
             for(var k in row) {
