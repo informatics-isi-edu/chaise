@@ -78,7 +78,7 @@ describe('Add a record,', function() {
 						});
 					});
 
-					it("should be redirected to record page", function() {
+					it("should be redirected to record page with correct values.", function() {
 						if (!hasErrors) {
                             var EC = protractor.ExpectedConditions;
 

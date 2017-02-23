@@ -452,7 +452,23 @@
         }
 
 
+        function queryStringToJSON(queryString) {
+            queryString  = queryString || window.location.search;
+            if (queryString.indexOf('?') > -1){
+                queryString = queryString.split('?')[1];
+            }
+            var pairs = queryString.split('&');
+            var result = {};
+            pairs.forEach(function(pair) {
+                pair = pair.split('=');
+                result[pair[0]] = decodeURIComponent(pair[1] || '');
+            });
+            return result;
+        }
+
+
         return {
+            queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
@@ -577,8 +593,40 @@
             });
         }
 
+        /**
+         * Gets all tags with only a src attribute
+         * @param element Any element from where to start the function.
+         * @returns {Array} An array of Matching element
+         */
+        function getElements(tag, element) {
+            if (!element) throw new Error("No element passed for getImageAndIframes");
+            var tags = element.querySelectorAll(tag + '[src]');//Get all tags with src attributes
+            var matches = [];
+            for (var i = 0, j = tags.length; i < j; i++) {
+                var attributes = tags[i].attributes;
+
+                if (attributes[0].name === 'src') {//if the attribute is a src attribute, add it to the matches
+                    matches.push(tags[i]);
+                }
+            }
+
+            return matches; //Matches will now just contain tags with only src attribute
+        }
+
+        /**
+         * Gets all images and iframe with only a src attribute
+         * @param element Any element from where to start the function.
+         * @returns {Array} An array of images and iframes
+         */
+        function getImageAndIframes(element) {
+            var images = getElements('img', element);
+            var iframes = getElements('iframe', element);
+            return images.concat(iframes);
+        }
+
         return {
-            setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior
+            setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
+            getImageAndIframes: getImageAndIframes
         }
     }])
 
@@ -648,6 +696,44 @@
             });
         };
     })
+
+    // An "autofocus" directive that applies focus on an element when it becomes visible.
+    // The HTML5 autofocus attribute (1) isn't uniformly implemented across major modern browsers;
+    // (2) doesn't focus the element beyond the first time it's loaded in DOM; and (3) works
+    // unreliably for dynamically loaded templates.
+    // Use: <input type="text" autofocus>
+    .directive('autofocus', ['$timeout', function($timeout) {
+        return {
+            restrict: 'A',
+            link: function(scope, element) {
+                var focusPromise;
+                // When element becomes visible, schedule an event to focus the element
+                var unbindWatch = scope.$watch(function() {
+                    return element.is(':visible');
+                }, function(visible) {
+                    if (visible == true) {
+                        focusPromise = $timeout(function() {
+                            element[0].focus();
+                        }, 0, false);
+                    }
+                });
+
+                // Once element has been focus, there's no need to watch its visibility anymore.
+                // So we deregister the watch.
+                element.on('focus', function() {
+                    unbindWatch();
+                });
+
+                // When this element is destroyed, cancel any scheduled focus events and deregister the watch.
+                element.on('$destroy', function() {
+                    unbindWatch();
+                    if (focusPromise) {
+                        $timeout.cancel(focusPromise);
+                    }
+                });
+            }
+        };
+    }])
 
     .service('headInjector', function() {
         function addCustomCSS() {
