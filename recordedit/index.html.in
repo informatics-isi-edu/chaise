@@ -74,7 +74,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row form-container" style="position:fixed;">
+                        <div class="row form-container">
                             <!-- loading spinner -->
                             <div ng-show="!displayReady" id="spinner">
                                 <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
