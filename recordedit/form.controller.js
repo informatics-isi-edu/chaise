@@ -197,7 +197,6 @@
 
             if (vm.editMode) {
                 // loop through model.submissionRows
-                // there should only be 1 row for editing but we want to account for it for future development
                 for (var i = 0; i < model.submissionRows.length; i++) {
                     var row = model.submissionRows[i];
                     var data = $rootScope.tuples[i].data;
