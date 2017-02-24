@@ -3,7 +3,7 @@
 
     angular.module('chaise.authen', ['chaise.utils'])
 
-    .factory('Session', ['$http', '$q', '$window', 'UriUtils', function ($http, $q, $window, UriUtils) {
+    .factory('Session', ['$http', '$q', '$window', 'UriUtils', '$uibModal', function ($http, $q, $window, UriUtils, $uibModal) {
 
         function NotFoundError(status, message) {
             this.code = 404;
@@ -78,11 +78,13 @@
                         'Accept': 'application/json'
                     }
                 };
+                var modalInstance; 
 
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
+                            modalInstance.close("Done");
                             cb();
                         }
                     }
@@ -90,12 +92,13 @@
 
                 $http.get(url, config).then(function(response){
                     var data = response.data;
+
+                    var login_url = "";
                     if (data['redirect_url'] !== undefined) {
-                        var url = data['redirect_url'];
-                        $window.open(url, '_blank','width=800,height=600');
+                        login_url = data['redirect_url'];
                     } else if (data['login_form'] !== undefined) {
                         var login_form = data['login_form'];
-                        var login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
+                        login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
                         var method = login_form['method'];
                         var action = UriUtils.fixedEncodeURIComponent(login_form['action']);
                         var text = '';
@@ -109,8 +112,21 @@
                             }
                         }
                         login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden + '&?referrerid=' + referrerId;
-                        $window.open(login_url, '_blank','width=800,height=600');
                     }
+
+                    modalInstance = $uibModal.open({
+                        windowClass: "modal-login-iframe",
+                        templateUrl: "../common/templates/loginDialog.modal.html",
+                        controller: 'LoginDialogController',
+                        controllerAs: 'ctrl',
+                        resolve: {
+                            params: { 
+                                login_url: login_url,
+                                height: 800
+                            }
+                        }
+                    });
+
                 }, function() {
                     document.body.style.cursor = 'default';
                     $window.location = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);

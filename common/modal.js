@@ -25,6 +25,11 @@
             $uibModalInstance.close();
         }
     }])
+    .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
+        var vm = this;
+        params.login_url = $sce.trustAsResourceUrl(params.login_url);
+        vm.params = params;
+    }])
     .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
         var vm = this;
 

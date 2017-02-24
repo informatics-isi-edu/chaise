@@ -524,3 +524,12 @@ input.search-progress {
 .form-control-feedback > span.search-remove {
     border-bottom: none;
 }
+
+/*=============Login inside an iframe in a  modal********/
+.modal-login-iframe .modal-dialog {
+    width: 800px;
+}
+
+.modal-login-iframe #spinner {
+    padding-top: 250px;
+}
