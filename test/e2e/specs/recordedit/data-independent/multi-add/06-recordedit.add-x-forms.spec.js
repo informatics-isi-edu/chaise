@@ -165,7 +165,7 @@ describe('Record Add', function() {
                 browser.get(browser.params.url + ":" + testParams.table_name);
             });
 
-            it("should show a resultset table with " + testParams.max_input_rows+1 + " entities.", function() {
+            it("should show a resultset table with " + (testParams.max_input_rows+1) + " entities.", function() {
                 browser.wait(EC.elementToBeClickable(multiFormOpenButton), browser.params.defaultTimeout);
 
                 var intInput = chaisePage.recordEditPage.getInputById(0, "int");

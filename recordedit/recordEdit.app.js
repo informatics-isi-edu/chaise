@@ -66,6 +66,31 @@
             context.appName = "recordedit";
             context.MAX_ROWS_TO_ADD = 201;
 
+            // modes = create, edit, copy
+            // create is contextualized to entry/create
+            // edit is contextualized to entry/edit
+            // copy is contextualized to entry/create
+            // NOTE: copy is technically creating an entity so it needs the proper visible column list as well as the data for the record associated with the given filter
+
+            context.modes = {
+                COPY: "copy",
+                CREATE: "create",
+                EDIT: "edit"
+            }
+            // mode defaults to create
+            context.mode = context.modes.CREATE;
+
+            // Mode can be any 3 with a filter
+            if (context.filter) {
+                // prefill always means create
+                // copy means copy regardless of a limit defined
+                // edit is everything else with a filter
+                context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
+            } else if (context.queryParams.limit) {
+                context.mode = context.modes.EDIT;
+            }
+
+
             Session.getSession().then(function getSession(_session) {
                 session = _session;
                 ERMrest.appLinkFn(UriUtils.appTagToURL);
@@ -75,7 +100,13 @@
                 // do nothing but return without a session
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
-                $rootScope.reference = ((context.filter && !context.queryParams.copy) ? reference.contextualize.entryEdit : reference.contextualize.entryCreate);
+                //contextualize the reference based on the mode (determined above) recordedit is in
+                if (context.mode == context.modes.EDIT) {
+                    $rootScope.reference = reference.contextualize.entryEdit;
+                } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
+                    $rootScope.reference = reference.contextualize.entryCreate;
+                }
+
                 $rootScope.reference.session = session;
                 $rootScope.session = session;
 
@@ -87,7 +118,7 @@
                     var cookie = $cookies.getObject(context.queryParams.prefill);
                     if (cookie) {
                         // Update view model
-                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname;
+                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
 
                         // Update submission model
                         var columnNames = Object.keys(cookie.keys);
@@ -103,7 +134,7 @@
                 }
 
                 // Case for editing an entity
-                if (context.filter || context.queryParams.limit) {
+                if (context.mode == context.modes.EDIT || context.mode == context.modes.COPY) {
                     if ($rootScope.reference.canUpdate) {
 
                         var numberRowsToRead;
@@ -138,7 +169,10 @@
 
                             var column, value;
 
-                            $rootScope.tuples = page.tuples;
+                            // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
+                            // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
+                            // The submission data is copied back to the tuples object before submitted in the PUT request
+                            $rootScope.tuples = angular.copy(page.tuples);
                             $rootScope.displayname = ((context.queryParams.copy && page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
 
                             for (var j = 0; j < page.tuples.length; j++) {
@@ -176,12 +210,14 @@
                                         case "int2":
                                         case "int4":
                                         case "int8":
-                                            value = (values[i] ? parseInt(values[i], 10) : '');
+                                            var intVal = parseInt(values[i], 10);
+                                            value = (!isNaN(intVal) ? intVal : null);
                                             break;
                                         case "float4":
                                         case "float8":
                                         case "numeric":
-                                            value = (values[i] ? parseFloat(values[i]) : '');
+                                            var floatVal = parseFloat(values[i]);
+                                            value = (!isNaN(floatVal) ? floatVal : null);
                                             break;
                                         default:
                                             value = values[i];
@@ -218,7 +254,7 @@
 
                         throw notAuthorizedError;
                     }
-                } else {
+                } else if (context.mode == context.modes.CREATE) {
                     if ($rootScope.reference.canCreate) {
                         $rootScope.displayname = $rootScope.reference.displayname;
 

@@ -68,6 +68,55 @@
 
             },
 
+            loginInANewWindow: function(cb) {
+                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : $window.location.origin + "/ermrest");
+                var referrerId = (new Date().getTime());
+                var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href.substring(0,window.location.href.indexOf('chaise')) + "chaise/login?referrerid=" + referrerId);
+                var config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Accept': 'application/json'
+                    }
+                };
+
+                window.addEventListener('message', function(args) {
+                    if (args && args.data && (typeof args.data == 'string')) {
+                        var obj = UriUtils.queryStringToJSON(args.data);
+                        if (obj.referrerid == referrerId && (typeof cb== 'function')) {
+                            cb();
+                        }
+                    }
+                });
+
+                $http.get(url, config).then(function(response){
+                    var data = response.data;
+                    if (data['redirect_url'] !== undefined) {
+                        var url = data['redirect_url'];
+                        $window.open(url, '_blank','width=800,height=600');
+                    } else if (data['login_form'] !== undefined) {
+                        var login_form = data['login_form'];
+                        var login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
+                        var method = login_form['method'];
+                        var action = UriUtils.fixedEncodeURIComponent(login_form['action']);
+                        var text = '';
+                        var hidden = '';
+                        for (var i = 0; i < login_form['input_fields'].length; i++) {
+                            var field = login_form['input_fields'][i];
+                            if (field.type === 'text') {
+                                text = UriUtils.fixedEncodeURIComponent(field.name);
+                            } else {
+                                hidden = UriUtils.fixedEncodeURIComponent(field.name);
+                            }
+                        }
+                        login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden + '&?referrerid=' + referrerId;
+                        $window.open(login_url, '_blank','width=800,height=600');
+                    }
+                }, function() {
+                    document.body.style.cursor = 'default';
+                    $window.location = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
+                });
+            },
+
             logout: function() {
                 var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : $window.location.origin + "/ermrest");
                 var logoutURL = chaiseConfig['logoutURL'];

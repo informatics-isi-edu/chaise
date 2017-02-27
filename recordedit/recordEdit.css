@@ -168,7 +168,6 @@ td.entity-value {
 }
 
 #formEdit > table {
-  overflow: hidden;
   margin-bottom: 0px;
 }
 
@@ -239,6 +238,17 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
 
 #formEdit.editMode table tr td:last-child {
   border-right: 0px;
+}
+
+#formEditScroll {
+  overflow-x: auto;
+  overflow-y:hidden;
+  height: 20px;
+}
+
+
+#formEditScroll > div {
+  height: 20px;
 }
 
 /* Chrome only: */
