@@ -33,7 +33,7 @@ describe('View existing record,', function() {
 			        });
 				});
 
-                describe("Click the delete record button ,", function() {
+                describe("Clicking the delete record button ,", function() {
 					var params = recordHelpers.testDeleteButton(tupleParams);
 				});
 
