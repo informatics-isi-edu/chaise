@@ -1,0 +1,10 @@
+<div class="modal-header">
+    <h3 class="modal-title">Can't Delete</h3>
+</div>
+<div class="modal-body">
+    This record cannot at this time because someone else has modified it. Please <a ng-href="{{::ctrl.params.recordUrl}}">review this record</a> before attempting to delete again.
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="ctrl.ok()">Review Record</button>
+    <button class="btn btn-default" type="button" ng-click="ctrl.cancel()">Cancel</button>
+</div>

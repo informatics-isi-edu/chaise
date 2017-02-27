@@ -52,13 +52,37 @@
         };
 
         vm.deleteRecord = function() {
-            $rootScope.reference.delete().then(function deleteSuccess() {
+            $rootScope.reference.delete([$rootScope.tuple]).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
-                ErrorService.catchAll(error);
-                $log.warn(error);
+                if (error instanceof ERMrest.PreconditionFailedError) {
+                    var params = {
+                        recordUrl: $rootScope.reference.contextualize.detailed.appLink
+                    };
+                    $uibModal.open({
+                        templateUrl: "../common/templates/deleteLater.modal.html",
+                        controller: "ErrorDialogController",
+                        controllerAs: "ctrl",
+                        size: "sm",
+                        resolve: {
+                            params: params
+                        }
+                    }).result.then(function reviewRecord() {
+                        // User opted to review the record
+                        $window.location.href = params.recordUrl;
+                    }, function cancel() {
+                        // User clicked cancel.
+                        // Do nothing. Just inserting an empty callback here to avoid tripping
+                        // the .catch clause below.
+                    }).catch(function(error) {
+                        ErrorService.catchAll(error);
+                    });
+                } else {
+                    ErrorService.catchAll(error);
+                    $log.warn(error);
+                }
             });
         };
 

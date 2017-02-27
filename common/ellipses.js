@@ -4,8 +4,8 @@
     angular.module('chaise.ellipses', [])
 
 
-        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', '$uibModal', '$log', 'MathUtils', 'UriUtils', '$window',
-            function($sce, $timeout, AlertsService, $uibModal, $log, MathUtils, UriUtils, $window) {
+        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', 'ErrorService', '$uibModal', '$log', 'MathUtils', 'UriUtils', '$window',
+            function($sce, $timeout, AlertsService, ErrorService, $uibModal, $log, MathUtils, UriUtils, $window) {
 
             return {
                 restrict: 'AE',
@@ -52,54 +52,108 @@
 
                         // define unlink function
                         if (scope.config.deletable && scope.context === "compact/brief" && scope.associationRef) {
-                            scope.unlink = function () {
-                                if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                                    $uibModal.open({
-                                        templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
-                                        controller: "ConfirmDeleteController",
-                                        controllerAs: "ctrl",
-                                        size: "sm"
-                                    }).result.then(function success() {
-                                        // user accepted prompt to delete
+                            var associatedRefTuples = [];
+                            scope.associationRef.read(1).then(function(page) {
+                                associatedRefTuples = page.tuples;
+                                scope.unlink = function () {
+                                    if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+                                        $uibModal.open({
+                                            templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
+                                            controller: "ConfirmDeleteController",
+                                            controllerAs: "ctrl",
+                                            size: "sm"
+                                        }).result.then(function success() {
+                                            // user accepted prompt to delete
+                                            return scope.associationRef.delete(associatedRefTuples);
+                                        }).then(function deleteSuccess() {
 
-                                        return scope.associationRef.delete();
+                                            // tell parent controller data updated
+                                            scope.$emit('record-modified');
 
-                                    }).then(function deleteSuccess() {
-
-                                        // tell parent controller data updated
-                                        scope.$emit('record-modified');
-
-                                    }, function deleteFailure(response) {
-                                        if (response != "cancel") {
+                                        }, function deleteFailure(response) {
+                                            if (response != "cancel") {
+                                                if (response instanceof ERMrest.PreconditionFailedError) {
+                                                    var params = {
+                                                        recordUrl: $rootScope.reference.contextualize.detailed.appLink
+                                                    };
+                                                    $uibModal.open({
+                                                        templateUrl: "../common/templates/deleteLater.modal.html",
+                                                        controller: "ErrorDialogController",
+                                                        controllerAs: "ctrl",
+                                                        size: "sm",
+                                                        resolve: {
+                                                            params: params
+                                                        }
+                                                    }).result.then(function reviewRecord() {
+                                                        // User opted to review the record
+                                                        $window.location.href = params.recordUrl;
+                                                    }, function cancel() {
+                                                        // User clicked cancel.
+                                                        // Do nothing. Just inserting an empty callback here to avoid tripping
+                                                        // the .catch clause below.
+                                                    }).catch(function(error) {
+                                                        ErrorService.catchAll(error);
+                                                    });
+                                                } else {
+                                                    scope.$emit('error', response);
+                                                    $log.warn(response);
+                                                }
+                                            }
+                                        }).catch(function (error) {
+                                            $log.info(error);
                                             scope.$emit('error', response);
-                                            $log.warn(response);
-                                        }
-                                    }).catch(function (error) {
-                                        $log.info(error);
-                                        scope.$emit('error', response);
-                                    });
-                                } else {
+                                        });
+                                    } else {
 
-                                    scope.associationRef.delete().then(function deleteSuccess() {
+                                        scope.associationRef.delete(associatedRefTuples).then(function deleteSuccess() {
 
-                                        // tell parent controller data updated
-                                        scope.$emit('record-modified');
+                                            // tell parent controller data updated
+                                            scope.$emit('record-modified');
 
-                                    }, function deleteFailure(response) {
-                                        scope.$emit('error', response);
-                                        $log.warn(response);
-                                    }).catch(function (error) {
-                                        scope.$emit('error', response);
-                                        $log.info(error);
-                                    });
+                                        }, function deleteFailure(response) {
+                                            if (response instanceof ERMrest.PreconditionFailedError) {
+                                                var params = {
+                                                    recordUrl: $rootScope.reference.contextualize.detailed.appLink
+                                                };
+                                                $uibModal.open({
+                                                    templateUrl: "../common/templates/deleteLater.modal.html",
+                                                    controller: "ErrorDialogController",
+                                                    controllerAs: "ctrl",
+                                                    size: "sm",
+                                                    resolve: {
+                                                        params: params
+                                                    }
+                                                }).result.then(function reviewRecord() {
+                                                    // User opted to review the record
+                                                    $window.location.href = params.recordUrl;
+                                                }, function cancel() {
+                                                    // User clicked cancel.
+                                                    // Do nothing. Just inserting an empty callback here to avoid tripping
+                                                    // the .catch clause below.
+                                                }).catch(function(error) {
+                                                    ErrorService.catchAll(error);
+                                                });
+                                            } else {
+                                                scope.$emit('error', response);
+                                                $log.warn(response);
+                                                ErrorService.catchAll(response);
+                                            }
+                                        }).catch(function (error) {
+                                            scope.$emit('error', error);
+                                            $log.info(error);
+                                            ErrorService.catchAll(error);
+                                        });
+                                    }
                                 }
-                            }
+                            }).catch(function(e) {
+                                ErrorService.catchAll(e);
+                            });
                         }
 
                         // define delete function
                         else if (scope.config.deletable) {
                             scope.delete = function () {
-
+                                var tuples = [scope.tuple];
                                 if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                                     $uibModal.open({
                                         templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -109,7 +163,7 @@
                                     }).result.then(function success() {
                                         // user accepted prompt to delete
 
-                                        return scope.tuple.reference.delete();
+                                        return scope.tuple.reference.delete(tuples);
 
                                     }).then(function deleteSuccess() {
 
@@ -118,8 +172,32 @@
 
                                     }, function deleteFailure(response) {
                                         if (response != "cancel") {
-                                            scope.$emit('error', response);
-                                            $log.warn(response);
+                                            if (response instanceof ERMrest.PreconditionFailedError) {
+                                                var params = {
+                                                    recordUrl: $rootScope.reference.contextualize.detailed.appLink
+                                                };
+                                                $uibModal.open({
+                                                    templateUrl: "../common/templates/deleteLater.modal.html",
+                                                    controller: "ErrorDialogController",
+                                                    controllerAs: "ctrl",
+                                                    size: "sm",
+                                                    resolve: {
+                                                        params: params
+                                                    }
+                                                }).result.then(function reviewRecord() {
+                                                    // User opted to review the record
+                                                    $window.location.href = params.recordUrl;
+                                                }, function cancel() {
+                                                    // User clicked cancel.
+                                                    // Do nothing. Just inserting an empty callback here to avoid tripping
+                                                    // the .catch clause below.
+                                                }).catch(function(error) {
+                                                    ErrorService.catchAll(error);
+                                                });
+                                            } else {
+                                                scope.$emit('error', response);
+                                                $log.warn(response);
+                                            }
                                         }
                                     }).catch(function (error) {
                                         $log.info(error);
@@ -127,14 +205,38 @@
                                     });
                                 } else {
 
-                                    scope.tuple.reference.delete().then(function deleteSuccess() {
+                                    scope.tuple.reference.delete(tuples).then(function deleteSuccess() {
 
                                         // tell parent controller data updated
                                         scope.$emit('record-modified');
 
                                     }, function deleteFailure(response) {
-                                        scope.$emit('error', response);
-                                        $log.warn(response);
+                                        if (response instanceof ERMrest.PreconditionFailedError) {
+                                            var params = {
+                                                recordUrl: $rootScope.reference.contextualize.detailed.appLink
+                                            };
+                                            $uibModal.open({
+                                                templateUrl: "../common/templates/deleteLater.modal.html",
+                                                controller: "ErrorDialogController",
+                                                controllerAs: "ctrl",
+                                                size: "sm",
+                                                resolve: {
+                                                    params: params
+                                                }
+                                            }).result.then(function reviewRecord() {
+                                                // User opted to review the record
+                                                $window.location.href = params.recordUrl;
+                                            }, function cancel() {
+                                                // User clicked cancel.
+                                                // Do nothing. Just inserting an empty callback here to avoid tripping
+                                                // the .catch clause below.
+                                            }).catch(function(error) {
+                                                ErrorService.catchAll(error);
+                                            });
+                                        } else {
+                                            scope.$emit('error', response);
+                                            $log.warn(response);
+                                        }
                                     }).catch(function (error) {
                                         scope.$emit('error', response);
                                         $log.info(error);
@@ -182,7 +284,7 @@
 
                         var resizeRow = function() {
                             if (containsOverflow == false && timerCount ++ < 500) {
-                                
+
                                 for (var i = 0; i < element[0].children.length; i++) {
                                     var height = element[0].children[i].children[0].clientHeight;
                                     if (height > maxHeight) {
@@ -198,7 +300,7 @@
                                     resizeRow();
                                 }, 50);
                             }
-                        };      
+                        };
 
                         scope.$watchCollection('rowValues', function (v) {
                             init();
@@ -207,7 +309,7 @@
                                 containsOverflow = false;
                                 resizeRow();
                             }, 10);
-                           
+
                         });
                     }
                 }

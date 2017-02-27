@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window', function FormController(AlertsService, DataUtils, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window', function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
         vm.recordEditModel = recordEditModel;
@@ -96,8 +96,7 @@
         }
 
         function showSubmissionError(response) {
-            AlertsService.addAlert({type: 'error', message: response.message});
-            $log.warn(response);
+            ErrorService.catchAll(response);
         }
 
         /*
@@ -295,23 +294,73 @@
                     size: "sm"
                 }).result.then(function success() {
                     // user accepted prompt to delete
-                    return $rootScope.reference.delete();
+                    return $rootScope.reference.delete($rootScope.tuples);
                 }).then(function deleteSuccess() {
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (response != "cancel") vm.showSubmissionError(response);
+                    if (response instanceof ERMrest.PreconditionFailedError) {
+                        var params = {
+                            recordUrl: $rootScope.reference.contextualize.detailed.appLink
+                        };
+                        $uibModal.open({
+                            templateUrl: "../common/templates/deleteLater.modal.html",
+                            controller: "ErrorDialogController",
+                            controllerAs: "ctrl",
+                            size: "sm",
+                            resolve: {
+                                params: params
+                            }
+                        }).result.then(function reviewRecord() {
+                            // User opted to review the record
+                            $window.location.href = params.recordUrl;
+                        }, function cancel() {
+                            // User clicked cancel.
+                            // Do nothing. Just inserting an empty callback here to avoid tripping
+                            // the .catch clause below.
+                        }).catch(function(error) {
+                            ErrorService.catchAll(error);
+                        });
+                    } else {
+                        if (response !== 'cancel') {
+                            vm.showSubmissionError(response);
+                        }
+                    }
                 }).catch(function (error) {
-                    $log.info(error);
+                    ErrorService.catchAll(error);
                 });
             } else {
-                $rootScope.reference.delete().then(function deleteSuccess() {
+                $rootScope.reference.delete($rootScope.tuples).then(function deleteSuccess() {
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    vm.showSubmissionError(response);
+                    if (response instanceof ERMrest.PreconditionFailedError) {
+                        var params = {
+                            recordUrl: $rootScope.reference.contextualize.detailed.appLink
+                        };
+                        $uibModal.open({
+                            templateUrl: "../common/templates/deleteLater.modal.html",
+                            controller: "ErrorDialogController",
+                            controllerAs: "ctrl",
+                            size: "sm",
+                            resolve: {
+                                params: params
+                            }
+                        }).result.then(function reviewRecord() {
+                            // User opted to review the record
+                            $window.location.href = params.recordUrl;
+                        }, function cancel() {
+                            // User clicked cancel.
+                            // Do nothing. Just inserting an empty callback here to avoid tripping
+                            // the .catch clause below.
+                        }).catch(function(error) {
+                            ErrorService.catchAll(error);
+                        });
+                    } else {
+                        vm.showSubmissionError(response);
+                    }
                 }).catch(function (error) {
-                    $log.info(error);
+                    ErrorService.catchAll(error);
                 });
             }
         }
