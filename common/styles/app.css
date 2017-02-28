@@ -532,9 +532,8 @@ input.search-progress {
 
 .modal-login-instruction .modal-dialog pre {
     white-space: pre-line;
-    word-break: break-word;
+    word-break: inherit;
     text-align: justify;
-    width: 97%;
 }
 
 .pls { padding-left: 5px; }

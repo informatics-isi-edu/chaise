@@ -1,14 +1,14 @@
 <div ng-if="ctrl.params.isChrome">
 	<div class="row">
-	    <div class="col-md-6 mtl">
+	    <div class="col-md-6 col-sm-6 mtl">
 	    	<img src="../common/styles/images/browser/chrome-popup.png" class="marl" style="width: 100%;">
     	</div>
-	    <div class="col-md-6 mtl">
+	    <div class="col-md-6 col-sm-6 mtl">
 	    	<pre style="width: 97%;">
-	    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Google Chrome, follow the steps listed below:</b>
+	    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Google Chrome, follow these steps:</b>
 				<ol>
 					<li>If pop-ups have been blocked, you'll see the icon in the address bar. Click the icon to see a list of the blocked pop-ups.</li>
-					<li>To always see pop-ups for this site, select "Always show pop-ups from <b><i>{{ctrl.params.site}}</i></b>." The site will be added to the exceptions list, which you can manage in the Content Settings dialog.</li>
+					<li>To always see pop-ups for this site, select <b><i>Always show pop-ups from {{ctrl.params.site}}</i></b>. The site will be added to the exceptions list, which you can manage in the Content Settings dialog.</li>
 					<li>Click the link for the login pop-up window.</li>
 				</ol>
 			</pre>
@@ -20,18 +20,21 @@
 </div>
 
 
-<div ng-if="ctrl.params.isSafari" class="ng-scope">
+<div ng-if="ctrl.params.isSafari">
 	<div class="row">
-	    <div class="col-md-4 mtl"><img src="../common/styles/images/browser/safari-popup1.png" class="marl" style=" width: 100%;">
-    </div>
-	<div class="col-md-8 mtl"><img src="../common/styles/images/browser/safari-popup2.png" class="marl" style="width: 95%;"></div>
-	    <div class="col-md-8" style="padding-left: 35px;">
+	    <div class="col-md-4 col-sm-8 mtl">
+	    	<img src="../common/styles/images/browser/safari-popup1.png" class="marl" style=" width: 100%;">
+    	</div>
+		<div class="col-md-8 col-sm-8 mtl">
+			<img src="../common/styles/images/browser/safari-popup2.png" class="marl" style="width: 95%;">
+		</div>
+	    <div class="col-md-8 col-sm-8" style="padding-left: 35px;">
 	    	<pre style="width: 97%;">	    		
-	    	<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Safari , follow the steps listed below:</b>
+	    	<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Safari , follow these steps:</b>
 				<ol>
-					<li>If pop-ups have been blocked, then Go to the Safari menu and choose 'Preferences' from the list of choices.</li>
-					<li>Click on the Security heading. To always see pop-ups for this site, uncheck the box marked 'Block pop-up windows' if you want to allow popup windows. Close the Preferences windows after you are done changing settings.</li>
-					<li>Click the link for the login pop-up window.</li>
+					<li>If pop-ups have been blocked, then Go to the Safari menu and choose <b><i>Preferences</b></i> from the list of choices.</li>
+					<li>Click on the <b><i>Security heading</b></i>. To always see pop-ups for this site, uncheck the box marked <b><i>Block pop-up windows</b></i> if you want to allow popup windows. Close the Preferences windows after you are done changing settings.</li>
+					<li>Click the blue link Login below.</li>
 				</ol>
 			</pre>
 			<div class="mtl">
@@ -41,19 +44,19 @@
 	</div>
 </div>
 
-<div ng-if="ctrl.params.isFirefox" class="ng-scope">
+<div ng-if="ctrl.params.isFirefox">
 	<div class="row">
-	    <div class="col-md-5 mtl">
-			<img src="../common/styles/images/browser/firefox-popup1.png" class="mrm mlm" style=" width: 100%;"><img src="../common/styles/images/browser/firefox-popup2.png" class="mtl mrm mlm mbm" style="width: 100%;height: 300px;">
+	    <div class="col-md-5 col-sm-5 mtl">
+			<img src="../common/styles/images/browser/firefox-popup1.png" class="mrm mlm" style=" width: 100%;"><img src="../common/styles/images/browser/firefox-popup2.png" class="mtl mrm mlm mbm" style="width: 100%;height: 360px;">
     	</div>
-	    <div class="col-md-7 mtl">
+	    <div class="col-md-7 col-sm-7 mtl">
 	    	<pre style="width: 97%;">	    		
-	    	<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Firefox , follow the steps listed below:</b>
+	    	<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Firefox, follow these steps:</b>
 				<ol>
-					<li>If pop-ups have been blocked, you'll see the icon in the address bar. Click the icon to see a list of the blocked pop-ups. Click on Edit Pop-Up Blocker preferences.</li>
+					<li>If pop-ups have been blocked, you'll see the icon in the address bar. Click the icon to see a list of the blocked pop-ups. Click on <b><i>Edit Pop-Up Blocker preferences</b></i>.</li>
 					<li>
 						<ol>
-							<li>By default, the input is populated with {{ctrl.params.host}}. Change it to <b><i>{{ctrl.params.site}}</b></i> to add <b><i>https://</b></i>.</li>
+							<li>By default, the input is populated with {{ctrl.params.host}}. Change it to <b><i>{{ctrl.params.site}}</b></i> to add <b><i>https://</b></i> at the beginning.</li>
 							<li>Click <b><i>Allow</b></i> button to add it to the list.</li>
 							<li>Click <b><i>Save Changes</b></i> button.</li>
 						</ol>
