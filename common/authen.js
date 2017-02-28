@@ -123,7 +123,8 @@
                             params: { 
                                 login_url: login_url
                             }
-                        }
+                        },
+                        size: "lg",
                     });
 
                 }, function() {

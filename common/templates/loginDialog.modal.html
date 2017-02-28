@@ -1,0 +1,63 @@
+<div ng-if="ctrl.params.isChrome">
+	<div class="row">
+	    <div class="col-md-6 mtl">
+	    	<img src="../common/styles/images/browser/chrome-popup.png" class="marl" style="width: 100%;">
+    	</div>
+	    <div class="col-md-6 mtl">
+	    	<pre style="width: 97%;">
+	    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Google Chrome, follow the steps listed below:</b>
+				<ol>
+					<li>If pop-ups have been blocked, you'll see the icon in the address bar. Click the icon to see a list of the blocked pop-ups.</li>
+					<li>To always see pop-ups for this site, select "Always show pop-ups from <b><i>{{ctrl.params.site}}</i></b>." The site will be added to the exceptions list, which you can manage in the Content Settings dialog.</li>
+					<li>Click the link for the login pop-up window.</li>
+				</ol>
+			</pre>
+			<div class="mtl">
+				<h4>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h4>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div ng-if="ctrl.params.isSafari" class="ng-scope">
+	<div class="row">
+	    <div class="col-md-4 mtl"><img src="../common/styles/images/browser/safari-popup1.png" class="marl" style=" width: 100%;">
+    </div>
+	<div class="col-md-8 mtl"><img src="../common/styles/images/browser/safari-popup2.png" class="marl" style="width: 95%;"></div>
+	    <div class="col-md-8" style="padding-left: 35px;">
+	    	<pre style="width: 97%;">	    		
+	    	<b>To see blocked pop-ups for <i class="ng-binding">https://dev.gpcrconsortium.org</i> on Safari , follow the steps listed below:</b>
+				<ol>
+					<li>If pop-ups have been blocked, then Go to the Safari menu and choose 'Preferences' from the list of choices.</li>
+					<li>Click on the Security heading. To always see pop-ups for this site, uncheck the box marked 'Block pop-up windows' if you want to allow popup windows. Close the Preferences windows after you are done changing settings.</li>
+					<li>Click the link for the login pop-up window.</li>
+				</ol>
+			</pre>
+			<div class="mtl">
+				<h3>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h3>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div ng-if="ctrl.params.isFirefox" class="ng-scope">
+	<div class="row">
+	    <div class="col-md-4 mtl"><img src="../common/styles/images/browser/safari-popup1.png" class="marl" style=" width: 100%;">
+    </div>
+	<div class="col-md-8 mtl"><img src="../common/styles/images/browser/safari-popup2.png" class="marl" style="width: 95%;"></div>
+	    <div class="col-md-8" style="padding-left: 35px;">
+	    	<pre style="width: 97%;">	    		
+	    	<b>To see blocked pop-ups for <i class="ng-binding">https://dev.gpcrconsortium.org</i> on Safari , follow the steps listed below:</b>
+				<ol>
+					<li>If pop-ups have been blocked, then Go to the Safari menu and choose 'Preferences' from the list of choices.</li>
+					<li>Click on the Security heading. To always see pop-ups for this site, uncheck the box marked 'Block pop-up windows' if you want to allow popup windows. Close the Preferences windows after you are done changing settings.</li>
+					<li>Click the link for the login pop-up window.</li>
+				</ol>
+			</pre>
+			<div class="mtl">
+				<h3>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h3>
+			</div>
+		</div>
+	</div>
+</div>

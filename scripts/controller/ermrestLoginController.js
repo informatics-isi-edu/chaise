@@ -9,9 +9,10 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUti
 
 
    	var queryString = uriUtils.queryStringToJSON(window.location.search);
-   	if (queryString.referrerid && (typeof queryString.action == 'undefined') && window.parent) {
+   	if (queryString.referrerid && (typeof queryString.action == 'undefined') && window.opener) {
    		//For child window
-		window.parent.postMessage(window.location.search, window.parent.location.href);
+		window.opener.postMessage(window.location.search, window.opener.location.href);
+		window.close();
    		return;
    	}
 
@@ -55,9 +56,10 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUti
 
 	   	//console.log(JSON.stringify(params, null, 4));
 		submitLogin($scope.username, $scope.password, params['referrer'], params['action'], params['text'], params['password'], function() {
-			if (queryString.referrerid && window.parent) {
+			if (queryString.referrerid && window.opener) {
 		   		//For child window
-				window.parent.postMessage(window.location.search, window.parent.location.href);
+				window.opener.postMessage(window.location.search, window.opener.location.href);
+				window.close();
 		   		return;
 		   	}
 
