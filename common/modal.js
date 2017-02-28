@@ -54,6 +54,8 @@
             window.open(params.login_url, '_blank','width=800,height=600');
         }
 
+        vm.params.host = $sce.trustAsResourceUrl(window.location.host);
+
         vm.openWindow();
         
     }])
