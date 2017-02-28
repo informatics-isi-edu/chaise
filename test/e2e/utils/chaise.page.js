@@ -676,6 +676,10 @@ var recordPage = function() {
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
     };
+
+    this.getModalText = function() {
+        return element(by.css(".modal-body"));    
+    };
 };
 
 var recordsetPage = function() {
@@ -880,7 +884,7 @@ function chaisePage() {
 
         browser.get(process.env.CHAISE_BASE_URL + "/login/");
         browser.ignoreSynchronization = true;
-          
+
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
             browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
               browser.ignoreSynchronization = false;
