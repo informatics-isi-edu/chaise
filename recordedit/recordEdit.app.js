@@ -34,8 +34,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
-        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+    .run(['AlertsService', 'ERMrest', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
+        function runRecordEditApp(AlertsService, ERMrest, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -152,18 +152,7 @@
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
-
-                                var filters = context.filter.filters;
-                                var noDataMessage = "No entity exists with ";
-                                for (var k = 0; k < filters.length; k++) {
-                                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
-                                    if (k != filters.length-1) {
-                                        noDataMessage += " or ";
-                                    }
-                                }
-                                var noDataError = new Error(noDataMessage);
-                                noDataError.code = errorNames.notFound;
-
+                                var noDataError = ErrorService.noRecordError(context.filter.filters);
                                 throw noDataError;
                             }
 

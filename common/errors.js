@@ -10,7 +10,7 @@
     })
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'textStrings', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, textStrings, $log, $rootScope, $uibModal, $window) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
             var providedLink = true;
@@ -46,6 +46,20 @@
             });
         }
 
+        function noRecordError(filters) {
+            var noDataMessage = textStrings.noDataMessage;
+            for (var k = 0; k < filters.length; k++) {
+                noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
+                if (k != filters.length-1) {
+                    noDataMessage += " or ";
+                }
+            }
+            var error = new Error(noDataMessage);
+            error.code = errorNames.notFound;
+
+            return error;
+        }
+
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function catchAll(exception) {
             $log.info(exception);
@@ -59,7 +73,8 @@
 
         return {
             errorPopup: errorPopup,
-            catchAll: catchAll
+            catchAll: catchAll,
+            noRecordError: noRecordError
         };
     }]);
 })();
