@@ -44,6 +44,60 @@ describe('Edit existing record,', function() {
     			        });
                     });
 
+                    it("should display a modal when attempting to delete a record that has been modified by someone else beforehand", function() {
+                        var EC = protractor.ExpectedConditions, allWindows;
+                        // Set up a mismatching ETag scenario before attempting delete to ensure that
+                        // that the delete operation doesn't throw a 412 error when ETags are mismatching
+                        // but the referenced tuples haven't changed from the tuples in the DB.
+                        var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
+                            config;
+
+                        // Edit the current record in a new tab in order to change the ETag
+                        // - Open current url in a new tab
+                        browser.driver.getCurrentUrl().then(function(url) {
+                            return browser.executeScript('window.open(arguments[0]);', url);
+                        }).then(function() {
+                            return browser.getAllWindowHandles();
+                        }).then(function(handles) {
+                            allWindows = handles;
+                            return browser.switchTo().window(allWindows[1]);
+                        }).then(function() {
+                            return chaisePage.waitForElement(element(by.id("submit-record-button")));
+                        }).then(function() {
+                        // - Change a small thing. Submit.
+                            var input = chaisePage.recordEditPage.getInputById(0, 'Summary');
+                            input.clear();
+                            input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
+                            return chaisePage.recordEditPage.getSubmitRecordButton().click();
+                        }).then(function(handles) {
+                        // - Go back to initial RecordEdit page
+                            browser.close();
+                            browser.switchTo().window(allWindows[0]);
+                        }).then(function() {
+                            return chaisePage.recordEditPage.getDeleteRecordButton().click()
+                        }).then(function () {
+                            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                            // expect modal to open
+                            return modalTitle.getText();
+                        }).then(function (text) {
+                            expect(text).toBe("Confirm Delete");
+                            return chaisePage.recordPage.getConfirmDeleteButton().click();
+                        }).then(function () {
+                            // Expect another modal to appear to tell user that this record cannot be deleted without page refresh.
+                            var refreshBtn = element(by.id('refresh-btn'));
+                            chaisePage.waitForElement(refreshBtn);
+                            return refreshBtn.click();
+                        }).then(function() {
+                            return chaisePage.waitForElement(element(by.id('submit-record-button')));
+                        }).then(function() {
+                            changedValue = chaisePage.recordEditPage.getInputById(0, 'Summary');
+                            expect(changedValue.getAttribute('value')).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
+                        }).catch(function(error) {
+                            console.dir(error);
+                            expect(error).not.toBeDefined();
+                        });
+                    });
+
                     it("from recordedit page and redirect to data browser.", function () {
                         var EC = protractor.ExpectedConditions,
                             modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
