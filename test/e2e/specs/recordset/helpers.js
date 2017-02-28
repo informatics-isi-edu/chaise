@@ -1,7 +1,7 @@
 var chaisePage = require('../../utils/chaise.page.js');
 
 exports.testPresentation = function (tableParams) {
-
+    var recEditUrl =  '';
 	it("should have '" + tableParams.title +  "' as title", function() {
 		var title = chaisePage.recordsetPage.getPageTitleElement();
         expect(title.getText()).toEqual(tableParams.title);
@@ -163,10 +163,65 @@ exports.testPresentation = function (tableParams) {
 			return browser.switchTo().window(allWindows[1]);
 		}).then(function() {
 			var result = '/recordedit/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
+            browser.driver.getCurrentUrl().then(function(url) {
+                // Store this for use in next spec.
+                recEditUrl = url;
+            });
 			expect(browser.driver.getCurrentUrl()).toContain(result);
 			browser.close();
 			browser.switchTo().window(allWindows[0]);
 		});
 	});
+
+    it('action columns should show a modal if user tries to delete a record that has been modified by someone else (412 error)', function() {
+        var EC = protractor.ExpectedConditions, allWindows;
+        var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
+            config;
+        // Edit a record in a new tab in order to change the ETag
+        browser.executeScript('window.open(arguments[0]);', recEditUrl).then(function() {
+            return browser.getAllWindowHandles();
+        }).then(function(handles) {
+            allWindows = handles;
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function() {
+            return chaisePage.waitForElement(element(by.id("submit-record-button")));
+        }).then(function() {
+        // - Change a small thing. Submit.
+            var input = chaisePage.recordEditPage.getInputById(0, 'Summary');
+            input.clear();
+            input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
+            return chaisePage.recordEditPage.getSubmitRecordButton().click();
+        }).then(function(handles) {
+        // - Go back to initial RecordEdit page
+            browser.close();
+            browser.switchTo().window(allWindows[0]);
+        }).then(function() {
+            return chaisePage.recordsetPage.getDeleteActionButtons();
+        }).then(function(deleteButtons) {
+            var deleteButton = deleteButtons[0];
+            return deleteButton.click();
+        }).then(function () {
+            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+            // expect modal to open
+            return modalTitle.getText();
+        }).then(function (text) {
+            expect(text).toBe("Confirm Delete");
+            return chaisePage.recordPage.getConfirmDeleteButton().click();
+        }).then(function () {
+            // Expect another modal to appear to tell user that this record cannot be deleted without page refresh.
+            var okBtn = element(by.id('confirm-btn'));
+            chaisePage.waitForElement(okBtn);
+            return okBtn.click();
+        }).then(function() {
+            return chaisePage.waitForElementInverse(element(by.id("spinner")));
+        }).then(function() {
+            var rows = chaisePage.recordsetPage.getRows();
+            var changedCell = rows.first().all(by.css('td')).get(4);
+            expect(changedCell.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
+        }).catch(function(error) {
+            console.dir(error);
+            expect(error).not.toBeDefined();
+        });
+    });
 
 };
