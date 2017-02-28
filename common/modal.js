@@ -30,6 +30,24 @@
         params.login_url = $sce.trustAsResourceUrl(params.login_url);
         vm.params = params;
 
+
+        //Firefox 1.0+
+        vm.params.isFirefox = typeof InstallTrigger !== 'undefined';
+
+        //Safari 3.0+ "[object HTMLElementConstructor]" 
+        vm.params.isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || safari.pushNotification);
+
+        //Internet Explorer 6-11
+        vm.params.isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        //Edge 20+
+        vm.params.isEdge = ! vm.params.isIE && !!window.StyleMedia;
+
+        //Chrome 1+
+        vm.params.isChrome = !!window.chrome && !!window.chrome.webstore;
+
+        vm.params.site = window.location.origin;
+
         vm.openWindow = function() {
             window.open(params.login_url, '_blank','width=800,height=600');
         }
