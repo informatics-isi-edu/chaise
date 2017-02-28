@@ -115,14 +115,13 @@
                     }
 
                     modalInstance = $uibModal.open({
-                        windowClass: "modal-login-iframe",
+                        windowClass: "modal-login-instruction",
                         templateUrl: "../common/templates/loginDialog.modal.html",
                         controller: 'LoginDialogController',
                         controllerAs: 'ctrl',
                         resolve: {
                             params: { 
-                                login_url: login_url,
-                                height: 800
+                                login_url: login_url
                             }
                         }
                     });

@@ -525,11 +525,8 @@ input.search-progress {
     border-bottom: none;
 }
 
-/*=============Login inside an iframe in a  modal********/
-.modal-login-iframe .modal-dialog {
-    width: 800px;
+/*=============Popup modal for login instructions********/
+.modal-login-instruction .modal-dialog {
+    margin-top: 0px;
 }
 
-.modal-login-iframe #spinner {
-    padding-top: 250px;
-}

@@ -29,6 +29,8 @@
         var vm = this;
         params.login_url = $sce.trustAsResourceUrl(params.login_url);
         vm.params = params;
+
+        $window.open(params.login_url, '_blank','width=800,height=600');
     }])
     .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
         var vm = this;
