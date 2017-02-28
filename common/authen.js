@@ -15,11 +15,12 @@
 
         NotFoundError.prototype.constructor = NotFoundError;
 
+        // authn API no longer communicates through ermrest, removing the need to check for ermrest location
+        var serviceURL = $window.location.origin;
+
         return {
 
             getSession: function() {
-                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : $window.location.origin + "/ermrest");
-
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
                     return response.data;
                 }, function(response) {
@@ -29,7 +30,6 @@
             },
 
             login: function (referrer) {
-                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : $window.location.origin + "/ermrest");
                 var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
                 var config = {
                     headers: {
@@ -69,7 +69,6 @@
             },
 
             loginInANewWindow: function(cb) {
-                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : $window.location.origin + "/ermrest");
                 var referrerId = (new Date().getTime());
                 var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href.substring(0,window.location.href.indexOf('chaise')) + "chaise/login?referrerid=" + referrerId);
                 var config = {
@@ -118,7 +117,6 @@
             },
 
             logout: function() {
-                var serviceURL = (chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : $window.location.origin + "/ermrest");
                 var logoutURL = chaiseConfig['logoutURL'];
                 var url = serviceURL + "/authn/session";
                 if (logoutURL !== undefined) {
