@@ -74,30 +74,25 @@
                                         }, function deleteFailure(response) {
                                             if (response != "cancel") {
                                                 if (response instanceof ERMrest.PreconditionFailedError) {
-                                                    var params = {
-                                                        recordUrl: $rootScope.reference.contextualize.detailed.appLink
-                                                    };
+                                                    // If a 412 is encountered, it means this row's info doesn't match
+                                                    // with the info in the DB currently.
+
+                                                    // 1. Open modal to let user know.
                                                     $uibModal.open({
-                                                        templateUrl: "../common/templates/deleteLater.modal.html",
+                                                        templateUrl: "../common/templates/uiChange.modal.html",
                                                         controller: "ErrorDialogController",
                                                         controllerAs: "ctrl",
                                                         size: "sm",
-                                                        resolve: {
-                                                            params: params
-                                                        }
-                                                    }).result.then(function reviewRecord() {
-                                                        // User opted to review the record
-                                                        $window.location.href = params.recordUrl;
-                                                    }, function cancel() {
-                                                        // User clicked cancel.
-                                                        // Do nothing. Just inserting an empty callback here to avoid tripping
-                                                        // the .catch clause below.
+                                                        resolve: {params: null}
+                                                    }).result.then(function reload() {
+                                                    // 2. Update UI by letting the table directive know
+                                                        scope.$emit('record-modified');
                                                     }).catch(function(error) {
                                                         ErrorService.catchAll(error);
                                                     });
                                                 } else {
                                                     scope.$emit('error', response);
-                                                    $log.warn(response);
+                                                    ErrorService.catchAll(error);
                                                 }
                                             }
                                         }).catch(function (error) {
@@ -113,31 +108,25 @@
 
                                         }, function deleteFailure(response) {
                                             if (response instanceof ERMrest.PreconditionFailedError) {
-                                                var params = {
-                                                    recordUrl: $rootScope.reference.contextualize.detailed.appLink
-                                                };
+                                                // If a 412 is encountered, it means this row's info doesn't match
+                                                // with the info in the DB currently.
+
+                                                // 1. Open modal to let user know.
                                                 $uibModal.open({
-                                                    templateUrl: "../common/templates/deleteLater.modal.html",
+                                                    templateUrl: "../common/templates/uiChange.modal.html",
                                                     controller: "ErrorDialogController",
                                                     controllerAs: "ctrl",
                                                     size: "sm",
-                                                    resolve: {
-                                                        params: params
-                                                    }
-                                                }).result.then(function reviewRecord() {
-                                                    // User opted to review the record
-                                                    $window.location.href = params.recordUrl;
-                                                }, function cancel() {
-                                                    // User clicked cancel.
-                                                    // Do nothing. Just inserting an empty callback here to avoid tripping
-                                                    // the .catch clause below.
+                                                    resolve: {params: null}
+                                                }).result.then(function reload() {
+                                                // 2. Update UI by letting the table directive know
+                                                    scope.$emit('record-modified');
                                                 }).catch(function(error) {
                                                     ErrorService.catchAll(error);
                                                 });
                                             } else {
                                                 scope.$emit('error', response);
-                                                $log.warn(response);
-                                                ErrorService.catchAll(response);
+                                                ErrorService.catchAll(error);
                                             }
                                         }).catch(function (error) {
                                             scope.$emit('error', error);
@@ -174,34 +163,29 @@
                                     }, function deleteFailure(response) {
                                         if (response != "cancel") {
                                             if (response instanceof ERMrest.PreconditionFailedError) {
-                                                var params = {
-                                                    recordUrl: $rootScope.reference.contextualize.detailed.appLink
-                                                };
+                                                // If a 412 is encountered, it means this row's info doesn't match
+                                                // with the info in the DB currently.
+
+                                                // 1. Open modal to let user know.
                                                 $uibModal.open({
-                                                    templateUrl: "../common/templates/deleteLater.modal.html",
+                                                    templateUrl: "../common/templates/uiChange.modal.html",
                                                     controller: "ErrorDialogController",
                                                     controllerAs: "ctrl",
                                                     size: "sm",
-                                                    resolve: {
-                                                        params: params
-                                                    }
-                                                }).result.then(function reviewRecord() {
-                                                    // User opted to review the record
-                                                    $window.location.href = params.recordUrl;
-                                                }, function cancel() {
-                                                    // User clicked cancel.
-                                                    // Do nothing. Just inserting an empty callback here to avoid tripping
-                                                    // the .catch clause below.
+                                                    resolve: {params: null}
+                                                }).result.then(function reload() {
+                                                // 2. Update UI by letting the table directive know
+                                                    scope.$emit('record-modified');
                                                 }).catch(function(error) {
                                                     ErrorService.catchAll(error);
                                                 });
                                             } else {
                                                 scope.$emit('error', response);
-                                                $log.warn(response);
+                                                ErrorService.catchAll(error);
                                             }
                                         }
                                     }).catch(function (error) {
-                                        $log.info(error);
+                                        ErrorService.catchAll(error);
                                         scope.$emit('error', response);
                                     });
                                 } else {
@@ -213,34 +197,29 @@
 
                                     }, function deleteFailure(response) {
                                         if (response instanceof ERMrest.PreconditionFailedError) {
-                                            var params = {
-                                                recordUrl: $rootScope.reference.contextualize.detailed.appLink
-                                            };
+                                            // If a 412 is encountered, it means this row's info doesn't match
+                                            // with the info in the DB currently.
+
+                                            // 1. Open modal to let user know.
                                             $uibModal.open({
-                                                templateUrl: "../common/templates/deleteLater.modal.html",
+                                                templateUrl: "../common/templates/uiChange.modal.html",
                                                 controller: "ErrorDialogController",
                                                 controllerAs: "ctrl",
                                                 size: "sm",
-                                                resolve: {
-                                                    params: params
-                                                }
-                                            }).result.then(function reviewRecord() {
-                                                // User opted to review the record
-                                                $window.location.href = params.recordUrl;
-                                            }, function cancel() {
-                                                // User clicked cancel.
-                                                // Do nothing. Just inserting an empty callback here to avoid tripping
-                                                // the .catch clause below.
+                                                resolve: {params: null}
+                                            }).result.then(function reload() {
+                                            // 2. Update UI by letting the table directive know
+                                                scope.$emit('record-modified');
                                             }).catch(function(error) {
                                                 ErrorService.catchAll(error);
                                             });
                                         } else {
                                             scope.$emit('error', response);
-                                            $log.warn(response);
+                                            ErrorService.catchAll(error);
                                         }
                                     }).catch(function (error) {
                                         scope.$emit('error', response);
-                                        $log.info(error);
+                                        ErrorService.catchAll(error);
                                     });
                                 }
                             };

@@ -313,24 +313,15 @@
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
                     if (response instanceof ERMrest.PreconditionFailedError) {
-                        var params = {
-                            recordUrl: $rootScope.reference.contextualize.detailed.appLink
-                        };
                         $uibModal.open({
-                            templateUrl: "../common/templates/deleteLater.modal.html",
+                            templateUrl: "../common/templates/refresh.modal.html",
                             controller: "ErrorDialogController",
                             controllerAs: "ctrl",
                             size: "sm",
-                            resolve: {
-                                params: params
-                            }
-                        }).result.then(function reviewRecord() {
-                            // User opted to review the record
-                            $window.location.href = params.recordUrl;
-                        }, function cancel() {
-                            // User clicked cancel.
-                            // Do nothing. Just inserting an empty callback here to avoid tripping
-                            // the .catch clause below.
+                            resolve: {params: null}
+                        }).result.then(function reload() {
+                            // Reload the page
+                            $window.location.reload();
                         }).catch(function(error) {
                             ErrorService.catchAll(error);
                         });
@@ -352,24 +343,15 @@
                             deleteRecord();
                         });
                     } else if (response instanceof ERMrest.PreconditionFailedError) {
-                        var params = {
-                            recordUrl: $rootScope.reference.contextualize.detailed.appLink
-                        };
                         $uibModal.open({
-                            templateUrl: "../common/templates/deleteLater.modal.html",
+                            templateUrl: "../common/templates/refresh.modal.html",
                             controller: "ErrorDialogController",
                             controllerAs: "ctrl",
                             size: "sm",
-                            resolve: {
-                                params: params
-                            }
-                        }).result.then(function reviewRecord() {
-                            // User opted to review the record
-                            $window.location.href = params.recordUrl;
-                        }, function cancel() {
-                            // User clicked cancel.
-                            // Do nothing. Just inserting an empty callback here to avoid tripping
-                            // the .catch clause below.
+                            resolve: {params: null}
+                        }).result.then(function reload() {
+                            // Reload the page
+                            $window.location.reload();
                         }).catch(function(error) {
                             ErrorService.catchAll(error);
                         });

@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', '$scope', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window, $scope) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window, $scope, $uibModal) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -67,24 +67,15 @@
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 if (error instanceof ERMrest.PreconditionFailedError) {
-                    var params = {
-                        recordUrl: $rootScope.reference.contextualize.detailed.appLink
-                    };
                     $uibModal.open({
-                        templateUrl: "../common/templates/deleteLater.modal.html",
+                        templateUrl: "../common/templates/refresh.modal.html",
                         controller: "ErrorDialogController",
                         controllerAs: "ctrl",
                         size: "sm",
-                        resolve: {
-                            params: params
-                        }
-                    }).result.then(function reviewRecord() {
-                        // User opted to review the record
-                        $window.location.href = params.recordUrl;
-                    }, function cancel() {
-                        // User clicked cancel.
-                        // Do nothing. Just inserting an empty callback here to avoid tripping
-                        // the .catch clause below.
+                        resolve: {params: null}
+                    }).result.then(function reload() {
+                        // Reload the page
+                        $window.location.reload();
                     }).catch(function(error) {
                         ErrorService.catchAll(error);
                     });

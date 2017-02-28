@@ -289,7 +289,7 @@ exports.testDeleteButton = function () {
         // that the delete operation doesn't throw a 412 error when ETags are mismatching
         // but the referenced tuples haven't changed from the tuples in the DB.
         var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
-            config;
+            config, changedValue;
 
         // Edit the current record in a new tab in order to change the ETag
         // - Grab current url, change record to recordedit, open this new url in a new tab
@@ -305,9 +305,9 @@ exports.testDeleteButton = function () {
             return chaisePage.waitForElement(element(by.id("submit-record-button")));
         }).then(function() {
         // - Change a small thing. Submit.
-            var input = chaisePage.recordEditPage.getInputById(0, 'User Rating');
+            var input = chaisePage.recordEditPage.getInputById(0, 'Summary');
             input.clear();
-            input.sendKeys('0.5');
+            input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
             return chaisePage.recordEditPage.getSubmitRecordButton().click();
         }).then(function(handles) {
         // - Go back to initial Record page
@@ -316,27 +316,24 @@ exports.testDeleteButton = function () {
         }).then(function() {
             return chaisePage.recordPage.getDeleteRecordButton().click()
         }).then(function () {
-            browser.wait(EC.visibilityOf(modalTitle));
+            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
             // expect modal to open
             return modalTitle.getText();
         }).then(function (text) {
             expect(text).toBe("Confirm Delete");
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function () {
-            /// Expect another modal to appear to tell user that this record cannot be deleted without review.
-            browser.wait(EC.visibilityOf(modalTitle));
-            return modalTitle.getText();
-        }).then(function(text) {
-            expect(text).toBe("Can't Delete");
-            return element(by.id('review-record-btn')).click();
+            // Expect another modal to appear to tell user that this record cannot be deleted without page refresh.
+            var refreshBtn = element(by.id('refresh-btn'));
+            chaisePage.waitForElement(refreshBtn);
+            return refreshBtn.click();
         }).then(function() {
-            browser.driver.sleep(1000);
-            return browser.driver.getCurrentUrl();
-        }).then(function(url) {
-            // Expect the Review Record button to take the user to Record app
-            expect(url.indexOf('/record/')).toBeGreaterThan(-1);
+            return chaisePage.waitForElement(element(by.id('tblRecord')));
+        }).then(function() {
+            changedValue = chaisePage.recordPage.getColumnValue('summary');
+            expect(changedValue.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
         }).catch(function(error) {
-            console.log(error);
+            console.dir(error);
             expect('Something went wrong with this promise chain.').toBe('Please see error message.');
         });
     });
@@ -344,31 +341,27 @@ exports.testDeleteButton = function () {
     it("should redirect to data browser if ETags match (like normal).", function () {
         var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
             config;
-
-        // Refresh the browser to exit the modal in the previous spec and continue
-        // deleting like normal.
-        browser.driver.navigate().refresh().then(function() {
-            chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
-                return browser.executeScript('return chaiseConfig;');
-            }).then(function(chaiseConfig) {
-                config = chaiseConfig
-                return chaisePage.recordPage.getDeleteRecordButton().click()
-            }).then(function () {
-                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-                // expect modal to open
-                return modalTitle.getText();
-            }).then(function (text) {
-                expect(text).toBe("Confirm Delete");
-                return chaisePage.recordPage.getConfirmDeleteButton().click();
-            }).then(function () {
-                browser.driver.sleep(1000);
-                return browser.driver.getCurrentUrl();
-            }).then(function(url) {
-                expect(url.indexOf('/recordset/')).toBeGreaterThan(-1);
-            }).catch(function(error) {
-                console.log(error);
-                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
-            });
+    
+        chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
+            return browser.executeScript('return chaiseConfig;');
+        }).then(function(chaiseConfig) {
+            config = chaiseConfig
+            return chaisePage.recordPage.getDeleteRecordButton().click()
+        }).then(function () {
+            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+            // expect modal to open
+            return modalTitle.getText();
+        }).then(function (text) {
+            expect(text).toBe("Confirm Delete");
+            return chaisePage.recordPage.getConfirmDeleteButton().click();
+        }).then(function () {
+            browser.driver.sleep(1000);
+            return browser.driver.getCurrentUrl();
+        }).then(function(url) {
+            expect(url.indexOf('/recordset/')).toBeGreaterThan(-1);
+        }).catch(function(error) {
+            console.log(error);
+            expect('Something went wrong with this promise chain.').toBe('Please see error message.');
         });
     });
 }
