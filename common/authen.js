@@ -114,17 +114,36 @@
                         login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden + '&?referrerid=' + referrerId;
                     }
 
+                    var params = {
+                        login_url: login_url
+                    };
+
+                    //Firefox 1.0+
+                    params.isFirefox = typeof InstallTrigger !== 'undefined';
+
+                    //Safari 3.0+ "[object HTMLElementConstructor]" 
+                    params.isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || safari.pushNotification);
+
+                    //Internet Explorer 6-11
+                    params.isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+                    //Edge 20+
+                    params.isEdge = !vm.params.isIE && !!window.StyleMedia;
+
+                    //Chrome 1+
+                    params.isChrome = !!window.chrome && !!window.chrome.webstore;
+
+                    params.site = window.location.origin;
+
                     modalInstance = $uibModal.open({
                         windowClass: "modal-login-instruction",
                         templateUrl: "../common/templates/loginDialog.modal.html",
                         controller: 'LoginDialogController',
                         controllerAs: 'ctrl',
                         resolve: {
-                            params: { 
-                                login_url: login_url
-                            }
+                            params: params
                         },
-                        size: "lg",
+                        size: if (params.isIE || params.isEdge) ?  "sm" : "lg",
                     });
 
                 }, function() {

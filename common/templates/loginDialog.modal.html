@@ -70,3 +70,43 @@
 		</div>
 	</div>
 </div>
+
+<div ng-if="ctrl.params.isEdge">
+	<div class="row">
+	    <div class="col-md-12 col-sm-12 mtl">
+	    	<img src="../common/styles/images/browser/edge-popup.png" class="marl" style="width: 100%;">
+    	</div>
+	    <div class="col-md-12 col-sm-12 mtl">
+	    	<pre style="width: 97%;">
+	    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Edge, follow these steps:</b>
+				<ol>
+					<li>If pop-ups have been blocked, you'll see a popup at the bottom of the screen mentioning Microsoft Edge has blocked it.</li>
+					<li>To always see pop-ups for this site, select <b><i>Always allow</i></b>. The site will be added to the exceptions list, which you can manage in the Adanced Settings.</li>
+				</ol>
+			</pre>
+			<div class="mtl">
+				<h4>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h4>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div ng-if="ctrl.params.isIE">
+	<div class="row">
+	    <div class="col-md-12 col-sm-12 mtl">
+	    	<img src="../common/styles/images/browser/edge-popup.png" class="marl" style="width: 100%;">
+    	</div>
+	    <div class="col-md-12 col-sm-12 mtl">
+	    	<pre style="width: 97%;">
+	    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Internet Explorer, follow these steps:</b>
+				<ol>
+					<li>If pop-ups have been blocked, you'll see a popup at the bottom of the screen mentioning Internet Explorer has blocked it. Click on <i><b>option for this site</b></i></li>
+					<li>To always see pop-ups for this site, select <b><i>Always allow</i></b>. The site will be added to the exceptions list, which you can manage in the Internet Options.</li>
+				</ol>
+			</pre>
+			<div class="mtl">
+				<h4>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h4>
+			</div>
+		</div>
+	</div>
+</div>
