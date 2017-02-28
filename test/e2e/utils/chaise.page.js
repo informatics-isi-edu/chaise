@@ -645,6 +645,10 @@ var recordPage = function() {
         return that.getRelatedTableRows(displayName).all(by.tagName("td"));
     };
 
+    this.getNoResultsRow = function() {
+        return element(by.id("no-results-row"));
+    };
+
     this.getCreateRecordButton = function() {
         return element(by.id("create-record"));
     };
@@ -697,6 +701,10 @@ var recordsetPage = function() {
 
     this.getRows = function() {
         return element.all(by.css('.table-row'));
+    };
+
+    this.getNoResultsRow = function() {
+        return element(by.id("no-results-row"));
     };
 
     this.getColumnsWithUnderline = function() {
@@ -880,7 +888,7 @@ function chaisePage() {
 
         browser.get(process.env.CHAISE_BASE_URL + "/login/");
         browser.ignoreSynchronization = true;
-          
+
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
             browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
               browser.ignoreSynchronization = false;
