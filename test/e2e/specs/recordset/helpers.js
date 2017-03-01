@@ -75,16 +75,20 @@ exports.testPresentation = function (tableParams) {
 		var e = element(by.id('custom-page-size'));
 		browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
-		var searchBox = chaisePage.recordsetPage.getSearchBox();
+		var searchBox = chaisePage.recordsetPage.getSearchBox(),
+            searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
+            clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
+            noResultsMessage = "No Results Found";
+
 		searchBox.sendKeys('Super 8 North Hollywood Motel');
-		chaisePage.recordsetPage.getSearchSubmitButton().click().then(function() {
+		searchSubmitButton.click().then(function() {
 			return chaisePage.waitForElementInverse(element(by.id("spinner")));
 		}).then(function() {
 			return chaisePage.recordsetPage.getRows()
 		}).then(function(rows) {
 			expect(rows.length).toBe(1);
 			// clear search
-			return chaisePage.recordsetPage.getSearchClearButton().click();
+			return clearSearchButton.click();
 		}).then(function() {
 			return chaisePage.waitForElementInverse(element(by.id("spinner")));
 		}).then(function() {
@@ -95,17 +99,36 @@ exports.testPresentation = function (tableParams) {
 			// apply conjunctive search words
 			searchBox.sendKeys('"Super 8" motel "North Hollywood"');
 
-			return chaisePage.recordsetPage.getSearchSubmitButton().click();
+			return searchSubmitButton.click();
 		}).then(function() {
 			return chaisePage.waitForElementInverse(element(by.id("spinner")));
 		}).then(function() {
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
 			expect(rows.length).toBe(1);
-
 			// clear search
-			chaisePage.recordsetPage.getSearchClearButton().click();
-		});
+			return clearSearchButton.click();
+		}).then(function() {
+            return chaisePage.waitForElementInverse(element(by.id("spinner")));
+        }).then(function() {
+            // search has been reset
+            searchBox.sendKeys("asdfghjkl");
+
+            return searchSubmitButton.click();
+        }).then(function() {
+            return chaisePage.waitForElementInverse(element(by.id("spinner")));
+        }).then(function() {
+            return chaisePage.recordsetPage.getRows();
+        }).then(function(rows) {
+            expect(rows.length).toBe(0);
+
+            return chaisePage.recordsetPage.getNoResultsRow().getText();
+        }).then(function(text) {
+            expect(text).toBe(noResultsMessage);
+
+            // clearing the search here resets the page for the next test case
+            clearSearchButton.click();
+        });
 
 	});
 

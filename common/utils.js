@@ -19,6 +19,13 @@
         "entry": "/recordedit"
     })
 
+    // this constant is used to keep track of our strings that the user is shown
+    // so that when one is changed, it is changed in all places.
+    // this will make localization easier if we go that route
+    .constant("messageMap", {
+        "noDataMessage": "No entity exists with "
+    })
+
     .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils',
         function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils) {
 

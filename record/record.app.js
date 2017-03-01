@@ -75,6 +75,13 @@
                 }, function error(exception) {
                     throw exception;
                 }).then(function getPage(page) {
+                    $log.info("Page: ", page);
+
+                    if (page.tuples.length < 1) {
+                        var noDataError = ErrorService.noRecordError(context.filter.filters);
+                        throw noDataError;
+                    }
+
                     var tuple = $rootScope.tuple = page.tuples[0];
                     // Used directly in the record-display directive
                     $rootScope.recordDisplayname = tuple.displayname;
