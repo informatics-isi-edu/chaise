@@ -1,113 +1,119 @@
-<div ng-if="ctrl.params.isChrome">
-	<div class="row">
-	    <div class="col-md-6 col-sm-6 col-xs-6 mtl">
-	    	<img src="../common/styles/images/browser/chrome-popup.png" class="marl" style="width: 100%;">
-    	</div>
-	    <div class="col-md-6 col-sm-6 col-xs-6 mtl" style="padding: 0px 30px 0px 20px;">
-	    	<pre>
-	    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Google Chrome, follow these steps:</b>
-				<ol>
-					<li>If pop-ups have been blocked, you'll see the icon in the address bar. Click the icon to see a list of the blocked pop-ups.</li>
-					<li>To always see pop-ups for this site, select <b><i>Always show pop-ups from {{ctrl.params.site}}</i></b>. The site will be added to the exceptions list, which you can manage in the Content Settings dialog.</li>
-					<li>Click the link for the login pop-up window.</li>
-				</ol>
-			</pre>
-			<div class="mtl">
-				<h4>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h4>
-			</div>
-		</div>
-	</div>
+<div class="modal-header">
+    <h3 class="modal-title">Error: {{::ctrl.params.message}}</h3>
 </div>
-
-
-<div ng-if="ctrl.params.isSafari">
-	<div class="row">
-	    <div class="col-md-4 col-sm-8 col-xs-8 mtl">
-	    	<img src="../common/styles/images/browser/safari-popup1.png" class="marl" style=" width: 100%;">
-    	</div>
-		<div class="col-md-8 col-sm-8 col-xs-8 mtl">
-			<img src="../common/styles/images/browser/safari-popup2.png" class="marl" style="width: 95%;">
-		</div>
-	    <div class="col-md-8 col-sm-8 col-xs-8" style="padding: 0px 40px 0px 35px;">
-	    	<pre>	    		
-	    	<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Safari , follow these steps:</b>
-				<ol>
-					<li>If pop-ups have been blocked, then Go to the Safari menu and choose <b><i>Preferences</b></i> from the list of choices.</li>
-					<li>Click on the <b><i>Security heading</b></i>. To always see pop-ups for this site, uncheck the box marked <b><i>Block pop-up windows</b></i> if you want to allow popup windows. Close the Preferences windows after you are done changing settings.</li>
-					<li>Click the blue link Login below.</li>
-				</ol>
-			</pre>
-			<div class="mtl">
-				<h3>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h3>
+<div class="modal-body">
+	<div ng-if="ctrl.params.isChrome">
+		<div class="row">
+		    <div class="col-md-6 col-sm-6 col-xs-6 mtl">
+		    	<img src="../common/styles/images/browser/chrome-popup.png" class="marl" style="width: 100%;">
+	    	</div>
+		    <div class="col-md-6 col-sm-6 col-xs-6 mtl" style="padding: 0px 30px 0px 20px;">
+		    	<pre>
+		    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Google Chrome, follow these steps:</b>
+					<ol>
+						<li>If pop-ups have been blocked, you'll see the icon in the address bar. Click the icon to see a list of the blocked pop-ups.</li>
+						<li>To always see pop-ups for this site, select <b><i>Always show pop-ups from {{ctrl.params.site}}</i></b>. The site will be added to the exceptions list, which you can manage in the Content Settings dialog.</li>
+						<li>Click the link for the login pop-up window.</li>
+					</ol>
+				</pre>
+				<div class="mtl">
+					<h4>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h4>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-<div ng-if="ctrl.params.isFirefox">
-	<div class="row">
-	    <div class="col-md-5 col-sm-5 col-xs-5 mtl">
-			<img src="../common/styles/images/browser/firefox-popup1.png" class="mrm mlm" style=" width: 100%;">
-			<img src="../common/styles/images/browser/firefox-popup2.png" class="mtl mrm mlm mbm" style="width: 100%;height: 360px;">
-    	</div>
-	    <div class="col-md-7 col-sm-7 col-xs-7 mtl"  style="padding: 0px 30px 0px 20px;">
-	    	<pre>	    		
-	    	<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Firefox, follow these steps:</b>
-				<ol>
-					<li>If pop-ups have been blocked, you'll see the icon in the address bar. Click the icon to see a list of the blocked pop-ups. Click on <b><i>Edit Pop-Up Blocker preferences</b></i>.</li>
-					<li>
-						<ol>
-							<li>By default, the input is populated with {{ctrl.params.host}}. Change it to <b><i>{{ctrl.params.site}}</b></i> to add <b><i>https://</b></i> at the beginning.</li>
-							<li>Click <b><i>Allow</b></i> button to add it to the list.</li>
-							<li>Click <b><i>Save Changes</b></i> button.</li>
-						</ol>
-					</li>
-					<li>Click the link <b><i>"Show https://auth.glo...."</i></b> in the popup we saw after clicking the icon in the address bar, to open the login pop-up window.</li>
-				</ol>
-			</pre>
-			<div class="mtl">
-				<h3>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h3>
+
+	<div ng-if="ctrl.params.isSafari">
+		<div class="row">
+		    <div class="col-md-4 col-sm-8 col-xs-8 mtl">
+		    	<img src="../common/styles/images/browser/safari-popup1.png" class="marl" style=" width: 100%;">
+	    	</div>
+			<div class="col-md-8 col-sm-8 col-xs-8 mtl">
+				<img src="../common/styles/images/browser/safari-popup2.png" class="marl" style="width: 95%;">
+			</div>
+		    <div class="col-md-8 col-sm-8 col-xs-8" style="padding: 0px 40px 0px 35px;">
+		    	<pre>	    		
+		    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Safari , follow these steps:</b>
+					<ol>
+						<li>If pop-ups have been blocked, then Go to the Safari menu and choose <b><i>Preferences</i></b> from the list of choices.</li>
+						<li>Click on the <b><i>Security heading</i></b>. To always see pop-ups for this site, uncheck the box marked <b><i>Block pop-up windows</i></b> if you want to allow popup windows. Close the Preferences windows after you are done changing settings.</li>
+						<li>Click the blue link Login below.</li>
+					</ol>
+				</pre>
+				<div class="mtl">
+					<h3>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h3>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-<div ng-if="ctrl.params.isEdge">
-	<div class="row">
-	    <div class="col-md-12 col-sm-12 col-xs-12 mtl">
-	    	<img src="../common/styles/images/browser/edge-popup.png" class="padl" style="width: 100%;">
-    	</div>
-	    <div class="col-md-12 col-sm-12 col-xs-12 mtl" style="padding: 0px 40px;">
-	    	<pre>
-	    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Edge, follow these steps:</b>
-				<ol>
-					<li>If pop-ups have been blocked, you'll see a popup at the bottom of the screen mentioning Microsoft Edge has blocked it.</li>
-					<li>To always see pop-ups for this site, select <b><i>Always allow</i></b>. The site will be added to the exceptions list, which you can manage in the Adanced Settings.</li>
-				</ol>
-			</pre>
-			<div class="mtm mbm pull-right mrl prl">
-				<h4>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h4>
+	<div ng-if="ctrl.params.isFirefox">
+		<div class="row">
+		    <div class="col-md-5 col-sm-5 col-xs-5 mtl">
+				<img src="../common/styles/images/browser/firefox-popup1.png" class="mrm mlm" style=" width: 100%;">
+				<img src="../common/styles/images/browser/firefox-popup2.png" class="mtl mrm mlm mbm" style="width: 100%;height: 360px;">
+	    	</div>
+		    <div class="col-md-7 col-sm-7 col-xs-7 mtl"  style="padding: 0px 30px 0px 20px;">
+		    	<pre>	    		
+		    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Firefox, follow these steps:</b>
+					<ol>
+						<li>If pop-ups have been blocked, you'll see the icon in the address bar. Click the icon to see a list of the blocked pop-ups. Click on <b><i>Edit Pop-Up Blocker preferences</i></b>.</li>
+						<li>
+							<ol>
+								<li>By default, the input is populated with <b><i>{{ctrl.params.host}}</i></b>. Change it to <b><i>{{ctrl.params.site}}</i></b> to add <b><i>https://</i></b> at the beginning.</li>
+								<li>Click <b><i>Allow</i></b> button to add it to the list.</li>
+								<li>Click <b><i>Save Changes</i></b> button.</li>
+							</ol>
+						</li>
+						<li>Click the link <b><i>"Show https://auth.glo...."</i></b> in the popup we saw after clicking the icon in the address bar, to open the login pop-up window.</li>
+					</ol>
+				</pre>
+				<div class="mtl">
+					<h3>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h3>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-<div ng-if="ctrl.params.isIE">
-	<div class="row">
-	    <div class="col-md-12 col-sm-12 col-xs-12 mtl">
-	    	<img src="../common/styles/images/browser/edge-popup.png" class="padl" style="width: 100%;">
-    	</div>
-	    <div class="col-md-12 col-sm-12 col-xs-12 mtl" style="padding: 0px 40px;">
-	    	<pre>
-	    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Internet Explorer, follow these steps:</b>
-				<ol>
-					<li>If pop-ups have been blocked, you'll see a popup at the bottom of the screen mentioning Internet Explorer has blocked it. Click on <i><b>option for this site</b></i></li>
-					<li>To always see pop-ups for this site, select <b><i>Always allow</i></b>. The site will be added to the exceptions list, which you can manage in the Internet Options.</li>
-				</ol>
-			</pre>
-			<div class="mtm mbm pull-right mrl prl">
-				<h4>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h4>
+	<div ng-if="ctrl.params.isEdge">
+		<div class="row">
+		    <div class="col-md-12 col-sm-12 col-xs-12 mtl">
+		    	<img src="../common/styles/images/browser/edge-popup.png" class="padl" style="width: 100%;">
+	    	</div>
+		    <div class="col-md-12 col-sm-12 col-xs-12 mtl" style="padding: 0px 40px;">
+		    	<pre>
+		    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Edge, follow these steps:</b>
+					<ol>
+						<li>If pop-ups have been blocked, you'll see a popup at the bottom of the screen mentioning Microsoft Edge has blocked it.</li>
+						<li>To always see pop-ups for this site, select <b><i>Always allow</i></b>. The site will be added to the exceptions list, which you can manage in the Adanced Settings.</li>
+					</ol>
+				</pre>
+				<div class="mtm mbm pull-right mrl prl">
+					<h4>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h4>
+				</div>
 			</div>
 		</div>
 	</div>
+
+	<div ng-if="ctrl.params.isIE">
+		<div class="row">
+		    <div class="col-md-12 col-sm-12 col-xs-12 mtl">
+		    	<img src="../common/styles/images/browser/edge-popup.png" class="padl" style="width: 100%;">
+	    	</div>
+		    <div class="col-md-12 col-sm-12 col-xs-12 mtl" style="padding: 0px 40px;">
+		    	<pre>
+		    		<b>To see blocked pop-ups for <i>{{ctrl.params.site}}</i> on Internet Explorer, follow these steps:</b>
+					<ol>
+						<li>If pop-ups have been blocked, you'll see a popup at the bottom of the screen mentioning Internet Explorer has blocked it. Click on <i><b>option for this site</b></i></li>
+						<li>To always see pop-ups for this site, select <b><i>Always allow</i></b>. The site will be added to the exceptions list, which you can manage in the Internet Options.</li>
+					</ol>
+				</pre>
+				<div class="mtm mbm pull-right mrl prl">
+					<h4>To reopen the login window if you missed it press <button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button></h4>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </div>

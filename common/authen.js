@@ -117,6 +117,8 @@
                     var params = {
                         login_url: login_url
                     };
+                    
+                    params.message = "Your session has expired, please login to continue."
 
                     modalInstance = $uibModal.open({
                         windowClass: "modal-login-instruction",
