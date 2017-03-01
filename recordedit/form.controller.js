@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap', function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -318,7 +318,11 @@
                             controller: "ErrorDialogController",
                             controllerAs: "ctrl",
                             size: "sm",
-                            resolve: {params: null},
+                            resolve: {
+                                params: {
+                                    message: messageMap.pageRefreshRequired
+                                }
+                            },
                             backdrop: 'static',
                             keyboard: false
                         }).result.then(function reload() {
@@ -350,7 +354,11 @@
                             controller: "ErrorDialogController",
                             controllerAs: "ctrl",
                             size: "sm",
-                            resolve: {params: null},
+                            resolve: {
+                                params: {
+                                    message: messageMap.pageRefreshRequired
+                                }
+                            },
                             backdrop: 'static',
                             keyboard: false
                         }).result.then(function reload() {

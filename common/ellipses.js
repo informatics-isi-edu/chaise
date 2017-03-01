@@ -4,8 +4,8 @@
     angular.module('chaise.ellipses', [])
 
 
-        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', 'ErrorService', '$uibModal', '$log', 'MathUtils', 'UriUtils', '$window', 'UiUtils',
-            function($sce, $timeout, AlertsService, ErrorService, $uibModal, $log, MathUtils, UriUtils, $window, UiUtils) {
+        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', 'ErrorService', '$uibModal', '$log', 'MathUtils', 'messageMap', 'UriUtils', '$window', 'UiUtils',
+            function($sce, $timeout, AlertsService, ErrorService, $uibModal, $log, MathUtils, messageMap, UriUtils, $window, UiUtils) {
 
             return {
                 restrict: 'AE',
@@ -83,7 +83,11 @@
                                                         controller: "ErrorDialogController",
                                                         controllerAs: "ctrl",
                                                         size: "sm",
-                                                        resolve: {params: null},
+                                                        resolve: {
+                                                            params: {
+                                                                message: messageMap.reviewModifiedRecord
+                                                            }
+                                                        },
                                                         backdrop: 'static',
                                                         keyboard: false
                                                     }).result.then(function reload() {
@@ -119,7 +123,11 @@
                                                     controller: "ErrorDialogController",
                                                     controllerAs: "ctrl",
                                                     size: "sm",
-                                                    resolve: {params: null},
+                                                    resolve: {
+                                                        params: {
+                                                            message: messageMap.reviewModifiedRecord
+                                                        }
+                                                    },
                                                     backdrop: 'static',
                                                     keyboard: false
                                                 }).result.then(function reload() {
@@ -176,7 +184,11 @@
                                                     controller: "ErrorDialogController",
                                                     controllerAs: "ctrl",
                                                     size: "sm",
-                                                    resolve: {params: null},
+                                                    resolve: {
+                                                        params: {
+                                                            message: messageMap.reviewModifiedRecord
+                                                        }
+                                                    },
                                                     backdrop: 'static',
                                                     keyboard: false
                                                 }).result.then(function reload() {
@@ -212,7 +224,11 @@
                                                 controller: "ErrorDialogController",
                                                 controllerAs: "ctrl",
                                                 size: "sm",
-                                                resolve: {params: null},
+                                                resolve: {
+                                                    params: {
+                                                        message: messageMap.reviewModifiedRecord
+                                                    }
+                                                },
                                                 backdrop: 'static',
                                                 keyboard: false
                                             }).result.then(function reload() {

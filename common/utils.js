@@ -23,7 +23,9 @@
     // so that when one is changed, it is changed in all places.
     // this will make localization easier if we go that route
     .constant("messageMap", {
-        "noDataMessage": "No entity exists with "
+        "noDataMessage": "No entity exists with ",
+        "pageRefreshRequired": "This record cannot be deleted at this time because someone else has modified it. Please refresh this page before attempting to delete again.",
+        "reviewModifiedRecord": "This record cannot be deleted or unlinked at this time because someone else has modified it. The record has been updated with the latest changes. Please review them before trying again."
     })
 
     .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils',

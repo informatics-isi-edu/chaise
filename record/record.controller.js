@@ -72,7 +72,11 @@
                         controller: "ErrorDialogController",
                         controllerAs: "ctrl",
                         size: "sm",
-                        resolve: {params: null}
+                        resolve: {
+                            params: {
+                                message: messageMap.pageRefreshRequired
+                            }
+                        }
                     }).result.then(function reload() {
                         // Reload the page
                         $window.location.reload();
