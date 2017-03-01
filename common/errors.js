@@ -10,7 +10,7 @@
     })
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'textStrings', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, textStrings, $log, $rootScope, $uibModal, $window) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'messageMap', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, messageMap, $log, $rootScope, $uibModal, $window) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
             var providedLink = true;
@@ -47,7 +47,7 @@
         }
 
         function noRecordError(filters) {
-            var noDataMessage = textStrings.noDataMessage;
+            var noDataMessage = messageMap.noDataMessage;
             for (var k = 0; k < filters.length; k++) {
                 noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
                 if (k != filters.length-1) {
