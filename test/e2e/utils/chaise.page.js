@@ -645,6 +645,10 @@ var recordPage = function() {
         return that.getRelatedTableRows(displayName).all(by.tagName("td"));
     };
 
+    this.getNoResultsRow = function() {
+        return element(by.id("no-results-row"));
+    };
+
     this.getCreateRecordButton = function() {
         return element(by.id("create-record"));
     };
@@ -701,6 +705,10 @@ var recordsetPage = function() {
 
     this.getRows = function() {
         return element.all(by.css('.table-row'));
+    };
+
+    this.getNoResultsRow = function() {
+        return element(by.id("no-results-row"));
     };
 
     this.getColumnsWithUnderline = function() {
