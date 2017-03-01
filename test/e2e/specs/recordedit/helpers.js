@@ -376,10 +376,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                                             activeElement = activeId;
                                             return activeId == searchBoxId;
                                         });
-                                    }).then(function() {
+                                    }, browser.params.defaultTimeout).then(function() {
                                         expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
                                     });
-                                    // expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
 	                                return modalTitle.getText();
 	                            }).then(function(text) {
 	                                // make sure modal opened
@@ -419,7 +418,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                                             activeElement = activeId;
                                             return activeId == searchBoxId;
                                         });
-                                    }).then(function() {
+                                    }, browser.params.defaultTimeout).then(function() {
                                         expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
                                     });
                                     // Close the modal
