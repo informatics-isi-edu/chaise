@@ -236,12 +236,18 @@ exports.testPresentation = function (tableParams) {
     // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
     it("should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities", function() {
         var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
-            tableDisplayname = "<strong>media</strong>";
+            tableDisplayname = "<strong>media</strong>",
+            noResultsMessage = "No Results Found";
         showAllRTButton.click().then(function() {
             expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();
             return showAllRTButton.click();
         }).then(function() {
+            // empty related table should show
             expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeTruthy();
+            //check the no results text appears properly
+            return chaisePage.recordPage.getNoResultsRow().getText();
+        }).then(function(text) {
+            expect(text).toBe(noResultsMessage);
             return showAllRTButton.click();
         }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();
