@@ -22,7 +22,7 @@
     // this constant is used to keep track of our strings that the user is shown
     // so that when one is changed, it is changed in all places.
     // this will make localization easier if we go that route
-    .constant("messagesMap", {
+    .constant("messageMap", {
         "noDataMessage": "No entity exists with "
     })
 
