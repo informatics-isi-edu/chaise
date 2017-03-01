@@ -680,6 +680,10 @@ var recordPage = function() {
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
     };
+
+    this.getModalText = function() {
+        return element(by.css(".modal-body"));    
+    };
 };
 
 var recordsetPage = function() {
