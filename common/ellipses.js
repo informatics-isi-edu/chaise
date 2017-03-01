@@ -83,7 +83,9 @@
                                                         controller: "ErrorDialogController",
                                                         controllerAs: "ctrl",
                                                         size: "sm",
-                                                        resolve: {params: null}
+                                                        resolve: {params: null},
+                                                        backdrop: 'static',
+                                                        keyboard: false
                                                     }).result.then(function reload() {
                                                     // 2. Update UI by letting the table directive know
                                                         scope.$emit('record-modified');
@@ -117,7 +119,9 @@
                                                     controller: "ErrorDialogController",
                                                     controllerAs: "ctrl",
                                                     size: "sm",
-                                                    resolve: {params: null}
+                                                    resolve: {params: null},
+                                                    backdrop: 'static',
+                                                    keyboard: false
                                                 }).result.then(function reload() {
                                                 // 2. Update UI by letting the table directive know
                                                     scope.$emit('record-modified');
@@ -172,7 +176,9 @@
                                                     controller: "ErrorDialogController",
                                                     controllerAs: "ctrl",
                                                     size: "sm",
-                                                    resolve: {params: null}
+                                                    resolve: {params: null},
+                                                    backdrop: 'static',
+                                                    keyboard: false
                                                 }).result.then(function reload() {
                                                 // 2. Update UI by letting the table directive know
                                                     scope.$emit('record-modified');
@@ -206,7 +212,9 @@
                                                 controller: "ErrorDialogController",
                                                 controllerAs: "ctrl",
                                                 size: "sm",
-                                                resolve: {params: null}
+                                                resolve: {params: null},
+                                                backdrop: 'static',
+                                                keyboard: false
                                             }).result.then(function reload() {
                                             // 2. Update UI by letting the table directive know
                                                 scope.$emit('record-modified');

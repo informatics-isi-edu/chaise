@@ -318,7 +318,9 @@
                             controller: "ErrorDialogController",
                             controllerAs: "ctrl",
                             size: "sm",
-                            resolve: {params: null}
+                            resolve: {params: null},
+                            backdrop: 'static',
+                            keyboard: false
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
@@ -348,7 +350,9 @@
                             controller: "ErrorDialogController",
                             controllerAs: "ctrl",
                             size: "sm",
-                            resolve: {params: null}
+                            resolve: {params: null},
+                            backdrop: 'static',
+                            keyboard: false
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
