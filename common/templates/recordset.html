@@ -49,7 +49,7 @@
 </div>
 
 <!-- record table -->
-<div>
+<div ng-if="vm.hasLoaded">
     <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
 </div>
 
