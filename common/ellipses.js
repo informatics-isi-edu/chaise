@@ -85,7 +85,8 @@
                                                         size: "sm",
                                                         resolve: {
                                                             params: {
-                                                                message: messageMap.reviewModifiedRecord
+                                                                title: messageMap.reviewModifiedRecord.title,
+                                                                message: messageMap.reviewModifiedRecord.message
                                                             }
                                                         },
                                                         backdrop: 'static',
@@ -125,7 +126,8 @@
                                                     size: "sm",
                                                     resolve: {
                                                         params: {
-                                                            message: messageMap.reviewModifiedRecord
+                                                            title: messageMap.reviewModifiedRecord.title,
+                                                            message: messageMap.reviewModifiedRecord.message
                                                         }
                                                     },
                                                     backdrop: 'static',
@@ -186,7 +188,8 @@
                                                     size: "sm",
                                                     resolve: {
                                                         params: {
-                                                            message: messageMap.reviewModifiedRecord
+                                                            title: messageMap.reviewModifiedRecord.title,
+                                                            message: messageMap.reviewModifiedRecord.message
                                                         }
                                                     },
                                                     backdrop: 'static',
@@ -226,7 +229,8 @@
                                                 size: "sm",
                                                 resolve: {
                                                     params: {
-                                                        message: messageMap.reviewModifiedRecord
+                                                        title: messageMap.reviewModifiedRecord.title,
+                                                        message: messageMap.reviewModifiedRecord.message
                                                     }
                                                 },
                                                 backdrop: 'static',

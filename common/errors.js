@@ -63,12 +63,11 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function catchAll(exception) {
             $log.info(exception);
-
             if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.login($window.location.href);
             } else if (exception instanceof ERMrest.PreconditionFailedError) {
-                // A more useful message for 412 Precondition Failed
-                AlertsService.addAlert({type: 'warning', message: 'This page is out of sync with the server. Please refresh the page and try again.'});
+                // A more useful general message for 412 Precondition Failed
+                AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
                 AlertsService.addAlert({type:'error', message:exception.message});
             }

@@ -74,7 +74,8 @@
                         size: "sm",
                         resolve: {
                             params: {
-                                message: messageMap.pageRefreshRequired
+                                title: messageMap.pageRefreshRequired.title,
+                                message: messageMap.pageRefreshRequired.message
                             }
                         }
                     }).result.then(function reload() {
