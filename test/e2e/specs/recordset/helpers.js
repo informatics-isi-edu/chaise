@@ -1,7 +1,7 @@
 var chaisePage = require('../../utils/chaise.page.js');
 
 exports.testPresentation = function (tableParams) {
-
+    var recEditUrl =  '';
 	it("should have '" + tableParams.title +  "' as title", function() {
 		var title = chaisePage.recordsetPage.getPageTitleElement();
         expect(title.getText()).toEqual(tableParams.title);
@@ -147,7 +147,82 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
-	it("action columns should show delete button that deletes record", function() {
+	it("action columns should show edit button that redirects to the recordedit page", function() {
+
+		var allWindows;
+		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
+			return chaisePage.recordsetPage.getEditActionButtons();
+		}).then(function(editButtons) {
+			expect(editButtons.length).toBe(4);
+			return editButtons[0].click();
+		}).then(function() {
+			return browser.getAllWindowHandles();
+		}).then(function(handles) {
+			allWindows = handles;
+			return browser.switchTo().window(allWindows[1]);
+		}).then(function() {
+			var result = '/recordedit/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
+            browser.driver.getCurrentUrl().then(function(url) {
+                // Store this for use in later spec.
+                recEditUrl = url;
+            });
+			expect(browser.driver.getCurrentUrl()).toContain(result);
+			browser.close();
+			browser.switchTo().window(allWindows[0]);
+		});
+	});
+
+    it('should show a modal if user tries to delete (via action column) a record that has been modified by someone else (412 error)', function() {
+        var EC = protractor.ExpectedConditions, allWindows, config;
+        // Edit a record in a new tab in order to change the ETag
+        recEditUrl = recEditUrl.replace('id=2003', 'id=4004');
+        recEditUrl = recEditUrl.slice(0, recEditUrl.indexOf('?invalidate'));
+
+        browser.executeScript('window.open(arguments[0]);', recEditUrl).then(function() {
+            return browser.getAllWindowHandles();
+        }).then(function(handles) {
+            allWindows = handles;
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function() {
+            return chaisePage.waitForElement(element(by.id("submit-record-button")));
+        }).then(function() {
+        // - Change a small thing. Submit.
+            var input = chaisePage.recordEditPage.getInputById(0, 'Summary');
+            input.clear();
+            input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
+            return chaisePage.recordEditPage.getSubmitRecordButton().click();
+        }).then(function(handles) {
+        // - Go back to initial RecordEdit page
+            browser.close();
+            browser.switchTo().window(allWindows[0]);
+        }).then(function() {
+            return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
+        }).then(function () {
+            var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+            // expect modal to open
+            return modalTitle.getText();
+        }).then(function(text) {
+            expect(text).toBe("Confirm Delete");
+            return chaisePage.recordPage.getConfirmDeleteButton().click();
+        }).then(function() {
+            // Expect another modal to appear to tell user that this record cannot be deleted
+            // and user should check the updated UI for latest row data.
+            chaisePage.waitForElement(element(by.id('confirm-btn')));
+            return element(by.id('confirm-btn')).click();
+        }).then(function() {
+            return chaisePage.waitForElementInverse(element(by.id("spinner")));
+        }).then(function() {
+            var rows = chaisePage.recordsetPage.getRows();
+            var changedCell = rows.get(3).all(by.css('td')).get(4);
+            expect(changedCell.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
+        }).catch(function(error) {
+            console.dir(error);
+            expect(error).not.toBeDefined();
+        });
+    });
+
+    it("action columns should show delete button that deletes record", function() {
 		var deleteButton;
 		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
 			return chaisePage.recordsetPage.getDeleteActionButtons();
@@ -168,27 +243,6 @@ exports.testPresentation = function (tableParams) {
 			return chaisePage.recordsetPage.getRows();
 		}).then(function(rows) {
 			expect(rows.length).toBe(3);
-		});
-	});
-
-	it("action columns should show edit button that redirects to the recordedit page", function() {
-
-		var allWindows;
-		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
-			return chaisePage.recordsetPage.getEditActionButtons();
-		}).then(function(editButtons) {
-			expect(editButtons.length).toBe(3);
-			return editButtons[0].click();
-		}).then(function() {
-			return browser.getAllWindowHandles();
-		}).then(function(handles) {
-			allWindows = handles;
-			return browser.switchTo().window(allWindows[1]);
-		}).then(function() {
-			var result = '/recordedit/#' + browser.params.catalogId + "/" + tableParams.schemaName + ":" + tableParams.table_name + "/id=" + tableParams.data[0].id;
-			expect(browser.driver.getCurrentUrl()).toContain(result);
-			browser.close();
-			browser.switchTo().window(allWindows[0]);
 		});
 	});
 

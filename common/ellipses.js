@@ -4,8 +4,8 @@
     angular.module('chaise.ellipses', [])
 
 
-        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', '$uibModal', '$log', 'MathUtils', 'UriUtils', '$window', 'UiUtils',
-            function($sce, $timeout, AlertsService, $uibModal, $log, MathUtils, UriUtils, $window, UiUtils) {
+        .directive('ellipses', ['$sce', '$timeout', 'AlertsService', 'ErrorService', '$uibModal', '$log', 'MathUtils', 'messageMap', 'UriUtils', '$window', 'UiUtils',
+            function($sce, $timeout, AlertsService, ErrorService, $uibModal, $log, MathUtils, messageMap, UriUtils, $window, UiUtils) {
 
             return {
                 restrict: 'AE',
@@ -53,54 +53,111 @@
 
                         // define unlink function
                         if (scope.config.deletable && scope.context === "compact/brief" && scope.associationRef) {
-                            scope.unlink = function () {
-                                if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                                    $uibModal.open({
-                                        templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
-                                        controller: "ConfirmDeleteController",
-                                        controllerAs: "ctrl",
-                                        size: "sm"
-                                    }).result.then(function success() {
-                                        // user accepted prompt to delete
+                            var associatedRefTuples = [];
+                            scope.associationRef.read(1).then(function(page) {
+                                associatedRefTuples = page.tuples;
+                                scope.unlink = function () {
+                                    if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+                                        $uibModal.open({
+                                            templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
+                                            controller: "ConfirmDeleteController",
+                                            controllerAs: "ctrl",
+                                            size: "sm"
+                                        }).result.then(function success() {
+                                            // user accepted prompt to delete
+                                            return scope.associationRef.delete(associatedRefTuples);
+                                        }).then(function deleteSuccess() {
 
-                                        return scope.associationRef.delete();
+                                            // tell parent controller data updated
+                                            scope.$emit('record-modified');
 
-                                    }).then(function deleteSuccess() {
+                                        }, function deleteFailure(response) {
+                                            if (response != "cancel") {
+                                                if (response instanceof ERMrest.PreconditionFailedError) {
+                                                    // If a 412 is encountered, it means this row's info doesn't match
+                                                    // with the info in the DB currently.
 
-                                        // tell parent controller data updated
-                                        scope.$emit('record-modified');
-
-                                    }, function deleteFailure(response) {
-                                        if (response != "cancel") {
+                                                    // 1. Open modal to let user know.
+                                                    $uibModal.open({
+                                                        templateUrl: "../common/templates/uiChange.modal.html",
+                                                        controller: "ErrorDialogController",
+                                                        controllerAs: "ctrl",
+                                                        size: "sm",
+                                                        resolve: {
+                                                            params: {
+                                                                title: messageMap.reviewModifiedRecord.title,
+                                                                message: messageMap.reviewModifiedRecord.message
+                                                            }
+                                                        },
+                                                        backdrop: 'static',
+                                                        keyboard: false
+                                                    }).result.then(function reload() {
+                                                    // 2. Update UI by letting the table directive know
+                                                        scope.$emit('record-modified');
+                                                    }).catch(function(error) {
+                                                        ErrorService.catchAll(error);
+                                                    });
+                                                } else {
+                                                    scope.$emit('error', response);
+                                                    ErrorService.catchAll(error);
+                                                }
+                                            }
+                                        }).catch(function (error) {
+                                            $log.info(error);
                                             scope.$emit('error', response);
-                                            $log.warn(response);
-                                        }
-                                    }).catch(function (error) {
-                                        $log.info(error);
-                                        scope.$emit('error', response);
-                                    });
-                                } else {
+                                        });
+                                    } else {
 
-                                    scope.associationRef.delete().then(function deleteSuccess() {
+                                        scope.associationRef.delete(associatedRefTuples).then(function deleteSuccess() {
 
-                                        // tell parent controller data updated
-                                        scope.$emit('record-modified');
+                                            // tell parent controller data updated
+                                            scope.$emit('record-modified');
 
-                                    }, function deleteFailure(response) {
-                                        scope.$emit('error', response);
-                                        $log.warn(response);
-                                    }).catch(function (error) {
-                                        scope.$emit('error', response);
-                                        $log.info(error);
-                                    });
+                                        }, function deleteFailure(response) {
+                                            if (response instanceof ERMrest.PreconditionFailedError) {
+                                                // If a 412 is encountered, it means this row's info doesn't match
+                                                // with the info in the DB currently.
+
+                                                // 1. Open modal to let user know.
+                                                $uibModal.open({
+                                                    templateUrl: "../common/templates/uiChange.modal.html",
+                                                    controller: "ErrorDialogController",
+                                                    controllerAs: "ctrl",
+                                                    size: "sm",
+                                                    resolve: {
+                                                        params: {
+                                                            title: messageMap.reviewModifiedRecord.title,
+                                                            message: messageMap.reviewModifiedRecord.message
+                                                        }
+                                                    },
+                                                    backdrop: 'static',
+                                                    keyboard: false
+                                                }).result.then(function reload() {
+                                                // 2. Update UI by letting the table directive know
+                                                    scope.$emit('record-modified');
+                                                }).catch(function(error) {
+                                                    ErrorService.catchAll(error);
+                                                });
+                                            } else {
+                                                scope.$emit('error', response);
+                                                ErrorService.catchAll(error);
+                                            }
+                                        }).catch(function (error) {
+                                            scope.$emit('error', error);
+                                            $log.info(error);
+                                            ErrorService.catchAll(error);
+                                        });
+                                    }
                                 }
-                            }
+                            }).catch(function(e) {
+                                ErrorService.catchAll(e);
+                            });
                         }
 
                         // define delete function
                         else if (scope.config.deletable) {
                             scope.delete = function () {
-
+                                var tuples = [scope.tuple];
                                 if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                                     $uibModal.open({
                                         templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -110,7 +167,7 @@
                                     }).result.then(function success() {
                                         // user accepted prompt to delete
 
-                                        return scope.tuple.reference.delete();
+                                        return scope.tuple.reference.delete(tuples);
 
                                     }).then(function deleteSuccess() {
 
@@ -119,32 +176,84 @@
 
                                     }, function deleteFailure(response) {
                                         if (response != "cancel") {
-                                            scope.$emit('error', response);
-                                            $log.warn(response);
+                                            if (response instanceof ERMrest.PreconditionFailedError) {
+                                                // If a 412 is encountered, it means this row's info doesn't match
+                                                // with the info in the DB currently.
+
+                                                // 1. Open modal to let user know.
+                                                $uibModal.open({
+                                                    templateUrl: "../common/templates/uiChange.modal.html",
+                                                    controller: "ErrorDialogController",
+                                                    controllerAs: "ctrl",
+                                                    size: "sm",
+                                                    resolve: {
+                                                        params: {
+                                                            title: messageMap.reviewModifiedRecord.title,
+                                                            message: messageMap.reviewModifiedRecord.message
+                                                        }
+                                                    },
+                                                    backdrop: 'static',
+                                                    keyboard: false
+                                                }).result.then(function reload() {
+                                                // 2. Update UI by letting the table directive know
+                                                    scope.$emit('record-modified');
+                                                }).catch(function(error) {
+                                                    ErrorService.catchAll(error);
+                                                });
+                                            } else {
+                                                scope.$emit('error', response);
+                                                ErrorService.catchAll(error);
+                                            }
                                         }
                                     }).catch(function (error) {
-                                        $log.info(error);
+                                        ErrorService.catchAll(error);
                                         scope.$emit('error', response);
                                     });
                                 } else {
 
-                                    scope.tuple.reference.delete().then(function deleteSuccess() {
+                                    scope.tuple.reference.delete(tuples).then(function deleteSuccess() {
 
                                         // tell parent controller data updated
                                         scope.$emit('record-modified');
 
                                     }, function deleteFailure(response) {
-                                        scope.$emit('error', response);
-                                        $log.warn(response);
+                                        if (response instanceof ERMrest.PreconditionFailedError) {
+                                            // If a 412 is encountered, it means this row's info doesn't match
+                                            // with the info in the DB currently.
+
+                                            // 1. Open modal to let user know.
+                                            $uibModal.open({
+                                                templateUrl: "../common/templates/uiChange.modal.html",
+                                                controller: "ErrorDialogController",
+                                                controllerAs: "ctrl",
+                                                size: "sm",
+                                                resolve: {
+                                                    params: {
+                                                        title: messageMap.reviewModifiedRecord.title,
+                                                        message: messageMap.reviewModifiedRecord.message
+                                                    }
+                                                },
+                                                backdrop: 'static',
+                                                keyboard: false
+                                            }).result.then(function reload() {
+                                            // 2. Update UI by letting the table directive know
+                                                scope.$emit('record-modified');
+                                            }).catch(function(error) {
+                                                ErrorService.catchAll(error);
+                                            });
+                                        } else {
+                                            scope.$emit('error', response);
+                                            ErrorService.catchAll(error);
+                                        }
                                     }).catch(function (error) {
                                         scope.$emit('error', response);
-                                        $log.info(error);
+                                        ErrorService.catchAll(error);
                                     });
                                 }
                             };
                         }
                     };
-                    
+
                     // Initialize the action column btn links
                     init();
 
@@ -208,7 +317,7 @@
                                 //Iterate over table data in the row
                                 for (var i = 0; i < element[0].children.length; i++) {
 
-                                    // Get all images and iframes inside the td  
+                                    // Get all images and iframes inside the td
                                     var imagesAndIframes = UiUtils.getImageAndIframes(element[0].children[i]);
 
                                     // Bind onload event and updateheight for particular td index
