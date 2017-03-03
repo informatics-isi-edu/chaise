@@ -67,7 +67,7 @@
                                             // user accepted prompt to delete
                                             return scope.associationRef.delete(associatedRefTuples);
                                         }, function errorOpening1stModal(error) {
-                                            console.dir('ERROR opening 2nd modal', error);
+                                            console.dir('ERROR opening 1st modal', error);
                                         }).then(function deleteSuccess() {
 
                                             // tell parent controller data updated
