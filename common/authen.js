@@ -78,7 +78,7 @@
                         'Accept': 'application/json'
                     }
                 };
-                var modalInstance; 
+                var modalInstance, closed = false; 
                 
                 $http.get(url, config).then(function(response){
                     var data = response.data;
@@ -134,11 +134,12 @@
                         $cookies.put("chaise-" + referrerId, true, { path: "/" });
                         var intervalId;
                         var watchChangeInReferrerId = function () {
-                            if (!$cookies.get("chaise-" + referrerId)) {
+                            if (!closed && !$cookies.get("chaise-" + referrerId)) {
                                 $interval.cancel(intervalId);
                                 if (typeof cb== 'function') {
                                     modalInstance.close("Done");
                                     cb();
+                                    closed = true;
                                 }
                                 return;
                             }
@@ -147,6 +148,7 @@
                         var onModalClose = function() {
                             $interval.cancel(intervalId);
                             $cookies.remove("chaise-" + referrerId, { path: "/" });
+                            closed = true;
                         }
 
                         // To avoid problems when user explicitly close the modal
@@ -162,6 +164,7 @@
                                 if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                                     modalInstance.close("Done");
                                     cb();
+                                    closed = true;
                                 }
                             }
                         });
