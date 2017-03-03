@@ -144,11 +144,13 @@
                             }
                         }
 
-                        // To avoid problems when user explicitly close the modal
-                        modalInstance.result.then(null, function () {
+                        var onModalClose = function() {
                             $interval.cancel(intervalId);
                             $cookies.remove("chaise-" + referrerId, { path: "/" });
-                        });
+                        }
+
+                        // To avoid problems when user explicitly close the modal
+                        modalInstance.result.then(onModalClose, onModalClose);
 
                         intervalId = $interval(watchChangeInReferrerId, 50);
 

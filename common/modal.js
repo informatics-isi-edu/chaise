@@ -42,6 +42,12 @@
 
         vm.params.host = $sce.trustAsResourceUrl(window.location.host);
 
+        vm.cancel = cancel;
+
+        function cancel() {
+            $uibModalInstance.dismiss('cancel');
+        }
+
     }])
     .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
         var vm = this;
