@@ -66,13 +66,16 @@
                                         }).result.then(function success() {
                                             // user accepted prompt to delete
                                             return scope.associationRef.delete(associatedRefTuples);
+                                        }, function errorOpening1stModal(error) {
+                                            console.dir('ERROR opening 2nd modal', error);
                                         }).then(function deleteSuccess() {
 
                                             // tell parent controller data updated
                                             scope.$emit('record-modified');
 
                                         }, function deleteFailure(response) {
-                                            if (response != "cancel") {
+                                            console.dir('RESPONSE', response);
+                                            // if (response != "cancel") {
                                                 if (response instanceof ERMrest.PreconditionFailedError) {
                                                     // If a 412 is encountered, it means this row's info doesn't match
                                                     // with the info in the DB currently.
@@ -95,13 +98,14 @@
                                                     // 2. Update UI by letting the table directive know
                                                         scope.$emit('record-modified');
                                                     }).catch(function(error) {
+                                                        console.dir('ERROR opening 2nd modal', error);
                                                         ErrorService.catchAll(error);
                                                     });
                                                 } else {
                                                     scope.$emit('error', response);
                                                     ErrorService.catchAll(error);
                                                 }
-                                            }
+                                            // }
                                         }).catch(function (error) {
                                             $log.info(error);
                                             scope.$emit('error', response);
@@ -114,6 +118,7 @@
                                             scope.$emit('record-modified');
 
                                         }, function deleteFailure(response) {
+                                            console.dir('RESPONSE', response);
                                             if (response instanceof ERMrest.PreconditionFailedError) {
                                                 // If a 412 is encountered, it means this row's info doesn't match
                                                 // with the info in the DB currently.
@@ -136,6 +141,7 @@
                                                 // 2. Update UI by letting the table directive know
                                                     scope.$emit('record-modified');
                                                 }).catch(function(error) {
+                                                    console.log('ERROR opening 2nd modal', error);
                                                     ErrorService.catchAll(error);
                                                 });
                                             } else {
