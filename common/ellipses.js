@@ -175,13 +175,15 @@
 
                                         return scope.tuple.reference.delete(tuples);
 
+                                    }, function errorOpening1stModal(error) {
+                                        console.dir('Error opening confirm delete modal', error);
                                     }).then(function deleteSuccess() {
 
                                         // tell parent controller data updated
                                         scope.$emit('record-modified');
 
                                     }, function deleteFailure(response) {
-                                        if (response != "cancel") {
+                                        // if (response != "cancel") {
                                             if (response instanceof ERMrest.PreconditionFailedError) {
                                                 // If a 412 is encountered, it means this row's info doesn't match
                                                 // with the info in the DB currently.
@@ -200,9 +202,11 @@
                                                     },
                                                     backdrop: 'static',
                                                     keyboard: false
-                                                }).result.then(function reload() {
+                                                }).result.then(function() {
                                                 // 2. Update UI by letting the table directive know
                                                     scope.$emit('record-modified');
+                                                }, function errorOpening2ndModal(error) {
+                                                    console.dir('error opening 2nd modal', error);
                                                 }).catch(function(error) {
                                                     ErrorService.catchAll(error);
                                                 });
@@ -210,7 +214,7 @@
                                                 scope.$emit('error', response);
                                                 ErrorService.catchAll(error);
                                             }
-                                        }
+                                        // }
                                     }).catch(function (error) {
                                         ErrorService.catchAll(error);
                                         scope.$emit('error', response);
