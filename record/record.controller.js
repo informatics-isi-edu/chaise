@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window, $scope, $uibModal) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
