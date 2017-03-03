@@ -347,7 +347,7 @@ exports.testDeleteButton = function () {
     it("should redirect to data browser if ETags match (like normal).", function () {
         var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
             config;
-    
+
         chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
             return browser.executeScript('return chaiseConfig;');
         }).then(function(chaiseConfig) {
