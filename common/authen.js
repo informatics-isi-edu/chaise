@@ -3,7 +3,7 @@
 
     angular.module('chaise.authen', ['chaise.utils'])
 
-    .factory('Session', ['$http', '$q', '$window', 'UriUtils', '$uibModal', function ($http, $q, $window, UriUtils, $uibModal) {
+    .factory('Session', ['$http', '$q', '$window', 'UriUtils', '$uibModal', '$interval', '$cookies', function ($http, $q, $window, UriUtils, $uibModal, $interval, $cookies) {
 
         function NotFoundError(status, message) {
             this.code = 404;
@@ -79,17 +79,7 @@
                     }
                 };
                 var modalInstance; 
-
-                window.addEventListener('message', function(args) {
-                    if (args && args.data && (typeof args.data == 'string')) {
-                        var obj = UriUtils.queryStringToJSON(args.data);
-                        if (obj.referrerid == referrerId && (typeof cb== 'function')) {
-                            modalInstance.close("Done");
-                            cb();
-                        }
-                    }
-                });
-
+                
                 $http.get(url, config).then(function(response){
                     var data = response.data;
 
@@ -118,7 +108,7 @@
                         login_url: login_url
                     };
                     
-                    params.message = "Your session has expired, please login to continue."
+                    params.message = "Your session has expired."
 
                     modalInstance = $uibModal.open({
                         windowClass: "modal-login-instruction",
@@ -128,8 +118,52 @@
                         resolve: {
                             params: params
                         },
-                        size: "lg"
+                        openedClass: 'modal-login',
+                        backdrop: 'static',
+                        keyboard: false
                     });
+
+                   
+
+                    /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
+                     * variable
+                     */
+                    if (UriUtils.isBrowserIE()) {
+
+                        
+                        $cookies.put("chaise-" + referrerId, true, { path: "/" });
+                        var intervalId;
+                        var watchChangeInReferrerId = function () {
+                            if (!$cookies.get("chaise-" + referrerId)) {
+                                $interval.cancel(intervalId);
+                                if (typeof cb== 'function') {
+                                    modalInstance.close("Done");
+                                    cb();
+                                }
+                                return;
+                            }
+                        }
+
+                        // To avoid problems when user explicitly close the modal
+                        modalInstance.result.then(null, function () {
+                            $interval.cancel(intervalId);
+                            $cookies.remove("chaise-" + referrerId, { path: "/" });
+                        });
+
+                        intervalId = $interval(watchChangeInReferrerId, 50);
+
+                    } else {
+
+                        window.addEventListener('message', function(args) {
+                            if (args && args.data && (typeof args.data == 'string')) {
+                                var obj = UriUtils.queryStringToJSON(args.data);
+                                if (obj.referrerid == referrerId && (typeof cb== 'function')) {
+                                    modalInstance.close("Done");
+                                    cb();
+                                }
+                            }
+                        });
+                    }
 
                 }, function() {
                     document.body.style.cursor = 'default';

@@ -526,6 +526,24 @@ input.search-progress {
 }
 
 /*=============Popup modal for login instructions********/
+
+.modal-login .modal-backdrop {
+    opacity: 0.7 !important;
+}
+
+.modal-login-instruction .modal-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -300px;
+    margin-top: -100px;
+}
+
+.modal-login-instruction .modal-dialog .modal-content {
+    width: 600px;
+    height: 200px;
+}
+
 .modal-login-instruction .modal-dialog ol li {
     list-style-type: decimal;
 }

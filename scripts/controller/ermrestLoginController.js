@@ -4,14 +4,21 @@
 
 var ermLoginController = angular.module('ermLoginController', []);
 
-ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUtils',
-                                           function($sce, $scope, ermrest, uriUtils) {
+ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUtils','$cookies',
+                                           function($sce, $scope, ermrest, uriUtils, $cookies) {
 
 
    	var queryString = uriUtils.queryStringToJSON(window.location.search);
    	if (queryString.referrerid && (typeof queryString.action == 'undefined') && window.opener) {
-   		//For child window
-		window.opener.postMessage(window.location.search, window.opener.location.href);
+			
+		// if browser is IE then clear the referrerId from cookiestore
+		// else postmessage to parent window and close itslef
+   		if (uriUtils.isBrowserIE()) {
+   			$cookies.remove("chaise-" + queryString.referrerid, { path: "/" });
+   		} else {
+	   		//For child window
+			window.opener.postMessage(window.location.search, window.opener.location.href);
+		}
 		window.close();
    		return;
    	}
@@ -57,10 +64,15 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUti
 	   	//console.log(JSON.stringify(params, null, 4));
 		submitLogin($scope.username, $scope.password, params['referrer'], params['action'], params['text'], params['password'], function() {
 			if (queryString.referrerid && window.opener) {
-		   		//For child window
-				window.opener.postMessage(window.location.search, window.opener.location.href);
+		   		// if browser is IE then clear the referrerId from cookiestore
+				// else postmessage to parent window and close itslef
+		   		if (uriUtils.isBrowserIE()) {
+		   			$cookies.remove("chaise-"  + queryString.referrerid);
+		   		} else {
+			   		//For child window
+					window.opener.postMessage(window.location.search, window.opener.location.href);
+				}
 				window.close();
-		   		return;
 		   	}
 
 		   	window.location = params['referrer'];

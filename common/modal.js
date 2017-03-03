@@ -30,32 +30,18 @@
         params.login_url = $sce.trustAsResourceUrl(params.login_url);
         vm.params = params;
 
-
-        //Firefox 1.0+
-        vm.params.isFirefox = typeof InstallTrigger !== 'undefined';
-
-        //Safari 3.0+ "[object HTMLElementConstructor]" 
-        vm.params.isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || safari.pushNotification);
-
-        //Internet Explorer 6-11
-        vm.params.isIE = /*@cc_on!@*/false || !!document.documentMode;
-
-        //Edge 20+
-        vm.params.isEdge = ! vm.params.isIE && !!window.StyleMedia;
-
-        //Chrome 1+
-        vm.params.isChrome = !!window.chrome && !!window.chrome.webstore;
-
-        vm.params.site = window.location.origin;
-
         vm.openWindow = function() {
-            window.open(params.login_url, '_blank','width=800,height=600');
+
+            var x = window.innerWidth/2 - 800/2;
+            var y = window.innerHeight/2 - 600/2;
+
+            window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
+
+            return false;
         }
 
         vm.params.host = $sce.trustAsResourceUrl(window.location.host);
 
-        vm.openWindow();
-        
     }])
     .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
         var vm = this;

@@ -466,6 +466,11 @@
             return result;
         }
 
+        function isBrowserIE() {
+            //Internet Explorer 6-11
+            return /*@cc_on!@*/false || !!document.documentMode;
+        }
+
 
         return {
             queryStringToJSON: queryStringToJSON,
@@ -475,7 +480,8 @@
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
-            setLocationChangeHandling: setLocationChangeHandling
+            setLocationChangeHandling: setLocationChangeHandling,
+            isBrowserIE: isBrowserIE
         }
     }])
 
