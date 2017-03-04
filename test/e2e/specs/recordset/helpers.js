@@ -203,10 +203,13 @@ exports.testPresentation = function (tableParams) {
             // expect modal to open
             return modalTitle.getText();
         }).then(function(text) {
-            browser.pause();
             expect(text).toBe("Confirm Delete");
+            browser.wait(500);
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function() {
+            browser.driver.manage().logs().get("browser").then(function(logs) {
+                console.log('HERE ARE THE LOGS', logs);
+            });
             // Expect another modal to appear to tell user that this record cannot be deleted
             // and user should check the updated UI for latest row data.
             chaisePage.waitForElement(element(by.id('confirm-btn')));

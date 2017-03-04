@@ -93,9 +93,9 @@ before_script:
 
 script:
   - make build
+  - make testrecordset
   - make testnavbar
   - make testrecord
-  - make testrecordset
   - make testrecordadd
   - make testrecordedit
   - make testviewer
