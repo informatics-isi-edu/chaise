@@ -177,6 +177,7 @@
 
                                     }, function errorOpening1stModal(error) {
                                         console.dir('Error opening confirm delete modal', error);
+                                        $window.alert(error);
                                     }).then(function deleteSuccess() {
 
                                         // tell parent controller data updated
@@ -207,7 +208,9 @@
                                                     scope.$emit('record-modified');
                                                 }, function errorOpening2ndModal(error) {
                                                     console.dir('error opening 2nd modal', error);
+                                                    $window.alert(error);
                                                 }).catch(function(error) {
+                                                    $window.alert(error);
                                                     ErrorService.catchAll(error);
                                                 });
                                             } else {
@@ -216,6 +219,7 @@
                                             }
                                         // }
                                     }).catch(function (error) {
+                                        $window.alert(error);
                                         ErrorService.catchAll(error);
                                         scope.$emit('error', response);
                                     });
