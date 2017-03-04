@@ -193,8 +193,7 @@ exports.testPresentation = function (tableParams) {
             return chaisePage.recordEditPage.getSubmitRecordButton().click();
         }).then(function() {
             // Wait for RecordEdit to redirect to Record to make sure the submission went through.
-            return chaisePage.waitForElement(element(by.id('tblRecord')));
-        }).then(function() {
+            chaisePage.waitForElement(element(by.id('tblRecord')));
         // - Go back to initial RecordSet page
             browser.close();
             browser.switchTo().window(allWindows[0]);
@@ -207,7 +206,6 @@ exports.testPresentation = function (tableParams) {
             return modalTitle.getText();
         }).then(function(text) {
             expect(text).toBe("Confirm Delete");
-            browser.sleep(500);
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function() {
             browser.driver.manage().logs().get("browser").then(function(logs) {
