@@ -203,6 +203,7 @@ exports.testPresentation = function (tableParams) {
             // expect modal to open
             return modalTitle.getText();
         }).then(function(text) {
+            browser.pause();
             expect(text).toBe("Confirm Delete");
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function() {
