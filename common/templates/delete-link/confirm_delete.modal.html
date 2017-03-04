@@ -2,9 +2,10 @@
     <h3 class="modal-title">Confirm Delete</h3>
 </div>
 <div class="modal-body">
+    Status: {{ctrl.status}}
     Are you sure you want to delete this?
 </div>
 <div class="modal-footer">
-    <button id="delete-confirmation" class="btn btn-danger" type="button" ng-click="ctrl.ok()">Delete</button>
+    <button id="delete-confirmation" class="btn btn-danger" type="button" ng-click="ctrl.status = 1;ctrl.ok()">Delete</button>
     <button class="btn btn-default" type="button" ng-click="ctrl.cancel()">Cancel</button>
 </div>

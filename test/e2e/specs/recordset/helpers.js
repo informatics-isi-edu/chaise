@@ -191,8 +191,11 @@ exports.testPresentation = function (tableParams) {
             input.clear();
             input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
             return chaisePage.recordEditPage.getSubmitRecordButton().click();
-        }).then(function(handles) {
-        // - Go back to initial RecordEdit page
+        }).then(function() {
+            // Wait for RecordEdit to redirect to Record to make sure the submission went through.
+            return chaisePage.waitForElement(element(by.id('tblRecord')));
+        }).then(function() {
+        // - Go back to initial RecordSet page
             browser.close();
             browser.switchTo().window(allWindows[0]);
         }).then(function() {
