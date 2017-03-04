@@ -193,10 +193,12 @@ exports.testPresentation = function (tableParams) {
             return chaisePage.recordEditPage.getSubmitRecordButton().click();
         }).then(function() {
             // Wait for RecordEdit to redirect to Record to make sure the submission went through.
-            chaisePage.waitForElement(element(by.id('tblRecord')));
-        // - Go back to initial RecordSet page
-            browser.close();
-            browser.switchTo().window(allWindows[0]);
+			chaisePage.waitForUrl('/record/', browser.params.defaultTimeout).finally(function() {
+				expect(browser.driver.getCurrentUrl()).toContain('/record/');
+                // - Go back to initial RecordSet page
+                browser.close();
+                browser.switchTo().window(allWindows[0]);
+			});
         }).then(function() {
             return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
         }).then(function () {
