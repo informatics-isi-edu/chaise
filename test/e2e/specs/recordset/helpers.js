@@ -199,6 +199,7 @@ exports.testPresentation = function (tableParams) {
                 browser.close();
                 browser.switchTo().window(allWindows[0]);
 			});
+            browser.pause();
         }).then(function() {
             return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
         }).then(function () {
