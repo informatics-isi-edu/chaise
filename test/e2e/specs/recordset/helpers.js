@@ -201,7 +201,6 @@ exports.testPresentation = function (tableParams) {
             browser.close();
             return browser.switchTo().window(allWindows[0]);
         }).then(function() {
-            browser.pause();
             return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
         }).then(function () {
             var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
@@ -212,6 +211,7 @@ exports.testPresentation = function (tableParams) {
             expect(text).toBe("Confirm Delete");
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function() {
+            browser.sleep(5000);
             browser.driver.manage().logs().get("browser").then(function(logs) {
                 console.log('HERE ARE THE LOGS', logs);
             });
