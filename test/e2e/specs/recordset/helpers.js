@@ -223,7 +223,7 @@ exports.testPresentation = function (tableParams) {
             var changedCell = rows.get(3).all(by.css('td')).get(4);
             expect(changedCell.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
         }).catch(function(error) {
-            browser.driver.manage().logs().get("browser").then(function(logs) {
+            browser.driver.manage().logs().get("client").then(function(logs) {
                 console.log('HERE ARE THE LOGS', logs);
             });
             console.dir(error);
