@@ -163,6 +163,7 @@
                         // define delete function
                         else if (scope.config.deletable) {
                             scope.delete = function () {
+                                console.log('Beginning delete..');
                                 var tuples = [scope.tuple];
                                 if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                                     $uibModal.open({
@@ -172,20 +173,21 @@
                                         size: "sm"
                                     }).result.then(function success() {
                                         // user accepted prompt to delete
-
+                                        console.log('Successfully deleted on first try');
                                         return scope.tuple.reference.delete(tuples);
 
                                     }, function errorOpening1stModal(error) {
                                         console.dir('Error opening confirm delete modal', error);
                                         $window.alert(error);
                                     }).then(function deleteSuccess() {
-
+                                        console.log('deleted on first try, sending record-modified msg');
                                         // tell parent controller data updated
                                         scope.$emit('record-modified');
 
                                     }, function deleteFailure(response) {
-                                        // if (response != "cancel") {
+                                        if (response != "cancel") {
                                             if (response instanceof ERMrest.PreconditionFailedError) {
+                                                console.log('delete failed and it was a 412');
                                                 // If a 412 is encountered, it means this row's info doesn't match
                                                 // with the info in the DB currently.
 
@@ -214,11 +216,13 @@
                                                     ErrorService.catchAll(error);
                                                 });
                                             } else {
+                                                console.log('delete failed but it was nOT a 412', response);
                                                 scope.$emit('error', response);
                                                 ErrorService.catchAll(error);
                                             }
-                                        // }
+                                        }
                                     }).catch(function (error) {
+                                        console.log('there was some other uncaught error', error);
                                         $window.alert(error);
                                         ErrorService.catchAll(error);
                                         scope.$emit('error', response);

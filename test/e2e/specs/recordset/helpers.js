@@ -212,9 +212,6 @@ exports.testPresentation = function (tableParams) {
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function() {
             browser.sleep(5000);
-            browser.driver.manage().logs().get("browser").then(function(logs) {
-                console.log('HERE ARE THE LOGS', logs);
-            });
             // Expect another modal to appear to tell user that this record cannot be deleted
             // and user should check the updated UI for latest row data.
             chaisePage.waitForElement(element(by.id('confirm-btn')));
@@ -226,6 +223,9 @@ exports.testPresentation = function (tableParams) {
             var changedCell = rows.get(3).all(by.css('td')).get(4);
             expect(changedCell.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
         }).catch(function(error) {
+            browser.driver.manage().logs().get("browser").then(function(logs) {
+                console.log('HERE ARE THE LOGS', logs);
+            });
             console.dir(error);
             expect(error).not.toBeDefined();
         });
