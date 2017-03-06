@@ -199,8 +199,9 @@ exports.testPresentation = function (tableParams) {
 			expect(browser.driver.getCurrentUrl()).toContain('/record/');
             // - Go back to initial RecordSet page
             browser.close();
-            browser.switchTo().window(allWindows[0]);
+            return browser.switchTo().window(allWindows[0]);
         }).then(function() {
+            browser.sleep(5000);
             return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
         }).then(function () {
             var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
