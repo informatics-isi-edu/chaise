@@ -201,7 +201,7 @@ exports.testPresentation = function (tableParams) {
             browser.close();
             return browser.switchTo().window(allWindows[0]);
         }).then(function() {
-            browser.sleep(5000);
+            browser.pause();
             return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
         }).then(function () {
             var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
