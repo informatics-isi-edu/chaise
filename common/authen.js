@@ -3,7 +3,7 @@
 
     angular.module('chaise.authen', ['chaise.utils'])
 
-    .factory('Session', ['$http', '$q', '$window', 'UriUtils', '$uibModal', '$interval', '$cookies', function ($http, $q, $window, UriUtils, $uibModal, $interval, $cookies) {
+    .factory('Session', ['$http', '$q', '$window', 'UriUtils', '$uibModal', '$interval', '$cookies','messageMap', function ($http, $q, $window, UriUtils, $uibModal, $interval, $cookies, messageMap) {
 
         function NotFoundError(status, message) {
             this.code = 404;
@@ -107,7 +107,8 @@
                         login_url: login_url
                     };
                     
-                    params.message = "Your session has expired."
+                    params.title = messageMap.sessionExpired.title;
+                    params.message = messageMap.sessionExpired.message;
 
                     modalInstance = $uibModal.open({
                         windowClass: "modal-login-instruction",

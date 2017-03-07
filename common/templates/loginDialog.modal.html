@@ -1,13 +1,13 @@
 <div class="modal-header">
 	<button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
-    <h3 class="modal-title text-center">{{::ctrl.params.message}} Please login to continue.</h3>
+    <h3 class="modal-title text-center">{{::ctrl.params.title}}</h3>
 </div>
 <div class="modal-body">
 	<div>
 		<div class="row">
 		    <div class="col-md-12 col-sm-12 col-xs-12">
 		    	<center>
-					<h4>To open the login window press</h4>
+					<h4>{{::ctrl.params.message}}</h4>
 					<button class="btn btn-primary" ng-class="btn-primary" ng-click="::ctrl.openWindow();">Login</button>
 				</div>
 			</div>
