@@ -174,7 +174,6 @@
                                     }).result.then(function success() {
                                         // user accepted prompt to delete
                                         console.log('Successfully deleted on first try');
-                                        $window.alert('THE DELETE BTN WAS CLICKED');
                                         return scope.tuple.reference.delete(tuples);
 
                                     }, function errorOpening1stModal(error) {

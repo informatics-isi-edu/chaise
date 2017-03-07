@@ -7,7 +7,6 @@
         var vm = this;
         vm.params = params;
         vm.ok = ok;
-        vm.status = 0;
 
         function ok() {
             $uibModalInstance.close();

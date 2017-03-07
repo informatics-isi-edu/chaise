@@ -95,7 +95,7 @@
 
             - If this is a foreground search, it is fired instantly depending on the variable vm.foregroundSearch and results are rendered once returned.
               It also sets vm.backgroundSearch to false and empties backgroundSearchPendingTerm, to cancel any backgroundSearch.
-            - If this is a background search and there is already a foreground search in progress which can be determined from vm.foregroundSearch, 
+            - If this is a background search and there is already a foreground search in progress which can be determined from vm.foregroundSearch,
               we cancel this search and empty the backgroundSearchPendingTerm.
             - If this is a background search, and there is already a background search in progress, this method will never be called,
               as we have the restriction of having only one background search running at a time
@@ -128,7 +128,7 @@
 
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
 
-                // This method sets the 
+                // This method sets the
                 if (!setSearchStates(scope, isBackground, searchTerm)) return;
 
                 scope.vm.page = page;
@@ -180,6 +180,7 @@
                 // row data has been modified (from ellipses)
                 // do a read
                 scope.$on('record-modified', function() {
+                    console.log('I fired here');
                     recordTableUtils.read(scope);
                 });
 
@@ -188,6 +189,7 @@
                         scope.vm.sortby = column;
                         scope.vm.sortOrder = "asc";
                         scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
+                        console.log('I fired here');
                         recordTableUtils.read(scope);
                     }
 
@@ -196,6 +198,7 @@
                 scope.toggleSortOrder = function () {
                     scope.vm.sortOrder = (scope.vm.sortOrder === 'asc' ? scope.vm.sortOrder = 'desc' : scope.vm.sortOrder = 'asc');
                     scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
+                    console.log('I fired here');
                     recordTableUtils.read(scope);
                 };
             }
@@ -223,6 +226,7 @@
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
+                    console.log('I fired here');
                     recordTableUtils.read(scope);
                 };
 
@@ -231,6 +235,7 @@
                     if (previous) {
 
                         scope.vm.reference = previous;
+                        console.log('I fired here');
                         recordTableUtils.read(scope);
 
                     }
@@ -241,6 +246,7 @@
                     if (next) {
 
                         scope.vm.reference = next;
+                        console.log('I fired here');
                         recordTableUtils.read(scope);
                     }
 
@@ -252,7 +258,7 @@
                 /*
                     The search fires at most one active "background"
                     search at a time and, i.e. for opportunistic type-ahead search. It should never send
-                    another before the previous terminates. The delay for firing the search is 
+                    another before the previous terminates. The delay for firing the search is
                     1 second, when the user has stopeed typing.
                 */
                 // On change in user input
@@ -271,7 +277,7 @@
 
                             // If there is no foregound search going currently
                             if (!scope.vm.foregroundSearch) {
-                                // If there is a background search going on currently then 
+                                // If there is a background search going on currently then
                                 // set the search term in the backgroundSearchPendingTerm
                                 // else fire the search and empty the backgroundSearchPendingTerm
                                 if (scope.vm.backgroundSearch) {
@@ -286,9 +292,9 @@
                 };
 
                 scope.enterPressed = function() {
-                    /* If user has pressed enter then foreground search starts, 
+                    /* If user has pressed enter then foreground search starts,
                     the input is supposed to be frozen w/ a spinner to show that it is busy doing what the user
-                    asked for. Any existing background search result completing during that time is to be discarded 
+                    asked for. Any existing background search result completing during that time is to be discarded
                     to avoid confusing the UX.
                     */
                     $timeout.cancel(inputChangedPromise);
@@ -308,6 +314,7 @@
 
                     scope.vm.search = term;
                     scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
+                    console.log('I fired here');
                     recordTableUtils.read(scope, isBackground);
                 };
 
@@ -352,6 +359,7 @@
                     // read
                     if (completed > 0 || updated) {
                         updated = false;
+                        console.log('I fired here');
                         recordTableUtils.read(scope);
                     }
 

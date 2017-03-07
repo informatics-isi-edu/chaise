@@ -178,12 +178,26 @@ exports.testPresentation = function (tableParams) {
         recEditUrl = recEditUrl.replace('id=2003', 'id=4004');
         recEditUrl = recEditUrl.slice(0, recEditUrl.indexOf('?invalidate'));
 
+        // Open a new tab
+        // browser.actions().sendKeys(protractor.Key.chord(protractor.Key.COMMAND,"t")).perform().then(function() {
+        //     return browser.getAllWindowHandles();
+        // }).then(function(handles) {
+        //     allWindows = handles;
+        //     return browser.switchTo().window()
+        // });
+
         browser.executeScript('window.open(arguments[0]);', recEditUrl).then(function() {
             return browser.getAllWindowHandles();
         }).then(function(handles) {
             allWindows = handles;
             return browser.switchTo().window(allWindows[1]);
         }).then(function() {
+            // In order to simulate someone else modifying a record (in order to
+            // trigger a 412), we need to set RecEdit's window.opener to null so
+            // that RecordSet won't think that this RecEdit page was opened by the same user
+            // from the RecordSet page.
+            return browser.executeScript('window.opener = null');
+        }).then(function () {
             return chaisePage.waitForElement(element(by.id("submit-record-button")));
         }).then(function() {
         // - Change a small thing. Submit.
@@ -192,7 +206,6 @@ exports.testPresentation = function (tableParams) {
             input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
             return chaisePage.recordEditPage.getSubmitRecordButton().click();
         }).then(function() {
-            browser.sleep(5000);
             // Wait for RecordEdit to redirect to Record to make sure the submission went through.
 			return chaisePage.waitForUrl('/record/', browser.params.defaultTimeout);
         }).then(function() {
@@ -211,7 +224,6 @@ exports.testPresentation = function (tableParams) {
             expect(text).toBe("Confirm Delete");
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function() {
-            browser.sleep(5000);
             // Expect another modal to appear to tell user that this record cannot be deleted
             // and user should check the updated UI for latest row data.
             chaisePage.waitForElement(element(by.id('confirm-btn')));
@@ -223,17 +235,12 @@ exports.testPresentation = function (tableParams) {
             var changedCell = rows.get(3).all(by.css('td')).get(4);
             expect(changedCell.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
         }).catch(function(error) {
-            // chromedriver only logs warnings and errors. console.logs aren't included.
-            // i.e. "client" isn't a valid log type.
-            browser.driver.manage().logs().get('browser').then(function(logs) {
-                console.log('HERE ARE THE LOGS', logs);
-            });
             console.dir(error);
             expect(error).not.toBeDefined();
         });
     });
 
-    xit("action columns should show delete button that deletes record", function() {
+    it("action columns should show delete button that deletes record", function() {
 		var deleteButton;
 		chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
 			return chaisePage.recordsetPage.getDeleteActionButtons();

@@ -207,6 +207,7 @@
                 // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                 $rootScope.reference.update($rootScope.tuples).then(function success(page) {
                     if (window.opener && window.opener.updated) {
+                        console.dir('I ran here and here is my opener:', window.opener);
                         window.opener.updated(context.queryParams.invalidate);
                     }
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
