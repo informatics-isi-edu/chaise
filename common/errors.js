@@ -10,7 +10,7 @@
     })
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'messageMap', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, messageMap, $log, $rootScope, $uibModal, $window) {
 
         function errorPopup(message, errorCode, pageName, redirectLink) {
             var providedLink = true;
@@ -46,12 +46,28 @@
             });
         }
 
+        function noRecordError(filters) {
+            var noDataMessage = messageMap.noDataMessage;
+            for (var k = 0; k < filters.length; k++) {
+                noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
+                if (k != filters.length-1) {
+                    noDataMessage += " or ";
+                }
+            }
+            var error = new Error(noDataMessage);
+            error.code = errorNames.notFound;
+
+            return error;
+        }
+
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function catchAll(exception) {
             $log.info(exception);
-
             if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.login($window.location.href);
+            } else if (exception instanceof ERMrest.PreconditionFailedError) {
+                // A more useful general message for 412 Precondition Failed
+                AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
                 AlertsService.addAlert({type:'error', message:exception.message});
             }
@@ -59,7 +75,8 @@
 
         return {
             errorPopup: errorPopup,
-            catchAll: catchAll
+            catchAll: catchAll,
+            noRecordError: noRecordError
         };
     }]);
 })();

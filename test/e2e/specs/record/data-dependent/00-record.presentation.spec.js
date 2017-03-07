@@ -67,4 +67,17 @@ describe('View existing record,', function() {
             expect(title).toEqual(chaiseConfig.headTitle);
         });
     });
+
+    it("should load an error dialog when the entity defined in the filter doesn't exist.", function() {
+        var noEntityMessage = "No entity exists with",
+            tupleParams = testParams.tuples[0];
+        // entity with id=10,000 should not exist
+        var url = browser.params.url + ":" + tupleParams.table_name + "/id=10000";
+        browser.get(url);
+        chaisePage.waitForElement(element(by.css(".modal-open"))).then(function() {
+            return chaisePage.recordPage.getModalText().getText();
+        }).then(function(text) {
+            expect(text.includes(noEntityMessage)).toBeTruthy();
+        });
+    });
 });

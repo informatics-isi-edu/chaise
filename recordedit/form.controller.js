@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', function FormController(AlertsService, DataUtils, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap', function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -98,8 +98,7 @@
         }
 
         function showSubmissionError(response) {
-            AlertsService.addAlert({type: 'error', message: response.message});
-            $log.warn(response);
+            ErrorService.catchAll(response);
         }
 
         /*
@@ -197,7 +196,6 @@
 
             if (vm.editMode) {
                 // loop through model.submissionRows
-                // there should only be 1 row for editing but we want to account for it for future development
                 for (var i = 0; i < model.submissionRows.length; i++) {
                     var row = model.submissionRows[i];
                     var data = $rootScope.tuples[i].data;
@@ -209,6 +207,7 @@
                 // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                 $rootScope.reference.update($rootScope.tuples).then(function success(page) {
                     if (window.opener && window.opener.updated) {
+                        console.dir('I ran here and here is my opener:', window.opener);
                         window.opener.updated(context.queryParams.invalidate);
                     }
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
@@ -309,29 +308,72 @@
                     size: "sm"
                 }).result.then(function success() {
                     // user accepted prompt to delete
-                    return $rootScope.reference.delete();
+                    return $rootScope.reference.delete($rootScope.tuples);
                 }).then(function deleteSuccess() {
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (response != "cancel") vm.showSubmissionError(response);
+                    if (response instanceof ERMrest.PreconditionFailedError) {
+                        $uibModal.open({
+                            templateUrl: "../common/templates/refresh.modal.html",
+                            controller: "ErrorDialogController",
+                            controllerAs: "ctrl",
+                            size: "sm",
+                            resolve: {
+                                params: {
+                                    title: messageMap.pageRefreshRequired.title,
+                                    message: messageMap.pageRefreshRequired.message
+                                }
+                            },
+                            backdrop: 'static',
+                            keyboard: false
+                        }).result.then(function reload() {
+                            // Reload the page
+                            $window.location.reload();
+                        }).catch(function(error) {
+                            ErrorService.catchAll(error);
+                        });
+                    } else {
+                        if (response !== 'cancel') {
+                            vm.showSubmissionError(response);
+                        }
+                    }
                 }).catch(function (error) {
-                    $log.info(error);
+                    ErrorService.catchAll(error);
                 });
             } else {
-                $rootScope.reference.delete().then(function deleteSuccess() {
+                $rootScope.reference.delete($rootScope.tuples).then(function deleteSuccess() {
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
-                }, function deleteFailure(exception) {
+                }, function deleteFailure(response) {
                     if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
                         Session.loginInANewWindow(function() {
                             deleteRecord();
                         });
+                    } else if (response instanceof ERMrest.PreconditionFailedError) {
+                        $uibModal.open({
+                            templateUrl: "../common/templates/refresh.modal.html",
+                            controller: "ErrorDialogController",
+                            controllerAs: "ctrl",
+                            size: "sm",
+                            resolve: {
+                                params: {
+                                    message: messageMap.pageRefreshRequired
+                                }
+                            },
+                            backdrop: 'static',
+                            keyboard: false
+                        }).result.then(function reload() {
+                            // Reload the page
+                            $window.location.reload();
+                        }).catch(function(error) {
+                            ErrorService.catchAll(error);
+                        });
                     } else {
-                        vm.showSubmissionError(exception);
+                        vm.showSubmissionError(response);
                     }
                 }).catch(function (error) {
-                    $log.info(error);
+                    ErrorService.catchAll(error);
                 });
             }
         }
