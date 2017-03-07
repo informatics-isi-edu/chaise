@@ -173,53 +173,55 @@ exports.testPresentation = function (tableParams) {
 	});
 
     it('should show a modal if user tries to delete (via action column) a record that has been modified by someone else (412 error)', function() {
-        var EC = protractor.ExpectedConditions, allWindows, config;
-        // Edit a record in a new tab in order to change the ETag
-        recEditUrl = recEditUrl.replace('id=2003', 'id=4004');
-        recEditUrl = recEditUrl.slice(0, recEditUrl.indexOf('?invalidate'));
+        if (!process.env.TRAVIS) {
+            var EC = protractor.ExpectedConditions, allWindows, config;
+            // Edit a record in a new tab in order to change the ETag
+            recEditUrl = recEditUrl.replace('id=2003', 'id=4004');
+            recEditUrl = recEditUrl.slice(0, recEditUrl.indexOf('?invalidate'));
 
-        browser.executeScript('window.open(arguments[0]);', recEditUrl).then(function() {
-            return browser.getAllWindowHandles();
-        }).then(function(handles) {
-            allWindows = handles;
-            return browser.switchTo().window(allWindows[1]);
-        }).then(function() {
-            return chaisePage.waitForElement(element(by.id("submit-record-button")));
-        }).then(function() {
-        // - Change a small thing. Submit.
-            var input = chaisePage.recordEditPage.getInputById(0, 'Summary');
-            input.clear();
-            input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
-            return chaisePage.recordEditPage.getSubmitRecordButton().click();
-        }).then(function(handles) {
-        // - Go back to initial RecordEdit page
-            browser.close();
-            browser.switchTo().window(allWindows[0]);
-        }).then(function() {
-            return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
-        }).then(function () {
-            var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
-            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-            // expect modal to open
-            return modalTitle.getText();
-        }).then(function(text) {
-            expect(text).toBe("Confirm Delete");
-            return chaisePage.recordPage.getConfirmDeleteButton().click();
-        }).then(function() {
-            // Expect another modal to appear to tell user that this record cannot be deleted
-            // and user should check the updated UI for latest row data.
-            chaisePage.waitForElement(element(by.id('confirm-btn')));
-            return element(by.id('confirm-btn')).click();
-        }).then(function() {
-            return chaisePage.waitForElementInverse(element(by.id("spinner")));
-        }).then(function() {
-            var rows = chaisePage.recordsetPage.getRows();
-            var changedCell = rows.get(3).all(by.css('td')).get(4);
-            expect(changedCell.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
-        }).catch(function(error) {
-            console.dir(error);
-            expect(error).not.toBeDefined();
-        });
+            browser.executeScript('window.open(arguments[0]);', recEditUrl).then(function() {
+                return browser.getAllWindowHandles();
+            }).then(function(handles) {
+                allWindows = handles;
+                return browser.switchTo().window(allWindows[1]);
+            }).then(function() {
+                return chaisePage.waitForElement(element(by.id("submit-record-button")));
+            }).then(function() {
+            // - Change a small thing. Submit.
+                var input = chaisePage.recordEditPage.getInputById(0, 'Summary');
+                input.clear();
+                input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
+                return chaisePage.recordEditPage.getSubmitRecordButton().click();
+            }).then(function(handles) {
+            // - Go back to initial RecordEdit page
+                browser.close();
+                browser.switchTo().window(allWindows[0]);
+            }).then(function() {
+                return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
+            }).then(function () {
+                var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                // expect modal to open
+                return modalTitle.getText();
+            }).then(function(text) {
+                expect(text).toBe("Confirm Delete");
+                return chaisePage.recordPage.getConfirmDeleteButton().click();
+            }).then(function() {
+                // Expect another modal to appear to tell user that this record cannot be deleted
+                // and user should check the updated UI for latest row data.
+                chaisePage.waitForElement(element(by.id('confirm-btn')));
+                return element(by.id('confirm-btn')).click();
+            }).then(function() {
+                return chaisePage.waitForElementInverse(element(by.id("spinner")));
+            }).then(function() {
+                var rows = chaisePage.recordsetPage.getRows();
+                var changedCell = rows.get(3).all(by.css('td')).get(4);
+                expect(changedCell.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
+            }).catch(function(error) {
+                console.dir(error);
+                expect(error).not.toBeDefined();
+            });
+        }
     });
 
     it("action columns should show delete button that deletes record", function() {
