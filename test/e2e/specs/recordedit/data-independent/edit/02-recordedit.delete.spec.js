@@ -62,6 +62,12 @@ describe('Edit existing record,', function() {
                             allWindows = handles;
                             return browser.switchTo().window(allWindows[1]);
                         }).then(function() {
+                            // In order to simulate someone else modifying a record (in order to
+                            // trigger a 412), we should set RecEdit's window.opener to null so
+                            // that RecordSet won't think that this RecEdit page was opened by the same user
+                            // from the original page.
+                            return browser.executeScript('window.opener = null');
+                        }).then(function() {
                             return chaisePage.waitForElement(element(by.id("submit-record-button")));
                         }).then(function() {
                         // - Change a small thing. Submit.

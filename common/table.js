@@ -180,7 +180,6 @@
                 // row data has been modified (from ellipses)
                 // do a read
                 scope.$on('record-modified', function() {
-                    console.log('I fired here');
                     recordTableUtils.read(scope);
                 });
 
@@ -189,7 +188,6 @@
                         scope.vm.sortby = column;
                         scope.vm.sortOrder = "asc";
                         scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
-                        console.log('I fired here');
                         recordTableUtils.read(scope);
                     }
 
@@ -198,7 +196,6 @@
                 scope.toggleSortOrder = function () {
                     scope.vm.sortOrder = (scope.vm.sortOrder === 'asc' ? scope.vm.sortOrder = 'desc' : scope.vm.sortOrder = 'asc');
                     scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
-                    console.log('I fired here');
                     recordTableUtils.read(scope);
                 };
             }
@@ -226,7 +223,6 @@
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
-                    console.log('I fired here');
                     recordTableUtils.read(scope);
                 };
 
@@ -235,7 +231,6 @@
                     if (previous) {
 
                         scope.vm.reference = previous;
-                        console.log('I fired here');
                         recordTableUtils.read(scope);
 
                     }
@@ -246,7 +241,6 @@
                     if (next) {
 
                         scope.vm.reference = next;
-                        console.log('I fired here');
                         recordTableUtils.read(scope);
                     }
 
@@ -314,7 +308,6 @@
 
                     scope.vm.search = term;
                     scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
-                    console.log('I fired here');
                     recordTableUtils.read(scope, isBackground);
                 };
 
@@ -359,7 +352,6 @@
                     // read
                     if (completed > 0 || updated) {
                         updated = false;
-                        console.log('I fired here');
                         recordTableUtils.read(scope);
                     }
 

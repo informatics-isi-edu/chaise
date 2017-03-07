@@ -66,59 +66,12 @@
                                         }).result.then(function success() {
                                             // user accepted prompt to delete
                                             return scope.associationRef.delete(associatedRefTuples);
-                                        }, function errorOpening1stModal(error) {
-                                            console.dir('ERROR opening 1st modal', error);
                                         }).then(function deleteSuccess() {
 
                                             // tell parent controller data updated
                                             scope.$emit('record-modified');
 
                                         }, function deleteFailure(response) {
-                                            console.dir('RESPONSE', response);
-                                            // if (response != "cancel") {
-                                                if (response instanceof ERMrest.PreconditionFailedError) {
-                                                    // If a 412 is encountered, it means this row's info doesn't match
-                                                    // with the info in the DB currently.
-
-                                                    // 1. Open modal to let user know.
-                                                    $uibModal.open({
-                                                        templateUrl: "../common/templates/uiChange.modal.html",
-                                                        controller: "ErrorDialogController",
-                                                        controllerAs: "ctrl",
-                                                        size: "sm",
-                                                        resolve: {
-                                                            params: {
-                                                                title: messageMap.reviewModifiedRecord.title,
-                                                                message: messageMap.reviewModifiedRecord.message
-                                                            }
-                                                        },
-                                                        backdrop: 'static',
-                                                        keyboard: false
-                                                    }).result.then(function reload() {
-                                                    // 2. Update UI by letting the table directive know
-                                                        scope.$emit('record-modified');
-                                                    }).catch(function(error) {
-                                                        console.dir('ERROR opening 2nd modal', error);
-                                                        ErrorService.catchAll(error);
-                                                    });
-                                                } else {
-                                                    scope.$emit('error', response);
-                                                    ErrorService.catchAll(error);
-                                                }
-                                            // }
-                                        }).catch(function (error) {
-                                            $log.info(error);
-                                            scope.$emit('error', response);
-                                        });
-                                    } else {
-
-                                        scope.associationRef.delete(associatedRefTuples).then(function deleteSuccess() {
-
-                                            // tell parent controller data updated
-                                            scope.$emit('record-modified');
-
-                                        }, function deleteFailure(response) {
-                                            console.dir('RESPONSE', response);
                                             if (response instanceof ERMrest.PreconditionFailedError) {
                                                 // If a 412 is encountered, it means this row's info doesn't match
                                                 // with the info in the DB currently.
@@ -141,7 +94,48 @@
                                                 // 2. Update UI by letting the table directive know
                                                     scope.$emit('record-modified');
                                                 }).catch(function(error) {
-                                                    console.log('ERROR opening 2nd modal', error);
+                                                    scope.$emit('error', response);
+                                                    ErrorService.catchAll(error);
+                                                });
+                                            } else {
+                                                scope.$emit('error', response);
+                                                ErrorService.catchAll(error);
+                                            }
+                                        }).catch(function (error) {
+                                            $log.info(error);
+                                            scope.$emit('error', response);
+                                        });
+                                    } else {
+
+                                        scope.associationRef.delete(associatedRefTuples).then(function deleteSuccess() {
+
+                                            // tell parent controller data updated
+                                            scope.$emit('record-modified');
+
+                                        }, function deleteFailure(response) {
+                                            if (response instanceof ERMrest.PreconditionFailedError) {
+                                                // If a 412 is encountered, it means this row's info doesn't match
+                                                // with the info in the DB currently.
+
+                                                // 1. Open modal to let user know.
+                                                $uibModal.open({
+                                                    templateUrl: "../common/templates/uiChange.modal.html",
+                                                    controller: "ErrorDialogController",
+                                                    controllerAs: "ctrl",
+                                                    size: "sm",
+                                                    resolve: {
+                                                        params: {
+                                                            title: messageMap.reviewModifiedRecord.title,
+                                                            message: messageMap.reviewModifiedRecord.message
+                                                        }
+                                                    },
+                                                    backdrop: 'static',
+                                                    keyboard: false
+                                                }).result.then(function reload() {
+                                                // 2. Update UI by letting the table directive know
+                                                    scope.$emit('record-modified');
+                                                }).catch(function(error) {
+                                                    scope.$emit('error', response);
                                                     ErrorService.catchAll(error);
                                                 });
                                             } else {
@@ -163,7 +157,6 @@
                         // define delete function
                         else if (scope.config.deletable) {
                             scope.delete = function () {
-                                console.log('Beginning delete..');
                                 var tuples = [scope.tuple];
                                 if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                                     $uibModal.open({
@@ -173,56 +166,43 @@
                                         size: "sm"
                                     }).result.then(function success() {
                                         // user accepted prompt to delete
-                                        console.log('Successfully deleted on first try');
                                         return scope.tuple.reference.delete(tuples);
 
-                                    }, function errorOpening1stModal(error) {
-                                        console.dir('Error opening confirm delete modal', error);
-                                        $window.alert(error);
                                     }).then(function deleteSuccess() {
-                                        console.log('deleted on first try, sending record-modified msg');
                                         // tell parent controller data updated
                                         scope.$emit('record-modified');
 
                                     }, function deleteFailure(response) {
-                                        if (response != "cancel") {
-                                            if (response instanceof ERMrest.PreconditionFailedError) {
-                                                console.log('delete failed and it was a 412');
-                                                // If a 412 is encountered, it means this row's info doesn't match
-                                                // with the info in the DB currently.
+                                        if (response instanceof ERMrest.PreconditionFailedError) {
+                                            // If a 412 is encountered, it means this row's info doesn't match
+                                            // with the info in the DB currently.
 
-                                                // 1. Open modal to let user know.
-                                                $uibModal.open({
-                                                    templateUrl: "../common/templates/uiChange.modal.html",
-                                                    controller: "ErrorDialogController",
-                                                    controllerAs: "ctrl",
-                                                    size: "sm",
-                                                    resolve: {
-                                                        params: {
-                                                            title: messageMap.reviewModifiedRecord.title,
-                                                            message: messageMap.reviewModifiedRecord.message
-                                                        }
-                                                    },
-                                                    backdrop: 'static',
-                                                    keyboard: false
-                                                }).result.then(function() {
-                                                // 2. Update UI by letting the table directive know
-                                                    scope.$emit('record-modified');
-                                                }, function errorOpening2ndModal(error) {
-                                                    console.dir('error opening 2nd modal', error);
-                                                    $window.alert(error);
-                                                }).catch(function(error) {
-                                                    $window.alert(error);
-                                                    ErrorService.catchAll(error);
-                                                });
-                                            } else {
-                                                console.log('delete failed but it was nOT a 412', response);
-                                                scope.$emit('error', response);
+                                            // 1. Open modal to let user know.
+                                            $uibModal.open({
+                                                templateUrl: "../common/templates/uiChange.modal.html",
+                                                controller: "ErrorDialogController",
+                                                controllerAs: "ctrl",
+                                                size: "sm",
+                                                resolve: {
+                                                    params: {
+                                                        title: messageMap.reviewModifiedRecord.title,
+                                                        message: messageMap.reviewModifiedRecord.message
+                                                    }
+                                                },
+                                                backdrop: 'static',
+                                                keyboard: false
+                                            }).result.then(function() {
+                                            // 2. Update UI by letting the table directive know
+                                                scope.$emit('record-modified');
+                                            }).catch(function(error) {
+                                                $window.alert(error);
                                                 ErrorService.catchAll(error);
-                                            }
+                                            });
+                                        } else {
+                                            scope.$emit('error', response);
+                                            ErrorService.catchAll(error);
                                         }
                                     }).catch(function (error) {
-                                        console.log('there was some other uncaught error', error);
                                         $window.alert(error);
                                         ErrorService.catchAll(error);
                                         scope.$emit('error', response);

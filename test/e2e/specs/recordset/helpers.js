@@ -178,14 +178,6 @@ exports.testPresentation = function (tableParams) {
         recEditUrl = recEditUrl.replace('id=2003', 'id=4004');
         recEditUrl = recEditUrl.slice(0, recEditUrl.indexOf('?invalidate'));
 
-        // Open a new tab
-        // browser.actions().sendKeys(protractor.Key.chord(protractor.Key.COMMAND,"t")).perform().then(function() {
-        //     return browser.getAllWindowHandles();
-        // }).then(function(handles) {
-        //     allWindows = handles;
-        //     return browser.switchTo().window()
-        // });
-
         browser.executeScript('window.open(arguments[0]);', recEditUrl).then(function() {
             return browser.getAllWindowHandles();
         }).then(function(handles) {
