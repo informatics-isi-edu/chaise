@@ -93,10 +93,10 @@ exports.getConfig = function(options) {
 
   console.log(options.parallel);
 
-  if (options.parallel) {
+//  if (options.parallel) {
     config.capabilities.shardTestFiles = true;
     config.capabilities.maxInstances = typeof options.parallel == 'number' ? options.parallel : 4;
-  }
+  //}
 
   console.dir(config);
 
