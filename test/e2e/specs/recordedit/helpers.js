@@ -367,12 +367,22 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                                     // Expect search box to have focus
                                     var searchBox = chaisePage.recordsetPage.getSearchBox();
-                                    expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+                                    browser.wait(function() {
+                                        var searchBoxId, activeElement;
+                                        return searchBox.getAttribute('id').then(function(id) {
+                                            searchBoxId = id;
+                                            return browser.driver.switchTo().activeElement().getAttribute('id');
+                                        }).then(function(activeId) {
+                                            activeElement = activeId;
+                                            return activeId == searchBoxId;
+                                        });
+                                    }, browser.params.defaultTimeout).then(function() {
+                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+                                    });
 	                                return modalTitle.getText();
 	                            }).then(function(text) {
 	                                // make sure modal opened
 	                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
-
                                     browser.wait(function () {
                                         return chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                             return (ct > 0);
@@ -392,16 +402,30 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].displayName, recordIndex);
 	                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-                                    // Open the same modal again to make sure search box is will be autofocused again
+                                    // Open the same modal again to make sure search box is autofocused again
                                     return chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]);
 	                            }).then(function() {
                                     // Wait for the modal to open
 	                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-                                    // Expect search box to have focus
+                                    // Expect search box to have focus.
                                     var searchBox = chaisePage.recordsetPage.getSearchBox();
-                                    expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+                                    browser.wait(function() {
+                                        var searchBoxId, activeElement;
+                                        return searchBox.getAttribute('id').then(function(id) {
+                                            searchBoxId = id;
+                                            return browser.driver.switchTo().activeElement().getAttribute('id');
+                                        }).then(function(activeId) {
+                                            activeElement = activeId;
+                                            return activeId == searchBoxId;
+                                        });
+                                    }, browser.params.defaultTimeout).then(function() {
+                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+                                    });
                                     // Close the modal
                                     chaisePage.recordEditPage.getModalCloseBtn().click();
+                                }).catch(function(e) {
+                                    console.dir(e);
+                                    expect('Something went wrong in this promise chain').toBe('Please see error message.');
                                 });
 	                        })(i);
 	                    }

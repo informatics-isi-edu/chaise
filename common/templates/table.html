@@ -4,7 +4,7 @@
         <thead class="table-heading">
             <tr>
                 <th ng-if="::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectable)">Actions</th>
-                <th nowrap ng-repeat="col in ::vm.columns track by $index">
+                <th nowrap ng-repeat="col in vm.columns track by $index">
                     <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.comment) ? col.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.comment) ? 'top' : undefined}}" title="{{col.comment}}" ng-click="col.sortable && vm.enableSort && sortby(col.name)">
                         <span ng-if="::col.displayname.isHTML" ng-bind-html="::col.displayname.value"></span>
                         <span ng-if="::!col.displayname.isHTML" ng-bind="::col.displayname.value"></span>
@@ -19,6 +19,9 @@
         <!-- rows -->
         <tbody>
             <tr class="table-row" ellipses ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" config="vm.config" context="vm.context" on-row-click-bind="onRowClickBind">
+            </tr>
+            <tr ng-if="vm.rowValues.length < 1">
+                <td id="no-results-row" colspan="{{vm.columns.length + 1}}" style="text-align: center;">No Results Found</td>
             </tr>
         </tbody>
     </table>

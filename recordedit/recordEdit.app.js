@@ -153,24 +153,16 @@
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
-
-                                var filters = context.filter.filters;
-                                var noDataMessage = "No entity exists with ";
-                                for (var k = 0; k < filters.length; k++) {
-                                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
-                                    if (k != filters.length-1) {
-                                        noDataMessage += " or ";
-                                    }
-                                }
-                                var noDataError = new Error(noDataMessage);
-                                noDataError.code = errorNames.notFound;
-
+                                var noDataError = ErrorService.noRecordError(context.filter.filters);
                                 throw noDataError;
                             }
 
                             var column, value;
 
-                            $rootScope.tuples = page.tuples;
+                            // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
+                            // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
+                            // The submission data is copied back to the tuples object before submitted in the PUT request
+                            $rootScope.tuples = angular.copy(page.tuples);
                             $rootScope.displayname = ((context.queryParams.copy && page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
 
                             for (var j = 0; j < page.tuples.length; j++) {

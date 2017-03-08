@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', '$rootScope', '$window', '$scope', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, $rootScope, $window, $scope) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -61,13 +61,33 @@
         };
 
         vm.deleteRecord = function() {
-            $rootScope.reference.delete().then(function deleteSuccess() {
+            $rootScope.reference.delete([$rootScope.tuple]).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
-                AlertsService.addAlert({type: 'error', message: error.message});
-                $log.warn(error);
+                if (error instanceof ERMrest.PreconditionFailedError) {
+                    $uibModal.open({
+                        templateUrl: "../common/templates/refresh.modal.html",
+                        controller: "ErrorDialogController",
+                        controllerAs: "ctrl",
+                        size: "sm",
+                        resolve: {
+                            params: {
+                                title: messageMap.pageRefreshRequired.title,
+                                message: messageMap.pageRefreshRequired.message
+                            }
+                        }
+                    }).result.then(function reload() {
+                        // Reload the page
+                        $window.location.reload();
+                    }).catch(function(error) {
+                        ErrorService.catchAll(error);
+                    });
+                } else {
+                    ErrorService.catchAll(error);
+                    $log.warn(error);
+                }
             });
         };
 
