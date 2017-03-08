@@ -554,6 +554,10 @@ input.search-progress {
     text-align: justify;
 }
 
+.modal-login .modal-title { 
+    font-size: 22px !important;
+}
+
 .pls { padding-left: 5px; }
 .prs { padding-right: 5px; }
 .pts { padding-top: 5px; }
