@@ -90,6 +90,16 @@ exports.getConfig = function(options) {
     process.exit(1);
   }
 
+
+  console.log(options.parallel);
+
+  if (options.parallel) {
+    config.capabilities.shardTestFiles = true;
+    config.capabilities.maxInstances = typeof options.parallel == 'number' ? options.parallel : 4;
+  }
+
+  console.dir(config);
+
   dataSetup.parameterize(config, dateSetupOptions);
 
   return config;
