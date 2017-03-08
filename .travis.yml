@@ -5,6 +5,10 @@ node_js:
 sudo: required
 dist: trusty
 
+branches:
+  only:
+    - master
+    - fix-travis
 
 addons:
   sauce_connect: true
