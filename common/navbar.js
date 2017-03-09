@@ -1,6 +1,10 @@
 (function() {
     'use strict';
-    angular.module('chaise.navbar', ['chaise.utils', 'chaise.authen'])
+    angular.module('chaise.navbar', [
+        'chaise.utils', 
+        'chaise.authen',
+        'ngCookies'
+        ])
     .directive('navbar', ['$window', '$rootScope', 'Session', function($window, $rootScope, Session) {
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
