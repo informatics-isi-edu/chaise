@@ -383,7 +383,9 @@
             var params = {};
 
             // pass the reference as a param for the modal
-            params.reference = column.reference.contextualize.compactSelect;
+            // call to page with tuple to get proper reference
+            console.log(column);
+            params.reference = column.reference.filterRef(column, vm.recordEditModel.submissionRows[rowIndex]).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
 
