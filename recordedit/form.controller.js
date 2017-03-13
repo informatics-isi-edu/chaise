@@ -117,6 +117,13 @@
              */
             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                 var col = $rootScope.reference.columns[i];
+
+                // If this column is disabled, its value is already in the format
+                // needed for submission.
+                if (col.getInputDisabled(context.appContext)) {
+                    continue;
+                }
+
                 var rowVal = row[col.name];
                 if (rowVal) {
                     switch (col.type.name) {
@@ -160,7 +167,6 @@
             vm.readyToSubmit = true;
             vm.submissionButtonDisabled = true;
             for (var j = 0; j < model.rows.length; j++) {
-                var transformedRow = transformRowValues(model.rows[j]);
                 $rootScope.reference.columns.forEach(function (column) {
                     // If the column is a pseudo column, it needs to get the originating columns name for data submission
                     if (column.isPseudo) {
@@ -188,6 +194,7 @@
                         }
                     // not pseudo, column.name is sufficient for the keys
                     } else {
+                        var transformedRow = transformRowValues(model.rows[j]);
                         // set null if not set so that the whole data object is filled out for posting to ermrestJS
                         model.submissionRows[j][column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
                     }
@@ -207,7 +214,6 @@
                 // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                 $rootScope.reference.update($rootScope.tuples).then(function success(page) {
                     if (window.opener && window.opener.updated) {
-                        console.dir('I ran here and here is my opener:', window.opener);
                         window.opener.updated(context.queryParams.invalidate);
                     }
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
