@@ -483,8 +483,7 @@ testrecordset:
 # Rule to run record edit app tests
 .PHONY: testrecordedit
 testrecordedit:
-	#$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && 
-	$(BIN)/protractor $(E2EDrecordEditDomainFilter)
+	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter)
 
 #Rule to run viewer app tests
 .PHONY: testviewer
