@@ -191,13 +191,31 @@ function handleError(jqXHR, textStatus, errorThrown, url) {
 	}
 }
 
+function url_cid(url) {
+	var ret = url;
+	var parser = document.createElement('a');
+	parser.href = url;
+	
+	if (parser.pathname.startsWith('/ermrest/')) {
+		var delimiter = '?';
+		if (parser.search != '') {
+			delimiter = '&';
+		}
+		ret = url + delimiter + 'cid=search';
+	}
+	
+	$(parser).remove();
+	
+	return ret;
+}
+
 var ERMREST = {
 	POST: function(url, contentType, async, processData, obj, successCallback, errorCallback, param) {
 		CHAISE_DATA['error'] = false;
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
-			url: url,
+			url: url_cid(url),
 			contentType: contentType,
 			headers: make_headers(),
 			type: 'POST',
@@ -231,7 +249,7 @@ var ERMREST = {
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
-			url: url,
+			url: url_cid(url),
 			contentType: contentType,
 			headers: make_headers(),
 			timeout: AJAX_TIMEOUT,
@@ -265,7 +283,7 @@ var ERMREST = {
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
-			url: url,
+			url: url_cid(url),
 			headers: make_headers(),
 			type: 'DELETE',
 			timeout: AJAX_TIMEOUT,
@@ -293,7 +311,7 @@ var ERMREST = {
 		document.body.style.cursor = 'wait';
 		var res = null;
 		$.ajax({
-			url: url,
+			url: url_cid(url),
 			contentType: contentType,
 			headers: make_headers(),
 			type: 'PUT',

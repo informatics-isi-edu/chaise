@@ -108,6 +108,8 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(COMMON)/vendor/angular-cookies.min.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/ng-grid.js \
@@ -242,6 +244,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/vendor/re-tree.js \
 	$(COMMON)/vendor/ng-device-detector.js \
+	$(COMMON)/vendor/angular-cookies.min.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js

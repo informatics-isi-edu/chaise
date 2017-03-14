@@ -32,7 +32,11 @@
             title: "Review Modified Record",
             message: "This record cannot be deleted or unlinked at this time because someone else has modified it. The record has been updated with the latest changes. Please review them before trying again."
         },
-        "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again."
+        "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
+        "sessionExpired": {
+            title: "Your session has expired. Please login to continue.",
+            message: "To open the login window press"
+        }
     })
 
     .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils',
@@ -482,6 +486,11 @@
             return result;
         }
 
+        function isBrowserIE() {
+            //Internet Explorer 6-11
+            return /*@cc_on!@*/false || !!document.documentMode;
+        }
+
 
         return {
             queryStringToJSON: queryStringToJSON,
@@ -491,7 +500,8 @@
             parseURLFragment: parseURLFragment,
             setOrigin: setOrigin,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
-            setLocationChangeHandling: setLocationChangeHandling
+            setLocationChangeHandling: setLocationChangeHandling,
+            isBrowserIE: isBrowserIE
         }
     }])
 

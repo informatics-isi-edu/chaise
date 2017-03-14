@@ -184,6 +184,12 @@ exports.testPresentation = function (tableParams) {
             allWindows = handles;
             return browser.switchTo().window(allWindows[1]);
         }).then(function() {
+            // In order to simulate someone else modifying a record (in order to
+            // trigger a 412), we need to set RecEdit's window.opener to null so
+            // that RecordSet won't think that this RecEdit page was opened by the same user
+            // from the RecordSet page.
+            return browser.executeScript('window.opener = null');
+        }).then(function () {
             return chaisePage.waitForElement(element(by.id("submit-record-button")));
         }).then(function() {
         // - Change a small thing. Submit.
@@ -191,10 +197,14 @@ exports.testPresentation = function (tableParams) {
             input.clear();
             input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
             return chaisePage.recordEditPage.getSubmitRecordButton().click();
-        }).then(function(handles) {
-        // - Go back to initial RecordEdit page
+        }).then(function() {
+            // Wait for RecordEdit to redirect to Record to make sure the submission went through.
+			return chaisePage.waitForUrl('/record/', browser.params.defaultTimeout);
+        }).then(function() {
+			expect(browser.driver.getCurrentUrl()).toContain('/record/');
+            // - Go back to initial RecordSet page
             browser.close();
-            browser.switchTo().window(allWindows[0]);
+            return browser.switchTo().window(allWindows[0]);
         }).then(function() {
             return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
         }).then(function () {
