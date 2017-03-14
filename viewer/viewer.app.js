@@ -8,6 +8,7 @@
         'ngSanitize',
         'chaise.alerts',
         'chaise.filters',
+        'ngCookies',
         'chaise.authen',
         'chaise.errors',
         'chaise.delete',

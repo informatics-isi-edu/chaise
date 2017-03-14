@@ -3,7 +3,7 @@
 
     angular.module('chaise.authen', ['chaise.utils'])
 
-    .factory('Session', ['$http', '$q', '$window', 'UriUtils', function ($http, $q, $window, UriUtils) {
+    .factory('Session', ['$http', '$q', '$window', 'UriUtils', '$uibModal', '$interval', '$cookies','messageMap', function ($http, $q, $window, UriUtils, $uibModal, $interval, $cookies, messageMap) {
 
         function NotFoundError(status, message) {
             this.code = 404;
@@ -77,24 +77,17 @@
                         'Accept': 'application/json'
                     }
                 };
-
-                window.addEventListener('message', function(args) {
-                    if (args && args.data && (typeof args.data == 'string')) {
-                        var obj = UriUtils.queryStringToJSON(args.data);
-                        if (obj.referrerid == referrerId && (typeof cb== 'function')) {
-                            cb();
-                        }
-                    }
-                });
-
+                var modalInstance, closed = false; 
+                
                 $http.get(url, config).then(function(response){
                     var data = response.data;
+
+                    var login_url = "";
                     if (data['redirect_url'] !== undefined) {
-                        var url = data['redirect_url'];
-                        $window.open(url, '_blank','width=800,height=600');
+                        login_url = data['redirect_url'];
                     } else if (data['login_form'] !== undefined) {
                         var login_form = data['login_form'];
-                        var login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
+                        login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
                         var method = login_form['method'];
                         var action = UriUtils.fixedEncodeURIComponent(login_form['action']);
                         var text = '';
@@ -108,8 +101,75 @@
                             }
                         }
                         login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden + '&?referrerid=' + referrerId;
-                        $window.open(login_url, '_blank','width=800,height=600');
                     }
+
+                    var params = {
+                        login_url: login_url
+                    };
+                    
+                    params.title = messageMap.sessionExpired.title;
+                    params.message = messageMap.sessionExpired.message;
+
+                    modalInstance = $uibModal.open({
+                        windowClass: "modal-login-instruction",
+                        templateUrl: "../common/templates/loginDialog.modal.html",
+                        controller: 'LoginDialogController',
+                        controllerAs: 'ctrl',
+                        resolve: {
+                            params: params
+                        },
+                        openedClass: 'modal-login',
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+
+                   
+
+                    /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
+                     * variable
+                     */
+                    if (UriUtils.isBrowserIE()) {
+
+                        
+                        $cookies.put("chaise-" + referrerId, true, { path: "/" });
+                        var intervalId;
+                        var watchChangeInReferrerId = function () {
+                            if (!closed && !$cookies.get("chaise-" + referrerId)) {
+                                $interval.cancel(intervalId);
+                                if (typeof cb== 'function') {
+                                    modalInstance.close("Done");
+                                    cb();
+                                    closed = true;
+                                }
+                                return;
+                            }
+                        }
+
+                        var onModalClose = function() {
+                            $interval.cancel(intervalId);
+                            $cookies.remove("chaise-" + referrerId, { path: "/" });
+                            closed = true;
+                        }
+
+                        // To avoid problems when user explicitly close the modal
+                        modalInstance.result.then(onModalClose, onModalClose);
+
+                        intervalId = $interval(watchChangeInReferrerId, 50);
+
+                    } else {
+
+                        window.addEventListener('message', function(args) {
+                            if (args && args.data && (typeof args.data == 'string')) {
+                                var obj = UriUtils.queryStringToJSON(args.data);
+                                if (obj.referrerid == referrerId && (typeof cb== 'function')) {
+                                    modalInstance.close("Done");
+                                    cb();
+                                    closed = true;
+                                }
+                            }
+                        });
+                    }
+
                 }, function() {
                     document.body.style.cursor = 'default';
                     $window.location = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);

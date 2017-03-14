@@ -7,7 +7,7 @@
 	    	<strong>Calculating and Verifying Checksum</strong>
     	</div>
     	<div class="col-md-6 pad0-left pad0-right text-right">
-	    	<strong>Completed: {{speed}}</strong>
+	    	<strong>Completed: {{ctrl.checkSumCompletedCount}}/{{ctrl.total}}</strong>
     	</div>
 	    <div class="progress">
 	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.checksumProgress + '%' }" style="width: 0%;"></div>
@@ -15,10 +15,10 @@
     </div>
     <div class="row no-row-margin" ng-show="isUpload">
     	<div class="col-md-6  pad0-left pad0-right">
-	    	<strong>Completed: {{ctrl.completed}}/{{ctrl.total}}</strong>
+	    	<strong>Completed: {{ctrl.completedCount}}/{{ctrl.total}}</strong>
     	</div>
     	<div class="col-md-6 pad0-left pad0-right text-right">
-	    	<strong>Speed: {{speed}}</strong>
+	    	<strong>Speed: {{ctrl.speed}}</strong>
     	</div>
 	    <div class="progress">
 	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.uploadProgress + '%' }" style="width: 0%;"></div>
@@ -37,7 +37,9 @@
 				</td>
 				<td>
 	                <div class="progress">
-	                    <div class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }" style="width: 0%;"></div>
+	                	<div ng-show="item.checksumProgress < 100" class="progress-bar" role="progressbar" ng-style="{ 'width': item.checksumProgress + '%' }" style="width: 0%;"></div>
+
+	                	<div ng-show="item.checksumProgress >= 100"  class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }" style="width: 0%;"></div>
 	                </div>
 	            </td>
 	        </tr>

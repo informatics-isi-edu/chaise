@@ -26,6 +26,30 @@
             $uibModalInstance.close();
         }
     }])
+    .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
+        var vm = this;
+        params.login_url = $sce.trustAsResourceUrl(params.login_url);
+        vm.params = params;
+
+        vm.openWindow = function() {
+
+            var x = window.innerWidth/2 - 800/2;
+            var y = window.innerHeight/2 - 600/2;
+
+            window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
+
+            return false;
+        }
+
+        vm.params.host = $sce.trustAsResourceUrl(window.location.host);
+
+        vm.cancel = cancel;
+
+        function cancel() {
+            $uibModalInstance.dismiss('cancel');
+        }
+
+    }])
     .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
         var vm = this;
 
@@ -92,12 +116,16 @@
 
         vm.totalSize = 0;
         vm.noOfFiles = 0;
+        vm.checkSumCompletedCount = 0;
+        vm.completedCount = 0;
 
         vm.checksumProgress = 0;
         vm.checksumCompleted = 0;
 
         vm.uploadProgress = 0;
         vm.uploadCompleted = 0;
+
+
 
         var updateChecksumProgreeBar = function() {
 
@@ -130,6 +158,7 @@
             var item = {
                 name: file.name, 
                 size: file.size, 
+                checksumProgress: 0,
                 progress: 0
             };
 
@@ -163,8 +192,8 @@
                 onChecksumError();
             };
 
-            uploadObj.onChecksumProgressChanged = function(calculatedSize, totalSize) {
-                
+            uploadObj.onChecksumProgressChanged = function(uploadedSize, totalSize) {
+
             };
 
             uploadObj.onChecksumCompleted = function() {
@@ -188,27 +217,39 @@
                 }
             };
 
+            uploadObj.start();
+
             return item;
         }
 
         var abortUploads = function() {
             params.rows.forEach(function(row) {
                 for(var k in row) {
+                    if (typeof row[k] == 'object' && row[k].file) {
+                        row[k].uploadObj.cancel();
+                    }
                 }
             });
         };
 
+        vm.cancel = abortUploads;
+
         params.rows.forEach(function(row) {
+            var tuple = [];
             for(var k in row) {
-                var tuple = [];
                 if (typeof row[k] == 'object' && row[k].file) {
                     vm.noOfFiles++;
                     vm.totalSize += row[k].file.size; 
                     tuple.push(uploadFile(row[k]));
                 }
-                vm.rows.push(tuple);
             }
+
+            if (tuple.length) vm.rows.push(tuple);
         });
+
+        if (!vm.rows.length) {
+            $uibModalInstance.close();
+        }
 
     }])
 })();

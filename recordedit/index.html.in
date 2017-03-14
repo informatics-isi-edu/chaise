@@ -61,7 +61,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="row padding-right-15">
+                        <div class="row padding-right-15"  style="position: absolute; right: 15px;">
                             <div class="pull-right add-rows-input" ng-class="form.showMultiInsert ? 'chaise-visible' : 'chaise-hidden'">
                                 <div class="input-group">
                                     <input id="copy-rows-input" type="number" class="form-control " ng-model="form.numberRowsToAdd">
@@ -74,7 +74,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row form-container" style="position: fixed;">
+                        <div class="row form-container" style="margin-top: 25px;">
                             <!-- loading spinner -->
                             <div ng-show="!displayReady" id="spinner">
                                 <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>

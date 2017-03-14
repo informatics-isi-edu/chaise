@@ -356,6 +356,8 @@
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
           "detailed" : ["id", ["product", "fk_category"], "website", "rating", "summary", "description", ["product", "fk_thumbnail"], "opened_on", "luxurious"],
+          "entry/create": ["id", "title", "website", ["product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product", "fk_thumbnail"], ["product", "fk_cover"], "opened_on","luxurious"],
+          "entry/edit": ["id", "title", "website", ["product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product", "fk_thumbnail"], ["product", "fk_cover"], "opened_on","luxurious"],
           "compact" : ["title", "website", "rating", "summary", "opened_on", "luxurious"]
         },
 

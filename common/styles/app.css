@@ -550,3 +550,73 @@ input.search-progress {
 .form-control-feedback > span.search-remove {
     border-bottom: none;
 }
+
+/*=============Popup modal for login instructions********/
+
+.modal-login .modal-backdrop {
+    opacity: 0.7 !important;
+}
+
+.modal-login-instruction .modal-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -300px;
+    margin-top: -100px;
+}
+
+.modal-login-instruction .modal-dialog .modal-content {
+    width: 600px;
+    height: 200px;
+}
+
+.modal-login-instruction .modal-dialog ol li {
+    list-style-type: decimal;
+}
+
+.modal-login-instruction .modal-dialog pre {
+    white-space: pre-line;
+    word-break: inherit;
+    text-align: justify;
+}
+
+.modal-login .modal-title { 
+    font-size: 22px !important;
+}
+
+.pls { padding-left: 5px; }
+.prs { padding-right: 5px; }
+.pts { padding-top: 5px; }
+.pbs { padding-bottom: 5px; }
+.pads { padding: 5px;  }
+
+.plm { padding-left: 10px; }
+.prm { padding-right: 10px; }
+.ptm { padding-top: 10px; }
+.pbm { padding-bottom: 10px; }
+.padm { padding: 10px;  }
+
+.pll { padding-left: 20px; }
+.prl { padding-right: 20px; }
+.ptl { padding-top: 20px; }
+.pbl { padding-bottom: 20px; }
+.padl { padding: 20px;  }
+
+.mls { margin-left: 5px; }
+.mrs { margin-right: 5px; }
+.mts { margin-top: 5px; }
+.mbs { margin-bottom: 5px; }
+.mars { margin : 5px;  }
+
+.mlm { margin-left: 10px; }
+.mrm { margin-right: 10px; }
+.mtm { margin-top: 10px; }
+.mbm { margin-bottom: 10px; }
+.marm { margin: 10px;  }
+
+.mll { margin-left: 20px; }
+.mrl { margin-right: 20px; }
+.mtl { margin-top: 20px; }
+.mbl { margin-bottom: 20px; }
+.marl { margin: 20px;  }
+
