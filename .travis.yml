@@ -98,6 +98,7 @@ script:
   - make testrecordset
   - make testrecordadd
   - make testrecordedit
+  - make testpermissions
   - make testviewer
   - make testlogin
   - make testsearch
