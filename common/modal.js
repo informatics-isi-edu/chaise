@@ -52,7 +52,6 @@
         };
 
         var fetchRecords = function() {
-
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
             reference.read(25).then(function getPseudoData(page) {
                 vm.tableModel.hasLoaded = true;

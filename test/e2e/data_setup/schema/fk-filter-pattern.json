@@ -68,7 +68,7 @@
                     ],
                     "annotations": {
                         "tag:isrd.isi.edu,2016:foreign-key": {
-                            "domain_filter_pattern": "position_type=fixed"
+                            "domain_filter_pattern": "position_type_col=fixed"
                         }
                     },
                     "referenced_columns": [
@@ -84,19 +84,42 @@
                     "names": [["fk-filter-pattern", "fk_position_user_defined"]],
                     "foreign_key_columns": [
                         {
-                            "table_name": "fk-constrained-table",
+                            "table_name": "main-entity-table",
                             "schema_name": "fk-filter-pattern",
                             "column_name": "position_fk_col"
                         }
                     ],
                     "annotations": {
                         "tag:isrd.isi.edu,2016:foreign-key": {
-                            "domain_filter_pattern": "position_type={{{position_text_col}}}"
+                            "domain_filter_pattern": "position_type_col={{{position_text_col}}}"
                         }
                     },
                     "referenced_columns": [
                         {
                             "table_name": "position-type-table",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "id"
+                        }
+                    ]
+                },
+                {
+                    "comment": "Foreign key that is constrained by a user input value via text input and another fk column value.",
+                    "names": [["fk-filter-pattern", "fk_multi_constrained"]],
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main-entity-table",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "multi_constrained_col"
+                        }
+                    ],
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "domain_filter_pattern": "fk2={{{fk1}}}&position_col={{{position_text_col}}}"
+                        }
+                    },
+                    "referenced_columns": [
+                        {
+                            "table_name": "fk-constrained-table",
                             "schema_name": "fk-filter-pattern",
                             "column_name": "id"
                         }
@@ -151,17 +174,20 @@
                 }, {
                     "comment": "Column constrained by position_text_col input value.",
                     "name": "position_fk_col",
-                    "nulok": true,
+                    "nullok": true,
                     "type": {
-                        "typename": "int"
+                        "typename": "int4"
+                    }
+                }, {
+                    "comment": "Column constrained by 2 values.",
+                    "name": "multi_constrained_col",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int4"
                     }
                 }
             ],
-            "annotations": {
-                "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "fk1", "fk_constrained_col, position_fixed_col, position_text_col, position_fk_col"]
-                }
-            }
+            "annotations": {}
         },
         "fk-no-constraint-table": {
             "comment": "Table with values that constrain other foreign key selector.",
@@ -186,19 +212,25 @@
                     "type": {
                         "typename": "serial4"
                     }
-                },
-                {
+                }, {
                     "comment": "Id value spelled out.",
                     "name": "alpha_id",
                     "nullok": true,
                     "type": {
                         "typename": "text"
                     }
+                }, {
+                    "comment": "Associated value for row.",
+                    "name": "int_value",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int4"
+                    }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "alpha_id"]
+                    "*": ["id", "alpha_id", "int_value"]
                 }
             }
         },
@@ -245,19 +277,25 @@
                     "type": {
                         "typename": "serial4"
                     }
-                },
-                {
+                }, {
                     "comment": "Foreign key column to fk-no-constraint-table. Limits the values displayed based on fk annotation on main-entity-table.",
                     "name": "fk2",
                     "nullok": true,
                     "type": {
                         "typename": "int4"
                     }
+                }, {
+                    "comment": "Column that can have one of multiple enumerated values: 'fixed', 'absolute', 'relative'",
+                    "name": "position_col",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "fk2"]
+                    "*": ["id", "fk2", "position_col"]
                 }
             }
         },
@@ -284,19 +322,25 @@
                     "type": {
                         "typename": "serial4"
                     }
-                },
-                {
+                }, {
                     "comment": "Column that can have one of multiple enumerated values: 'fixed', 'absolute', 'relative'",
-                    "name": "position_type",
+                    "name": "position_type_col",
                     "nullok": true,
                     "type": {
                         "typename": "text"
+                    }
+                }, {
+                    "comment": "Associated value for row.",
+                    "name": "int_value",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int4"
                     }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "position_type"]
+                    "*": ["id", "position_type_col, int_value"]
                 }
             }
         }
