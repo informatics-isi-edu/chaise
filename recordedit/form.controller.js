@@ -167,6 +167,7 @@
             vm.readyToSubmit = true;
             vm.submissionButtonDisabled = true;
             for (var j = 0; j < model.rows.length; j++) {
+                var transformedRow = transformRowValues(model.rows[j]);
                 $rootScope.reference.columns.forEach(function (column) {
                     // If the column is a pseudo column, it needs to get the originating columns name for data submission
                     if (column.isPseudo) {
@@ -194,7 +195,6 @@
                         }
                     // not pseudo, column.name is sufficient for the keys
                     } else {
-                        var transformedRow = transformRowValues(model.rows[j]);
                         // set null if not set so that the whole data object is filled out for posting to ermrestJS
                         model.submissionRows[j][column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
                     }
