@@ -379,7 +379,7 @@
 
             var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
 
-            params.reference = column.reference.filteredRef(column, submissionRow).contextualize.compactSelect;
+            params.reference = column.reference.filteredRef(submissionRow).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
 
