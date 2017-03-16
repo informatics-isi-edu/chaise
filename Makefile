@@ -72,8 +72,9 @@ HTML=search/index.html \
 	 record/index.html
 
 # ERMrestjs Deps
-ERMRESTJS_DIR=../../ermrestjs
-ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js
+ERMRESTJS_RT_DIR=../../ermrestjs
+ERMRESTJS_BLD_DIR=../ermrestjs/build
+ERMRESTJS_DEPS=ermrest.js
 
 # Shared utilities
 COMMON=common
@@ -628,8 +629,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 	for file in $(VIEWER_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -651,8 +654,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-de-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
 	for file in $(RE_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -674,8 +679,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-rs-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 	for file in $(RECSET_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -697,8 +704,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-record-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 	for file in $(RECORD_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
