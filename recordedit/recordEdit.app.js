@@ -37,6 +37,7 @@
     .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
         function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
 
+
         var session,
             context = { booleanValues: ['', true, false] };
 
