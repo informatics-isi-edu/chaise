@@ -379,7 +379,7 @@
 
             var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
 
-            params.reference = column.reference.filteredRef(submissionRow).contextualize.compactSelect;
+            params.reference = column.filteredRef(submissionRow).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
 
@@ -495,8 +495,8 @@
                              * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
                              * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
                             **/
-                            if (editOrCopy) {
-                                submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name] || null;
+                            if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
+                                submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
                             } else {
                                 submissionRow[referenceColumn.name] = null;
                             }
