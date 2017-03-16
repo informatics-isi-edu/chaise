@@ -7,6 +7,7 @@
         var vm = this;
         var context = $rootScope.context;
 
+
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
