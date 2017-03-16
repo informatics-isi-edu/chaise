@@ -14,17 +14,43 @@ describe('When editing a record', function() {
 
     beforeAll(function() {
         browser.ignoreSynchronization = true;
+        browser.get(browser.params.url + ":" + testParams.table_w_generated_columns.tableName + '/' + testParams.table_w_generated_columns.key.columnName + testParams.table_w_generated_columns.key.operator + testParams.table_w_generated_columns.key.value);
+        chaisePage.waitForElement(element(by.id("submit-record-button")));
     });
 
     beforeEach(function() {
         ermRest.setUserCookie(authCookie);
     });
 
-    describe('if the user made no edits, the app', function() {
+    // Tests that check the values for regular, non-disabled input fields are in 01-recordedit.edit.spec.js
+    it('should display the correct values in disabled input fields', function() {
+        testParams.table_w_generated_columns.row.forEach(function checkInput(col) {
+            (function(col) {
+                if (col.name == 'bool_true_col_gen' || col.name == 'bool_false_col_gen') {
+                    var dropdown = recordEditPage.getInputById(0, col.name);
+                    recordEditPage.getDropdownText(dropdown).then(function(text) {
+                        expect(text).toBe(col.value.toString());
+                    });
+                } else if (col.name == 'fk_col_gen') {
+                    recordEditPage.getForeignKeyInputs().first().getAttribute('innerText').then(function(text) {
+                        expect(text).toBe('Abraham Lincoln');
+                    });
+                } else {
+                    var input = recordEditPage.getInputById(0, col.name);
+                    expect(input.isEnabled()).toBe(false);
+                    input.getAttribute('value').then(function(value) {
+                        expect(value).toBe(col.value.toString());
+                    });
+                }
+            })(col);
+        });
+    });
+
+    describe('if the user made no edits', function() {
         var url;
         beforeAll(function(done) {
-            url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/' + browser.params.schema.name + ':' + testParams.tableName + '/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
-            browser.get(browser.params.url + ":" + testParams.tableName + '/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/' + browser.params.schema.name + ':' + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value;
+            browser.get(browser.params.url + ":" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 done();
             });
@@ -43,7 +69,7 @@ describe('When editing a record', function() {
             }).then(function(page) {
                 // Compare tuple data with expected data
                 var tuple = page.tuples[0].data;
-                var row = testParams.row;
+                var row = testParams.table_1.row;
                 expect(Object.keys(tuple).length).toEqual(row.length);
                 row.forEach(function(column) {
                     var expectedValue = column.value;
@@ -73,11 +99,12 @@ describe('When editing a record', function() {
     // 1. Converting from null to non-null (e.g. "int2_null_col" will be changed from null to 32767)
     // 2. Converting from non-null to null (e.g. "int2_col" will be changed from 32767 to null)
     // Except boolean type gets 3 cases (null to true, true to false, false to null).
-    describe('if the user did make edits, the app', function() {
+    describe('if the user did make edits', function() {
         var url, newRowData;
         beforeAll(function(done) {
-            url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/' + browser.params.schema.name + ':' + testParams.tableName + '/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
+            url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/' + browser.params.schema.name + ':' + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value;
             // These will be the new values we expect the row to have in ERMrest after editing this row in the app
+            // The generated columns are excluded here because they retain their initial values even after submission.
             newRowData = {
                 "id": 1,
                 "int2_null_col": 32767,
@@ -102,7 +129,7 @@ describe('When editing a record', function() {
                 "timestamp_null_col": "2016-01-18T13:00:00",
                 "timestamp_col": null,
                 // The expected value for timestamptz columns depends on the testing platform's time zone, since
-                // ERMrest produces timestamptz values in the time zone that's it deployed it.
+                // ERMrest produces timestamptz values in the time zone that's it deployed in.
                 "timestamptz_null_col": moment("2016-01-18T13:00:00-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ"),
                 "timestamptz_col": null,
                 "date_null_col": "2016-08-15",
@@ -110,7 +137,7 @@ describe('When editing a record', function() {
                 "fk_null_col": 1,
                 "fk_col": null
             };
-            browser.get(browser.params.url + ":" + testParams.tableName + '/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            browser.get(browser.params.url + ":" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 done();
             });
@@ -119,10 +146,10 @@ describe('When editing a record', function() {
         // Test each column type to check that the app converts the submission data correctly for each type
         it('should submit the right data to the DB', function(done) {
             // Edit each column with the new row data
-            testParams.row.forEach(function(column, index, array) {
+            testParams.table_1.row.forEach(function(column, index, array) {
                 (function(column) {
                     switch (column.displayType) {
-                        case 'serial4':
+                        case 'disabled':
                             break;
                         case 'popup-select':
                             // Clear the foreign key field for fk_col b/c fk_col needs to be null
@@ -217,7 +244,7 @@ describe('When editing a record', function() {
             }).then(function(ref) {
                 return ref.contextualize.entryEdit.read(1);
             }).then(function(page) {
-                // Compare tuple data with expected data
+                // Compare tuple data with expected new data
                 var tuple = page.tuples[0].data;
                 expect(Object.keys(tuple).length).toBe(Object.keys(newRowData).length);
                 for (var colName in newRowData) {
