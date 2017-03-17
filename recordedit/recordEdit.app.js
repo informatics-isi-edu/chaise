@@ -177,12 +177,18 @@
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                     column = $rootScope.reference.columns[i];
 
+                                    // If input is disabled, there's
+                                    // no need to transform the column value.
+                                    if (column.getInputDisabled(context.appContext)) {
+                                        recordEditModel.rows[j][column.name] = values[i];
+                                        continue;
+                                    }
+
+                                    // Transform column values for use in view model
                                     switch (column.type.name) {
                                         case "timestamp":
                                         case "timestamptz":
                                             if (values[i]) {
-                                                // Cannot ensure that all timestamp values are formatted in ISO 8601
-                                                // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
                                                 var ts = moment(values[i]);
                                                 value = {
                                                     date: ts.format('YYYY-MM-DD'),

@@ -8,7 +8,6 @@ dist: trusty
 branches:
   only:
     - master
-    - fix-travis
 
 addons:
   sauce_connect: true
