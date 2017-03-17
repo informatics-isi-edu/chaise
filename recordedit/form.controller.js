@@ -98,6 +98,8 @@
             $window.location = redirectUrl;
         }
 
+        // TODO: Instead of calling this function in the error callback, the .catchAll() call should be in the catch attached to that promise chain
+        // this function is completely unnecessary
         function showSubmissionError(response) {
             ErrorService.catchAll(response);
         }
@@ -242,6 +244,7 @@
                             submit();
                         });
                     } else {
+                        // TODO: this needs to be removed and a .catch() added
                         vm.showSubmissionError(exception);
                         vm.submissionButtonDisabled = false;
                     }
@@ -292,6 +295,7 @@
                             submit();
                         });
                     } else {
+                        // TODO: this needs to be removed and a catch added here
                         vm.showSubmissionError(exception);
                         vm.submissionButtonDisabled = false;
                     }
@@ -336,6 +340,7 @@
                         });
                     } else {
                         if (response !== 'cancel') {
+                            // TODO: rethrow error here
                             vm.showSubmissionError(response);
                         }
                     }
@@ -371,6 +376,7 @@
                             ErrorService.catchAll(error);
                         });
                     } else {
+                        // TODO: rethrow error here
                         vm.showSubmissionError(response);
                     }
                 }).catch(function (error) {
@@ -416,6 +422,7 @@
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
             }, function noDataSelected() {
                 // do nothing
+                // TODO: nned catchall here
             });
         }
 
@@ -434,6 +441,7 @@
         }
 
         function createRecord(column) {
+            // TODO: wrapper function with catch here
             var newRef = column.reference.contextualize.entryCreate;
             var appURL = newRef.appLink;
             if (!appURL) {
