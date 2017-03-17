@@ -8,7 +8,6 @@ dist: trusty
 branches:
   only:
     - master
-    - fix-travis
 
 addons:
   sauce_connect: true
@@ -93,7 +92,6 @@ before_script:
 
 script:
   - make build
-  - make blah
   - make testnavbar
   - make testrecord
   - make testrecordset
