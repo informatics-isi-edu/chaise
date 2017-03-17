@@ -503,6 +503,10 @@ testviewer:
 testlogin:
 	$(BIN)/protractor $(E2Elogin)
 
+.PHONY: blah
+blah:
+	$(BIN)/protractor $(E2EDIrecordEditMultiColTypes)
+
 # Rule to make html
 .PHONY: html
 html: $(HTML)

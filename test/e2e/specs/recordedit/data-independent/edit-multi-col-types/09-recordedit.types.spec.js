@@ -39,7 +39,13 @@ describe('When editing a record', function() {
                     var input = recordEditPage.getInputById(0, col.name);
                     expect(input.isEnabled()).toBe(false);
                     input.getAttribute('value').then(function(value) {
-                        expect(value).toBe(col.value.toString());
+                        if (col.name == 'timestamp_col_gen' || col.name == 'timestamptz_col_gen') {
+                            var actualValue = moment(value, "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                            var expectedValue = moment("2016-01-18T00:00:00-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                            expect(actualValue).toBe(expectedValue);
+                        } else {
+                            expect(value).toBe(col.value.toString());
+                        }
                     });
                 }
             })(col);
