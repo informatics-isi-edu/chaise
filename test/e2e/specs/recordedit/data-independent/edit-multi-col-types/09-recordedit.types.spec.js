@@ -41,7 +41,7 @@ describe('When editing a record', function() {
                     input.getAttribute('value').then(function(value) {
                         if (col.name == 'timestamp_col_gen' || col.name == 'timestamptz_col_gen') {
                             var actualValue = moment(value, "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
-                            var expectedValue = moment("2016-01-18T00:00:00-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
+                            var expectedValue = moment(col.value.toString(), "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
                             expect(actualValue).toBe(expectedValue);
                         } else {
                             expect(value).toBe(col.value.toString());
