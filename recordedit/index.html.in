@@ -160,7 +160,7 @@
                                                     <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::form.clearForeignKey(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                                                 </div>
                                                 <span class="input-group-addon" ng-show="::!form.isDisabled(column);">
-                                                    <button ng-focus="::form.blurElement($event);" class="btn btn-default modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
+                                                    <button ng-focus="::form.blurElement($event);" id="row-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="btn btn-default modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
                                                         <span class="glyphicon glyphicon-chevron-down"></span>
                                                     </button>
                                                 </span>

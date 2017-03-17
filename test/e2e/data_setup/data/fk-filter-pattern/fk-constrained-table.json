@@ -1,0 +1,7 @@
+[{"id": 1, "fk2": 1, "position_col": "fixed"},
+ {"id": 2, "fk2": 1, "position_col": "relative"},
+ {"id": 3, "fk2": 2, "position_col": "fixed"},
+ {"id": 4, "fk2": 1, "position_col": "fixed"},
+ {"id": 5, "fk2": 3, "position_col": "relative"},
+ {"id": 6, "fk2": 3, "position_col": "absolute"},
+ {"id": 7, "fk2": 4, "position_col": "fixed"}]

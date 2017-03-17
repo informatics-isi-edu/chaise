@@ -386,6 +386,11 @@ var recordEditPage = function() {
         return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
     };
 
+    this.getForeignKeyInputButton = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("row-" + index + '-' + columnDisplayName + "-button"));
+    };
+
     this.getForeignKeyInputs = function() {
         return element.all(by.css(".popup-select-value"));
     };
@@ -682,7 +687,7 @@ var recordPage = function() {
     };
 
     this.getModalText = function() {
-        return element(by.css(".modal-body"));    
+        return element(by.css(".modal-body"));
     };
 };
 
