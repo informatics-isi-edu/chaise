@@ -234,6 +234,7 @@
                             $log.warn(response);
                             throw response;
                         }).catch(function readCatch(exception) {
+                            // TODO: catchAll here too or should this be logic specific to recordedit?
                             ErrorService.errorPopup(exception.message, exception.code, "home page");
                         });
                     } else if (session) {
@@ -310,6 +311,7 @@
                 $log.warn(response);
                 throw response;
             }).catch(function genericCatch(exception) {
+                // TODO: Should this be factored out so that this logic is in the catchALL() or do we think this is specific to Recordedit?
                 if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                     ErrorService.catchAll(exception);
                 } else if (exception.code == errorNames.forbidden) {
@@ -319,6 +321,7 @@
                 }
             });
         } catch (exception) {
+            // TODO: should probably call the catchAll()
             ErrorService.errorPopup(exception.message, exception.code, "home page");
         }
     }]);

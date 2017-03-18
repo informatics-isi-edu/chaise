@@ -28,6 +28,8 @@
         vm.submit = submit;
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
+        // TODO: following functions attached to vm (view model) should be wrapped in try/catch
+        // Utils.catchWrapper(fn)
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.showSubmissionError = showSubmissionError;
         vm.searchPopup = searchPopup;
@@ -37,6 +39,8 @@
         vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
         vm.numberRowsToAdd = 1;
         vm.showMultiInsert = false;
+        // TODO: mentioned below this function should be wrapped in a try/catch
+        // vm.copyFormRow = Utils.catchWrapper(copyFormRow);
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
         vm.deleteRecord = deleteRecord;
@@ -422,7 +426,7 @@
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
             }, function noDataSelected() {
                 // do nothing
-                // TODO: nned catchall here
+                // TODO: need catchall here
             });
         }
 
@@ -452,6 +456,7 @@
             }
         }
 
+        // TODO: function should be wrapped in a try catch
         function copyFormRow() {
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
                 AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.'});
