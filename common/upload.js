@@ -25,7 +25,7 @@
                         scope.fileEl
                             .bind('change', function (event) {
                                 scope.value.file = event.target.files[0];
-                                scope.value.hatracObj = new ERMrest.Upload(scope.value.file, { url: 'https://dev.isrd.isi.edu/hatrac/test1' });
+                                scope.value.hatracObj = new ERMrest.Upload(scope.value.file, { url: 'https://dev.isrd.isi.edu/hatrac/test10' });
                                 scope.value.fileName = scope.value.file.name;
                                 scope.$apply();
                             });

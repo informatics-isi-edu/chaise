@@ -2,20 +2,21 @@
     <h3 class="modal-title">Uploading files</h3>
 </div>
 <div class="modal-body">
-	<div class="row no-row-margin" ng-show="!isUpload">
+	<div class="row no-row-margin" ng-show="!ctrl.isUpload">
     	<div class="col-md-6  pad0-left pad0-right">
 	    	<strong>Calculating and Verifying Checksum</strong>
     	</div>
     	<div class="col-md-6 pad0-left pad0-right text-right">
-	    	<strong>Completed: {{ctrl.checkSumCompletedCount}}/{{ctrl.total}}</strong>
+	    	<strong>Completed: {{ctrl.checksumCompleted}}/{{ctrl.noOfFiles}}</strong>
     	</div>
 	    <div class="progress">
-	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.checksumProgress + '%' }" style="width: 0%;"></div>
+	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.checksumProgress + '%' }" style="width: 0%;background-color: #8cacc7 !important;"></div>
 	    </div>
+	    <div class="progress-percent">{{ctrl.checksumProgress | number:0}}%</div>
     </div>
-    <div class="row no-row-margin" ng-show="isUpload">
+    <div class="row no-row-margin" ng-show="ctrl.isUpload">
     	<div class="col-md-6  pad0-left pad0-right">
-	    	<strong>Completed: {{ctrl.completedCount}}/{{ctrl.total}}</strong>
+	    	<strong>Completed: {{ctrl.uploadCompleted}}/{{ctrl.noOfFiles}} Files ({{ctrl.humanSizeTransferred}}/ {{ctrl.humanTotalSize}}) </strong>
     	</div>
     	<div class="col-md-6 pad0-left pad0-right text-right">
 	    	<strong>Speed: {{ctrl.speed}}</strong>
@@ -23,6 +24,7 @@
 	    <div class="progress">
 	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.uploadProgress + '%' }" style="width: 0%;"></div>
 	    </div>
+	    <div class="progress-percent">{{ctrl.uploadProgress | number:0}}%</div>
     </div>
 	<table class=" table upload-table">
 	    <tbody ng-repeat="(rowIndex, row) in ctrl.rows track by $index" ng-show="row.length">    
@@ -32,15 +34,17 @@
 			<tr ng-repeat="item in row"> 
 	            <td>
 	    			<div class="ellipsis">
-	    				{{item.name}}
+	    				{{item.name}} ( {{item.humanFileSize}} )
 					</div>
 				</td>
 				<td>
 	                <div class="progress">
-	                	<div ng-show="item.checksumProgress < 100" class="progress-bar" role="progressbar" ng-style="{ 'width': item.checksumProgress + '%' }" style="width: 0%;"></div>
+	                	<div ng-show="!item.uploadStarted" class="progress-bar" role="progressbar" ng-style="{ 'width': item.checksumPercent + '%' }" style="background-color: #8cacc7 !important;"></div>
 
-	                	<div ng-show="item.checksumProgress >= 100"  class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }" style="width: 0%;"></div>
+	                	<div ng-show="item.uploadStarted" class="progress-bar" role="progressbar" ng-style="{ 'width': item.progressPercent + '%' }"></div>
 	                </div>
+	                <div ng-show="!item.uploadStarted" class="progress-percent inner-progress-percent">{{item.checksumPercent | number:0}}%</div>
+	                <div ng-show="item.uploadStarted" class="progress-percent inner-progress-percent">{{item.progressPercent | number:0}}%</div>
 	            </td>
 	        </tr>
 	    </tbody>

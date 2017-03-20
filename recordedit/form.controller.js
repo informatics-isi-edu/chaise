@@ -153,7 +153,20 @@
         }
 
         function uploadFiles(isUpdate, onSuccess) {
-            onSuccess();
+
+            $uibModal.open({
+                templateUrl: "../common/templates/uploadProgress.modal.html",
+                controller: "UploadModalDialogController",
+                controllerAs: "ctrl",
+                size: "md",
+                backdrop: 'static',
+                keyboard: false,
+                resolve: {
+                    params: {
+                        rows: vm.recordEditModel.submissionRows
+                    }
+                }
+            }).result.then(onSuccess);
         }
 
         function addRecords(isUpdate) {

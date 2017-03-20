@@ -286,6 +286,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/mask.min.js \
 	$(COMMON)/vendor/moment.min.js \
+	$(COMMON)/vendor/sparkMD5.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
