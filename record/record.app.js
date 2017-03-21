@@ -38,6 +38,8 @@
 
         var session,
             context = {};
+
+        // TODO: Add catcher fn to these 3 in utils.js
         UriUtils.setOrigin();
         headInjector.addTitle();
         headInjector.addCustomCSS();
@@ -144,10 +146,16 @@
                                     hasLoaded: true
                                 };
                                 $rootScope.tableModels[i] = model;
+                                // TODO: Throw unhandled error.
                             });
+                            // TODO: Add a .catch for exceptions from this loop
+                            // .catch(e) {
+                            //  ErrorService.catchAll(e);
+                            // }
                         })(i);
                     }
                 }, function error(response) {
+                    // reference.read has an error
                     $log.warn(response);
                     throw response;
                 }).catch(function genericCatch(exception) {
@@ -155,6 +163,12 @@
                         ErrorService.catchAll(exception);
                     else
                         ErrorService.errorPopup(exception.message, exception.code, "home page");
+
+                    // TODO: Conclude with generic catchAll and show errorPopup if it's not UnauthorizedError. i.e.:
+                    // if (exception instanceof ERMrest.UnauthorizedError === false) {
+                    //     ErrorService.errorPopup(exception.message, exception.code, "home page");
+                    // }
+                    // ErrorService.catchAll(exception)
                 });
             // No filter defined, redirect to search
             } else {
@@ -174,6 +188,10 @@
             }
         // no catalog or schema:table defined, no defaults either, redirect to home page
         } catch (exception) {
+            // Decided a generic catchAll isn't necessary because errors caught here come from
+            // either chaiseURItoErmrestURI or parseURLFragment. If the former, then errorPopup takes care
+            // of that. If the latter, then parseURLFragment should have a generic catchAll to its body (TODO: need to add).
+            // Thoughts?
             ErrorService.errorPopup(exception.message, exception.code, "home page");
         }
 
@@ -185,6 +203,7 @@
          * outside recordset, refresh page.
          *
          */
+         // TODO: try/catch these 2 fns if we decide to not handle errors in utils.js
         UriUtils.setLocationChangeHandling();
 
         // This is to allow the dropdown button to open at the top/bottom depending on the space available
