@@ -137,6 +137,7 @@
                         var intervalId;
                         var watchChangeInReferrerId = function () {
                             if (!closed && !$cookies.get("chaise-" + referrerId)) {
+                                // TODO: Attach .catch w/ catchAll
                                 $interval.cancel(intervalId);
                                 if (typeof cb== 'function') {
                                     modalInstance.close("Done");
@@ -148,6 +149,7 @@
                         }
 
                         var onModalClose = function() {
+                            // TODO: Attach .catch w/ catchAll
                             $interval.cancel(intervalId);
                             $cookies.remove("chaise-" + referrerId, { path: "/" });
                             closed = true;
@@ -156,6 +158,7 @@
                         // To avoid problems when user explicitly close the modal
                         modalInstance.result.then(onModalClose, onModalClose);
 
+                        // TODO: Attach .catch w/ catchAll
                         intervalId = $interval(watchChangeInReferrerId, 50);
 
                     } else {
