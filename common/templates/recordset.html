@@ -26,14 +26,14 @@
     <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
         <!-- pagination -->
         <span class="dropdown" style="margin-left: 5px">
-            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
+            <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
                 <span class="caret"></span></button>
             <ul class="dropdown-menu dropdown-menu-right">
                 <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
                     <span class="glyphicon glyphicon-ok"></span>
                     {{ vm.pageLimit }} (Custom)</a>
                 </li>
-                <li ng-repeat="limit in pageLimits"><a href ng-click="setPageLimit(limit)">
+                <li ng-repeat="limit in pageLimits"><a id="page-size-{{limit}}" href ng-click="setPageLimit(limit)">
                     <span class="glyphicon" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
                     {{ limit }}</a>
                 </li>
@@ -55,10 +55,10 @@
 
 <!-- bottom pagination -->
 <div class="pager" ng-show="vm.initialized && vm.hasLoaded && (vm.page.hasPrevious || vm.page.hasNext)">
-    <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
+    <button id="rs-next-btn" type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
         <span class="glyphicon glyphicon-chevron-left"></span>
     </button>
-    <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
+    <button id="rs-previous-btn" type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
         <span class="glyphicon glyphicon-chevron-right"></span>
     </button>
 </div>

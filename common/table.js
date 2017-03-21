@@ -127,15 +127,6 @@
             }
 
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
-                // we are paging based on @before (user navigated backwards in the set of data)
-                // AND there is less data than limit implies (beginning of set) OR we got the right set of data (tuples.length == pageLimit) but there's no previous set (beginning of set)
-                if ((scope.vm.reference.location.pagingObject.before) && (page.tuples.length < scope.vm.pageLimit || !page.hasPrevious) ) {
-                    scope.vm.reference.location.pagingObject = null;
-
-                    read(scope);
-                    return;
-                }
-
                 // This method sets the
                 if (!setSearchStates(scope, isBackground, searchTerm)) return;
 
