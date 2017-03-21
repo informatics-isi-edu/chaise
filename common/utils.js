@@ -1,3 +1,6 @@
+// TODO: Should errors be caught here in in these util functions or
+// should they be caught at the call site?
+
 (function() {
     'use strict';
 
@@ -49,6 +52,7 @@
          * @desc
          * Converts a chaise URI to an ermrest resource URI object
          */
+
         function chaiseURItoErmrestURI(location) {
             var tableMissing = "No table specified in the form of 'schema-name:table-name' and no Default is set.",
                 catalogMissing = "No catalog specified and no Default is set.";
@@ -131,7 +135,7 @@
         function fixedEncodeURIComponent(str) {
             return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
                 return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            })
+            });
         }
 
         /**
@@ -463,9 +467,16 @@
          *
          */
         function setLocationChangeHandling() {
+            // TODO: Surround this onhashchange function with a catcher
             $window.onhashchange = function() {
                 // when address bar changes by user
-                if ($window.location.href !== $rootScope.location) {
+
+                // TODO: Check $rootScope.location
+                // if (!$rootScope.location) {
+                //     throw new Error('No location information found');
+                // }
+
+                else if ($window.location.href !== $rootScope.location) {
                     location.reload();
                 }
             };
@@ -473,7 +484,7 @@
 
 
         function queryStringToJSON(queryString) {
-            queryString  = queryString || window.location.search;
+            queryString  = queryString || $window.location.search;
             if (queryString.indexOf('?') > -1){
                 queryString = queryString.split('?')[1];
             }
@@ -492,6 +503,10 @@
         }
 
 
+        // TODO: If we decide to catch errors in this file instead of call site,
+        // then we could wrap each of the returned functions with the catcher fn
+        // so that it's all in one place. Same with the other util functions returned
+        // in the factories/services in this file.
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -694,6 +709,7 @@
             restrict: 'A',
             require: 'ngModel',
             link: function (scope, elem, attrs, ctrl) {
+                // TODO: Wrap this function in catcher fn
                 ctrl.$parsers.push(function(viewValue) {
                     if(viewValue === "") {
                         return null;
@@ -706,7 +722,7 @@
 
     .directive('onEnter', function() {
         return function(scope, element, attrs) {
-
+            // TODO: Wrap this function in catcher fn
             element.bind("keydown keypress", function(event) {
                 var keyCode = event.which || event.keyCode;
 
@@ -738,6 +754,7 @@
                     return element.is(':visible');
                 }, function(visible) {
                     if (visible == true) {
+                        // TODO: Attach .catch w/ catchAll
                         focusPromise = $timeout(function() {
                             element[0].focus();
                         }, 0, false);
@@ -754,6 +771,7 @@
                 element.on('$destroy', function() {
                     unbindWatch();
                     if (focusPromise) {
+                        // TODO: Attach .catch w/ catchAll
                         $timeout.cancel(focusPromise);
                     }
                 });
@@ -778,7 +796,6 @@
             }
         }
         return {
-            // TODO: Add catcher fn to these
             addCustomCSS: addCustomCSS,
             addTitle: addTitle
         };

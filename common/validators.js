@@ -13,6 +13,7 @@
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
+                // TODO: Wrap in catcher fn
                 ctrl.$validators.integer = function(modelValue, viewValue) {
                     if (ctrl.$isEmpty(modelValue)) {
                         // consider empty models to be valid
@@ -36,6 +37,7 @@
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
+                // TODO: Wrap in catcher fn
                 ctrl.$validators.float = function(modelValue, viewValue) {
                     if (ctrl.$isEmpty(modelValue)) {
                         // consider empty models to be valid
@@ -59,6 +61,7 @@
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
+                // TODO: Wrap in catcher fn
                 ctrl.$validators.date = function(modelValue, viewValue) {
                     var value = modelValue || viewValue;
                     if (ctrl.$isEmpty(value)) {
@@ -76,6 +79,7 @@
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
+                // TODO: Wrap in catcher fn
                 ctrl.$validators.time = function(modelValue, viewValue) {
                     if (ctrl.$isEmpty(modelValue)) {
                         return true;
@@ -114,6 +118,7 @@
             restrict: 'A',
             require: 'ngModel',
             link: function(scope, elm, attr, ctrl) {
+                // TODO: Wrap in catcher fn
                 scope.$watch(attr.validateValues, function(newObj, oldObj) {
                     // If newObj and oldObj are identical, then this listener fn was triggered
                     // due to app initialization, not an actual model change. Do nothing.

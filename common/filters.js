@@ -5,6 +5,7 @@
 
     // Underscore to Space: Replaces underscores with spaces
     .filter('underscoreToSpace', function() {
+        // TODO: Wrap in try/catch
         return function underscoreToSpace(input) {
             if (typeof input === "string") {
                 return input.replace(/_/g, ' ');
@@ -14,9 +15,10 @@
     })
 
     // toTitleCase: Capitalizes the first character for each word in a string
-    // TODO: Make it more ~ROBUST~ internationalize this
+    // TODO: Make it more robust by internationalizing this
     // Account for names with slashes, hyphens, Cyrillic names, Klingon, Chinese, etc.
     .filter('toTitleCase', function() {
+        // TODO: Wrap in try/catch
         return function toTitleCase(input) {
             if (typeof input === "string") {
                 return input.replace(/[^-'\s]+/g, function(word) {

@@ -27,6 +27,7 @@
                     // get session failed, not logged in
                     return $q.reject(new NotFoundError(response.statusText, response.data));
                 });
+                // TODO: Conclude chain w/ a .catch for catchAll
             },
 
             login: function (referrer) {
@@ -65,6 +66,7 @@
                     document.body.style.cursor = 'default';
                     $window.location = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
                 });
+                // TODO: Conclude chain w/ a .catch for catchAll
 
             },
 
@@ -77,8 +79,8 @@
                         'Accept': 'application/json'
                     }
                 };
-                var modalInstance, closed = false; 
-                
+                var modalInstance, closed = false;
+
                 $http.get(url, config).then(function(response){
                     var data = response.data;
 
@@ -106,7 +108,7 @@
                     var params = {
                         login_url: login_url
                     };
-                    
+
                     params.title = messageMap.sessionExpired.title;
                     params.message = messageMap.sessionExpired.message;
 
@@ -123,14 +125,14 @@
                         keyboard: false
                     });
 
-                   
+
 
                     /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
                      * variable
                      */
                     if (UriUtils.isBrowserIE()) {
 
-                        
+
                         $cookies.put("chaise-" + referrerId, true, { path: "/" });
                         var intervalId;
                         var watchChangeInReferrerId = function () {
@@ -174,6 +176,7 @@
                     document.body.style.cursor = 'default';
                     $window.location = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
                 });
+                // TODO: Conclude chain w/ a .catch for catchAll
             },
 
             logout: function() {
@@ -189,6 +192,7 @@
                     // user not logged in
                     $window.location = "/chaise/logout";
                 });
+                // TODO: Conclude chain w/ a .catch for catchAll
             },
 
             NotFoundError: NotFoundError

@@ -2,13 +2,14 @@
     'use strict';
     angular.module('chaise.navbar', [
         'ngCookies',
-        'chaise.utils', 
+        'chaise.utils',
         'chaise.authen',
         'ui.bootstrap'
     ])
     .directive('navbar', ['$window', '$rootScope', 'Session', function($window, $rootScope, Session) {
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
+    // TODO: Wrap this transformation in try/catch
         var root = chaiseConfig.navbarMenu = chaiseConfig.navbarMenu || {};
         if (root) {
             // Set default newTab property at root node
@@ -59,12 +60,16 @@
                 }, function(error) {
                     // No session = no user
                     scope.user = null;
+                    // TODO: Throw the error
                 });
+                // TODO: Attach a .catch w/ catchAll
 
+                // TODO: Wrap in catcher fn
                 scope.login = function login() {
                     Session.login($window.location.href);
                 };
 
+                // TODO: Wrap in catcher fn
                 scope.logout = function logout() {
                     Session.logout();
                 };
@@ -80,6 +85,7 @@
             },
             templateUrl: '../common/templates/navbarMenu.html',
             compile: function(el) {
+                // TODO: Wrap this function's body in try/catch
                 var contents = el.contents().remove();
                 var compiled;
                 return function(scope, el) {

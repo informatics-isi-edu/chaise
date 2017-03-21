@@ -33,6 +33,7 @@
                 controllerAs: 'ctrl',
                 size: 'sm'
             });
+            // TODO: Conclude chain w/ a .catch for catchAll
         }
 
         return {
@@ -47,12 +48,14 @@
             link: function(scope) {
                 scope.deleteFn = function deleteFn() {
                     if (!CONFIRM_DELETE) {
+                        // TODO: Wrap callback in catcher fn
                         return scope.callback();
                     }
                     var modalInstance = createModal();
                     modalInstance.result.then(function success() {
                         return scope.callback();
                     }).catch(function error(response) {
+                        // TODO: ErrorService.catchAll(response) instead of console.log
                         console.log(response);
                     });
                 }

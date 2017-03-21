@@ -19,6 +19,7 @@
                     fromTuple: "=?"
                 },
                 link: function (scope, element) {
+                    // TODO: Wrap most of the body of this function in a try/catch with generic catchAll
 
                     var init = function() {
 
@@ -41,6 +42,7 @@
 
                         else if (scope.config.editable)
                             editLink = scope.tuple.reference.contextualize.entryEdit.appLink;
+
 
                         if (editLink) {
                             scope.edit = function () {
@@ -99,11 +101,13 @@
                                                 });
                                             } else {
                                                 scope.$emit('error', response);
+                                                // TODO: Throw error instead.
                                                 ErrorService.catchAll(error);
                                             }
                                         }).catch(function (error) {
                                             $log.info(error);
                                             scope.$emit('error', response);
+                                            // TODO: Conclude chain w/ catchAll
                                         });
                                     } else {
 
@@ -136,10 +140,12 @@
                                                     scope.$emit('record-modified');
                                                 }).catch(function(error) {
                                                     scope.$emit('error', response);
+                                                    // TODO: Throw the error instead
                                                     ErrorService.catchAll(error);
                                                 });
                                             } else {
                                                 scope.$emit('error', response);
+                                                // TODO: Throw the error instead
                                                 ErrorService.catchAll(error);
                                             }
                                         }).catch(function (error) {
@@ -195,15 +201,15 @@
                                             // 2. Update UI by letting the table directive know
                                                 scope.$emit('record-modified');
                                             }).catch(function(error) {
-                                                $window.alert(error);
+                                                // TODO: Throw the error instead
                                                 ErrorService.catchAll(error);
                                             });
                                         } else {
                                             scope.$emit('error', response);
+                                            // TODO: Throw the error instead
                                             ErrorService.catchAll(error);
                                         }
                                     }).catch(function (error) {
-                                        $window.alert(error);
                                         ErrorService.catchAll(error);
                                         scope.$emit('error', response);
                                     });
@@ -237,10 +243,12 @@
                                             // 2. Update UI by letting the table directive know
                                                 scope.$emit('record-modified');
                                             }).catch(function(error) {
+                                                // TODO: Throw the error instead
                                                 ErrorService.catchAll(error);
                                             });
                                         } else {
                                             scope.$emit('error', response);
+                                            // TODO: Throw the error instead
                                             ErrorService.catchAll(error);
                                         }
                                     }).catch(function (error) {
@@ -293,13 +301,13 @@
 
                         // This function checks for height of an element in the row at an index(td'th)
                         // and Set overflow
-                        var updateHeight = function(index ,element) {
+                        var updateHeight = function(index, element) {
                             var height = element.clientHeight;
                             if (height > maxHeight) {
                                 scope.overflow[index] = true;
                                 scope.hideContent = true;
                                 containsOverflow = true;
-                                scope.maxHeightStyle =  maxHeightStyle;
+                                scope.maxHeightStyle = maxHeightStyle;
                             } else {
                                 scope.overflow[index] = false;
                             }

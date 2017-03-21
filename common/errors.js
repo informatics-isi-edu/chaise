@@ -44,6 +44,7 @@
                     $window.location.replace(redirectLink);
                 }
             });
+            // TODO: Add .catch for catchAll
         }
 
         function noRecordError(filters) {
@@ -72,6 +73,8 @@
                 AlertsService.addAlert({type:'error', message:exception.message});
             }
         }
+
+        // TODO: Add catcher function to wrap synchronous code
 
         return {
             errorPopup: errorPopup,

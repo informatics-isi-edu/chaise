@@ -48,7 +48,12 @@
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
         try {
-            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+            // TODO: Redirecting to home page is appropriate for an error in chaiseURItoErmrestURI
+            // try {
+                var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+            // } catch (e) {
+            //     ErrorService.errorPopup(exception.message, exception.code, "home page");
+            // }
 
             context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
 
@@ -147,6 +152,7 @@
                                 };
                                 $rootScope.tableModels[i] = model;
                                 // TODO: Throw unhandled error.
+                                // throw e;
                             });
                             // TODO: Add a .catch for exceptions from this loop
                             // .catch(e) {
@@ -188,11 +194,11 @@
             }
         // no catalog or schema:table defined, no defaults either, redirect to home page
         } catch (exception) {
-            // Decided a generic catchAll isn't necessary because errors caught here come from
-            // either chaiseURItoErmrestURI or parseURLFragment. If the former, then errorPopup takes care
-            // of that. If the latter, then parseURLFragment should have a generic catchAll to its body (TODO: need to add).
-            // Thoughts?
+            // TODO: See above. Move this errorPopup line to the chaiseURItoErmrestURI line since redirecting to homepage is appropriate for an error on that line.
             ErrorService.errorPopup(exception.message, exception.code, "home page");
+
+            // TODO: And then leave a generic catchAll here for if parseURLFragment or any other synchronous code throws an exception.
+            // ErrorService.catchAll(e);
         }
 
         /**
@@ -203,7 +209,7 @@
          * outside recordset, refresh page.
          *
          */
-         // TODO: try/catch these 2 fns if we decide to not handle errors in utils.js
+         // TODO: try/catch these 2 UriUtils functions
         UriUtils.setLocationChangeHandling();
 
         // This is to allow the dropdown button to open at the top/bottom depending on the space available

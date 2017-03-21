@@ -10,12 +10,15 @@
             if (alert.hasOwnProperty('type') && alert.hasOwnProperty('message')) {
                 return alerts.push(alert);
             }
-            console.log('Invalid alert properties: ', alert);
+            throw "Invalid alert";
         }
 
         function deleteAlert(alert) {
             var index = alerts.indexOf(alert);
-            alerts.splice(index, 1);
+            if (index > -1) {
+                return alerts.splice(index, 1);
+            }
+            throw "Alert not found.";
         }
 
         return {
@@ -35,6 +38,7 @@
             },
             link: function (scope, elem, attr) {
 
+                // TODO: Add catcher fn
                 scope.closeAlert = function (alert) {
                     AlertsService.deleteAlert(alert);
                 };

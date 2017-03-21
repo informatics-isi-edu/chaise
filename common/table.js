@@ -61,6 +61,7 @@
         // If it returns true then we should render the data
         // else we should reject the data
         function setSearchStates(scope, isBackground, searchTerm) {
+            // TODO: Wrap this function body in try/catch?
 
             // If request is background
             if (isBackground) {
@@ -132,12 +133,15 @@
                 if (!setSearchStates(scope, isBackground, searchTerm)) return;
 
                 scope.vm.page = page;
+                // TODO: Wrap catcher fn around DataUtils.getRowValuesFromPage
                 scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
                 scope.vm.hasLoaded = true;
 
                 $timeout(function() {
                     if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 }, 200);
+                // TODO: Attach .catch with catchAll to $timeout. The .catch on L165
+                // will not activate if $timeout throws an exception.
 
 
                 // tell parent controller data updated
@@ -151,6 +155,7 @@
                         read(scope, isBackground);
                     });
                 } else {
+                    // TODO: Throw the error
                     scope.vm.hasLoaded = true;
                     scope.$emit('error', exception);
                     setSearchStates(scope, isBackground);
@@ -158,9 +163,11 @@
                     if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 }
             });
+            // TODO: Attach a .catch w/ catchAll
         }
 
         return {
+            // TODO: Wrap in catcher fn here? Or wrap at call sites?
             read: read
         }
     }])
@@ -180,9 +187,11 @@
                 // row data has been modified (from ellipses)
                 // do a read
                 scope.$on('record-modified', function() {
+                    // TODO: Wrap in try/catch
                     recordTableUtils.read(scope);
                 });
 
+                // TODO: Wrap in try/catch or catcher fn
                 scope.sortby = function(column) {
                     if (scope.vm.sortby !== column) {
                         scope.vm.sortby = column;
@@ -193,6 +202,7 @@
 
                 };
 
+                // TODO: Wrap in try/catch or catcher fn
                 scope.toggleSortOrder = function () {
                     scope.vm.sortOrder = (scope.vm.sortOrder === 'asc' ? scope.vm.sortOrder = 'desc' : scope.vm.sortOrder = 'asc');
                     scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
@@ -217,15 +227,18 @@
                 var updated = false; // table refresh used by ellipses' edit action (new method)
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
+                // TODO: Wrap in catcher fn
                 scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
                 scope.vm.backgroundSearchPendingTerm = null;
 
+                // TODO: Wrap in try/catch or catcher fn
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
                     recordTableUtils.read(scope);
                 };
 
+                // TODO: Wrap in try/catch or catcher fn
                 scope.before = function() {
                     var previous = scope.vm.page.previous;
                     if (previous) {
@@ -236,6 +249,7 @@
                     }
                 };
 
+                // TODO: Wrap in try/catch or catcher fn
                 scope.after = function() {
                     var next = scope.vm.page.next;
                     if (next) {
@@ -262,6 +276,7 @@
                         // Cancel previous promise for background search that was queued to be called
 
                         if (inputChangedPromise) {
+                            // TODO: Attach .catch w/ catchAll.
                             $timeout.cancel(inputChangedPromise);
                         }
 
@@ -282,6 +297,7 @@
                                 }
                             }
                         }, 1000);
+                        // TODO: Attach .catch w/ catchAll.
                     }
                 };
 
@@ -291,6 +307,7 @@
                     asked for. Any existing background search result completing during that time is to be discarded
                     to avoid confusing the UX.
                     */
+                    // TODO: Attach .catch w/ catchAll.
                     $timeout.cancel(inputChangedPromise);
 
                     // Set the foregroundSearch to true and empty the backgroundSearchPendingTerm
@@ -301,6 +318,7 @@
                     scope.search(scope.vm.search);
                 };
 
+                // TODO: Wrap in catcher fn
                 scope.search = function(term, isBackground) {
 
                     if (term)
@@ -311,6 +329,7 @@
                     recordTableUtils.read(scope, isBackground);
                 };
 
+                // TODO: Wrap in catcher fn
                 scope.clearSearch = function() {
                     if (scope.vm.reference.location.searchTerm)
                         scope.search();
@@ -318,6 +337,7 @@
                     scope.vm.search = null;
                 };
 
+                // TODO: Wrap in catcher fn
                 scope.addRecord = function() {
 
                     // Generate a unique id for this request
@@ -328,6 +348,7 @@
                     // open a new tab
                     var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
                     var appLink = newRef.appLink;
+                    // TODO: Necessary to check for existence of appLink?
                     appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
                         'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
 
@@ -337,6 +358,7 @@
 
                 // on window focus, if has pending add record requests
                 // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
+                // TODO: Wrap in catcher fn
                 $window.onfocus = function() {
 
                     var completed = 0; // completed add record requests
@@ -358,6 +380,7 @@
                 };
 
                 // allow child window to call to indicate table has been updated
+                // TODO: Wrap in catcher fn
                 window.updated = function() {
                     updated = true;
                 }
