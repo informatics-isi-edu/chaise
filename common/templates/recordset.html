@@ -55,10 +55,10 @@
 
 <!-- bottom pagination -->
 <div class="pager" ng-show="vm.initialized && vm.hasLoaded && (vm.page.hasPrevious || vm.page.hasNext)">
-    <button id="rs-next-btn" type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
+    <button id="rs-previous-btn" type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
         <span class="glyphicon glyphicon-chevron-left"></span>
     </button>
-    <button id="rs-previous-btn" type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
+    <button id="rs-next-btn" type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
         <span class="glyphicon glyphicon-chevron-right"></span>
     </button>
 </div>

@@ -4,33 +4,33 @@ describe('View recordset,', function() {
 
     var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params, fileParams = testParams.file_tuple;
 
-    for (var i=0; i< testParams.tuples.length; i++) {
-
-        (function(tupleParams, index) {
-
-            describe("For table " + tupleParams.table_name + ",", function() {
-
-                beforeAll(function () {
-                    var keys = [];
-                    tupleParams.keys.forEach(function(key) {
-                        keys.push(key.name + key.operator + key.value);
-                    });
-                    browser.ignoreSynchronization=true;
-                    browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
-
-                    chaisePage.waitForElement(element(by.id("divRecordSet")));
-                });
-
-                describe("Presentation ,", function() {
-                    var params = recordsetHelpers.testPresentation(tupleParams);
-                });
-
-            });
-
-        })(testParams.tuples[i], i);
-
-
-    }
+    // for (var i=0; i< testParams.tuples.length; i++) {
+    //
+    //     (function(tupleParams, index) {
+    //
+    //         describe("For table " + tupleParams.table_name + ",", function() {
+    //
+    //             beforeAll(function () {
+    //                 var keys = [];
+    //                 tupleParams.keys.forEach(function(key) {
+    //                     keys.push(key.name + key.operator + key.value);
+    //                 });
+    //                 browser.ignoreSynchronization=true;
+    //                 browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
+    //
+    //                 chaisePage.waitForElement(element(by.id("divRecordSet")));
+    //             });
+    //
+    //             describe("Presentation ,", function() {
+    //                 var params = recordsetHelpers.testPresentation(tupleParams);
+    //             });
+    //
+    //         });
+    //
+    //     })(testParams.tuples[i], i);
+    //
+    //
+    // }
 
     describe("For table " + fileParams.table_name + ',', function() {
         var EC = protractor.ExpectedConditions;
@@ -56,18 +56,12 @@ describe('View recordset,', function() {
             // page to the next page then page back to the first page so the @before modifier is applied
             chaisePage.recordsetPage.getNextButton().click().then(function() {
                 // wait for it to be on the second page
-                // browser.wait(function() {
-                //     return chaisePage.recordsetPage.getRows().get(0).getText().then(function(text) {
-                //         return (text.indexOf("Four Points Sherathon 2") > -1);
-                //     });
-                // }, browser.params.defaultTimeout);
-                browser.sleep(500);
+                browser.wait(EC.elementToBeClickable(previousBtn), browser.params.defaultTimeout);
 
                 return previousBtn.click();
             }).then(function() {
                 //wait for it to be on the first page again
-                // browser.wait(EC.not(EC.elementToBeClickable(previousBtn)), browser.params.defaultTimeout);
-                browser.sleep(500);
+                browser.wait(EC.not(EC.elementToBeClickable(previousBtn)), browser.params.defaultTimeout);
 
                 return chaisePage.recordsetPage.getPageLimitDropdown().click();
             }).then(function() {
