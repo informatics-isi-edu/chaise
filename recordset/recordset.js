@@ -79,10 +79,12 @@
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
 
+        // TODO: Session.login should already be wrapped in a try catch, maybe don't need to wrap this function with the wrapper (Utils.catchWrapper(function() {...}))
         $scope.login = function() {
             Session.login($window.location.href);
         };
 
+        // TODO: same comment as above. Shoudl already be wrapped in wrapper in session service
         $scope.logout = function() {
             Session.logout();
         };
@@ -95,11 +97,13 @@
             $rootScope.location = $window.location.href;
         });
 
+        // TODO: We might not need to wrap functions if $on("error", ...) will catch errors thrown from one time function events
         $scope.$on('error', function(event, exception) {
             $log.warn(exception);
             ErrorService.catchAll(exception);
         });
 
+        // TODO: wrap function with catchWrapper()
         $scope.permalink = function() {
 
             // before run, use window location
@@ -124,6 +128,7 @@
             return url;
         };
 
+        // TODO: wrap function with catchWrapper()
         $scope.edit = function() {
             var link = recordsetModel.page.reference.contextualize.entryEdit.appLink;
             // TODO ermrestJS needs to handle the case when no limit is defined in the URL
@@ -219,6 +224,7 @@
                 $log.warn(exception);
                 recordsetModel.hasLoaded = true;
 
+                // TODO: should the catchAll be the case that's limited to one error? (or the other way around?)
                 if (exception instanceof ERMrest.UnauthorizedError)
                     ErrorService.catchAll(exception);
                 else
@@ -240,6 +246,7 @@
             UiUtils.setBootstrapDropdownButtonBehavior();
         } catch (exception) {
             // pass to error handler
+            // TODO: should the catchAll be the case that's limited to one error? (or the other way around?)
             if (exception instanceof ERMrest.UnauthorizedError)
                 ErrorService.catchAll(exception);
             else
