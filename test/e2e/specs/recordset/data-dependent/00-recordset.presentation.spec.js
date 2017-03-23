@@ -68,6 +68,12 @@ describe('View recordset,', function() {
                 // increase the page limit
                 return chaisePage.recordsetPage.getPageLimitSelector(fileParams.page_size).click();
             }).then(function() {
+                browser.wait(function() {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return (ct == 10);
+                    });
+                }, browser.params.defaultTimeout);
+
                 // verify more records are now shown
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
