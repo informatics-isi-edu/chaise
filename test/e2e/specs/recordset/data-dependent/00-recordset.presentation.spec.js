@@ -4,33 +4,33 @@ describe('View recordset,', function() {
 
     var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params, fileParams = testParams.file_tuple;
 
-    // for (var i=0; i< testParams.tuples.length; i++) {
-    //
-    //     (function(tupleParams, index) {
-    //
-    //         describe("For table " + tupleParams.table_name + ",", function() {
-    //
-    //             beforeAll(function () {
-    //                 var keys = [];
-    //                 tupleParams.keys.forEach(function(key) {
-    //                     keys.push(key.name + key.operator + key.value);
-    //                 });
-    //                 browser.ignoreSynchronization=true;
-    //                 browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
-    //
-    //                 chaisePage.waitForElement(element(by.id("divRecordSet")));
-    //             });
-    //
-    //             describe("Presentation ,", function() {
-    //                 var params = recordsetHelpers.testPresentation(tupleParams);
-    //             });
-    //
-    //         });
-    //
-    //     })(testParams.tuples[i], i);
-    //
-    //
-    // }
+    for (var i=0; i< testParams.tuples.length; i++) {
+
+        (function(tupleParams, index) {
+
+            describe("For table " + tupleParams.table_name + ",", function() {
+
+                beforeAll(function () {
+                    var keys = [];
+                    tupleParams.keys.forEach(function(key) {
+                        keys.push(key.name + key.operator + key.value);
+                    });
+                    browser.ignoreSynchronization=true;
+                    browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
+
+                    chaisePage.waitForElement(element(by.id("divRecordSet")));
+                });
+
+                describe("Presentation ,", function() {
+                    var params = recordsetHelpers.testPresentation(tupleParams);
+                });
+
+            });
+
+        })(testParams.tuples[i], i);
+
+
+    }
 
     describe("For table " + fileParams.table_name + ',', function() {
         var EC = protractor.ExpectedConditions;
