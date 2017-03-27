@@ -208,7 +208,8 @@
 
         var onChecksumCompleted = function() {
             if (vm.checksumCompleted == vm.noOfFiles) {
-                startUpload();
+                alert("Done");
+                //startUpload();
             }
         };
 
@@ -219,7 +220,6 @@
         var onChecksumError = function(err) {
             alert("checksum error " + err.message);
         };
-
 
         var uploadFile = function(col) {
             var file = col.file;
@@ -240,18 +240,23 @@
                 url: ""
             };
 
-            uploadObj.onServerError = function(command, jqXHR, textStatus, errorThrown) {
+            return item;
+        }
+
+
+        var itemOps = {
+            onServerError: function(response) {
                 if (vm.uploadError || vm.serverError || vm.checksumError) return;
                 vm.serverError = true;
-                if (jqXHR.status === 401) {
-                    alert("Sorry you are not allowed to upload:" + jqXHR.responseText);
+                if (response.status === 401) {
+                    alert("Sorry you are not allowed to upload:" + response.message);
                 } else {
-                    alert(jqXHR.status + "  " + errorThrown);
+                    alert(response.status + "  " + response.message);
                     console.log("Our server is not responding correctly");
                 }
-            };
+            },
 
-            uploadObj.onUploadError = function(xhr) {
+            onUploadError: function(xhr) {
                 if (vm.uploadError || vm.serverError || vm.checksumError) return;
 
                 vm.uploadError = true;
@@ -260,53 +265,50 @@
                 } else {
                     alert(xhr.status + "  " + xhr.responseText);
                 }
-            };
+            },
 
-            uploadObj.onChecksumError = function(err) {
+            onChecksumError: function(err) {
                 if (vm.uploadError || vm.serverError || vm.checksumError) return;
                 
                 vm.checksumError = true;
                 onChecksumError();
-            };
+            },
 
-            uploadObj.onChecksumProgressChanged = function(uploadedSize, totalSize) {
-                item.uploadStarted = false;
-                item.checksumPercent = Math.floor((uploadedSize/totalSize) * 100);
-                item.checksumProgress = uploadedSize;
+            onChecksumProgressChanged: function(uploadedSize) {
+                this.uploadStarted = false;
+                this.checksumPercent = Math.floor((uploadedSize/this.size) * 100);
+                this.checksumProgress = uploadedSize;
                 updateChecksumProgreeBar(uploadedSize);
-            };
+            },
 
-            uploadObj.onProgressChanged = function(uploadedSize, totalSize) {
-                item.uploadStarted = true;
-                item.progressPercent = Math.floor((uploadedSize/totalSize) * 100);
-                item.progress = uploadedSize;
+            onProgressChanged: function(uploadedSize) {
+                this.uploadStarted = true;
+                this.progressPercent = Math.floor((uploadedSize/this.size) * 100);
+                this.progress = uploadedSize;
                 updateUploadProgressBar(uploadedSize);
-            };
+            },
 
-            uploadObj.onChecksumCompleted = function(url) {
-                item.checksumPercent = 100;
-                item.checksumProgress = item.size;
-                if (!item.checksumCompleted) { 
-                    item.checksumCompleted = true;
-                    item.url = url;
+            onChecksumCompleted: function(url) {
+                this.checksumPercent = 100;
+                this.checksumProgress = this.size;
+                if (!this.checksumCompleted) { 
+                    this.checksumCompleted = true;
+                    this.url = url;
                     vm.checksumCompleted++;
                     onChecksumCompleted();
                 }
-            };
+            },
 
-
-            uploadObj.onUploadCompleted = function(url) {
-                item.progress = item.size;
-                item.progressPercent = 100;
-                if (!item.uploadCompleted) {
-                    item.uploadCompleted = true;
+            onUploadCompleted: function(url) {
+                this.progress = this.size;
+                this.progressPercent = 100;
+                if (!this.uploadCompleted) {
+                    this.uploadCompleted = true;
                     vm.uploadCompleted++;
                     onUploadCompleted();
                 }
-            };
-
-            return item;
-        }
+            }
+        };
 
         var abortUploads = function() {
             clearInterval(speedIntervalTimer);
@@ -343,7 +345,10 @@
             vm.isUpload = false;
             vm.rows.forEach(function(row) {
                 row.forEach(function(item) {
-                    item.uploadObj.calculateChecksum();
+                    item.uploadObj.calculateChecksum().then(
+                        itemOps.onChecksumCompleted.bind(item),
+                        itemOps.onChecksumError.bind(item), 
+                        itemOps.onChecksumProgressChanged.bind(item));
                 });
             });
         }
