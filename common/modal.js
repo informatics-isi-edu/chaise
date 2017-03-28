@@ -26,6 +26,30 @@
             $uibModalInstance.close();
         }
     }])
+    .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
+        var vm = this;
+        params.login_url = $sce.trustAsResourceUrl(params.login_url);
+        vm.params = params;
+
+        vm.openWindow = function() {
+
+            var x = window.innerWidth/2 - 800/2;
+            var y = window.innerHeight/2 - 600/2;
+
+            window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
+
+            return false;
+        }
+
+        vm.params.host = $sce.trustAsResourceUrl(window.location.host);
+
+        vm.cancel = cancel;
+
+        function cancel() {
+            $uibModalInstance.dismiss('cancel');
+        }
+
+    }])
     .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
         var vm = this;
 
@@ -53,7 +77,6 @@
         };
 
         var fetchRecords = function() {
-
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
             reference.read(25).then(function getPseudoData(page) {
                 vm.tableModel.hasLoaded = true;

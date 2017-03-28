@@ -61,7 +61,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="row padding-right-15">
+                        <div class="row padding-right-15"  style="position: absolute; right: 15px;">
                             <div class="pull-right add-rows-input" ng-class="form.showMultiInsert ? 'chaise-visible' : 'chaise-hidden'">
                                 <div class="input-group">
                                     <input id="copy-rows-input" type="number" class="form-control " ng-model="form.numberRowsToAdd">
@@ -74,7 +74,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row form-container">
+                        <div class="row form-container" style="margin-top: 25px;">
                             <!-- loading spinner -->
                             <div ng-show="!displayReady" id="spinner">
                                 <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
@@ -108,7 +108,7 @@
                                             <!-- date input-->
                                             <div ng-switch-when="date">
                                                 <div ng-show="form.isDisabled(column);" >
-                                                    <input type="text" ng-disabled="::form.isDisabled(column);" class="form-control" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}"
+                                                    <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" type="text" ng-disabled="::form.isDisabled(column);" class="form-control" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}"
                                                     placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}">
                                                 </div>
                                                 <div ng-show="!form.isDisabled(column);" class="input-group">
@@ -122,8 +122,8 @@
                                             </div>
                                             <!-- timestamp[tz] input -->
                                             <div ng-switch-when="timestamp">
-                                                <input type="text" ng-disabled="::form.isDisabled(column);" class="form-control" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{column.name}}"
-                                                ng-show="form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" />
+                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" type="text" ng-disabled="::form.isDisabled(column);" class="form-control" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{column.name}}"
+                                                ng-show="form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}">
                                                 <div class="row" ng-show="::!form.isDisabled(column);">
                                                     <div class="col-xs-12">
                                                         <div class="input-group">
@@ -160,7 +160,7 @@
                                                     <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::form.clearForeignKey(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                                                 </div>
                                                 <span class="input-group-addon" ng-show="::!form.isDisabled(column);">
-                                                    <button ng-focus="::form.blurElement($event);" class="btn btn-default modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
+                                                    <button ng-focus="::form.blurElement($event);" id="row-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="btn btn-default modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
                                                         <span class="glyphicon glyphicon-chevron-down"></span>
                                                     </button>
                                                 </span>
