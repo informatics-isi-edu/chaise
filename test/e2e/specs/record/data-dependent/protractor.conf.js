@@ -13,8 +13,6 @@ var config = pConfig.getConfig({
     },
   */
 
-    parallel: false,
-
     chaiseConfigFilePath: 'test/e2e/specs/record/data-dependent/chaise-config.js',
 
     page: 'record',

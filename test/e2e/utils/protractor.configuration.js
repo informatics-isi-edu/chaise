@@ -35,6 +35,7 @@ exports.getConfig = function(options) {
     }
   };
 
+  Object.assign(config, options);
 
   if (!options.configFileName && !options.testConfiguration) throw new Error("No configfile provided in protractor.conf.js");
   if (!options.page) throw new Error("No page provided in protractor.conf.js");
@@ -90,10 +91,11 @@ exports.getConfig = function(options) {
     process.exit(1);
   }
 
+  config.capabilities.shardTestFiles = process.env.SHARDING;
+  config.capabilities.maxInstances = process.env.MAXINSTANCES || 4;
 
-  if (options.parallel) {
-    config.capabilities.shardTestFiles = true;
-    config.capabilities.maxInstances = typeof options.parallel == 'number' ? options.parallel : 4;
+  if (options.parallel == false) {
+    config.capabilities.shardTestFiles = false;
   }
 
   dataSetup.parameterize(config, dateSetupOptions);
