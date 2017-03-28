@@ -53,6 +53,7 @@
          * Converts a chaise URI to an ermrest resource URI object
          */
 
+        // TODO: Should throw malformed URI exception
         function chaiseURItoErmrestURI(location) {
             var tableMissing = "No table specified in the form of 'schema-name:table-name' and no Default is set.",
                 catalogMissing = "No catalog specified and no Default is set.";
@@ -604,9 +605,26 @@
                 .replace(/'/g, '&#39;');
         }
 
+        /**
+         * Throws an {@link ERMrest.InvalidInputError} if test is
+         * not `True`.
+         * @memberof ERMrest
+         * @private
+         * @function verify
+         * @param {boolean} test The test
+         * @param {string} message The message
+         * @throws {ERMrest.InvalidInputError} If test is not true.
+         */
+        function verify(test, message) {
+            if (!test) {
+                throw new Error(message);
+            }
+        }
+
         return {
             getRowValuesFromPage: getRowValuesFromPage,
-            makeSafeIdAttr: makeSafeIdAttr
+            makeSafeIdAttr: makeSafeIdAttr,
+            verify: verify
         };
     }])
 

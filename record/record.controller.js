@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -11,42 +11,16 @@
 
         vm.alerts = AlertsService.alerts;
         vm.showEmptyRelatedTables = false;
-        // TODO: Wrap in catcher fn
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
-        // TODO: Wrap in catcher fn. i.e. ...
-        // vm.canCreate = catcher(function() {
-        //     return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
-        // });
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
         };
 
-        // TODO: Wrap in catcher fn.
         vm.createRecord = function() {
-            var newRef = $rootScope.reference.table.reference.contextualize.entryCreate;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.location.href = appURL;
-            }
-            //     if (!appURL) {
-            //          TODO: Should we throw an error if appURL doesn't exist?
-            //                If yes, is this error too specific for the generic catchAll? i.e.:
-            //
-            //          throw new Error('SomeNewApplicationErrorClass');
-            //
-            //                If no, then it'd be nice to show something less scary/more
-            //                more helpful to the user.
-            //
-            //     } else {
-            //         $window.location.href = appURL;
-            //     }
+            $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
         };
 
-        // TODO: Wrap in catcher fn.
         vm.canEdit = function() {
             var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
@@ -57,29 +31,14 @@
             return canEdit;
         };
 
-        // TODO: Wrap in catcher fn.
         vm.editRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryEdit;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                // TODO: See above comment in vm.createRecord.
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.location.href = appURL;
-            }
+            $window.location.href = $rootScope.reference.contextualize.entryEdit.appLink;
         };
 
-        // TODO: Wrap in catcher fn.
         vm.copyRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryCreate;
-            // TODO: Add check for !appURL for consistency w/ vm.createRecord and vm.editRecord?
-            // If yes, see comment in vm.createRecord for handling if appURL is falsy.
-            var appLink = newRef.appLink + "?copy=true&limit=1";
-            $window.location.href = appLink;
+            $window.location.href = $rootScope.reference.contextualize.entryCreate.appLink + "?copy=true&limit=1";
         };
 
-        // TODO: Wrap in catcher fn.
         vm.canDelete = function() {
             return ($rootScope.reference && $rootScope.reference.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton);
         };
@@ -91,7 +50,7 @@
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 if (error instanceof ERMrest.PreconditionFailedError) {
-                    $uibModal.open({
+                    return $uibModal.open({
                         templateUrl: "../common/templates/refresh.modal.html",
                         controller: "ErrorDialogController",
                         controllerAs: "ctrl",
@@ -104,25 +63,14 @@
                         }
                     }).result.then(function reload() {
                         // Reload the page
-                        $window.location.reload();
-                    }).catch(function(error) {
-                        // TODO: throw error here instead of passing to catchAll
-                        ErrorService.catchAll(error);
+                        return $window.location.reload();
                     });
                 } else {
-                    // TODO: throw error here instead of passing to catchAll
-                    ErrorService.catchAll(error);
-                    // TODO: $log.warn unncessary. There's a $log.info at
-                    // the top of catchAll.
-                    $log.warn(error);
+                    throw error;
                 }
             });
-            // TODO: Attach .catch to promise chain
-            //      ErrorService.catchAll(e);
-            // });
         };
 
-        // TODO: Wrap in catcher fn.
         vm.permalink = function getPermalink() {
             if (!$rootScope.reference) {
                 return $window.location.href;
@@ -130,17 +78,10 @@
             return $rootScope.context.mainURI;
         };
 
-        // TODO: Wrap in catcher fn.
         vm.toRecordSet = function(ref) {
-            var appURL = ref.appLink;
-            if (!appURL) {
-                // TODO: See comment in vm.createRecord
-                return AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + ref.compactPath});
-            }
-            return $window.location.href = appURL;
+            return $window.location.href = ref.appLink;
         };
 
-        // TODO: Wrap in catcher fn.
         vm.showRelatedTable = function(i) {
             var isFirst = false, prevTableHasLoaded = false;
             if ($rootScope.tableModels && $rootScope.tableModels[i]) {
@@ -170,7 +111,6 @@
             }
         };
 
-        // TODO: Wrap in catcher fn.
         vm.toggleRelatedTableDisplayType = function(i) {
             if ($rootScope.tableModels[i].displayType == 'markdown') {
                 $rootScope.tableModels[i].displayType = 'table';
@@ -179,18 +119,15 @@
             }
         };
 
-        // TODO: Wrap in catcher fn.
         vm.toggleRelatedTables = function() {
             vm.showEmptyRelatedTables = !vm.showEmptyRelatedTables;
         };
 
-        // TODO: Wrap in catcher fn.
         vm.canCreateRelated = function(relatedRef) {
             return (relatedRef.canCreate && $rootScope.modifyRecord);
         };
 
         // Send user to RecordEdit to create a new row in this related table
-        // TODO: Wrap in catcher fn.
         vm.addRelatedRecord = function(ref) {
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
             var cookie = {
@@ -233,7 +170,6 @@
 
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
-        // TODO: Wrap in catcher fn.
         $window.onfocus = function() {
 
             var completed = {};
@@ -258,11 +194,7 @@
                             relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
                                 $rootScope.tableModels[i].page = page;
                                 $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
-                            });
-                            // TODO: Attach a .catch
-                            // .catch(e) {
-                            //  ErrorService.catchAll(e);
-                            // });
+                            }, ErrorService.catchAll(error));
                         }
                         })(i);
                     }
@@ -271,7 +203,6 @@
 
         };
 
-        // TODO: Wrap in catcher fn.
         window.updated = function(id) {
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
             delete editRecordRequests[id];
