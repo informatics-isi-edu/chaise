@@ -8,6 +8,7 @@ describe('Sidebar top search input,', function () {
     var EC = protractor.ExpectedConditions;
 
     beforeAll(function () {
+        browser.ignoreSynchronization=true;
         browser.get(browser.params.url || "");
         var sidebar = element(by.id('sidebar'));
         browser.wait(EC.visibilityOf(sidebar), browser.params.defaultTimeout);

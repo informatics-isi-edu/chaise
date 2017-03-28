@@ -99,8 +99,6 @@ exports.parameterize = function(config, configParams) {
 
     pImport.fetchSchemas(testConfiguration, catalogId).then(function(data) {
 
-        console.log(data.defaultTable);
-
         // Set schema returned in browser params for refering it in test cases
         browser.params.schema = data.defaultSchema;
         browser.params.catalog = data.catalog;
