@@ -477,7 +477,7 @@
                 //     throw new Error('No location information found');
                 // }
 
-                else if ($window.location.href !== $rootScope.location) {
+                if ($window.location.href !== $rootScope.location) {
                     location.reload();
                 }
             };

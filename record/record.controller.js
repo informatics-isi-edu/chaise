@@ -171,19 +171,24 @@
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
-
+            console.log('Received onfocus event');
+            console.log('List of addRecordRequests', addRecordRequests);
             var completed = {};
             for (var id in addRecordRequests) {
                 var cookie = $cookies.getObject(id);
                 if (cookie) { // add request has been completed
+                    console.log('Cookie found', cookie);
                     completed[addRecordRequests[id]] = true;
 
                     // remove cookie and request
                     $cookies.remove(id);
                     delete addRecordRequests[id];
+                } else {
+                    console.log('Could not find cookie', cookie);
                 }
             }
 
+            console.log('List of completed addRequests... about to re-read them now...', completed);
             // read updated tables
             if (Object.keys(completed).length > 0 || updated !== {}) {
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
@@ -194,8 +199,11 @@
                             relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
                                 $rootScope.tableModels[i].page = page;
                                 $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
-                            }, ErrorService.catchAll(error));
-                        }
+                            }, function(error) {
+                                throw error;
+                            }).catch(function(error) {
+                                ErrorService.catchAll(error);
+                            });
                         })(i);
                     }
                 }
