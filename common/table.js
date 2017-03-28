@@ -127,7 +127,6 @@
             }
 
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
-
                 // This method sets the
                 if (!setSearchStates(scope, isBackground, searchTerm)) return;
 
@@ -138,7 +137,6 @@
                 $timeout(function() {
                     if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 }, 200);
-
 
                 // tell parent controller data updated
                 scope.$emit('recordset-update');

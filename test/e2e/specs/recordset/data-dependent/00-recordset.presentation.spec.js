@@ -2,7 +2,7 @@ var recordsetHelpers = require('../helpers.js'), chaisePage = require('../../../
 
 describe('View recordset,', function() {
 
-    var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+    var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params, fileParams = testParams.file_tuple;
 
     for (var i=0; i< testParams.tuples.length; i++) {
 
@@ -31,6 +31,56 @@ describe('View recordset,', function() {
 
 
     }
+
+    describe("For table " + fileParams.table_name + ',', function() {
+        var EC = protractor.ExpectedConditions;
+
+        beforeAll(function () {
+            browser.ignoreSynchronization = true;
+            browser.get(browser.params.url + ':' + fileParams.table_name);
+        });
+
+        it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function() {
+            // Verify page count and on first page
+            var e = element(by.id("custom-page-size"));
+
+            browser.wait(EC.presenceOf(e), browser.params.defaultTimeout).then(function() {
+                return chaisePage.recordsetPage.getRows().count();
+            }).then(function(ct) {
+                expect(ct).toBe(fileParams.custom_page_size);
+            });
+        });
+
+        it("should have " + fileParams.page_size + " rows after paging to the second page, back to the first, and then changing page size to " + fileParams.page_size + ".", function() {
+            var previousBtn = chaisePage.recordsetPage.getPreviousButton();
+            // page to the next page then page back to the first page so the @before modifier is applied
+            chaisePage.recordsetPage.getNextButton().click().then(function() {
+                // wait for it to be on the second page
+                browser.wait(EC.elementToBeClickable(previousBtn), browser.params.defaultTimeout);
+
+                return previousBtn.click();
+            }).then(function() {
+                //wait for it to be on the first page again
+                browser.wait(EC.not(EC.elementToBeClickable(previousBtn)), browser.params.defaultTimeout);
+
+                return chaisePage.recordsetPage.getPageLimitDropdown().click();
+            }).then(function() {
+                // increase the page limit
+                return chaisePage.recordsetPage.getPageLimitSelector(fileParams.page_size).click();
+            }).then(function() {
+                browser.wait(function() {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return (ct == 10);
+                    });
+                }, browser.params.defaultTimeout);
+
+                // verify more records are now shown
+                return chaisePage.recordsetPage.getRows().count();
+            }).then(function(ct) {
+                expect(ct).toBe(fileParams.page_size);
+            });
+        });
+    });
 
     it('should load custom CSS and document title defined in chaise-config.js', function() {
         var chaiseConfig, tupleParams = testParams.tuples[0], keys = [];
