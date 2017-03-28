@@ -3,6 +3,46 @@
 var ermrestUtils = require(process.env.PWD + "/../ErmrestDataUtils/import.js");
 var Q = require('q');
 
+//**********************************************************************
+// function waitfor - Wait until a condition is met
+//        
+// Needed parameters:
+//    test: function that returns a value
+//    expectedValue: the value of the test function we are waiting for
+//    msec: delay between the calls to test
+//    callback: function to execute when the condition is met
+// Parameters for debugging:
+//    count: used to count the loops
+//    source: a string to specify an ID, a message, etc
+//**********************************************************************
+function waitfor(test, timer, end, defer) {
+    // Check if condition met. If not, re-check later (msec).
+    if (!test()) {
+        if (timer > end) {
+            defer.reject(new Error("Timer timed out"));
+        } else {
+            setTimeout(function() {
+                timer = timer + 50;
+                waitfor(test, timer, end, defer);
+            }, 50);
+        }
+        return;
+    }
+    // Condition finally met. callback() can be executed.
+    defer.resolve();
+}
+
+function wait(condition, msec) {
+    var defer = Q.defer();
+
+    var timer = new Date().getTime();
+    var end = timer + msec;
+
+    waitfor(condition, timer, end, defer);
+
+    return defer.promise;
+}
+
 // Fetches the schemas for the current catalog
 // The schema could be a new one or existing one depending on the test configuration
 // Takes a callback function as an argument to be called on success
@@ -32,7 +72,7 @@ var fetchSchemas = function(testConfiguration, catalogId) {
     });
 
     // Wait until the value of done is true
-    browser.wait(function() {
+    wait(function() {
         return done;
     }, 5000).then(function() {
         defer.resolve({ schema: defaultSchema, catalogId: catalogId, catalog: catalog, defaultSchema: defaultSchema, defaultTable: defaultTable });
@@ -107,13 +147,13 @@ exports.setup = function(testConfiguration) {
 
         // Set catalogId in browser params for future reference to delete if it required
         catalogId = err.catalogId || null;
-
+        
         // Set setupDone to true to specify that the setup code has completed its execution
         setupDone = true;
     });
 
     // Wait until setupDone value is true
-    browser.wait(function() {
+    wait(function() {
         return setupDone;
     }, 120000).then(function() {
         // If data import was successful then fetch the schema definitions for the catalog
@@ -150,7 +190,7 @@ exports.tear = function(testConfiguration, catalogId, defer) {
       cleanupDone = true;
     });
 
-    browser.wait(function() {
+    wait(function() {
       return cleanupDone;
     }, 5000).then(function() {
         defer.resolve();
