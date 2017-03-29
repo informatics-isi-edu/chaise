@@ -45,7 +45,6 @@
                     $window.location.replace(redirectLink);
                 }
             });
-            // TODO: Add .catch for catchAll
         }
 
         function noRecordError(filters) {
