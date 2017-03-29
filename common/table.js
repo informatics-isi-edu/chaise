@@ -150,10 +150,12 @@
                     });
                 } else {
                     scope.vm.hasLoaded = true;
-                    scope.$emit('error', exception);
+                    
                     setSearchStates(scope, isBackground);
 
                     if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+
+                    throw exception;
                 }
             });
         }
