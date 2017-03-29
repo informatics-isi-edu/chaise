@@ -88,7 +88,7 @@
                 // A more useful general message for 412 Precondition Failed
                 AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
-                errorPopup("Oops! something went wrong.", 0, "Home Page", $window.location.origin, "The page encountered an error. See the Javascript console for technical details.");
+                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", "Terminal Error", "Home Page", $window.location.origin, exception.message + "<br>"  + ((exception.stack && exception.stack.length) ? ("<pre>" + exception.stack  + "</pre>"): ""));
             }
 
             exceptionFlag = true;

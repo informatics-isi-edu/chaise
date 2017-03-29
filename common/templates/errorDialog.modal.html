@@ -5,8 +5,8 @@
     {{::ctrl.params.message}}
     <br><br>
     Click OK to return to the {{::ctrl.params.pageName}}. <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">{{ctrl.linkText}}</a>
-    <br><br>
-    <span ng-show="ctrl.details">{{::ctrl.params.subMessage}}</span>
+    <br>
+    <span ng-show="ctrl.details" ng-bind-html="ctrl.params.subMessage"></span>
 </div>
 <div class="modal-footer">
     <button class="btn btn-danger" type="button" ng-click="ctrl.ok()">OK</button>
