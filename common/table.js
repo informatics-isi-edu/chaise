@@ -150,7 +150,6 @@
                 }
                 scope.vm.hasLoaded = true;
                 setSearchStates(scope, isBackground);
-
                 if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 throw exception;
             });

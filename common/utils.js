@@ -472,14 +472,8 @@
          *
          */
         function setLocationChangeHandling() {
-            // TODO: Surround this onhashchange function with a catcher
             $window.onhashchange = function() {
                 // when address bar changes by user
-
-                if (!$rootScope.location) {
-                    throw new Error('No location information found');
-                }
-
                 if ($window.location.href !== $rootScope.location) {
                     location.reload();
                 }

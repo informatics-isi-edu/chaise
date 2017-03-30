@@ -24,7 +24,8 @@
         }
 
         function deleteAlert(alert) {
-            DataUtils.verify((alerts.indexOf(alert) > -1), 'Alert not found.')
+            var index = alerts.indexOf(alert);
+            DataUtils.verify((index > -1), 'Alert not found.')
             return alerts.splice(index, 1);
         }
 
