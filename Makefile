@@ -210,6 +210,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
@@ -336,6 +337,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
@@ -483,7 +485,6 @@ testrecordadd:
 .PHONY: testrecordset
 testrecordset:
 	$(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit)
-
 
 # Rule to run record edit app tests
 .PHONY: testrecordedit

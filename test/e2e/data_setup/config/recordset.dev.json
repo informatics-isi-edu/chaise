@@ -78,7 +78,12 @@
             "luxurious": "true"
           }
         ]
-      }]
+      }],
+      "file_tuple" : {
+          "table_name" : "file",
+          "custom_page_size" : 5,
+          "page_size" : 10
+      }
     }
   }
 }

@@ -12,7 +12,7 @@
     // Factory for each error type
     .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'messageMap', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, messageMap, $log, $rootScope, $uibModal, $window) {
 
-        function errorPopup(message, errorCode, pageName, redirectLink) {
+        function errorPopup(message, errorCode, pageName, redirectLink, subMessage) {
             var providedLink = true;
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
             if (!redirectLink) {
@@ -23,7 +23,8 @@
             var params = {
                 message: message,
                 errorCode: errorCode,
-                pageName: pageName
+                pageName: pageName,
+                subMessage: subMessage
             };
 
             var modalInstance = $uibModal.open({
@@ -86,12 +87,43 @@
             }
         }
 
+        var exceptionFlag = false;
+
+        // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
+        function handleException(exception) {
+            $log.info(exception);
+
+            if (exceptionFlag) return;
+
+            if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
+                Session.login($window.location.href);
+            } else if (exception instanceof ERMrest.PreconditionFailedError) {
+                // A more useful general message for 412 Precondition Failed
+                AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
+            } else {
+                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", "Terminal Error", "Home Page", $window.location.origin, exception.message + "<br>"  + ((exception.stack && exception.stack.length) ? ("<pre>" + exception.stack  + "</pre>"): ""));
+            }
+
+            exceptionFlag = true;
+        }
+
         return {
             errorPopup: errorPopup,
             catchAll: catchAll,
             noRecordError: noRecordError,
             MalformedUriError: MalformedUriError,
-            InvalidInputError: InvalidInputError
+            InvalidInputError: InvalidInputError,
+            handleException: handleException
         };
-    }]);
+    }])
+
+
+    .factory('$exceptionHandler', ['$log', '$injector' , function($log, $injector) {
+
+        return function(exception, cause) {
+            var ErrorService = $injector.get("ErrorService");
+            ErrorService.handleException(exception);
+        };
+    }])
+
 })();
