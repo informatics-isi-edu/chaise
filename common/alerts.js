@@ -44,8 +44,6 @@
                 alerts: '='
             },
             link: function (scope, elem, attr) {
-
-                // TODO: Add catcher fn
                 scope.closeAlert = function(alert) {
                     AlertsService.deleteAlert(alert);
                 };

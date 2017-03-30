@@ -42,7 +42,6 @@
             return false;
         }
 
-        // TODO: Wrap in catcher fn
         vm.params.host = $sce.trustAsResourceUrl(window.location.host);
 
         function cancel() {
@@ -54,9 +53,7 @@
         var vm = this;
 
         vm.params = params;
-        // TODO: Wrap in catcher fn
         vm.ok = ok;
-        // TODO: Wrap in catcher fn
         vm.cancel = cancel;
 
         var reference = params.reference;

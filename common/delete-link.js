@@ -47,7 +47,6 @@
             link: function(scope) {
                 scope.deleteFn = function deleteFn() {
                     if (!CONFIRM_DELETE) {
-                        // TODO: Wrap callback in catcher fn
                         return scope.callback();
                     }
                     var modalInstance = createModal();
