@@ -9,6 +9,27 @@
         notFound: "Not Found"
     })
 
+    .factory('Errors', [function() {
+        function MalformedUriError(message) {
+            this.message = message;
+        }
+
+        MalformedUriError.prototype = Object.create(Error.prototype);
+        MalformedUriError.prototype.constructor = MalformedUriError;
+
+        function InvalidInputError(message) {
+            this.message = message;
+        }
+
+        InvalidInputError.prototype = Object.create(Error.prototype);
+        InvalidInputError.prototype.constructor = MalformedUriError;
+
+        return {
+            InvalidInputError: InvalidInputError,
+            MalformedUriError: MalformedUriError
+        };
+    }])
+
     // Factory for each error type
     .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'messageMap', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, messageMap, $log, $rootScope, $uibModal, $window) {
 
@@ -111,12 +132,9 @@
             errorPopup: errorPopup,
             catchAll: catchAll,
             noRecordError: noRecordError,
-            MalformedUriError: MalformedUriError,
-            InvalidInputError: InvalidInputError,
             handleException: handleException
         };
     }])
-
 
     .factory('$exceptionHandler', ['$log', '$injector' , function($log, $injector) {
 

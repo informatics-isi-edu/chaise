@@ -56,7 +56,7 @@
                     if (response instanceof ERMrest.PreconditionFailedError) {
                         // If a 412 is encountered, it means this row's info doesn't match
                         // with the info in the DB currently.
-                        eturn $uibModal.open({
+                        return $uibModal.open({
                             templateUrl: "../common/templates/uiChange.modal.html",
                             controller: "ErrorDialogController",
                             controllerAs: "ctrl",
@@ -79,6 +79,7 @@
                 });
             }
         }
+
         return {
             restrict: 'AE',
             templateUrl: '../common/templates/ellipses.html',
@@ -129,7 +130,9 @@
                         var associatedRefTuples = [];
                         scope.associationRef.read(1).then(function(page) {
                             associatedRefTuples = page.tuples;
-                            scope.unlink = deleteTuples(scope, scope.associationRef, associatedRefTuples);
+                            scope.unlink = function() {
+                                deleteTuples(scope, scope.associationRef, associatedRefTuples)
+                            };
                         }).catch(function(e) {
                             throw e;
                         });
@@ -137,7 +140,9 @@
 
                     // define delete function
                     else if (scope.config.deletable) {
-                        scope.delete = deleteTuples(scope, scope.tuple.reference, [scope.tuple]);
+                        scope.delete = function() {
+                            deleteTuples(scope, scope.tuple.reference, [scope.tuple])
+                        };
                     }
                 };
 

@@ -175,10 +175,7 @@
                 }, function(error) {
                     $window.location = '../logout';
                 });
-            },
-
-            NotFoundError: NotFoundError
-
+            }
         }
     }])
 

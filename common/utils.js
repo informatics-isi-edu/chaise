@@ -39,8 +39,8 @@
         }
     })
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils', 'ErrorService',
-        function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils, ErrorService) {
+    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils', 'Errors',
+        function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils, Errors) {
 
         var chaiseBaseURL;
         /**
@@ -82,11 +82,11 @@
                         hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
-                        throw new ErrorService.MalformedUriError(tableMissing);
+                        throw new Errors.MalformedUriError(tableMissing);
                     }
                 } else {
                     // no defined or default catalog
-                    throw new ErrorService.MalformedUriError(catalogMissing);
+                    throw new Errors.MalformedUriError(catalogMissing);
                 }
             } else {
                 // pull off the catalog ID
@@ -99,7 +99,7 @@
                         catalogId = chaiseConfig.defaultCatalog;
                     } else {
                         // no defined or default catalog
-                        throw new ErrorService.MalformedUriError(catalogMissing);
+                        throw new Errors.MalformedUriError(catalogMissing);
                     }
                 }
 
@@ -111,7 +111,7 @@
                         hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
-                        throw new ErrorService.MalformedUriError(tableMissing);
+                        throw new Errors.MalformedUriError(tableMissing);
                     }
                 } else {
                     // grab the end of the hash from: '.../<schema-name>...'
@@ -565,7 +565,7 @@
         return ParsedFilter;
     }])
 
-    .factory("DataUtils", ['ErrorService', function(ErrorService) {
+    .factory("DataUtils", ['Errors', function(Errors) {
         /**
          *
          * @param {ERMrest.Page} page
@@ -615,7 +615,7 @@
          */
         function verify(test, message) {
             if (!test) {
-                throw new ErrorService.InvalidInputError(message);
+                throw new Errors.InvalidInputError(message);
             }
         }
 
