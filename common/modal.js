@@ -5,9 +5,7 @@
 
     .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
         var vm = this;
-        // TODO: Wrap in catcher fn
         vm.ok = ok;
-        // TODO: Wrap in catcher fn
         vm.cancel = cancel;
         vm.status = 0;
 
@@ -22,7 +20,6 @@
     .controller('ErrorDialogController', ['$uibModalInstance', 'params', function ErrorDeleteController($uibModalInstance, params) {
         var vm = this;
         vm.params = params;
-        // TODO: Wrap in catcher fn
         vm.ok = ok;
 
         function ok() {
@@ -33,11 +30,8 @@
         var vm = this;
         params.login_url = $sce.trustAsResourceUrl(params.login_url);
         vm.params = params;
-        // TODO: Wrap in catcher fn
         vm.cancel = cancel;
 
-        // TODO: Wrap in catcher fn. e.g.:
-        // vm.openWindow = catcher(function() {...})
         vm.openWindow = function() {
 
             var x = window.innerWidth/2 - 800/2;
@@ -92,17 +86,8 @@
                 vm.tableModel.page = page;
                 vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
             }, function(exception) {
-                if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                    Session.loginInANewWindow(function() {
-                        fetchRecords();
-                    });
-                } else {
-                    // TODO: Throw error instead of these two lines
-                    AlertsService.addAlert({type: 'error', message: response.message});
-                    $log.warn(response);
-                }
+                throw exception;
             });
-            // TODO: Attach .catch w/ catchAll
         }
 
         fetchRecords();

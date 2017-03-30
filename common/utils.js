@@ -1,10 +1,7 @@
-// TODO: Should errors be caught here in in these util functions or
-// should they be caught at the call site?
-
 (function() {
     'use strict';
 
-    angular.module('chaise.utils', [])
+    angular.module('chaise.utils', ['chaise.errors'])
 
     .constant("appTagMapping", {
         "tag:isrd.isi.edu,2016:chaise:record": "/record",
@@ -42,18 +39,18 @@
         }
     })
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils',
-        function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils) {
+    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils', 'ErrorService',
+        function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils, ErrorService) {
 
-            var chaiseBaseURL;
+        var chaiseBaseURL;
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
          * @desc
-         * Converts a chaise URI to an ermrest resource URI object
+         * Converts a chaise URI to an ermrest resource URI object.
+         * @throws {MalformedUriError} if table or catalog data are missing.
          */
 
-        // TODO: Should throw malformed URI exception
         function chaiseURItoErmrestURI(location) {
             var tableMissing = "No table specified in the form of 'schema-name:table-name' and no Default is set.",
                 catalogMissing = "No catalog specified and no Default is set.";
@@ -85,11 +82,11 @@
                         hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
-                        throw new Error(tableMissing);
+                        throw new ErrorService.MalformedUriError(tableMissing);
                     }
                 } else {
                     // no defined or default catalog
-                    throw new Error(catalogMissing);
+                    throw new ErrorService.MalformedUriError(catalogMissing);
                 }
             } else {
                 // pull off the catalog ID
@@ -102,7 +99,7 @@
                         catalogId = chaiseConfig.defaultCatalog;
                     } else {
                         // no defined or default catalog
-                        throw new Error(catalogMissing);
+                        throw new ErrorService.MalformedUriError(catalogMissing);
                     }
                 }
 
@@ -114,7 +111,7 @@
                         hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
-                        throw new Error(tableMissing);
+                        throw new ErrorService.MalformedUriError(tableMissing);
                     }
                 } else {
                     // grab the end of the hash from: '.../<schema-name>...'
@@ -232,6 +229,7 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
+                        // Should throw a MalformedUriError?
                         throw new Error("Invalid URL. Paging modifier requires @sort");
                     }
 
@@ -240,6 +238,7 @@
                 // extract @after
                 if (modifierPath.indexOf("@after(") !== -1) {
                     if (context.paging)
+                        // Should throw a MalformedUriError?
                         throw new Error("Invalid URL. Only one paging modifier allowed");
                     if (context.sort) {
                         context.paging = {};
@@ -252,6 +251,7 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
+                        // Should throw a MalformedUriError?
                         throw new Error("Invalid URL. Paging modifier requires @sort");
                     }
                 }
@@ -330,9 +330,11 @@
                             type = "Disjunction";
                         } else if (type === "Conjunction" && items[i] === ";") {
                             // using combination of ! and & without ()
+                            // Should throw a MalformedUriError?
                             throw new Error("Invalid filter " + parts[2]);
                         } else if (type === "Disjunction" && items[i] === "&") {
                             // using combination of ! and & without ()
+                            // Should throw a MalformedUriError?
                             throw new Error("Invalid filter " + parts[2]);
                         } else if (items[i] !== "&" && items[i] !== ";") {
                             // single filter on the first level
@@ -370,20 +372,20 @@
                     var filter = new ParsedFilter("BinaryPredicate");
                     filter.setBinaryPredicate(decodeURIComponent(f[0]), "=", decodeURIComponent(f[1]));
                     return filter;
-                } else {
-                    // invalid filter
-                    throw new Error("Invalid filter " + filterString);
                 }
+                // invalid filter
+                // Should throw a MalformedUriError?
+                throw new Error("Invalid filter " + filterString);
             } else {
                 var f = filterString.split("::");
                 if (f.length === 3) {
                     var filter = new ParsedFilter("BinaryPredicate");
                     filter.setBinaryPredicate(decodeURIComponent(f[0]), "::"+f[1]+"::", decodeURIComponent(f[2]));
                     return filter;
-                } else {
-                    // invalid filter error
-                    throw new Error("Invalid filter " + filterString);
                 }
+                // invalid filter error
+                // Should throw a MalformedUriError?
+                throw new Error("Invalid filter " + filterString);
             }
         }
 
@@ -406,9 +408,11 @@
                     type = "Disjunction";
                 } else if (type === "Conjunction" && filterStrings[i] === ";") {
                     // TODO throw invalid filter error (using combination of ! and &)
+                    // Should throw a MalformedUriError?
                     throw new Error("Invalid filter " + filterStrings);
                 } else if (type === "Disjunction" && filterStrings[i] === "&") {
                     // TODO throw invalid filter error (using combination of ! and &)
+                    // Should throw a MalformedUriError?
                     throw new Error("Invalid filter " + filterStrings);
                 } else if (filterStrings[i] !== "&" && filterStrings[i] !== ";") {
                     // single filter on the first level
@@ -472,10 +476,9 @@
             $window.onhashchange = function() {
                 // when address bar changes by user
 
-                // TODO: Check $rootScope.location
-                // if (!$rootScope.location) {
-                //     throw new Error('No location information found');
-                // }
+                if (!$rootScope.location) {
+                    throw new Error('No location information found');
+                }
 
                 if ($window.location.href !== $rootScope.location) {
                     location.reload();
@@ -503,11 +506,6 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
-
-        // TODO: If we decide to catch errors in this file instead of call site,
-        // then we could wrap each of the returned functions with the catcher fn
-        // so that it's all in one place. Same with the other util functions returned
-        // in the factories/services in this file.
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -567,7 +565,7 @@
         return ParsedFilter;
     }])
 
-    .factory("DataUtils", [function() {
+    .factory("DataUtils", ['ErrorService', function(ErrorService) {
         /**
          *
          * @param {ERMrest.Page} page
@@ -606,18 +604,18 @@
         }
 
         /**
-         * Throws an {@link ERMrest.InvalidInputError} if test is
+         * Throws an {InvalidInputError} if test is
          * not `True`.
          * @memberof ERMrest
          * @private
          * @function verify
          * @param {boolean} test The test
          * @param {string} message The message
-         * @throws {ERMrest.InvalidInputError} If test is not true.
+         * @throws {InvalidInputError} If test is not true.
          */
         function verify(test, message) {
             if (!test) {
-                throw new Error(message);
+                throw new ErrorService.InvalidInputError(message);
             }
         }
 
@@ -727,7 +725,6 @@
             restrict: 'A',
             require: 'ngModel',
             link: function (scope, elem, attrs, ctrl) {
-                // TODO: Wrap this function in catcher fn
                 ctrl.$parsers.push(function(viewValue) {
                     if(viewValue === "") {
                         return null;
@@ -740,7 +737,6 @@
 
     .directive('onEnter', function() {
         return function(scope, element, attrs) {
-            // TODO: Wrap this function in catcher fn
             element.bind("keydown keypress", function(event) {
                 var keyCode = event.which || event.keyCode;
 
@@ -758,9 +754,10 @@
     })
 
     // An "autofocus" directive that applies focus on an element when it becomes visible.
-    // The HTML5 autofocus attribute (1) isn't uniformly implemented across major modern browsers;
-    // (2) doesn't focus the element beyond the first time it's loaded in DOM; and (3) works
-    // unreliably for dynamically loaded templates.
+    // A directive is necessary because the HTML5 autofocus attribute (1) isn't
+    // uniformly implemented across major modern browsers; (2) doesn't focus the
+    // element beyond the first time it's loaded in DOM; and (3) works unreliably
+    // for dynamically loaded templates.
     // Use: <input type="text" autofocus>
     .directive('autofocus', ['$timeout', function($timeout) {
         return {
@@ -772,7 +769,6 @@
                     return element.is(':visible');
                 }, function(visible) {
                     if (visible == true) {
-                        // TODO: Attach .catch w/ catchAll
                         focusPromise = $timeout(function() {
                             element[0].focus();
                         }, 0, false);
@@ -789,7 +785,6 @@
                 element.on('$destroy', function() {
                     unbindWatch();
                     if (focusPromise) {
-                        // TODO: Attach .catch w/ catchAll
                         $timeout.cancel(focusPromise);
                     }
                 });

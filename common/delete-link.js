@@ -33,7 +33,6 @@
                 controllerAs: 'ctrl',
                 size: 'sm'
             });
-            // TODO: Conclude chain w/ a .catch for catchAll
         }
 
         return {
@@ -54,9 +53,6 @@
                     var modalInstance = createModal();
                     modalInstance.result.then(function success() {
                         return scope.callback();
-                    }).catch(function error(response) {
-                        // TODO: ErrorService.catchAll(response) instead of console.log
-                        console.log(response);
                     });
                 }
             },

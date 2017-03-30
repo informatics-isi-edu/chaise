@@ -5,16 +5,6 @@
 
     .factory('Session', ['$http', '$q', '$window', 'UriUtils', '$uibModal', '$interval', '$cookies','messageMap', function ($http, $q, $window, UriUtils, $uibModal, $interval, $cookies, messageMap) {
 
-        function NotFoundError(status, message) {
-            this.code = 404;
-            this.status = status;
-            this.message = message;
-        }
-
-        NotFoundError.prototype = Object.create(Error.prototype);
-
-        NotFoundError.prototype.constructor = NotFoundError;
-
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
 
@@ -24,10 +14,8 @@
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
                     return response.data;
                 }, function(response) {
-                    // get session failed, not logged in
-                    return $q.reject(new NotFoundError(response.statusText, response.data));
+                    return $q.reject(response);
                 });
-                // TODO: Conclude chain w/ a .catch for catchAll
             },
 
             login: function (referrer) {
@@ -62,12 +50,9 @@
                         login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden;
                         $window.location = login_url;
                     }
-                }, function() {
-                    document.body.style.cursor = 'default';
-                    $window.location = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
+                }, function(error) {
+                    throw error;
                 });
-                // TODO: Conclude chain w/ a .catch for catchAll
-
             },
 
             loginInANewWindow: function(cb) {
@@ -137,7 +122,6 @@
                         var intervalId;
                         var watchChangeInReferrerId = function () {
                             if (!closed && !$cookies.get("chaise-" + referrerId)) {
-                                // TODO: Attach .catch w/ catchAll
                                 $interval.cancel(intervalId);
                                 if (typeof cb== 'function') {
                                     modalInstance.close("Done");
@@ -149,7 +133,6 @@
                         }
 
                         var onModalClose = function() {
-                            // TODO: Attach .catch w/ catchAll
                             $interval.cancel(intervalId);
                             $cookies.remove("chaise-" + referrerId, { path: "/" });
                             closed = true;
@@ -158,7 +141,6 @@
                         // To avoid problems when user explicitly close the modal
                         modalInstance.result.then(onModalClose, onModalClose);
 
-                        // TODO: Attach .catch w/ catchAll
                         intervalId = $interval(watchChangeInReferrerId, 50);
 
                     } else {
@@ -175,27 +157,24 @@
                         });
                     }
 
-                }, function() {
-                    document.body.style.cursor = 'default';
-                    $window.location = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
+                }, function(error) {
+                    throw error;
                 });
-                // TODO: Conclude chain w/ a .catch for catchAll
             },
 
             logout: function() {
                 var logoutURL = chaiseConfig['logoutURL'];
                 var url = serviceURL + "/authn/session";
-                if (logoutURL !== undefined) {
-                    url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
+                if (logoutURL === undefined) {
+                    logoutURL = $window.location.origin + '/chaise/logout';
                 }
+                url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
 
                 $http.delete(url).then(function(response) {
                     $window.location = response.data.logout_url ;
-                }, function() {
-                    // user not logged in
-                    $window.location = "/chaise/logout";
+                }, function(error) {
+                    $window.location = '../logout';
                 });
-                // TODO: Conclude chain w/ a .catch for catchAll
             },
 
             NotFoundError: NotFoundError

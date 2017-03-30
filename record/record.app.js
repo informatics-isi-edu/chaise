@@ -149,12 +149,12 @@
                     }).catch(function(e) {
                         // The .catch from the outer promise won't catch errors from this closure
                         // so a .catch needs to be appended here.
-                        ErrorService.catchAll(e);
+                        throw e;
                     });
                 })(i);
             }
         }).catch(function genericCatch(exception) {
-            ErrorService.catchAll(exception);
+            throw exception;
         });
 
         /**

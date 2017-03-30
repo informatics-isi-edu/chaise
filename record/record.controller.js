@@ -202,7 +202,7 @@
                             }, function(error) {
                                 throw error;
                             }).catch(function(error) {
-                                ErrorService.catchAll(error);
+                                throw error;
                             });
                         })(i);
                     }
