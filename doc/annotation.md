@@ -131,6 +131,7 @@ The below tables explains the meaning of the possible values for the two keys.
 | title | The column will be displayed as a title in the summary page. Clicking on it, will display the detail page. | 
 | top | The column will be displayed in the summary page. | 
 | type | The column contains the type of a file (image/gif, image/jpeg, image/png, image/tiff). | 
+| unsortable | The column will be excluded from the drop down list of sort columns. | 
 | url | The column will be displayed as an URL link. | 
 | viewer | The column represents the value of a 3-D image file. | 
 

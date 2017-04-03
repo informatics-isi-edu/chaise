@@ -95,11 +95,6 @@
             $rootScope.location = $window.location.href;
         });
 
-        $scope.$on('error', function(event, exception) {
-            $log.warn(exception);
-            ErrorService.catchAll(exception);
-        });
-
         $scope.permalink = function() {
 
             // before run, use window location
@@ -232,10 +227,7 @@
                 $log.warn(exception);
                 recordsetModel.hasLoaded = true;
 
-                if (exception instanceof ERMrest.UnauthorizedError)
-                    ErrorService.catchAll(exception);
-                else
-                    ErrorService.errorPopup(exception.message, exception.code, "home page");
+                throw exception;
             });
 
             /**
@@ -253,10 +245,7 @@
             UiUtils.setBootstrapDropdownButtonBehavior();
         } catch (exception) {
             // pass to error handler
-            if (exception instanceof ERMrest.UnauthorizedError)
-                ErrorService.catchAll(exception);
-            else
-                ErrorService.errorPopup(exception.message, exception.code, "home page");
+            throw exception;
         }
     }]);
 

@@ -1,0 +1,19 @@
+[
+    {
+        "id": 1,
+        "int2_col_gen": 32767,
+        "int4_col_gen": -2147483648,
+        "int8_col_gen": 9007199254740991,
+        "float4_col_gen": 4.6123,
+        "float8_col_gen": 234523523.023045,
+        "text_col_gen": "sample",
+        "longtext_col_gen": "asjdf;laksjdf;laj ;lkajsd;f lkajsdf;lakjs f;lakjs df;lasjd f;ladsjf;alskdjfa ;lskdjf a;lsdkjf a;lskdfjal;sdkfj as;ldfkj as;dlf kjasl;fkaj;lfkjasl;fjas;ldfkjals;dfkjas;dlkfja;sldkfjasl;dkfjas;dlfkjasl;dfkja; lsdjfk a;lskdjf a;lsdfj as;ldfja;sldkfja;lskjdfa;lskdjfa;lsdkfja;sldkfjas;ldfkjas;dlfkjas;lfkja;sldkjf a;lsjf ;laskj fa;slk jfa;sld fjas;l js;lfkajs;lfkasjf;alsja;lk ;l kja",
+        "markdown_col_gen": "<strong>Sample</strong>",
+        "bool_true_col_gen": true,
+        "bool_false_col_gen": false,
+        "timestamp_col_gen": "2016-01-18T13:00:00",
+        "timestamptz_col_gen": "2016-01-18T00:00:00-08:00",
+        "date_col_gen": "2016-08-15",
+        "fk_col_gen": 1
+    }
+]

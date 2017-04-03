@@ -386,6 +386,11 @@ var recordEditPage = function() {
         return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
     };
 
+    this.getForeignKeyInputButton = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("row-" + index + '-' + columnDisplayName + "-button"));
+    };
+
     this.getForeignKeyInputs = function() {
         return element.all(by.css(".popup-select-value"));
     };
@@ -682,7 +687,7 @@ var recordPage = function() {
     };
 
     this.getModalText = function() {
-        return element(by.css(".modal-body"));    
+        return element(by.css(".modal-body"));
     };
 };
 
@@ -779,8 +784,23 @@ var recordsetPage = function() {
 
     this.getConfirmDeleteButton = function () {
         return element(by.id("delete-confirmation"));
-    }
+    };
 
+    this.getNextButton = function () {
+        return element(by.id("rs-next-btn"));
+    };
+
+    this.getPreviousButton = function () {
+        return element(by.id("rs-previous-btn"));
+    };
+
+    this.getPageLimitDropdown = function () {
+        return element(by.id("page-size-dropdown"));
+    };
+
+    this.getPageLimitSelector = function (limit) {
+        return element(by.id("page-size-" + limit));
+    };
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.

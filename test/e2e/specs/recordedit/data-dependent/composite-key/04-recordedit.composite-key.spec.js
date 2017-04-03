@@ -3,7 +3,7 @@ var recordEditHelpers = require('../../helpers.js');
 
 describe('Add a record,', function() {
 
-	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params, EC = protractor.ExpectedConditions;
 
     for (var i=0; i< testParams.tables.length; i++) {
 
@@ -20,9 +20,10 @@ describe('Add a record,', function() {
 
                 describe("Presentation and validation for an entity with a composite key,", function() {
 
+                    var rows;
+
                     it("the composite key should be filled in.", function() {
-                        var modalTitle = chaisePage.recordEditPage.getModalTitle(),
-                        	EC = protractor.ExpectedConditions;
+                        var modalTitle = chaisePage.recordEditPage.getModalTitle();
 
                         // make sure recordedit is loaded
                         chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
@@ -49,7 +50,7 @@ describe('Add a record,', function() {
                             var index = Math.floor(Math.random() * ct);
                             return rows.get(index).all(by.css(".select-action-button"));
                         }).then(function(selectButtons) {
-                            selectButtons[0].click();
+                            return selectButtons[0].click();
                         }).then(function() {
                             browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
@@ -80,7 +81,6 @@ describe('Add a record,', function() {
 
 					it("should be redirected to record page with correct values.", function() {
 						if (!hasErrors) {
-                            var EC = protractor.ExpectedConditions;
 
                             // After submitting 1 record in RecordEdit, the expected record
                             // page url will have a id of 1 because it'll always be the first
