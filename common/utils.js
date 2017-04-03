@@ -60,13 +60,16 @@
             // remove query params other than limit
             if (hash.indexOf('?') !== -1) {
                 var queries = hash.match(/\?(.+)/)[1].split("&"); // get the query params
+                var acceptedQueries = [], i;
+
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
-                for (var i = 0; i < queries.length; i++) { // add back only the valid queries
-                    var query = queries[i];
-                    if (query.indexOf("limit=") === 0) {
-                        hash = hash + "?" + query;
-                        break; // right now only 'limit' is valid
+                for (i = 0; i < queries.length; i++) { // add back only the valid queries
+                    if (queries[i].indexOf("limit=") === 0 || queries[i].indexOf("subset=") === 0) {
+                        acceptedQueries.push(queries[i]);
                     }
+                }
+                if (acceptedQueries.length != 0) {
+                    hash = hash + "?" + acceptedQueries.join("&");
                 }
             }
 
@@ -154,7 +157,11 @@
                 return undefined;
             }
 
-            return chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
+            var url = chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
+            if (location.queryParamsString) {
+                url = url + "?" + location.queryParamsString;
+            }
+            return url;
         }
 
         /**

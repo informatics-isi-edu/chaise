@@ -693,7 +693,19 @@ var recordsetPage = function() {
 
     this.getPageTitleElement = function() {
         return element(by.id('page-title'));
-    }
+    };
+
+    this.getPageSubTitle = function() {
+        return browser.executeScript("return $('#page-subtitle).text();')");
+    };
+
+    this.getPageSubTitleElement = function() {
+        return element(by.id('page-subtitle'));
+    };
+
+    this.getShowUnfilterdButton = function() {
+        return element(by.id('show-unfiltered'));
+    };
 
     this.getCustomPageSize = function() {
         return browser.executeScript("return $('#custom-page-size').text().trim();");

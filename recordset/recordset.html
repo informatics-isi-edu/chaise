@@ -23,7 +23,11 @@
                 <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value"></span>
                 <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value"></span>
             </h2>
-
+            <div class="page-filters">
+                <span id="page-subtitle" class="sub-title" ng-bind="vm.subTitle"></span>
+                <a ng-if="::vm.subTitle && vm.reference" class="btn btn-sm btn-primary" ng-href="{{ unfiltered() }}" tooltip-placement="bottom"
+                    uib-tooltip="Show unfiltered list" id="show-unfiltered">Show Unfiltered</a>
+            </div>
         </div>
 
         <!-- loading spinner -->

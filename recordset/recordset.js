@@ -118,8 +118,11 @@
             // add paging modifier
             if (recordsetModel.reference.location.paging)
                 url = url + recordsetModel.reference.location.paging;
-
-            url = url + "?limit=" + recordsetModel.pageLimit;
+            
+            // add ermrestjs supported queryParams
+            if (recordsetModel.reference.location.queryParamsString) {
+                url = url + "?" + recordsetModel.reference.location.queryParamsString;
+            }
 
             return url;
         };
@@ -131,7 +134,11 @@
                 link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + recordsetModel.pageLimit;
 
             return link;
-        }
+        };
+
+        $scope.unfiltered = function () {
+            return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;
+        };
 
     }])
 
@@ -202,6 +209,12 @@
                 else
                     recordsetModel.pageLimit = 25;
                 recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
+                
+                 // the additional provided name
+                if (p_context.queryParams && p_context.queryParams.subset) {
+                    recordsetModel.subTitle = p_context.queryParams.subset;
+                }
+
                 recordsetModel.columns = recordsetModel.reference.columns;
                 recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
