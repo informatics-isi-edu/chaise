@@ -16,7 +16,8 @@
         "detailed": "/record",
         "compact": "/recordset",
         "edit": "/recordedit",
-        "entry": "/recordedit"
+        "entry": "/recordedit",
+        "*": "/record"
     })
 
     // this constant is used to keep track of our strings that the user is shown
@@ -145,22 +146,20 @@
 
         /**
          * given an app tag and location object, return the full url
-         * @param {string} tag
-         * @param {ERMrest.Location} location
+         * @param {string} tag the tag that is defined in the annotation. If null, should use context.
+         * @param {ERMrest.Location} location the location object that ERMrest will return.
          * @param {string} context - optional, used to determine default app if tag is null/undefined
-         * @returns {string} url
+         * @returns {string} url the chaise url
          */
         function appTagToURL(tag, location, context) {
             if (!chaiseBaseURL)
                 chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             chaiseBaseURL = chaiseBaseURL.replace("/" + $rootScope.context.appName + "/", '');
             var appPath;
-            if (!tag && context) {
-                appPath = ContextUtils.getValueFromContext(appContextMapping, context);
-            } else if (tag) {
+            if (tag && (tag in appTagMapping)) {
                 appPath = appTagMapping[tag];
             } else {
-                return undefined;
+                appPath = ContextUtils.getValueFromContext(appContextMapping, context);
             }
 
             var url = chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
@@ -696,6 +695,7 @@
                 parts.splice(-1,1); // remove the last part
                 partial = parts.join("/");
             }
+            return object["*"];
         }
 
         return {
