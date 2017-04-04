@@ -158,7 +158,7 @@
             }
 
             var url = chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
-            if (location.queryParamsString) {
+            if (location.queryParamsString && (context === "compact" || context === "compact/brief")) {
                 url = url + "?" + location.queryParamsString;
             }
             return url;
