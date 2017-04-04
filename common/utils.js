@@ -23,24 +23,28 @@
     // so that when one is changed, it is changed in all places.
     // this will make localization easier if we go that route
     .constant("messageMap", {
+        "catalogMissing": "No catalog specified and no Default is set.",
+        "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
         "noDataMessage": "No entity exists with ",
+        "onePagingModifier": "Invalid URL. Only one paging modifier allowed",
         "pageRefreshRequired": {
             title: "Page Refresh Required",
             message: "This record cannot be deleted at this time because someone else has modified it. Please refresh this page before attempting to delete again."
         },
+        "pagingModifierRequiresSort": "Invalid URL. Paging modifier requires @sort",
         "reviewModifiedRecord": {
             title: "Review Modified Record",
             message: "This record cannot be deleted or unlinked at this time because someone else has modified it. The record has been updated with the latest changes. Please review them before trying again."
         },
-        "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
         "sessionExpired": {
             title: "Your session has expired. Please login to continue.",
             message: "To open the login window press"
-        }
+        },
+        "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set."
     })
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils', 'Errors',
-        function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils, Errors) {
+    .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
+        function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
         var chaiseBaseURL;
         /**
@@ -52,8 +56,8 @@
          */
 
         function chaiseURItoErmrestURI(location) {
-            var tableMissing = "No table specified in the form of 'schema-name:table-name' and no Default is set.",
-                catalogMissing = "No catalog specified and no Default is set.";
+            var tableMissing = messageMap.tableMissing,
+                catalogMissing = messageMap.catalogMissing;
 
             var hash = location.hash,
                 ermrestUri = {},
@@ -229,8 +233,7 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        // Should throw a MalformedUriError?
-                        throw new Error("Invalid URL. Paging modifier requires @sort");
+                        throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
                     }
 
                 }
@@ -238,8 +241,7 @@
                 // extract @after
                 if (modifierPath.indexOf("@after(") !== -1) {
                     if (context.paging)
-                        // Should throw a MalformedUriError?
-                        throw new Error("Invalid URL. Only one paging modifier allowed");
+                        throw new Errors.MalformedUriError(messageMap.onePagingModifier);
                     if (context.sort) {
                         context.paging = {};
                         context.paging.before = false;
@@ -251,8 +253,7 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        // Should throw a MalformedUriError?
-                        throw new Error("Invalid URL. Paging modifier requires @sort");
+                        throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
                     }
                 }
 
@@ -330,12 +331,10 @@
                             type = "Disjunction";
                         } else if (type === "Conjunction" && items[i] === ";") {
                             // using combination of ! and & without ()
-                            // Should throw a MalformedUriError?
-                            throw new Error("Invalid filter " + parts[2]);
+                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
                         } else if (type === "Disjunction" && items[i] === "&") {
                             // using combination of ! and & without ()
-                            // Should throw a MalformedUriError?
-                            throw new Error("Invalid filter " + parts[2]);
+                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
                         } else if (items[i] !== "&" && items[i] !== ";") {
                             // single filter on the first level
                             var binaryFilter = processSingleFilterString(items[i]);
@@ -374,8 +373,7 @@
                     return filter;
                 }
                 // invalid filter
-                // Should throw a MalformedUriError?
-                throw new Error("Invalid filter " + filterString);
+                throw new Errors.MalformedUriError("Invalid filter " + filterString);
             } else {
                 var f = filterString.split("::");
                 if (f.length === 3) {
@@ -384,8 +382,7 @@
                     return filter;
                 }
                 // invalid filter error
-                // Should throw a MalformedUriError?
-                throw new Error("Invalid filter " + filterString);
+                throw new Errors.MalformedUriError("Invalid filter " + filterString);
             }
         }
 
@@ -408,12 +405,10 @@
                     type = "Disjunction";
                 } else if (type === "Conjunction" && filterStrings[i] === ";") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    // Should throw a MalformedUriError?
-                    throw new Error("Invalid filter " + filterStrings);
+                    throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
                 } else if (type === "Disjunction" && filterStrings[i] === "&") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    // Should throw a MalformedUriError?
-                    throw new Error("Invalid filter " + filterStrings);
+                    throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
                 } else if (filterStrings[i] !== "&" && filterStrings[i] !== ";") {
                     // single filter on the first level
                     var binaryFilter = processSingleFilterString(filterStrings[i]);

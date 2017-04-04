@@ -171,8 +171,6 @@
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
-            console.log('Received onfocus event');
-            console.log('List of addRecordRequests', addRecordRequests);
             var completed = {};
             for (var id in addRecordRequests) {
                 var cookie = $cookies.getObject(id);
@@ -188,7 +186,6 @@
                 }
             }
 
-            console.log('List of completed addRequests... about to re-read them now...', completed);
             // read updated tables
             if (Object.keys(completed).length > 0 || updated !== {}) {
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
