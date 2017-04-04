@@ -52,8 +52,10 @@
                     "related_associate_table": "accommodation_image",
                     "related_linked_table": "file",
                     "related_linked_table_key_filter": "id=3009",
+                    "related_linked_subtitle": "for Accommodations = Super 8 North Hollywood Motel",
                     "related_regular_table": "booking",
-                    "related_regular_table_key_filter": "accommodation_id=2004"
+                    "related_regular_table_key_filter": "accommodation_id=2004",
+                    "related_regular_subtitle": "for Accommodations = Super 8 North Hollywood Motel"
                 }
             ]
         }

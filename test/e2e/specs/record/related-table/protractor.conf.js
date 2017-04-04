@@ -16,6 +16,7 @@ var config = pConfig.getConfig({
     page: 'record',
     setBaseUrl: function(browser, data) {
       browser.params.url = process.env.CHAISE_BASE_URL + "/record/#" + data.catalogId + "/" + data.schema.name;
+      browser.params.recordsetURL = process.env.CHAISE_BASE_URL + "/recordset/#" + data.catalogId + "/" + data.schema.name;
       return browser.params.url;
     }
 });
