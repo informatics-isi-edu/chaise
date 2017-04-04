@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -18,14 +18,7 @@
         };
 
         vm.createRecord = function() {
-            var newRef = $rootScope.reference.table.reference.contextualize.entryCreate;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.location.href = appURL;
-            }
+            $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
         };
 
         vm.canEdit = function() {
@@ -39,21 +32,11 @@
         };
 
         vm.editRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryEdit;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.location.href = appURL;
-            }
+            $window.location.href = $rootScope.reference.contextualize.entryEdit.appLink;
         };
 
         vm.copyRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryCreate;
-
-            var appLink = newRef.appLink + "?copy=true&limit=1";
-            $window.location.href = appLink;
+            $window.location.href = $rootScope.reference.contextualize.entryCreate.appLink + "?copy=true&limit=1";
         };
 
         vm.canDelete = function() {
@@ -67,7 +50,7 @@
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 if (error instanceof ERMrest.PreconditionFailedError) {
-                    $uibModal.open({
+                    return $uibModal.open({
                         templateUrl: "../common/templates/refresh.modal.html",
                         controller: "ErrorDialogController",
                         controllerAs: "ctrl",
@@ -80,13 +63,10 @@
                         }
                     }).result.then(function reload() {
                         // Reload the page
-                        $window.location.reload();
-                    }).catch(function(error) {
-                        ErrorService.catchAll(error);
+                        return $window.location.reload();
                     });
                 } else {
-                    ErrorService.catchAll(error);
-                    $log.warn(error);
+                    throw error;
                 }
             });
         };
@@ -99,11 +79,7 @@
         };
 
         vm.toRecordSet = function(ref) {
-            var appURL = ref.appLink;
-            if (!appURL) {
-                return AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + ref.compactPath});
-            }
-            return $window.location.href = appURL;
+            return $window.location.href = ref.appLink;
         };
 
         vm.showRelatedTable = function(i) {
@@ -195,16 +171,18 @@
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
-
             var completed = {};
             for (var id in addRecordRequests) {
                 var cookie = $cookies.getObject(id);
                 if (cookie) { // add request has been completed
+                    console.log('Cookie found', cookie);
                     completed[addRecordRequests[id]] = true;
 
                     // remove cookie and request
                     $cookies.remove(id);
                     delete addRecordRequests[id];
+                } else {
+                    console.log('Could not find cookie', cookie);
                 }
             }
 
@@ -218,6 +196,10 @@
                             relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
                                 $rootScope.tableModels[i].page = page;
                                 $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
+                            }, function(error) {
+                                throw error;
+                            }).catch(function(error) {
+                                throw error;
                             });
                         })(i);
                     }

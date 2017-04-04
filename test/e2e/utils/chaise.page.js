@@ -700,14 +700,14 @@ var recordsetPage = function() {
         return element(by.id('page-title'));
     };
 
-    this.getPageSubTitle = function() {
+    this.getPageSubtitle = function() {
         return browser.executeScript("return $('#page-subtitle).text();')");
     };
 
-    this.getPageSubTitleElement = function() {
+    this.getPageSubtitleElement = function() {
         return element(by.id('page-subtitle'));
     };
-
+    
     this.getShowUnfilterdButton = function() {
         return element(by.id('show-unfiltered'));
     };

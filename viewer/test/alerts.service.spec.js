@@ -8,16 +8,12 @@ describe('AlertsService', function() {
         inject(function(AlertsService) {
             mockAlertsService = AlertsService;
         });
-
-        alert = {
-            type: 'info',
-            message: 'This is a message'
-        };
     });
 
-    it('addAlert() should add an alert properly', function() {
-        mockAlertsService.addAlert(alert);
+    it('addAlert() should add an alert properly', function(done) {
+        alert = mockAlertsService.addAlert('This is a message', 'error');
         expect(mockAlertsService.alerts.length).toEqual(1);
+        done();
     });
 
     it('deleteAlert() should remove an alert properly', function() {

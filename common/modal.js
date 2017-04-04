@@ -30,6 +30,7 @@
         var vm = this;
         params.login_url = $sce.trustAsResourceUrl(params.login_url);
         vm.params = params;
+        vm.cancel = cancel;
 
         vm.openWindow = function() {
 
@@ -42,8 +43,6 @@
         }
 
         vm.params.host = $sce.trustAsResourceUrl(window.location.host);
-
-        vm.cancel = cancel;
 
         function cancel() {
             $uibModalInstance.dismiss('cancel');
@@ -84,14 +83,7 @@
                 vm.tableModel.page = page;
                 vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
             }, function(exception) {
-                if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                    Session.loginInANewWindow(function() {
-                        fetchRecords();
-                    });
-                } else {
-                    AlertsService.addAlert({type: 'error', message: response.message});
-                    $log.warn(response);
-                }
+                throw exception;
             });
         }
 

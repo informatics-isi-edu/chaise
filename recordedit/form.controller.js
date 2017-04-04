@@ -86,10 +86,10 @@
 
             // Created a single entity or Updated one
             if (rowset.length == 1) {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
+                AlertsService.addAlert('Your data has been submitted. Redirecting you now to the record...', 'success');
                 redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             } else {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the recordset...'});
+                AlertsService.addAlert('Your data has been submitted. Redirecting you now to the recordset...', 'success');
                 redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             }
 
@@ -160,7 +160,7 @@
 
             if (form.$invalid) {
                 vm.readyToSubmit = false;
-                AlertsService.addAlert({type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'});
+                AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
                 form.$setSubmitted();
                 return;
             }
@@ -200,7 +200,7 @@
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
                     } else {
-                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        AlertsService.addAlert('Your data has been submitted. Showing you the result set...', 'success');
                         // can't use page.reference because it reflects the specific values that were inserted
                         vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
                         //set values for the view to flip to recordedit resultset view
@@ -250,7 +250,7 @@
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
                     } else {
-                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        AlertsService.addAlert('Your data has been submitted. Showing you the result set...', 'success');
                         // can't use page.reference because it reflects the specific values that were inserted
                         vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
                         //set values for the view to flip to recordedit resultset view
@@ -433,19 +433,12 @@
         }
 
         function createRecord(column) {
-            var newRef = column.reference.contextualize.entryCreate;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.open(appURL, '_blank');
-            }
+            $window.open(column.reference.contextualize.entryCreate.appLink, '_blank');
         }
 
         function copyFormRow() {
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
-                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.'});
+                AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
                 return true;
             }
             // Check if the prototype row to copy has any invalid values. If it
@@ -457,7 +450,7 @@
                 var value = protoRowValidityStates[key];
                 if (value.$dirty && value.$invalid) {
                     vm.readyToSubmit = false, validRow = false;
-                    AlertsService.addAlert({type: 'error', message: "Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again."});
+                    AlertsService.addAlert("Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again.", "error");
                     return true;
                 }
             });

@@ -142,7 +142,7 @@
                             numberRowsToRead = Number(context.queryParams.limit);
                             if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
                                 var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
-                                AlertsService.addAlert({type: "error", message: limitMessage})
+                                AlertsService.addAlert(limitMessage, 'error');
                             }
                         } else {
                             numberRowsToRead = context.MAX_ROWS_TO_ADD;
