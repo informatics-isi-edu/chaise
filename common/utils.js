@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.utils', [])
+    angular.module('chaise.utils', ['chaise.errors'])
 
     .constant("appTagMapping", {
         "tag:isrd.isi.edu,2016:chaise:record": "/record",
@@ -23,35 +23,41 @@
     // so that when one is changed, it is changed in all places.
     // this will make localization easier if we go that route
     .constant("messageMap", {
+        "catalogMissing": "No catalog specified and no Default is set.",
+        "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
         "noDataMessage": "No entity exists with ",
+        "onePagingModifier": "Invalid URL. Only one paging modifier allowed",
         "pageRefreshRequired": {
             title: "Page Refresh Required",
             message: "This record cannot be deleted at this time because someone else has modified it. Please refresh this page before attempting to delete again."
         },
+        "pagingModifierRequiresSort": "Invalid URL. Paging modifier requires @sort",
         "reviewModifiedRecord": {
             title: "Review Modified Record",
             message: "This record cannot be deleted or unlinked at this time because someone else has modified it. The record has been updated with the latest changes. Please review them before trying again."
         },
-        "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
         "sessionExpired": {
             title: "Your session has expired. Please login to continue.",
             message: "To open the login window press"
-        }
+        },
+        "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set."
     })
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils',
-        function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils) {
+    .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
+        function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
-            var chaiseBaseURL;
+        var chaiseBaseURL;
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
          * @desc
-         * Converts a chaise URI to an ermrest resource URI object
+         * Converts a chaise URI to an ermrest resource URI object.
+         * @throws {MalformedUriError} if table or catalog data are missing.
          */
+
         function chaiseURItoErmrestURI(location) {
-            var tableMissing = "No table specified in the form of 'schema-name:table-name' and no Default is set.",
-                catalogMissing = "No catalog specified and no Default is set.";
+            var tableMissing = messageMap.tableMissing,
+                catalogMissing = messageMap.catalogMissing;
 
             var hash = location.hash,
                 ermrestUri = {},
@@ -80,11 +86,11 @@
                         hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
-                        throw new Error(tableMissing);
+                        throw new Errors.MalformedUriError(tableMissing);
                     }
                 } else {
                     // no defined or default catalog
-                    throw new Error(catalogMissing);
+                    throw new Errors.MalformedUriError(catalogMissing);
                 }
             } else {
                 // pull off the catalog ID
@@ -97,7 +103,7 @@
                         catalogId = chaiseConfig.defaultCatalog;
                     } else {
                         // no defined or default catalog
-                        throw new Error(catalogMissing);
+                        throw new Errors.MalformedUriError(catalogMissing);
                     }
                 }
 
@@ -109,7 +115,7 @@
                         hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                     } else {
                         // no defined or default schema:table
-                        throw new Error(tableMissing);
+                        throw new Errors.MalformedUriError(tableMissing);
                     }
                 } else {
                     // grab the end of the hash from: '.../<schema-name>...'
@@ -131,7 +137,7 @@
         function fixedEncodeURIComponent(str) {
             return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
                 return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            })
+            });
         }
 
         /**
@@ -227,7 +233,7 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        throw new Error("Invalid URL. Paging modifier requires @sort");
+                        throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
                     }
 
                 }
@@ -235,7 +241,7 @@
                 // extract @after
                 if (modifierPath.indexOf("@after(") !== -1) {
                     if (context.paging)
-                        throw new Error("Invalid URL. Only one paging modifier allowed");
+                        throw new Errors.MalformedUriError(messageMap.onePagingModifier);
                     if (context.sort) {
                         context.paging = {};
                         context.paging.before = false;
@@ -247,7 +253,7 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        throw new Error("Invalid URL. Paging modifier requires @sort");
+                        throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
                     }
                 }
 
@@ -325,10 +331,10 @@
                             type = "Disjunction";
                         } else if (type === "Conjunction" && items[i] === ";") {
                             // using combination of ! and & without ()
-                            throw new Error("Invalid filter " + parts[2]);
+                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
                         } else if (type === "Disjunction" && items[i] === "&") {
                             // using combination of ! and & without ()
-                            throw new Error("Invalid filter " + parts[2]);
+                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
                         } else if (items[i] !== "&" && items[i] !== ";") {
                             // single filter on the first level
                             var binaryFilter = processSingleFilterString(items[i]);
@@ -365,20 +371,18 @@
                     var filter = new ParsedFilter("BinaryPredicate");
                     filter.setBinaryPredicate(decodeURIComponent(f[0]), "=", decodeURIComponent(f[1]));
                     return filter;
-                } else {
-                    // invalid filter
-                    throw new Error("Invalid filter " + filterString);
                 }
+                // invalid filter
+                throw new Errors.MalformedUriError("Invalid filter " + filterString);
             } else {
                 var f = filterString.split("::");
                 if (f.length === 3) {
                     var filter = new ParsedFilter("BinaryPredicate");
                     filter.setBinaryPredicate(decodeURIComponent(f[0]), "::"+f[1]+"::", decodeURIComponent(f[2]));
                     return filter;
-                } else {
-                    // invalid filter error
-                    throw new Error("Invalid filter " + filterString);
                 }
+                // invalid filter error
+                throw new Errors.MalformedUriError("Invalid filter " + filterString);
             }
         }
 
@@ -401,10 +405,10 @@
                     type = "Disjunction";
                 } else if (type === "Conjunction" && filterStrings[i] === ";") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    throw new Error("Invalid filter " + filterStrings);
+                    throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
                 } else if (type === "Disjunction" && filterStrings[i] === "&") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    throw new Error("Invalid filter " + filterStrings);
+                    throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
                 } else if (filterStrings[i] !== "&" && filterStrings[i] !== ";") {
                     // single filter on the first level
                     var binaryFilter = processSingleFilterString(filterStrings[i]);
@@ -473,7 +477,7 @@
 
 
         function queryStringToJSON(queryString) {
-            queryString  = queryString || window.location.search;
+            queryString  = queryString || $window.location.search;
             if (queryString.indexOf('?') > -1){
                 queryString = queryString.split('?')[1];
             }
@@ -490,7 +494,6 @@
             //Internet Explorer 6-11
             return /*@cc_on!@*/false || !!document.documentMode;
         }
-
 
         return {
             queryStringToJSON: queryStringToJSON,
@@ -551,7 +554,7 @@
         return ParsedFilter;
     }])
 
-    .factory("DataUtils", [function() {
+    .factory("DataUtils", ['Errors', function(Errors) {
         /**
          *
          * @param {ERMrest.Page} page
@@ -589,9 +592,26 @@
                 .replace(/'/g, '&#39;');
         }
 
+        /**
+         * Throws an {InvalidInputError} if test is
+         * not `True`.
+         * @memberof ERMrest
+         * @private
+         * @function verify
+         * @param {boolean} test The test
+         * @param {string} message The message
+         * @throws {InvalidInputError} If test is not true.
+         */
+        function verify(test, message) {
+            if (!test) {
+                throw new Errors.InvalidInputError(message);
+            }
+        }
+
         return {
             getRowValuesFromPage: getRowValuesFromPage,
-            makeSafeIdAttr: makeSafeIdAttr
+            makeSafeIdAttr: makeSafeIdAttr,
+            verify: verify
         };
     }])
 
@@ -706,7 +726,6 @@
 
     .directive('onEnter', function() {
         return function(scope, element, attrs) {
-
             element.bind("keydown keypress", function(event) {
                 var keyCode = event.which || event.keyCode;
 
@@ -724,9 +743,10 @@
     })
 
     // An "autofocus" directive that applies focus on an element when it becomes visible.
-    // The HTML5 autofocus attribute (1) isn't uniformly implemented across major modern browsers;
-    // (2) doesn't focus the element beyond the first time it's loaded in DOM; and (3) works
-    // unreliably for dynamically loaded templates.
+    // A directive is necessary because the HTML5 autofocus attribute (1) isn't
+    // uniformly implemented across major modern browsers; (2) doesn't focus the
+    // element beyond the first time it's loaded in DOM; and (3) works unreliably
+    // for dynamically loaded templates.
     // Use: <input type="text" autofocus>
     .directive('autofocus', ['$timeout', function($timeout) {
         return {

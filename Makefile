@@ -136,9 +136,18 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestMatrixController.js \
 	$(JS)/tour.js \
 	$(JS)/matrix.js \
-	$(COMMON)/utils.js \
+	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/delete-link.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
+	$(COMMON)/filters.js \
+	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/record.js \
+	$(COMMON)/ellipses.js \
+	$(COMMON)/table.js \
+	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js
 
 # HTML templates

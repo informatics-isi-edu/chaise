@@ -511,7 +511,6 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         it("should have a new record, View More link for a related table that redirects to recordset.", function() {
             browser.close();
             browser.switchTo().window(allWindows[0]);
-
             var EC = protractor.ExpectedConditions,
                 relatedTableName = tableParams.related_regular_table,
                 relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);

@@ -61,7 +61,6 @@
         // If it returns true then we should render the data
         // else we should reject the data
         function setSearchStates(scope, isBackground, searchTerm) {
-
             // If request is background
             if (isBackground) {
                 // If there is a term in backgroundSearchPendingTerm for background and there is no foreground search going on then
@@ -144,19 +143,15 @@
             }, function error(exception) {
                 // If the errorcode is unauthorizederror (401) then open the login window to make the user login
                 if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                    Session.loginInANewWindow(function() {
+                    return Session.loginInANewWindow(function() {
                         //Once the user has logged in successfully trigger read again
                         read(scope, isBackground);
                     });
-                } else {
-                    scope.vm.hasLoaded = true;
-                    
-                    setSearchStates(scope, isBackground);
-
-                    if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
-
-                    throw exception;
                 }
+                scope.vm.hasLoaded = true;
+                setSearchStates(scope, isBackground);
+                if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+                throw exception;
             });
         }
 
@@ -246,7 +241,6 @@
 
                 };
 
-
                 var inputChangedPromise;
 
                 /*
@@ -328,7 +322,7 @@
                     // open a new tab
                     var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
                     var appLink = newRef.appLink;
-                    appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
+                    appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
                         'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
 
                     // open url in a new tab
