@@ -35,7 +35,7 @@
 
     .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
         function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
-
+        try {
         var session,
             context = {};
 
@@ -53,7 +53,7 @@
         // The context object won't change unless the app is reloaded
         context.appName = "record";
 
-        // DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
+        DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
         Session.getSession().then(function getSession(_session) {
@@ -158,6 +158,9 @@
         }).catch(function genericCatch(exception) {
             throw exception;
         });
+    } catch (exception) {
+        ErrorService.handleException(exception);
+    }
 
         /**
          * it saves the location in $rootScope.location.
