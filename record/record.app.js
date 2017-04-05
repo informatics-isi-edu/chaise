@@ -53,7 +53,7 @@
         // The context object won't change unless the app is reloaded
         context.appName = "record";
 
-        DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
+        // DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
         Session.getSession().then(function getSession(_session) {
@@ -88,7 +88,7 @@
 
             // related references
             $rootScope.relatedReferences = $rootScope.reference.related(tuple);
-            
+
             // Collate tuple.isHTML and tuple.values into an array of objects
             // i.e. {isHTML: false, value: 'sample'}
             $rootScope.recordValues = [];
