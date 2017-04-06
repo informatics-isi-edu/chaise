@@ -158,7 +158,7 @@ window.onerror = function() {
     
     var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
     document.body.innerHTML = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">' 
-        + '<div class="modal-dialog ">'
+        + '<div class="modal-dialog" style="width:90% !important;">'
             + '<div class="modal-content" uib-modal-transclude="">'
                 + '<div class="modal-header">'
                     + '<h3 class="modal-title ">Error: Terminal Error</h3>'
