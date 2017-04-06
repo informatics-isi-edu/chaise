@@ -157,6 +157,9 @@ window.onerror = function() {
     ].join(':');
     
     var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
+
+    if (!document || !document.body) return;
+
     document.body.innerHTML = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">' 
         + '<div class="modal-dialog" style="width:90% !important;">'
             + '<div class="modal-content" uib-modal-transclude="">'
@@ -169,7 +172,6 @@ window.onerror = function() {
                     + 'Click OK to return to the Home Page.'
                     + '<br>'
                     + '<span class="terminalError"><br>'
-                        + '<pre>Ermrest ' + (document.querySelector('script[src*="../../ermrestjs/ermrest.js"]') ? 'Loaded' : 'Not Loaded') + '</pre>' 
                         + '<pre>' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
                     + '</span>'
                 + '</div>'
