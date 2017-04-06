@@ -82,7 +82,6 @@ install:
   - sudo service apache2 restart
   - sudo cat /var/www/html/chaise/chaise-config.js
   - sudo cat /var/www/html/chaise/version.txt
-  - sudo cat /var/www/html/ermrestjs/ermrest.js
 
 before_script:
   - sudo -H -u webauthn webauthn2-manage adduser test1
