@@ -70,7 +70,6 @@
 
             $log.info("Reference: ", $rootScope.reference);
 
-            $rootScope.relatedReferences = $rootScope.reference.related;
             // There should only ever be one entity related to this reference
             return $rootScope.reference.read(1);
         }, function error(exception) {
@@ -87,6 +86,9 @@
             // Used directly in the record-display directive
             $rootScope.recordDisplayname = tuple.displayname;
 
+            // related references
+            $rootScope.relatedReferences = $rootScope.reference.related(tuple);
+            
             // Collate tuple.isHTML and tuple.values into an array of objects
             // i.e. {isHTML: false, value: 'sample'}
             $rootScope.recordValues = [];
