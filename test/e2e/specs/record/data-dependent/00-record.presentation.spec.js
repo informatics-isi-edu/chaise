@@ -29,6 +29,8 @@ describe('View existing record,', function() {
 			    });
 
                 it('should load document title defined in chaise-config.js and have deleteRecord=true', function() {
+                    var log = browser.driver.get_log(‘browser’);
+                    console.dir(log);
                     browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                         expect(chaiseConfig.deleteRecord).toBe(true);
                         if (chaiseConfig.headTitle) {
