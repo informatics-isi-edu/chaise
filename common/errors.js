@@ -169,6 +169,7 @@ window.onerror = function() {
                     + 'Click OK to return to the Home Page.'
                     + '<br>'
                     + '<span class="terminalError"><br>'
+                        + '<pre>Ermrest ' + (window._thirdParty.ERMrest ? 'Loaded"]' : 'Not Loaded') + '</pre>' 
                         + '<pre>' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
                     + '</span>'
                 + '</div>'
@@ -179,5 +180,7 @@ window.onerror = function() {
         + '</div>'
     + '</div>'
     + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>';
+
+
 
 };
