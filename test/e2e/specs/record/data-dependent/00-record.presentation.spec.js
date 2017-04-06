@@ -33,6 +33,8 @@ describe('View existing record,', function() {
                     browser.manage().logs().get('browser').then(function(browserLog) {
                         console.log('log: ' + require('util').inspect(browserLog));
 
+                        browser.pause();
+
                         browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                             expect(chaiseConfig.deleteRecord).toBe(true);
                             if (chaiseConfig.headTitle) {
