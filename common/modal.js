@@ -123,11 +123,22 @@
         vm.checksumProgress = 0;
         vm.checksumCompleted = 0;
 
+        vm.createUploadJobProgress = 0;
+        vm.createUploadJobCompleted = 0;
+
+        vm.fileExistsProgress = 0;
+        vm.fileExistsCompleted = 0;
+
         vm.uploadProgress = 0;
         vm.uploadCompleted = 0;
 
+        vm.uploadJobCompleteProgress = 0;
+        vm.uploadJobCompletedCount = 0;
+
         vm.speed = 0;
         vm.isUpload = false;
+        vm.isCreateUploadJob = false;
+        vm.isFileExists = false;
 
         var lastByteTransferred = 0;
         var speedIntervalTimer;
@@ -135,6 +146,9 @@
         var updateChecksumProgreeBar = function() {
             var progress  = 0;
             vm.isUpload = false;
+            vm.isCreateUploadJob = false;
+            vm.isFileExists = false;
+
             vm.rows.forEach(function(row) {
                 row.forEach(function(item) {
                     progress += item.checksumProgress;
@@ -148,8 +162,57 @@
             
         };
 
+
+        var onChecksumCompleted = function() {
+            if (vm.checksumCompleted == vm.noOfFiles) {
+                createUploadJobs();
+            }
+        };
+
+        var updateCreateUploadJobProgreeBar = function() {
+            var progress  = 0;
+            vm.rows.forEach(function(row) {
+                row.forEach(function(item) {
+                    progress += item.jobCreateDone ? 1 : 0;
+                });
+            });
+
+            vm.createUploadJobProgress = (progress/vm.noOfFiles)*100;
+            vm.createUploadJobCompleted = progress;
+
+            $timeout(function() {
+                $scope.$apply();
+            });
+            
+            if (progress == vm.noOfFiles) {
+                checkFileExists();
+            }
+        };
+
+
+        var updateFileExistsProgreeBar = function() {
+            var progress  = 0;
+            vm.isFileExists = true;
+            vm.isUpload = false;
+            vm.rows.forEach(function(row) {
+                row.forEach(function(item) {
+                    progress += item.fileExistsDone ? 1 : 0;
+                });
+            });
+
+            vm.fileExistsProgress = (progress/vm.noOfFiles)*100;
+            vm.fileExistsCompleted = progress;
+
+            $timeout(function() {
+                $scope.$apply();
+            });
+            
+            if (progress == vm.noOfFiles) {
+                startUpload();
+            }
+        };
+
         var updateUploadProgressBar = function() {
-            vm.isUpload = true;
             var progress  = 0
             vm.rows.forEach(function(row) {
                 row.forEach(function(item) {
@@ -168,6 +231,27 @@
 
         var onUploadCompleted = function() {
             if (vm.uploadCompleted == vm.noOfFiles) {
+                clearInterval(speedIntervalTimer);
+                completeUpload();
+            }
+        };
+
+        var updateJobCompleteProgreeBar = function() {
+            var progress  = 0;
+            vm.rows.forEach(function(row) {
+                row.forEach(function(item) {
+                    progress += item.completeUploadJob ? 1 : 0;
+                });
+            });
+
+            vm.uploadJobCompleteProgress = (progress/vm.noOfFiles)*100;
+            vm.uploadJobCompletedCount = progress;
+
+            $timeout(function() {
+                $scope.$apply();
+            });
+            
+            if (progress == vm.noOfFiles) {
                 var index = 0;
                 params.rows.forEach(function(row) {
                     var tuple = [];
@@ -180,19 +264,62 @@
 
                     index++;
                 });
-
-                clearInterval(speedIntervalTimer);
-
                 $uibModalInstance.close();
             }
         };
 
+        var calculateChecksum = function() {
+            vm.title = "Calculating and Verifying Checksum";
+            vm.isCreateUploadJob = false;
+            vm.isFileExists = false;
+            vm.isUpload = false;
+            vm.rows.forEach(function(row) {
+                row.forEach(function(item) {
+                    item.uploadObj.calculateChecksum().then(
+                        itemOps.onChecksumCompleted.bind(item),
+                        onChecksumError, 
+                        itemOps.onChecksumProgressChanged.bind(item));
+                });
+            });
+        };
+
+        var createUploadJobs = function() {
+            vm.title = "Creating Upload Jobs for the files";
+            vm.isCreateUploadJob = true;
+            vm.isFileExists = false;
+            vm.isUpload = false;
+            vm.rows.forEach(function(row) {
+                row.forEach(function(item) {
+                    item.uploadObj.createUploadJob().then(
+                        itemOps.onJobCreated.bind(item),
+                        onUploadJobCreationError);
+                });
+            });
+        };
+
+        var checkFileExists = function() {
+            vm.title = "Checking for existing files";
+            vm.isFileExists = true;
+            vm.isUpload = false;
+            vm.rows.forEach(function(row) {
+                row.forEach(function(item) {
+                    item.uploadObj.fileExists().then(
+                        itemOps.onFileExistSuccess.bind(item),
+                        onFileExistsError);
+                });
+            });
+        };
+
         var startUpload = function() {
-           
+            vm.title = "Uploading files";
+            vm.isUpload = true;
             vm.humanTotalSize = UiUtils.humanFileSize(vm.totalSize);
             vm.rows.forEach(function(row) {
                 row.forEach(function(item) {
-                    item.uploadObj.start();
+                    item.uploadObj.start().then(
+                        itemOps.onUploadCompleted.bind(item),
+                        onUploadError, 
+                        itemOps.onProgressChanged.bind(item));
                 });
             });
 
@@ -206,19 +333,60 @@
 
         };
 
-        var onChecksumCompleted = function() {
-            if (vm.checksumCompleted == vm.noOfFiles) {
-                alert("Done");
-                //startUpload();
-            }
+        var completeUpload = function() {
+            vm.title = "Finalizing Upload";
+            vm.rows.forEach(function(row) {
+                row.forEach(function(item) {
+                    item.uploadObj.completeUpload().then(
+                        itemOps.onCompleteUploadJob.bind(item),
+                        onCompleteUploadJobError);
+                });
+            });
+        };
+
+        var onUploadJobCreationError = function(err) {
+            if (vm.uploadError || vm.checksumError) return;
+            
+            vm.uploadError = true;
+            abortUploads();
+            $uibModalInstance.cancel();
+            throw err;
+        };
+
+        var onFileExistsError = function() {
+            if (vm.uploadError || vm.checksumError) return;
+            
+            vm.uploadError = true;
+            abortUploads();
+            $uibModalInstance.cancel();
+            throw err;
         };
 
         var onUploadError = function(err) {
+            if (vm.uploadError || vm.checksumError) return;
+            
+            vm.uploadError = true;
+
             abortUploads();
+            $uibModalInstance.cancel();
+            throw err;
+        };
+
+        var onCompleteUploadJobError = function(err) {
+            if (vm.uploadError || vm.checksumError) return;
+            
+            vm.uploadError = true;
+            $uibModalInstance.cancel();
+            throw err;
         };
 
         var onChecksumError = function(err) {
-            alert("checksum error " + err.message);
+            if (vm.uploadError || vm.checksumError) return;
+            
+            vm.checksumError = true;
+            
+            $uibModalInstance.cancel();
+            throw err;
         };
 
         var uploadFile = function(col) {
@@ -231,8 +399,11 @@
                 checksumProgress: 0,
                 checksumPercent: 0,
                 checksumCompleted: false,
+                jobCreateDone: false,
+                fileExistsDone: false,
                 uploadCompleted: false,
                 uploadStarted: false,
+                completeUploadJob: false,
                 sometext: "sometext",
                 progress: 0,
                 progressPercent: 0,
@@ -241,41 +412,16 @@
             };
 
             return item;
-        }
+        };
 
 
         var itemOps = {
-            onServerError: function(response) {
-                if (vm.uploadError || vm.serverError || vm.checksumError) return;
-                vm.serverError = true;
-                if (response.status === 401) {
-                    alert("Sorry you are not allowed to upload:" + response.message);
-                } else {
-                    alert(response.status + "  " + response.message);
-                    console.log("Our server is not responding correctly");
-                }
-            },
-
-            onUploadError: function(xhr) {
-                if (vm.uploadError || vm.serverError || vm.checksumError) return;
-
-                vm.uploadError = true;
-                if (xhr.status === 401) {
-                    alert("Sorry you are not allowed to upload : " + xhr.responseText);
-                } else {
-                    alert(xhr.status + "  " + xhr.responseText);
-                }
-            },
-
-            onChecksumError: function(err) {
-                if (vm.uploadError || vm.serverError || vm.checksumError) return;
-                
-                vm.checksumError = true;
-                onChecksumError();
-            },
-
+            
             onChecksumProgressChanged: function(uploadedSize) {
+                this.jobCreateDone = false;
+                this.fileExistsDone = false;
                 this.uploadStarted = false;
+                this.completeUploadJob = false;
                 this.checksumPercent = Math.floor((uploadedSize/this.size) * 100);
                 this.checksumProgress = uploadedSize;
                 updateChecksumProgreeBar(uploadedSize);
@@ -283,6 +429,7 @@
 
             onProgressChanged: function(uploadedSize) {
                 this.uploadStarted = true;
+                this.completeUploadJob = false;
                 this.progressPercent = Math.floor((uploadedSize/this.size) * 100);
                 this.progress = uploadedSize;
                 updateUploadProgressBar(uploadedSize);
@@ -299,6 +446,21 @@
                 }
             },
 
+            onJobCreated: function() {
+                this.jobCreateDone = true;
+                this.fileExistsDone = false;
+                this.uploadStarted = false;
+                this.completeUploadJob = false;
+                updateCreateUploadJobProgreeBar();
+            },
+
+            onFileExistSuccess: function() {
+                this.fileExistsDone = true;
+                this.uploadStarted = false;
+                this.completeUploadJob = false;
+                updateFileExistsProgreeBar();
+            },
+
             onUploadCompleted: function(url) {
                 this.progress = this.size;
                 this.progressPercent = 100;
@@ -307,6 +469,11 @@
                     vm.uploadCompleted++;
                     onUploadCompleted();
                 }
+            },
+
+            onCompleteUploadJob: function() {
+                this.completeUploadJob = true;
+                updateJobCompleteProgreeBar();
             }
         };
 
@@ -342,15 +509,7 @@
                $uibModalInstance.close();
             });
         } else {
-            vm.isUpload = false;
-            vm.rows.forEach(function(row) {
-                row.forEach(function(item) {
-                    item.uploadObj.calculateChecksum().then(
-                        itemOps.onChecksumCompleted.bind(item),
-                        itemOps.onChecksumError.bind(item), 
-                        itemOps.onChecksumProgressChanged.bind(item));
-                });
-            });
+            calculateChecksum();
         }
 
     }])
