@@ -136,12 +136,51 @@
         };
     }])
 
-    .factory('$exceptionHandler', ['$log', '$injector' , function($log, $injector) {
-
-        return function(exception, cause) {
-            var ErrorService = $injector.get("ErrorService");
-            ErrorService.handleException(exception);
-        };
-    }])
+    .config(function($provide) {
+        $provide.decorator("$exceptionHandler", ['$log', '$injector' , function($log, $injector) {
+            return function(exception, cause) {
+                var ErrorService = $injector.get("ErrorService");
+                ErrorService.handleException(exception);
+            };
+        }]);
+    });
 
 })();
+
+
+window.onerror = function() {
+    var error = arguments[4];
+    error.stack = [
+        arguments[1],
+        arguments[2],
+        arguments[3]
+    ].join(':');
+    
+    var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
+
+    if (!document || !document.body) return;
+
+    document.body.innerHTML = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">' 
+        + '<div class="modal-dialog" style="width:90% !important;">'
+            + '<div class="modal-content" uib-modal-transclude="">'
+                + '<div class="modal-header">'
+                    + '<h3 class="modal-title ">Error: Terminal Error</h3>'
+                + '</div>'
+                + '<div class="modal-body ">'
+                    + 'An unexpected error has occurred. Please report this problem to your system administrators.'
+                    + '<br><br>'
+                    + 'Click OK to return to the Home Page.'
+                    + '<br>'
+                    + '<span class="terminalError"><br>'
+                        + '<pre>' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
+                    + '</span>'
+                + '</div>'
+                + '<div class="modal-footer">'
+                    + '<button class="btn btn-danger" type="button" onclick="window.location.replace(\'' + redirectLink + '\');">OK</button>'
+                + '</div>'
+            + '</div>'
+        + '</div>'
+    + '</div>'
+    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>';
+
+};
