@@ -29,14 +29,18 @@ describe('View existing record,', function() {
 			    });
 
                 it('should load document title defined in chaise-config.js and have deleteRecord=true', function() {
-                    browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                        expect(chaiseConfig.deleteRecord).toBe(true);
-                        if (chaiseConfig.headTitle) {
-                            browser.getTitle().then(function(title) {
-                                expect(title).toEqual(chaiseConfig.headTitle);
-                            });
-                        }
+                    browser.manage().logs().get('browser').then(function(browserLog) {
+                        console.log('log: ' + require('util').inspect(browserLog));
+                        browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                            expect(chaiseConfig.deleteRecord).toBe(true);
+                            if (chaiseConfig.headTitle) {
+                                browser.getTitle().then(function(title) {
+                                    expect(title).toEqual(chaiseConfig.headTitle);
+                                });
+                            }
+                        });
                     });
+                    
                 });
 
 				describe("Presentation ,", function() {

@@ -98,9 +98,7 @@ script:
   - make testrecordadd
   - make testrecordedit
   - make testpermissions
-  - make testviewer
   - make testlogin
-  - make testsearch
 
 after_failure:
   - sudo cat ${HTTPD_ERROR_LOG}
