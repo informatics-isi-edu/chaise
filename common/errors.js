@@ -159,7 +159,7 @@ window.onerror = function() {
     var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
 
     if (!document || !document.body) return;
-    
+
     document.body.innerHTML = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">' 
         + '<div class="modal-dialog" style="width:90% !important;">'
             + '<div class="modal-content" uib-modal-transclude="">'
@@ -182,7 +182,5 @@ window.onerror = function() {
         + '</div>'
     + '</div>'
     + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>';
-
-
 
 };
