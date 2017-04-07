@@ -176,10 +176,12 @@
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                     column = $rootScope.reference.columns[i];
 
-                                    // If input is disabled, there's
-                                    // no need to transform the column value.
+                                    // If input is disabled, there's no need to transform the column value.
                                     if (column.getInputDisabled(context.appContext)) {
-                                        recordEditModel.rows[j][column.name] = values[i];
+                                        // if not copy, populate the field without transforming it
+                                        if (context.mode != context.modes.COPY) {
+                                            recordEditModel.rows[j][column.name] = values[i];
+                                        }
                                         continue;
                                     }
 
@@ -219,9 +221,8 @@
                                             break;
                                     }
 
-                                    if (!context.queryParams.copy || !column.getInputDisabled(context.appContext)) {
-                                        recordEditModel.rows[j][column.name] = value;
-                                    }
+                                    // no need to check for copy here because the case above guards against the negative case for copy
+                                    recordEditModel.rows[j][column.name] = value;
                                 }
                             }
 
