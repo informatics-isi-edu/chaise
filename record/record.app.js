@@ -64,6 +64,9 @@
             // do nothing but return without a session
             return ERMrest.resolve(ermrestUri, {cid: context.appName});
         }).then(function getReference(reference) {
+            // if the user can fetch the reference, they can see the content for the rest of the page
+            // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
+            $rootScope.loading = true;
             // $rootScope.reference != reference after contextualization
             $rootScope.reference = reference.contextualize.detailed;
             $rootScope.reference.session = session;
@@ -88,7 +91,7 @@
 
             // related references
             $rootScope.relatedReferences = $rootScope.reference.related(tuple);
-            
+
             // Collate tuple.isHTML and tuple.values into an array of objects
             // i.e. {isHTML: false, value: 'sample'}
             $rootScope.recordValues = [];
@@ -104,7 +107,6 @@
             $rootScope.tableModels = [];
             $rootScope.lastRendered = null;
 
-            $rootScope.loading = ($rootScope.relatedReferences.length > 0);
             for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                 $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
 

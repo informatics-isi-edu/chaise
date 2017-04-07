@@ -171,37 +171,39 @@
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
-            var completed = {};
-            for (var id in addRecordRequests) {
-                var cookie = $cookies.getObject(id);
-                if (cookie) { // add request has been completed
-                    console.log('Cookie found', cookie);
-                    completed[addRecordRequests[id]] = true;
+            if ($rootScope.loading === false) {
+                var completed = {};
+                for (var id in addRecordRequests) {
+                    var cookie = $cookies.getObject(id);
+                    if (cookie) { // add request has been completed
+                        console.log('Cookie found', cookie);
+                        completed[addRecordRequests[id]] = true;
 
-                    // remove cookie and request
-                    $cookies.remove(id);
-                    delete addRecordRequests[id];
-                } else {
-                    console.log('Could not find cookie', cookie);
+                        // remove cookie and request
+                        $cookies.remove(id);
+                        delete addRecordRequests[id];
+                    } else {
+                        console.log('Could not find cookie', cookie);
+                    }
                 }
-            }
 
-            // read updated tables
-            if (Object.keys(completed).length > 0 || updated !== {}) {
-                for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                    var relatedTableReference = $rootScope.relatedReferences[i];
-                    if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
-                        delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
-                        (function (i) {
-                            relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
-                                $rootScope.tableModels[i].page = page;
-                                $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
-                            }, function(error) {
-                                throw error;
-                            }).catch(function(error) {
-                                throw error;
-                            });
-                        })(i);
+                // read updated tables
+                if (Object.keys(completed).length > 0 || updated !== {}) {
+                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+                        var relatedTableReference = $rootScope.relatedReferences[i];
+                        if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
+                            delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
+                            (function (i) {
+                                relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
+                                    $rootScope.tableModels[i].page = page;
+                                    $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
+                                }, function(error) {
+                                    throw error;
+                                }).catch(function(error) {
+                                    throw error;
+                                });
+                            })(i);
+                        }
                     }
                 }
             }
