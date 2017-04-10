@@ -581,6 +581,54 @@
         }
 
         /**
+         * @param {ERMrest.Tuple[]} tuples - array of tuples
+         * @param {ERMrest.ReferenceColumn[]} columns - array of column names
+         * @return {Object[]} array of row value arrays [{isHTML: boolean, value: v}, ...]
+         */
+        function getRowValuesFromTupleData(tuples, columns) {
+            var rows = [];
+            for (var i = 0; i < tuples.length; i++) {
+                var tuple = tuples[i],
+                    row = [];
+
+                for (var j = 0; j < columns.length; j++) {
+                    var value,
+                        column = columns[j];
+
+                    if (column.isPseudo) {
+                        var keyColumns;
+
+                        if (column.key) {
+                            keyColumns = column.key.colset.columns;
+                        } else if (column.foreignKey) {
+                            keyColumns =  column.foreignKey.colset.columns;
+                        }
+
+                        for (var k = 0; k < keyColumns.length; k++) {
+                            var referenceColumn = keyColumns[k];
+
+                            value = tuple.data[referenceColumn.name];
+
+                            row.push({
+                                isHTML: false,
+                                value: value
+                            });
+                        }
+                    } else {
+                        value = tuple.data[column.name];
+
+                        row.push({
+                            isHTML: false,
+                            value: value
+                        });
+                    }
+                }
+                rows.push(row);
+            }
+            return rows;
+        }
+
+        /**
         *
         * @desc Converts the following characters to HTML entities for safe and
         * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
@@ -616,6 +664,7 @@
 
         return {
             getRowValuesFromPage: getRowValuesFromPage,
+            getRowValuesFromTupleData: getRowValuesFromTupleData,
             makeSafeIdAttr: makeSafeIdAttr,
             verify: verify
         };
