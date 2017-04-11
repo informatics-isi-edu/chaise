@@ -161,6 +161,12 @@
 
 
 window.onerror = function() {
+
+    if (window.location.pathname.indexOf('chaise/search') != -1) {
+        console.log(arguments[4]);
+        return;
+    }
+
     var error = arguments[4];
     error.stack = [
         arguments[1],
