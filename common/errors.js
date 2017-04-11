@@ -33,7 +33,7 @@
     // Factory for each error type
     .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'messageMap', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, messageMap, $log, $rootScope, $uibModal, $window) {
 
-        function errorPopup(message, errorCode, pageName, redirectLink, subMessage) {
+        function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
             if (!redirectLink) {
@@ -41,12 +41,24 @@
                 var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
             }
 
+
+            var isFirefox = typeof InstallTrigger !== 'undefined';
+            var isChrome = !!window.chrome && !!window.chrome.webstore;
+            // If browser is chrome then
+            if (subMessage && stackTrace) {
+                if (isChrome) {
+                    subMessage = stackTrace;
+                } else {
+                    subMessage = subMessage + "\n   " + stackTrace.split("\n").join("\n   ");
+                }
+            }
             var params = {
                 message: message,
                 errorCode: errorCode,
                 pageName: pageName,
                 subMessage: subMessage
             };
+
 
             var modalInstance = $uibModal.open({
                 templateUrl: '../common/templates/errorDialog.modal.html',
@@ -122,7 +134,7 @@
                 // A more useful general message for 412 Precondition Failed
                 AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
-                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", "Terminal Error", "Home Page", $window.location.origin, exception.message + "<br>"  + ((exception.stack && exception.stack.length) ? ("<pre>" + exception.stack  + "</pre>"): ""));
+                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", "Terminal Error", "Home Page", $window.location.origin,  exception.message , exception.stack);
             }
 
             exceptionFlag = true;
@@ -172,7 +184,7 @@ window.onerror = function() {
                     + 'Click OK to return to the Home Page.'
                     + '<br>'
                     + '<span class="terminalError"><br>'
-                        + '<pre>' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
+                        + '<pre  style="word-wrap: unset;">' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
                     + '</span>'
                 + '</div>'
                 + '<div class="modal-footer">'
