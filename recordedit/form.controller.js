@@ -202,13 +202,14 @@
                     } else {
                         AlertsService.addAlert('Your data has been submitted. Showing you the result set...', 'success');
                         // can't use page.reference because it reflects the specific values that were inserted
-                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        var resultsReference = $rootScope.reference.contextualize.compact;
+                        vm.recordsetLink = resultsReference.appLink;
                         //set values for the view to flip to recordedit resultset view
                         vm.resultsetModel = {
                             hasLoaded: true,
-                            reference: page.reference,
-                            tableDisplayName: page.reference.displayname,
-                            columns: page.reference.columns,
+                            reference: resultsReference,
+                            tableDisplayName: resultsReference.displayname,
+                            columns: resultsReference.columns,
                             enableSort: false,
                             sortby: null,
                             sortOrder: null,
@@ -218,7 +219,62 @@
                             search: null,
                             config: {}
                         }
-                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+
+                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData($rootScope.tuples, resultsReference.columns);
+
+                        // NOTE: This case is for a pseudo-failure case
+                        // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
+                        if (page.tuples.length < $rootScope.tuples.length) {
+                            var tuplesOmitted = [],
+                                tuplesUpdated = [],
+                                omittedResultsPage = {};
+
+                            for (var j = 0; j < $rootScope.tuples.length; j++) {
+                                var submittedRow = $rootScope.tuples[j],
+                                    rowMatch = false;
+
+                                for (var k = 0; k < page.tuples.length; k++) {
+                                    var updatedRow = page.tuples[k],
+                                        shortestKeySet = resultsReference.table.shortestKey,
+                                        keyMatch = true;
+
+                                    for (var keyNameIndex = 0; keyNameIndex < shortestKeySet.length; keyNameIndex++) {
+                                        var key = shortestKeySet[keyNameIndex].name;
+
+                                        if (submittedRow.data[key] !== updatedRow.data[key]) {
+                                            keyMatch = false;
+                                            break;
+                                        }
+                                    }
+                                    if (keyMatch) {
+                                        rowMatch = true;
+                                    }
+                                }
+                                if (!rowMatch) {
+                                    tuplesOmitted.push(submittedRow);
+                                } else {
+                                    tuplesUpdated.push(submittedRow);
+                                }
+                            }
+                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesUpdated, resultsReference.columns);
+
+                            vm.omittedResultsetModel = {
+                                hasLoaded: true,
+                                reference: resultsReference,
+                                tableDisplayName: resultsReference.displayname,
+                                columns: resultsReference.columns,
+                                enableSort: false,
+                                sortby: null,
+                                sortOrder: null,
+                                page: page,
+                                pageLimit: model.rows.length,
+                                rowValues: [],
+                                search: null,
+                                config: {}
+                            }
+                            vm.omittedResultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesOmitted, resultsReference.columns);
+                        }
+
                         vm.resultset = true;
                     }
                 }, function error(exception) {

@@ -243,15 +243,24 @@
             </div>
             </div>
             <div ng-show="form.resultset" class="container-fluid">
-                <h2 class="entity-title"><span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Edited</span> {{ form.resultsetModel.pageLimit }} records for table
+                <h2>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}
                     <a ng-href="{{::form.recordsetLink}}">
-                        <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.resultsetModel.tableDisplayName.value"></span>
-                        <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="::form.resultsetModel.tableDisplayName.value"></span>
+                        <span ng-if="::form.omittedResultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.omittedResultsetModel.tableDisplayName.value"></span>
+                        <span ng-if="::!form.omittedResultsetModel.tableDisplayname.isHTML" ng-bind="::form.omittedResultsetModel.tableDisplayName.value"></span>
                     </a>
+                    Records Updated Successfully
                 </h2>
 
                 <div class="side-padding-15">
+                    <h3>{{ form.resultsetModel.rowValues.length }} Successful <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
+
                     <record-table vm="form.resultsetModel" default-row-linking="true"></record-table>
+
+                    <div ng-if="form.omittedResultsetModel">
+                        <h3>{{ form.omittedResultsetModel.rowValues.length }} Failed <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
+
+                        <record-table vm="form.omittedResultsetModel" default-row-linking="true"></record-table>
+                    </div>
                 </div>
             </div>
         </div>
