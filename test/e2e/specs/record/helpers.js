@@ -511,10 +511,11 @@ exports.relatedTableLinks = function (testParams, tableParams) {
         it("should have a new record, View More link for a related table that redirects to recordset.", function() {
             browser.close();
             browser.switchTo().window(allWindows[0]);
-
             var EC = protractor.ExpectedConditions,
                 relatedTableName = tableParams.related_regular_table,
-                relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
+                relatedTableSubtitle = tableParams.related_regular_subtitle,
+                relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName),
+                relatedUnfilteredLink = browser.params.recordsetURL + ":" + relatedTableName;
 
             browser.wait(EC.visibilityOf(relatedTableLink), browser.params.defaultTimeout).then(function() {
                 // waits until the count is what we expect, so we know the refresh occured
@@ -537,6 +538,8 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 return chaisePage.waitForElement(element(by.id("divRecordSet")));
             }).then(function() {
                 expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(relatedTableName);
+                expect(chaisePage.recordsetPage.getPageSubtitleElement().getText()).toBe(relatedTableSubtitle);
+                expect(chaisePage.recordsetPage.getShowUnfilterdButton().getAttribute('href')).toEqual(relatedUnfilteredLink);
                 browser.navigate().back();
             });
         });
@@ -654,8 +657,10 @@ exports.relatedTableLinks = function (testParams, tableParams) {
 
         it("should have a View More link for a related table that redirects to recordset.", function() {
             var relatedTableNameOnRecord = tableParams.related_associate_table,
-                relatedTableNameOnRecordset = tableParams.related_linked_table
-                relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord);
+                relatedTableNameOnRecordset = tableParams.related_linked_table,
+                relatedTableSubtitleOnRecordset = tableParams.related_linked_subtitle,
+                relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord),
+                relatedUnfilteredLink = browser.params.recordsetURL + ":" + relatedTableNameOnRecordset;
 
             expect(relatedTableLink.isDisplayed()).toBeTruthy();
 
@@ -667,6 +672,8 @@ exports.relatedTableLinks = function (testParams, tableParams) {
                 return chaisePage.waitForElement(element(by.id("divRecordSet")));
             }).then(function() {
                 expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(relatedTableNameOnRecordset);
+                expect(chaisePage.recordsetPage.getPageSubtitleElement().getText()).toBe(relatedTableSubtitleOnRecordset);
+                expect(chaisePage.recordsetPage.getShowUnfilterdButton().getAttribute('href')).toEqual(relatedUnfilteredLink);
             });
         });
     });

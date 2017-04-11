@@ -8,7 +8,6 @@ dist: trusty
 branches:
   only:
     - master
-    - fix-travis
 
 addons:
   sauce_connect: true
@@ -98,9 +97,8 @@ script:
   - make testrecordset
   - make testrecordadd
   - make testrecordedit
-  - make testviewer
+  - make testpermissions
   - make testlogin
-  - make testsearch
 
 after_failure:
   - sudo cat ${HTTPD_ERROR_LOG}

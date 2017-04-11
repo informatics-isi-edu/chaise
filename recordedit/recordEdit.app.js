@@ -143,7 +143,7 @@
                             numberRowsToRead = Number(context.queryParams.limit);
                             if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
                                 var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
-                                AlertsService.addAlert({type: "error", message: limitMessage})
+                                AlertsService.addAlert(limitMessage, 'error');
                             }
                         } else {
                             numberRowsToRead = context.MAX_ROWS_TO_ADD;
@@ -177,12 +177,20 @@
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                     column = $rootScope.reference.columns[i];
 
+                                    // If input is disabled, there's no need to transform the column value.
+                                    if (column.getInputDisabled(context.appContext)) {
+                                        // if not copy, populate the field without transforming it
+                                        if (context.mode != context.modes.COPY) {
+                                            recordEditModel.rows[j][column.name] = values[i];
+                                        }
+                                        continue;
+                                    }
+
+                                    // Transform column values for use in view model
                                     switch (column.type.name) {
                                         case "timestamp":
                                         case "timestamptz":
                                             if (values[i]) {
-                                                // Cannot ensure that all timestamp values are formatted in ISO 8601
-                                                // TODO: Fix pretty print fn in ermrestjs to return ISO 8601 format instead of toLocaleString?
                                                 var ts = moment(values[i]);
                                                 value = {
                                                     date: ts.format('YYYY-MM-DD'),
@@ -228,9 +236,8 @@
                                             break;
                                     }
 
-                                    if (!context.queryParams.copy || !column.getInputDisabled(context.appContext)) {
-                                        recordEditModel.rows[j][column.name] = value;
-                                    }
+                                    // no need to check for copy here because the case above guards against the negative case for copy
+                                    recordEditModel.rows[j][column.name] = value;
                                 }
                             }
 

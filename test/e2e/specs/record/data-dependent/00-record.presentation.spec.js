@@ -29,14 +29,18 @@ describe('View existing record,', function() {
 			    });
 
                 it('should load document title defined in chaise-config.js and have deleteRecord=true', function() {
-                    browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                        expect(chaiseConfig.deleteRecord).toBe(true);
-                        if (chaiseConfig.headTitle) {
-                            browser.getTitle().then(function(title) {
-                                expect(title).toEqual(chaiseConfig.headTitle);
-                            });
-                        }
+                    browser.manage().logs().get('browser').then(function(browserLog) {
+                        console.log('log: ' + require('util').inspect(browserLog));
+                        browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                            expect(chaiseConfig.deleteRecord).toBe(true);
+                            if (chaiseConfig.headTitle) {
+                                browser.getTitle().then(function(title) {
+                                    expect(title).toEqual(chaiseConfig.headTitle);
+                                });
+                            }
+                        });
                     });
+                    
                 });
 
 				describe("Presentation ,", function() {
@@ -65,19 +69,6 @@ describe('View existing record,', function() {
             return browser.getTitle();
         }).then(function(title) {
             expect(title).toEqual(chaiseConfig.headTitle);
-        });
-    });
-
-    it("should load an error dialog when the entity defined in the filter doesn't exist.", function() {
-        var noEntityMessage = "No entity exists with",
-            tupleParams = testParams.tuples[0];
-        // entity with id=10,000 should not exist
-        var url = browser.params.url + ":" + tupleParams.table_name + "/id=10000";
-        browser.get(url);
-        chaisePage.waitForElement(element(by.css(".modal-open"))).then(function() {
-            return chaisePage.recordPage.getModalText().getText();
-        }).then(function(text) {
-            expect(text.includes(noEntityMessage)).toBeTruthy();
         });
     });
 });

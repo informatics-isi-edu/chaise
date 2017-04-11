@@ -508,6 +508,16 @@ tbody{
     overflow-x: hidden;
 }
 
+.page-filters {
+    margin: 1em 0;
+}
+
+.page-filters .sub-title {
+    font-size: 1.2em;
+    color: #747474;
+    margin-left: 15px;
+}
+
 /************* custom buttons **************/
 .btn-no-focus:focus {
     outline: none;

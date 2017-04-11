@@ -2,7 +2,7 @@
     'use strict';
     angular.module('chaise.navbar', [
         'ngCookies',
-        'chaise.utils', 
+        'chaise.utils',
         'chaise.authen',
         'ui.bootstrap'
     ])

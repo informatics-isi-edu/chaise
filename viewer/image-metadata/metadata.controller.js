@@ -26,13 +26,8 @@
             var table = context.schema.tables.get(context.tableName);
             var imageArr = [];
             imageArr.push(vm.image.entity);
-            table.entity.put(imageArr).then(function success(response){
-                // do nothing
-            }, function error(response){
-                AlertsService.addAlert({
-                    type: 'error',
-                    message: 'Your image data was not updated.'
-                });
+            table.entity.put(imageArr).then(null, function error(response){
+                AlertsService.addAlert('Your image data was not updated', 'error');
                 console.log(response);
             });
         }

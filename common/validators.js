@@ -135,7 +135,7 @@
                         if (timeIsValid || !timeIsEmpty) {
                             return ctrl.$setValidity('timestampDate', false);
                         }
-                    } else { // if date is bad... the whole timestamp is bad..
+                    } else { // if date is bad, the whole timestamp is bad..
                         return ctrl.$setValidity('timestampDate', false);
                     }
                     ctrl.$setValidity('timestampDate', true);

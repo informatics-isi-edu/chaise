@@ -618,7 +618,12 @@
       "annotations": {
         "comment": [
           "exclude"
-        ]
+        ],
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact": {
+            "page_size": 5
+          }
+        }
       }
     },
     "accommodation_image": {

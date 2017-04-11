@@ -86,10 +86,10 @@
 
             // Created a single entity or Updated one
             if (rowset.length == 1) {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
+                AlertsService.addAlert('Your data has been submitted. Redirecting you now to the record...', 'success');
                 redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             } else {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the recordset...'});
+                AlertsService.addAlert('Your data has been submitted. Redirecting you now to the recordset...', 'success');
                 redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             }
 
@@ -117,6 +117,13 @@
              */
             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                 var col = $rootScope.reference.columns[i];
+
+                // If this column is disabled, its value is already in the format
+                // needed for submission.
+                if (col.getInputDisabled(context.appContext)) {
+                    continue;
+                }
+
                 var rowVal = row[col.name];
                 if (rowVal) {
                     switch (col.type.name) {
@@ -251,12 +258,14 @@
         }
 
         function submit() {
-            var form = vm.formContainer;
-            var model = vm.recordEditModel;
+            var originalTuple,
+                editOrCopy = true,
+                form = vm.formContainer,
+                model = vm.recordEditModel;
 
             if (form.$invalid) {
                 vm.readyToSubmit = false;
-                AlertsService.addAlert({type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'});
+                AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
                 form.$setSubmitted();
                 return;
             }
@@ -265,38 +274,16 @@
             vm.readyToSubmit = true;
             vm.submissionButtonDisabled = true;
             for (var j = 0; j < model.rows.length; j++) {
-                var transformedRow = transformRowValues(model.rows[j]);
-                $rootScope.reference.columns.forEach(function (column) {
-                    // If the column is a pseudo column, it needs to get the originating columns name for data submission
-                    if (column.isPseudo) {
-
-                        var foreignKeyColumns = column.foreignKey.colset.columns;
-                        for (var k = 0; k < foreignKeyColumns.length; k++) {
-                            var referenceColumn = foreignKeyColumns[k];
-                            var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
-                            // check if value is set in submission data yet
-                            if (!model.submissionRows[j][referenceColumn.name]) {
-                                /**
-                                 * User didn't change the foreign key, copy the value over to the submission data with the proper column name
-                                 * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
-                                 * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
-                                **/
-                                if (vm.editMode) {
-                                    model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[j].data[referenceColumn.name] || null;
-                                } else if (context.queryParams.copy) {
-                                    // in the copy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
-                                    model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[0].data[referenceColumn.name] || null;
-                                } else {
-                                    model.submissionRows[j][referenceColumn.name] = null;
-                                }
-                            }
-                        }
-                    // not pseudo, column.name is sufficient for the keys
-                    } else {
-                        // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                        model.submissionRows[j][column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
-                    }
-                });
+                // in the copy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
+                if (vm.editMode) {
+                    originalTuple = $rootScope.tuples[j];
+                }else if (context.queryParams.copy) {
+                    originalTuple = $rootScope.tuples[0];
+                } else {
+                    originalTuple = null;
+                    editOrCopy = false;
+                }
+                populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
             }
 
             if (vm.editMode) {
@@ -399,10 +386,24 @@
 
             if (isDisabled(column)) return;
 
-            var params = {};
+            var originalTuple,
+                editOrCopy = true,
+                params = {};
 
             // pass the reference as a param for the modal
-            params.reference = column.reference.contextualize.compactSelect;
+            // call to page with tuple to get proper reference
+            if (vm.editMode) {
+                originalTuple = $rootScope.tuples[rowIndex];
+            }else if (context.queryParams.copy) {
+                originalTuple = $rootScope.tuples[0];
+            } else {
+                originalTuple = null;
+                editOrCopy = false;
+            }
+
+            var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
+
+            params.reference = column.filteredRef(submissionRow).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
 
@@ -450,19 +451,12 @@
         }
 
         function createRecord(column) {
-            var newRef = column.reference.contextualize.entryCreate;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.open(appURL, '_blank');
-            }
+            $window.open(column.reference.contextualize.entryCreate.appLink, '_blank');
         }
 
         function copyFormRow() {
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
-                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.'});
+                AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
                 return true;
             }
             // Check if the prototype row to copy has any invalid values. If it
@@ -474,7 +468,7 @@
                 var value = protoRowValidityStates[key];
                 if (value.$dirty && value.$invalid) {
                     vm.readyToSubmit = false, validRow = false;
-                    AlertsService.addAlert({type: 'error', message: "Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again."});
+                    AlertsService.addAlert("Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again.", "error");
                     return true;
                 }
             });
@@ -499,6 +493,40 @@
                     onResize();
                 }, 10);
             }
+        }
+
+        function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
+            var transformedRow = transformRowValues(modelRow);
+            columns.forEach(function (column) {
+                // If the column is a pseudo column, it needs to get the originating columns name for data submission
+                if (column.isPseudo) {
+
+                    var foreignKeyColumns = column.foreignKey.colset.columns;
+                    for (var k = 0; k < foreignKeyColumns.length; k++) {
+                        var referenceColumn = foreignKeyColumns[k];
+                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+                        // check if value is set in submission data yet
+                        if (!submissionRow[referenceColumn.name]) {
+                            /**
+                             * User didn't change the foreign key, copy the value over to the submission data with the proper column name
+                             * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
+                             * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
+                            **/
+                            if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
+                                submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
+                            } else {
+                                submissionRow[referenceColumn.name] = null;
+                            }
+                        }
+                    }
+                // not pseudo, column.name is sufficient for the keys
+                } else {
+                    // set null if not set so that the whole data object is filled out for posting to ermrestJS
+                    submissionRow[column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
+                }
+            });
+
+            return submissionRow;
         }
 
         function removeFormRow(index) {

@@ -32,6 +32,7 @@ E2EDIrecordEditDeleteRecord=test/e2e/specs/recordedit/data-independent/delete-re
 E2EDIrecordMultiAdd=test/e2e/specs/recordedit/data-independent/multi-add/protractor.conf.js
 E2EDIrecordMultiEdit=test/e2e/specs/recordedit/data-independent/multi-edit/protractor.conf.js
 E2EDrecordEditCompositeKey=test/e2e/specs/recordedit/data-dependent/composite-key/protractor.conf.js
+E2EDrecordEditDomainFilter=test/e2e/specs/recordedit/data-dependent/domain-filter/protractor.conf.js
 E2EDrecordEditSubmissionDisabled=test/e2e/specs/recordedit/data-dependent/submission-disabled/protractor.conf.js
 # Record tests
 E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
@@ -71,8 +72,9 @@ HTML=search/index.html \
 	 record/index.html
 
 # ERMrestjs Deps
-ERMRESTJS_DIR=../../ermrestjs
-ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js
+ERMRESTJS_RT_DIR=../../ermrestjs
+ERMRESTJS_BLD_DIR=../ermrestjs/build
+ERMRESTJS_DEPS=ermrest.js
 
 # Shared utilities
 COMMON=common
@@ -134,9 +136,18 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestMatrixController.js \
 	$(JS)/tour.js \
 	$(JS)/matrix.js \
-	$(COMMON)/utils.js \
+	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/delete-link.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
+	$(COMMON)/filters.js \
+	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/record.js \
+	$(COMMON)/ellipses.js \
+	$(COMMON)/table.js \
+	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js
 
 # HTML templates
@@ -208,6 +219,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
@@ -336,6 +348,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
@@ -441,7 +454,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 # Rule to run karma
 .PHONY: karma
@@ -452,7 +465,7 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
 #Rule to run navbar tests
 .PHONY: testnavbar
@@ -487,7 +500,11 @@ testrecordset:
 # Rule to run record edit app tests
 .PHONY: testrecordedit
 testrecordedit:
-	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes)
+	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter)
+
+.PHONY: testpermissions
+testpermissions:
+	$(BIN)/protractor $(E2EmultiPermissionsVisibility)
 
 #Rule to run viewer app tests
 .PHONY: testviewer
@@ -625,8 +642,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 	for file in $(VIEWER_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -648,8 +667,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-de-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
 	for file in $(RE_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -671,8 +692,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-rs-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 	for file in $(RECSET_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -694,8 +717,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-record-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 	for file in $(RECORD_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
