@@ -128,9 +128,9 @@
 
             if (exceptionFlag) return;
 
-            if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
+            if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.login($window.location.href);
-            } else if (exception instanceof ERMrest.PreconditionFailedError) {
+            } else if (ERMrest && exception instanceof ERMrest.PreconditionFailedError) {
                 // A more useful general message for 412 Precondition Failed
                 AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
