@@ -35,7 +35,7 @@
 
     .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
         function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
-
+        // try {
         var session,
             context = {};
 
@@ -160,6 +160,9 @@
         }).catch(function genericCatch(exception) {
             throw exception;
         });
+    // } catch (exception) {
+    //     throw exception;
+    // }
 
         /**
          * it saves the location in $rootScope.location.
