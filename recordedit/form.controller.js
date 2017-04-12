@@ -239,14 +239,15 @@
                 }
 
                 fnScope[fn].apply(fnScope, args).then(function success(page) {
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     
+                    var resultRef = page.reference;
+
                     if (isUpdate) {
+                        resultRef = $rootScope.reference.contextualize.compact;
                         if (window.opener && window.opener.updated) {
                             window.opener.updated(context.queryParams.invalidate);
                         }
                     } else {
-
                         if (vm.prefillCookie) {
                             $cookies.remove(context.queryParams.prefill);
                         }
@@ -260,7 +261,8 @@
                             );
                         }
                     }
-
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                   
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
                     } else {
@@ -270,9 +272,9 @@
                         //set values for the view to flip to recordedit resultset view
                         vm.resultsetModel = {
                             hasLoaded: true,
-                            reference: page.reference,
-                            tableDisplayName: page.reference.displayname,
-                            columns: page.reference.columns,
+                            reference: resultRef,
+                            tableDisplayName: resultRef.displayname,
+                            columns: resultRef.columns,
                             enableSort: false,
                             sortby: null,
                             sortOrder: null,
@@ -282,7 +284,66 @@
                             search: null,
                             config: {}
                         }
-                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+
+                        if (isUpdate) {
+                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData($rootScope.tuples, resultsReference.columns);
+
+                            // NOTE: This case is for a pseudo-failure case
+                            // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
+                            if (page.tuples.length < $rootScope.tuples.length) {
+                                var tuplesOmitted = [],
+                                    tuplesUpdated = [],
+                                    omittedResultsPage = {};
+
+                                for (var j = 0; j < $rootScope.tuples.length; j++) {
+                                    var submittedRow = $rootScope.tuples[j],
+                                        rowMatch = false;
+
+                                    for (var k = 0; k < page.tuples.length; k++) {
+                                        var updatedRow = page.tuples[k],
+                                            shortestKeySet = resultsReference.table.shortestKey,
+                                            keyMatch = true;
+
+                                        for (var keyNameIndex = 0; keyNameIndex < shortestKeySet.length; keyNameIndex++) {
+                                            var key = shortestKeySet[keyNameIndex].name;
+
+                                            if (submittedRow.data[key] !== updatedRow.data[key]) {
+                                                keyMatch = false;
+                                                break;
+                                            }
+                                        }
+                                        if (keyMatch) {
+                                            rowMatch = true;
+                                        }
+                                    }
+                                    if (!rowMatch) {
+                                        tuplesOmitted.push(submittedRow);
+                                    } else {
+                                        tuplesUpdated.push(submittedRow);
+                                    }
+                                }
+                                vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesUpdated, resultsReference.columns);
+
+                                vm.omittedResultsetModel = {
+                                    hasLoaded: true,
+                                    reference: resultsReference,
+                                    tableDisplayName: resultsReference.displayname,
+                                    columns: resultsReference.columns,
+                                    enableSort: false,
+                                    sortby: null,
+                                    sortOrder: null,
+                                    page: page,
+                                    pageLimit: model.rows.length,
+                                    rowValues: [],
+                                    search: null,
+                                    config: {}
+                                }
+                                vm.omittedResultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesOmitted, resultsReference.columns);
+                            }
+
+                        } else {
+                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        }
                         vm.resultset = true;
                     }
 
