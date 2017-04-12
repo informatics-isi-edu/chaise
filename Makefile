@@ -307,7 +307,6 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/upload.js \
-	$(COMMON)/upload.modal.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/errorDialog.controller.js \
