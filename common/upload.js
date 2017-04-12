@@ -22,10 +22,17 @@
 
                         scope.fileEl = angular.element(element[0].querySelector('input[type="file"]'));
                         
+                        // Bind change event file input
                         scope.fileEl
                             .bind('change', function (event) {
+
+                                // set the reference value object with selected file, fileName
+                                // and also create an Upload object and save it as hatracObj in the value object
                                 scope.value.file = event.target.files[0];
-                                scope.value.hatracObj = new ERMrest.Upload(scope.value.file, { url: 'https://dev.isrd.isi.edu/hatrac/test10' });
+                                scope.value.hatracObj = new ERMrest.Upload(scope.value.file, {
+                                        baseURL:  window.location.protocol + "//" + window.location.host + "/hatrac/",
+                                        column: scope.column
+                                    });
                                 scope.value.fileName = scope.value.file.name;
                                 scope.$apply();
                             });
@@ -36,9 +43,9 @@
                     scope.clear = function() {
                         scope.value.fileName = "";
                         delete scope.value.file;
+                        delete scope.value.hatracObj;
                         scope.fileEl.val("");
                     };
-
                 }
             };
         }])

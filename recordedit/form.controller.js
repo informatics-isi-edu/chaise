@@ -159,21 +159,66 @@
             return row;
         }
 
+        // This function checks whether file columns are getting the correct url and
+        // are not nul if nullok is false
+        function areFilesValid(rows) {
+            var isValid = true, index = 0;
+            // Iterate over all rows that are passed as parameters to the modal controller
+            rows.forEach(function(row) {
+
+                index++;
+
+                // Iterate over each property/column of a row
+                for(var k in row) {
+
+                    // If the column type is object and has a file property inside it
+                    // Then increment the count for no of files and create an uploadFile Object for it
+                    // Push this to the tuple array for the row
+                    // NOTE: each file object has an hatracObj property which is an hatrac object
+                    try {
+                        var column = $rootScope.reference.columns.find(function(c) { return c.name == k;  });
+                        var annotation = column_base.annotations.get("'tag:isrd.isi.edu,2016:asset'");
+
+                        if (row[k] == null && !column.nullok) {
+                            AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
+                        } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
+                            try {
+                                row[k].hatracObj.validateURL(column, row);
+                            } catch(e) {
+                                isValid = false;
+                                AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
+                            }
+                        }
+                    } catch(e) {
+                        //NOthing to do
+                    }
+                    
+                }
+            });
+
+            return isValid;
+        }
+
         function uploadFiles(isUpdate, onSuccess) {
 
-            $uibModal.open({
-                templateUrl: "../common/templates/uploadProgress.modal.html",
-                controller: "UploadModalDialogController",
-                controllerAs: "ctrl",
-                size: "md",
-                backdrop: 'static',
-                keyboard: false,
-                resolve: {
-                    params: {
-                        rows: vm.recordEditModel.submissionRows
+            // If url is valid
+            if (areFilesValid(vm.recordEditModel.submissionRows)) {
+
+                $uibModal.open({
+                    templateUrl: "../common/templates/uploadProgress.modal.html",
+                    controller: "UploadModalDialogController",
+                    controllerAs: "ctrl",
+                    size: "md",
+                    backdrop: 'static',
+                    keyboard: false,
+                    resolve: {
+                        params: {
+                            reference: $rootScope.reference,
+                            rows: vm.recordEditModel.submissionRows
+                        }
                     }
-                }
-            }).result.then(onSuccess);
+                }).result.then(onSuccess);
+            }
         }
 
         function addRecords(isUpdate) {
@@ -188,7 +233,8 @@
 
                 // If this is an update call 
                 if (isUpdate) {
-                    // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
+                    // submit $rootScope.tuples because we are changing and 
+                    // comparing data from the old data set for the tuple with the updated data set from the UI
                     fn = "update", scope = $rootScope.reference, args = [$rootScope.tuples];
                 }
 

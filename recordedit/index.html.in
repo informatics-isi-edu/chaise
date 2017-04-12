@@ -218,7 +218,7 @@
 
                                             <!-- File input -->
                                             <div ng-switch-when="file">
-                                                <upload column="column" values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]"></upload>
+                                                <upload column="::column" values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]"></upload>
                                             </div>
 
                                             <!-- shorttext/default text input -->
