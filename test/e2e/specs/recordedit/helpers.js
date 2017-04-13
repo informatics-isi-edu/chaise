@@ -639,6 +639,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                             }
                         });
 
+                        // toggle after data is input as well
                         meridiemBtn.click().then(function() {
                             return meridiemBtn.getText();
                         }).then(function(newText) {
