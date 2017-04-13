@@ -218,18 +218,8 @@
                                             value = (!isNaN(floatVal) ? floatVal : null);
                                             break;
                                         default:
-
-                                            //TODO: needs to be a part of ermrestjs for getting a file object for the column determining file upload type
-                                            if (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
-                                                if (values[i]) {
-                                                    value = {
-                                                        fileName: values[i].split('/').pop() 
-                                                    } 
-                                                } else {
-                                                    value = {
-                                                        fileName: ""
-                                                    }
-                                                }
+                                            if (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {                                            
+                                                value = { url: values[i] || "" }; 
                                             } else {
                                                 value = values[i];
                                             }
@@ -292,7 +282,7 @@
                                     }
                                 } else if (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
                                     recordEditModel.rows[0][column.name] = {
-                                        fileName: ""
+                                        url: ""
                                     }
                                 } else {
                                     recordEditModel.rows[0][column.name] = column.default;

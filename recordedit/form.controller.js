@@ -120,6 +120,15 @@
 
                 // If this column is disabled, its value is already in the format
                 // needed for submission.
+                var rowVal = row[col.name];
+                if (col._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
+                    if (!vm.readyToSubmit) {
+                        rowVal = { url: "" };
+                    }
+                }
+
+                // If this column is disabled, its value is already in the format
+                // needed for submission.
                 if (col.getInputDisabled(context.appContext)) {
                     continue;
                 }
@@ -141,13 +150,7 @@
                             }
                             break;
                         default:
-                            //TODO: needs to be a part of ermrestjs for getting a file object for the column determining file upload type
-                            if (!vm.readyToSubmit) {
-                                if (col._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
-                                    rowVal = { fileName: "" };
-                                }
-                            } 
-
+                            
                             if (rowVal === '') {
                                 rowVal = null;
                             }
@@ -177,16 +180,18 @@
                     // NOTE: each file object has an hatracObj property which is an hatrac object
                     try {
                         var column = $rootScope.reference.columns.find(function(c) { return c.name == k;  });
-                        var annotation = column_base.annotations.get("'tag:isrd.isi.edu,2016:asset'");
+                        if (column) {
+                            var annotation = column._base.annotations.get("tag:isrd.isi.edu,2016:asset");
 
-                        if (row[k] == null && !column.nullok) {
-                            AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
-                        } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
-                            try {
-                                row[k].hatracObj.validateURL(column, row);
-                            } catch(e) {
-                                isValid = false;
-                                AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
+                            if (row[k] == null && !column.nullok) {
+                                AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
+                            } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
+                                try {
+                                    row[k].hatracObj.validateURL(column, row);
+                                } catch(e) {
+                                    isValid = false;
+                                    AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
+                                }
                             }
                         }
                     } catch(e) {
@@ -199,7 +204,7 @@
             return isValid;
         }
 
-        function uploadFiles(isUpdate, onSuccess) {
+        function uploadFiles(submissionRowsCopy, isUpdate, onSuccess) {
 
             // If url is valid
             if (areFilesValid(vm.recordEditModel.submissionRows)) {
@@ -214,7 +219,7 @@
                     resolve: {
                         params: {
                             reference: $rootScope.reference,
-                            rows: vm.recordEditModel.submissionRows
+                            rows: submissionRowsCopy
                         }
                     }
                 }).result.then(onSuccess);
@@ -222,28 +227,43 @@
         }
 
         function addRecords(isUpdate) {
+            var model = vm.recordEditModel;
+            var form = vm.formContainer;
+
+            var submissionRowsCopy = [];
+
+            model.submissionRows.forEach(function(row) {
+                submissionRowsCopy.push(Object.assign({}, row));
+            });
 
             //call uploadFiles which will upload files and callback on success
-            uploadFiles(isUpdate, function() {
-
-                var model = vm.recordEditModel;
-                var form = vm.formContainer;
+            uploadFiles(submissionRowsCopy, isUpdate, function() {
                 
-                var fn = "create", fnScope = $rootScope.reference.table.reference, args = [model.submissionRows];
-
+                var fn = "create", fnScope = $rootScope.reference.unfilteredReference.contextualize.entryCreate, args = [submissionRowsCopy];
                 // If this is an update call 
                 if (isUpdate) {
+
+                    // loop through model.submissionRows
+                    for (var i = 0; i < submissionRowsCopy.length; i++) {
+                        var row = submissionRowsCopy[i];
+                        var data = $rootScope.tuples[i].data;
+                        // assign each value from the form to the data object on tuple
+                        for (var key in row) {
+                            data[key] = (row[key] === '' ? null : row[key]);
+                        }
+                    }
+
                     // submit $rootScope.tuples because we are changing and 
                     // comparing data from the old data set for the tuple with the updated data set from the UI
-                    fn = "update", scope = $rootScope.reference, args = [$rootScope.tuples];
+                    fn = "update", fnScope = $rootScope.reference, args = [$rootScope.tuples];
                 }
-
+                
                 fnScope[fn].apply(fnScope, args).then(function success(page) {
                     
-                    var resultRef = page.reference;
+                    var resultsReference = page.reference;
 
                     if (isUpdate) {
-                        resultRef = $rootScope.reference.contextualize.compact;
+                        resultsReference = $rootScope.reference.contextualize.compact;
                         if (window.opener && window.opener.updated) {
                             window.opener.updated(context.queryParams.invalidate);
                         }
@@ -254,7 +274,7 @@
 
                         // add cookie indicating record added
                         if (context.queryParams.invalidate) {
-                            $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
+                            $cookies.put(context.queryParams.invalidate, submissionRowsCopy.length,
                                 {
                                     expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
                                 }
@@ -272,9 +292,9 @@
                         //set values for the view to flip to recordedit resultset view
                         vm.resultsetModel = {
                             hasLoaded: true,
-                            reference: resultRef,
-                            tableDisplayName: resultRef.displayname,
-                            columns: resultRef.columns,
+                            reference: resultsReference,
+                            tableDisplayName: resultsReference.displayname,
+                            columns: resultsReference.columns,
                             enableSort: false,
                             sortby: null,
                             sortOrder: null,
@@ -348,7 +368,7 @@
                     }
 
 
-                }, function error(response) {
+                }, function error(exception) {
                     vm.readyToSubmit = false;
                     vm.submissionButtonDisabled = false;
                     if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
@@ -393,20 +413,7 @@
                 populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
             }
 
-            if (vm.editMode) {
-                // loop through model.submissionRows
-                for (var i = 0; i < model.submissionRows.length; i++) {
-                    var row = model.submissionRows[i];
-                    var data = $rootScope.tuples[i].data;
-                    // assign each value from the form to the data object on tuple
-                    for (var key in row) {
-                        data[key] = (row[key] === '' ? null : row[key]);
-                    }
-                }
-                addRecords(true);
-            } else {
-                addRecords();
-            }
+            addRecords(vm.editMode);
         }
 
         function deleteRecord() {
@@ -804,7 +811,7 @@
         // to make it uniform
         vm.firstHeaderStyle = {
             'width' : captionColumnWidth + "px",
-            'height' : headerHeight + "px"
+            'height' : (headerHeight + 1) + "px"
         };
         vm.tableWidth = { width: '0px' };
 
@@ -899,7 +906,7 @@
 
                     var valuetdHeight = trs[i].children[1].offsetHeight;
 
-                    if (editMode && i==0) valuetdHeight++;
+                    //if (editMode && i==0) valuetdHeight++;
 
                     // If keytdHeight is greater than valuetdHeight
                     // then set valuetdHeight

@@ -26,14 +26,14 @@
                         scope.fileEl
                             .bind('change', function (event) {
 
-                                // set the reference value object with selected file, fileName
+                                // set the reference value object with selected file, url/filename
                                 // and also create an Upload object and save it as hatracObj in the value object
                                 scope.value.file = event.target.files[0];
                                 scope.value.hatracObj = new ERMrest.Upload(scope.value.file, {
-                                        baseURL:  window.location.protocol + "//" + window.location.host + "/hatrac/",
-                                        column: scope.column
-                                    });
-                                scope.value.fileName = scope.value.file.name;
+                                    defaultTemplate: window.location.protocol + "//" + window.location.host + "/hatrac/test10/{{{" + scope.column.name + ".md5_hex}}}",
+                                    column: scope.column
+                                });
+                                scope.value.url = scope.value.file.name;
                                 scope.$apply();
                             });
 
@@ -41,7 +41,7 @@
 
 
                     scope.clear = function() {
-                        scope.value.fileName = "";
+                        scope.value.url = "";
                         delete scope.value.file;
                         delete scope.value.hatracObj;
                         scope.fileEl.val("");
@@ -133,9 +133,9 @@
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
                         item.hatracObj.calculateChecksum(item.row).then(
-                            itemOps.onChecksumCompleted.bind(item),
+                            item.onChecksumCompleted.bind(item),
                             onError, 
-                            itemOps.onChecksumProgressChanged.bind(item));
+                            item.onChecksumProgressChanged.bind(item));
                     });
                 });
             };
@@ -149,7 +149,7 @@
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
                         item.hatracObj.createUploadJob().then(
-                            itemOps.onJobCreated.bind(item),
+                            item.onJobCreated.bind(item),
                             onError);
                     });
                 });
@@ -163,7 +163,7 @@
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
                         item.hatracObj.fileExists().then(
-                            itemOps.onFileExistSuccess.bind(item),
+                            item.onFileExistSuccess.bind(item),
                             onError);
                     });
                 });
@@ -177,9 +177,9 @@
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
                         item.hatracObj.start().then(
-                            itemOps.onUploadCompleted.bind(item),
+                            item.onUploadCompleted.bind(item),
                             onError, 
-                            itemOps.onProgressChanged.bind(item));
+                            item.onProgressChanged.bind(item));
                     });
                 });
 
@@ -199,20 +199,10 @@
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
                         item.hatracObj.completeUpload().then(
-                            itemOps.onCompleteUploadJob.bind(item),
+                            item.onCompleteUploadJob.bind(item),
                             onError);
                     });
                 });
-            };
-
-            // This function is called by all rejected promises form above functions
-            var onError = function(err) {
-                if (vm.uploadError || vm.checksumError) return;
-                
-                vm.checksumError = true;
-                
-                $uibModalInstance.cancel();
-                throw err;
             };
 
             // This function aborts upload for all files
@@ -227,8 +217,21 @@
                     }
                 });
             };
-            vm.cancel = abortUploads;
 
+            // This function is called by all rejected promises form above functions
+            var onError = function(err) {
+                if (vm.uploadError || vm.checksumError) return;
+                
+                vm.checksumError = true;
+                
+                abortUploads();
+
+                $uibModalInstance.dismiss();
+                
+                throw err;
+            };
+
+            
             /**
              * @function
              * @param {Object} col - Column Object
@@ -238,28 +241,26 @@
             var uploadFile = function(col, column, row) {
                 var file = col.file;
                 
-                var item = {
-                    name: file.name, 
-                    size: file.size, 
-                    humanFileSize: UiUtils.humanFileSize(file.size), 
-                    checksumProgress: 0,
-                    checksumPercent: 0,
-                    checksumCompleted: false,
-                    jobCreateDone: false,
-                    fileExistsDone: false,
-                    uploadCompleted: false,
-                    uploadStarted: false,
-                    completeUploadJob: false,
-                    progress: 0,
-                    progressPercent: 0,
-                    hatracObj: col.hatracObj,
-                    url: "",
-                    column: column,
-                    reference: reference,
-                    row: row
-                };
+                this.name = file.name; 
+                this.size = file.size; 
+                this.humanFileSize = UiUtils.humanFileSize(file.size); 
+                this.checksumProgress = 0;
+                this.checksumPercent = 0;
+                this.checksumCompleted = false;
+                this.jobCreateDone = false;
+                this.fileExistsDone = false;
+                this.uploadCompleted = false;
+                this.uploadStarted = false;
+                this.completeUploadJob = false;
+                this.progress = 0;
+                this.progressPercent = 0;
+                this.hatracObj = col.hatracObj;
+                this.url = "";
+                this.column = column;
+                this.reference = reference;
+                this.row = row;
 
-                return item;
+                return this;
             };
 
             // This function is called as a notify promise callback by calculateChecksum function above for each file
@@ -450,7 +451,7 @@
                             // If the column type is object and has a file property inside it
                             // then set the url in the corresonding column for the row as its value
                             var column = reference.columns.find(function(c) { return c.name == k;  });
-                            if (row[k] != null && (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) && typeof row[k] == 'object' && row[k].file) {
+                            if (column && row[k] != null && (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) && typeof row[k] == 'object' && row[k].file) {
                                 row[k] = vm.rows[index][rowIndex++].url;
                             }
                         }
@@ -475,10 +476,18 @@
                     // Push this to the tuple array for the row
                     // NOTE: each file object has an hatracObj property which is an hatrac object
                     var column = reference.columns.find(function(c) { return c.name == k;  });
-                    if (row[k] != null && (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) && typeof row[k] == 'object' && row[k].file) {
-                        vm.noOfFiles++;
-                        vm.totalSize += row[k].file.size; 
-                        tuple.push(new uploadFile(row[k], column, row));
+                    if (column && (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1)) {
+                        
+                        // If the column value of the row contains a file object then add it to the tuple to upload
+                        // else if column contains url then set it in the column directly
+                        // if the url is empty then set the column values as null
+                        if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
+                            vm.noOfFiles++;
+                            vm.totalSize += row[k].file.size; 
+                            tuple.push(new uploadFile(row[k], column, row));
+                        } else {
+                            row[k] = (row[k].url && row[k].url.length) ? row[k].url : null;
+                        }
                     }
                 }
 
