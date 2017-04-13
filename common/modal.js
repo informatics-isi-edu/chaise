@@ -25,6 +25,10 @@
         function ok() {
             $uibModalInstance.close();
         }
+
+        function cancel() {
+            $uibModalInstance.dismiss('cancel');
+        }
     }])
     .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
         var vm = this;
