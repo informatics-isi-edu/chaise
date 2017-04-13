@@ -275,8 +275,9 @@
                                             meridiem: 'AM'
                                         };
                                     }
+                                } else {
+                                    recordEditModel.rows[0][column.name] = column.default;
                                 }
-                                recordEditModel.rows[0][column.name] = column.default;
                             } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
                                 // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
                                 recordEditModel.rows[0][column.name] = {

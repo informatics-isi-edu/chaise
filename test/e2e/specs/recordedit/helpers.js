@@ -639,6 +639,25 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                             }
                         });
 
+                        // toggle after data is input as well
+                        meridiemBtn.click().then(function() {
+                            return meridiemBtn.getText();
+                        }).then(function(newText) {
+                            if (initialMeridiem == 'AM') {
+                                expect(newText).toEqual('PM');
+                            } else {
+                                expect(newText).toEqual('AM');
+                            }
+                            return meridiemBtn.click();
+                        }).then(function() {
+                            return meridiemBtn.getText();
+                        }).then(function(newText) {
+                            expect(newText).toEqual(initialMeridiem);
+                        }).catch(function(error) {
+                            console.log(error);
+                            expect('There was an error in this promise chain.').toBe('Please see the error message.');
+                        });
+
                         timeInputFields.push({
                             date: dateInput,
                             time: timeInput,
