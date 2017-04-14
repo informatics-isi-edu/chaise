@@ -17,18 +17,18 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorDialogController', ['$uibModalInstance', 'params', function ErrorDeleteController($uibModalInstance, params) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', function ErrorModalController($uibModalInstance, params) {
         var vm = this;
         vm.params = params;
-        vm.ok = ok;
-
-        function ok() {
+        
+        vm.ok = function () {
             $uibModalInstance.close();
-        }
+        };
 
-        function cancel() {
+        vm.cancel = function cancel() {
             $uibModalInstance.dismiss('cancel');
-        }
+        };
+        
     }])
     .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
         var vm = this;
