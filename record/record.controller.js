@@ -25,9 +25,7 @@
             var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
             // Otherwise, canEdit will be undefined, so no need to change anything b/c showEmptyRelatedTables is already false.
-            if (canEdit === true) {
-                vm.showEmptyRelatedTables = true;
-            }
+
             return canEdit;
         };
 
@@ -124,7 +122,11 @@
         };
 
         vm.canCreateRelated = function(relatedRef) {
-            return (relatedRef.canCreate && $rootScope.modifyRecord);
+            var canCreate = (relatedRef.canCreate && $rootScope.modifyRecord);
+            if (canCreate && !vm.showEmptyRelatedTables) {
+                vm.showEmptyRelatedTables = canCreate;
+            }
+            return canCreate;
         };
 
         // Send user to RecordEdit to create a new row in this related table
