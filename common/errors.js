@@ -59,17 +59,25 @@
                 subMessage: subMessage
             };
 
-
-            var modalInstance = $uibModal.open({
+            var modalProperties = {
                 templateUrl: '../common/templates/errorDialog.modal.html',
-                controller: 'ErrorDialogController',
+                controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
                 keyboard: false,
                 resolve: {
                     params: params
                 }
-            });
+            };
+            
+
+            if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+                delete modalProperties.keyboard;
+                delete modalProperties.backdrop;
+                params.canClose = true;
+            }
+
+            var modalInstance = $uibModal.open(modalProperties);
 
             modalInstance.result.then(function () {
                 if (errorCode == errorNames.unauthorized && !providedLink) {
@@ -167,6 +175,12 @@ window.onerror = function() {
         return;
     }
 
+    var canClose = false;
+
+    if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+        canClose = true;
+    }
+
     var error = arguments[4];
     error.stack = [
         arguments[1],
@@ -178,11 +192,13 @@ window.onerror = function() {
 
     if (!document || !document.body) return;
 
-    document.body.innerHTML = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">' 
+    var html  = '<div id="divErrorModal">'
+        + '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">' 
         + '<div class="modal-dialog" style="width:90% !important;">'
             + '<div class="modal-content" uib-modal-transclude="">'
                 + '<div class="modal-header">'
                     + '<h3 class="modal-title ">Error: Terminal Error</h3>'
+                    + (canClose ? '<button class="btn btn-default pull-right modal-close" type="button" onclick="document.getElementById(\"divErrorModal\").remove();">X</button>' : '')
                 + '</div>'
                 + '<div class="modal-body ">'
                     + 'An unexpected error has occurred. Please report this problem to your system administrators.'
@@ -199,6 +215,13 @@ window.onerror = function() {
             + '</div>'
         + '</div>'
     + '</div>'
-    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>';
+    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>'
+    + '</div>';
 
+    if (canClose) {
+        document.body.innerHTML = html;
+    } else {
+        document.body.append(html);
+    }
+   
 };
