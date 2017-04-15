@@ -69,7 +69,7 @@
                     params: params
                 }
             };
-            
+
 
             if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
                 delete modalProperties.keyboard;
@@ -134,7 +134,7 @@
         function handleException(exception) {
             $log.info(exception);
 
-            if (exceptionFlag) return;
+            if (exceptionFlag || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.login($window.location.href);
@@ -170,7 +170,7 @@
 
 window.onerror = function() {
 
-    if (window.location.pathname.indexOf('chaise/search') != -1) {
+    if (window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) {
         console.log(arguments[4]);
         return;
     }
@@ -187,13 +187,13 @@ window.onerror = function() {
         arguments[2],
         arguments[3]
     ].join(':');
-    
+
     var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
 
     if (!document || !document.body) return;
 
     var html  = '<div id="divErrorModal">'
-        + '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">' 
+        + '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">'
         + '<div class="modal-dialog" style="width:90% !important;">'
             + '<div class="modal-content" uib-modal-transclude="">'
                 + '<div class="modal-header">'
@@ -223,5 +223,5 @@ window.onerror = function() {
     } else {
         document.body.append(html);
     }
-   
+
 };
