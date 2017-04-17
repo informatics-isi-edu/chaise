@@ -143,7 +143,7 @@
                             numberRowsToRead = Number(context.queryParams.limit);
                             if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
                                 var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
-                                AlertsService.addAlert({type: "error", message: limitMessage})
+                                AlertsService.addAlert(limitMessage, 'error');
                             }
                         } else {
                             numberRowsToRead = context.MAX_ROWS_TO_ADD;
@@ -177,10 +177,12 @@
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                     column = $rootScope.reference.columns[i];
 
-                                    // If input is disabled, there's
-                                    // no need to transform the column value.
+                                    // If input is disabled, there's no need to transform the column value.
                                     if (column.getInputDisabled(context.appContext)) {
-                                        recordEditModel.rows[j][column.name] = values[i];
+                                        // if not copy, populate the field without transforming it
+                                        if (context.mode != context.modes.COPY) {
+                                            recordEditModel.rows[j][column.name] = values[i];
+                                        }
                                         continue;
                                     }
 
@@ -220,9 +222,8 @@
                                             break;
                                     }
 
-                                    if (!context.queryParams.copy || !column.getInputDisabled(context.appContext)) {
-                                        recordEditModel.rows[j][column.name] = value;
-                                    }
+                                    // no need to check for copy here because the case above guards against the negative case for copy
+                                    recordEditModel.rows[j][column.name] = value;
                                 }
                             }
 
@@ -276,8 +277,9 @@
                                             meridiem: 'AM'
                                         };
                                     }
+                                } else {
+                                    recordEditModel.rows[0][column.name] = column.default;
                                 }
-                                recordEditModel.rows[0][column.name] = column.default;
                             } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
                                 // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
                                 recordEditModel.rows[0][column.name] = {

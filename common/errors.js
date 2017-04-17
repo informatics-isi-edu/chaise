@@ -9,10 +9,31 @@
         notFound: "Not Found"
     })
 
+    .factory('Errors', [function() {
+        function MalformedUriError(message) {
+            this.message = message;
+        }
+
+        MalformedUriError.prototype = Object.create(Error.prototype);
+        MalformedUriError.prototype.constructor = MalformedUriError;
+
+        function InvalidInputError(message) {
+            this.message = message;
+        }
+
+        InvalidInputError.prototype = Object.create(Error.prototype);
+        InvalidInputError.prototype.constructor = MalformedUriError;
+
+        return {
+            InvalidInputError: InvalidInputError,
+            MalformedUriError: MalformedUriError
+        };
+    }])
+
     // Factory for each error type
     .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'messageMap', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, messageMap, $log, $rootScope, $uibModal, $window) {
 
-        function errorPopup(message, errorCode, pageName, redirectLink) {
+        function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
             if (!redirectLink) {
@@ -20,22 +41,43 @@
                 var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
             }
 
+
+            var isFirefox = typeof InstallTrigger !== 'undefined';
+            var isChrome = !!window.chrome && !!window.chrome.webstore;
+            // If browser is chrome then
+            if (subMessage && stackTrace) {
+                if (isChrome) {
+                    subMessage = stackTrace;
+                } else {
+                    subMessage = subMessage + "\n   " + stackTrace.split("\n").join("\n   ");
+                }
+            }
             var params = {
                 message: message,
                 errorCode: errorCode,
-                pageName: pageName
+                pageName: pageName,
+                subMessage: subMessage
             };
 
-            var modalInstance = $uibModal.open({
+            var modalProperties = {
                 templateUrl: '../common/templates/errorDialog.modal.html',
-                controller: 'ErrorDialogController',
+                controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
                 keyboard: false,
                 resolve: {
                     params: params
                 }
-            });
+            };
+
+
+            if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+                delete modalProperties.keyboard;
+                delete modalProperties.backdrop;
+                params.canClose = true;
+            }
+
+            var modalInstance = $uibModal.open(modalProperties);
 
             modalInstance.result.then(function () {
                 if (errorCode == errorNames.unauthorized && !providedLink) {
@@ -60,23 +102,126 @@
             return error;
         }
 
+        function MalformedUriError(message) {
+            this.message = message;
+        }
+
+        MalformedUriError.prototype = Object.create(Error.prototype);
+        MalformedUriError.prototype.constructor = MalformedUriError;
+
+        function InvalidInputError(message) {
+            this.message = message;
+        }
+
+        InvalidInputError.prototype = Object.create(Error.prototype);
+        InvalidInputError.prototype.constructor = MalformedUriError;
+
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function catchAll(exception) {
             $log.info(exception);
             if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.login($window.location.href);
             } else if (exception instanceof ERMrest.PreconditionFailedError) {
+                AlertsService.addAlert(messageMap.generalPreconditionFailed, 'warning');
+            } else {
+                AlertsService.addAlert(exception.message, 'error');
+            }
+        }
+
+        var exceptionFlag = false;
+
+        // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
+        function handleException(exception) {
+            $log.info(exception);
+
+            if (exceptionFlag || window.location.pathname.indexOf('/viewer/') != -1) return;
+
+            if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
+                Session.login($window.location.href);
+            } else if (ERMrest && exception instanceof ERMrest.PreconditionFailedError) {
                 // A more useful general message for 412 Precondition Failed
                 AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
-                AlertsService.addAlert({type:'error', message:exception.message});
+                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", "Terminal Error", "Home Page", $window.location.origin,  exception.message , exception.stack);
             }
+
+            exceptionFlag = true;
         }
 
         return {
             errorPopup: errorPopup,
             catchAll: catchAll,
-            noRecordError: noRecordError
+            noRecordError: noRecordError,
+            handleException: handleException
         };
-    }]);
+    }])
+
+    .config(function($provide) {
+        $provide.decorator("$exceptionHandler", ['$log', '$injector' , function($log, $injector) {
+            return function(exception, cause) {
+                var ErrorService = $injector.get("ErrorService");
+                ErrorService.handleException(exception);
+            };
+        }]);
+    });
+
 })();
+
+
+window.onerror = function() {
+
+    if (window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) {
+        console.log(arguments[4]);
+        return;
+    }
+
+    var canClose = false;
+
+    if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+        canClose = true;
+    }
+
+    var error = arguments[4];
+    error.stack = [
+        arguments[1],
+        arguments[2],
+        arguments[3]
+    ].join(':');
+
+    var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
+
+    if (!document || !document.body) return;
+
+    var html  = '<div id="divErrorModal">'
+        + '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">'
+        + '<div class="modal-dialog" style="width:90% !important;">'
+            + '<div class="modal-content" uib-modal-transclude="">'
+                + '<div class="modal-header">'
+                    + '<h3 class="modal-title ">Error: Terminal Error</h3>'
+                    + (canClose ? '<button class="btn btn-default pull-right modal-close" type="button" onclick="document.getElementById(\"divErrorModal\").remove();">X</button>' : '')
+                + '</div>'
+                + '<div class="modal-body ">'
+                    + 'An unexpected error has occurred. Please report this problem to your system administrators.'
+                    + '<br><br>'
+                    + 'Click OK to return to the Home Page.'
+                    + '<br>'
+                    + '<span class="terminalError"><br>'
+                        + '<pre  style="word-wrap: unset;">' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
+                    + '</span>'
+                + '</div>'
+                + '<div class="modal-footer">'
+                    + '<button class="btn btn-danger" type="button" onclick="window.location.replace(\'' + redirectLink + '\');">OK</button>'
+                + '</div>'
+            + '</div>'
+        + '</div>'
+    + '</div>'
+    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>'
+    + '</div>';
+
+    if (canClose) {
+        document.body.innerHTML = html;
+    } else {
+        document.body.append(html);
+    }
+
+};

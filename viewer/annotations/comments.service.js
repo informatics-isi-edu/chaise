@@ -31,10 +31,7 @@
                 }
                 comments[annotationId].push(comment);
             }, function error(response) {
-                AlertsService.addAlert({
-                    type: 'error',
-                    message: response
-                });
+                AlertsService.addAlert(response, 'error');
                 console.log(response);
             });
         }
@@ -62,10 +59,7 @@
                 var index = annotationComments.indexOf(comment);
                 annotationComments.splice(index, 1);
             }, function error(response) {
-                AlertsService.addAlert({
-                    type: 'error',
-                    message: response
-                });
+                AlertsService.addAlert(response, 'error');
                 console.log(response);
             });
         }

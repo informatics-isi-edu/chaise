@@ -17,19 +17,24 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorDialogController', ['$uibModalInstance', 'params', function ErrorDeleteController($uibModalInstance, params) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', function ErrorModalController($uibModalInstance, params) {
         var vm = this;
         vm.params = params;
-        vm.ok = ok;
-
-        function ok() {
+        
+        vm.ok = function () {
             $uibModalInstance.close();
-        }
+        };
+
+        vm.cancel = function cancel() {
+            $uibModalInstance.dismiss('cancel');
+        };
+        
     }])
     .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
         var vm = this;
         params.login_url = $sce.trustAsResourceUrl(params.login_url);
         vm.params = params;
+        vm.cancel = cancel;
 
         vm.openWindow = function() {
 
@@ -42,8 +47,6 @@
         }
 
         vm.params.host = $sce.trustAsResourceUrl(window.location.host);
-
-        vm.cancel = cancel;
 
         function cancel() {
             $uibModalInstance.dismiss('cancel');
@@ -84,14 +87,7 @@
                 vm.tableModel.page = page;
                 vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
             }, function(exception) {
-                if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                    Session.loginInANewWindow(function() {
-                        fetchRecords();
-                    });
-                } else {
-                    AlertsService.addAlert({type: 'error', message: response.message});
-                    $log.warn(response);
-                }
+                throw exception;
             });
         }
 

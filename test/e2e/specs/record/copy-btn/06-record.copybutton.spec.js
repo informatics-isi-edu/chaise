@@ -97,6 +97,12 @@ describe('View existing record,', function() {
                 });
             });
 
+            it("should have 'Automatically Generated' in an input that is generated rather than copying the value from the copied record.", function() {
+                chaisePage.recordEditPage.getInputById(0, "generated").getAttribute("placeholder").then(function (text) {
+                    expect(text).toBe("Automatically generated");
+                });
+            });
+
             it("should alert the user if trying to submit data without changing the id.", function() {
                 chaisePage.recordEditPage.submitForm();
                 browser.wait(function() {

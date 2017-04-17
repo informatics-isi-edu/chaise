@@ -353,7 +353,7 @@ function submitLogin(username, password, referrer, action, input_user, input_pas
 	successCallback = successCallback || successSubmitLogin;
 	errorCallback = errorCallback || errorSubmitLogin
 
-	var url = HOME + (action != null ? action : '/ermrest/authn/session');
+	var url = HOME + (action != null ? action : '/authn/session');
 	var obj = {};
 
 	if (input_user != null) {
@@ -1906,7 +1906,7 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 
 function deleteSession(param) {
 	if (token == null) {
-		var url = HOME + '/ermrest/authn/session';
+		var url = HOME + '/authn/session';
 		if (chaiseConfig['logoutURL'] != null) {
 			url += '?logout_url=' + encodeSafeURIComponent(chaiseConfig['logoutURL']);
 		}
@@ -1938,7 +1938,7 @@ function errorDeleteSession(jqXHR, textStatus, errorThrown, url, param) {
 }
 
 function getSession(param) {
-	var url = HOME + '/ermrest/authn/session';
+	var url = HOME + '/authn/session';
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetSession, errorGetSession, param);
 }
 
@@ -2036,7 +2036,7 @@ function errorGetSession(jqXHR, textStatus, errorThrown, url, param) {
 }
 
 function login(referrer) {
-	var url = HOME + '/ermrest/authn/preauth?referrer='+referrer;
+	var url = HOME + '/authn/preauth?referrer='+referrer;
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
 }
 
