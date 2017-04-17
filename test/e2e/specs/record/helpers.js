@@ -546,7 +546,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
     });
 
     describe("for a related entity without an association table", function() {
-        it("should have a \"Link\" link for a related table that redirects to that related table's association table in recordedit with a prefill query parameter.", function() {
+        it("should have a \"Add\" link for a related table that redirects to that related table's association table in recordedit with a prefill query parameter.", function() {
             var EC = protractor.ExpectedConditions, newTabUrl, rows, foreignKeyInputs,
                 modalTitle = chaisePage.recordEditPage.getModalTitle(),
                 relatedTableName = tableParams.related_associate_table,
@@ -555,6 +555,7 @@ exports.relatedTableLinks = function (testParams, tableParams) {
             browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
 
             expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
+            expect(addRelatedRecordLink.getText()).toBe("Add");
 
             addRelatedRecordLink.click().then(function() {
                 // This Add link opens in a new tab so we have to track the windows in the browser...
