@@ -8,14 +8,26 @@
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
 
+        // Private variable to store current session object
+        var _session = null;
+
         return {
 
             getSession: function() {
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
+                    _session = response.data;
                     return response.data;
                 }, function(response) {
                     return $q.reject(response);
                 });
+            },
+
+            setSessionValue: function(session) {
+                _session = session;
+            },
+
+            getSessionValue: function() {
+                return _session;
             },
 
             login: function (referrer) {
@@ -94,8 +106,13 @@
                         login_url: login_url
                     };
 
-                    params.title = messageMap.sessionExpired.title;
-                    params.message = messageMap.sessionExpired.message;
+                    if (_session) {
+                        params.title = messageMap.sessionExpired.title;
+                        params.message = messageMap.sessionExpired.message;
+                    } else {
+                        params.title = messageMap.noSession.title;
+                        params.message = messageMap.noSession.message;
+                    }
 
                     modalInstance = $uibModal.open({
                         windowClass: "modal-login-instruction",
@@ -109,7 +126,6 @@
                         backdrop: 'static',
                         keyboard: false
                     });
-
 
 
                     /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
@@ -178,5 +194,44 @@
             }
         }
     }])
+
+    var pathname = window.location.pathname;
+
+    // If app is not search, viewer and login then attach the unauthorised 401 http handler to ermrestjs
+
+    if (pathname.indexOf('/search/') == -1 && pathname.indexOf('/viewer/') == -1 && pathname.indexOf('/login') == -1) {
+        
+        angular.module('chaise.authen')
+        .run(['ERMrest', '$injector', '$q', function runRecordEditApp(ERMrest, $injector, $q) {
+            
+            var Session = $injector.get("Session");
+            
+            // Bind callback function for httpUnauthorizedFn handler
+            // This callback will be called whenver 
+            ERMrest.httpUnauthorizedFn(function() {
+                var defer = $q.defer();
+                
+                // Call login in a new window to perform authentication
+                // and return a promise to notify ermrestjs that the user has loggedin
+                Session.loginInANewWindow(function() {
+
+                    // Once the user has logged in fetch the new session and set the session value
+                    // and resolve the promise to notify ermrestjs that the user has logged in 
+                    // and it can continue firing other queued calls
+                    Session.getSession().then(function(_session) {
+                        defer.resolve();
+                    }, function(exception) {
+                        throw exception;
+                    });
+
+                });
+
+                return defer.promise;
+            });
+
+
+        }]);
+
+    }
 
 })();

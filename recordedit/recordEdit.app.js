@@ -92,7 +92,6 @@
 
 
             Session.getSession().then(function getSession(_session) {
-                session = _session;
                 ERMrest.appLinkFn(UriUtils.appTagToURL);
 
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
@@ -106,6 +105,8 @@
                 } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
                     $rootScope.reference = reference.contextualize.entryCreate;
                 }
+
+                session = Session.getSessionValue();
 
                 $rootScope.reference.session = session;
                 $rootScope.session = session;
