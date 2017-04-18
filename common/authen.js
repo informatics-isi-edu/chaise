@@ -206,11 +206,12 @@
             
             var Session = $injector.get("Session");
             
-            // Bind callback function for httpUnauthorizedFn handler
-            // This callback will be called whenver 
-            ERMrest.httpUnauthorizedFn(function() {
+            // Bind callback function by invoking setHttpUnauthorizedFn handler passing the callback
+            // This callback will be called whenever 401 HTTP error is encountered unless there is 
+            // already login flow in progress
+            ERMrest.setHttpUnauthorizedFn(function() {
                 var defer = $q.defer();
-                
+
                 // Call login in a new window to perform authentication
                 // and return a promise to notify ermrestjs that the user has loggedin
                 Session.loginInANewWindow(function() {

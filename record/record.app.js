@@ -57,8 +57,6 @@
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
         Session.getSession().then(function getSession(_session) {
-            session = _session;
-
             return ERMrest.resolve(ermrestUri, {cid: context.appName});
         }, function(exception){
             // do nothing but return without a session
@@ -66,6 +64,8 @@
         }).then(function getReference(reference) {
             // if the user can fetch the reference, they can see the content for the rest of the page
             // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
+            session = Session.getSessionValue();
+
             $rootScope.loading = true;
             // $rootScope.reference != reference after contextualization
             $rootScope.reference = reference.contextualize.detailed;

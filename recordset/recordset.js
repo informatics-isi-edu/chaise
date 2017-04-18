@@ -184,13 +184,14 @@
 
             ERMrest.appLinkFn(UriUtils.appTagToURL);
             Session.getSession().then(function getSession(_session) {
-                session = _session;
-
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }, function(exception) {
                 // do nothing but return without a session
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
+
+                session = Session.getSessionValue();
+
                 recordsetModel.reference = reference.contextualize.compact;
                 recordsetModel.context = "compact";
                 recordsetModel.reference.session = session;
