@@ -96,6 +96,8 @@
 
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }, function sessionFailed() {
+
+                ERMrest.appLinkFn(UriUtils.appTagToURL);
                 // do nothing but return without a session
                 return ERMrest.resolve(ermrestUri, {cid: context.appName});
             }).then(function getReference(reference) {
