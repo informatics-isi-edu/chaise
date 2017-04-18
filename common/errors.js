@@ -136,9 +136,9 @@
 
             if (exceptionFlag || window.location.pathname.indexOf('/viewer/') != -1) return;
 
-            if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
+            if ((typeof ERMrest == 'object') && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.login($window.location.href);
-            } else if (ERMrest && exception instanceof ERMrest.PreconditionFailedError) {
+            } else if ((typeof ERMrest == 'object') && exception instanceof ERMrest.PreconditionFailedError) {
                 // A more useful general message for 412 Precondition Failed
                 AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
