@@ -28,10 +28,7 @@
         vm.submit = submit;
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
-        // TODO: following functions attached to vm (view model) should be wrapped in try/catch
-        // Utils.catchWrapper(fn)
         vm.redirectAfterSubmission = redirectAfterSubmission;
-        vm.showSubmissionError = showSubmissionError;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
@@ -39,8 +36,6 @@
         vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
         vm.numberRowsToAdd = 1;
         vm.showMultiInsert = false;
-        // TODO: mentioned below this function should be wrapped in a try/catch
-        // vm.copyFormRow = Utils.catchWrapper(copyFormRow);
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
         vm.deleteRecord = deleteRecord;
@@ -100,12 +95,6 @@
 
             // Redirect to record or recordset app..
             $window.location = redirectUrl;
-        }
-
-        // TODO: Instead of calling this function in the error callback, the .catchAll() call should be in the catch attached to that promise chain
-        // this function is completely unnecessary
-        function showSubmissionError(response) {
-            ErrorService.catchAll(response);
         }
 
         /*
@@ -284,16 +273,9 @@
 
                         vm.resultset = true;
                     }
-                }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        // TODO: this needs to be removed and a .catch() added
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
+                }).catch(function (exception) {
+                    vm.submissionButtonDisabled = false;
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
                 var creatRef = $rootScope.reference.unfilteredReference.contextualize.entryCreate;
@@ -336,16 +318,9 @@
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
                     }
-                }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        // TODO: this needs to be removed and a catch added here
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
+                }).catch(function (exception) {
+                    vm.submissionButtonDisabled = false;
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             }
         }
@@ -382,17 +357,14 @@
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
                         });
                     } else {
                         if (response !== 'cancel') {
-                            // TODO: rethrow error here
-                            vm.showSubmissionError(response);
+                            throw response;
                         }
                     }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
                 $rootScope.reference.delete($rootScope.tuples).then(function deleteSuccess() {
@@ -419,15 +391,12 @@
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
                         });
                     } else {
-                        // TODO: rethrow error here
-                        vm.showSubmissionError(response);
+                        throw response;
                     }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             }
         }
@@ -481,9 +450,6 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            }, function noDataSelected() {
-                // do nothing
-                // TODO: need catchall here
             });
         }
 
@@ -505,7 +471,6 @@
             $window.open(column.reference.contextualize.entryCreate.appLink, '_blank');
         }
 
-        // TODO: function should be wrapped in a try catch
         function copyFormRow() {
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
