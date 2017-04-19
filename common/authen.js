@@ -13,13 +13,22 @@
 
         var _changeCbs = [];
 
+
+        var _executeListeners = function() {
+            _changeCbs.forEach(function(cb) {
+               cb(); 
+            });
+        },
+
         return {
 
             getSession: function() {
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
                     _session = response.data;
+                    _executeListeners();
                     return response.data;
                 }, function(response) {
+                    _session = null;
                     return $q.reject(response);
                 });
             },
@@ -30,12 +39,6 @@
 
             subscribeOnChange: function(fn) {
                 if (typeof fn  == 'function') _changeCbs.push(fn);
-            },
-
-            executeListeners: function() {
-                _changeCbs.forEach(function(cb) {
-                   cb(); 
-                });
             },
 
             login: function (referrer) {
@@ -229,9 +232,6 @@
                     // and it can continue firing other queued calls
                     Session.getSession().then(function(_session) {
                         defer.resolve();
-
-                        Session.executeListeners();
-
                     }, function(exception) {
                         throw exception;
                     });

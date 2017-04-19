@@ -62,15 +62,7 @@
                     }
                 });
 
-                Session.getSession().then(function(session) {
-                    $rootScope.session = session;
-
-                    var user = session.client;
-                    scope.user = user.display_name || user.full_name || user.email || user;
-                }, function(error) {
-                    // No session = no user
-                    scope.user = null;
-                });
+                Session.getSession();
 
                 scope.login = function login() {
                     Session.login($window.location.href);
