@@ -41,10 +41,6 @@
             title: "Your session has expired. Please login to continue.",
             message: "To open the login window press"
         },
-        "noSession" : {
-            title: "You need to be logged in to continue.",
-            message: "To open the login window press"
-        },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set."
     })
 

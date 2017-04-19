@@ -37,68 +37,69 @@
     .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
         function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
 
-            var session,
-                context = { booleanValues: ['', true, false] };
+        var session,
+            context = { booleanValues: ['', true, false] };
 
-            $rootScope.displayReady = false;
+        $rootScope.displayReady = false;
 
-            UriUtils.setOrigin();
-            headInjector.addTitle();
-            headInjector.addCustomCSS();
+        UriUtils.setOrigin();
+        headInjector.addTitle();
+        headInjector.addCustomCSS();
 
-            // This is to allow the dropdown button to open at the top/bottom depending on the space available
-            UiUtils.setBootstrapDropdownButtonBehavior();
-            UriUtils.setLocationChangeHandling();
+        // This is to allow the dropdown button to open at the top/bottom depending on the space available
+        UiUtils.setBootstrapDropdownButtonBehavior();
+        UriUtils.setLocationChangeHandling();
 
-            // If defined but false, throw an error
-            if (!chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
-                var message = 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.';
-                var error = new Error(message);
-                error.code = "Record Editing Disabled";
+        // If defined but false, throw an error
+        if (!chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
+            var message = 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.';
+            var error = new Error(message);
+            error.code = "Record Editing Disabled";
 
-                throw error;
-            }
+            throw error;
+        }
 
-            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
-            context.appName = "recordedit";
-            context.MAX_ROWS_TO_ADD = 201;
+        context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
+        context.appName = "recordedit";
+        context.MAX_ROWS_TO_ADD = 201;
 
-            // modes = create, edit, copy
-            // create is contextualized to entry/create
-            // edit is contextualized to entry/edit
-            // copy is contextualized to entry/create
-            // NOTE: copy is technically creating an entity so it needs the proper visible column list as well as the data for the record associated with the given filter
+        // modes = create, edit, copy
+        // create is contextualized to entry/create
+        // edit is contextualized to entry/edit
+        // copy is contextualized to entry/create
+        // NOTE: copy is technically creating an entity so it needs the proper visible column list as well as the data for the record associated with the given filter
 
-            context.modes = {
-                COPY: "copy",
-                CREATE: "create",
-                EDIT: "edit"
-            }
-            // mode defaults to create
-            context.mode = context.modes.CREATE;
+        context.modes = {
+            COPY: "copy",
+            CREATE: "create",
+            EDIT: "edit"
+        }
+        // mode defaults to create
+        context.mode = context.modes.CREATE;
 
-            // Mode can be any 3 with a filter
-            if (context.filter) {
-                // prefill always means create
-                // copy means copy regardless of a limit defined
-                // edit is everything else with a filter
-                context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
-            } else if (context.queryParams.limit) {
-                context.mode = context.modes.EDIT;
-            }
+        // Mode can be any 3 with a filter
+        if (context.filter) {
+            // prefill always means create
+            // copy means copy regardless of a limit defined
+            // edit is everything else with a filter
+            context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
+        } else if (context.queryParams.limit) {
+            context.mode = context.modes.EDIT;
+        }
 
-            Session.getSession().then(function getSession(_session) {
-                ERMrest.appLinkFn(UriUtils.appTagToURL);
+        ERMrest.appLinkFn(UriUtils.appTagToURL);
 
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }, function sessionFailed() {
+        // Subscribe to on change event for session
+        var subId = Session.subscribeOnChange(function() {
 
-                ERMrest.appLinkFn(UriUtils.appTagToURL);
-                // do nothing but return without a session
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }).then(function getReference(reference) {
+            // Unsubscribe onchange event to avoid this function getting called again
+            Session.unsubscribeOnChange(subId);
+
+            // On resolution
+            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                
                 //contextualize the reference based on the mode (determined above) recordedit is in
                 if (context.mode == context.modes.EDIT) {
                     $rootScope.reference = reference.contextualize.entryEdit;
@@ -132,188 +133,184 @@
                     // Keep a copy of the initial rows data so that we can see if user has made any changes later
                     recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                     $log.info('Old model.rows:', recordEditModel.oldRows);
-
                 }
-                $log.info('Model: ', recordEditModel);
-                // Keep a copy of the initial rows data so that we can see if user has made any changes later
-                recordEditModel.oldRows = angular.copy(recordEditModel.rows);
-                $log.info('Old model.rows:', recordEditModel.oldRows);
-            }
 
-            // Case for editing an entity
-            if (context.mode == context.modes.EDIT || context.mode == context.modes.COPY) {
-                if ($rootScope.reference.canUpdate) {
+                // Case for editing an entity
+                if (context.mode == context.modes.EDIT || context.mode == context.modes.COPY) {
+                    if ($rootScope.reference.canUpdate) {
 
-                    var numberRowsToRead;
-                    if (context.queryParams.limit) {
-                        numberRowsToRead = Number(context.queryParams.limit);
-                        if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
-                            var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
-                            AlertsService.addAlert(limitMessage, 'error');
-                        }
-                    } else {
-                        numberRowsToRead = context.MAX_ROWS_TO_ADD;
-                    }
-
-                    $rootScope.reference.read(numberRowsToRead).then(function getPage(page) {
-                        $log.info("Page: ", page);
-
-                        if (page.tuples.length < 1) {
-                            var noDataError = ErrorService.noRecordError(context.filter.filters);
-                            throw noDataError;
-                        }
-
-                        var column, value;
-
-                        // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
-                        // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
-                        // The submission data is copied back to the tuples object before submitted in the PUT request
-                        $rootScope.tuples = angular.copy(page.tuples);
-                        $rootScope.displayname = ((context.queryParams.copy && page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
-
-                        for (var j = 0; j < page.tuples.length; j++) {
-                            // initialize row objects {column-name: value,...}
-                            recordEditModel.rows[j] = {};
-                            // needs to be initialized so foreign keys can be set
-                            recordEditModel.submissionRows[j] = {};
-
-                            var tuple = page.tuples[j],
-                            values = tuple.values;
-
-                            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
-                                column = $rootScope.reference.columns[i];
-
-                                // If input is disabled, there's no need to transform the column value.
-                                if (column.getInputDisabled(context.appContext)) {
-                                    // if not copy, populate the field without transforming it
-                                    if (context.mode != context.modes.COPY) {
-                                        recordEditModel.rows[j][column.name] = values[i];
-                                    }
-                                    continue;
-                                }
-
-                                // Transform column values for use in view model
-                                switch (column.type.name) {
-                                    case "timestamp":
-                                    case "timestamptz":
-                                        if (values[i]) {
-                                            var ts = moment(values[i]);
-                                            value = {
-                                                date: ts.format('YYYY-MM-DD'),
-                                                time: ts.format('hh:mm:ss'),
-                                                meridiem: ts.format('A')
-                                            };
-                                        } else {
-                                            value = {
-                                                date: null,
-                                                time: null,
-                                                meridiem: 'AM'
-                                            };
-                                        }
-                                        break;
-                                    case "int2":
-                                    case "int4":
-                                    case "int8":
-                                        var intVal = parseInt(values[i], 10);
-                                        value = (!isNaN(intVal) ? intVal : null);
-                                        break;
-                                    case "float4":
-                                    case "float8":
-                                    case "numeric":
-                                        var floatVal = parseFloat(values[i]);
-                                        value = (!isNaN(floatVal) ? floatVal : null);
-                                        break;
-                                    default:
-                                        value = values[i];
-                                        break;
-                                }
-
-                                // no need to check for copy here because the case above guards against the negative case for copy
-                                recordEditModel.rows[j][column.name] = value;
+                        var numberRowsToRead;
+                        if (context.queryParams.limit) {
+                            numberRowsToRead = Number(context.queryParams.limit);
+                            if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
+                                var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
+                                AlertsService.addAlert(limitMessage, 'error');
                             }
+                        } else {
+                            numberRowsToRead = context.MAX_ROWS_TO_ADD;
                         }
+
+                        $rootScope.reference.read(numberRowsToRead).then(function getPage(page) {
+                            $log.info("Page: ", page);
+
+                            if (page.tuples.length < 1) {
+                                var noDataError = ErrorService.noRecordError(context.filter.filters);
+                                throw noDataError;
+                            }
+
+                            var column, value;
+
+                            // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
+                            // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
+                            // The submission data is copied back to the tuples object before submitted in the PUT request
+                            $rootScope.tuples = angular.copy(page.tuples);
+                            $rootScope.displayname = ((context.queryParams.copy && page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
+
+                            for (var j = 0; j < page.tuples.length; j++) {
+                                // initialize row objects {column-name: value,...}
+                                recordEditModel.rows[j] = {};
+                                // needs to be initialized so foreign keys can be set
+                                recordEditModel.submissionRows[j] = {};
+
+                                var tuple = page.tuples[j],
+                                values = tuple.values;
+
+                                for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+                                    column = $rootScope.reference.columns[i];
+
+                                    // If input is disabled, there's no need to transform the column value.
+                                    if (column.getInputDisabled(context.appContext)) {
+                                        // if not copy, populate the field without transforming it
+                                        if (context.mode != context.modes.COPY) {
+                                            recordEditModel.rows[j][column.name] = values[i];
+                                        }
+                                        continue;
+                                    }
+
+                                    // Transform column values for use in view model
+                                    switch (column.type.name) {
+                                        case "timestamp":
+                                        case "timestamptz":
+                                            if (values[i]) {
+                                                var ts = moment(values[i]);
+                                                value = {
+                                                    date: ts.format('YYYY-MM-DD'),
+                                                    time: ts.format('hh:mm:ss'),
+                                                    meridiem: ts.format('A')
+                                                };
+                                            } else {
+                                                value = {
+                                                    date: null,
+                                                    time: null,
+                                                    meridiem: 'AM'
+                                                };
+                                            }
+                                            break;
+                                        case "int2":
+                                        case "int4":
+                                        case "int8":
+                                            var intVal = parseInt(values[i], 10);
+                                            value = (!isNaN(intVal) ? intVal : null);
+                                            break;
+                                        case "float4":
+                                        case "float8":
+                                        case "numeric":
+                                            var floatVal = parseFloat(values[i]);
+                                            value = (!isNaN(floatVal) ? floatVal : null);
+                                            break;
+                                        default:
+                                            value = values[i];
+                                            break;
+                                    }
+
+                                    // no need to check for copy here because the case above guards against the negative case for copy
+                                    recordEditModel.rows[j][column.name] = value;
+                                }
+                            }
+
+                            $rootScope.displayReady = true;
+                            $log.info('Model: ', recordEditModel);
+                            // Keep a copy of the initial rows data so that we can see if user has made any changes later
+                            recordEditModel.oldRows = angular.copy(recordEditModel.rows);
+                        }, function error(response) {
+                            throw response;
+                        });
+                    } else if (session) {
+                        var notAuthorizedMessage = "You are not authorized to Update entities.";
+                        var notAuthorizedError = new Error(notAuthorizedMessage);
+                        // user logged in but not allowed (forbidden)
+                        notAuthorizedError.code = errorNames.forbidden;
+
+                        throw notAuthorizedError;
+                    } else {
+                        var notAuthorizedMessage = "You are not authorized to Update entities.";
+                        var notAuthorizedError = new Error(notAuthorizedMessage);
+                        // user not logged in (unauthorized)
+                        notAuthorizedError.code = errorNames.unauthorized;
+
+                        throw notAuthorizedError;
+                    }
+                } else if (context.mode == context.modes.CREATE) {
+                    if ($rootScope.reference.canCreate) {
+                        $rootScope.displayname = $rootScope.reference.displayname;
+
+                        // populate defaults
+                        angular.forEach($rootScope.reference.columns, function(column) {
+                            // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
+                            // only want to set values in the input fields so make sure it isn't a function
+                            // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
+                            if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
+                                if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
+                                    if (column.default !== null) {
+                                        var ts = moment(column.default);
+                                        recordEditModel.rows[0][column.name] = {
+                                            date: ts.format('YYYY-MM-DD'),
+                                            time: ts.format('hh:mm:ss'),
+                                            meridiem: ts.format('A')
+                                        };
+                                    } else {
+                                        recordEditModel.rows[0][column.name] = {
+                                            date: null,
+                                            time: null,
+                                            meridiem: 'AM'
+                                        };
+                                    }
+                                } else {
+                                    recordEditModel.rows[0][column.name] = column.default;
+                                }
+                            } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
+                                // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
+                                recordEditModel.rows[0][column.name] = {
+                                    date: null,
+                                    time: null,
+                                    meridiem: 'AM'
+                                };
+                            }
+                        });
 
                         $rootScope.displayReady = true;
-                        $log.info('Model: ', recordEditModel);
-                        // Keep a copy of the initial rows data so that we can see if user has made any changes later
-                        recordEditModel.oldRows = angular.copy(recordEditModel.rows);
-                    }, function error(response) {
-                        throw response;
-                    });
-                } else if (session) {
-                    var notAuthorizedMessage = "You are not authorized to Update entities.";
-                    var notAuthorizedError = new Error(notAuthorizedMessage);
-                    // user logged in but not allowed (forbidden)
-                    notAuthorizedError.code = errorNames.forbidden;
+                        // if there is a session, user isn't allowed to create
+                    } else if (session) {
+                        var forbiddenMessage = "You are not authorized to Create entities.";
+                        var forbiddenError = new Error(forbiddenMessage);
 
-                    throw notAuthorizedError;
-                } else {
-                    var notAuthorizedMessage = "You are not authorized to Update entities.";
-                    var notAuthorizedError = new Error(notAuthorizedMessage);
-                    // user not logged in (unauthorized)
-                    notAuthorizedError.code = errorNames.unauthorized;
+                        forbiddenError.code = errorNames.forbidden;
 
-                    throw notAuthorizedError;
+                        throw forbiddenError;
+                        // user isn't logged in and needs permissions to create
+                    } else {
+                        var notAuthorizedMessage = "You are not authorized to Create entities.";
+                        var notAuthorizedError = new Error(notAuthorizedMessage);
+
+                        notAuthorizedError.code = errorNames.unauthorized;
+
+                        throw notAuthorizedError;
+                    }
                 }
-            } else if (context.mode == context.modes.CREATE) {
-                if ($rootScope.reference.canCreate) {
-                    $rootScope.displayname = $rootScope.reference.displayname;
-
-                    // populate defaults
-                    angular.forEach($rootScope.reference.columns, function(column) {
-                        // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
-                        // only want to set values in the input fields so make sure it isn't a function
-                        // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
-                        if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
-                            if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
-                                if (column.default !== null) {
-                                    var ts = moment(column.default);
-                                    recordEditModel.rows[0][column.name] = {
-                                        date: ts.format('YYYY-MM-DD'),
-                                        time: ts.format('hh:mm:ss'),
-                                        meridiem: ts.format('A')
-                                    };
-                                } else {
-                                    recordEditModel.rows[0][column.name] = {
-                                        date: null,
-                                        time: null,
-                                        meridiem: 'AM'
-                                    };
-                                }
-                            } else {
-                                recordEditModel.rows[0][column.name] = column.default;
-                            }
-                        } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
-                            // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
-                            recordEditModel.rows[0][column.name] = {
-                                date: null,
-                                time: null,
-                                meridiem: 'AM'
-                            };
-                        }
-                    });
-
-                    $rootScope.displayReady = true;
-                    // if there is a session, user isn't allowed to create
-                } else if (session) {
-                    var forbiddenMessage = "You are not authorized to Create entities.";
-                    var forbiddenError = new Error(forbiddenMessage);
-
-                    forbiddenError.code = errorNames.forbidden;
-
-                    throw forbiddenError;
-                    // user isn't logged in and needs permissions to create
-                } else {
-                    var notAuthorizedMessage = "You are not authorized to Create entities.";
-                    var notAuthorizedError = new Error(notAuthorizedMessage);
-
-                    notAuthorizedError.code = errorNames.unauthorized;
-
-                    throw notAuthorizedError;
-                }
-            }
-        }, function error(response) {
-            throw response;
+            }, function error(response) {
+                throw response;
+            });
         });
+
     }]);
 })();

@@ -11,14 +11,13 @@
         // Private variable to store current session object
         var _session = null;
 
-        var _changeCbs = [];
-
+        var _changeCbs = {};
 
         var _executeListeners = function() {
-            _changeCbs.forEach(function(cb) {
-               cb(); 
-            });
-        },
+            for (var k in _changeCbs) {
+                _changeCbs[k]();
+            }
+        };
 
         return {
 
@@ -38,7 +37,15 @@
             },
 
             subscribeOnChange: function(fn) {
-                if (typeof fn  == 'function') _changeCbs.push(fn);
+                var id = new Date().getTime();
+                if (typeof fn  == 'function') {
+                    _changeCbs[id] = fn;
+                } 
+                return id;
+            },
+
+            unsubscribeOnChange: function(id) {
+                delete _changeCbs[id];
             },
 
             login: function (referrer) {
