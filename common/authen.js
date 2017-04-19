@@ -30,6 +30,7 @@
                     return response.data;
                 }, function(response) {
                     _session = null;
+                    _executeListeners();
                     return $q.reject(response);
                 });
             },
@@ -41,7 +42,7 @@
             subscribeOnChange: function(fn) {
                 // To avoid same ids for an instance we add counter
                 var id = new Date().getTime() + (++_counter);
-                
+
                 if (typeof fn  == 'function') {
                     _changeCbs[id] = fn;
                 } 
