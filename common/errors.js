@@ -116,18 +116,6 @@
         InvalidInputError.prototype = Object.create(Error.prototype);
         InvalidInputError.prototype.constructor = MalformedUriError;
 
-        // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-        function catchAll(exception) {
-            $log.info(exception);
-            if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
-                Session.login($window.location.href);
-            } else if (exception instanceof ERMrest.PreconditionFailedError) {
-                AlertsService.addAlert(messageMap.generalPreconditionFailed, 'warning');
-            } else {
-                AlertsService.addAlert(exception.message, 'error');
-            }
-        }
-
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
@@ -150,7 +138,6 @@
 
         return {
             errorPopup: errorPopup,
-            catchAll: catchAll,
             noRecordError: noRecordError,
             handleException: handleException
         };

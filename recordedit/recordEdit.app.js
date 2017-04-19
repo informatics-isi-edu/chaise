@@ -230,7 +230,6 @@
                         // Keep a copy of the initial rows data so that we can see if user has made any changes later
                         recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                     }, function error(response) {
-                        $log.warn(response);
                         throw response;
                     });
                 } else if (session) {
@@ -306,7 +305,6 @@
                 }
             }
         }, function error(response) {
-            $log.warn(response);
             throw response;
         });
     }]);
