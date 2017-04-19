@@ -278,14 +278,8 @@
                         vm.resultset = true;
                     }
                 }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
+                    vm.showSubmissionError(exception);
+                    vm.submissionButtonDisabled = false;
                 });
             } else {
                 var creatRef = $rootScope.reference.unfilteredReference.contextualize.entryCreate;
@@ -329,14 +323,8 @@
                         vm.resultset = true;
                     }
                 }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
+                    vm.showSubmissionError(exception);
+                    vm.submissionButtonDisabled = false;
                 });
             }
         }
@@ -389,11 +377,7 @@
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            deleteRecord();
-                        });
-                    } else if (response instanceof ERMrest.PreconditionFailedError) {
+                    if (response instanceof ERMrest.PreconditionFailedError) {
                         $uibModal.open({
                             templateUrl: "../common/templates/refresh.modal.html",
                             controller: "ErrorDialogController",

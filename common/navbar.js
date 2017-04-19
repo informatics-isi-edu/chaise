@@ -51,6 +51,17 @@
                 scope.signUpURL = chaiseConfig.signUpURL;
                 scope.profileURL = chaiseConfig.profileURL;
 
+                Session.subscribeOnChange(function() {
+                    $rootScope.session = Session.getSessionValue();
+
+                    if ($rootScope.session == null) {
+                        scope.user = null;
+                    } else {
+                        var user = $rootScope.session.client;
+                        scope.user = user.display_name || user.full_name || user.email || user;
+                    }
+                });
+
                 Session.getSession().then(function(session) {
                     $rootScope.session = session;
 

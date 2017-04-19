@@ -11,6 +11,8 @@
         // Private variable to store current session object
         var _session = null;
 
+        var _changeCbs = [];
+
         return {
 
             getSession: function() {
@@ -28,6 +30,16 @@
 
             getSessionValue: function() {
                 return _session;
+            },
+
+            subscribeOnChange: function(fn) {
+                if (typeof fn  == 'function') _changeCbs.push(fn);
+            },
+
+            executeListeners: function() {
+                _changeCbs.forEach(function(cb) {
+                   cb(); 
+                });
             },
 
             login: function (referrer) {
@@ -221,6 +233,9 @@
                     // and it can continue firing other queued calls
                     Session.getSession().then(function(_session) {
                         defer.resolve();
+
+                        Session.executeListeners();
+
                     }, function(exception) {
                         throw exception;
                     });
