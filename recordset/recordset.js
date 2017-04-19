@@ -183,51 +183,55 @@
 
 
             ERMrest.appLinkFn(UriUtils.appTagToURL);
-            Session.getSession().then(function getSession(_session) {
-                session = _session;
 
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }, function(exception) {
-                // do nothing but return without a session
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }).then(function getReference(reference) {
-                recordsetModel.reference = reference.contextualize.compact;
-                recordsetModel.context = "compact";
-                recordsetModel.reference.session = session;
+            // Subscribe to on change event for session
+            var subId = Session.subscribeOnChange(function() {
 
-                $log.info("Reference:", recordsetModel.reference);
+                // Unsubscribe onchange event to avoid this function getting called again
+                Session.unsubscribeOnChange(subId);
 
-                if (p_context.queryParams.limit)
-                    recordsetModel.pageLimit = parseInt(p_context.queryParams.limit);
-                else if (recordsetModel.reference.display.defaultPageSize)
-                    recordsetModel.pageLimit = recordsetModel.reference.display.defaultPageSize;
-                else
-                    recordsetModel.pageLimit = 25;
-                recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
-                
-                 // the additional provided name
-                if (p_context.queryParams && p_context.queryParams.subset) {
-                    recordsetModel.subTitle = p_context.queryParams.subset;
-                }
+                ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                    session = Session.getSessionValue();
 
-                recordsetModel.columns = recordsetModel.reference.columns;
-                recordsetModel.search = recordsetModel.reference.location.searchTerm;
+                    recordsetModel.reference = reference.contextualize.compact;
+                    recordsetModel.context = "compact";
+                    recordsetModel.reference.session = session;
 
-                return recordsetModel.reference.read(recordsetModel.pageLimit);
-            }, function error(response) {
-                throw response;
-            }).then(function getPage(page) {
-                recordsetModel.page = page;
-                recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                recordsetModel.initialized = true;
-                recordsetModel.hasLoaded = true;
-            }, function error(response) {
-                throw response;
-            }).catch(function genericCatch(exception) {
-                $log.warn(exception);
-                recordsetModel.hasLoaded = true;
+                    $log.info("Reference:", recordsetModel.reference);
 
-                throw exception;
+                    if (p_context.queryParams.limit)
+                        recordsetModel.pageLimit = parseInt(p_context.queryParams.limit);
+                    else if (recordsetModel.reference.display.defaultPageSize)
+                        recordsetModel.pageLimit = recordsetModel.reference.display.defaultPageSize;
+                    else
+                        recordsetModel.pageLimit = 25;
+                    recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
+                    
+                     // the additional provided name
+                    if (p_context.queryParams && p_context.queryParams.subset) {
+                        recordsetModel.subTitle = p_context.queryParams.subset;
+                    }
+
+                    recordsetModel.columns = recordsetModel.reference.columns;
+                    recordsetModel.search = recordsetModel.reference.location.searchTerm;
+
+                    return recordsetModel.reference.read(recordsetModel.pageLimit);
+                }, function error(response) {
+                    throw response;
+                }).then(function getPage(page) {
+                    recordsetModel.page = page;
+                    recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                    recordsetModel.initialized = true;
+                    recordsetModel.hasLoaded = true;
+                }, function error(response) {
+                    throw response;
+                }).catch(function genericCatch(exception) {
+                    $log.warn(exception);
+                    recordsetModel.hasLoaded = true;
+
+                    throw exception;
+                });
+
             });
 
             /**
