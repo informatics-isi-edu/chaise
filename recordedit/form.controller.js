@@ -554,7 +554,7 @@
             var name = column.name;
             var type = column.type.name;
             var displayType;
-            if (isForeignKey(column)) {
+            if (column.isForeignKey) {
                 displayType = 'popup-select';
             } else {
                 switch (type) {
@@ -609,10 +609,6 @@
             }
         }
 
-        function isForeignKey(column) {
-            return column.isPseudo;
-        }
-
         // Returns true if a column type is found in the given array of types
         function matchType(columnType, types) {
             if (types.indexOf(columnType) !== -1) {
@@ -631,7 +627,7 @@
                         return value;
                     }
                     return '';
-                } else if (isForeignKey(column)) {
+                } else if (column.isForeignKey) {
                     return 'Select a value';
                 }
             } catch (e) {
