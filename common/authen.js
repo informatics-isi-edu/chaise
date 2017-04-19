@@ -13,6 +13,8 @@
 
         var _changeCbs = {};
 
+        var _counter = 0;
+
         var _executeListeners = function() {
             for (var k in _changeCbs) {
                 _changeCbs[k]();
@@ -37,7 +39,9 @@
             },
 
             subscribeOnChange: function(fn) {
-                var id = new Date().getTime();
+                // To avoid same ids for an instance we add counter
+                var id = new Date().getTime() + (++_counter);
+                
                 if (typeof fn  == 'function') {
                     _changeCbs[id] = fn;
                 } 
