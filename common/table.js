@@ -47,13 +47,6 @@
      *          $window.location.replace($scope.permalink());
      *          $rootScope.location = $window.location.href;
      *      });
-     *
-     * 2. error - an exception was caught
-     *
-     *      $scope.$on('error', function(event, exception) {
-     *          $log.warn(exception);
-     *          ErrorService.catchAll(exception);
-     *      });
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout','Session', function(DataUtils, $timeout, Session) {
 

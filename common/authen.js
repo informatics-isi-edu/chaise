@@ -24,10 +24,6 @@
                 });
             },
 
-            setSessionValue: function(session) {
-                _session = session;
-            },
-
             getSessionValue: function() {
                 return _session;
             },
