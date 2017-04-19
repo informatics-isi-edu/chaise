@@ -7,6 +7,7 @@
         var vm = this;
         var context = $rootScope.context;
 
+
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
@@ -28,7 +29,6 @@
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
-        vm.showSubmissionError = showSubmissionError;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
@@ -95,10 +95,6 @@
 
             // Redirect to record or recordset app..
             $window.location = redirectUrl;
-        }
-
-        function showSubmissionError(response) {
-            ErrorService.catchAll(response);
         }
 
         /*
@@ -277,15 +273,9 @@
 
                         vm.resultset = true;
                     }
-                }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
+                }).catch(function (exception) {
+                    vm.submissionButtonDisabled = false;
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
                 var creatRef = $rootScope.reference.unfilteredReference.contextualize.entryCreate;
@@ -328,15 +318,9 @@
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
                     }
-                }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
+                }).catch(function (exception) {
+                    vm.submissionButtonDisabled = false;
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             }
         }
@@ -373,16 +357,14 @@
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
                         });
                     } else {
                         if (response !== 'cancel') {
-                            vm.showSubmissionError(response);
+                            throw response;
                         }
                     }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
                 $rootScope.reference.delete($rootScope.tuples).then(function deleteSuccess() {
@@ -409,14 +391,12 @@
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
                         });
                     } else {
-                        vm.showSubmissionError(response);
+                        throw response;
                     }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             }
         }
@@ -470,8 +450,6 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            }, function noDataSelected() {
-                // do nothing
             });
         }
 
