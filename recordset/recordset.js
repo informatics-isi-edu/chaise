@@ -113,7 +113,7 @@
             // add paging modifier
             if (recordsetModel.reference.location.paging)
                 url = url + recordsetModel.reference.location.paging;
-            
+
             // add ermrestjs supported queryParams
             if (recordsetModel.reference.location.queryParamsString) {
                 url = url + "?" + recordsetModel.reference.location.queryParamsString;
@@ -206,7 +206,7 @@
                     else
                         recordsetModel.pageLimit = 25;
                     recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
-                    
+
                      // the additional provided name
                     if (p_context.queryParams && p_context.queryParams.subset) {
                         recordsetModel.subTitle = p_context.queryParams.subset;
