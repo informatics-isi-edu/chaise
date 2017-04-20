@@ -131,7 +131,7 @@
                 AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
 
-                var errName = error.constructor.name;
+                var errName = exception.constructor.name;
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 
                 errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", errName, "Home Page", $window.location.origin,  exception.message , exception.stack);
