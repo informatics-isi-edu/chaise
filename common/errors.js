@@ -130,7 +130,11 @@
                 // A more useful general message for 412 Precondition Failed
                 AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
-                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", "Terminal Error", "Home Page", $window.location.origin,  exception.message , exception.stack);
+
+                var errName = error.constructor.name;
+                errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
+
+                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", errName, "Home Page", $window.location.origin,  exception.message , exception.stack);
             }
 
             exceptionFlag = true;
@@ -179,13 +183,15 @@ window.onerror = function() {
 
     if (!document || !document.body) return;
 
-    var html  = '<div id="divErrorModal">'
-        + '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">'
+    var errName = error.constructor.name;
+    errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
+
+    var html  = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">'
         + '<div class="modal-dialog" style="width:90% !important;">'
             + '<div class="modal-content" uib-modal-transclude="">'
                 + '<div class="modal-header">'
-                    + '<h3 class="modal-title ">Error: Terminal Error</h3>'
                     + (canClose ? '<button class="btn btn-default pull-right modal-close" type="button" onclick="document.getElementById(\"divErrorModal\").remove();">X</button>' : '')
+                    + '<h3 class="modal-title ">Error: ' + errName + '</h3>'
                 + '</div>'
                 + '<div class="modal-body ">'
                     + 'An unexpected error has occurred. Please report this problem to your system administrators.'
@@ -202,13 +208,15 @@ window.onerror = function() {
             + '</div>'
         + '</div>'
     + '</div>'
-    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>'
-    + '</div>';
+    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>';
 
     if (canClose) {
-        document.body.innerHTML = html;
+        var el = document.createElement('div');
+        el.id = "divErrorModal";
+        el.innerHTML = html;
+        document.body.appendChild(el);
     } else {
-        document.body.append(html);
+        document.body.innerHTML = html;
     }
 
 };
