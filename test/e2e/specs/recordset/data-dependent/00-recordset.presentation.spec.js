@@ -119,10 +119,8 @@ describe('View recordset,', function() {
             it("should use the default catalog and schema:table defined in chaise config if no catalog or schema:table is present in the uri.", function() {
                 browser.get(process.env.CHAISE_BASE_URL + "/recordset");
 
-                var pageTitle = chaisePage.recordsetPage.getPageTitleElement();
-
-                chaisePage.waitForElement(pageTitle, browser.params.defaultTimeout).then(function() {
-                    return pageTitle.getText();
+                chaisePage.waitForElement(chaisePage.recordsetPage.getPageLimitDropdown(), browser.params.defaultTimeout).then(function() {
+                    return chaisePage.recordsetPage.getPageTitleElement().getText();
                 }).then(function (title) {
                     expect(title).toBe("Dataset");
                 });
@@ -131,10 +129,8 @@ describe('View recordset,', function() {
             it("should use the default schema:table defined in chaise config if no schema:table is present in the uri.", function() {
                 browser.get(process.env.CHAISE_BASE_URL + "/recordset/#1");
 
-                var pageTitle = chaisePage.recordsetPage.getPageTitleElement();
-
-                chaisePage.waitForElement(pageTitle, browser.params.defaultTimeout).then(function() {
-                    return pageTitle.getText();
+                chaisePage.waitForElement(chaisePage.recordsetPage.getPageLimitDropdown(), browser.params.defaultTimeout).then(function() {
+                    return chaisePage.recordsetPage.getPageTitleElement().getText();
                 }).then(function (title) {
                     expect(title).toBe("Dataset");
                 });
