@@ -68,7 +68,6 @@
                 // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
                 session = Session.getSessionValue();
 
-                $rootScope.loading = true;
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
                 $rootScope.reference.session = session;
@@ -93,6 +92,8 @@
 
                 // related references
                 $rootScope.relatedReferences = $rootScope.reference.related(tuple);
+
+                $rootScope.loading = $rootScope.relatedReferences.length > 0;
 
                 // Collate tuple.isHTML and tuple.values into an array of objects
                 // i.e. {isHTML: false, value: 'sample'}
@@ -163,7 +164,7 @@
                 throw exception;
             });
         })
-        
+
 
         /**
          * it saves the location in $rootScope.location.

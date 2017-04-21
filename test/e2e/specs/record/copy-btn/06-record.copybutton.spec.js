@@ -64,8 +64,15 @@ describe('View existing record,', function() {
 
             it("should show when the page loads.", function() {
                 browser.wait(EC.elementToBeClickable(copyButton), browser.params.defaultTimeout);
+
                 copyButton.isDisplayed().then(function (bool) {
                     expect(bool).toBeTruthy();
+                });
+            });
+
+            it("should not show Loading... text when there are no related tables.", function() {
+                element(by.id('rt-loading')).isDisplayed().then(function (displayed) {
+                    expect(displayed).toBeFalsy();
                 });
             });
 
