@@ -2636,7 +2636,15 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 function getColumnDisplayName(column) {
 	var parts = column.split('_');
 	$.each(parts, function(i, part) {
-		parts[i] = part[0].toUpperCase() + part.substr(1);
+        if (part.length == 0) {
+            parts[i] = ' ';
+        }
+        else if (part.length == 1) {
+            parts[i] = part[0].toUpperCase();
+        }
+        else {
+            parts[i] = part[0].toUpperCase() + part.substr(1);
+        }
 	});
 	return parts.join(' ');
 }
