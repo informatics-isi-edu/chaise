@@ -44,7 +44,7 @@ describe('Edit existing record,', function() {
         it("should have the table displayname as part of the entity title.", function() {
             // if submit button is visible, this means the recordedit page has loaded
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create multi-add-table Record")
+                expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit multi-add-table Records")
             });
         });
 
