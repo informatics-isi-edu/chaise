@@ -91,7 +91,12 @@
                         catalogId = chaiseConfig.defaultCatalog;
 
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        if (tableConfig) {
+                            hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        } else {
+                            // no defined or default schema:table for catalogId
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
                     } else {
                         // no defined or default schema:table
                         throw new Errors.MalformedUriError(tableMissing);
@@ -120,7 +125,12 @@
                     // check for default Table
                     if (chaiseConfig.defaultTables) {
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        if (tableConfig) {
+                            hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        } else {
+                            // no defined or default schema:table for catalogId
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
                     } else {
                         // no defined or default schema:table
                         throw new Errors.MalformedUriError(tableMissing);
@@ -192,6 +202,8 @@
                 context.serviceURL = chaiseConfig.ermrestLocation;
             }
 
+            context.queryParams = {};
+
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
             var hash = location.hash;
@@ -211,8 +223,6 @@
 
             context.mainURI = hash; // uri without modifiers
             var modifierPath = uri.split(hash)[1];
-
-            context.queryParams = {};
 
             if (modifierPath) {
 

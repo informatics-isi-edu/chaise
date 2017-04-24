@@ -82,27 +82,71 @@ describe('View recordset,', function() {
         });
     });
 
-    it('should load custom CSS and document title defined in chaise-config.js', function() {
-        var chaiseConfig, tupleParams = testParams.tuples[0], keys = [];
-        tupleParams.keys.forEach(function(key) {
-            keys.push(key.name + key.operator + key.value);
+    describe("For chaise config properties", function () {
+        var EC = protractor.ExpectedConditions;
+
+        it('should load custom CSS and document title defined in chaise-config.js', function() {
+            var chaiseConfig, tupleParams = testParams.tuples[0], keys = [];
+            tupleParams.keys.forEach(function(key) {
+                keys.push(key.name + key.operator + key.value);
+            });
+            var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")";
+            browser.get(url);
+            chaisePage.waitForElement(element(by.id('page-title')), browser.params.defaultTimeout).then(function() {
+                return browser.executeScript('return chaiseConfig');
+            }).then(function(config) {
+                chaiseConfig = config;
+                return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
+            }).then(function(elemArray) {
+                expect(elemArray.length).toBeTruthy();
+                return browser.getTitle();
+            }).then(function(title) {
+                expect(title).toEqual(chaiseConfig.headTitle);
+            }).catch(function(error) {
+                console.log('ERROR:', error);
+                // Fail the test
+                expect('There was an error in this promise chain.').toBe('See the error msg for more info.');
+            });
         });
-        var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")";
-        browser.get(url);
-        chaisePage.waitForElement(element(by.id('page-title')), browser.params.defaultTimeout).then(function() {
-            return browser.executeScript('return chaiseConfig');
-        }).then(function(config) {
-            chaiseConfig = config;
-            return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
-        }).then(function(elemArray) {
-            expect(elemArray.length).toBeTruthy();
-            return browser.getTitle();
-        }).then(function(title) {
-            expect(title).toEqual(chaiseConfig.headTitle);
-        }).catch(function(error) {
-            console.log('ERROR:', error);
-            // Fail the test
-            expect('There was an error in this promise chain.').toBe('See the error msg for more info.');
+
+        describe("For when no catalog or schema:table is specified,", function() {
+            var baseUrl;
+
+            beforeAll(function () {
+                browser.ignoreSynchronization = true;
+            });
+
+            it("should use the default catalog and schema:table defined in chaise config if no catalog or schema:table is present in the uri.", function() {
+                browser.get(process.env.CHAISE_BASE_URL + "/recordset");
+
+                chaisePage.waitForElement(chaisePage.recordsetPage.getPageLimitDropdown(), browser.params.defaultTimeout).then(function() {
+                    return chaisePage.recordsetPage.getPageTitleElement().getText();
+                }).then(function (title) {
+                    expect(title).toBe("Dataset");
+                });
+            });
+
+            it("should use the default schema:table defined in chaise config if no schema:table is present in the uri.", function() {
+                browser.get(process.env.CHAISE_BASE_URL + "/recordset/#1");
+
+                chaisePage.waitForElement(chaisePage.recordsetPage.getPageLimitDropdown(), browser.params.defaultTimeout).then(function() {
+                    return chaisePage.recordsetPage.getPageTitleElement().getText();
+                }).then(function (title) {
+                    expect(title).toBe("Dataset");
+                });
+            });
+
+            it("should throw a malformed URI error when no default schema:table is set for a catalog.", function() {
+                browser.get(process.env.CHAISE_BASE_URL + "/recordset/#" + browser.params.catalogId);
+
+                var modalTitle = chaisePage.recordEditPage.getModalTitle();
+
+                chaisePage.waitForElement(modalTitle, browser.params.defaultTimeout).then(function() {
+                    return modalTitle.getText();
+                }).then(function (title) {
+                    expect(title).toBe("Error: MalformedUriError");
+                });
+            });
         });
     });
 
