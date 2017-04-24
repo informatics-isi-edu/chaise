@@ -116,25 +116,27 @@ describe('View recordset,', function() {
                 browser.ignoreSynchronization = true;
             });
 
-            it("should use the default catalog and schema:table defined in chaise config if no catalog or schema:table is present in the uri.", function() {
-                browser.get(process.env.CHAISE_BASE_URL + "/recordset");
+            if (!process.env.TRAVIS) {
+                it("should use the default catalog and schema:table defined in chaise config if no catalog or schema:table is present in the uri.", function() {
+                    browser.get(process.env.CHAISE_BASE_URL + "/recordset");
 
-                chaisePage.waitForElement(chaisePage.recordsetPage.getPageLimitDropdown(), browser.params.defaultTimeout).then(function() {
-                    return chaisePage.recordsetPage.getPageTitleElement().getText();
-                }).then(function (title) {
-                    expect(title).toBe("Dataset");
+                    chaisePage.waitForElement(chaisePage.recordsetPage.getPageLimitDropdown(), browser.params.defaultTimeout).then(function() {
+                        return chaisePage.recordsetPage.getPageTitleElement().getText();
+                    }).then(function (title) {
+                        expect(title).toBe("Dataset");
+                    });
                 });
-            });
 
-            it("should use the default schema:table defined in chaise config if no schema:table is present in the uri.", function() {
-                browser.get(process.env.CHAISE_BASE_URL + "/recordset/#1");
+                it("should use the default schema:table defined in chaise config if no schema:table is present in the uri.", function() {
+                    browser.get(process.env.CHAISE_BASE_URL + "/recordset/#1");
 
-                chaisePage.waitForElement(chaisePage.recordsetPage.getPageLimitDropdown(), browser.params.defaultTimeout).then(function() {
-                    return chaisePage.recordsetPage.getPageTitleElement().getText();
-                }).then(function (title) {
-                    expect(title).toBe("Dataset");
+                    chaisePage.waitForElement(chaisePage.recordsetPage.getPageLimitDropdown(), browser.params.defaultTimeout).then(function() {
+                        return chaisePage.recordsetPage.getPageTitleElement().getText();
+                    }).then(function (title) {
+                        expect(title).toBe("Dataset");
+                    });
                 });
-            });
+            }
 
             it("should throw a malformed URI error when no default schema:table is set for a catalog.", function() {
                 browser.get(process.env.CHAISE_BASE_URL + "/recordset/#" + browser.params.catalogId);
