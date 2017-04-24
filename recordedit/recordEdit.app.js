@@ -99,7 +99,7 @@
 
             // On resolution
             ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
-                
+
                 //contextualize the reference based on the mode (determined above) recordedit is in
                 if (context.mode == context.modes.EDIT) {
                     $rootScope.reference = reference.contextualize.entryEdit;
@@ -164,7 +164,7 @@
                             // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
                             // The submission data is copied back to the tuples object before submitted in the PUT request
                             $rootScope.tuples = angular.copy(page.tuples);
-                            $rootScope.displayname = ((context.queryParams.copy && page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
+                            $rootScope.displayname = ((context.queryParams.copy || page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
 
                             for (var j = 0; j < page.tuples.length; j++) {
                                 // initialize row objects {column-name: value,...}
