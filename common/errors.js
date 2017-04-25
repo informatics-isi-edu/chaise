@@ -122,7 +122,7 @@
         function handleException(exception) {
             $log.info(exception);
 
-            if (exceptionFlag || window.location.pathname.indexOf('/viewer/') != -1) return;
+            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.login($window.location.href);
