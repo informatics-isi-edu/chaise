@@ -117,7 +117,7 @@
                 scope.$watch(attr.validateValues, function(newObj, oldObj) {
                     // If newObj and oldObj are identical, then this listener fn was triggered
                     // due to app initialization, not an actual model change. Do nothing.
-                    if (newObj === oldObj) {
+                    if (newObj === oldObj || newObj == null) {
                         return;
                     }
                     var date = newObj.date,
