@@ -45,7 +45,7 @@
 
                 if (typeof fn  == 'function') {
                     _changeCbs[id] = fn;
-                } 
+                }
                 return id;
             },
 
@@ -222,15 +222,15 @@
 
     // If app is not search, viewer and login then attach the unauthorised 401 http handler to ermrestjs
 
-    if (pathname.indexOf('/search/') == -1 && pathname.indexOf('/viewer/') == -1 && pathname.indexOf('/login') == -1) {
-        
+    if (pathname.indexOf('/search/') == -1 && pathname.indexOf('/viewer/') == -1 && pathname.indexOf('/login') == -1 && pathname.indexOf('/logout') == -1) {
+
         angular.module('chaise.authen')
         .run(['ERMrest', '$injector', '$q', function runRecordEditApp(ERMrest, $injector, $q) {
-            
+
             var Session = $injector.get("Session");
-            
+
             // Bind callback function by invoking setHttpUnauthorizedFn handler passing the callback
-            // This callback will be called whenever 401 HTTP error is encountered unless there is 
+            // This callback will be called whenever 401 HTTP error is encountered unless there is
             // already login flow in progress
             ERMrest.setHttpUnauthorizedFn(function() {
                 var defer = $q.defer();
@@ -240,7 +240,7 @@
                 Session.loginInANewWindow(function() {
 
                     // Once the user has logged in fetch the new session and set the session value
-                    // and resolve the promise to notify ermrestjs that the user has logged in 
+                    // and resolve the promise to notify ermrestjs that the user has logged in
                     // and it can continue firing other queued calls
                     Session.getSession().then(function(_session) {
                         defer.resolve();
