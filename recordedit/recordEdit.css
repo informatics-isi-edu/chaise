@@ -115,7 +115,7 @@ input[type=number]::-webkit-outer-spin-button {
     }
 }
 
-#spinner {
+.modal-body #spinner {
   width: 100%;
   text-align: center;
   padding: 14px 0;
@@ -129,7 +129,7 @@ input[type=number]::-webkit-outer-spin-button {
   background: rgba(128, 128, 128, 0.25);
 }
 
-img.spinner{
+.modal-body img.spinner{
     display: block;
     margin: 0 auto;
     width: 32px;
