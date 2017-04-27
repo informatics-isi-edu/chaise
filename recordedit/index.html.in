@@ -22,9 +22,11 @@
 <body>
     <div class="container-fluid">
         <navbar></navbar>
+        <loading-spinner ng-show="!displayReady"></loading-spinner>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
             <div ng-controller="FormController as form" class="row">
                 <div ng-show="!form.resultset">
+                    <loading-spinner ng-show="form.submissionButtonDisabled"></loading-spinner>
                     <div class="col-xs-12">
                         <!-- Alerts section -->
                         <div ng-repeat="alert in form.alerts" class="row">
@@ -76,8 +78,6 @@
                                     </div>
                                 </div>
                                 <div class="row form-container" style="margin-top: 25px;">
-                                    <!-- loading spinner -->
-                                    <loading-spinner ng-show="!displayReady || form.submissionButtonDisabled"></loading-spinner>
                                     <div ng-show="displayReady" class="col-xs-12" id="formEditScroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
                                         <div ng-style="form.tableWidth"></div>
                                     </div>
