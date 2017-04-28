@@ -7,6 +7,7 @@
         var vm = this;
         var context = $rootScope.context;
 
+
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
@@ -28,7 +29,6 @@
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
-        vm.showSubmissionError = showSubmissionError;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
@@ -86,19 +86,15 @@
 
             // Created a single entity or Updated one
             if (rowset.length == 1) {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
+                AlertsService.addAlert('Your data has been submitted. Redirecting you now to the record...', 'success');
                 redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             } else {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the recordset...'});
+                AlertsService.addAlert('Your data has been submitted. Redirecting you now to the recordset...', 'success');
                 redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             }
 
             // Redirect to record or recordset app..
             $window.location = redirectUrl;
-        }
-
-        function showSubmissionError(response) {
-            ErrorService.catchAll(response);
         }
 
         /*
@@ -160,7 +156,7 @@
 
             if (form.$invalid) {
                 vm.readyToSubmit = false;
-                AlertsService.addAlert({type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'});
+                AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
                 form.$setSubmitted();
                 return;
             }
@@ -193,22 +189,23 @@
                 }
                 // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
                 $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-                    if (window.opener && window.opener.updated) {
+                    if (window.opener && window.opener.updated && context.queryParams.invalidate) {
                         window.opener.updated(context.queryParams.invalidate);
                     }
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
                     } else {
-                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        AlertsService.addAlert('Your data has been submitted. Showing you the result set...', 'success');
                         // can't use page.reference because it reflects the specific values that were inserted
-                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        var resultsReference = $rootScope.reference.contextualize.compact;
+                        vm.recordsetLink = resultsReference.appLink;
                         //set values for the view to flip to recordedit resultset view
                         vm.resultsetModel = {
                             hasLoaded: true,
-                            reference: page.reference,
-                            tableDisplayName: page.reference.displayname,
-                            columns: page.reference.columns,
+                            reference: resultsReference,
+                            tableDisplayName: resultsReference.displayname,
+                            columns: resultsReference.columns,
                             enableSort: false,
                             sortby: null,
                             sortOrder: null,
@@ -218,21 +215,71 @@
                             search: null,
                             config: {}
                         }
-                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+
+                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData($rootScope.tuples, resultsReference.columns);
+
+                        // NOTE: This case is for a pseudo-failure case
+                        // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
+                        if (page.tuples.length < $rootScope.tuples.length) {
+                            var tuplesOmitted = [],
+                                tuplesUpdated = [],
+                                omittedResultsPage = {};
+
+                            for (var j = 0; j < $rootScope.tuples.length; j++) {
+                                var submittedRow = $rootScope.tuples[j],
+                                    rowMatch = false;
+
+                                for (var k = 0; k < page.tuples.length; k++) {
+                                    var updatedRow = page.tuples[k],
+                                        shortestKeySet = resultsReference.table.shortestKey,
+                                        keyMatch = true;
+
+                                    for (var keyNameIndex = 0; keyNameIndex < shortestKeySet.length; keyNameIndex++) {
+                                        var key = shortestKeySet[keyNameIndex].name;
+
+                                        if (submittedRow.data[key] !== updatedRow.data[key]) {
+                                            keyMatch = false;
+                                            break;
+                                        }
+                                    }
+                                    if (keyMatch) {
+                                        rowMatch = true;
+                                    }
+                                }
+                                if (!rowMatch) {
+                                    tuplesOmitted.push(submittedRow);
+                                } else {
+                                    tuplesUpdated.push(submittedRow);
+                                }
+                            }
+                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesUpdated, resultsReference.columns);
+
+                            vm.omittedResultsetModel = {
+                                hasLoaded: true,
+                                reference: resultsReference,
+                                tableDisplayName: resultsReference.displayname,
+                                columns: resultsReference.columns,
+                                enableSort: false,
+                                sortby: null,
+                                sortOrder: null,
+                                page: page,
+                                pageLimit: model.rows.length,
+                                rowValues: [],
+                                search: null,
+                                config: {}
+                            }
+                            vm.omittedResultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesOmitted, resultsReference.columns);
+                        }
+
                         vm.resultset = true;
                     }
-                }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
+                }).catch(function (exception) {
+                    vm.submissionButtonDisabled = false;
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
-                $rootScope.reference.table.reference.create(model.submissionRows).then(function success(page) {
+                var creatRef = $rootScope.reference.unfilteredReference.contextualize.entryCreate;
+                creatRef.create(model.submissionRows).then(function success(page) {
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
                     if (vm.prefillCookie) {
                         $cookies.remove(context.queryParams.prefill);
@@ -250,7 +297,7 @@
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
                     } else {
-                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        AlertsService.addAlert('Your data has been submitted. Showing you the result set...', 'success');
                         // can't use page.reference because it reflects the specific values that were inserted
                         vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
                         //set values for the view to flip to recordedit resultset view
@@ -271,15 +318,9 @@
                         vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                         vm.resultset = true;
                     }
-                }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
+                }).catch(function (exception) {
+                    vm.submissionButtonDisabled = false;
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             }
         }
@@ -316,27 +357,21 @@
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
                         });
                     } else {
                         if (response !== 'cancel') {
-                            vm.showSubmissionError(response);
+                            throw response;
                         }
                     }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
                 $rootScope.reference.delete($rootScope.tuples).then(function deleteSuccess() {
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            deleteRecord();
-                        });
-                    } else if (response instanceof ERMrest.PreconditionFailedError) {
+                    if (response instanceof ERMrest.PreconditionFailedError) {
                         $uibModal.open({
                             templateUrl: "../common/templates/refresh.modal.html",
                             controller: "ErrorDialogController",
@@ -352,14 +387,12 @@
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
                         });
                     } else {
-                        vm.showSubmissionError(response);
+                        throw response;
                     }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             }
         }
@@ -413,8 +446,6 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            }, function noDataSelected() {
-                // do nothing
             });
         }
 
@@ -433,19 +464,12 @@
         }
 
         function createRecord(column) {
-            var newRef = column.reference.contextualize.entryCreate;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.open(appURL, '_blank');
-            }
+            $window.open(column.reference.contextualize.entryCreate.appLink, '_blank');
         }
 
         function copyFormRow() {
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
-                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.'});
+                AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
                 return true;
             }
             // Check if the prototype row to copy has any invalid values. If it
@@ -457,7 +481,7 @@
                 var value = protoRowValidityStates[key];
                 if (value.$dirty && value.$invalid) {
                     vm.readyToSubmit = false, validRow = false;
-                    AlertsService.addAlert({type: 'error', message: "Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again."});
+                    AlertsService.addAlert("Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again.", "error");
                     return true;
                 }
             });
@@ -530,7 +554,7 @@
             var name = column.name;
             var type = column.type.name;
             var displayType;
-            if (isForeignKey(column)) {
+            if (column.isForeignKey) {
                 displayType = 'popup-select';
             } else {
                 switch (type) {
@@ -585,10 +609,6 @@
             }
         }
 
-        function isForeignKey(column) {
-            return column.isPseudo;
-        }
-
         // Returns true if a column type is found in the given array of types
         function matchType(columnType, types) {
             if (types.indexOf(columnType) !== -1) {
@@ -607,7 +627,7 @@
                         return value;
                     }
                     return '';
-                } else if (isForeignKey(column)) {
+                } else if (column.isForeignKey) {
                     return 'Select a value';
                 }
             } catch (e) {

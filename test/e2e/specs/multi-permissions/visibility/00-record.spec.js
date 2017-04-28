@@ -86,10 +86,11 @@ describe('When viewing Record app', function() {
             expect(button.isPresent()).toBe(false);
         });
 
-        it('should display the related tables toggle as "Show All Related Records"', function() {
+        // As create only user, 'Hide Empty Related Tables' should appear because the user can create entities for one or more related tables
+        it('should display the related tables toggle as "Hide Empty Related Records"', function() {
             var button = recordPage.getShowAllRelatedEntitiesButton();
             expect(button.isDisplayed()).toBe(true);
-            expect(button.getText()).toBe("Show All Related Records");
+            expect(button.getText()).toBe("Hide Empty Related Records");
         });
 
         describe('the related tables', function() {
@@ -105,11 +106,11 @@ describe('When viewing Record app', function() {
                 expect(link.getText()).toBe('Add');
             });
 
-            it('should show an "Link" link if the table is an associative relationship', function() {
+            it('should show an "Add" link if the table is an associative relationship', function() {
                 // If a related table is an association table, it should show "Unlink"
                 var link = recordPage.getAddRecordLink('assoc_create_table');
                 expect(link.isDisplayed()).toBe(true);
-                expect(link.getText()).toBe('Link');
+                expect(link.getText()).toBe('Add');
             });
 
             it('should not show an "Add" or "Unlink" link if the table doesn\'t allow adding a new row', function() {

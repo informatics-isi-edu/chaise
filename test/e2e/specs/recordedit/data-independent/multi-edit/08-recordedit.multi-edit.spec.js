@@ -41,42 +41,46 @@ describe('Edit existing record,', function() {
             browser.get(browser.params.url + ":" + testParams.table_name + "/" + keys.join(";"));
         });
 
+        it("should have the table displayname as part of the entity title.", function() {
+            // if submit button is visible, this means the recordedit page has loaded
+            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+                expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit multi-add-table Records")
+            });
+        });
+
         it("should change their values and show a resultset table with 2 entities.", function() {
             var intInput1 = chaisePage.recordEditPage.getInputById(0, intDisplayName),
                 intInput2 = chaisePage.recordEditPage.getInputById(1, intDisplayName),
                 textInput1 = chaisePage.recordEditPage.getInputById(0, textDisplayName),
                 textInput2 = chaisePage.recordEditPage.getInputById(1, textDisplayName);
 
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+            // modify first form
+            // check value before that it loaded correctly
+            expect(intInput1.getAttribute("value")).toBe(intInput1DefaultVal);
+            chaisePage.recordEditPage.clearInput(intInput1);
+            browser.sleep(10);
+            intInput1.sendKeys(intInput1FirstVal);
+            // check value after it was changed
+            expect(intInput1.getAttribute("value")).toBe(intInput1FirstVal);
 
-                // modify first form
-                // check value before that it loaded correctly
-                expect(intInput1.getAttribute("value")).toBe(intInput1DefaultVal);
-                chaisePage.recordEditPage.clearInput(intInput1);
-                browser.sleep(10);
-                intInput1.sendKeys(intInput1FirstVal);
-                // check value after it was changed
-                expect(intInput1.getAttribute("value")).toBe(intInput1FirstVal);
+            expect(textInput1.getAttribute("value")).toBe(textInput1DefaultVal);
+            chaisePage.recordEditPage.clearInput(textInput1);
+            browser.sleep(10);
+            textInput1.sendKeys(textInput1FirstVal);
+            expect(textInput1.getAttribute("value")).toBe(textInput1FirstVal);
 
-                expect(textInput1.getAttribute("value")).toBe(textInput1DefaultVal);
-                chaisePage.recordEditPage.clearInput(textInput1);
-                browser.sleep(10);
-                textInput1.sendKeys(textInput1FirstVal);
-                expect(textInput1.getAttribute("value")).toBe(textInput1FirstVal);
+            // modify second form
+            expect(intInput2.getAttribute("value")).toBe(intInput2DefaultVal);
+            chaisePage.recordEditPage.clearInput(intInput2);
+            browser.sleep(10);
+            intInput2.sendKeys(intInput2FirstVal);
+            expect(intInput2.getAttribute("value")).toBe(intInput2FirstVal);
 
-                // modify second form
-                expect(intInput2.getAttribute("value")).toBe(intInput2DefaultVal);
-                chaisePage.recordEditPage.clearInput(intInput2);
-                browser.sleep(10);
-                intInput2.sendKeys(intInput2FirstVal);
-                expect(intInput2.getAttribute("value")).toBe(intInput2FirstVal);
-
-                expect(textInput2.getAttribute("value")).toBe(textInput2DefaultVal);
-                chaisePage.recordEditPage.clearInput(textInput2);
-                browser.sleep(10);
-                textInput2.sendKeys(textInput2FirstVal);
-                expect(textInput2.getAttribute("value")).toBe(textInput2FirstVal);
-            });
+            expect(textInput2.getAttribute("value")).toBe(textInput2DefaultVal);
+            chaisePage.recordEditPage.clearInput(textInput2);
+            browser.sleep(10);
+            textInput2.sendKeys(textInput2FirstVal);
+            expect(textInput2.getAttribute("value")).toBe(textInput2FirstVal);
         });
 
         describe("Submit " + testParams.keys_2.length + " records", function() {

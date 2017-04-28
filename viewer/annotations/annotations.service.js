@@ -42,10 +42,7 @@
                 iframe.postMessage({messageType: 'createAnnotation', content: _annotation}, origin);
                 return _annotation;
             }, function error(response) {
-                AlertsService.addAlert({
-                    type: 'error',
-                    message: response
-                });
+                AlertsService.addAlert(response, 'error');
                 console.log(response);
             });
         }
@@ -72,10 +69,7 @@
                     iframe.postMessage({messageType: 'updateAnnotation', content: _annotation}, origin);
                 }
             }, function error(response) {
-                AlertsService.addAlert({
-                    type: 'error',
-                    message: response
-                });
+                AlertsService.addAlert(response, 'error');
                 console.log(response);
             });
         }
@@ -91,10 +85,7 @@
 
                 iframe.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
             }, function error(response) {
-                AlertsService.addAlert({
-                    type: 'error',
-                    message: response
-                });
+                AlertsService.addAlert(response, 'error');
                 console.log(response);
             });
         }

@@ -2,7 +2,7 @@
     'use strict';
     angular.module('chaise.navbar', [
         'ngCookies',
-        'chaise.utils', 
+        'chaise.utils',
         'chaise.authen',
         'ui.bootstrap'
     ])
@@ -51,15 +51,18 @@
                 scope.signUpURL = chaiseConfig.signUpURL;
                 scope.profileURL = chaiseConfig.profileURL;
 
-                Session.getSession().then(function(session) {
-                    $rootScope.session = session;
+                Session.subscribeOnChange(function() {
+                    $rootScope.session = Session.getSessionValue();
 
-                    var user = session.client;
-                    scope.user = user.display_name || user.full_name || user.email || user;
-                }, function(error) {
-                    // No session = no user
-                    scope.user = null;
+                    if ($rootScope.session == null) {
+                        scope.user = null;
+                    } else {
+                        var user = $rootScope.session.client;
+                        scope.user = user.display_name || user.full_name || user.email || user;
+                    }
                 });
+
+                Session.getSession();
 
                 scope.login = function login() {
                     Session.login($window.location.href);

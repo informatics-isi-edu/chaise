@@ -38,6 +38,14 @@ a:hover, a:focus{
     z-index: 10;
 }
 
+img.spinner {
+    display: block;
+    margin: 0 auto;
+    width: 32px;
+    height: 32px;
+    opacity: 0.8;
+}
+
 .glyphicon-trash {
     color: #428bca;
 }
@@ -508,6 +516,16 @@ tbody{
     overflow-x: hidden;
 }
 
+.page-filters {
+    margin: 1em 0;
+}
+
+.page-filters .sub-title {
+    font-size: 1.2em;
+    color: #747474;
+    margin-left: 15px;
+}
+
 /************* custom buttons **************/
 .btn-no-focus:focus {
     outline: none;
@@ -554,7 +572,7 @@ input.search-progress {
     text-align: justify;
 }
 
-.modal-login .modal-title { 
+.modal-login .modal-title {
     font-size: 22px !important;
 }
 
@@ -593,4 +611,3 @@ input.search-progress {
 .mtl { margin-top: 20px; }
 .mbl { margin-bottom: 20px; }
 .marl { margin: 20px;  }
-

@@ -95,11 +95,6 @@
             $rootScope.location = $window.location.href;
         });
 
-        $scope.$on('error', function(event, exception) {
-            $log.warn(exception);
-            ErrorService.catchAll(exception);
-        });
-
         $scope.permalink = function() {
 
             // before run, use window location
@@ -119,7 +114,10 @@
             if (recordsetModel.reference.location.paging)
                 url = url + recordsetModel.reference.location.paging;
 
-            url = url + "?limit=" + recordsetModel.pageLimit;
+            // add ermrestjs supported queryParams
+            if (recordsetModel.reference.location.queryParamsString) {
+                url = url + "?" + recordsetModel.reference.location.queryParamsString;
+            }
 
             return url;
         };
@@ -131,7 +129,11 @@
                 link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + recordsetModel.pageLimit;
 
             return link;
-        }
+        };
+
+        $scope.unfiltered = function () {
+            return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;
+        };
 
     }])
 
@@ -181,48 +183,55 @@
 
 
             ERMrest.appLinkFn(UriUtils.appTagToURL);
-            Session.getSession().then(function getSession(_session) {
-                session = _session;
 
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }, function(exception) {
-                // do nothing but return without a session
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }).then(function getReference(reference) {
-                recordsetModel.reference = reference.contextualize.compact;
-                recordsetModel.context = "compact";
-                recordsetModel.reference.session = session;
+            // Subscribe to on change event for session
+            var subId = Session.subscribeOnChange(function() {
 
-                $log.info("Reference:", recordsetModel.reference);
+                // Unsubscribe onchange event to avoid this function getting called again
+                Session.unsubscribeOnChange(subId);
 
-                if (p_context.queryParams.limit)
-                    recordsetModel.pageLimit = parseInt(p_context.queryParams.limit);
-                else if (recordsetModel.reference.display.defaultPageSize)
-                    recordsetModel.pageLimit = recordsetModel.reference.display.defaultPageSize;
-                else
-                    recordsetModel.pageLimit = 25;
-                recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
-                recordsetModel.columns = recordsetModel.reference.columns;
-                recordsetModel.search = recordsetModel.reference.location.searchTerm;
+                ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                    session = Session.getSessionValue();
 
-                return recordsetModel.reference.read(recordsetModel.pageLimit);
-            }, function error(response) {
-                throw response;
-            }).then(function getPage(page) {
-                recordsetModel.page = page;
-                recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                recordsetModel.initialized = true;
-                recordsetModel.hasLoaded = true;
-            }, function error(response) {
-                throw response;
-            }).catch(function genericCatch(exception) {
-                $log.warn(exception);
-                recordsetModel.hasLoaded = true;
+                    recordsetModel.reference = reference.contextualize.compact;
+                    recordsetModel.context = "compact";
+                    recordsetModel.reference.session = session;
 
-                if (exception instanceof ERMrest.UnauthorizedError)
-                    ErrorService.catchAll(exception);
-                else
-                    ErrorService.errorPopup(exception.message, exception.code, "home page");
+                    $log.info("Reference:", recordsetModel.reference);
+
+                    if (p_context.queryParams.limit)
+                        recordsetModel.pageLimit = parseInt(p_context.queryParams.limit);
+                    else if (recordsetModel.reference.display.defaultPageSize)
+                        recordsetModel.pageLimit = recordsetModel.reference.display.defaultPageSize;
+                    else
+                        recordsetModel.pageLimit = 25;
+                    recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
+
+                     // the additional provided name
+                    if (p_context.queryParams && p_context.queryParams.subset) {
+                        recordsetModel.subTitle = p_context.queryParams.subset;
+                    }
+
+                    recordsetModel.columns = recordsetModel.reference.columns;
+                    recordsetModel.search = recordsetModel.reference.location.searchTerm;
+
+                    return recordsetModel.reference.read(recordsetModel.pageLimit);
+                }, function error(response) {
+                    throw response;
+                }).then(function getPage(page) {
+                    recordsetModel.page = page;
+                    recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                    recordsetModel.initialized = true;
+                    recordsetModel.hasLoaded = true;
+                }, function error(response) {
+                    throw response;
+                }).catch(function genericCatch(exception) {
+                    $log.warn(exception);
+                    recordsetModel.hasLoaded = true;
+
+                    throw exception;
+                });
+
             });
 
             /**
@@ -240,10 +249,7 @@
             UiUtils.setBootstrapDropdownButtonBehavior();
         } catch (exception) {
             // pass to error handler
-            if (exception instanceof ERMrest.UnauthorizedError)
-                ErrorService.catchAll(exception);
-            else
-                ErrorService.errorPopup(exception.message, exception.code, "home page");
+            throw exception;
         }
     }]);
 

@@ -43,11 +43,21 @@
                     "type": {
                         "typename": "int"
                     }
+                }, {
+                    "name": "generated",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int"]
+                    "*": ["id", "text", "int", "generated"]
                 },
                 "tag:misd.isi.edu,2015:display" : {
                     "markdown_name": "**Editable Id Table**"

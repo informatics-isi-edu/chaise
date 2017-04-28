@@ -52,8 +52,6 @@
                     var modalInstance = createModal();
                     modalInstance.result.then(function success() {
                         return scope.callback();
-                    }).catch(function error(response) {
-                        console.log(response);
                     });
                 }
             },
