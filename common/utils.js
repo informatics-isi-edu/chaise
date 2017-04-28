@@ -778,6 +778,14 @@
         }
     }])
 
+    // directive for including the loading spinner
+    .directive('loadingSpinner', function () {
+        return {
+            restrict: 'E',
+            templateUrl: '../common/templates/spinner.html'
+        }
+    })
+
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {
         return {

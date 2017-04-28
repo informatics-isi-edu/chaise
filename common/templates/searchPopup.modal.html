@@ -6,9 +6,6 @@
     </h3>
 </div>
 <div class="modal-body">
-    <div ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch" id="spinner">
-        <img src="loader.gif" class="spinner"/>
-        <div style="margin-top: 15px;">Loading...</div>
-    </div>
+    <loading-spinner ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch"></loading-spinner>
     <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok(tuple)"></recordset>
 </div>
