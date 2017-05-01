@@ -47,13 +47,6 @@
      *          $window.location.replace($scope.permalink());
      *          $rootScope.location = $window.location.href;
      *      });
-     *
-     * 2. error - an exception was caught
-     *
-     *      $scope.$on('error', function(event, exception) {
-     *          $log.warn(exception);
-     *          ErrorService.catchAll(exception);
-     *      });
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout','Session', function(DataUtils, $timeout, Session) {
 
@@ -141,13 +134,6 @@
                 scope.$emit('recordset-update');
 
             }, function error(exception) {
-                // If the errorcode is unauthorizederror (401) then open the login window to make the user login
-                if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                    return Session.loginInANewWindow(function() {
-                        //Once the user has logged in successfully trigger read again
-                        read(scope, isBackground);
-                    });
-                }
                 scope.vm.hasLoaded = true;
                 setSearchStates(scope, isBackground);
                 if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;

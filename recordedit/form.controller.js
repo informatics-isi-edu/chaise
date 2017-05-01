@@ -7,6 +7,7 @@
         var vm = this;
         var context = $rootScope.context;
 
+
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
@@ -28,7 +29,6 @@
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
-        vm.showSubmissionError = showSubmissionError;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
@@ -95,10 +95,6 @@
 
             // Redirect to record or recordset app..
             $window.location = redirectUrl;
-        }
-
-        function showSubmissionError(response) {
-            ErrorService.catchAll(response);
         }
 
         /*
@@ -222,7 +218,9 @@
                             rows: submissionRowsCopy
                         }
                     }
-                }).result.then(onSuccess);
+                }).result.then(onSuccess, function(exception) {
+                    
+                });
             }
         }
 
@@ -366,18 +364,9 @@
                         }
                         vm.resultset = true;
                     }
-
-
-                }, function error(exception) {
-                    vm.readyToSubmit = false;
+                }).catch(function (exception) {
                     vm.submissionButtonDisabled = false;
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        vm.showSubmissionError(exception);
-                    }
+                    AlertsService.addAlert(exception.message, 'error');
                 });
 
             });
@@ -448,27 +437,21 @@
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
                         });
                     } else {
                         if (response !== 'cancel') {
-                            vm.showSubmissionError(response);
+                            throw response;
                         }
                     }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
                 $rootScope.reference.delete($rootScope.tuples).then(function deleteSuccess() {
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            deleteRecord();
-                        });
-                    } else if (response instanceof ERMrest.PreconditionFailedError) {
+                    if (response instanceof ERMrest.PreconditionFailedError) {
                         $uibModal.open({
                             templateUrl: "../common/templates/refresh.modal.html",
                             controller: "ErrorDialogController",
@@ -484,14 +467,12 @@
                         }).result.then(function reload() {
                             // Reload the page
                             $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
                         });
                     } else {
-                        vm.showSubmissionError(response);
+                        throw response;
                     }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             }
         }
@@ -545,8 +526,6 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            }, function noDataSelected() {
-                // do nothing
             });
         }
 
@@ -655,7 +634,7 @@
             var name = column.name;
             var type = column.type.name;
             var displayType;
-            if (isForeignKey(column)) {
+            if (column.isForeignKey) {
                 displayType = 'popup-select';
             } else {
                 switch (type) {
@@ -716,10 +695,6 @@
             }
         }
 
-        function isForeignKey(column) {
-            return column.isPseudo;
-        }
-
         // Returns true if a column type is found in the given array of types
         function matchType(columnType, types) {
             if (types.indexOf(columnType) !== -1) {
@@ -738,7 +713,7 @@
                         return value;
                     }
                     return '';
-                } else if (isForeignKey(column)) {
+                } else if (column.isForeignKey) {
                     return 'Select a value';
                 }
             } catch (e) {

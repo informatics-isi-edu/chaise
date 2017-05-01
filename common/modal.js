@@ -20,7 +20,14 @@
     .controller('ErrorModalController', ['$uibModalInstance', 'params', function ErrorModalController($uibModalInstance, params) {
         var vm = this;
         vm.params = params;
-        
+        vm.details = false;
+        vm.linkText = "Show Details";
+
+        vm.showDetails = function() {
+            vm.details = !vm.details;
+            vm.linkText = (vm.details) ? "Hide Details" : "Show Details";
+        };
+
         vm.ok = function () {
             $uibModalInstance.close();
         };

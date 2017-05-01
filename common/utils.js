@@ -41,6 +41,10 @@
             title: "Your session has expired. Please login to continue.",
             message: "To open the login window press"
         },
+        "noSession": {
+            title: "Your need to be logged in to continue.",
+            message: "To open the login window press"
+        },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set."
     })
 
@@ -87,7 +91,12 @@
                         catalogId = chaiseConfig.defaultCatalog;
 
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        if (tableConfig) {
+                            hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        } else {
+                            // no defined or default schema:table for catalogId
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
                     } else {
                         // no defined or default schema:table
                         throw new Errors.MalformedUriError(tableMissing);
@@ -116,7 +125,12 @@
                     // check for default Table
                     if (chaiseConfig.defaultTables) {
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        if (tableConfig) {
+                            hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        } else {
+                            // no defined or default schema:table for catalogId
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
                     } else {
                         // no defined or default schema:table
                         throw new Errors.MalformedUriError(tableMissing);
@@ -188,6 +202,8 @@
                 context.serviceURL = chaiseConfig.ermrestLocation;
             }
 
+            context.queryParams = {};
+
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
             var hash = location.hash;
@@ -207,8 +223,6 @@
 
             context.mainURI = hash; // uri without modifiers
             var modifierPath = uri.split(hash)[1];
-
-            context.queryParams = {};
 
             if (modifierPath) {
 
@@ -769,6 +783,14 @@
             getRandomInt: getRandomInt
         }
     }])
+
+    // directive for including the loading spinner
+    .directive('loadingSpinner', function () {
+        return {
+            restrict: 'E',
+            templateUrl: '../common/templates/spinner.html'
+        }
+    })
 
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {

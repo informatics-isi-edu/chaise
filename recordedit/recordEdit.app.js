@@ -51,62 +51,64 @@
         UiUtils.setBootstrapDropdownButtonBehavior();
         UriUtils.setLocationChangeHandling();
 
-        try {
-            // If defined but false, throw an error
-            if (!chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
-                var message = 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.';
-                var error = new Error(message);
-                error.code = "Record Editing Disabled";
+        // If defined but false, throw an error
+        if (!chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
+            var message = 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.';
+            var error = new Error(message);
+            error.code = "Record Editing Disabled";
 
-                throw error;
-            }
+            throw error;
+        }
 
-            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
-            context.appName = "recordedit";
-            context.MAX_ROWS_TO_ADD = 201;
+        context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
+        context.appName = "recordedit";
+        context.MAX_ROWS_TO_ADD = 201;
 
-            // modes = create, edit, copy
-            // create is contextualized to entry/create
-            // edit is contextualized to entry/edit
-            // copy is contextualized to entry/create
-            // NOTE: copy is technically creating an entity so it needs the proper visible column list as well as the data for the record associated with the given filter
+        // modes = create, edit, copy
+        // create is contextualized to entry/create
+        // edit is contextualized to entry/edit
+        // copy is contextualized to entry/create
+        // NOTE: copy is technically creating an entity so it needs the proper visible column list as well as the data for the record associated with the given filter
 
-            context.modes = {
-                COPY: "copy",
-                CREATE: "create",
-                EDIT: "edit"
-            }
-            // mode defaults to create
-            context.mode = context.modes.CREATE;
+        context.modes = {
+            COPY: "copy",
+            CREATE: "create",
+            EDIT: "edit"
+        }
+        // mode defaults to create
+        context.mode = context.modes.CREATE;
 
-            // Mode can be any 3 with a filter
-            if (context.filter) {
-                // prefill always means create
-                // copy means copy regardless of a limit defined
-                // edit is everything else with a filter
-                context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
-            } else if (context.queryParams.limit) {
-                context.mode = context.modes.EDIT;
-            }
+        // Mode can be any 3 with a filter
+        if (context.filter) {
+            // prefill always means create
+            // copy means copy regardless of a limit defined
+            // edit is everything else with a filter
+            context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
+        } else if (context.queryParams.limit) {
+            context.mode = context.modes.EDIT;
+        }
 
+        ERMrest.appLinkFn(UriUtils.appTagToURL);
 
-            Session.getSession().then(function getSession(_session) {
-                session = _session;
-                ERMrest.appLinkFn(UriUtils.appTagToURL);
+        // Subscribe to on change event for session
+        var subId = Session.subscribeOnChange(function() {
 
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }, function sessionFailed() {
-                // do nothing but return without a session
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }).then(function getReference(reference) {
+            // Unsubscribe onchange event to avoid this function getting called again
+            Session.unsubscribeOnChange(subId);
+
+            // On resolution
+            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+
                 //contextualize the reference based on the mode (determined above) recordedit is in
                 if (context.mode == context.modes.EDIT) {
                     $rootScope.reference = reference.contextualize.entryEdit;
                 } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
                     $rootScope.reference = reference.contextualize.entryCreate;
                 }
+
+                session = Session.getSessionValue();
 
                 $rootScope.reference.session = session;
                 $rootScope.session = session;
@@ -163,7 +165,7 @@
                             // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
                             // The submission data is copied back to the tuples object before submitted in the PUT request
                             $rootScope.tuples = angular.copy(page.tuples);
-                            $rootScope.displayname = ((context.queryParams.copy && page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
+                            $rootScope.displayname = ((context.queryParams.copy || page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
 
                             for (var j = 0; j < page.tuples.length; j++) {
                                 // initialize row objects {column-name: value,...}
@@ -172,7 +174,7 @@
                                 recordEditModel.submissionRows[j] = {};
 
                                 var tuple = page.tuples[j],
-                                    values = tuple.values;
+                                values = tuple.values;
 
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                     column = $rootScope.reference.columns[i];
@@ -236,21 +238,19 @@
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                         }, function error(response) {
-                            $log.warn(response);
                             throw response;
-                        }).catch(function readCatch(exception) {
-                            ErrorService.errorPopup(exception.message, exception.code, "home page");
                         });
                     } else if (session) {
                         var notAuthorizedMessage = "You are not authorized to Update entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
+                        // user logged in but not allowed (forbidden)
                         notAuthorizedError.code = errorNames.forbidden;
 
                         throw notAuthorizedError;
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Update entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
-
+                        // user not logged in (unauthorized)
                         notAuthorizedError.code = errorNames.unauthorized;
 
                         throw notAuthorizedError;
@@ -298,7 +298,7 @@
                         });
 
                         $rootScope.displayReady = true;
-                    // if there is a session, user isn't allowed to create
+                        // if there is a session, user isn't allowed to create
                     } else if (session) {
                         var forbiddenMessage = "You are not authorized to Create entities.";
                         var forbiddenError = new Error(forbiddenMessage);
@@ -306,7 +306,7 @@
                         forbiddenError.code = errorNames.forbidden;
 
                         throw forbiddenError;
-                    // user isn't logged in and needs permissions to create
+                        // user isn't logged in and needs permissions to create
                     } else {
                         var notAuthorizedMessage = "You are not authorized to Create entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
@@ -317,19 +317,9 @@
                     }
                 }
             }, function error(response) {
-                $log.warn(response);
                 throw response;
-            }).catch(function genericCatch(exception) {
-                if (exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
-                    ErrorService.catchAll(exception);
-                } else if (exception.code == errorNames.forbidden) {
-                    ErrorService.errorPopup(exception.message, exception.code, "previous page", $window.document.referrer);
-                } else {
-                    ErrorService.errorPopup(exception.message, exception.code, "home page");
-                }
             });
-        } catch (exception) {
-            ErrorService.errorPopup(exception.message, exception.code, "home page");
-        }
+        });
+
     }]);
 })();

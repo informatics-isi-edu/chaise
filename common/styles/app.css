@@ -38,6 +38,14 @@ a:hover, a:focus{
     z-index: 10;
 }
 
+img.spinner {
+    display: block;
+    margin: 0 auto;
+    width: 32px;
+    height: 32px;
+    opacity: 0.8;
+}
+
 .glyphicon-trash {
     color: #428bca;
 }
@@ -590,7 +598,7 @@ input.search-progress {
     text-align: justify;
 }
 
-.modal-login .modal-title { 
+.modal-login .modal-title {
     font-size: 22px !important;
 }
 
@@ -629,4 +637,3 @@ input.search-progress {
 .mtl { margin-top: 20px; }
 .mbl { margin-bottom: 20px; }
 .marl { margin: 20px;  }
-

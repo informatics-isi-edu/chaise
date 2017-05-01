@@ -91,10 +91,8 @@
             var reference = params.reference;
             // The controller uses a bunch of variables that're being used to keep track of current state of upload.
 
-            vm.serverError = false;
-            vm.uploadError = false;
-            vm.checksumError = false;
-
+            vm.erred = false;
+            
             vm.totalSize = 0;
             vm.humanTotalSize = 0
             vm.noOfFiles = 0;
@@ -220,15 +218,13 @@
 
             // This function is called by all rejected promises form above functions
             var onError = function(err) {
-                if (vm.uploadError || vm.checksumError) return;
+                if (vm.erred) return;
                 
-                vm.checksumError = true;
+                vm.erred = true;
                 
                 abortUploads();
 
-                $uibModalInstance.dismiss();
-                
-                throw err;
+                $uibModalInstance.dismiss(err);
             };
 
             

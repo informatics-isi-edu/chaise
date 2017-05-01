@@ -27,8 +27,8 @@
         "params": {
             "tuples" : [{
                 "table_name": "editable-id-table",
-                "table_inner_html_display": "<strong>Editable Id Table</strong>",
                 "table_displayname": "Editable Id Table",
+                "table_inner_html_display": "<strong>Editable Id Table</strong>",
                 "entity_title": "1",
                 "entity_inner_html_title": "<strong>1</strong>",
                 "html_table_name": "html-name-table",
