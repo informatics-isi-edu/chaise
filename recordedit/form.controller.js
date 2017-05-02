@@ -115,12 +115,6 @@
             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                 var col = $rootScope.reference.columns[i];
 
-                // If this column is disabled, its value is already in the format
-                // needed for submission.
-                if (col.getInputDisabled(context.appContext)) {
-                    continue;
-                }
-
                 var rowVal = row[col.name];
                 if (rowVal) {
                     switch (col.type.name) {
@@ -132,7 +126,8 @@
                                 } else if (rowVal.date && rowVal.time === null) {
                                     rowVal.time = '00:00:00';
                                     rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                                } else if (!rowVal.date || !rowVal.time || !rowVal.meridiem) {
+                                // if the input is disabled, rowVal will be a string instead of a datetime object
+                                } else if ((!rowVal.date || !rowVal.time || !rowVal.meridiem) && !col.getInputDisabled(context.appContext)) {
                                     rowVal = null;
                                 }
                             }
