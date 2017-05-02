@@ -103,6 +103,7 @@
          * Date/Timestamptz: If the value is empty ('') then set it as null
          */
         function transformRowValues(row) {
+            var transformedRow = {};
             /* Go through the set of columns for the reference.
              * If a value for that column is present (row[col.name]), transform the row value as needed
              * NOTE:
@@ -143,9 +144,9 @@
                             break;
                     }
                 }
-                row[col.name] = rowVal;
+                transformedRow[col.name] = rowVal;
             }
-            return row;
+            return transformedRow;
         }
 
         function submit() {
