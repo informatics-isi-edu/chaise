@@ -49,9 +49,9 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 
 	$scope.FacetsData = FacetsData;
 
-	if (chaiseConfig['pageSize'] !== undefined) {
+	if (chaiseConfig['searchPageSize'] !== undefined) {
 		$scope.FacetsData.pagingOptions.pageSizes.empty();
-		$scope.FacetsData.pagingOptions.pageSize = chaiseConfig['pageSize'];
+		$scope.FacetsData.pagingOptions.pageSize = chaiseConfig['searchPageSize'];
 		$scope.FacetsData.pagingOptions.pageSizes.push($scope.FacetsData.pagingOptions.pageSize);
 		$scope.FacetsData.pagingOptions.pageSizes.push(2*$scope.FacetsData.pagingOptions.pageSize);
 		$scope.FacetsData.pagingOptions.pageSizes.push(4*$scope.FacetsData.pagingOptions.pageSize);
