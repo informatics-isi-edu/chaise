@@ -133,9 +133,6 @@
                             }
                             break;
                         default:
-                            if (rowVal === '') {
-                                rowVal = null;
-                            }
                             break;
                     }
                 }
