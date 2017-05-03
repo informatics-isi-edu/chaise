@@ -602,7 +602,11 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 				var checkValues = [];
 				$.each(value['values'], function(checkbox_key, checkbox_value) {
 					if (checkbox_value) {
-						checkValues.push(encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(checkbox_key));
+						if (checkbox_key == 'null') {
+							checkValues.push(encodeSafeURIComponent(key) + '::null::');
+						} else {
+							checkValues.push(encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(checkbox_key));
+						}
 					}
 				});
 				checkValues = checkValues.join(';');
@@ -1323,9 +1327,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			entity[col]['ready'] = true;
 			var values = [];
 			$.each(data, function(i, row) {
-				if (row[col] != null) {
-					values.push(row[col]);
-				}
+				values.push(row[col]);
 			});
 			entity[col]['values'] = values;
 		} else if (entity[col]['type'] == 'select') {
@@ -2597,9 +2599,7 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 		entity[col]['ready'] = true;
 		var values = [];
 		$.each(data, function(i, row) {
-			if (row[col] != null) {
-				values.push(row[col]);
-			}
+			values.push(row[col]);
 		});
 		entity[col]['values'] = values;
 	} else if (sliderPresentation.contains(entity[col]['type'])) {
@@ -3694,9 +3694,7 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 		ready = true;
 		var values = [];
 		$.each(data, function(i, row) {
-			if (row[col] != null) {
-				values.push(row[col]);
-			}
+			values.push(row[col]);
 		});
 		options['colsGroup'][table][col] = {};
 		options['colsDescr'][table][col]['type'] = col_type;
