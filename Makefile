@@ -62,7 +62,6 @@ CAT=cat
 
 # HTML
 HTML=search/index.html \
-	 logout/index.html \
 	 login/index.html \
 	 detailed/index.html \
 	 recordset/index.html \
@@ -129,7 +128,6 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestFilterController.js \
 	$(JS)/controller/ermrestInitController.js \
 	$(JS)/controller/ermrestLoginController.js \
-	$(JS)/controller/ermrestLogoutController.js \
 	$(JS)/controller/ermrestResultsController.js \
 	$(JS)/controller/ermrestSideBarController.js \
 	$(JS)/controller/ermrestTourController.js \
@@ -527,10 +525,6 @@ search/index.html: search/index.html.in .make-asset-block .make-template-block
 login/index.html: login/index.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		login/index.html.in > login/index.html
-
-logout/index.html: logout/index.html.in .make-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		logout/index.html.in > logout/index.html
 
 detailed/index.html: detailed/index.html.in .make-detailed-asset-block .make-detailed-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-detailed-asset-block' -e 'd' -e '}' \

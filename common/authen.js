@@ -202,17 +202,16 @@
             },
 
             logout: function() {
-                var logoutURL = chaiseConfig['logoutURL'];
+                var logoutURL = chaiseConfig['logoutURL'] ? chaiseConfig['logoutURL'] : '/';
                 var url = serviceURL + "/authn/session";
-                if (logoutURL === undefined) {
-                    logoutURL = $window.location.origin + '/chaise/logout';
-                }
+
                 url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
 
                 $http.delete(url).then(function(response) {
-                    $window.location = response.data.logout_url ;
+                    $window.location = response.data.logout_url;
                 }, function(error) {
-                    $window.location = '../logout';
+                    // if the logout fails for some reason, send the user to the logout url as defined above
+                    $window.location = logoutURL;
                 });
             }
         }
@@ -222,7 +221,7 @@
 
     // If app is not search, viewer and login then attach the unauthorised 401 http handler to ermrestjs
 
-    if (pathname.indexOf('/search/') == -1 && pathname.indexOf('/viewer/') == -1 && pathname.indexOf('/login') == -1 && pathname.indexOf('/logout') == -1) {
+    if (pathname.indexOf('/search/') == -1 && pathname.indexOf('/viewer/') == -1 && pathname.indexOf('/login') == -1) {
 
         angular.module('chaise.authen')
         .run(['ERMrest', '$injector', '$q', function runRecordEditApp(ERMrest, $injector, $q) {
