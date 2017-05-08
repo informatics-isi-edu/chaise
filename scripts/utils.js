@@ -81,12 +81,12 @@ function clearFacets(options) {
 	var pagingOptions = options['pagingOptions'];
 	$.each(pagingOptions, function(key, value) {
 		if (key == 'pageSizes') {
-			value.empty();
-			value.push(25);
-			value.push(50);
-			value.push(100);
+			//value.empty();
+			//value.push(25);
+			//value.push(50);
+			//value.push(100);
 		} else if (key == 'pageSize') {
-			pagingOptions[key] = 25;
+			//pagingOptions[key] = 25;
 		} else if (key == 'currentPage') {
 			pagingOptions[key] = 1;
 		} else {

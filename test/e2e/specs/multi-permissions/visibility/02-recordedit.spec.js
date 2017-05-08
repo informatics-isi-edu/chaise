@@ -6,35 +6,41 @@ var recordEditPage = chaisePage.recordEditPage;
 
 
 describe('When viewing RecordEdit app', function() {
-    var EC = protractor.ExpectedConditions, baseUrl, url;
+    var EC = protractor.ExpectedConditions, baseUrl, url, modalBody;
     beforeAll(function() {
         baseUrl = browser.params.url.replace('/record', '/recordedit');
     });
 
     it('as a create-only user, the app should not load the form and displays error modal instead', function() {
         url = baseUrl + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value
+        modalBody = element(by.css('.modal-body'));
+
         browser.get(url);
-        chaisePage.waitForUrl(url).then(function() {
+        chaisePage.waitForElement(modalBody).then(function() {
             expect(element(by.id('entity-title')).isPresent()).toBe(false);
-            expect(element(by.css('.modal-body')).isDisplayed()).toBe(true);
+            expect(modalBody.isDisplayed()).toBe(true);
         });
     });
 
     it('as a read-only user, the app should not load the form and displays error modal instead', function() {
         url = baseUrl + ':main_read_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value
+        modalBody = element(by.css('.modal-body'));
+
         browser.get(url);
-        chaisePage.waitForUrl(url).then(function() {
+        chaisePage.waitForElement(modalBody).then(function() {
             expect(element(by.id('entity-title')).isPresent()).toBe(false);
-            expect(element(by.css('.modal-body')).isDisplayed()).toBe(true);
+            expect(modalBody.isDisplayed()).toBe(true);
         });
     });
 
     it('as a delete-only user, the app should not load the form and displays error modal instead', function() {
         url = baseUrl + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value
+        modalBody = element(by.css('.modal-body'));
+
         browser.get(url);
-        chaisePage.waitForUrl(url).then(function() {
+        chaisePage.waitForElement(modalBody).then(function() {
             expect(element(by.id('entity-title')).isPresent()).toBe(false);
-            expect(element(by.css('.modal-body')).isDisplayed()).toBe(true);
+            expect(modalBody.isDisplayed()).toBe(true);
         });
     });
 

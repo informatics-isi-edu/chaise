@@ -11,7 +11,6 @@ var ermrestApp = angular.module('ermrestApp', [
   'ngCookies',
   'chaise.navbar',
   'ermLoginController',
-  'ermLogoutController',
   'facetsModel',
   'facetsService',
   'ermInitController',
