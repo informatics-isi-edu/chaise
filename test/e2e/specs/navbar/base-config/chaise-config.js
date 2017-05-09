@@ -7,39 +7,12 @@
 */
 
 var chaiseConfig = {
-    name: "navebar",
-    layout: 'list',
-    confirmDelete: true,
-    customCSS: '/assets/css/chaise.css',
+    name: "navbar base",
     navbarBrand: 'test123',
     navbarBrandImage: 'test123.jpg',
     navbarBrandText: 'test123',
     headTitle: 'this one should be ignored in favor of navbarBrandText',
-    logoutURL: 'test123',
-    profileURL: 'test123l;akjdf;lakdsjf',
-    dataBrowser: '/',
-    maxColumns: 6,
-    showUnfilteredResults: false,
-    defaultAnnotationColor: 'red',
-    feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
-    helpURL: '/help/using-the-data-browser/',
-    showBadgeCounts: false,
-    recordUiGridEnabled: false,
-    recordUiGridExportCSVEnabled: true,
-    recordUiGridExportPDFEnabled: true,
-    editRecord: true,
-    deleteRecord: true,
-    tour: {
-      pickRandom: false,
-      searchInputAttribute: "Data",
-      searchChosenAttribute: "Data Type",
-      searchInputValue: "micro",
-      extraAttribute: "Mouse Anatomic Source",
-      chosenAttribute: "Data Type",
-      chosenValue: "Expression microarray - gene"
-   },
-   signUpURL: 'test123.coma;lksjf;laksj',
-   navbarMenu: {
+    navbarMenu: {
        newTab: true,
        children: [
            {
