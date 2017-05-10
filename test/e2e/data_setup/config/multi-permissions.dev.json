@@ -8,7 +8,7 @@
                 ]
             },
             "schema": {
-                "name": "multi-permissions.json",
+                "name": "multi-permissions",
                 "createNew": true,
                 "path": "test/e2e/data_setup/schema/multi-permissions.json"
             },
