@@ -65,7 +65,6 @@ HTML=search/index.html \
 	 login/index.html \
 	 detailed/index.html \
 	 recordset/index.html \
-	 matrix/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
 	 record/index.html
@@ -95,7 +94,6 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/ermrest.css \
 	$(CSS)/app.css \
 	$(COMMON)/styles/appheader.css \
-	$(CSS)/matrix.css \
 	$(CSS)/tour.css
 
 # JavaScript source and test specs
@@ -131,9 +129,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestResultsController.js \
 	$(JS)/controller/ermrestSideBarController.js \
 	$(JS)/controller/ermrestTourController.js \
-	$(JS)/controller/ermrestMatrixController.js \
 	$(JS)/tour.js \
-	$(JS)/matrix.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
@@ -155,9 +151,6 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermsidebar.html \
 	$(TEMPLATES)/ermretrievefilters.html \
 	$(TEMPLATES)/ermretrieveresults.html
-
-MATRIX_TEMPLATES_DEPS =$(TEMPLATES)/erminit.html \
-    $(TEMPLATES)/ermmatrix.html
 
 DETAILED_TEMPLATES=detailed/assets/views/detailed.html
 RECSET_TEMPLATES_DEPS=recordset/recordset.html
@@ -540,11 +533,6 @@ recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-temp
 		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
 		recordset/index.html.in > recordset/index.html
 
-matrix/index.html: matrix/index.html.in .make-asset-block .make-matrix-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-matrix-template-block' -e 'd' -e '}' \
-		matrix/index.html.in > matrix/index.html
-
 viewer/index.html: viewer/index.html.in .make-viewer-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
 		viewer/index.html.in > viewer/index.html
@@ -605,12 +593,6 @@ $(JS_CONFIG): chaise-config-sample.js
 	> .make-rs-template-block
 	for file in $(RECSET_TEMPLATES_DEPS); do \
 		$(CAT) $$file >> .make-rs-template-block ; \
-	done
-
-.make-matrix-template-block: $(MATRIX_TEMPLATES_DEPS)
-	> .make-matrix-template-block
-	for file in $(MATRIX_TEMPLATES_DEPS); do \
-		$(CAT) $$file >> .make-matrix-template-block ; \
 	done
 
 .make-detailed-template-block: $(DETAILED_TEMPLATES)
