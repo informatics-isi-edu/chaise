@@ -220,7 +220,7 @@
                                             value = (!isNaN(floatVal) ? floatVal : null);
                                             break;
                                         default:
-                                            if (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {                                            
+                                            if (column.isAsset) {                                            
                                                 value = { url: values[i] || "" }; 
                                             } else {
                                                 value = values[i];
@@ -280,7 +280,7 @@
                                             meridiem: 'AM'
                                         };
                                     }
-                                } else if (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
+                                } else if (column.isAsset) {
                                     recordEditModel.rows[0][column.name] = {
                                         url: ""
                                     }

@@ -117,7 +117,7 @@
                 // If this column is disabled, its value is already in the format
                 // needed for submission.
                 var rowVal = row[col.name];
-                if (col._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
+                if (col.isAsset) {
                     if (!vm.readyToSubmit) {
                         rowVal = { url: "" };
                     }
@@ -176,14 +176,17 @@
                     // NOTE: each file object has an hatracObj property which is an hatrac object
                     try {
                         var column = $rootScope.reference.columns.find(function(c) { return c.name == k;  });
-                        if (column) {
-                            var annotation = column._base.annotations.get("tag:isrd.isi.edu,2016:asset");
-
-                            if (row[k] == null && !column.nullok) {
+                        if (column.isAsset) {
+                            
+                            if (row[k].url == "" && !column.nullok) {
+                                isValid = false;
                                 AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
                             } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
                                 try {
-                                    row[k].hatracObj.validateURL(column, row);
+                                    if (!row[k].hatracObj.validateURL(row)) {
+                                        isValid = false; 
+                                        AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
+                                    } 
                                 } catch(e) {
                                     isValid = false;
                                     AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
@@ -219,8 +222,13 @@
                         }
                     }
                 }).result.then(onSuccess, function(exception) {
-                    
+                    vm.readyToSubmit = false;
+                    vm.submissionButtonDisabled = false;
+                    AlertsService.addAlert(exception.message, 'error');
                 });
+            } else {
+                vm.readyToSubmit = false;
+                vm.submissionButtonDisabled = false;
             }
         }
 
@@ -591,8 +599,8 @@
         function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
             var transformedRow = transformRowValues(modelRow);
             columns.forEach(function (column) {
-                // If the column is a pseudo column, it needs to get the originating columns name for data submission
-                if (column.isPseudo) {
+                // If the column is a foreign key column, it needs to get the originating columns name for data submission
+                if (column.isForeignKey) {
 
                     var foreignKeyColumns = column.foreignKey.colset.columns;
                     for (var k = 0; k < foreignKeyColumns.length; k++) {
@@ -612,7 +620,7 @@
                             }
                         }
                     }
-                // not pseudo, column.name is sufficient for the keys
+                // not foreign key, column.name is sufficient for the keys
                 } else {
                     // set null if not set so that the whole data object is filled out for posting to ermrestJS
                     submissionRow[column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
@@ -664,17 +672,15 @@
                         break;
                     case 'markdown':
                     case 'longtext':
-                        displayType = 'longtext';
+                        if (column.isAsset) {
+                            displayType = 'file';
+                        } else {
+                            displayType = 'longtext';
+                        }   
                         break;
                     case 'shorttext':
                     default:
-
-                        //TODO: needs to be a part of ermrestjs for determining file upload type
-                        if (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) {
-                            displayType = 'file';
-                        } else {
-                            displayType = 'text';
-                        }
+                        displayType = 'text';
                         break;
                 }
             }

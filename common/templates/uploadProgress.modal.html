@@ -42,10 +42,7 @@
 	    <div class="progress-percent">{{ctrl.uploadProgress | number:0}}%</div>
     </div>
     <div class="row no-row-margin" ng-show="ctrl.isUpload && (ctrl.uploadCompleted == ctrl.noOfFiles)">
-    	<div class="col-md-12  pad0-left pad0-right">
-	    	<strong>Finalizing Upload</strong>
-    	</div>
-    	<div class="col-md-6 pad0-left pad0-right text-right">
+    	<div class="col-md-12 pad0-left pad0-right text-right">
 	    	<strong>Completed: {{ctrl.uploadJobCompletedCount}}/{{ctrl.noOfFiles}}</strong>
     	</div>
 	    <div class="progress">

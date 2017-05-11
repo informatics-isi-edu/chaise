@@ -12,7 +12,8 @@
                 scope: {
                     column: '=',
                     values: '=',
-                    value: '='
+                    value: '=',
+                    reference: '='
                 },
                 link: function (scope, element,attrs, ngModel) {
                     scope.fileEl;
@@ -31,7 +32,8 @@
                                 scope.value.file = event.target.files[0];
                                 scope.value.hatracObj = new ERMrest.Upload(scope.value.file, {
                                     defaultTemplate: window.location.protocol + "//" + window.location.host + "/hatrac/test10/{{{" + scope.column.name + ".md5_hex}}}",
-                                    column: scope.column
+                                    column: scope.column,
+                                    reference: scope.reference
                                 });
                                 scope.value.url = scope.value.file.name;
                                 scope.$apply();
@@ -60,7 +62,7 @@
                 The code iterates over all rows, to find for file objects and creates an uploadFile type object.
                 It calls calculateChecksum if there are any file objects
 
-            2.  CalculateChecksum calls the relevant function in hatrac.js using the hatracObj to calcualte the checksum
+            2.  CalculateChecksum calls the relevant function in hatrac.js using the hatracObj to calculate the checksum
                 It keeps track of checksum calculationprogress for each file and once all are done it calls createUploadJob
 
             3.  CreateUploadJob creates an upload job for each file calling the relevant function in hatrac.js using the hatracObj
@@ -92,7 +94,7 @@
             // The controller uses a bunch of variables that're being used to keep track of current state of upload.
 
             vm.erred = false;
-            
+
             vm.totalSize = 0;
             vm.humanTotalSize = 0
             vm.noOfFiles = 0;
@@ -209,7 +211,7 @@
                 vm.speed = 0;
                 params.rows.forEach(function(row) {
                     for(var k in row) {
-                        if (typeof row[k] == 'object' && row[k].file) {
+                        if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
                             row[k].hatracObj.cancel();
                         }
                     }
@@ -447,7 +449,7 @@
                             // If the column type is object and has a file property inside it
                             // then set the url in the corresonding column for the row as its value
                             var column = reference.columns.find(function(c) { return c.name == k;  });
-                            if (column && row[k] != null && (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1) && typeof row[k] == 'object' && row[k].file) {
+                            if (column && row[k] != null && (column.isAsset) && typeof row[k] == 'object' && row[k].file) {
                                 row[k] = vm.rows[index][rowIndex++].url;
                             }
                         }
@@ -472,7 +474,7 @@
                     // Push this to the tuple array for the row
                     // NOTE: each file object has an hatracObj property which is an hatrac object
                     var column = reference.columns.find(function(c) { return c.name == k;  });
-                    if (column && (column._base.annotations.names().indexOf('tag:isrd.isi.edu,2016:asset') != -1)) {
+                    if (column && column.isAsset) {
                         
                         // If the column value of the row contains a file object then add it to the tuple to upload
                         // else if column contains url then set it in the column directly

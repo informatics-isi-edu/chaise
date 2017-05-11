@@ -297,7 +297,9 @@
             "description": {
               "display": "Terms and Conditions"
             },
-            "tag:isrd.isi.edu,2016:asset": {}
+            "tag:isrd.isi.edu,2017:asset": {
+              "url_pattern":"hatrac/test12/{{{terms.md5_hex}}}"
+            }
           }
         },
         {
