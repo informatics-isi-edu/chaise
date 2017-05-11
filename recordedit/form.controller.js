@@ -505,7 +505,7 @@
             var transformedRow = transformRowValues(modelRow);
             columns.forEach(function (column) {
                 // If the column is a pseudo column, it needs to get the originating columns name for data submission
-                if (column.isPseudo) {
+                if (column.isPseudo && column.isForeignKey) {
 
                     var foreignKeyColumns = column.foreignKey.colset.columns;
                     for (var k = 0; k < foreignKeyColumns.length; k++) {
