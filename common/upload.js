@@ -121,6 +121,8 @@
             vm.isCreateUploadJob = false;
             vm.isFileExists = false;
 
+            vm.queue = [];
+
             var lastByteTransferred = 0;
             var speedIntervalTimer;
 
@@ -174,14 +176,16 @@
                 vm.title = "Uploading files";
                 vm.isUpload = true;
                 vm.humanTotalSize = UiUtils.humanFileSize(vm.totalSize);
+
+                vm.queue = [];
+
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
-                        item.hatracObj.start().then(
-                            item.onUploadCompleted.bind(item),
-                            onError, 
-                            item.onProgressChanged.bind(item));
+                        queue.push(item);
                     });
                 });
+
+                startQueuedUpload();
 
                 speedIntervalTimer = setInterval(function() {
                     var diff = vm.sizeTransferred - lastByteTransferred;
@@ -191,6 +195,16 @@
                     else vm.speed = UiUtils.humanFileSize(diff) + "ps";
                 }, 1000);
 
+            };
+
+            var startQueuedUpload = function() {
+                var item = queue.pop();
+                if(!item) return;
+
+                item.hatracObj.start().then(
+                            item.onUploadCompleted.bind(item),
+                            onError, 
+                            item.onProgressChanged.bind(item));
             };
 
             // This function completes upload job in hatrac.js for all files
@@ -457,6 +471,8 @@
                         index++;
                     });
                     $uibModalInstance.close();
+                } else {
+                    startQueuedUpload();
                 }
             };
 

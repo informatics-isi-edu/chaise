@@ -103,6 +103,7 @@
          * Date/Timestamptz: If the value is empty ('') then set it as null
          */
         function transformRowValues(row) {
+            var transformedRow = {};
             /* Go through the set of columns for the reference.
              * If a value for that column is present (row[col.name]), transform the row value as needed
              * NOTE:
@@ -113,22 +114,6 @@
              */
             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                 var col = $rootScope.reference.columns[i];
-
-                // If this column is disabled, its value is already in the format
-                // needed for submission.
-                var rowVal = row[col.name];
-                if (col.isAsset) {
-                    if (!vm.readyToSubmit) {
-                        rowVal = { url: "" };
-                    }
-                }
-
-                // If this column is disabled, its value is already in the format
-                // needed for submission.
-                if (col.getInputDisabled(context.appContext)) {
-                    continue;
-                }
-
                 var rowVal = row[col.name];
                 if (rowVal) {
                     switch (col.type.name) {
@@ -140,22 +125,24 @@
                                 } else if (rowVal.date && rowVal.time === null) {
                                     rowVal.time = '00:00:00';
                                     rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                                } else if (!rowVal.date || !rowVal.time || !rowVal.meridiem) {
+                                // if the input is disabled, rowVal will be a string instead of a datetime object
+                                } else if ((!rowVal.date || !rowVal.time || !rowVal.meridiem) && !col.getInputDisabled(context.appContext)) {
                                     rowVal = null;
                                 }
                             }
                             break;
                         default:
-                            
-                            if (rowVal === '') {
-                                rowVal = null;
+                            if (col.isAsset) {
+                                if (!vm.readyToSubmit) {
+                                    rowVal = { url: "" };
+                                }
                             }
                             break;
                     }
                 }
-                row[col.name] = rowVal;
+                transformedRow[col.name] = rowVal;
             }
-            return row;
+            return transformedRow;
         }
 
         // This function checks whether file columns are getting the correct url and
