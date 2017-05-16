@@ -537,7 +537,13 @@
             "comment": [
               "thumbnail",
               "download"
-            ]
+            ],
+            "tag:isrd.isi.edu,2017:asset": {
+              "url_pattern":"hatrac/{{{id}}}/{{{uri.md5_hex}}}",
+              "filename_column" : "filename",
+              "byte_count_column": "bytes",
+              "md5": "preview"
+            }
           }
         },
         {

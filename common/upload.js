@@ -181,7 +181,8 @@
 
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
-                        queue.push(item);
+                        item.onProgressChanged(0);
+                        vm.queue.push(item);
                     });
                 });
 
@@ -198,7 +199,7 @@
             };
 
             var startQueuedUpload = function() {
-                var item = queue.pop();
+                var item = vm.queue.shift();
                 if(!item) return;
 
                 item.hatracObj.start().then(
@@ -424,6 +425,7 @@
                         completeUpload();
                     }
                 }
+                startQueuedUpload();
             };
 
             // This function is called as a success promise callback by completeUpload function above for each file
@@ -471,8 +473,6 @@
                         index++;
                     });
                     $uibModalInstance.close();
-                } else {
-                    startQueuedUpload();
                 }
             };
 
