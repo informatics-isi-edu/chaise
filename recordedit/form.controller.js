@@ -116,7 +116,7 @@
                 var col = $rootScope.reference.columns[i];
 
                 var rowVal = row[col.name];
-                if (rowVal) {
+                if (rowVal && !column.getInputDisabled(context.appContext)) {
                     switch (col.type.name) {
                         case "timestamp":
                         case "timestamptz":
@@ -126,8 +126,8 @@
                                 } else if (rowVal.date && rowVal.time === null) {
                                     rowVal.time = '00:00:00';
                                     rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                                // if the input is disabled, rowVal will be a string instead of a datetime object
-                                } else if ((!rowVal.date || !rowVal.time || !rowVal.meridiem) && !col.getInputDisabled(context.appContext)) {
+                                // in create if the user doesn't change the timestamp field, it will be an object in form {time: val, date: val, meridiem: AM/PM}
+                                } else if ( (!rowVal.date || !rowVal.time || !rowVal.meridiem) ) {
                                     rowVal = null;
                                 }
                             }
