@@ -161,9 +161,7 @@
                             var column, value;
 
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
-                            // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
-                            // The submission data is copied back to the tuples object before submitted in the PUT request
-                            $rootScope.tuples = angular.copy(page.tuples);
+                            $rootScope.tuples = [];
                             $rootScope.displayname = ((context.queryParams.copy || page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
 
                             for (var j = 0; j < page.tuples.length; j++) {
@@ -173,7 +171,12 @@
                                 recordEditModel.submissionRows[j] = {};
 
                                 var tuple = page.tuples[j],
-                                values = tuple.values;
+                                    values = tuple.values;
+
+                                // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
+                                // The submission data is copied back to the tuples object before submitted in the PUT request
+                                var shallowTuple = tuple.copy();
+                                $rootScope.tuples.push(shallowTuple);
 
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                     column = $rootScope.reference.columns[i];
