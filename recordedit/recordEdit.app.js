@@ -175,7 +175,7 @@
 
                                 // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
                                 // The submission data is copied back to the tuples object before submitted in the PUT request
-                                var shallowTuple = tuple.deepCopyData();
+                                var shallowTuple = tuple.copy();
                                 $rootScope.tuples.push(shallowTuple);
 
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
