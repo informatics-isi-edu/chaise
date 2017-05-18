@@ -80,7 +80,7 @@
                     if (ctrl.$isEmpty(modelValue)) {
                         return true;
                     }
-                    return moment(modelValue, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid();
+                    return moment(modelValue, ['H:m:s', 'H:m', 'H'], true).isValid();
                 };
                 /*
                 The parser below takes the view value and inserts the appropriate colons before updating the model value.
@@ -124,7 +124,9 @@
                         dateIsValid = moment(date, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid(),
                         dateIsEmpty = (date === null || date === '' || date === undefined),
                         time = newObj.time,
-                        timeIsValid = moment(time, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid(),
+                        // H:m:s matches all permutation of hours:minutes:seconds where there is a single digit or 2 digits input
+                        // eg. 02:02:02 === 2:2:2 are both validated as proper
+                        timeIsValid = moment(time, ['H:m:s', 'H:m', 'H'], true).isValid(),
                         timeIsEmpty = (time === null || time === '' || time === undefined);
 
                     if (dateIsValid) {

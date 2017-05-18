@@ -88,6 +88,7 @@
         } else if (context.queryParams.limit) {
             context.mode = context.modes.EDIT;
         }
+        context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
 
@@ -277,7 +278,7 @@
                                             };
                                         }
                                     } else {
-                                        recordEditModel.rows[0][column.name] = column.default;
+                                        recordEditModel.rows[0][column.name] = (column.default !== null ? column.default : null);
                                     }
                                 } else if ((column.type.name === 'timestamp' || column.type.name === 'timestamptz')) {
                                     // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj

@@ -137,16 +137,15 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                             expect(dateInput.isEnabled()).toBe(false);
                             expect(timeInput.isEnabled()).toBe(false);
                             expect(meridiemBtn.isEnabled()).toBe(false);
-                        } else {
-                            chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(input) {
-                                expect(input.isEnabled()).toBe(false);
-                                if (!tableParams.keys) {
-                                    expect(input.getAttribute('placeholder')).toBe('Automatically generated');
-                                }
-                            }).catch(function(e) {
-                                console.log(e);
-                            });
                         }
+                        chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(input) {
+                            expect(input.isEnabled()).toBe(false);
+                            if (!tableParams.keys) {
+                                expect(input.getAttribute('placeholder')).toBe('Automatically generated');
+                            }
+                        }).catch(function(e) {
+                            console.log(e);
+                        });
                     });
                 }
             });
@@ -586,7 +585,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
                         // If user enters an invalid time an error msg should appear
                         timeInput.clear();
-                        timeInput.sendKeys('00:00:00'); // this is invalid because we're only accepting 12-hr time formats
+                        timeInput.sendKeys('24:12:00'); // this is invalid because we're only accepting 24-hr time formats from 0-23
                         chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
                             if (error) {
                                 expect(true).toBe(true);
@@ -597,6 +596,56 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                         // If user enters a valid time, then error msg should disappear
                         timeInput.clear();
                         timeInput.sendKeys('12:00:00');
+                        chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            if (error) {
+                                expect('An error message was not supposed to appear.').toBe('But one was found.');
+                            } else {
+                                expect(true).toBe(true);
+                            }
+                        });
+                        timeInput.clear();
+                        // users can enter 1 digit in any place
+                        timeInput.sendKeys('2:00:00');
+                        chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            if (error) {
+                                expect('An error message was not supposed to appear.').toBe('But one was found.');
+                            } else {
+                                expect(true).toBe(true);
+                            }
+                        });
+                        timeInput.clear();
+                        // users can enter just the hours
+                        timeInput.sendKeys('08');
+                        chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            if (error) {
+                                expect('An error message was not supposed to appear.').toBe('But one was found.');
+                            } else {
+                                expect(true).toBe(true);
+                            }
+                        });
+                        timeInput.clear();
+                        // users can enter less than the full string
+                        timeInput.sendKeys('2:10');
+                        chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            if (error) {
+                                expect('An error message was not supposed to appear.').toBe('But one was found.');
+                            } else {
+                                expect(true).toBe(true);
+                            }
+                        });
+                        timeInput.clear();
+                        // users can enter time in 24 hr format
+                        timeInput.sendKeys('20:00:00');
+                        chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            if (error) {
+                                expect('An error message was not supposed to appear.').toBe('But one was found.');
+                            } else {
+                                expect(true).toBe(true);
+                            }
+                        });
+                        timeInput.clear();
+                        // users can enter 0 for the time
+                        timeInput.sendKeys('00:00:00');
                         chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
                             if (error) {
                                 expect('An error message was not supposed to appear.').toBe('But one was found.');
