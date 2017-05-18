@@ -125,7 +125,8 @@
                                 } else if (rowVal.date && rowVal.time === null) {
                                     rowVal.time = '00:00:00';
                                     rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                                // in create if the user doesn't change the timestamp field, it will be an object in form {time: val, date: val, meridiem: AM/PM}
+                                // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
+                                // meridiem should never be null,time is allowed to 
                                 } else if (!rowVal.date) {
                                     rowVal = null;
                                 }
