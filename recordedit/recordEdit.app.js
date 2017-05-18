@@ -88,6 +88,7 @@
         } else if (context.queryParams.limit) {
             context.mode = context.modes.EDIT;
         }
+        context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
 
@@ -259,35 +260,37 @@
 
                         // populate defaults
                         angular.forEach($rootScope.reference.columns, function(column) {
-                            // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
-                            // only want to set values in the input fields so make sure it isn't a function
-                            // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
-                            if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
-                                if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
-                                    if (column.default !== null) {
-                                        var ts = moment(column.default);
-                                        recordEditModel.rows[0][column.name] = {
-                                            date: ts.format('YYYY-MM-DD'),
-                                            time: ts.format('hh:mm:ss'),
-                                            meridiem: ts.format('A')
-                                        };
+                            if (!column.getInputDisabled(context.appContext)) {
+                                // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
+                                // only want to set values in the input fields so make sure it isn't a function
+                                // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
+                                if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
+                                    if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
+                                        if (column.default !== null) {
+                                            var ts = moment(column.default);
+                                            recordEditModel.rows[0][column.name] = {
+                                                date: ts.format('YYYY-MM-DD'),
+                                                time: ts.format('hh:mm:ss'),
+                                                meridiem: ts.format('A')
+                                            };
+                                        } else {
+                                            recordEditModel.rows[0][column.name] = {
+                                                date: null,
+                                                time: null,
+                                                meridiem: 'AM'
+                                            };
+                                        }
                                     } else {
-                                        recordEditModel.rows[0][column.name] = {
-                                            date: null,
-                                            time: null,
-                                            meridiem: 'AM'
-                                        };
+                                        recordEditModel.rows[0][column.name] = (column.default !== null ? column.default : null);
                                     }
-                                } else {
-                                    recordEditModel.rows[0][column.name] = column.default;
+                                } else if ((column.type.name === 'timestamp' || column.type.name === 'timestamptz')) {
+                                    // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
+                                    recordEditModel.rows[0][column.name] = {
+                                        date: null,
+                                        time: null,
+                                        meridiem: 'AM'
+                                    };
                                 }
-                            } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
-                                // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
-                                recordEditModel.rows[0][column.name] = {
-                                    date: null,
-                                    time: null,
-                                    meridiem: 'AM'
-                                };
                             }
                         });
 

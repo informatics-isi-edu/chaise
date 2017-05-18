@@ -193,7 +193,7 @@ describe('When editing a record', function() {
 
                             timeInput.clear().then(function() {
                                 if (newValue !== null) {
-                                    return timeInput.sendKeys('010000');
+                                    return timeInput.sendKeys('01:00:00');
                                 };
                             }).catch(function(error) {
                                 console.log(error);

@@ -12,7 +12,6 @@
         vm.resultset = false;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
-        context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
         vm.mdHelpLinks = { // Links to Markdown references to be used in help text
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
@@ -116,7 +115,7 @@
                 var col = $rootScope.reference.columns[i];
 
                 var rowVal = row[col.name];
-                if (rowVal) {
+                if (rowVal && !col.getInputDisabled(context.appContext)) {
                     switch (col.type.name) {
                         case "timestamp":
                         case "timestamptz":
@@ -126,8 +125,9 @@
                                 } else if (rowVal.date && rowVal.time === null) {
                                     rowVal.time = '00:00:00';
                                     rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                                // if the input is disabled, rowVal will be a string instead of a datetime object
-                                } else if ((!rowVal.date || !rowVal.time || !rowVal.meridiem) && !col.getInputDisabled(context.appContext)) {
+                                // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
+                                // meridiem should never be null,time can be left empty (null) but the case above would catch that.
+                                } else if (!rowVal.date) {
                                     rowVal = null;
                                 }
                             }

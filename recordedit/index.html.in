@@ -135,7 +135,7 @@
                                                                 <div class="input-group">
                                                                     <span class="input-group-addon">Time</span>
                                                                     <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].time" placeholder="HH:MM:SS" name="{{::column.name}}"
-                                                                        ui-mask="19?:?5?9?:?5?9" ui-options="form.maskOptions.time" model-view-value="true" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" time timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]">
+                                                                         model-view-value="true" ng-disabled="::form.isDisabled(column);" time timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]">
                                                                     <span class="input-group-btn">
                                                                         <button class="btn btn-primary" name="{{::column.name}}" type="button" ng-click="::form.toggleMeridiem(rowIndex, column.name);" ng-bind="form.recordEditModel.rows[rowIndex][column.name].meridiem || 'AM'" ng-disabled="::form.isDisabled(column);">AM</button>
                                                                     </span>
