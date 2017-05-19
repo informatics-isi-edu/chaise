@@ -89,6 +89,7 @@
         } else if (context.queryParams.limit) {
             context.mode = context.modes.EDIT;
         }
+        context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
 
@@ -162,9 +163,7 @@
                             var column, value;
 
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
-                            // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
-                            // The submission data is copied back to the tuples object before submitted in the PUT request
-                            $rootScope.tuples = angular.copy(page.tuples);
+                            $rootScope.tuples = [];
                             $rootScope.displayname = ((context.queryParams.copy || page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
 
                             for (var j = 0; j < page.tuples.length; j++) {
@@ -174,7 +173,12 @@
                                 recordEditModel.submissionRows[j] = {};
 
                                 var tuple = page.tuples[j],
-                                values = tuple.values;
+                                    values = tuple.values;
+
+                                // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
+                                // The submission data is copied back to the tuples object before submitted in the PUT request
+                                var shallowTuple = tuple.copy();
+                                $rootScope.tuples.push(shallowTuple);
 
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                     column = $rootScope.reference.columns[i];
@@ -261,39 +265,45 @@
 
                         // populate defaults
                         angular.forEach($rootScope.reference.columns, function(column) {
-                            // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
-                            // only want to set values in the input fields so make sure it isn't a function
-                            // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
-                            if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
-                                if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
-                                    if (column.default !== null) {
-                                        var ts = moment(column.default);
+                            if (!column.getInputDisabled(context.appContext)) {
+                                // if column.default == undefined, the second condition would be true so we need to check if column.default is defined
+                                // only want to set values in the input fields so make sure it isn't a function
+                                // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
+                                if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
+                                    if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
+                                        if (column.default !== null) {
+                                            var ts = moment(column.default);
+                                            recordEditModel.rows[0][column.name] = {
+                                                date: ts.format('YYYY-MM-DD'),
+                                                time: ts.format('hh:mm:ss'),
+                                                meridiem: ts.format('A')
+                                            };
+                                        } else {
+                                            recordEditModel.rows[0][column.name] = {
+                                                date: null,
+                                                time: null,
+                                                meridiem: 'AM'
+                                            };
+                                        }
+                                    } else if (column.isAsset) {
                                         recordEditModel.rows[0][column.name] = {
-                                            date: ts.format('YYYY-MM-DD'),
-                                            time: ts.format('hh:mm:ss'),
-                                            meridiem: ts.format('A')
-                                        };
+                                            url: column.default
+                                        }
                                     } else {
-                                        recordEditModel.rows[0][column.name] = {
-                                            date: null,
-                                            time: null,
-                                            meridiem: 'AM'
-                                        };
+                                        recordEditModel.rows[0][column.name] = (column.default !== null ? column.default : null);
                                     }
                                 } else if (column.isAsset) {
                                     recordEditModel.rows[0][column.name] = {
                                         url: ""
                                     }
-                                } else {
-                                    recordEditModel.rows[0][column.name] = column.default;
+                                } else if ((column.type.name === 'timestamp' || column.type.name === 'timestamptz')) {
+                                    // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
+                                    recordEditModel.rows[0][column.name] = {
+                                        date: null,
+                                        time: null,
+                                        meridiem: 'AM'
+                                    };
                                 }
-                            } else if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
-                                // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
-                                recordEditModel.rows[0][column.name] = {
-                                    date: null,
-                                    time: null,
-                                    meridiem: 'AM'
-                                };
                             }
                         });
 
