@@ -287,23 +287,6 @@
         },
         {
           "comment": null,
-          "name": "terms",
-          "default": null,
-          "nullok": true,
-          "type": {
-            "typename": "text"
-          },
-          "annotations": {
-            "description": {
-              "display": "Terms and Conditions"
-            },
-            "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"hatrac/test12/{{{terms.md5_hex}}}"
-            }
-          }
-        },
-        {
-          "comment": null,
           "name": "opened_on",
           "default": null,
           "nullok": false,

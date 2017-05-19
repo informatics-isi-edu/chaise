@@ -134,7 +134,6 @@ describe('Record Add', function() {
         }).then(function(config) {
             chaiseConfig = config;
             console.log(chaiseConfig);
-            browser.pause();
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
         }).then(function(elemArray) {
             expect(elemArray.length).toBeTruthy();
