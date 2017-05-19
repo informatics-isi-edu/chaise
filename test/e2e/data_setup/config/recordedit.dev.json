@@ -40,7 +40,6 @@
                     { "name": "no_of_rooms", "title" : "Number of Rooms", "value": "23", "type": "int2"},
                     { "name": "cover","isForeignKey": true, "title" : "Cover Image", "value": "3,005" , "type": "int2", "presentation": { "type":"url", "template": "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/id=3005"} },
                     { "name": "thumbnail","isForeignKey": true, "title" : "Thumbnail", "value": null, "type": "int4"},
-                    { "name": "terms", "title": "terms", "type": "file"},
                     { "name": "opened_on", "title" : "Operational Since", "value": "12/9/2008, 12:00:00 AM", "type": "timestamptz", "nullok": false },
                     { "name": "luxurious", "title" : "Is Luxurious", "value": "false", "type": "boolean" }
                 ],

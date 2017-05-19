@@ -49,6 +49,19 @@ before_install:
   - sudo make deploy
   - sudo bash ./test/ubuntu-travis-setup.sh
   - cd ..
+  - git clone https://github.com/informatics-isi-edu/hatrac.git
+  - cd hatrac
+  - sudo python ./setup.py install
+  - sudo useradd -m -r hatrac
+  - sudo -H -u postgres createuser -d hatrac
+  - sudo -H -u postgres psql -c "GRANT webauthn TO hatrac"
+  - sudo -H -u hatrac createdb hatrac
+  - sudo cp test/hatrac_config.json ~hatrac/
+  - sudo -H -u hatrac hatrac-deploy admin
+  - sudo cp test/wsgi_hatrac_travis.conf /etc/apache2/conf.d/
+  - sudo mkdir /var/www/hatrac
+  - sudo chown hatrac /var/www/hatrac
+  - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrest.git
   - cd ermrest
   - sudo make install PLATFORM=ubuntu1204
