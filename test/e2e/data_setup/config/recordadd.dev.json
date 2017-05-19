@@ -27,9 +27,33 @@
         "params" : {
             "tables" : [{
                 "table_name" : "accommodation",
+                "create_entity_displayname": "Accommodations",
+                "columns" : [
+                    { "name": "id", "generated": true, "immutable": true, "title" : "Id", "type": "serial4", "nullok": false},
+                    { "name": "title", "title" : "Name of Accommodation", "type": "text", "nullok": false},
+                    { "name": "website", "isUrl": true, "title" : "Website", "type": "text", "comment" : "A valid url of the accommodation"},
+                    { "name": "category", "isForeignKey": true, "title" : "Category", "type": "text", "comment": "Type of accommodation ('Resort/Hotel/Motel')", "presentation": { "type":"url", "template": "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/id=10003"}, "nullok": false},
+                    { "name": "rating", "title" : "User Rating", "type": "float4", "nullok": false},
+                    { "name": "summary", "title" : "Summary", "type": "longtext", "nullok": false},
+                    { "name": "description", "title" : "Description", "type": "markdown"},
+                    { "name": "no_of_rooms", "title" : "Number of Rooms", "type": "int2"},
+                    { "name": "cover","isForeignKey": true, "title" : "Cover Image", "type": "int2", "presentation": { "type":"url", "template": "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/id=3005"} },
+                    { "name": "thumbnail","isForeignKey": true, "title" : "Thumbnail", "type": "int4"},
+                    { "name": "opened_on", "title" : "Operational Since", "type": "timestamptz", "nullok": false },
+                    { "name": "luxurious", "title" : "Is Luxurious", "type": "boolean" }
+                ],
+                "primary_keys": ["id"],
                 "records": 3
             }, {
                 "table_name" : "booking",
+                "columns" : [
+                    { "name":"id", "generated": true, "title" : "id", "type": "serial4"},
+                    { "name":"accommodation_id","isForeignKey": true, "title" : "accommodation_id", "type": "int4"},
+                    { "name":"price","title" : "price", "type": "float4"},
+                    { "name":"booking_date","title" : "booking_date", "type": "timestamptz" }
+                ],
+                "primary_keys": ["id"],
+                "create_entity_displayname": "booking",
                 "records": 1
             }],
             "multi_insert" : {
