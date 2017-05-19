@@ -130,9 +130,11 @@ describe('Record Add', function() {
         var chaiseConfig;
         browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
         chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-            return browser.executeScript('return chaiseConfig');
+            return browser.executeScript('return chaiseConfig;');
         }).then(function(config) {
             chaiseConfig = config;
+            console.log(chaiseConfig);
+            browser.pause();
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
         }).then(function(elemArray) {
             expect(elemArray.length).toBeTruthy();

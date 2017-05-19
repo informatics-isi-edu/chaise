@@ -1,5 +1,4 @@
 var chaisePage = require('../../../../utils/chaise.page.js');
-var recordEditHelpers = require('../../helpers.js');
 
 describe('Edit existing record,', function() {
 

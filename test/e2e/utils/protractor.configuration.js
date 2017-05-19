@@ -16,9 +16,7 @@ exports.getConfig = function(options) {
       },
       'os': 'MacOS El Capitan 10.11',
       'platform': 'OS X 10.11',
-      'screenResolution': '1920x1440',
-      shardTestFiles: true,
-      maxInstances: 5
+      'screenResolution': '1920x1440'
     },
     specs: [
       '*.spec.js'
