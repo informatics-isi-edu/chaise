@@ -42,6 +42,10 @@
                     }, 10);
 
 
+                    scope.select = function() {
+                        scope.fileEl.click();
+                    };
+
                     scope.clear = function() {
                         scope.value.url = "";
                         delete scope.value.file;
@@ -122,6 +126,10 @@
             vm.isFileExists = false;
 
             vm.queue = [];
+
+            vm.cancel = function() {
+                abortUploads();
+            };
 
             var lastByteTransferred = 0;
             var speedIntervalTimer;
@@ -223,6 +231,7 @@
             // This function aborts upload for all files
             var abortUploads = function() {
                 clearInterval(speedIntervalTimer);
+                vm.aborted = true;
                 vm.speed = 0;
                 params.rows.forEach(function(row) {
                     for(var k in row) {
@@ -235,7 +244,7 @@
 
             // This function is called by all rejected promises form above functions
             var onError = function(err) {
-                if (vm.erred) return;
+                if (vm.erred || vm.aborted) return;
                 
                 vm.erred = true;
                 
