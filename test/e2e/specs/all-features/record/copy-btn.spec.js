@@ -1,9 +1,8 @@
 var chaisePage = require('../../../utils/chaise.page.js');
-var recordHelpers = require('../helpers.js');
 
 describe('View existing record,', function() {
 
-    var params, testConfiguration = browser.params.configuration.tests, tupleParams = testConfiguration.params.tuples[0];
+    var testConfiguration = browser.params.configuration.tests, tupleParams = testConfiguration.params.tuples[0];
 
     describe("For table " + tupleParams.html_table_name + ",", function() {
         beforeAll(function() {
@@ -131,7 +130,5 @@ describe('View existing record,', function() {
                 });
             });
         });
-
     });
-
 });

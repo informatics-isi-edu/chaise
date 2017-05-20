@@ -1,9 +1,8 @@
 var chaisePage = require('../../../utils/chaise.page.js');
-var recordHelpers = require('../helpers.js');
 
 describe('View existing record,', function() {
 
-	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+	var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
 
     for (var i=0; i< testParams.tuples.length; i++) {
 
@@ -15,7 +14,7 @@ describe('View existing record,', function() {
 
 				beforeAll(function() {
 					var keys = [];
-					tupleParams.keys.forEach(function(key) {
+					tupleParams.deleteKeys.forEach(function(key) {
 						keys.push(key.name + key.operator + key.value);
 					});
 					browser.ignoreSynchronization=true;
@@ -25,15 +24,17 @@ describe('View existing record,', function() {
 					chaisePage.waitForElement(element(by.id('tblRecord')));
 			    });
 
-			    it('should load chaise-config.js and have editRecord=true', function() {
-			        browser.executeScript('return chaiseConfig;').then(function(chaiseConfig) {
-			        	expect(chaiseConfig.editRecord).toBe(true);
+			    it("should load chaise-config.js and have deleteRecord=false and dataBrowser=''", function() {
+			        browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+			        	expect(chaiseConfig.deleteRecord).toBe(false);
+                        expect(chaiseConfig.dataBrowser).toBe("");
 			        });
 				});
 
-                describe("Click the create record button ,", function() {
-					var params = recordHelpers.testCreateButton(tupleParams);
-				});
+                it('should not display a delete record button', function() {
+                    var deleteBtn = chaisePage.recordPage.getDeleteRecordButton();
+                    expect(deleteBtn.isPresent()).toBeFalsy();
+                });
 
     		});
 

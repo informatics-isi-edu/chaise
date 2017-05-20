@@ -1,10 +1,9 @@
 // Configure deployment-specific data here
 
 var chaiseConfig = {
-    name: "copy button test",
-    headTitle: 'Copy Button test',
+    name: "Delete Prohibited",
     editRecord: true,
-    deleteRecord: true
+    deleteRecord: false
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {

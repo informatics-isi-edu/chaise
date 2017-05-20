@@ -1,12 +1,7 @@
-/* This config tests functionalities with:
- - headTitle
- - customCSS
-*/
+// Configure deployment-specific data here
 
 var chaiseConfig = {
-    name: "recordset presentation",
-    headTitle: 'some sample title 23423lkj42;l31j4',
-    customCSS: '/path/to/custom/css',
+    name: "All Features with Delete Confirmation Dialog",
     editRecord: true,
     deleteRecord: true,
     confirmDelete: true,

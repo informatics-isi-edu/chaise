@@ -1,7 +1,7 @@
 // Configure deployment-specific data here
 
 var chaiseConfig = {
-    name: "Full functionality",
+    name: "All Features",
     editRecord: true,
     deleteRecord: true
 };
