@@ -43,7 +43,8 @@
                     { "name": "luxurious", "title" : "Is Luxurious", "type": "boolean" }
                 ],
                 "primary_keys": ["id"],
-                "records": 3
+                "records": 3,
+                "files" : []
             }, {
                 "table_name" : "booking",
                 "columns" : [
@@ -54,11 +55,41 @@
                 ],
                 "primary_keys": ["id"],
                 "create_entity_displayname": "booking",
-                "records": 1
+                "records": 1,
+                "files" : []
+            }, {
+                "table_name" : "file",
+                "columns" : [
+                    { "name": "id", "nullok": false, "title" : "id", "type": "int4"},
+                    { "name": "uri", "title": "uri", "type": "text", "isFile": true, "comment": "asset/reference" },
+                    { "name": "content_type", "title" : "content_type", "type": "text"},
+                    { "name": "timestamp", "title" : "timestamp", "type": "timestamptz"},
+                    { "name": "image_width", "title": "image_width", "type": "int8"},
+                    { "name": "image_height", "title": "image_height", "type": "int8"}
+                ],
+                "primary_keys": ["id"],
+                "create_entity_displayname": "file",
+                "records": 2,
+                "files" : [{
+                    "name": "testfile50MB.pdf",
+                    "size": "52428800",
+                    "displaySize": "50MB",
+                    "path" : "uploadFiles/testfile50MB.pdf"
+                }, {
+                    "name": "testfile5MB.txt",
+                    "size": "5242880",
+                    "displaySize": "5MB",
+                    "path" : "uploadFiles/testfile5MB.txt"
+                }, {
+                    "name": "testfile500kb.png",
+                    "size": "512000",
+                    "displaySize": "500KB",
+                    "path" : "uploadFiles/testfile500kb.png"
+                }]
             }],
             "multi_insert" : {
                 "table_name" : "accommodation",
-                "records" : 3,
+                "records" : 1,
                 "max_input_rows" : 200
             }
         }
