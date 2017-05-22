@@ -170,7 +170,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 
 			it("should show text input for shorttext and text datatype", function() {
+
 				var columns = tableParams.columns.filter(function(c) { if ((c.type === "shorttext" || c.type === "text") && !c.isForeignKey && !c.isFile) return true; });
+
 				columns.forEach(function(c) {
 					chaisePage.recordEditPage.getInputForAColumn(c.name, recordIndex).then(function(txtInput) {
 						if (txtInput) {
