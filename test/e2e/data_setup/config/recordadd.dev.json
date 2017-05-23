@@ -74,7 +74,8 @@
                     "name": "testfile50MB.pdf",
                     "size": "52428800",
                     "displaySize": "50MB",
-                    "path" : "uploadFiles/testfile50MB.pdf"
+                    "path" : "uploadFiles/testfile50MB.pdf",
+                    "doNotRunInTravis": true
                 }, {
                     "name": "testfile5MB.txt",
                     "size": "5242880",
@@ -85,6 +86,11 @@
                     "size": "512000",
                     "displaySize": "500KB",
                     "path" : "uploadFiles/testfile500kb.png"
+                }, {
+                    "name": "testfile50MB.pdf",
+                    "size": "5242880",
+                    "displaySize": "5MB",
+                    "path" : "uploadFiles/testfile50MB.pdf"
                 }]
             }],
             "multi_insert" : {

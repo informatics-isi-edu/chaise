@@ -92,7 +92,7 @@ describe('Record Add', function() {
 
                                 // if there is a file upload
                                 if (tableParams.files.length) {
-                                   browser.wait(EC.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
+                                   browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
                                 }
                                 
                                 // wait for url change
@@ -132,7 +132,10 @@ describe('Record Add', function() {
 					});
 
                     afterAll(function(done) {
-                        tableParams.files.forEach(function(f) {
+                        var files = tableParams.files;
+                        if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
+                        
+                        files.forEach(function(f) {
                             exec('rm ' + f.path);
                         });
                         done();

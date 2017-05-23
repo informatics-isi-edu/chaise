@@ -996,7 +996,11 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 			describe("File fields,", function() {
 
 				beforeAll(function() {
-		            tableParams.files.forEach(function(f) {
+
+					var files = tableParams.files;
+                    if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
+                        
+		            files.forEach(function(f) {
 		            	var path = __dirname + "/" + f.path;
 			        	exec("perl -e 'print \"\1\" x " + f.size + "' > " + path);
 			        });
