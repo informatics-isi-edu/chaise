@@ -211,7 +211,8 @@
                 }).result.then(onSuccess, function(exception) {
                     vm.readyToSubmit = false;
                     vm.submissionButtonDisabled = false;
-                    AlertsService.addAlert(exception.message, 'error');
+                    
+                    if (exception) AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
                 vm.readyToSubmit = false;
@@ -659,16 +660,16 @@
                         break;
                     case 'markdown':
                     case 'longtext':
-                        if (column.isAsset) {
-                            displayType = 'file';
-                        } else {
                             displayType = 'longtext';
-                        }   
                         break;
                     case 'shorttext':
                     default:
                         displayType = 'text';
                         break;
+                }
+
+                if (column.isAsset) {
+                    displayType = 'file';
                 }
             }
             return displayType;

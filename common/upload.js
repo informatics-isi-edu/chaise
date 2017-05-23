@@ -31,7 +31,6 @@
                                 // and also create an Upload object and save it as hatracObj in the value object
                                 scope.value.file = event.target.files[0];
                                 scope.value.hatracObj = new ERMrest.Upload(scope.value.file, {
-                                    defaultTemplate: window.location.protocol + "//" + window.location.host + "/hatrac/test10/{{{" + scope.column.name + ".md5_hex}}}",
                                     column: scope.column,
                                     reference: scope.reference
                                 });
@@ -127,8 +126,12 @@
 
             vm.queue = [];
 
+            vm.aborted = false;
+
             vm.cancel = function() {
+                vm.aborted = true;
                 abortUploads();
+                $uibModalInstance.dismiss();
             };
 
             var lastByteTransferred = 0;
@@ -136,6 +139,9 @@
 
             // This function calls for checksumCalculation in hatrac.js for all files
             var calculateChecksum = function() {
+
+                if (vm.erred || vm.aborted) return;
+
                 vm.title = "Calculating and Verifying Checksum";
                 vm.isCreateUploadJob = false;
                 vm.isFileExists = false;
@@ -152,6 +158,9 @@
 
             // This function creates upload jobs in hatrac.js for all files
             var createUploadJobs = function() {
+
+                if (vm.erred || vm.aborted) return;
+
                 vm.title = "Creating Upload Jobs for the files";
                 vm.isCreateUploadJob = true;
                 vm.isFileExists = false;
@@ -167,6 +176,9 @@
 
             // This function calls for checkFileExists in hatrac.js for all files to determine their existence
             var checkFileExists = function() {
+
+                if (vm.erred || vm.aborted) return;
+
                 vm.title = "Checking for existing files";
                 vm.isFileExists = true;
                 vm.isUpload = false;
@@ -181,6 +193,9 @@
 
             // This function starts upload in hatrac.js for all files
             var startUpload = function() {
+                
+                if (vm.erred || vm.aborted) return;
+
                 vm.title = "Uploading files";
                 vm.isUpload = true;
                 vm.humanTotalSize = UiUtils.humanFileSize(vm.totalSize);
@@ -196,17 +211,22 @@
 
                 startQueuedUpload();
 
+                vm.speed = "Calculating Speed";
+
                 speedIntervalTimer = setInterval(function() {
                     var diff = vm.sizeTransferred - lastByteTransferred;
                     lastByteTransferred = vm.sizeTransferred;
 
-                    if (diff <=0) vm.speed = 0;
-                    else vm.speed = UiUtils.humanFileSize(diff) + "ps";
+                    if (diff > 0) vm.speed = UiUtils.humanFileSize(diff) + "ps";
+
                 }, 1000);
 
             };
 
             var startQueuedUpload = function() {
+
+                if (vm.erred || vm.aborted) return;
+
                 var item = vm.queue.shift();
                 if(!item) return;
 
@@ -218,6 +238,9 @@
 
             // This function completes upload job in hatrac.js for all files
             var completeUpload = function() {
+
+                if (vm.erred || vm.aborted) return;
+
                 vm.title = "Finalizing Upload";
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
@@ -256,12 +279,14 @@
             
             /**
              * @function
-             * @param {Object} col - Column Object
+             * @param {Object} data - data object for the file column
+             * @param {Ermrest.Column} column - Column Object
+             * @param {Object} row - Json key value Object of row values
              * @desc
              * Creates an uploadFile obj to keep track of file and its upload.
              */
-            var uploadFile = function(col, column, row) {
-                var file = col.file;
+            var uploadFile = function(data, column, row) {
+                var file = data.file;
                 
                 this.name = file.name; 
                 this.size = file.size; 
@@ -276,7 +301,7 @@
                 this.completeUploadJob = false;
                 this.progress = 0;
                 this.progressPercent = 0;
-                this.hatracObj = col.hatracObj;
+                this.hatracObj = data.hatracObj;
                 this.url = "";
                 this.column = column;
                 this.reference = reference;
@@ -288,6 +313,9 @@
             // This function is called as a notify promise callback by calculateChecksum function above for each file
             // It updates the progress for checksum on the UI
             uploadFile.prototype.onChecksumProgressChanged = function(uploadedSize) {
+
+                if (vm.erred || vm.aborted) return;
+
                 // This code updates the specific progress bar for checksum for the file
                 this.jobCreateDone = false;
                 this.fileExistsDone = false;
@@ -317,6 +345,9 @@
             // This function is called as a success promise callback by calculateChecksum function above for each file
             // Once all files are done it calls createUploadJob
             uploadFile.prototype.onChecksumCompleted = function(url) {
+
+                if (vm.erred || vm.aborted) return;
+
                 this.checksumPercent = 100;
                 this.checksumProgress = this.size;
                 if (!this.checksumCompleted) { 
@@ -335,6 +366,9 @@
             // This function is called as a success promise callback by createUpload function above for each file
             // Once upload jobs for all files are done it calls checkFileExists
             uploadFile.prototype.onJobCreated = function() {
+
+                if (vm.erred || vm.aborted) return;
+
                 // This code updates the individual progress bar for job creation progress for this file
                 this.jobCreateDone = true;
                 this.fileExistsDone = false;
@@ -364,6 +398,9 @@
             // This function is called as a success promise callback by checkFileExists function above for each file
             // Once all files have been checked for their existence it calls startUpload
             uploadFile.prototype.onFileExistSuccess = function() {
+
+                if (vm.erred || vm.aborted) return;
+
                  // This code updates the individual progress bar for file exist progress for current file
                 this.fileExistsDone = true;
                 this.uploadStarted = false;
@@ -394,6 +431,9 @@
             // This function is called as a notify promise callback by startUpload function above for each file
             // It updates the progress for upload on the UI
             uploadFile.prototype.onProgressChanged = function(uploadedSize) {
+
+                if (vm.erred || vm.aborted) return;
+
                 // This code updates the individual progress bar for uploading file
                 this.uploadStarted = true;
                 this.completeUploadJob = false;
@@ -413,6 +453,7 @@
                 vm.humanSizeTransferred = UiUtils.humanFileSize(vm.sizeTransferred);
 
                 vm.uploadProgress = (progress/vm.totalSize)*100;
+
                 $timeout(function() {
                     $scope.$apply();
                 });
@@ -421,6 +462,9 @@
             // This function is called as a success promise callback by startUpload function above for each file
             // Once all files are uploaded it calls completeUpload
             uploadFile.prototype.onUploadCompleted = function(url) {
+
+                if (vm.erred || vm.aborted) return;
+
                 this.progress = this.size;
                 this.progressPercent = 100;
                 if (!this.uploadCompleted) {
@@ -441,6 +485,9 @@
             // Once upload jobs are marked as completed it sets the url in the columns for rows
             // And closes the modal
             uploadFile.prototype.onCompleteUploadJob = function() {
+
+                if (vm.erred || vm.aborted) return;
+
                 this.completeUploadJob = true;
                 
 
