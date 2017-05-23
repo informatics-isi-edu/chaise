@@ -2,45 +2,45 @@ var chaisePage = require('../../../../utils/chaise.page.js');
 
 describe('Edit existing record,', function() {
 
-	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+    var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
 
     for (var i=0; i< testParams.tables.length; i++) {
 
-    	(function(tableParams, index) {
+        (function(tableParams, index) {
 
-    		describe("For table " + table.table_name + ",", function() {
+            describe("For table " + table.table_name + ",", function() {
 
-    			var table, record;
+                var table, record;
 
-				beforeAll(function () {
-					var keys = [];
-					tableParams.delete_keys.forEach(function(key) {
-						keys.push(key.name + key.operator + key.value);
-					});
-					browser.ignoreSynchronization=true;
-					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
-					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
+                beforeAll(function () {
+                    var keys = [];
+                    tableParams.delete_keys.forEach(function(key) {
+                        keys.push(key.name + key.operator + key.value);
+                    });
+                    browser.ignoreSynchronization=true;
+                    browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
+                    table = browser.params.defaultSchema.content.tables[tableParams.table_name];
 
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                         return chaisePage.recordEditPage.getViewModelRows()
                     }).then(function(records) {
-			        	browser.params.record = record = records[0];
-			        	table.column_definitions.forEach(function(c) {
-			        		if (record[c.name]) {
-			        			if (c.type.typename !== "date" && c.type.typename !== "timestamptz") {
-				        		 	c._value =  record[c.name] + "";
-				        		}
-			        		}
-			        	});
-			        });
-			    });
+                        browser.params.record = record = records[0];
+                        table.column_definitions.forEach(function(c) {
+                            if (record[c.name]) {
+                                if (c.type.typename !== "date" && c.type.typename !== "timestamptz") {
+                                    c._value =  record[c.name] + "";
+                                }
+                            }
+                        });
+                    });
+                });
 
                 describe("delete existing record ", function () {
                     it("should load chaise-config.js and have confirmDelete=true and dataBrowser=''", function () {
                         browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-    			        	expect(chaiseConfig.confirmDelete).toBe(true);
+                            expect(chaiseConfig.confirmDelete).toBe(true);
                             expect(chaiseConfig.dataBrowser).toBe("");
-    			        });
+                        });
                     });
 
                     it("should display a modal when attempting to delete a record that has been modified by someone else beforehand", function() {
