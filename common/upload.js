@@ -252,14 +252,21 @@
             };
 
             // This function aborts upload for all files
-            var abortUploads = function() {
+            var abortUploads = function(err) {
+
+                var deleteUploadJob = false;
+
+                if (err && ([401, 408, 0 , -1, 500, 503].indexOf(err.code) == -1)) {
+                    deleteUploadJob = true;
+                }
+
                 clearInterval(speedIntervalTimer);
                 vm.aborted = true;
                 vm.speed = 0;
                 params.rows.forEach(function(row) {
                     for(var k in row) {
                         if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
-                            row[k].hatracObj.cancel();
+                            row[k].hatracObj.cancel(deleteUploadJob);
                         }
                     }
                 });
