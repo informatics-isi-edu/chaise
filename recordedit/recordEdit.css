@@ -338,4 +338,8 @@ table.upload-table .progress {
 } 
 
 
+.upload-progress-bar {
+  width: 0%;
+  background-color: #8cacc7 !important;
+}
 

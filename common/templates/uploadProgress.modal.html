@@ -8,7 +8,7 @@
 	    	<strong>Completed: {{ctrl.checksumCompleted}}/{{ctrl.noOfFiles}}</strong>
     	</div>
 	    <div class="progress">
-	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.checksumProgress + '%' }" style="width: 0%;background-color: #8cacc7 !important;"></div>
+	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.checksumProgress + '%' }" ></div>
 	    </div>
 	    <div class="progress-percent">{{ctrl.checksumProgress | number:0}}%</div>
     </div>
@@ -17,7 +17,7 @@
 	    	<strong>Completed: {{ctrl.createUploadJobCompleted}}/{{ctrl.noOfFiles}}</strong>
     	</div>
 	    <div class="progress">
-	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.createUploadJobProgress + '%' }" style="width: 0%;background-color: #8cacc7 !important;"></div>
+	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.createUploadJobProgress + '%' }"></div>
 	    </div>
 	    <div class="progress-percent">{{ctrl.createUploadJobProgress | number:0}}%</div>
     </div>
@@ -26,7 +26,7 @@
 	    	<strong>Completed: {{ctrl.fileExistsCompleted}}/{{ctrl.noOfFiles}}</strong>
     	</div>
 	    <div class="progress">
-	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.fileExistsProgress + '%' }" style="width: 0%;background-color: #8cacc7 !important;"></div>
+	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.fileExistsProgress + '%' }"></div>
 	    </div>
 	    <div class="progress-percent">{{ctrl.fileExistsProgress | number:0}}%</div>
     </div>
@@ -47,7 +47,7 @@
 	    	<strong>Completed: {{ctrl.uploadJobCompletedCount}}/{{ctrl.noOfFiles}}</strong>
     	</div>
 	    <div class="progress">
-	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.uploadJobCompleteProgress + '%' }" style="width: 0%;background-color: #8cacc7 !important;"></div>
+	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.uploadJobCompleteProgress + '%' }"></div>
 	    </div>
 	    <div class="progress-percent">{{ctrl.uploadJobCompleteProgress | number:0}}%</div>
     </div>
