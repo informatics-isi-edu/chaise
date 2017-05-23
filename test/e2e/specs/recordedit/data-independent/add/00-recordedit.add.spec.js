@@ -20,6 +20,20 @@ describe('Record Add', function() {
 			    });
 
 				describe("Presentation and validation,", function() {
+
+
+                    beforeAll(function() {
+
+                        var files = tableParams.files;
+                        if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
+                            
+                        files.forEach(function(f) {
+                            var path = require('path').join(__dirname , "/../../" + f.path);
+                            exec("perl -e 'print \"\1\" x " + f.size + "' > " + path);
+                            console.log(path + " created");
+                        });
+                    });
+
                     var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
 				});
 
