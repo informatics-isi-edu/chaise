@@ -3,30 +3,30 @@ var recordHelpers = require('../helpers.js');
 
 describe('View existing record,', function() {
 
-	var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+    var params, testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
 
     for (var i=0; i< testParams.tuples.length; i++) {
 
-    	(function(tupleParams, index) {
+        (function(tupleParams, index) {
 
-    		describe("For table " + tupleParams.table_name + ",", function() {
+            describe("For table " + tupleParams.table_name + ",", function() {
 
-    			var table, record;
+                var table, record;
 
-				beforeAll(function() {
-					var keys = [];
-					tupleParams.keys.forEach(function(key) {
-						keys.push(key.name + key.operator + key.value);
-					});
+                beforeAll(function() {
+                    var keys = [];
+                    tupleParams.keys.forEach(function(key) {
+                        keys.push(key.name + key.operator + key.value);
+                    });
                     browser.ignoreSynchronization=true;
                     var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
-					browser.get(url);
-					table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
+                    browser.get(url);
+                    table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
                     var start = (new Date()).getTime();
                     chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
                         console.log((new Date()).getTime() - start);
                     });
-			    });
+                });
 
                 it('should load document title defined in chaise-config.js and have deleteRecord=true', function() {
                     browser.manage().logs().get('browser').then(function(browserLog) {
@@ -42,13 +42,13 @@ describe('View existing record,', function() {
 
                 });
 
-				describe("Presentation ,", function() {
-					var params = recordHelpers.testPresentation(tupleParams);
-				});
+                describe("Presentation ,", function() {
+                    var params = recordHelpers.testPresentation(tupleParams);
+                });
 
-    		});
+            });
 
-    	})(testParams.tuples[i], i);
+        })(testParams.tuples[i], i);
     }
 
     it('should load custom CSS and document title defined in chaise-config.js', function() {
