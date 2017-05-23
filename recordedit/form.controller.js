@@ -113,7 +113,6 @@
              */
             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                 var col = $rootScope.reference.columns[i];
-
                 var rowVal = row[col.name];
                 if (rowVal && !col.getInputDisabled(context.appContext)) {
                     switch (col.type.name) {
@@ -133,12 +132,240 @@
                             }
                             break;
                         default:
+                            if (col.isAsset) {
+                                if (!vm.readyToSubmit) {
+                                    rowVal = { url: "" };
+                                }
+                            }
                             break;
                     }
                 }
                 transformedRow[col.name] = rowVal;
             }
             return transformedRow;
+        }
+
+        // This function checks whether file columns are getting the correct url and
+        // are not nul if nullok is false
+        function areFilesValid(rows) {
+            var isValid = true, index = 0;
+            // Iterate over all rows that are passed as parameters to the modal controller
+            rows.forEach(function(row) {
+
+                index++;
+
+                // Iterate over each property/column of a row
+                for(var k in row) {
+
+                    // If the column type is object and has a file property inside it
+                    // Then increment the count for no of files and create an uploadFile Object for it
+                    // Push this to the tuple array for the row
+                    // NOTE: each file object has an hatracObj property which is an hatrac object
+                    try {
+                        var column = $rootScope.reference.columns.find(function(c) { return c.name == k;  });
+                        if (column.isAsset) {
+                            
+                            if (row[k].url == "" && !column.nullok) {
+                                isValid = false;
+                                AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
+                            } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
+                                try {
+                                    if (!row[k].hatracObj.validateURL(row)) {
+                                        isValid = false; 
+                                        AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
+                                    } 
+                                } catch(e) {
+                                    isValid = false;
+                                    AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
+                                }
+                            }
+                        }
+                    } catch(e) {
+                        //NOthing to do
+                    }
+                    
+                }
+            });
+
+            return isValid;
+        }
+
+        function uploadFiles(submissionRowsCopy, isUpdate, onSuccess) {
+
+            // If url is valid
+            if (areFilesValid(vm.recordEditModel.submissionRows)) {
+
+                $uibModal.open({
+                    templateUrl: "../common/templates/uploadProgress.modal.html",
+                    controller: "UploadModalDialogController",
+                    controllerAs: "ctrl",
+                    size: "md",
+                    backdrop: 'static',
+                    keyboard: false,
+                    resolve: {
+                        params: {
+                            reference: $rootScope.reference,
+                            rows: submissionRowsCopy
+                        }
+                    }
+                }).result.then(onSuccess, function(exception) {
+                    vm.readyToSubmit = false;
+                    vm.submissionButtonDisabled = false;
+                    AlertsService.addAlert(exception.message, 'error');
+                });
+            } else {
+                vm.readyToSubmit = false;
+                vm.submissionButtonDisabled = false;
+            }
+        }
+
+        function addRecords(isUpdate) {
+            var model = vm.recordEditModel;
+            var form = vm.formContainer;
+
+            var submissionRowsCopy = [];
+
+            model.submissionRows.forEach(function(row) {
+                submissionRowsCopy.push(Object.assign({}, row));
+            });
+
+            //call uploadFiles which will upload files and callback on success
+            uploadFiles(submissionRowsCopy, isUpdate, function() {
+                
+                var fn = "create", fnScope = $rootScope.reference.unfilteredReference.contextualize.entryCreate, args = [submissionRowsCopy];
+                // If this is an update call 
+                if (isUpdate) {
+
+                    // loop through model.submissionRows
+                    for (var i = 0; i < submissionRowsCopy.length; i++) {
+                        var row = submissionRowsCopy[i];
+                        var data = $rootScope.tuples[i].data;
+                        // assign each value from the form to the data object on tuple
+                        for (var key in row) {
+                            data[key] = (row[key] === '' ? null : row[key]);
+                        }
+                    }
+
+                    // submit $rootScope.tuples because we are changing and 
+                    // comparing data from the old data set for the tuple with the updated data set from the UI
+                    fn = "update", fnScope = $rootScope.reference, args = [$rootScope.tuples];
+                }
+                
+                fnScope[fn].apply(fnScope, args).then(function success(page) {
+                    
+                    var resultsReference = page.reference;
+
+                    if (isUpdate) {
+                        resultsReference = $rootScope.reference.contextualize.compact;
+                        if (window.opener && window.opener.updated) {
+                            window.opener.updated(context.queryParams.invalidate);
+                        }
+                    } else {
+                        if (vm.prefillCookie) {
+                            $cookies.remove(context.queryParams.prefill);
+                        }
+
+                        // add cookie indicating record added
+                        if (context.queryParams.invalidate) {
+                            $cookies.put(context.queryParams.invalidate, submissionRowsCopy.length,
+                                {
+                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                                }
+                            );
+                        }
+                    }
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+                   
+                    if (model.rows.length == 1) {
+                        vm.redirectAfterSubmission(page);
+                    } else {
+                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+                        // can't use page.reference because it reflects the specific values that were inserted
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        //set values for the view to flip to recordedit resultset view
+                        vm.resultsetModel = {
+                            hasLoaded: true,
+                            reference: resultsReference,
+                            tableDisplayName: resultsReference.displayname,
+                            columns: resultsReference.columns,
+                            enableSort: false,
+                            sortby: null,
+                            sortOrder: null,
+                            page: page,
+                            pageLimit: model.rows.length,
+                            rowValues: [],
+                            search: null,
+                            config: {}
+                        }
+
+                        if (isUpdate) {
+                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData($rootScope.tuples, resultsReference.columns);
+
+                            // NOTE: This case is for a pseudo-failure case
+                            // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
+                            if (page.tuples.length < $rootScope.tuples.length) {
+                                var tuplesOmitted = [],
+                                    tuplesUpdated = [],
+                                    omittedResultsPage = {};
+
+                                for (var j = 0; j < $rootScope.tuples.length; j++) {
+                                    var submittedRow = $rootScope.tuples[j],
+                                        rowMatch = false;
+
+                                    for (var k = 0; k < page.tuples.length; k++) {
+                                        var updatedRow = page.tuples[k],
+                                            shortestKeySet = resultsReference.table.shortestKey,
+                                            keyMatch = true;
+
+                                        for (var keyNameIndex = 0; keyNameIndex < shortestKeySet.length; keyNameIndex++) {
+                                            var key = shortestKeySet[keyNameIndex].name;
+
+                                            if (submittedRow.data[key] !== updatedRow.data[key]) {
+                                                keyMatch = false;
+                                                break;
+                                            }
+                                        }
+                                        if (keyMatch) {
+                                            rowMatch = true;
+                                        }
+                                    }
+                                    if (!rowMatch) {
+                                        tuplesOmitted.push(submittedRow);
+                                    } else {
+                                        tuplesUpdated.push(submittedRow);
+                                    }
+                                }
+                                vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesUpdated, resultsReference.columns);
+
+                                vm.omittedResultsetModel = {
+                                    hasLoaded: true,
+                                    reference: resultsReference,
+                                    tableDisplayName: resultsReference.displayname,
+                                    columns: resultsReference.columns,
+                                    enableSort: false,
+                                    sortby: null,
+                                    sortOrder: null,
+                                    page: page,
+                                    pageLimit: model.rows.length,
+                                    rowValues: [],
+                                    search: null,
+                                    config: {}
+                                }
+                                vm.omittedResultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesOmitted, resultsReference.columns);
+                            }
+
+                        } else {
+                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        }
+                        vm.resultset = true;
+                    }
+                }).catch(function (exception) {
+                    vm.submissionButtonDisabled = false;
+                    AlertsService.addAlert(exception.message, 'error');
+                });
+
+            });
+            
         }
 
         function submit() {
@@ -170,152 +397,7 @@
                 populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
             }
 
-            if (vm.editMode) {
-                // loop through model.submissionRows
-                for (var i = 0; i < model.submissionRows.length; i++) {
-                    var row = model.submissionRows[i];
-                    var data = $rootScope.tuples[i].data;
-                    // assign each value from the form to the data object on tuple
-                    for (var key in row) {
-                        data[key] = (row[key] === '' ? null : row[key]);
-                    }
-                }
-                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
-                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-                    if (window.opener && window.opener.updated && context.queryParams.invalidate) {
-                        window.opener.updated(context.queryParams.invalidate);
-                    }
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    if (model.rows.length == 1) {
-                        vm.redirectAfterSubmission(page);
-                    } else {
-                        AlertsService.addAlert('Your data has been submitted. Showing you the result set...', 'success');
-                        // can't use page.reference because it reflects the specific values that were inserted
-                        var resultsReference = $rootScope.reference.contextualize.compact;
-                        vm.recordsetLink = resultsReference.appLink;
-                        //set values for the view to flip to recordedit resultset view
-                        vm.resultsetModel = {
-                            hasLoaded: true,
-                            reference: resultsReference,
-                            tableDisplayName: resultsReference.displayname,
-                            columns: resultsReference.columns,
-                            enableSort: false,
-                            sortby: null,
-                            sortOrder: null,
-                            page: page,
-                            pageLimit: model.rows.length,
-                            rowValues: [],
-                            search: null,
-                            config: {}
-                        }
-
-                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData($rootScope.tuples, resultsReference.columns);
-
-                        // NOTE: This case is for a pseudo-failure case
-                        // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
-                        if (page.tuples.length < $rootScope.tuples.length) {
-                            var tuplesOmitted = [],
-                                tuplesUpdated = [],
-                                omittedResultsPage = {};
-
-                            for (var j = 0; j < $rootScope.tuples.length; j++) {
-                                var submittedRow = $rootScope.tuples[j],
-                                    rowMatch = false;
-
-                                for (var k = 0; k < page.tuples.length; k++) {
-                                    var updatedRow = page.tuples[k],
-                                        shortestKeySet = resultsReference.table.shortestKey,
-                                        keyMatch = true;
-
-                                    for (var keyNameIndex = 0; keyNameIndex < shortestKeySet.length; keyNameIndex++) {
-                                        var key = shortestKeySet[keyNameIndex].name;
-
-                                        if (submittedRow.data[key] !== updatedRow.data[key]) {
-                                            keyMatch = false;
-                                            break;
-                                        }
-                                    }
-                                    if (keyMatch) {
-                                        rowMatch = true;
-                                    }
-                                }
-                                if (!rowMatch) {
-                                    tuplesOmitted.push(submittedRow);
-                                } else {
-                                    tuplesUpdated.push(submittedRow);
-                                }
-                            }
-                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesUpdated, resultsReference.columns);
-
-                            vm.omittedResultsetModel = {
-                                hasLoaded: true,
-                                reference: resultsReference,
-                                tableDisplayName: resultsReference.displayname,
-                                columns: resultsReference.columns,
-                                enableSort: false,
-                                sortby: null,
-                                sortOrder: null,
-                                page: page,
-                                pageLimit: model.rows.length,
-                                rowValues: [],
-                                search: null,
-                                config: {}
-                            }
-                            vm.omittedResultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesOmitted, resultsReference.columns);
-                        }
-
-                        vm.resultset = true;
-                    }
-                }).catch(function (exception) {
-                    vm.submissionButtonDisabled = false;
-                    AlertsService.addAlert(exception.message, 'error');
-                });
-            } else {
-                var creatRef = $rootScope.reference.unfilteredReference.contextualize.entryCreate;
-                creatRef.create(model.submissionRows).then(function success(page) {
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    if (vm.prefillCookie) {
-                        $cookies.remove(context.queryParams.prefill);
-                    }
-
-                    // add cookie indicating record added
-                    if (context.queryParams.invalidate) {
-                        $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
-                            {
-                                expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-                            }
-                        );
-                    }
-
-                    if (model.rows.length == 1) {
-                        vm.redirectAfterSubmission(page);
-                    } else {
-                        AlertsService.addAlert('Your data has been submitted. Showing you the result set...', 'success');
-                        // can't use page.reference because it reflects the specific values that were inserted
-                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
-                        //set values for the view to flip to recordedit resultset view
-                        vm.resultsetModel = {
-                            hasLoaded: true,
-                            reference: page.reference,
-                            tableDisplayName: page.reference.displayname.value,
-                            columns: page.reference.columns,
-                            enableSort: false,
-                            sortby: null,
-                            sortOrder: null,
-                            page: page,
-                            pageLimit: model.rows.length,
-                            rowValues: [],
-                            search: null,
-                            config: {}
-                        }
-                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                        vm.resultset = true;
-                    }
-                }).catch(function (exception) {
-                    vm.submissionButtonDisabled = false;
-                    AlertsService.addAlert(exception.message, 'error');
-                });
-            }
+            addRecords(vm.editMode);
         }
 
         function deleteRecord() {
@@ -504,7 +586,7 @@
         function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
             var transformedRow = transformRowValues(modelRow);
             columns.forEach(function (column) {
-                // If the column is a pseudo column, it needs to get the originating columns name for data submission
+                // If the column is a foreign key column, it needs to get the originating columns name for data submission
                 if (column.isForeignKey) {
 
                     var foreignKeyColumns = column.foreignKey.colset.columns;
@@ -525,7 +607,7 @@
                             }
                         }
                     }
-                // not pseudo, column.name is sufficient for the keys
+                // not foreign key, column.name is sufficient for the keys
                 } else {
                     // set null if not set so that the whole data object is filled out for posting to ermrestJS
                     submissionRow[column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
@@ -577,7 +659,11 @@
                         break;
                     case 'markdown':
                     case 'longtext':
-                        displayType = 'longtext';
+                        if (column.isAsset) {
+                            displayType = 'file';
+                        } else {
+                            displayType = 'longtext';
+                        }   
                         break;
                     case 'shorttext':
                     default:
@@ -693,7 +779,7 @@
         // to make it uniform
         vm.firstHeaderStyle = {
             'width' : captionColumnWidth + "px",
-            'height' : headerHeight + "px"
+            'height' : (headerHeight + 1) + "px"
         };
         vm.tableWidth = { width: '0px' };
 
@@ -788,7 +874,7 @@
 
                     var valuetdHeight = trs[i].children[1].offsetHeight;
 
-                    if (editMode && i==0) valuetdHeight++;
+                    //if (editMode && i==0) valuetdHeight++;
 
                     // If keytdHeight is greater than valuetdHeight
                     // then set valuetdHeight

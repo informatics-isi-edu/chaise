@@ -6,6 +6,7 @@ GENERATED = "tag:isrd.isi.edu,2016:generated";
 var chance = require('chance').Chance();
 var moment = require('moment');
 var EC = protractor.ExpectedConditions;
+var exec = require('child_process').execSync;
 
 exports.testPresentationAndBasicValidation = function(tableParams) {
 
@@ -169,7 +170,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 
 			it("should show text input for shorttext and text datatype", function() {
-				var columns = tableParams.columns.filter(function(c) { if ((c.type === "shorttext" || c.type === "text") && !c.isForeignKey) return true; });
+
+				var columns = tableParams.columns.filter(function(c) { if ((c.type === "shorttext" || c.type === "text") && !c.isForeignKey && !c.isFile) return true; });
+
 				columns.forEach(function(c) {
 					chaisePage.recordEditPage.getInputForAColumn(c.name, recordIndex).then(function(txtInput) {
 						if (txtInput) {
@@ -772,7 +775,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 						// Clear value if it is in edit mode
 						if (tableParams.primary_keys.indexOf(intInput.column.name) != -1) {
-							el.getAttribute(value).then(function(value) {
+							intInput.getAttribute("value").then(function(value) {
 								prevValue = value + "";
 							});
 						}
@@ -828,7 +831,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 						// Store original value to reset it for avoiding any conflicts or referece issues due to unique or foreign key issue
 						if (tableParams.primary_keys.indexOf(intInput.column.name) != -1) {
-							el.getAttribute(value).then(function(value) {
+							intInput.getAttribute("value").then(function(value) {
 								validNo = value + "";
 							});
 						}
@@ -938,7 +941,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 						// Clear value if it is in edit mode
 						if (tableParams.primary_keys.indexOf(floatInput.column.name) != -1) {
-							el.getAttribute(value).then(function(value) {
+							floatInput.getAttribute("value").then(function(value) {
 								validNo = value + "";
 							});
 						}
@@ -990,7 +993,51 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 			});
 
+			describe("File fields,", function() {
+
+				beforeAll(function() {
+		            tableParams.files.forEach(function(f) {
+		            	var path = __dirname + "/" + f.path;
+			        	exec("perl -e 'print \"\1\" x " + f.size + "' > " + path);
+			        });
+				});
+
+				it("should render input type as file input ", function() {
+					console.log("\n       File Input Fields");
+					var columns = tableParams.columns.filter(function(c){ if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
+					columns.forEach(function(column) {
+						chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(fileInput) {
+							console.log("         ->" + column.name);
+							if (fileInput) {
+								expect(true).toBeDefined();
+								fileInput.column = column;
+
+								chaisePage.recordEditPage.getInputForAColumn("txt" + column.name, recordIndex).then(function(txtInput) {
+									var file = tableParams.files.shift();
+									var filePath = require('path').resolve(__dirname, file.path);
+
+									column._value = file.name;
+									fileInput.sendKeys(filePath);
+
+									browser.sleep(100);
+
+									expect(fileInput.getAttribute('value')).toContain(file.name);
+									expect(txtInput.getAttribute('value')).toBe(file.name);
+								});
+								
+							} else {
+								expect(undefined).toBe(true, "Unable to find file input field for column " + column.name);
+							}
+						});
+					});
+				});
+
+			});
+
+
 		});
+
+		
 
 		if (tableParams.records && recordIndex < (tableParams.records > 1 ? tableParams.records : 0)) {
 			testMultipleRecords(recordIndex + 1);

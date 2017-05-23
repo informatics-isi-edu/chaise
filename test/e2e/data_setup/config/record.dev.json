@@ -19,8 +19,7 @@
                 "createNew": true,
                 "path": "test/e2e/data_setup/data/product"
             }
-        }],
-        "schema": "product"
+        }]
     },
     "cleanup" : true,
     "tests" : {

@@ -1,0 +1,23 @@
+<table class="table" style="margin-bottom: 0px;">
+    <tbody> 
+        <tr>
+            <td style="padding: 0px; border-bottom:none;">
+                <div class="form-group" style="margin-bottom: 0px;">
+                    <input name="{{::column.name}}" type="file" tabindex="-1" id="{{fileElId}}" style="position: absolute; clip: rect(0px 0px 0px 0px);">
+                    <div class="input-group input-group-sm" style="width: 100%;">
+                        <input name="txt{{::column.name}}" type="text" class="form-control" ng-required="!column.nullok" placeholder="No file Selected" readonly="" ng-model="value.url" ng-click="select()" style="padding-right: 25px;font-size: 14px; background-color: white; height: 34px;pointer-events: all; cursor: pointer;"/> 
+                        <div class="form-control-feedback coltooltip" ng-click="clear()" ng-hide="!value.url || value.url == ''" style="cursor: pointer;right: 105px;top: 2px;pointer-events: all; height: 34px;">
+                            <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                        <span class="input-group-btn" tabindex="0" tooltip-placement="bottom" uib-tooltip="Select file">
+                            <label for="{{fileElId}}" class="btn btn-primary " style="height: 34px;font-size: 14px;">
+                                <span class="icon-span-filestyle glyphicon glyphicon-folder-open"></span> 
+                                <span class="buttonText plm">Select  file</span>
+                            </label>
+                        </span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
