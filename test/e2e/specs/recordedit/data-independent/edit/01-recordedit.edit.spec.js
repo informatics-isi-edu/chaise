@@ -10,9 +10,9 @@ describe('Edit existing record,', function() {
 
     	(function(tableParams, index) {
 
-    		describe("For table " + table.table_name + ",", function() {
+    		describe("For table " + tableParams.table_name + ",", function() {
 
-    			var table, record;
+    			var record;
 
 				beforeAll(function () {
 					var keys = [];
@@ -21,15 +21,14 @@ describe('Edit existing record,', function() {
 					});
 					browser.ignoreSynchronization=true;
 					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
-					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
-
+					
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                         return chaisePage.recordEditPage.getViewModelRows();
                     }).then(function(records) {
 			        	browser.params.record = record = records[0];
-			        	table.column_definitions.forEach(function(c) {
+			        	tableParams.columns.forEach(function(c) {
 			        		if (record[c.name]) {
-			        			if (c.type.typename !== "date" && c.type.typename !== "timestamptz") {
+			        			if (c.type !== "date" && c.type !== "timestamptz") {
 				        		 	c._value =  record[c.name] + "";
 				        		}
 			        		}
@@ -39,7 +38,7 @@ describe('Edit existing record,', function() {
 
 
 				describe("Presentation and validation,", function() {
-                    var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
+                    var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams, true);
 				});
 
 				describe("Submitting an existing record,", function() {
@@ -68,6 +67,12 @@ describe('Edit existing record,', function() {
 
 					it("should redirect to Record page", function() {
 						if (!hasErrors) {
+							// if there is a file upload
+                            if (tableParams.files.length) {
+                               browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
+                            }
+                            
+							
                             var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
                             redirectUrl += ':' + tableParams.table_name + '/' + keys.join('&');
                             // Wait for #tblRecord on Record page to appear

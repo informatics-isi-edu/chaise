@@ -74,12 +74,16 @@ exports.parameterize = function(config, configParams) {
         browser.params.defaultTable = data.defaultTable;
         browser.params.catalogId = data.catalogId;
 
-        // Set the base url to the page that we are running the tests for
-        browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
-
         // set the url for testcases to stat using the catalogId and schema that was mentioned in the configuration
-        if (typeof configParams.setBaseUrl == 'function') configParams.setBaseUrl(browser, data);
-        else browser.params.url = browser.baseUrl + "/#" + data.catalogId + "/schema/" + data.defaultSchema.name;
+        if (typeof configParams.setBaseUrl == 'function') {
+          var baseUrl = configParams.setBaseUrl(browser, data);
+          if (baseUrl) browser.baseUrl = baseUrl;
+          else  browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
+        } else {
+           // Set the base url to the page that we are running the tests for
+          browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
+          browser.params.url = browser.baseUrl + "/#" + data.catalogId + "/schema/" + data.defaultSchema.name;
+        }
 
         console.log(browser.params.baseUrl);
 

@@ -539,6 +539,10 @@ var recordEditPage = function() {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("form-" + index + '-' + displayName + "-input"));
     };
+
+    this.getClearButton = function(el) {
+        return browser.executeScript("return $(arguments[0]).parent().find('.glyphicon-remove')[0]", el);
+    };
 };
 
 var recordPage = function() {
