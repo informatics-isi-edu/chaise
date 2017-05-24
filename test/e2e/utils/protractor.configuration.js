@@ -91,7 +91,7 @@ exports.getConfig = function(options) {
     process.exit(1);
   }
 
-  config.capabilities.shardTestFiles = (process.env.SHARDING == 'false' || prcess.env.SHARDING == false) ? false : true;
+  config.capabilities.shardTestFiles = (process.env.SHARDING == 'false' || process.env.SHARDING == false) ? false : true;
   config.capabilities.maxInstances = process.env.MAXINSTANCES || 4;
 
   if (options.parallel == false) {
