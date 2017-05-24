@@ -1037,68 +1037,66 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
 			});
 
-			describe("File fields,", function() {
+			if (!process.env.TRAVIS) {
+				describe("File fields,", function() {
 
-				it("should render input type as file input ", function() {
-					console.log("\n       File Input Fields");
-					var columns = tableParams.columns.filter(function(c){ if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
-					columns.forEach(function(column) {
-						chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(fileInput) {
-							console.log("         ->" + column.name);
-							if (fileInput) {
+					it("should render input type as file input ", function() {
+						console.log("\n       File Input Fields");
+						var columns = tableParams.columns.filter(function(c){ if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
+						columns.forEach(function(column) {
+							chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(fileInput) {
+								console.log("         ->" + column.name);
+								if (fileInput) {
 
-								expect(true).toBeDefined();
-								fileInput.column = column;
+									expect(true).toBeDefined();
+									fileInput.column = column;
 
-								chaisePage.recordEditPage.getInputForAColumn("txt" + column.name, recordIndex).then(function(txtInput) {
-									
-									var testFileSelect = function() {
-										var file = tableParams.files.shift();
-										var filePath = require('path').resolve(__dirname, file.path);
+									chaisePage.recordEditPage.getInputForAColumn("txt" + column.name, recordIndex).then(function(txtInput) {
+										
+										var testFileSelect = function() {
+											var file = tableParams.files.shift();
+											var filePath = require('path').resolve(__dirname, file.path);
 
-										column._value = file.name;
-										fileInput.sendKeys(filePath);
+											column._value = file.name;
+											fileInput.sendKeys(filePath);
 
-										browser.sleep(100);
+											browser.sleep(100);
 
-										expect(fileInput.getAttribute('value')).toContain(file.name);
-										expect(txtInput.getAttribute('value')).toBe(file.name);
-									};
+											expect(fileInput.getAttribute('value')).toContain(file.name);
+											expect(txtInput.getAttribute('value')).toBe(file.name);
+										};
 
-									txtInput.getAttribute('value').then(function(value) {
-										// Incase of edit first clear the fileinput field by pressing the dismiss button
-										// and then set new file
-										if (value.trim().length > 0) {
+										txtInput.getAttribute('value').then(function(value) {
+											// Incase of edit first clear the fileinput field by pressing the dismiss button
+											// and then set new file
+											if (value.trim().length > 0) {
 
-											chaisePage.recordEditPage.getClearButton(txtInput).then(function(clearButton) {
-												clearButton.click();
-												
-												browser.sleep(50);
+												chaisePage.recordEditPage.getClearButton(txtInput).then(function(clearButton) {
+													clearButton.click();
+													
+													browser.sleep(50);
 
-												expect(txtInput.getAttribute('value')).toBe("");
+													expect(txtInput.getAttribute('value')).toBe("");
 
+													testFileSelect();
+												});
+											} else {
 												testFileSelect();
-											});
-										} else {
-											testFileSelect();
-										}
+											}
+										});
+										
 									});
 									
-								});
-								
-							} else {
-								expect(undefined).toBeDefined("Unable to find file input field for column " + column.name);
-							}
+								} else {
+									expect(undefined).toBeDefined("Unable to find file input field for column " + column.name);
+								}
+							});
 						});
 					});
+
 				});
-
-			});
-
-
+			}
 		});
-
-		
 
 		if (tableParams.records && recordIndex < (tableParams.records > 1 ? tableParams.records : 0)) {
 			testMultipleRecords(recordIndex + 1);
