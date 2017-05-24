@@ -21,4 +21,4 @@ index.html
 sftp-config.json
 npm-debug.log
 version.txt
-uploadFiles/*.*
+test/e2e/specs/recordedit/uploadFiles/*.*

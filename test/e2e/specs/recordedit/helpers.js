@@ -11,7 +11,7 @@ var exec = require('child_process').execSync;
 exports.testPresentationAndBasicValidation = function(tableParams) {
 
     var visibleFields = [];
-
+    
 	if (tableParams.keys) {
 		it("should have edit record title", function() {
             var EC = protractor.ExpectedConditions;
@@ -994,13 +994,6 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 			});
 
 			describe("File fields,", function() {
-
-				beforeAll(function() {
-		            tableParams.files.forEach(function(f) {
-		            	var path = __dirname + "/" + f.path;
-			        	exec("perl -e 'print \"\1\" x " + f.size + "' > " + path);
-			        });
-				});
 
 				it("should render input type as file input ", function() {
 					console.log("\n       File Input Fields");

@@ -43,19 +43,7 @@
                     { "name": "luxurious", "title" : "Is Luxurious", "type": "boolean" }
                 ],
                 "primary_keys": ["id"],
-                "records": 3,
-                "files" : []
-            }, {
-                "table_name" : "booking",
-                "columns" : [
-                    { "name":"id", "generated": true, "title" : "id", "type": "serial4"},
-                    { "name":"accommodation_id","isForeignKey": true, "title" : "accommodation_id", "type": "int4"},
-                    { "name":"price","title" : "price", "type": "float4"},
-                    { "name":"booking_date","title" : "booking_date", "type": "timestamptz" }
-                ],
-                "primary_keys": ["id"],
-                "create_entity_displayname": "booking",
-                "records": 1,
+                "records": 2,
                 "files" : []
             }, {
                 "table_name" : "file",
@@ -71,20 +59,20 @@
                 "create_entity_displayname": "file",
                 "records": 2,
                 "files" : [{
-                    "name": "testfile50MB.pdf",
-                    "size": "52428800",
-                    "displaySize": "50MB",
-                    "path" : "uploadFiles/testfile50MB.pdf"
-                }, {
-                    "name": "testfile5MB.txt",
-                    "size": "5242880",
-                    "displaySize": "5MB",
-                    "path" : "uploadFiles/testfile5MB.txt"
+                    "name": "testfile1MB.txt",
+                    "size": "1024000",
+                    "displaySize": "1MB",
+                    "path" : "uploadFiles/testfile1MB.txt"
                 }, {
                     "name": "testfile500kb.png",
                     "size": "512000",
                     "displaySize": "500KB",
                     "path" : "uploadFiles/testfile500kb.png"
+                }, {
+                    "name": "testfile5MB.pdf",
+                    "size": "5242880",
+                    "displaySize": "5MB",
+                    "path" : "uploadFiles/testfile5MB.pdf"
                 }]
             }],
             "multi_insert" : {
