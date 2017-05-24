@@ -18,7 +18,8 @@ MODULES=node_modules
 # Node bin scripts
 BIN=$(MODULES)/.bin
 
-# Protractor scripts
+### Protractor scripts
+## Sequential protractor scripts
 # Legacy apps tests
 E2EDIsearch=test/e2e/specs/search/data-independent/protractor.conf.js
 E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
@@ -50,6 +51,9 @@ E2Elogin=test/e2e/specs/login/protractor.conf.js
 E2Enavbar=test/e2e/specs/navbar/base-config/protractor.conf.js
 E2EnavbarHeadTitle=test/e2e/specs/navbar/no-logo-no-brandtext/protractor.conf.js
 E2EmultiPermissionsVisibility=test/e2e/specs/multi-permissions/visibility/protractor.conf.js
+
+## Parallel protractor scripts
+FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)
@@ -456,6 +460,7 @@ testall:
 	$(BIN)/karma start
 	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
 
+#### Sequential make commands - these commands will run tests in sequential order
 #Rule to run navbar tests
 .PHONY: testnavbar
 testnavbar:
@@ -504,6 +509,12 @@ testviewer:
 .PHONY: testlogin
 testlogin:
 	$(BIN)/protractor $(E2Elogin)
+
+#### Parallel make commands - these commands will run tests in parallel
+#Rule to run the full features chaise configuration tests in parallel
+.PHONY: testfullfeatures
+testfullfeatures:
+	$(BIN)/protractor $(FullFeaturesParallel)
 
 # Rule to make html
 .PHONY: html

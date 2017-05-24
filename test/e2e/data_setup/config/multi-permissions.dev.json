@@ -22,12 +22,5 @@
         }],
         "schema": "multi-permissions"
     },
-    "cleanup": true,
-    "tests": {
-        "params": {
-            "tableName": "main_create_table",
-            "key": {"columnName": "id", "value": 1, "operator": "="},
-            "row": []
-        }
-    }
+    "cleanup": true
 }

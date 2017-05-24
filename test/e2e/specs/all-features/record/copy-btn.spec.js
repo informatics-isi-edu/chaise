@@ -1,8 +1,17 @@
 var chaisePage = require('../../../utils/chaise.page.js');
+var tupleParams = {
+    table_name: "editable-id-table",
+    table_displayname: "Editable Id Table",
+    table_inner_html_display: "<strong>Editable Id Table</strong>",
+    entity_title: "1",
+    entity_inner_html_title: "<strong>1</strong>",
+    html_table_name: "html-name-table",
+    html_table_display: "<strong>Html Name</strong>",
+    keys: [{"name": "id", "value": 1, "operator": "="}],
+    html_keys: [{"name": "id", "value": 1, "operator": "="}]
+};
 
 describe('View existing record,', function() {
-
-    var testConfiguration = browser.params.configuration.tests, tupleParams = testConfiguration.params.tuples[0];
 
     describe("For table " + tupleParams.html_table_name + ",", function() {
         beforeAll(function() {

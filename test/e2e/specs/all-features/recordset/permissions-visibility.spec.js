@@ -1,9 +1,13 @@
 // The goal of this spec is to test whether Recordset app correctly displays the right UI controls given different user permission levels
-var testConfiguration = browser.params.configuration;
-var testParams = testConfiguration.tests.params;
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordsetPage = chaisePage.recordsetPage;
-
+var testParams = {
+    key: {
+        columnName: "id",
+        value: 1,
+        operator: "="
+    }
+};
 
 describe('When viewing Recordset app', function() {
     var EC = protractor.ExpectedConditions, url;
