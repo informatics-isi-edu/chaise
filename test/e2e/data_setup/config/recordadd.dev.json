@@ -43,22 +43,41 @@
                     { "name": "luxurious", "title" : "Is Luxurious", "type": "boolean" }
                 ],
                 "primary_keys": ["id"],
-                "records": 3
+                "records": 2,
+                "files" : []
             }, {
-                "table_name" : "booking",
+                "table_name" : "file",
                 "columns" : [
-                    { "name":"id", "generated": true, "title" : "id", "type": "serial4"},
-                    { "name":"accommodation_id","isForeignKey": true, "title" : "accommodation_id", "type": "int4"},
-                    { "name":"price","title" : "price", "type": "float4"},
-                    { "name":"booking_date","title" : "booking_date", "type": "timestamptz" }
+                    { "name": "id", "nullok": false, "title" : "id", "type": "int4"},
+                    { "name": "uri", "title": "uri", "type": "text", "isFile": true, "comment": "asset/reference" },
+                    { "name": "content_type", "title" : "content_type", "type": "text"},
+                    { "name": "timestamp", "title" : "timestamp", "type": "timestamptz"},
+                    { "name": "image_width", "title": "image_width", "type": "int8"},
+                    { "name": "image_height", "title": "image_height", "type": "int8"}
                 ],
                 "primary_keys": ["id"],
-                "create_entity_displayname": "booking",
-                "records": 1
+                "create_entity_displayname": "file",
+                "records": 2,
+                "files" : [{
+                    "name": "testfile1MB.txt",
+                    "size": "1024000",
+                    "displaySize": "1MB",
+                    "path" : "uploadFiles/testfile1MB.txt"
+                }, {
+                    "name": "testfile500kb.png",
+                    "size": "512000",
+                    "displaySize": "500KB",
+                    "path" : "uploadFiles/testfile500kb.png"
+                }, {
+                    "name": "testfile5MB.pdf",
+                    "size": "5242880",
+                    "displaySize": "5MB",
+                    "path" : "uploadFiles/testfile5MB.pdf"
+                }]
             }],
             "multi_insert" : {
                 "table_name" : "accommodation",
-                "records" : 3,
+                "records" : 1,
                 "max_input_rows" : 200
             }
         }

@@ -10,6 +10,7 @@
         'chaise.filters',
         'chaise.modal',
         'chaise.navbar',
+        'chaise.upload',
         'chaise.record.table',
         'chaise.utils',
         'chaise.validators',
@@ -223,7 +224,11 @@
                                             value = (!isNaN(floatVal) ? floatVal : null);
                                             break;
                                         default:
-                                            value = values[i];
+                                            if (column.isAsset) {                                            
+                                                value = { url: values[i] || "" }; 
+                                            } else {
+                                                value = values[i];
+                                            }
                                             break;
                                     }
 
@@ -280,8 +285,16 @@
                                                 meridiem: 'AM'
                                             };
                                         }
+                                    } else if (column.isAsset) {
+                                        recordEditModel.rows[0][column.name] = {
+                                            url: column.default
+                                        }
                                     } else {
                                         recordEditModel.rows[0][column.name] = (column.default !== null ? column.default : null);
+                                    }
+                                } else if (column.isAsset) {
+                                    recordEditModel.rows[0][column.name] = {
+                                        url: ""
                                     }
                                 } else if ((column.type.name === 'timestamp' || column.type.name === 'timestamptz')) {
                                     // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj

@@ -44,7 +44,8 @@
                     { "name": "luxurious", "title" : "Is Luxurious", "value": "false", "type": "boolean" }
                 ],
                 "delete_keys": [{ "name": "id", "value": "4004", "operator": "="}],
-                "edit_entity_displayname": "Sherathon Hotel"
+                "edit_entity_displayname": "Sherathon Hotel",
+                "files" : []
             }]
         }
     }

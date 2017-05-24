@@ -107,5 +107,5 @@
         function cancel() {
             $uibModalInstance.dismiss("cancel");
         }
-    }]);
+    }])
 })();

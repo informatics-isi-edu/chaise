@@ -293,6 +293,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/mask.min.js \
 	$(COMMON)/vendor/moment.min.js \
+	$(COMMON)/vendor/sparkMD5.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
@@ -300,6 +301,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
+	$(COMMON)/upload.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/errorDialog.controller.js \
@@ -315,7 +317,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 
 RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
 	$(RE_ASSETS)/model.js \
-	$(RE_ASSETS)/form.controller.js
+	$(RE_ASSETS)/form.controller.js \
 
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \

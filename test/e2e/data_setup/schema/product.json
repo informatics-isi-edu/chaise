@@ -337,10 +337,10 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", ["product", "fk_category"], "website", "rating", "summary", "description", ["product", "fk_thumbnail"], "opened_on", "luxurious"],
-          "entry/create": ["id", "title", "website", ["product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product", "fk_thumbnail"], ["product", "fk_cover"], "opened_on","luxurious"],
-          "entry/edit": ["id", "title", "website", ["product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product", "fk_thumbnail"], ["product", "fk_cover"], "opened_on","luxurious"],
-          "compact" : ["title", "website", "rating", "summary", "opened_on", "luxurious"]
+          "detailed" : ["id", ["product", "fk_category"], "website", "rating", "summary", "description", ["product", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
+          "entry/create": ["id", "title", "website", ["product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product", "fk_thumbnail"], ["product", "fk_cover"],"terms", "opened_on","luxurious"],
+          "entry/edit": ["id", "title", "website", ["product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product", "fk_thumbnail"], ["product", "fk_cover"],"terms", "opened_on","luxurious"],
+          "compact" : ["title", "website", "rating", "summary","terms", "opened_on", "luxurious"]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
@@ -520,7 +520,13 @@
             "comment": [
               "thumbnail",
               "download"
-            ]
+            ],
+            "tag:isrd.isi.edu,2017:asset": {
+              "url_pattern":"hatrac/{{{id}}}/{{{uri.md5_hex}}}",
+              "filename_column" : "filename",
+              "byte_count_column": "bytes",
+              "md5": "preview"
+            }
           }
         },
         {

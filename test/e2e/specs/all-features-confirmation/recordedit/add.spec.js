@@ -1,5 +1,6 @@
 var chaisePage = require('../../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../helpers.js'), chance = require('chance').Chance();
+var exec = require('child_process').execSync;
 
 describe('Record Add', function() {
 
@@ -19,6 +20,20 @@ describe('Record Add', function() {
 			    });
 
 				describe("Presentation and validation,", function() {
+
+
+                    beforeAll(function() {
+
+                        var files = tableParams.files;
+                        if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
+                            
+                        files.forEach(function(f) {
+                            var path = require('path').join(__dirname , "/../../" + f.path);
+                            exec("perl -e 'print \"\1\" x " + f.size + "' > " + path);
+                            console.log(path + " created");
+                        });
+                    });
+
                     var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
 				});
 
@@ -41,9 +56,11 @@ describe('Record Add', function() {
 						it("click any delete button", function() {
 							chaisePage.recordEditPage.getDeleteRowButton(randomNo).then(function(button)	 {
 								chaisePage.clickButton(button);
-								browser.sleep(50);
+								
+                                browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id('delete-confirmation'))), browser.params.defaultTimeout);
+
 								chaisePage.recordEditPage.getDeleteModalButton().then(function(modalBtn) {
-									chaisePage.clickButton(modalBtn);
+                                    chaisePage.clickButton(modalBtn);
 									browser.sleep(50);
 									chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
 										expect(buttons.length).toBe(tableParams.records);
@@ -86,6 +103,12 @@ describe('Record Add', function() {
 						if (!hasErrors) {
                             // doesn't redirect to record
                             if (tableParams.records > 1) {
+
+                                // if there is a file upload
+                                if (tableParams.files.length) {
+                                   browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
+                                }
+                                
                                 // wait for url change
                                 browser.wait(function () {
                                     return browser.driver.getCurrentUrl().then(function(url) {
@@ -121,6 +144,16 @@ describe('Record Add', function() {
 						    }
 						}
 					});
+
+                    afterAll(function(done) {
+                        var files = tableParams.files;
+                        if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
+                        
+                        files.forEach(function(f) {
+                            exec('rm ' + f.path);
+                        });
+                        done();
+                    });
 				});
     		});
     	})(testParams.tables[i], i);
@@ -130,9 +163,10 @@ describe('Record Add', function() {
         var chaiseConfig;
         browser.get(browser.params.url + ":" + testParams.tables[0].table_name);
         chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-            return browser.executeScript('return chaiseConfig');
+            return browser.executeScript('return chaiseConfig;');
         }).then(function(config) {
             chaiseConfig = config;
+            console.log(chaiseConfig);
             return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
         }).then(function(elemArray) {
             expect(elemArray.length).toBeTruthy();

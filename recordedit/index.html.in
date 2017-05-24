@@ -198,6 +198,7 @@
                                                     <input ng-switch-when="number" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                         name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" float>
 
+
                                                     <!-- boolean input -->
                                                     <div ng-switch-when="boolean">
                                                         <ui-select id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" append-to-body="true" theme="select2" ng-disabled="::form.isDisabled(column);">
@@ -217,6 +218,12 @@
                                                         </span>
                                                     </div>
 
+                                                    
+                                                    <!-- File input -->
+                                                    <div ng-switch-when="file">
+                                                        <upload reference="::reference"  column="::column" values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]"></upload>
+                                                    </div>
+                                                    
                                                     <!-- shorttext/default text input -->
                                                     <input ng-switch-default id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
                                                         name="{{::column.name}}" type="text" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>
