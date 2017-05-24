@@ -13,7 +13,8 @@ var testParams = {
 describe('When viewing RecordEdit app', function() {
     var EC = protractor.ExpectedConditions, baseUrl, url, modalBody;
     beforeAll(function() {
-        baseUrl = browser.params.url.replace('/record', '/recordedit');
+        baseUrl = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-permissions";
+        browser.ignoreSynchronization = true;
     });
 
     it('as a create-only user, the app should not load the form and displays error modal instead', function() {

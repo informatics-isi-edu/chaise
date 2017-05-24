@@ -12,7 +12,8 @@ var testParams = {
 describe('When viewing Recordset app', function() {
     var EC = protractor.ExpectedConditions, url;
     beforeAll(function() {
-        url = browser.params.url.replace('/record', '/recordset');
+        url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions";
+        browser.ignoreSynchronization = true;
     });
 
     describe('as a read-only user', function() {

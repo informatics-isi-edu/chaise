@@ -1,5 +1,5 @@
 var chaisePage = require('../../../utils/chaise.page.js');
-var tupleParams = {
+var testParams = {
     table_name: "editable-id-table",
     table_displayname: "Editable Id Table",
     table_inner_html_display: "<strong>Editable Id Table</strong>",
@@ -13,34 +13,34 @@ var tupleParams = {
 
 describe('View existing record,', function() {
 
-    describe("For table " + tupleParams.html_table_name + ",", function() {
+    describe("For table " + testParams.html_table_name + ",", function() {
         beforeAll(function() {
             var keys = [];
-            tupleParams.html_keys.forEach(function(key) {
+            testParams.html_keys.forEach(function(key) {
                 keys.push(key.name + key.operator + key.value);
             });
             browser.ignoreSynchronization=true;
-            var url = browser.params.url + ":" + tupleParams.html_table_name + "/" + keys.join("&");
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.html_table_name + "/" + keys.join("&");
             browser.get(url);
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
         it("should display the entity subtitle name with html in it.", function() {
-            expect(chaisePage.recordPage.getEntitySubTitle()).toBe(tupleParams.html_table_display);
+            expect(chaisePage.recordPage.getEntitySubTitle()).toBe(testParams.html_table_display);
         });
     });
 
-    describe("For table " + tupleParams.table_name + ",", function() {
+    describe("For table " + testParams.table_name + ",", function() {
 
         var table, record;
 
         beforeAll(function() {
             var keys = [];
-            tupleParams.keys.forEach(function(key) {
+            testParams.keys.forEach(function(key) {
                 keys.push(key.name + key.operator + key.value);
             });
             browser.ignoreSynchronization=true;
-            var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
@@ -60,13 +60,13 @@ describe('View existing record,', function() {
                     titleElement = chaisePage.recordPage.getEntityTitleElement().element(by.tagName("span"));
 
                 subtitleElement.getAttribute("innerHTML").then(function(html) {
-                    expect(html).toBe(tupleParams.table_inner_html_display);
-                    expect(chaisePage.recordPage.getEntitySubTitle()).toBe(tupleParams.table_displayname);
+                    expect(html).toBe(testParams.table_inner_html_display);
+                    expect(chaisePage.recordPage.getEntitySubTitle()).toBe(testParams.table_displayname);
 
                     return titleElement.getAttribute("innerHTML");
                 }).then(function(html) {
-                    expect(html).toBe(tupleParams.entity_inner_html_title);
-                    expect(chaisePage.recordPage.getEntityTitle()).toBe(tupleParams.entity_title);
+                    expect(html).toBe(testParams.entity_inner_html_title);
+                    expect(chaisePage.recordPage.getEntityTitle()).toBe(testParams.entity_title);
                 });
             });
 
@@ -96,11 +96,11 @@ describe('View existing record,', function() {
 
                     return titleElement.getText();
                 }).then(function(txt) {
-                    expect(txt).toBe("Create " + tupleParams.table_displayname +" Record");
+                    expect(txt).toBe("Create " + testParams.table_displayname +" Record");
 
                     return titleElement.element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
                 }).then(function(html) {
-                    expect(html).toBe(tupleParams.table_inner_html_display);
+                    expect(html).toBe(testParams.table_inner_html_display);
 
                     return chaisePage.recordEditPage.getForms().count();
                 }).then(function(ct) {

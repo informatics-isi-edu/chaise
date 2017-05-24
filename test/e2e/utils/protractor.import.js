@@ -5,7 +5,7 @@ var Q = require('q');
 
 //**********************************************************************
 // function waitfor - Wait until a condition is met
-//        
+//
 // Needed parameters:
 //    test: function that returns a value
 //    expectedValue: the value of the test function we are waiting for
@@ -147,7 +147,7 @@ exports.setup = function(testConfiguration) {
 
         // Set catalogId in browser params for future reference to delete if it required
         catalogId = err.catalogId || null;
-        
+
         // Set setupDone to true to specify that the setup code has completed its execution
         setupDone = true;
     });

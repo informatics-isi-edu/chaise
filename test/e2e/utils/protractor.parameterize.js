@@ -1,7 +1,7 @@
 
 exports.parameterize = function(config, configParams) {
 
-  if ((typeof configParams != 'object') || (!configParams.page)) {
+  if ((typeof configParams != 'object')) {
     throw new Error("Invalid testConfiguration path provided for protractor parameterization in protractor config");
   }
 
@@ -24,7 +24,7 @@ exports.parameterize = function(config, configParams) {
   }
 
   var onErmrestLogin = function(defer) {
-    
+
     testConfiguration.setup.url = process.env.ERMREST_URL;
     testConfiguration.setup.authCookie = testConfiguration.authCookie;
 
@@ -33,7 +33,7 @@ exports.parameterize = function(config, configParams) {
       process.env.CATALOGID = data.catalogId;
 
       defer.resolve();
-      
+
     }, function(err) {
       process.env.CATALOGID = catalogId = err.catalogId;
       console.log(err);
@@ -48,10 +48,10 @@ exports.parameterize = function(config, configParams) {
     if (process.env.TRAVIS) {
       var exec = require('child_process').exec;
       exec("hostname", function (error, stdout, stderr) {
-          
+
           process.env.ERMREST_URL = "http://" + stdout.trim() + "/ermrest";
           process.env.CHAISE_BASE_URL = "http://" + stdout.trim() + "/chaise";
-          
+
           require('request')({
               url:  process.env.ERMREST_URL.replace('ermrest', 'authn') + '/session',
               method: 'POST',
@@ -89,10 +89,10 @@ exports.parameterize = function(config, configParams) {
     jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'all'}));
 
     browser.params.configuration = testConfiguration, defer = Q.defer();
-    
+
     // Set catalogId in browser params for future reference to delete it if required
     browser.params.catalogId = catalogId = process.env.CATALOGID;
-    
+
     if (process.env.AUTH_COOKIE) {
       testConfiguration.authCookie = process.env.AUTH_COOKIE;
     }
@@ -107,11 +107,11 @@ exports.parameterize = function(config, configParams) {
         browser.params.catalogId = data.catalogId;
 
         // Set the base url to the page that we are running the tests for
-        browser.baseUrl = process.env.CHAISE_BASE_URL + configParams.page;
+        browser.baseUrl = process.env.CHAISE_BASE_URL;
 
-        // set the url for testcases to stat using the catalogId and schema that was mentioned in the configuration
+        // set the url for testcases to start using the catalogId and schema that was mentioned in the configuration
         if (typeof configParams.setBaseUrl == 'function') configParams.setBaseUrl(browser, data);
-        else browser.params.url = browser.baseUrl + "/#" + data.catalogId + "/schema/" + data.defaultSchema.name;
+        else browser.params.url = browser.baseUrl;
 
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
@@ -124,7 +124,7 @@ exports.parameterize = function(config, configParams) {
         defer.reject({ catalogId: catalogId });
     });
 
-    
+
     return defer.promise;
   };
 
