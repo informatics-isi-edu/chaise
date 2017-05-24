@@ -35,6 +35,7 @@ exports.getConfig = function(options) {
     }
   };
 
+  Object.assign(config, options);
 
   if (!options.configFileName && !options.testConfiguration) throw new Error("No configfile provided in protractor.conf.js");
   if (!options.page) throw new Error("No page provided in protractor.conf.js");
@@ -88,6 +89,13 @@ exports.getConfig = function(options) {
   else {
     console.log("Unable to copy file " + chaiseFilePath + " to chaise-config.js \n");
     process.exit(1);
+  }
+
+  config.capabilities.shardTestFiles = (process.env.SHARDING == 'false' || process.env.SHARDING == false) ? false : true;
+  config.capabilities.maxInstances = process.env.MAXINSTANCES || 4;
+
+  if (options.parallel == false) {
+    config.capabilities.shardTestFiles = false;
   }
 
   dataSetup.parameterize(config, dateSetupOptions);

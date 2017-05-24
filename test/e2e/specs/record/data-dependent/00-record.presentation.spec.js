@@ -30,7 +30,6 @@ describe('View existing record,', function() {
 
                 it('should load document title defined in chaise-config.js and have deleteRecord=true', function() {
                     browser.manage().logs().get('browser').then(function(browserLog) {
-                        console.log('log: ' + require('util').inspect(browserLog));
                         browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                             expect(chaiseConfig.deleteRecord).toBe(true);
                             if (chaiseConfig.headTitle) {
@@ -40,7 +39,7 @@ describe('View existing record,', function() {
                             }
                         });
                     });
-                    
+
                 });
 
 				describe("Presentation ,", function() {
