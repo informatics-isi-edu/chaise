@@ -50,7 +50,7 @@ E2EDviewer=test/e2e/specs/viewer/data-dependent/protractor.conf.js
 E2Elogin=test/e2e/specs/login/protractor.conf.js
 E2Enavbar=test/e2e/specs/navbar/base-config/protractor.conf.js
 E2EnavbarHeadTitle=test/e2e/specs/navbar/no-logo-no-brandtext/protractor.conf.js
-E2EmultiPermissionsVisibility=test/e2e/specs/multi-permissions/visibility/protractor.conf.js
+E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
 
 ## Parallel protractor scripts
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
