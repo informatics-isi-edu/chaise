@@ -8,7 +8,7 @@ var moment = require('moment');
 var EC = protractor.ExpectedConditions;
 var exec = require('child_process').execSync;
 
-exports.testPresentationAndBasicValidation = function(tableParams) {
+exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
     var visibleFields = [];
     
@@ -151,6 +151,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 								expect(txtArea.getAttribute('value')).toBe(c._value);
 							}
 
+							if (isEditMode && (c.generated || c.immutable)) return;
+
 							chaisePage.recordEditPage.clearInput(txtArea);
 							browser.sleep(10);
 
@@ -183,6 +185,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 							if (c._value != undefined) {
 								expect(txtInput.getAttribute('value')).toBe(c._value);
 							}
+
+							if (isEditMode && (c.generated || c.immutable)) return;
 
 							chaisePage.recordEditPage.clearInput(txtInput);
 							browser.sleep(10);
@@ -257,6 +261,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 				it("should select an option (true, false, none)", function() {
 					dropdowns.forEach(function(dropdown) {
+
+						if (isEditMode && (dropdown.column.generated || dropdown.column.immutable)) return;
+
 						var value = chance.bool();
 						/*if (dropdown.column.nullok == true) {
 							if (chance.bool()) value = "";
@@ -273,149 +280,153 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 			describe("Foreign key fields,", function() {
 
-				var pageColumns = [], columns = [], dropdowns = [];
+				var pageColumns = [], dropdowns = [];
 
-				beforeAll(function() {
-					columns = tableParams.columns.filter(function(c) { if (c.isForeignKey) return true; });
+				var columns  = tableParams.columns.filter(function(c) { if (c.isForeignKey) return true; });
 
-					chaisePage.recordEditPage.getAllColumnCaptions().then(function(pcs) {
-						pcs.forEach(function(pc) {
-							pc.getAttribute('innerHTML').then(function(txt) {
-								txt = txt.trim();
-								var col = columns.find(function(cl) { return txt == cl.title });
-								if (col) {
-									pc.column = col;
-									pageColumns.push(pc);
-								}
+				if (columns.length > 0) {
+
+					beforeAll(function() {
+						
+						chaisePage.recordEditPage.getAllColumnCaptions().then(function(pcs) {
+							pcs.forEach(function(pc) {
+								pc.getAttribute('innerHTML').then(function(txt) {
+									txt = txt.trim();
+									var col = columns.find(function(cl) { return txt == cl.title });
+									if (col) {
+										pc.column = col;
+										pageColumns.push(pc);
+									}
+								});
 							});
 						});
 					});
-				});
 
-                it('should show an uneditable field for each foreign key column', function() {
-                    var expectedNumOfPopupFields = columns.length * (recordIndex + 1);
-                    var popupFields = element.all(by.css('.popup-select-value'));
-                    expect(popupFields.count()).toBe(expectedNumOfPopupFields);
-                    // Ensure each field is an uneditable div element (not an input)
-                    popupFields.map(function(field) {
-                        expect(field.getTagName()).toBe('div');
-                        expect(field.getAttribute('contenteditable')).toBe('false');
-                    });
-                });
+	                it('should show an uneditable field for each foreign key column', function() {
+	                    var expectedNumOfPopupFields = columns.length * (recordIndex + 1);
+	                    var popupFields = element.all(by.css('.popup-select-value'));
+	                    expect(popupFields.count()).toBe(expectedNumOfPopupFields);
+	                    // Ensure each field is an uneditable div element (not an input)
+	                    popupFields.map(function(field) {
+	                        expect(field.getTagName()).toBe('div');
+	                        expect(field.getAttribute('contenteditable')).toBe('false');
+	                    });
+	                });
 
-                // in the edit case
-                if (!tableParams.records) {
+	                // in the edit case
+	                if (!tableParams.records) {
 
-                    it("clicking the 'x' should remove the value in the foreign key field.", function () {
-                        var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].title, recordIndex);
-                        //the first foreignkey input for editing should be pre-filled
-                        expect(foreignKeyInput.getAttribute("value")).toBeDefined();
+	                    it("clicking the 'x' should remove the value in the foreign key field.", function () {
+	                        var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].title, recordIndex);
+	                        //the first foreignkey input for editing should be pre-filled
+	                        expect(foreignKeyInput.getAttribute("value")).toBeDefined();
 
-                        chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(foreignKeyInputRemoveBtn) {
-                        	return chaisePage.clickButton(foreignKeyInputRemoveBtn[0]);
-                        }).then(function() {
-                            // value is empty string after removing it
-                            expect(foreignKeyInput.getAttribute("value")).toBe('');
-                        });
-                    });
+	                        chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(foreignKeyInputRemoveBtn) {
+	                        	return chaisePage.clickButton(foreignKeyInputRemoveBtn[0]);
+	                        }).then(function() {
+	                            // value is empty string after removing it
+	                            expect(foreignKeyInput.getAttribute("value")).toBe('');
+	                        });
+	                    });
 
-                    it("clicking 'x' in the model should close it without returning a value.", function () {
-                        var modalClose = chaisePage.recordEditPage.getModalCloseBtn(),
-                            EC = protractor.ExpectedConditions;
+	                    it("clicking 'x' in the model should close it without returning a value.", function () {
+	                        var modalClose = chaisePage.recordEditPage.getModalCloseBtn(),
+	                            EC = protractor.ExpectedConditions;
 
-                        chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
-                        	return chaisePage.clickButton(popupBtns[0]);
-                        }).then(function() {
-                            // wait for the modal to open
-                            browser.wait(EC.visibilityOf(modalClose), browser.params.defaultTimeout);
-                            return modalClose.click();
-                        }).then(function() {
-                            var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].title, recordIndex);
-                            expect(foreignKeyInput.getAttribute("value")).toBe('');
-                        });
-                    });
+	                        chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+	                        	return chaisePage.clickButton(popupBtns[0]);
+	                        }).then(function() {
+	                            // wait for the modal to open
+	                            browser.wait(EC.visibilityOf(modalClose), browser.params.defaultTimeout);
+	                            return modalClose.click();
+	                        }).then(function() {
+	                            var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].title, recordIndex);
+	                            expect(foreignKeyInput.getAttribute("value")).toBe('');
+	                        });
+	                    });
+					}
+
+	                it("should open a modal search and select a foreign key value.", function () {
+	                    chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+	                    	var modalTitle = chaisePage.recordEditPage.getModalTitle(),
+	                        	EC = protractor.ExpectedConditions;
+
+	                    	expect(popupBtns.length).toBe(columns.length * (recordIndex + 1));
+
+		                    for (var i=0; i<columns.length; i++) {
+		                        (function(i) {
+		                            var rows;
+		                            chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]).then(function() {
+		                                // wait for the modal to open
+		                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+	                                    // Expect search box to have focus
+	                                    var searchBox = chaisePage.recordsetPage.getSearchBox();
+	                                    browser.wait(function() {
+	                                        var searchBoxId, activeElement;
+	                                        return searchBox.getAttribute('id').then(function(id) {
+	                                            searchBoxId = id;
+	                                            return browser.driver.switchTo().activeElement().getAttribute('id');
+	                                        }).then(function(activeId) {
+	                                            activeElement = activeId;
+	                                            return activeId == searchBoxId;
+	                                        });
+	                                    }, browser.params.defaultTimeout).then(function() {
+	                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+	                                    });
+		                                return modalTitle.getText();
+		                            }).then(function(text) {
+		                                // make sure modal opened
+		                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+	                                    browser.wait(function () {
+	                                        return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+	                                            return (ct > 0);
+	                                        });
+	                                    });
+		                                rows = chaisePage.recordsetPage.getRows();
+		                                // count is needed for clicking a random row
+		                                return rows.count();
+		                            }).then(function(ct) {
+		                                expect(ct).toBeGreaterThan(0);
+
+		                                var index = Math.floor(Math.random() * ct);
+		                                return rows.get(index).all(by.css(".select-action-button"));
+									}).then(function(selectButtons) {
+										return selectButtons[0].click();
+		                            }).then(function() {
+		                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
+		                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].title, recordIndex);
+		                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
+	                                    // Open the same modal again to make sure search box is autofocused again
+	                                    return chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]);
+		                            }).then(function() {
+	                                    // Wait for the modal to open
+		                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+	                                    // Expect search box to have focus.
+	                                    var searchBox = chaisePage.recordsetPage.getSearchBox();
+	                                    browser.wait(function() {
+	                                        var searchBoxId, activeElement;
+	                                        return searchBox.getAttribute('id').then(function(id) {
+	                                            searchBoxId = id;
+	                                            return browser.driver.switchTo().activeElement().getAttribute('id');
+	                                        }).then(function(activeId) {
+	                                            activeElement = activeId;
+	                                            return activeId == searchBoxId;
+	                                        });
+	                                    }, browser.params.defaultTimeout).then(function() {
+	                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+	                                    });
+	                                    // Close the modal
+	                                    chaisePage.recordEditPage.getModalCloseBtn().click();
+	                                }).catch(function(e) {
+	                                    console.dir(e);
+	                                    expect('Something went wrong in this promise chain').toBe('Please see error message.');
+	                                });
+		                        })(i);
+		                    }
+	                    });
+
+	                });
 				}
-
-                it("should open a modal search and select a foreign key value.", function () {
-                    chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
-                    	var modalTitle = chaisePage.recordEditPage.getModalTitle(),
-                        	EC = protractor.ExpectedConditions;
-
-                    	expect(popupBtns.length).toBe(columns.length * (recordIndex + 1));
-
-	                    for (var i=0; i<columns.length; i++) {
-	                        (function(i) {
-	                            var rows;
-	                            chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]).then(function() {
-	                                // wait for the modal to open
-	                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-                                    // Expect search box to have focus
-                                    var searchBox = chaisePage.recordsetPage.getSearchBox();
-                                    browser.wait(function() {
-                                        var searchBoxId, activeElement;
-                                        return searchBox.getAttribute('id').then(function(id) {
-                                            searchBoxId = id;
-                                            return browser.driver.switchTo().activeElement().getAttribute('id');
-                                        }).then(function(activeId) {
-                                            activeElement = activeId;
-                                            return activeId == searchBoxId;
-                                        });
-                                    }, browser.params.defaultTimeout).then(function() {
-                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
-                                    });
-	                                return modalTitle.getText();
-	                            }).then(function(text) {
-	                                // make sure modal opened
-	                                expect(text.indexOf("Choose")).toBeGreaterThan(-1);
-                                    browser.wait(function () {
-                                        return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                            return (ct > 0);
-                                        });
-                                    });
-	                                rows = chaisePage.recordsetPage.getRows();
-	                                // count is needed for clicking a random row
-	                                return rows.count();
-	                            }).then(function(ct) {
-	                                expect(ct).toBeGreaterThan(0);
-
-	                                var index = Math.floor(Math.random() * ct);
-	                                return rows.get(index).all(by.css(".select-action-button"));
-								}).then(function(selectButtons) {
-									return selectButtons[0].click();
-	                            }).then(function() {
-	                                browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-	                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[i].title, recordIndex);
-	                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-                                    // Open the same modal again to make sure search box is autofocused again
-                                    return chaisePage.clickButton(popupBtns[(columns.length * recordIndex) + i ]);
-	                            }).then(function() {
-                                    // Wait for the modal to open
-	                                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-                                    // Expect search box to have focus.
-                                    var searchBox = chaisePage.recordsetPage.getSearchBox();
-                                    browser.wait(function() {
-                                        var searchBoxId, activeElement;
-                                        return searchBox.getAttribute('id').then(function(id) {
-                                            searchBoxId = id;
-                                            return browser.driver.switchTo().activeElement().getAttribute('id');
-                                        }).then(function(activeId) {
-                                            activeElement = activeId;
-                                            return activeId == searchBoxId;
-                                        });
-                                    }, browser.params.defaultTimeout).then(function() {
-                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
-                                    });
-                                    // Close the modal
-                                    chaisePage.recordEditPage.getModalCloseBtn().click();
-                                }).catch(function(e) {
-                                    console.dir(e);
-                                    expect('Something went wrong in this promise chain').toBe('Please see error message.');
-                                });
-	                        })(i);
-	                    }
-                    });
-
-                });
 			});
 
 			describe("Date fields,", function() {
@@ -427,6 +438,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                         if (column._value != undefined) {
 							expect(dateInput.getAttribute('value')).toBe(column._value);
 						}
+
+						if (isEditMode && (column.generated || column.immutable)) return;
 
                         chaisePage.recordEditPage.clearInput(dateInput);
 
@@ -449,6 +462,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                 it('\"Today\" button should enter the current date into the input', function() {
                     var today = moment().format('YYYY-MM-DD');
                     datePickerFields.forEach(function(dp) {
+
+                    	if (isEditMode && (dp.column.generated || dp.column.immutable)) return;
+
                         var todayBtn = dp.all(by.css('.input-group-btn > button'))[0];
                         todayBtn.click();
                         expect(dp.getAttribute('value')).toEqual(today);
@@ -457,6 +473,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
                 it('\"Clear\" button clear the date input respectively', function() {
                     datePickerFields.forEach(function(dp) {
+
+                    	if (isEditMode && (dp.column.generated || dp.column.immutable)) return;
+
                         var clearBtn = dp.all(by.css('.input-group-btn > button'))[1];
                         expect(dp.getAttribute('value')).toBeFalsy();
                     });
@@ -485,6 +504,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 				it("should render open datepicker on click", function() {
 					datePickerFields.forEach(function(dp) {
+
+						if (isEditMode && (dp.column.generated || dp.column.immutable)) return;
+
 						chaisePage.clickButton(dp);
 						browser.sleep(10);
 						chaisePage.recordEditPage.getDatePickerForAnInput(dp).then(function(datePicker) {
@@ -500,6 +522,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 				it("should select a date , and check the value", function() {
 					datePickerFields.forEach(function(dateInput) {
+						if (isEditMode && (dateInput.column.generated || dateInput.column.immutable)) return;
+
 						chaisePage.clickButton(dateInput);
 						browser.sleep(10);
 						chaisePage.recordEditPage.getDayButtonsForDatePicker(dateInput.datePicker).then(function(dayBtns) {
@@ -544,6 +568,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                         expect(timeInput).toBeDefined();
                         expect(meridiemBtn).toBeDefined();
 
+                        if (isEditMode && (column.generated || column.immutable)) return;
+
                         // Test toggling of meridiem button
                         // Testing meridiem before the time input test because toggling btn should work
                         // with or without input in the other fields (i.e. date and time input fields).
@@ -568,6 +594,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
                             console.log(error);
                             expect('There was an error in this promise chain.').toBe('Please see the error message.');
                         });
+
+                        if (isEditMode && (column.generated || column.immutable)) return;
 
                         // If user enters an invalid time an error msg should appear
                         timeInput.clear();
@@ -704,6 +732,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
                 it('should clear the input after clicking the \"Clear\" button', function() {
                     timeInputFields.forEach(function(obj) {
+                    	if (isEditMode && (obj.column.generated || obj.column.immutable)) return;
+
                         var clearBtn = element.all(by.css('button[name="' + obj.column.name + '"]')).get(2);
                         clearBtn.click();
                         expect(obj.date.getAttribute('value')).toBeFalsy();
@@ -714,6 +744,9 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
                 it('should have the current time after clicking the \"Now\" button', function() {
                     timeInputFields.forEach(function(obj) {
+
+                    	if (isEditMode && (obj.column.generated || obj.column.immutable)) return;
+
                         var nowBtn = element.all(by.css('button[name="' + obj.column.name + '"]')).get(1);
                         var UIdate, date = moment().format('YYYY-MM-DD');
                         var UItime, time = moment().format('x'); // in milliseconds
@@ -747,12 +780,13 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				it("should render input type as number with integer attribute", function() {
 					console.log("\n       Integer Fields");
 					
-					var columns = tableParams.columns.filter(function(c) { if (c.type.startsWith("int") && !c.isForeignKey) return true; });
+					var columns = tableParams.columns.filter(function(c) { if (c.type.startsWith("int") && !c.isForeignKey && !c.generated) return true; });
 
 					columns.forEach(function(column) {
 						chaisePage.recordEditPage.getIntegerInputForAColumn(column.name, recordIndex).then(function(intInput) {
 							console.log("         ->" + column.name);
 							if (intInput) {
+
 								expect(true).toBeDefined();
 								intInput.column = column;
 								integerDataTypeFields.push(intInput);
@@ -769,7 +803,10 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				});
 
 				it("should validate required and invalid text input", function() {
+
 					integerDataTypeFields.forEach(function(intInput) {
+
+						if (isEditMode && (intInput.column.generated || intInput.column.immutable)) return;
 
 						var prevValue = "";
 
@@ -797,6 +834,7 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 						intInput.sendKeys(text);
 						expect(intInput.getAttribute('value')).toBe(actualValue);
 
+						
 						// Required Error message should disappear;
 						chaisePage.recordEditPage.getInputErrorMessage(intInput, 'required').then(function(err) {
 							if (err) {
@@ -814,12 +852,16 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 						if (tableParams.primary_keys.indexOf(intInput.column.name) != -1) {
 							intInput.sendKeys(prevValue);
 						}
+
 					});
 				});
 
 				it("should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values", function() {
 
 					integerDataTypeFields.forEach(function(intInput) {
+						
+						if (isEditMode && (intInput.column.generated || intInput.column.immutable)) return;
+
 						var min = -9223372036854776000, max = 9223372036854776000, invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
 						if (intInput.column.type == 'int2') {
 							min = -32768, max = 32767, invalidMaxNo = "8375832757832", invalidMinNo = "-237587565";
@@ -937,6 +979,8 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 				it("should validate invalid text input", function() {
 					floatDataTypeFields.forEach(function(floatInput) {
 
+						if (isEditMode && (floatInput.column.generated || floatInput.column.immutable)) return;
+
 						var validNo = chaisePage.recordEditPage.getRandomArbitrary() + "";
 
 						// Clear value if it is in edit mode
@@ -993,44 +1037,66 @@ exports.testPresentationAndBasicValidation = function(tableParams) {
 
 			});
 
-			describe("File fields,", function() {
+			if (!process.env.TRAVIS) {
+				describe("File fields,", function() {
 
-				it("should render input type as file input ", function() {
-					console.log("\n       File Input Fields");
-					var columns = tableParams.columns.filter(function(c){ if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
-					columns.forEach(function(column) {
-						chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(fileInput) {
-							console.log("         ->" + column.name);
-							if (fileInput) {
-								expect(true).toBeDefined();
-								fileInput.column = column;
+					it("should render input type as file input ", function() {
+						console.log("\n       File Input Fields");
+						var columns = tableParams.columns.filter(function(c){ if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
+						columns.forEach(function(column) {
+							chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(fileInput) {
+								console.log("         ->" + column.name);
+								if (fileInput) {
 
-								chaisePage.recordEditPage.getInputForAColumn("txt" + column.name, recordIndex).then(function(txtInput) {
-									var file = tableParams.files.shift();
-									var filePath = require('path').resolve(__dirname, file.path);
+									expect(true).toBeDefined();
+									fileInput.column = column;
 
-									column._value = file.name;
-									fileInput.sendKeys(filePath);
+									chaisePage.recordEditPage.getInputForAColumn("txt" + column.name, recordIndex).then(function(txtInput) {
+										
+										var testFileSelect = function() {
+											var file = tableParams.files.shift();
+											var filePath = require('path').resolve(__dirname, file.path);
 
-									browser.sleep(100);
+											column._value = file.name;
+											fileInput.sendKeys(filePath);
 
-									expect(fileInput.getAttribute('value')).toContain(file.name);
-									expect(txtInput.getAttribute('value')).toBe(file.name);
-								});
-								
-							} else {
-								expect(undefined).toBe(true, "Unable to find file input field for column " + column.name);
-							}
+											browser.sleep(100);
+
+											expect(fileInput.getAttribute('value')).toContain(file.name);
+											expect(txtInput.getAttribute('value')).toBe(file.name);
+										};
+
+										txtInput.getAttribute('value').then(function(value) {
+											// Incase of edit first clear the fileinput field by pressing the dismiss button
+											// and then set new file
+											if (value.trim().length > 0) {
+
+												chaisePage.recordEditPage.getClearButton(txtInput).then(function(clearButton) {
+													clearButton.click();
+													
+													browser.sleep(50);
+
+													expect(txtInput.getAttribute('value')).toBe("");
+
+													testFileSelect();
+												});
+											} else {
+												testFileSelect();
+											}
+										});
+										
+									});
+									
+								} else {
+									expect(undefined).toBeDefined("Unable to find file input field for column " + column.name);
+								}
+							});
 						});
 					});
+
 				});
-
-			});
-
-
+			}
 		});
-
-		
 
 		if (tableParams.records && recordIndex < (tableParams.records > 1 ? tableParams.records : 0)) {
 			testMultipleRecords(recordIndex + 1);

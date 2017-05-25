@@ -5,7 +5,21 @@ var testParams = {
         name: "id",
         value: "4004",
         operator: "="
-    }
+    },
+    columns: [
+        { name: "id", generated: true, immutable: true, title: "Id", value: "2002", type: "serial4", nullok: false},
+        { name: "title", title: "Name of Accommodation", value: "Sherathon Hotel", type: "text", nullok: false},
+        { name: "website", isUrl: true, title: "Website", value: "<p class=\"ng-scope\"><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>", type: "text", comment: "A valid url of the accommodation"},
+        { name: "category", isForeignKey: true, title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/id=10003"}, nullok: false},
+        { name: "rating", title: "User Rating", value: "4.3000", type: "float4", nullok: false},
+        { name: "summary", title: "Summary", nullok: false, value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
+        { name: "description", title: "Description", type: "markdown", value: "<p class=\"ng-scope\"><strong>CARING. SHARING. DARING.</strong><br>\nRadisson<sup>®</sup> is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.<br>\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding <code>Yes I Can!</code> <sup>SM</sup> service, comfort and style where you need us.</p>\n<p class=\"ng-scope\"><strong>THE RADISSON<sup>®</sup> WAY</strong> Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to <code>Yes I Can!</code> <sup>SM</sup> hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.</p>"},
+        { name: "no_of_rooms", title : "Number of Rooms", value: "23", type: "int2"},
+        { name: "cover", isForeignKey: true, title: "Cover Image", value: "3,005", type: "int2", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/id=3005"} },
+        { name: "thumbnail", isForeignKey: true, title: "Thumbnail", value: null, type: "int4"},
+        { name: "opened_on", title: "Operational Since", value: "12/9/2008, 12:00:00 AM", type: "timestamptz", nullok: false },
+        { name: "luxurious", title: "Is Luxurious", value: "false", type: "boolean" }
+    ]
 };
 
 describe('Edit existing record,', function() {
@@ -25,9 +39,9 @@ describe('Edit existing record,', function() {
                 return chaisePage.recordEditPage.getViewModelRows()
             }).then(function(records) {
                 browser.params.record = record = records[0];
-                table.column_definitions.forEach(function(c) {
+                testParams.columns.forEach(function(c) {
                     if (record[c.name]) {
-                        if (c.type.typename !== "date" && c.type.typename !== "timestamptz") {
+                        if (c.type !== "date" && c.type !== "timestamptz") {
                             c._value =  record[c.name] + "";
                         }
                     }
