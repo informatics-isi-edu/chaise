@@ -37,7 +37,7 @@ E2EDrecordEditDomainFilter=test/e2e/specs/recordedit/data-dependent/domain-filte
 E2EDrecordEditSubmissionDisabled=test/e2e/specs/recordedit/data-dependent/submission-disabled/protractor.conf.js
 # Record tests
 E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
-E2EDrecordCopy=test/e2e/specs/record/copy-btn/protractor.conf.js
+E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
 E2ErecordNoDeleteBtn=test/e2e/specs/record/no-delete-btn/protractor.conf.js
 E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
 # Recordset tests
