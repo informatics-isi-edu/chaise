@@ -29,7 +29,7 @@ E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
 E2EDIrecordEditMultiColTypes=test/e2e/specs/recordedit/data-independent/edit-multi-col-types/protractor.conf.js
 E2EDIrecordDefaults=test/e2e/specs/recordedit/data-independent/add-defaults/protractor.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
-E2EDIrecordEditDeleteRecord=test/e2e/specs/recordedit/data-independent/delete-record/protractor.conf.js
+E2EDIrecordEditDeleteRecord=test/e2e/specs/delete-prohibited/recordedit/delete-btn.conf.js
 E2EDIrecordMultiAdd=test/e2e/specs/recordedit/data-independent/multi-add/protractor.conf.js
 E2EDIrecordMultiEdit=test/e2e/specs/recordedit/data-independent/multi-edit/protractor.conf.js
 E2EDrecordEditCompositeKey=test/e2e/specs/recordedit/data-dependent/composite-key/protractor.conf.js
@@ -38,7 +38,7 @@ E2EDrecordEditSubmissionDisabled=test/e2e/specs/recordedit/data-dependent/submis
 # Record tests
 E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
-E2ErecordNoDeleteBtn=test/e2e/specs/record/no-delete-btn/protractor.conf.js
+E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.conf.js
 E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
 # Recordset tests
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
@@ -54,6 +54,7 @@ E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility
 
 ## Parallel protractor scripts
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
+DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)
@@ -517,6 +518,11 @@ testlogin:
 .PHONY: testfullfeatures
 testfullfeatures:
 	$(BIN)/protractor $(FullFeaturesParallel)
+
+#Rule to run the delete prohibited chaise configuration tests in parallel
+.PHONY: testdeleteprohibited
+testdeleteprohibited:
+	$(BIN)/protractor $(DeleteProhibitedParallel)
 
 # Rule to make html
 .PHONY: html

@@ -1,46 +1,39 @@
 var chaisePage = require('../../../utils/chaise.page.js');
+var testParams = {
+    table_name: "accommodation",
+    key: {
+        name: "id",
+        value: "4004",
+        operator: "="
+    }
+}
 
 describe('View existing record,', function() {
 
-	var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
+    describe("For table " + testParams.table_name + ",", function() {
 
-    for (var i=0; i< testParams.tuples.length; i++) {
+        var table, record;
 
-    	(function(tupleParams, index) {
+        beforeAll(function() {
+            var keys = [];
+            keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+            browser.ignoreSynchronization=true;
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
+            browser.get(url);
+            table = browser.params.defaultSchema.content.tables[testParams.table_name];
+            chaisePage.waitForElement(element(by.id('tblRecord')));
+        });
 
-    		describe("For table " + tupleParams.table_name + ",", function() {
+        it("should load chaise-config.js and have deleteRecord=false and dataBrowser=''", function() {
+            browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                expect(chaiseConfig.deleteRecord).toBe(false);
+                expect(chaiseConfig.dataBrowser).toBe("");
+            });
+        });
 
-    			var table, record;
-
-				beforeAll(function() {
-					var keys = [];
-					tupleParams.deleteKeys.forEach(function(key) {
-						keys.push(key.name + key.operator + key.value);
-					});
-					browser.ignoreSynchronization=true;
-                    var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&");
-					browser.get(url);
-					table = browser.params.defaultSchema.content.tables[tupleParams.table_name];
-					chaisePage.waitForElement(element(by.id('tblRecord')));
-			    });
-
-			    it("should load chaise-config.js and have deleteRecord=false and dataBrowser=''", function() {
-			        browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-			        	expect(chaiseConfig.deleteRecord).toBe(false);
-                        expect(chaiseConfig.dataBrowser).toBe("");
-			        });
-				});
-
-                it('should not display a delete record button', function() {
-                    var deleteBtn = chaisePage.recordPage.getDeleteRecordButton();
-                    expect(deleteBtn.isPresent()).toBeFalsy();
-                });
-
-    		});
-
-    	})(testParams.tuples[i], i);
-
-
-    }
-
+        it('should not display a delete record button', function() {
+            var deleteBtn = chaisePage.recordPage.getDeleteRecordButton();
+            expect(deleteBtn.isPresent()).toBeFalsy();
+        });
+    });
 });
