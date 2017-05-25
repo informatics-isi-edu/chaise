@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "multi-permissions/config.json"
+        ],
+        "schema": "multi-permissions"
+    },
+    "cleanup": true
+}

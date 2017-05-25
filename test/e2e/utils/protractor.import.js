@@ -94,6 +94,9 @@ var importSchemas = function(configs, defer, authCookie, catalogId) {
     }
 
     var config = configs.shift();
+    if (typeof config === 'string') {
+        config = require(process.env.PWD + "/test/e2e/data_setup/config/" + config);
+    }
 
     if (catalogId) config.catalog.id = catalogId;
     else delete config.catalog.id;

@@ -2,7 +2,7 @@ var pConfig = require('./../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
     // This config is meant to be run as part of the parallel tests configuration
-    configFileName: 'delete-prohibited.dev.json',
+    configFileName: 'parallel-configs/delete-prohibited.dev.json',
     specs: [
         "*/*.spec.js"
     ],

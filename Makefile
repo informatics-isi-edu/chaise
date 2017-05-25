@@ -39,7 +39,7 @@ E2EDrecordEditSubmissionDisabled=test/e2e/specs/recordedit/data-dependent/submis
 E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
 E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.conf.js
-E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
+E2EDrecordRelatedTable=test/e2e/specs/default-config/record/related-table.conf.js
 # Recordset tests
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
 E2EDrecordsetEdit=test/e2e/specs/recordset/edit/protractor.conf.js
@@ -497,7 +497,8 @@ testrecordset:
 # Rule to run record edit app tests
 .PHONY: testrecordedit
 testrecordedit:
-	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter)
+	# $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) &&
+	$(BIN)/protractor $(E2EDIrecordEditDeleteRecord) #&& $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter)
 
 .PHONY: testpermissions
 testpermissions:
@@ -514,6 +515,11 @@ testlogin:
 	$(BIN)/protractor $(E2Elogin)
 
 #### Parallel make commands - these commands will run tests in parallel
+#Rule to run all parallel test configurations
+.PHONY: testparallel
+testparallel:
+	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(DeleteProhibitedParallel)
+
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures
 testfullfeatures:

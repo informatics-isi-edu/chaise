@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "copy-btn/config.json",
+            "multi-permissions/config.json"
+        ]
+    },
+    "cleanup": true
+}

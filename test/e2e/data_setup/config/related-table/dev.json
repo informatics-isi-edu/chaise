@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "related-table/actions.config.json",
+            "related-table/links.config.json"
+        ]
+    },
+    "cleanup" : true
+}

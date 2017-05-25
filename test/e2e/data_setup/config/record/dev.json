@@ -1,0 +1,8 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "record/config.json"
+        ]
+    },
+    "cleanup" : true
+}

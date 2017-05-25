@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "copy-btn/config.json"
+        ],
+        "schema": "editable-id"
+    },
+    "cleanup": true
+}

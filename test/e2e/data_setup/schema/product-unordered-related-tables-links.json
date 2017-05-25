@@ -16,11 +16,11 @@
       "foreign_keys": [
         {
           "comment": null,
-          "names": [["product-unordered-related-tables", "fk_category"]],
+          "names": [["product-unordered-related-tables-links", "fk_category"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "category"
             }
           ],
@@ -28,18 +28,18 @@
           "referenced_columns": [
             {
               "table_name": "category",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "term"
             }
           ]
         },
         {
           "comment": null,
-          "names": [["product-unordered-related-tables", "fk_thumbnail"]],
+          "names": [["product-unordered-related-tables-links", "fk_thumbnail"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "thumbnail"
             }
           ],
@@ -49,18 +49,18 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "id"
             }
           ]
         },
         {
           "comment": null,
-          "names": [["product-unordered-related-tables", "fk_cover"]],
+          "names": [["product-unordered-related-tables-links", "fk_cover"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "cover"
             }
           ],
@@ -70,14 +70,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation",
-      "schema_name": "product-unordered-related-tables",
+      "schema_name": "product-unordered-related-tables-links",
       "column_definitions": [
         {
           "comment": null,
@@ -335,7 +335,7 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", "title", "website", ["product-unordered-related-tables", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-unordered-related-tables", "fk_cover"], ["product-unordered-related-tables", "fk_thumbnail"], "opened_on", "luxurious"]
+          "detailed" : ["id", "title", "website", ["product-unordered-related-tables-links", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-unordered-related-tables-links", "fk_cover"], ["product-unordered-related-tables-links", "fk_thumbnail"], "opened_on", "luxurious"]
         }
       }
     },
@@ -355,12 +355,12 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product-unordered-related-tables", "fk_booking_accommodation"]],
+          "names" : [["product-unordered-related-tables-links", "fk_booking_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "booking",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "accommodation_id"
             }
           ],
@@ -368,14 +368,14 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "booking",
-      "schema_name": "product-unordered-related-tables",
+      "schema_name": "product-unordered-related-tables-links",
       "column_definitions": [
         {
           "comment": null,
@@ -456,7 +456,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "file",
-      "schema_name": "product-unordered-related-tables",
+      "schema_name": "product-unordered-related-tables-links",
       "column_definitions": [
         {
           "comment": null,
@@ -610,12 +610,12 @@
       "entityCount": 0,
       "foreign_keys": [
         {
-          "names" : [["product-unordered-related-tables", "fk_accommodation_image"]],
+          "names" : [["product-unordered-related-tables-links", "fk_accommodation_image"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "accommodation_id"
             }
           ],
@@ -623,7 +623,7 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "id"
             }
           ]
@@ -633,7 +633,7 @@
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "image_id"
             }
           ],
@@ -641,14 +641,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation_image",
-      "schema_name": "product-unordered-related-tables",
+      "schema_name": "product-unordered-related-tables-links",
       "column_definitions": [
         {
           "comment": null,
@@ -713,7 +713,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "category",
-      "schema_name": "product-unordered-related-tables",
+      "schema_name": "product-unordered-related-tables-links",
       "column_definitions": [
         {
           "comment": null,
@@ -767,12 +767,12 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product-unordered-related-tables", "fk_media_accommodation"]],
+          "names" : [["product-unordered-related-tables-links", "fk_media_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "media",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "accommodation_id"
             }
           ],
@@ -780,14 +780,14 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-unordered-related-tables",
+              "schema_name": "product-unordered-related-tables-links",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "media",
-      "schema_name": "product-unordered-related-tables",
+      "schema_name": "product-unordered-related-tables-links",
       "column_definitions": [
         {
           "comment": null,
@@ -827,7 +827,7 @@
             }
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-            "*": ["id", ["product-unordered-related-tables", "fk_booking_accommodation"], "price", "bookin_date"]
+            "*": ["id", ["product-unordered-related-tables-links", "fk_booking_accommodation"], "price", "bookin_date"]
         }
       }
     }
@@ -846,5 +846,5 @@
       "name": "accommodation"
     }
   },
-  "schema_name": "product-unordered-related-tables"
+  "schema_name": "product-unordered-related-tables-links"
 }
