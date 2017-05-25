@@ -8,9 +8,11 @@ describe('Edit existing record,', function() {
 
     	(function(tableParams, index) {
 
-    		describe("For table " + table.table_name + ",", function() {
+            if (!tableParams.delete_keys || tableParams.delete_keys.length == 0) return;
 
-    			var table, record;
+    		describe("For table " + tableParams.table_name + ",", function() {
+
+    			var  record;
 
 				beforeAll(function () {
 					var keys = [];
@@ -18,16 +20,19 @@ describe('Edit existing record,', function() {
 						keys.push(key.name + key.operator + key.value);
 					});
 					browser.ignoreSynchronization=true;
-					browser.get(browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&"));
-					table = browser.params.defaultSchema.content.tables[tableParams.table_name];
+
+                    var url = browser.params.url + ":" + tableParams.table_name + "/" + keys.join("&");
+                    browser.get(url);
+					
+                    browser.sleep(500);
 
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                         return chaisePage.recordEditPage.getViewModelRows()
                     }).then(function(records) {
 			        	browser.params.record = record = records[0];
-			        	table.column_definitions.forEach(function(c) {
+			        	tableParams.columns.forEach(function(c) {
 			        		if (record[c.name]) {
-			        			if (c.type.typename !== "date" && c.type.typename !== "timestamptz") {
+			        			if (c.type !== "date" && c.type !== "timestamptz") {
 				        		 	c._value =  record[c.name] + "";
 				        		}
 			        		}
@@ -38,7 +43,7 @@ describe('Edit existing record,', function() {
                 describe("delete existing record ", function () {
                     it("should load chaise-config.js and have confirmDelete=true and dataBrowser=''", function () {
                         browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-    			        	expect(chaiseConfig.confirmDelete).toBe(true);
+                            expect(chaiseConfig.confirmDelete).toBe(true);
                             expect(chaiseConfig.dataBrowser).toBe("");
     			        });
                     });

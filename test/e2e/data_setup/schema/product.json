@@ -486,12 +486,24 @@
           "default": null,
           "nullok": false,
           "type": {
-            "typename": "int4"
+            "typename": "serial4"
           },
           "annotations": {
             "comment": [
               "hidden"
-            ]
+            ],
+            "tag:isrd.isi.edu,2016:generated": null
+          }
+        },
+        {
+          "comment": null,
+          "name": "fileid",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
           }
         },
         {
@@ -522,7 +534,7 @@
               "download"
             ],
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"hatrac/{{{id}}}/{{{uri.md5_hex}}}",
+              "url_pattern":"hatrac/{{{fileid}}}/{{{uri.md5_hex}}}",
               "filename_column" : "filename",
               "byte_count_column": "bytes",
               "md5": "preview"

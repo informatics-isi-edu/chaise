@@ -48,7 +48,7 @@
             }, {
                 "table_name" : "file",
                 "columns" : [
-                    { "name": "id", "nullok": false, "title" : "id", "type": "int4"},
+                    { "name": "fileid", "title": "fileid", "type": "int4" },
                     { "name": "uri", "title": "uri", "type": "text", "isFile": true, "comment": "asset/reference" },
                     { "name": "content_type", "title" : "content_type", "type": "text"},
                     { "name": "timestamp", "title" : "timestamp", "type": "timestamptz"},

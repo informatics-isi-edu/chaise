@@ -46,6 +46,36 @@
                 "delete_keys": [{ "name": "id", "value": "4004", "operator": "="}],
                 "edit_entity_displayname": "Sherathon Hotel",
                 "files" : []
+            }, {
+                "table_name" : "file",
+                "keys" : [{ "name": "id", "value": "90007", "operator" : "="}],
+                "primary_keys": ["id"],
+                "columns" : [
+                    { "name": "fileid", "title": "fileid", "type": "int4" },
+                    { "name": "uri", "title": "uri", "type": "text", "isFile": true, "comment": "asset/reference" },
+                    { "name": "content_type", "title" : "content_type", "type": "text"},
+                    { "name": "timestamp", "title" : "timestamp", "type": "timestamptz"},
+                    { "name": "image_width", "title": "image_width", "type": "int8"},
+                    { "name": "image_height", "title": "image_height", "type": "int8"}
+                ],
+                "edit_entity_displayname": "90007",
+                "delete_keys": [],
+                "files" : [{
+                    "name": "testfile1MB.txt",
+                    "size": "1024000",
+                    "displaySize": "1MB",
+                    "path" : "uploadFiles/testfile1MB.txt"
+                }, {
+                    "name": "testfile500kb.png",
+                    "size": "512000",
+                    "displaySize": "500KB",
+                    "path" : "uploadFiles/testfile500kb.png"
+                }, {
+                    "name": "testfile5MB.pdf",
+                    "size": "5242880",
+                    "displaySize": "5MB",
+                    "path" : "uploadFiles/testfile5MB.pdf"
+                }]
             }]
         }
     }
