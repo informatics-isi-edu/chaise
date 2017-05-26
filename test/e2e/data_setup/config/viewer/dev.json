@@ -1,0 +1,9 @@
+{
+  "setup": {
+    "schemaConfigurations": [
+        "viewer/config.json"
+    ],
+    "schema": "product-viewer"
+  },
+  "cleanup" : true
+}

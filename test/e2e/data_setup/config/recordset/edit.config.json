@@ -1,0 +1,20 @@
+{
+    "catalog": {
+        "acls": [
+            {"name": "content_write_user", "user": "*" },
+            {"name": "content_read_user", "user": "*" }
+        ]
+    },
+    "schema": {
+        "name": "multi-add",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/multi-add.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/multi-add"
+    }
+}

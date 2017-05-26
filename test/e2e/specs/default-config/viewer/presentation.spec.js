@@ -1,16 +1,20 @@
-var chaisePage = require('../../utils/chaise.page.js');
+var chaisePage = require('../../../utils/chaise.page.js');
+var testParams = {
+    table_name: "accommodation",
+    key: {
+        name: "id",
+        value: "2001",
+        operator: "="
+    }
+};
 
 describe('Viewer app', function() {
 
-    var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
-
     it('should load custom CSS and document title defined in chaise-config.js', function() {
-        var chaiseConfig, tupleParams = testParams.tuples[0], keys = [];
+        var chaiseConfig, keys = [];
         browser.ignoreSynchronization = true;
-        tupleParams.keys.forEach(function(key) {
-            keys.push(key.name + key.operator + key.value);
-        });
-        browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&"));
+        keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+        browser.get(browser.params.url + "/viewer/#" + browser.params.catalogId + "/product-viewer:" + testParams.table_name + "/" + keys.join("&"));
         browser.sleep(browser.params.defaultTimeout);
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;

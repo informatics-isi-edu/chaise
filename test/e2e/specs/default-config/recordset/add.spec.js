@@ -1,14 +1,20 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var moment = require('moment');
+var testParams = {
+    schemaName: "product",
+    table_name: "accommodation",
+    title: "Best Western Plus Amedia Art Salzburg",
+    rating: "3.50",
+    summary: "The BEST WESTERN PLUS Amedia Art Salzburg is located near the traditional old part of town, near the highway, near the train station and close to the exhibition center of Salzburg.\nBEST WESTERN PLUS Amedia Art Salzburg offers harmony of modern technique and convenient atmosphere to our national and international business guest and tourists."
+};
 
 describe('Recordset add record,', function() {
 
-    var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
     var rowCount, allWindows;;
 
     beforeAll(function () {
         browser.ignoreSynchronization = true;
-        browser.get(browser.params.url + ":" + testParams.table_name);
+        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name);
         chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function() {
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {

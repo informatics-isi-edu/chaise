@@ -1,17 +1,17 @@
 var pConfig = require('./../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
-    // This config is meant to be run as part of the parallel tests configuration
-    configFileName: 'parallel-configs/default-config.dev.json',
+    configFileName: 'search/dev.json',
     specs: [
-        "recordset/*.spec.js",
-        "record/*.spec.js",
-        "viewer/*.spec.js"
+        "spec.js"
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;
         return browser.params.url;
     }
 });
+
+// If ng-app attribute is in a descendant of <body>, tell Protractor where ng-app is
+config.rootElement = '#main-content';
 
 exports.config = config;

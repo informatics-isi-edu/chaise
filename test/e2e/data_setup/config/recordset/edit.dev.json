@@ -1,0 +1,19 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordset/edit.config.json"
+        ],
+        "schema": "multi-add"
+    },
+    "cleanup" : true,
+    "tests" : {
+        "params" : {
+            "table_name" : "multi-add-table",
+            "int_column_name" : "int",
+            "text_column_name" : "text",
+            "default_page_limit" : 25,
+            "limit" : 10,
+            "int_23_count" : 11
+        }
+    }
+}

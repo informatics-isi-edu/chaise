@@ -2,7 +2,11 @@
     "setup": {
         "schemaConfigurations": [
             "related-table/actions.config.json",
-            "related-table/links.config.json"
+            "related-table/links.config.json",
+            "recordset/add.config.json",
+            "recordset/edit.config.json",
+            "search/config.json",
+            "viewer/config.json"
         ]
     },
     "cleanup" : true

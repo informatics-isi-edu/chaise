@@ -1,13 +1,17 @@
 var chaisePage = require('../../../utils/chaise.page.js');
+var testParams = {
+    table_name: "multi-add-table",
+    default_page_limit: 25,
+    limit: 10,
+    int_23_count: 11
+};
 
 describe('Recordset edit records,', function() {
-
-    var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
 
     describe("recordset shows results with no limit defined,", function() {
         beforeAll(function() {
             browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + ":" + testParams.table_name);
+            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name);
         });
 
         it("clicking edit will show forms based on the default page size of " + testParams.default_page_limit + ".", function() {
@@ -34,7 +38,7 @@ describe('Recordset edit records,', function() {
     describe("recordset url includes a limit,", function() {
         beforeAll(function() {
             browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + ":" + testParams.table_name + "?limit=" + testParams.limit);
+            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name + "?limit=" + testParams.limit);
         });
 
         it("clicking edit will show forms based on the limit of " + testParams.limit + " in the uri.", function() {
@@ -64,7 +68,7 @@ describe('Recordset edit records,', function() {
         });
 
         it("without a limit, clicking edit will show all forms with int=23.", function() {
-            browser.get(browser.params.url + ":" + testParams.table_name + "/int=23");
+            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name + "/int=23");
 
             chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function() {
                 return chaisePage.recordsetPage.getRows().count();
@@ -86,7 +90,7 @@ describe('Recordset edit records,', function() {
         });
 
         it("with a limit of " + testParams.limit + ", clicking edit will show all forms with int=23.", function() {
-            browser.get(browser.params.url + ":" + testParams.table_name + "/int=23?limit=" + testParams.limit);
+            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name + "/int=23?limit=" + testParams.limit);
 
             chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function() {
                 return chaisePage.recordsetPage.getRows().count();
