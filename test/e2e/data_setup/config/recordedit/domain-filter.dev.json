@@ -1,9 +1,9 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "recordset/edit.config.json"
+            "recordedit/domain-filter.config.json"
         ],
-        "schema": "recordset-multi-edit"
+        "schema": "fk-filter-pattern"
     },
     "cleanup" : true
 }

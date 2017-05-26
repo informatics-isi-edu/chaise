@@ -1,9 +1,9 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "recordset/edit.config.json"
+            "recordedit/composite-key.config.json"
         ],
-        "schema": "recordset-multi-edit"
+        "schema": "product-person"
     },
     "cleanup" : true
 }

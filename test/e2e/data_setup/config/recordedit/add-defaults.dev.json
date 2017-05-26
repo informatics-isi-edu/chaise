@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordedit/add-defaults.config.json"
+        ],
+        "schema": "defaults"
+    },
+    "cleanup": true
+}

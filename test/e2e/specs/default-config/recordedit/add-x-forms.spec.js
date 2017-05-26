@@ -1,8 +1,16 @@
-var chaisePage = require('../../../../utils/chaise.page.js');
+var chaisePage = require('../../../utils/chaise.page.js');
+var testParams = {
+    table_name: "multi-add-table",
+    records: 3,
+    max_input_rows: 200,
+    initial_int_val: "1",
+    initial_text_val: "a",
+    input_1_text_val: "asdfg",
+    input_2_text_val: "qwerty",
+    input_3_int_val: "17"
+};
 
 describe('Record Add', function() {
-
-    var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params.multi_insert;
 
     describe("for when the user adds multiple forms using the multi form input control, ", function() {
         var EC = protractor.ExpectedConditions,
@@ -18,7 +26,7 @@ describe('Record Add', function() {
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
-            browser.get(browser.params.url + ":" + testParams.table_name);
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name);
         });
 
         it("should click the button and show an input box.", function() {
@@ -161,7 +169,7 @@ describe('Record Add', function() {
 
             beforeAll(function () {
                 browser.ignoreSynchronization=true;
-                browser.get(browser.params.url + ":" + testParams.table_name);
+                browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name);
             });
 
             it("should show a resultset table with " + (testParams.max_input_rows+1) + " entities.", function() {

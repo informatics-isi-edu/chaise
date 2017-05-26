@@ -1,10 +1,18 @@
-var chaisePage = require('../../../../utils/chaise.page.js');
+var chaisePage = require('../../../utils/chaise.page.js');
+var testParams = {
+    table_name: "multi-add-table",
+    int_column_name: "int",
+    text_column_name: "text",
+    keys_2: [{ name: "id", value: "1000", operator: "=" },
+             { name: "id", value: "1001", operator: "=" }],
+    keys_3: [{ name: "id", value: "1000", operator: "=" },
+             { name: "id", value: "1001", operator: "=" },
+             { name: "id", value: "1002", operator: "=" }]
+};
 
 describe('Edit existing record,', function() {
 
-	var testConfiguration = browser.params.configuration.tests,
-        testParams = testConfiguration.params.multi_edit,
-        intDisplayName = testParams.int_column_name,
+    var intDisplayName = testParams.int_column_name,
         textDisplayName = testParams.text_column_name;
 
     // database values before changes
@@ -37,7 +45,7 @@ describe('Edit existing record,', function() {
                 keys.push(key.name + key.operator + key.value);
             });
             browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + ":" + testParams.table_name + "/" + keys.join(";"));
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-edit:" + testParams.table_name + "/" + keys.join(";"));
         });
 
         it("should have the table displayname as part of the entity title.", function() {
@@ -115,7 +123,7 @@ describe('Edit existing record,', function() {
                 keys.push(key.name + key.operator + key.value);
             });
             browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + ":" + testParams.table_name + "/" + keys.join(";"));
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-edit:" + testParams.table_name + "/" + keys.join(";"));
         });
 
         it("should change their values and show a resultset table with 3 entities.", function() {

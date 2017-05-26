@@ -3,6 +3,15 @@
         "schemaConfigurations": [
             "related-table/actions.config.json",
             "related-table/links.config.json",
+
+            "recordedit/add-defaults.config.json",
+            "recordedit/add-multi.config.json",
+            "recordedit/composite-key.config.json",
+            "recordedit/domain-filter.config.json",
+            "recordedit/multi-column-types.config.json",
+            "recordedit/edit-multi.config.json",
+            "recordedit/submission-disabled.config.json",
+
             "recordset/add.config.json",
             "recordset/edit.config.json",
             "search/config.json",

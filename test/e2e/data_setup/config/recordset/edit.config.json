@@ -6,9 +6,9 @@
         ]
     },
     "schema": {
-        "name": "multi-add",
+        "name": "recordset-multi-edit",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/multi-add.json"
+        "path": "test/e2e/data_setup/schema/recordset-multi-edit.json"
     },
     "tables": {
         "createNew": true

@@ -1,17 +1,18 @@
-var chaisePage = require("../../../../utils/chaise.page.js");
+var chaisePage = require("../../../utils/chaise.page.js");
+var testParams = {
+    table_name: "main-entity-table"
+};
 
 describe("Add a record,", function() {
 
-	var testConfiguration = browser.params.configuration.tests,
-        testParams = testConfiguration.params,
-        EC = protractor.ExpectedConditions
+    var EC = protractor.ExpectedConditions,
         sleepTimer = 200;
 
     describe("For table " + testParams.table_name + ',', function() {
 
         beforeAll(function() {
             browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + ':' + testParams.table_name);
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name);
         });
 
         describe("The domain filter pattern annotation should limit foreign key search sets,", function() {

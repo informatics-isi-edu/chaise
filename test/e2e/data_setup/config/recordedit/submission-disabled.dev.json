@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordedit/submission-disabled.config.json"
+        ],
+        "schema": "product-no-serial"
+    },
+    "cleanup" : true
+}

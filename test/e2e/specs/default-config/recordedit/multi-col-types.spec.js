@@ -1,20 +1,75 @@
 // The goal of this spec is to test whether RecordEdit app correctly converts data for different column types for submission to ERMrest.
 var testConfiguration = browser.params.configuration;
-var testParams = testConfiguration.tests.params;
 var authCookie = testConfiguration.authCookie || process.env.AUTH_COOKIE;
 var ermRestUrl = testConfiguration.setup.url || process.env.ERMREST_URL;
-var ermRest = require('../../../../../../../ermrestjs/build/ermrest.js');
+var ermRest = require('../../../../../../ermrestjs/build/ermrest.js');
 var moment = require('moment');
 
-var chaisePage = require('../../../../utils/chaise.page.js');
+var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditPage = chaisePage.recordEditPage;
+var testParams = {
+    table_1: {
+        tableName: "table_1",
+        key: {columnName: "id", value: 1, operator: "="},
+        row: [
+            {name: "id", value: 1, displayType: "disabled"},
+            {name: "int2_null_col", value: null, displayType: "int2"},
+            {name: "int2_col", value: 32767, displayType: "int2"},
+            {name: "int4_null_col", value: null, displayType: "int4"},
+            {name: "int4_col", value: -2147483648, displayType: "int4"},
+            {name: "int8_null_col", value: null, displayType: "int8"},
+            {name: "int8_col", value: 9007199254740991, displayType: "int8"},
+            {name: "float4_null_col", value: null, displayType: "float4"},
+            {name: "float4_col", value: 4.6123, displayType: "float4"},
+            {name: "float8_null_col", value: null, displayType: "float8"},
+            {name: "float8_col", value: 234523523.023045, displayType: "float8"},
+            {name: "text_null_col", value: null, displayType: "text"},
+            {name: "text_col", value: "sample", displayType: "text"},
+            {name: "longtext_null_col", value: null, displayType: "longtext"},
+            {name: "longtext_col", value: "asjdf;laksjdf;laj ;lkajsd;f lkajsdf;lakjs f;lakjs df;lasjd f;ladsjf;alskdjfa ;lskdjf a;lsdkjf a;lskdfjal;sdkfj as;ldfkj as;dlf kjasl;fkaj;lfkjasl;fjas;ldfkjals;dfkjas;dlkfja;sldkfjasl;dkfjas;dlfkjasl;dfkja; lsdjfk a;lskdjf a;lsdfj as;ldfja;sldkfja;lskjdfa;lskdjfa;lsdkfja;sldkfjas;ldfkjas;dlfkjas;lfkja;sldkjf a;lsjf ;laskj fa;slk jfa;sld fjas;l js;lfkajs;lfkasjf;alsja;lk ;l kja", displayType: "longtext"},
+            {name: "markdown_null_col", value: null, displayType: "markdown"},
+            {name: "markdown_col", value: "<strong>Sample</strong>", displayType: "markdown"},
+            {name: "bool_null_col", value: null, displayType: "boolean"},
+            {name: "bool_true_col", value: true, displayType: "boolean"},
+            {name: "bool_false_col", value: false, displayType: "boolean"},
+            {name: "timestamp_null_col", value: null, displayType: "timestamp"},
+            {name: "timestamp_col", value: "2016-01-18T13:00:00", displayType: "timestamp"},
+            {name: "timestamptz_null_col", value: null, displayType: "timestamptz"},
+            {name: "timestamptz_col", value: "2016-01-18T00:00:00-08:00", displayType: "timestamptz"},
+            {name: "date_null_col", value: null, displayType: "date"},
+            {name: "date_col", value: "2016-08-15", displayType: "date"},
+            {name: "fk_null_col", value: null, displayType: "popup-select"},
+            {name: "fk_col", value: "1", displayType: "popup-select"}
+        ]
+    },
+    table_w_generated_columns : {
+        tableName: "table_w_generated_columns",
+        key: {columnName: "id", value: 1, operator: "="},
+        row: [
+            {"name": "int2_col_gen", value: 32767, displayType: "disabled"},
+            {"name": "int4_col_gen", value: -2147483648, displayType: "disabled"},
+            {"name": "int8_col_gen", value: 9007199254740991, displayType: "disabled"},
+            {"name": "float4_col_gen", value: 4.6123, displayType: "disabled"},
+            {"name": "float8_col_gen", value: 234523523.023045, displayType: "disabled"},
+            {"name": "text_col_gen", value: "sample", displayType: "disabled"},
+            {"name": "longtext_col_gen", value: "asjdf;laksjdf;laj ;lkajsd;f lkajsdf;lakjs f;lakjs df;lasjd f;ladsjf;alskdjfa ;lskdjf a;lsdkjf a;lskdfjal;sdkfj as;ldfkj as;dlf kjasl;fkaj;lfkjasl;fjas;ldfkjals;dfkjas;dlkfja;sldkfjasl;dkfjas;dlfkjasl;dfkja; lsdjfk a;lskdjf a;lsdfj as;ldfja;sldkfja;lskjdfa;lskdjfa;lsdkfja;sldkfjas;ldfkjas;dlfkjas;lfkja;sldkjf a;lsjf ;laskj fa;slk jfa;sld fjas;l js;lfkajs;lfkasjf;alsja;lk ;l kja", displayType: "disabled"},
+            {"name": "markdown_col_gen", value: "<strong>Sample</strong>", displayType: "disabled"},
+            {"name": "bool_true_col_gen", value: true, displayType: "disabled"},
+            {"name": "bool_false_col_gen", value: false, displayType: "disabled"},
+            {"name": "timestamp_col_gen", value: "2016-01-18T13:00:00", displayType: "disabled"},
+            {"name": "timestamptz_col_gen", value: "2016-01-18T00:00:00-08:00", displayType: "disabled"},
+            {"name": "date_col_gen", value: "2016-08-15", displayType: "disabled"},
+            {"name": "fk_col_gen", value: "1", displayType: "disabled"}
+        ]
+    }
+};
 
 // When editing a record, the app should reliably submit the right data to ERMrest
 describe('When editing a record', function() {
 
     beforeAll(function() {
         browser.ignoreSynchronization = true;
-        browser.get(browser.params.url + ":" + testParams.table_w_generated_columns.tableName + '/' + testParams.table_w_generated_columns.key.columnName + testParams.table_w_generated_columns.key.operator + testParams.table_w_generated_columns.key.value);
+        browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_w_generated_columns.tableName + '/' + testParams.table_w_generated_columns.key.columnName + testParams.table_w_generated_columns.key.operator + testParams.table_w_generated_columns.key.value);
         chaisePage.waitForElement(element(by.id("submit-record-button")));
     });
 
@@ -55,8 +110,8 @@ describe('When editing a record', function() {
     describe('if the user made no edits', function() {
         var url;
         beforeAll(function(done) {
-            url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/' + browser.params.schema.name + ':' + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value;
-            browser.get(browser.params.url + ":" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
+            url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/multi-column-types:' + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value;
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 done();
             });
@@ -108,7 +163,7 @@ describe('When editing a record', function() {
     describe('if the user did make edits', function() {
         var url, newRowData;
         beforeAll(function(done) {
-            url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/' + browser.params.schema.name + ':' + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value;
+            url = ermRestUrl + '/catalog/' + browser.params.catalogId + '/entity/multi-column-types:' + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value;
             // These will be the new values we expect the row to have in ERMrest after editing this row in the app
             // The generated columns are excluded here because they retain their initial values even after submission.
             newRowData = {
@@ -143,7 +198,7 @@ describe('When editing a record', function() {
                 "fk_null_col": 1,
                 "fk_col": null
             };
-            browser.get(browser.params.url + ":" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 done();
             });

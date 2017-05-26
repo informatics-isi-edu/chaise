@@ -25,15 +25,15 @@ E2Esearch=test/e2e/specs/search/conf.js
 E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 # Recordedit tests
 E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
-E2EDIrecordEditMultiColTypes=test/e2e/specs/recordedit/data-independent/edit-multi-col-types/protractor.conf.js
-E2EDIrecordDefaults=test/e2e/specs/recordedit/data-independent/add-defaults/protractor.conf.js
+E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
+E2EDIrecordDefaults=test/e2e/specs/default-config/recordedit/add-defaults.conf.js
 E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
 E2EDIrecordEditDeleteRecord=test/e2e/specs/delete-prohibited/recordedit/delete-btn.conf.js
-E2EDIrecordMultiAdd=test/e2e/specs/recordedit/data-independent/multi-add/protractor.conf.js
-E2EDIrecordMultiEdit=test/e2e/specs/recordedit/data-independent/multi-edit/protractor.conf.js
-E2EDrecordEditCompositeKey=test/e2e/specs/recordedit/data-dependent/composite-key/protractor.conf.js
-E2EDrecordEditDomainFilter=test/e2e/specs/recordedit/data-dependent/domain-filter/protractor.conf.js
-E2EDrecordEditSubmissionDisabled=test/e2e/specs/recordedit/data-dependent/submission-disabled/protractor.conf.js
+E2EDIrecordMultiAdd=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js
+E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
+E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.conf.js
+E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.conf.js
+E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submission-disabled.conf.js
 # Record tests
 E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
@@ -41,8 +41,8 @@ E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.conf.
 E2EDrecordRelatedTable=test/e2e/specs/default-config/record/related-table.conf.js
 # Recordset tests
 E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
-E2EDrecordsetEdit=test/e2e/specs/recordset/edit/protractor.conf.js
-E2ErecordsetAdd=test/e2e/specs/recordset/add/protractor.conf.js
+E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
+E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 # Viewer tests
 E2EDviewer=test/e2e/specs/default-config/viewer/presentation.conf.js
 # misc tests
@@ -492,7 +492,8 @@ testrecordadd:
 #Rule to run recordset app tests
 .PHONY: testrecordset
 testrecordset:
-	$(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit)
+	#$(BIN)/protractor $(E2EDrecordset) &&
+	$(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit)
 
 # Rule to run record edit app tests
 .PHONY: testrecordedit

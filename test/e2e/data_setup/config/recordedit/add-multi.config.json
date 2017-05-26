@@ -6,15 +6,15 @@
         ]
     },
     "schema": {
-        "name": "recordset-product",
+        "name": "multi-add",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/recordset-product.json"
+        "path": "test/e2e/data_setup/schema/multi-add.json"
     },
     "tables": {
         "createNew": true
     },
     "entities": {
         "createNew": true,
-        "path": "test/e2e/data_setup/data/product"
+        "path": "test/e2e/data_setup/data/multi-add"
     }
 }

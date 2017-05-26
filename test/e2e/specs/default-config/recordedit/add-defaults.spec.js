@@ -1,9 +1,15 @@
-var chaisePage = require('../../../../utils/chaise.page.js');
-var recordEditHelpers = require('../../helpers.js');
+var chaisePage = require('../../../utils/chaise.page.js');
+var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
+var testParams = {
+    table_name: "defaults-table",
+    column_names: ["text", "int"],
+    text_value: "default",
+    int_value: "25",
+    boolean_true_value: "true",
+    boolean_false_value: "false"
+};
 
 describe('Record Add with defaults', function() {
-
-    var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params;
 
     describe("for when the user creates an entity with default values, ", function() {
         var EC = protractor.ExpectedConditions,
@@ -12,7 +18,7 @@ describe('Record Add with defaults', function() {
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
-            browser.get(browser.params.url + ":" + testParams.table_name);
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/defaults:" + testParams.table_name);
         });
 
         // adding this test here to avoid making a whole new spec
@@ -22,7 +28,7 @@ describe('Record Add with defaults', function() {
                 return chaisePage.recordEditPage.getColumnCaptionsWithHtml();
             }).then(function(pageColumns) {
                 expect(pageColumns[0].getText()).toBe("text");
-                
+
                 return pageColumns[0].getAttribute("innerHTML");
             }).then(function(html) {
                 expect(html).toBe(textDisplayname);
@@ -53,13 +59,12 @@ describe('Record Add with defaults', function() {
                 // After submitting 1 record in RecordEdit, the expected record
                 // page url will have a id of 1 because it'll always be the first
                 // row of this table in the new catalog created by the defaults tests.
-                var redirectUrl = browser.params.url.replace('/recordedit/', '/record/');
-                redirectUrl += ":" + testParams.table_name + '/id=1';
+                var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/defaults:" + testParams.table_name + '/id=1';
 
                 chaisePage.waitForUrl(redirectUrl).then(function() {
                     expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
 
-                    recordEditHelpers.testRecordAppValuesAfterSubmission(testParams);
+                    recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names);
                 });
             });
         });

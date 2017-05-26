@@ -1,0 +1,60 @@
+{
+    "schema_name": "multi-edit",
+    "tables": {
+        "multi-add-table": {
+            "comment": "Table to represent adding multiple entities",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "multi-add-table",
+            "schema_name": "multi-edit",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    },
+                    "annotations": {
+                        "comment": [
+                            "hidden"
+                        ],
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }, {
+                    "name": "text",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "int",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "*": ["id", "text", "int"]
+                }
+            }
+        }
+    },
+    "table_names": [
+        "multi-add-table"
+    ],
+    "comment": null,
+    "annotations": {}
+}

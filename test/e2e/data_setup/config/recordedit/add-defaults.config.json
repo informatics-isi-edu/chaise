@@ -6,15 +6,11 @@
         ]
     },
     "schema": {
-        "name": "recordset-product",
+        "name": "defaults",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/recordset-product.json"
+        "path": "test/e2e/data_setup/schema/defaults.json"
     },
     "tables": {
         "createNew": true
-    },
-    "entities": {
-        "createNew": true,
-        "path": "test/e2e/data_setup/data/product"
     }
 }

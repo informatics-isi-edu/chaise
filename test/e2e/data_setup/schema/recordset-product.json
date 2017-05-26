@@ -16,11 +16,11 @@
       "foreign_keys": [
         {
           "comment": null,
-          "names": [["product-search", "fk_category"]],
+          "names": [["recordset-product", "fk_category"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "category"
             }
           ],
@@ -28,18 +28,18 @@
           "referenced_columns": [
             {
               "table_name": "category",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "term"
             }
           ]
         },
         {
           "comment": null,
-          "names": [["product-search", "fk_thumbnail"]],
+          "names": [["recordset-product", "fk_thumbnail"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "thumbnail"
             }
           ],
@@ -49,18 +49,18 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "id"
             }
           ]
         },
         {
           "comment": null,
-          "names": [["product-search", "fk_cover"]],
+          "names": [["recordset-product", "fk_cover"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "cover"
             }
           ],
@@ -70,14 +70,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation",
-      "schema_name": "product-search",
+      "schema_name": "recordset-product",
       "column_definitions": [
         {
           "comment": null,
@@ -337,16 +337,16 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", ["product-search", "fk_category"], "website", "rating", "summary", "description", ["product-search", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
-          "entry/create": ["id", "title", "website", ["product-search", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-search", "fk_thumbnail"], ["product-search", "fk_cover"],"terms", "opened_on","luxurious"],
-          "entry/edit": ["id", "title", "website", ["product-search", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-search", "fk_thumbnail"], ["product-search", "fk_cover"],"terms", "opened_on","luxurious"],
+          "detailed" : ["id", ["recordset-product", "fk_category"], "website", "rating", "summary", "description", ["recordset-product", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
+          "entry/create": ["id", "title", "website", ["recordset-product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["recordset-product", "fk_thumbnail"], ["recordset-product", "fk_cover"],"terms", "opened_on","luxurious"],
+          "entry/edit": ["id", "title", "website", ["recordset-product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["recordset-product", "fk_thumbnail"], ["recordset-product", "fk_cover"],"terms", "opened_on","luxurious"],
           "compact" : ["title", "website", "rating", "summary","terms", "opened_on", "luxurious"]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
           "*" : [
-              ["product-search", "fk_booking_accommodation"],
-              ["product-search", "fk_accommodation_image"]
+              ["recordset-product", "fk_booking_accommodation"],
+              ["recordset-product", "fk_accommodation_image"]
           ]
         },
         "tag:isrd.isi.edu,2016:table-display": {
@@ -372,12 +372,12 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product-search", "fk_booking_accommodation"]],
+          "names" : [["recordset-product", "fk_booking_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "booking",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "accommodation_id"
             }
           ],
@@ -385,14 +385,14 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "booking",
-      "schema_name": "product-search",
+      "schema_name": "recordset-product",
       "column_definitions": [
         {
           "comment": null,
@@ -459,7 +459,7 @@
           "display": "Bookings"
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": ["id", ["product-search", "fk_booking_accommodation"], "price", "booking_date"]
+          "*": ["id", ["recordset-product", "fk_booking_accommodation"], "price", "booking_date"]
         }
       }
     },
@@ -478,7 +478,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "file",
-      "schema_name": "product-search",
+      "schema_name": "recordset-product",
       "column_definitions": [
         {
           "comment": null,
@@ -645,12 +645,12 @@
       "entityCount": 0,
       "foreign_keys": [
         {
-          "names" : [["product-search", "fk_accommodation_image"]],
+          "names" : [["recordset-product", "fk_accommodation_image"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "accommodation_id"
             }
           ],
@@ -658,18 +658,18 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "id"
             }
           ]
         },
         {
           "comment": null,
-          "names" : [["product-search-record", "fk_accommodation_image_2"]],
+          "names" : [["recordset-product-record", "fk_accommodation_image_2"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "image_id"
             }
           ],
@@ -677,14 +677,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "product-search",
+              "schema_name": "recordset-product",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation_image",
-      "schema_name": "product-search",
+      "schema_name": "recordset-product",
       "column_definitions": [
         {
           "comment": null,
@@ -726,7 +726,7 @@
           "display": "Accommodation Images"
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": [["product-search", "fk_accommodation_image"], ["product-search", "fk_accommodation_image_2"]]
+          "*": [["recordset-product", "fk_accommodation_image"], ["recordset-product", "fk_accommodation_image_2"]]
         }
       }
     },
@@ -752,7 +752,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "category",
-      "schema_name": "product-search",
+      "schema_name": "recordset-product",
       "column_definitions": [
         {
           "comment": null,
@@ -812,5 +812,5 @@
       "entry": "tag:isrd.isi.edu,2016:chaise:recordedit"
     }
   },
-  "schema_name": "product-search"
+  "schema_name": "recordset-product"
 }

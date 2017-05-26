@@ -1,7 +1,7 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var moment = require('moment');
 var testParams = {
-    schemaName: "product",
+    schemaName: "recordset-product",
     table_name: "accommodation",
     title: "Best Western Plus Amedia Art Salzburg",
     rating: "3.50",

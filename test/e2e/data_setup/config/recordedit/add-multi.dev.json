@@ -1,9 +1,9 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "recordset/edit.config.json"
+            "recordedit/add-multi.config.json"
         ],
-        "schema": "recordset-multi-edit"
+        "schema": "multi-add"
     },
     "cleanup" : true
 }
