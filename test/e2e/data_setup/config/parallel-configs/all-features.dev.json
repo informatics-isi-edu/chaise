@@ -1,7 +1,7 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "copy-btn/config.json",
+            "record/copy-btn.config.json",
             "multi-permissions/config.json"
         ]
     },

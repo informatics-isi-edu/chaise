@@ -24,10 +24,10 @@ BIN=$(MODULES)/.bin
 E2Esearch=test/e2e/specs/search/conf.js
 E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 # Recordedit tests
-E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
+E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
 E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
 E2EDIrecordDefaults=test/e2e/specs/default-config/recordedit/add-defaults.conf.js
-E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
+E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
 E2EDIrecordEditDeleteRecord=test/e2e/specs/delete-prohibited/recordedit/delete-btn.conf.js
 E2EDIrecordMultiAdd=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js
 E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
@@ -35,12 +35,12 @@ E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-ke
 E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.conf.js
 E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submission-disabled.conf.js
 # Record tests
-E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
+E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
 E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.conf.js
 E2EDrecordRelatedTable=test/e2e/specs/default-config/record/related-table.conf.js
 # Recordset tests
-E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
+E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 # Viewer tests
@@ -53,6 +53,7 @@ E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility
 
 ## Parallel protractor scripts
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
+FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
 
@@ -518,7 +519,7 @@ testlogin:
 #Rule to run all parallel test configurations
 .PHONY: testparallel
 testparallel:
-	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(E2Esearch)
+	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(DefaultConfigParallel) && $(BIN)/protractor $(E2Esearch)
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures

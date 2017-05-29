@@ -1,295 +1,345 @@
-var recordsetHelpers = require('../helpers.js'), chaisePage = require('../../../utils/chaise.page.js');;
+var chaisePage = require('../../../utils/chaise.page.js');;
+var testParams = {
+    tuple: {
+        schemaName: "product-recordset",
+        table_name: "accommodation",
+        displayName: "Accommodations",
+        title: "Accommodations",
+        key: { name: "id", value: "2001", operator: "::gt::"},
+        sortby: "no_of_rooms",
+        columns: [
+            { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
+            { title: "Website", value: "<p class=\"ng-scope\"><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>", type: "text", comment: "A valid url of the accommodation"},
+            { title: "User Rating", value: "4.3000", type: "float4"},
+            { title: "Summary", value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
+            { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
+            { title: "Is Luxurious", value: "true", type: "boolean" }
+        ],
+        data: [
+            {
+                id: 2003,
+                title: "NH Munich Resort",
+                website: "http://www.nh-hotels.com/hotels/munich",
+                rating: "3.2000",
+                summary: "NH Hotels has six resorts in the city of Munich. Very close to Munich Main Train Station -- the train being one of the most interesting choices of transport for travelling around Germany -- is the four-star NH München Deutscher Kaiser Hotel. In addition to the excellent quality of accommodation that it offers, the hotel is located close to Marienplatz, the monumental central square in the city, the Frauenkirche church, Stachus (Karlsplatz) and the Viktualienmarkt. Other places of interest to explore in Munich are the English garden, the spectacular Nymphenburg Palace and the German Museum, a museum of science and technology very much in keeping with the industrial spirit of the city. Do not forget to visit Munich at the end of September and beginning of October, the time for its most famous international festival: Oktoberfest! Beer, sausages, baked knuckles and other gastronomic specialities await you in a festive atmosphere on the grasslands of Theresienwiese. Not to be missed! And with NH Hotels you can choose the hotels in Munich which best suit your travel plans, with free WiFi and the possibility to bring your pets with you.\n... more",
+                opened_on: "1976-06-15 00:00:00",
+                luxurious: "true"
+            },
+            {
+                id: 2002,
+                title: "Sherathon Hotel",
+                website: "http://www.starwoodhotels.com/sheraton/index.html",
+                rating: "4.3000",
+                summary: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
+                opened_on: "2008-12-09 00:00:00",
+                luxurious: "true"
+            },
+            {
+                id: 2004,
+                title: "Super 8 North Hollywood Motel",
+                website: "https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests",
+                summary: "Fair Hotel. Close to Universal Studios. Located near shopping areas with easy access to parking. Professional staff and clean rooms. Poorly-maintained rooms.",
+                rating: "2.8000",
+                opened_on: "2013-06-11 00:00:00",
+                luxurious: "false"
+            },
+            {
+                id: 4004,
+                title: "Hilton Hotel",
+                website: "",
+                summary: "Great Hotel. We've got the best prices out of anyone. Stay here to make America great again. Located near shopping areas with easy access to parking. Professional staff and clean rooms. Poorly-maintained rooms.",
+                rating: "4.2000",
+                opened_on: "2013-06-11 00:00:00",
+                luxurious: "true"
+            }
+        ]
+    },
+    file_tuple: {
+        table_name: "file",
+        custom_page_size: 5,
+        page_size: 10
+    }
+};
 
 describe('View recordset,', function() {
 
-    var testConfiguration = browser.params.configuration.tests, testParams = testConfiguration.params, fileParams = testParams.file_tuple;
+    var fileParams = testParams.file_tuple;
 
-    for (var i=0; i< testParams.tuples.length; i++) {
+    describe("For table " + testParams.table_name + ",", function() {
 
-        (function(tupleParams, index) {
+        beforeAll(function () {
+            var keys = [];
+            keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+            browser.ignoreSynchronization=true;
+            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + testParams.table_name + "/" + keys.join("&") + "@sort(" + testParams.sortby + ")");
 
-            describe("For table " + tupleParams.table_name + ",", function() {
+            chaisePage.waitForElement(element(by.id("divRecordSet")));
+        });
 
-                beforeAll(function () {
-                    var keys = [];
-                    tupleParams.keys.forEach(function(key) {
-                        keys.push(key.name + key.operator + key.value);
-                    });
-                    browser.ignoreSynchronization=true;
-                    browser.get(browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")");
+        describe("Presentation ,", function() {
+            var recEditUrl =  '';
+            it("should have '" + testParams.title +  "' as title", function() {
+                var title = chaisePage.recordsetPage.getPageTitleElement();
+                expect(title.getText()).toEqual(testParams.title);
+            });
 
-                    chaisePage.waitForElement(element(by.id("divRecordSet")));
+            it("should autofocus on search box", function() {
+                var searchBox = chaisePage.recordsetPage.getSearchBox();
+                expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
+            });
+
+            it("should use annotated page size", function() {
+                var EC = protractor.ExpectedConditions;
+                var e = element(by.id('custom-page-size'));
+                browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
+                chaisePage.recordsetPage.getCustomPageSize().then(function(text) {
+                    expect(text).toBe("15 (Custom)");
+                })
+            });
+
+            it("should show correct table rows", function() {
+                chaisePage.recordsetPage.getRows().then(function(rows) {
+                    expect(rows.length).toBe(4);
+                    for (var i = 0; i < rows.length; i++) {
+                        (function(index) {
+                            rows[index].all(by.tagName("td")).then(function (cells) {
+                                expect(cells.length).toBe(testParams.columns.length + 1);
+                                expect(cells[1].getText()).toBe(testParams.data[index].title);
+                                expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(testParams.data[index].website);
+                                expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website");
+                                expect(cells[3].getText()).toBe(testParams.data[index].rating);
+                                expect(cells[4].getText()).toBe(testParams.data[index].summary);
+                                expect(cells[5].getText()).toBe(testParams.data[index].opened_on);
+                                expect(cells[6].getText()).toBe(testParams.data[index].luxurious);
+                            });
+                        }(i))
+                    }
                 });
+            });
 
-                describe("Presentation ,", function() {
-                    var recEditUrl =  '';
-                    it("should have '" + tupleParams.title +  "' as title", function() {
-                        var title = chaisePage.recordsetPage.getPageTitleElement();
-                        expect(title.getText()).toEqual(tupleParams.title);
-                    });
+            it("should have " + testParams.columns.length + " columns", function() {
+                chaisePage.recordsetPage.getColumnNames().then(function(columns) {
+                    expect(columns.length).toBe(testParams.columns.length);
+                    for (var i = 0; i < columns.length; i++) {
+                        expect(columns[i].getText()).toEqual(testParams.columns[i].title);
+                    }
+                });
+            });
 
-                    it("should autofocus on search box", function() {
-                        var searchBox = chaisePage.recordsetPage.getSearchBox();
-                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
-                    });
+            it("should show line under columns which have a comment and inspect the comment value too", function() {
+                var columns = testParams.columns.filter(function(c) {
+                    return (c.value != null && typeof c.comment == 'string');
+                });
+                chaisePage.recordsetPage.getColumnsWithUnderline().then(function(pageColumns) {
+                    expect(pageColumns.length).toBe(columns.length);
+                    var index = 0;
+                    pageColumns.forEach(function(c) {
+                        var comment = columns[index++].comment;
+                        chaisePage.recordsetPage.getColumnComment(c).then(function(actualComment) {
+                            var exists = actualComment ? true : undefined;
+                            expect(exists).toBeDefined();
 
-                    it("should use annotated page size", function() {
-                        var EC = protractor.ExpectedConditions;
-                        var e = element(by.id('custom-page-size'));
-                        browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
-                        chaisePage.recordsetPage.getCustomPageSize().then(function(text) {
-                            expect(text).toBe("15 (Custom)");
-                        })
-                    });
-
-                    it("should show correct table rows", function() {
-                        chaisePage.recordsetPage.getRows().then(function(rows) {
-                            expect(rows.length).toBe(4);
-                            for (var i = 0; i < rows.length; i++) {
-                                (function(index) {
-                                    rows[index].all(by.tagName("td")).then(function (cells) {
-                                        expect(cells.length).toBe(tupleParams.columns.length + 1);
-                                        expect(cells[1].getText()).toBe(tupleParams.data[index].title);
-                                        expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(tupleParams.data[index].website);
-                                        expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website");
-                                        expect(cells[3].getText()).toBe(tupleParams.data[index].rating);
-                                        expect(cells[4].getText()).toBe(tupleParams.data[index].summary);
-                                        expect(cells[5].getText()).toBe(tupleParams.data[index].opened_on);
-                                        expect(cells[6].getText()).toBe(tupleParams.data[index].luxurious);
-                                    });
-                                }(i))
-                            }
+                            // Check comment is same
+                            expect(actualComment).toBe(comment);
                         });
                     });
+                });
+            });
 
-                    it("should have " + tupleParams.columns.length + " columns", function() {
-                        chaisePage.recordsetPage.getColumnNames().then(function(columns) {
-                            expect(columns.length).toBe(tupleParams.columns.length);
-                            for (var i = 0; i < columns.length; i++) {
-                                expect(columns[i].getText()).toEqual(tupleParams.columns[i].title);
-                            }
-                        });
-                    });
+            it("apply different searches, ", function() {
+                var EC = protractor.ExpectedConditions;
+                var e = element(by.id('custom-page-size'));
+                browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
-                    it("should show line under columns which have a comment and inspect the comment value too", function() {
-                        var columns = tupleParams.columns.filter(function(c) {
-                            return (c.value != null && typeof c.comment == 'string');
-                        });
-                        chaisePage.recordsetPage.getColumnsWithUnderline().then(function(pageColumns) {
-                            expect(pageColumns.length).toBe(columns.length);
-                            var index = 0;
-                            pageColumns.forEach(function(c) {
-                                var comment = columns[index++].comment;
-                                chaisePage.recordsetPage.getColumnComment(c).then(function(actualComment) {
-                                    var exists = actualComment ? true : undefined;
-                                    expect(exists).toBeDefined();
+                var searchBox = chaisePage.recordsetPage.getSearchBox(),
+                searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
+                clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
+                noResultsMessage = "No Results Found";
 
-                                    // Check comment is same
-                                    expect(actualComment).toBe(comment);
-                                });
-                            });
-                        });
-                    });
+                searchBox.sendKeys('Super 8 North Hollywood Motel');
+                searchSubmitButton.click().then(function() {
+                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
+                }).then(function() {
+                    return chaisePage.recordsetPage.getRows()
+                }).then(function(rows) {
+                    expect(rows.length).toBe(1);
+                    // clear search
+                    return clearSearchButton.click();
+                }).then(function() {
+                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
+                }).then(function() {
+                    return chaisePage.recordsetPage.getRows();
+                }).then(function(rows) {
+                    expect(rows.length).toBe(4);
 
-                    it("apply different searches, ", function() {
-                        var EC = protractor.ExpectedConditions;
-                        var e = element(by.id('custom-page-size'));
-                        browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
+                    // apply conjunctive search words
+                    searchBox.sendKeys('"Super 8" motel "North Hollywood"');
 
-                        var searchBox = chaisePage.recordsetPage.getSearchBox(),
-                            searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
-                            clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
-                            noResultsMessage = "No Results Found";
+                    return searchSubmitButton.click();
+                }).then(function() {
+                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
+                }).then(function() {
+                    return chaisePage.recordsetPage.getRows();
+                }).then(function(rows) {
+                    expect(rows.length).toBe(1);
+                    // clear search
+                    return clearSearchButton.click();
+                }).then(function() {
+                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
+                }).then(function() {
+                    // search has been reset
+                    searchBox.sendKeys("asdfghjkl");
 
-                        searchBox.sendKeys('Super 8 North Hollywood Motel');
-                        searchSubmitButton.click().then(function() {
-                            return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                        }).then(function() {
-                            return chaisePage.recordsetPage.getRows()
-                        }).then(function(rows) {
-                            expect(rows.length).toBe(1);
-                            // clear search
-                            return clearSearchButton.click();
-                        }).then(function() {
-                            return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                        }).then(function() {
-                            return chaisePage.recordsetPage.getRows();
-                        }).then(function(rows) {
-                            expect(rows.length).toBe(4);
+                    return searchSubmitButton.click();
+                }).then(function() {
+                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
+                }).then(function() {
+                    return chaisePage.recordsetPage.getRows();
+                }).then(function(rows) {
+                    expect(rows.length).toBe(0);
 
-                            // apply conjunctive search words
-                            searchBox.sendKeys('"Super 8" motel "North Hollywood"');
+                    return chaisePage.recordsetPage.getNoResultsRow().getText();
+                }).then(function(text) {
+                    expect(text).toBe(noResultsMessage);
 
-                            return searchSubmitButton.click();
-                        }).then(function() {
-                            return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                        }).then(function() {
-                            return chaisePage.recordsetPage.getRows();
-                        }).then(function(rows) {
-                            expect(rows.length).toBe(1);
-                            // clear search
-                            return clearSearchButton.click();
-                        }).then(function() {
-                            return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                        }).then(function() {
-                            // search has been reset
-                            searchBox.sendKeys("asdfghjkl");
-
-                            return searchSubmitButton.click();
-                        }).then(function() {
-                            return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                        }).then(function() {
-                            return chaisePage.recordsetPage.getRows();
-                        }).then(function(rows) {
-                            expect(rows.length).toBe(0);
-
-                            return chaisePage.recordsetPage.getNoResultsRow().getText();
-                        }).then(function(text) {
-                            expect(text).toBe(noResultsMessage);
-
-                            // clearing the search here resets the page for the next test case
-                            clearSearchButton.click();
-                        });
-
-                    });
-
-                    it("action columns should show view button that redirects to the record page", function() {
-                        chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
-                            return chaisePage.recordsetPage.getViewActionButtons();
-                        }).then(function(viewButtons) {
-                            expect(viewButtons.length).toBe(4);
-                            return viewButtons[0].click();
-                        }).then(function() {
-                            var result = '/record/#' + browser.params.catalogId + "/" + tupleParams.schemaName + ":" + tupleParams.table_name + "/id=" + tupleParams.data[0].id;
-                            chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
-                                expect(browser.driver.getCurrentUrl()).toContain(result);
-                                browser.navigate().back();
-                            });
-                        });
-                    });
-
-                    it("action columns should show edit button that redirects to the recordedit page", function() {
-                        var allWindows;
-                        chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
-                            return chaisePage.recordsetPage.getEditActionButtons();
-                        }).then(function(editButtons) {
-                            expect(editButtons.length).toBe(4);
-                            return editButtons[0].click();
-                        }).then(function() {
-                            return browser.getAllWindowHandles();
-                        }).then(function(handles) {
-                            allWindows = handles;
-                            return browser.switchTo().window(allWindows[1]);
-                        }).then(function() {
-                            var result = '/recordedit/#' + browser.params.catalogId + "/" + tupleParams.schemaName + ":" + tupleParams.table_name + "/id=" + tupleParams.data[0].id;
-                            browser.driver.getCurrentUrl().then(function(url) {
-                                // Store this for use in later spec.
-                                recEditUrl = url;
-                            });
-                            expect(browser.driver.getCurrentUrl()).toContain(result);
-                            browser.close();
-                            browser.switchTo().window(allWindows[0]);
-                        });
-                    });
-
-                    it('should show a modal if user tries to delete (via action column) a record that has been modified by someone else (412 error)', function() {
-                        var EC = protractor.ExpectedConditions, allWindows, config;
-                        // Edit a record in a new tab in order to change the ETag
-                        recEditUrl = recEditUrl.replace('id=2003', 'id=4004');
-                        recEditUrl = recEditUrl.slice(0, recEditUrl.indexOf('?invalidate'));
-
-                        browser.executeScript('window.open(arguments[0]);', recEditUrl).then(function() {
-                            return browser.getAllWindowHandles();
-                        }).then(function(handles) {
-                            allWindows = handles;
-                            return browser.switchTo().window(allWindows[1]);
-                        }).then(function() {
-                            // In order to simulate someone else modifying a record (in order to
-                            // trigger a 412), we need to set RecEdit's window.opener to null so
-                            // that RecordSet won't think that this RecEdit page was opened by the same user
-                            // from the RecordSet page.
-                            return browser.executeScript('window.opener = null');
-                        }).then(function () {
-                            return chaisePage.waitForElement(element(by.id("submit-record-button")));
-                        }).then(function() {
-                            // - Change a small thing. Submit.
-                            var input = chaisePage.recordEditPage.getInputById(0, 'Summary');
-                            input.clear();
-                            input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
-                            return chaisePage.recordEditPage.getSubmitRecordButton().click();
-                        }).then(function() {
-                            // Wait for RecordEdit to redirect to Record to make sure the submission went through.
-                            return chaisePage.waitForUrl('/record/', browser.params.defaultTimeout);
-                        }).then(function() {
-                            expect(browser.driver.getCurrentUrl()).toContain('/record/');
-                            // - Go back to initial RecordSet page
-                            browser.close();
-                            return browser.switchTo().window(allWindows[0]);
-                        }).then(function() {
-                            return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
-                        }).then(function () {
-                            var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
-                            browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-                            // expect modal to open
-                            return modalTitle.getText();
-                        }).then(function(text) {
-                            expect(text).toBe("Confirm Delete");
-                            return chaisePage.recordPage.getConfirmDeleteButton().click();
-                        }).then(function() {
-                            // Expect another modal to appear to tell user that this record cannot be deleted
-                            // and user should check the updated UI for latest row data.
-                            chaisePage.waitForElement(element(by.id('confirm-btn')));
-                            return element(by.id('confirm-btn')).click();
-                        }).then(function() {
-                            return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                        }).then(function() {
-                            var rows = chaisePage.recordsetPage.getRows();
-                            var changedCell = rows.get(3).all(by.css('td')).get(4);
-                            expect(changedCell.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
-                        }).catch(function(error) {
-                            console.dir(error);
-                            expect(error).not.toBeDefined();
-                        });
-                    });
-
-                    it("action columns should show delete button that deletes record", function() {
-                        var deleteButton;
-                        chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
-                            return chaisePage.recordsetPage.getDeleteActionButtons();
-                        }).then(function(deleteButtons) {
-                            expect(deleteButtons.length).toBe(4);
-                            deleteButton = deleteButtons[3];
-                            return deleteButton.click();
-                        }).then(function() {
-                            var EC = protractor.ExpectedConditions;
-                            var confirmButton = chaisePage.recordsetPage.getConfirmDeleteButton();
-                            browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
-
-                            return confirmButton.click();
-                        }).then(function() {
-                            var EC = protractor.ExpectedConditions;
-                            browser.wait(EC.stalenessOf(deleteButton), browser.params.defaultTimeout);
-                        }).then(function() {
-                            return chaisePage.recordsetPage.getRows();
-                        }).then(function(rows) {
-                            expect(rows.length).toBe(3);
-                        });
-                    });
+                    // clearing the search here resets the page for the next test case
+                    clearSearchButton.click();
                 });
 
             });
 
-        })(testParams.tuples[i], i);
+            it("action columns should show view button that redirects to the record page", function() {
+                chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
+                    return chaisePage.recordsetPage.getViewActionButtons();
+                }).then(function(viewButtons) {
+                    expect(viewButtons.length).toBe(4);
+                    return viewButtons[0].click();
+                }).then(function() {
+                    var result = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/id=" + testParams.data[0].id;
+                    chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
+                        expect(browser.driver.getCurrentUrl()).toContain(result);
+                        browser.navigate().back();
+                    });
+                });
+            });
 
+            it("action columns should show edit button that redirects to the recordedit page", function() {
+                var allWindows;
+                chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
+                    return chaisePage.recordsetPage.getEditActionButtons();
+                }).then(function(editButtons) {
+                    expect(editButtons.length).toBe(4);
+                    return editButtons[0].click();
+                }).then(function() {
+                    return browser.getAllWindowHandles();
+                }).then(function(handles) {
+                    allWindows = handles;
+                    return browser.switchTo().window(allWindows[1]);
+                }).then(function() {
+                    var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/id=" + testParams.data[0].id;
+                    browser.driver.getCurrentUrl().then(function(url) {
+                        // Store this for use in later spec.
+                        recEditUrl = url;
+                    });
+                    expect(browser.driver.getCurrentUrl()).toContain(result);
+                    browser.close();
+                    browser.switchTo().window(allWindows[0]);
+                });
+            });
 
-    }
+            it('should show a modal if user tries to delete (via action column) a record that has been modified by someone else (412 error)', function() {
+                var EC = protractor.ExpectedConditions, allWindows, config;
+                // Edit a record in a new tab in order to change the ETag
+                recEditUrl = recEditUrl.replace('id=2003', 'id=4004');
+                recEditUrl = recEditUrl.slice(0, recEditUrl.indexOf('?invalidate'));
+
+                browser.executeScript('window.open(arguments[0]);', recEditUrl).then(function() {
+                    return browser.getAllWindowHandles();
+                }).then(function(handles) {
+                    allWindows = handles;
+                    return browser.switchTo().window(allWindows[1]);
+                }).then(function() {
+                    // In order to simulate someone else modifying a record (in order to
+                    // trigger a 412), we need to set RecEdit's window.opener to null so
+                    // that RecordSet won't think that this RecEdit page was opened by the same user
+                    // from the RecordSet page.
+                    return browser.executeScript('window.opener = null');
+                }).then(function () {
+                    return chaisePage.waitForElement(element(by.id("submit-record-button")));
+                }).then(function() {
+                    // - Change a small thing. Submit.
+                    var input = chaisePage.recordEditPage.getInputById(0, 'Summary');
+                    input.clear();
+                    input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
+                    return chaisePage.recordEditPage.getSubmitRecordButton().click();
+                }).then(function() {
+                    // Wait for RecordEdit to redirect to Record to make sure the submission went through.
+                    return chaisePage.waitForUrl('/record/', browser.params.defaultTimeout);
+                }).then(function() {
+                    expect(browser.driver.getCurrentUrl()).toContain('/record/');
+                    // - Go back to initial RecordSet page
+                    browser.close();
+                    return browser.switchTo().window(allWindows[0]);
+                }).then(function() {
+                    return chaisePage.recordsetPage.getDeleteActionButtons().get(3).click();
+                }).then(function () {
+                    var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+                    browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                    // expect modal to open
+                    return modalTitle.getText();
+                }).then(function(text) {
+                    expect(text).toBe("Confirm Delete");
+                    return chaisePage.recordPage.getConfirmDeleteButton().click();
+                }).then(function() {
+                    // Expect another modal to appear to tell user that this record cannot be deleted
+                    // and user should check the updated UI for latest row data.
+                    chaisePage.waitForElement(element(by.id('confirm-btn')));
+                    return element(by.id('confirm-btn')).click();
+                }).then(function() {
+                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
+                }).then(function() {
+                    var rows = chaisePage.recordsetPage.getRows();
+                    var changedCell = rows.get(3).all(by.css('td')).get(4);
+                    expect(changedCell.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
+                }).catch(function(error) {
+                    console.dir(error);
+                    expect(error).not.toBeDefined();
+                });
+            });
+
+            it("action columns should show delete button that deletes record", function() {
+                var deleteButton;
+                chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
+                    return chaisePage.recordsetPage.getDeleteActionButtons();
+                }).then(function(deleteButtons) {
+                    expect(deleteButtons.length).toBe(4);
+                    deleteButton = deleteButtons[3];
+                    return deleteButton.click();
+                }).then(function() {
+                    var EC = protractor.ExpectedConditions;
+                    var confirmButton = chaisePage.recordsetPage.getConfirmDeleteButton();
+                    browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+
+                    return confirmButton.click();
+                }).then(function() {
+                    var EC = protractor.ExpectedConditions;
+                    browser.wait(EC.stalenessOf(deleteButton), browser.params.defaultTimeout);
+                }).then(function() {
+                    return chaisePage.recordsetPage.getRows();
+                }).then(function(rows) {
+                    expect(rows.length).toBe(3);
+                });
+            });
+        });
+
+    });
 
     describe("For table " + fileParams.table_name + ',', function() {
         var EC = protractor.ExpectedConditions;
 
         beforeAll(function () {
             browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + ':' + fileParams.table_name);
+            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + fileParams.table_name);
         });
 
         it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function() {
@@ -338,11 +388,9 @@ describe('View recordset,', function() {
         var EC = protractor.ExpectedConditions;
 
         it('should load custom CSS and document title defined in chaise-config.js', function() {
-            var chaiseConfig, tupleParams = testParams.tuples[0], keys = [];
-            tupleParams.keys.forEach(function(key) {
-                keys.push(key.name + key.operator + key.value);
-            });
-            var url = browser.params.url + ":" + tupleParams.table_name + "/" + keys.join("&") + "@sort(" + tupleParams.sortby + ")";
+            var chaiseConfig, testParams = testParams.tuples[0], keys = [];
+            keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+            var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + testParams.table_name + "/" + keys.join("&") + "@sort(" + testParams.sortby + ")";
             browser.get(url);
             chaisePage.waitForElement(element(by.id('page-title')), browser.params.defaultTimeout).then(function() {
                 return browser.executeScript('return chaiseConfig');
@@ -403,5 +451,4 @@ describe('View recordset,', function() {
             });
         });
     });
-
 });

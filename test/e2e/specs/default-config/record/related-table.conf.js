@@ -1,7 +1,7 @@
 var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
-    configFileName: 'related-table/dev.json',
+    configFileName: 'record/related-table/dev.json',
     specs: [
         "*.spec.js"
     ],

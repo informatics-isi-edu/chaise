@@ -1,8 +1,8 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "related-table/actions.config.json",
-            "related-table/links.config.json",
+            "record/related-table/actions.config.json",
+            "record/related-table/links.config.json",
 
             "recordedit/add-defaults.config.json",
             "recordedit/add-multi.config.json",

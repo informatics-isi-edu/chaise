@@ -18,7 +18,7 @@ describe('View existing record,', function() {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
             browser.ignoreSynchronization=true;
-            var url = browser.params.url + ":" + testParams.table_name + "/" + keys.join("&");
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-edit-btn:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
             table = browser.params.defaultSchema.content.tables[testParams.table_name];
             chaisePage.waitForElement(element(by.id('tblRecord')));

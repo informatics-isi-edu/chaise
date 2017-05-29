@@ -4,7 +4,13 @@
             "record/config.json",
             "record/create-btn.config.json",
             "record/delete-btn.config.json",
-            "record/edit-btn.config.json"
+            "record/edit-btn.config.json",
+
+            "recordedit/add.config.json",
+            "recordedit/edit.config.json",
+            "recordedit/delete.config.json",
+
+            "recordset/config.json"
         ]
     },
     "cleanup" : true

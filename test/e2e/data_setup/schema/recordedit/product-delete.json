@@ -16,11 +16,11 @@
       "foreign_keys": [
         {
           "comment": null,
-          "names": [["recordset-product", "fk_category"]],
+          "names": [["product-delete", "fk_category"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "category"
             }
           ],
@@ -28,18 +28,18 @@
           "referenced_columns": [
             {
               "table_name": "category",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "term"
             }
           ]
         },
         {
           "comment": null,
-          "names": [["recordset-product", "fk_thumbnail"]],
+          "names": [["product-delete", "fk_thumbnail"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "thumbnail"
             }
           ],
@@ -49,18 +49,18 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "id"
             }
           ]
         },
         {
           "comment": null,
-          "names": [["recordset-product", "fk_cover"]],
+          "names": [["product-delete", "fk_cover"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "cover"
             }
           ],
@@ -70,14 +70,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation",
-      "schema_name": "recordset-product",
+      "schema_name": "product-delete",
       "column_definitions": [
         {
           "comment": null,
@@ -337,16 +337,16 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", ["recordset-product", "fk_category"], "website", "rating", "summary", "description", ["recordset-product", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
-          "entry/create": ["id", "title", "website", ["recordset-product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["recordset-product", "fk_thumbnail"], ["recordset-product", "fk_cover"],"terms", "opened_on","luxurious"],
-          "entry/edit": ["id", "title", "website", ["recordset-product", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["recordset-product", "fk_thumbnail"], ["recordset-product", "fk_cover"],"terms", "opened_on","luxurious"],
+          "detailed" : ["id", ["product-delete", "fk_category"], "website", "rating", "summary", "description", ["product-delete", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
+          "entry/create": ["id", "title", "website", ["product-delete", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-delete", "fk_thumbnail"], ["product-delete", "fk_cover"],"terms", "opened_on","luxurious"],
+          "entry/edit": ["id", "title", "website", ["product-delete", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-delete", "fk_thumbnail"], ["product-delete", "fk_cover"],"terms", "opened_on","luxurious"],
           "compact" : ["title", "website", "rating", "summary","terms", "opened_on", "luxurious"]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
           "*" : [
-              ["recordset-product", "fk_booking_accommodation"],
-              ["recordset-product", "fk_accommodation_image"]
+              ["product-delete", "fk_booking_accommodation"],
+              ["product-delete", "fk_accommodation_image"]
           ]
         },
         "tag:isrd.isi.edu,2016:table-display": {
@@ -372,12 +372,12 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["recordset-product", "fk_booking_accommodation"]],
+          "names" : [["product-delete", "fk_booking_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "booking",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "accommodation_id"
             }
           ],
@@ -385,14 +385,14 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "booking",
-      "schema_name": "recordset-product",
+      "schema_name": "product-delete",
       "column_definitions": [
         {
           "comment": null,
@@ -459,7 +459,7 @@
           "display": "Bookings"
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": ["id", ["recordset-product", "fk_booking_accommodation"], "price", "booking_date"]
+          "*": ["id", ["product-delete", "fk_booking_accommodation"], "price", "booking_date"]
         }
       }
     },
@@ -478,7 +478,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "file",
-      "schema_name": "recordset-product",
+      "schema_name": "product-delete",
       "column_definitions": [
         {
           "comment": null,
@@ -645,12 +645,12 @@
       "entityCount": 0,
       "foreign_keys": [
         {
-          "names" : [["recordset-product", "fk_accommodation_image"]],
+          "names" : [["product-delete", "fk_accommodation_image"]],
           "comment": null,
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "accommodation_id"
             }
           ],
@@ -658,18 +658,18 @@
           "referenced_columns": [
             {
               "table_name": "accommodation",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "id"
             }
           ]
         },
         {
           "comment": null,
-          "names" : [["recordset-product-record", "fk_accommodation_image_2"]],
+          "names" : [["product-delete-record", "fk_accommodation_image_2"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "image_id"
             }
           ],
@@ -677,14 +677,14 @@
           "referenced_columns": [
             {
               "table_name": "file",
-              "schema_name": "recordset-product",
+              "schema_name": "product-delete",
               "column_name": "id"
             }
           ]
         }
       ],
       "table_name": "accommodation_image",
-      "schema_name": "recordset-product",
+      "schema_name": "product-delete",
       "column_definitions": [
         {
           "comment": null,
@@ -726,7 +726,7 @@
           "display": "Accommodation Images"
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": [["recordset-product", "fk_accommodation_image"], ["recordset-product", "fk_accommodation_image_2"]]
+          "*": [["product-delete", "fk_accommodation_image"], ["product-delete", "fk_accommodation_image_2"]]
         }
       }
     },
@@ -752,7 +752,7 @@
       "entityCount": 0,
       "foreign_keys": [],
       "table_name": "category",
-      "schema_name": "recordset-product",
+      "schema_name": "product-delete",
       "column_definitions": [
         {
           "comment": null,
@@ -812,5 +812,5 @@
       "entry": "tag:isrd.isi.edu,2016:chaise:recordedit"
     }
   },
-  "schema_name": "recordset-product"
+  "schema_name": "product-delete"
 }

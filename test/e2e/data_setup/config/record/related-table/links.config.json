@@ -6,9 +6,9 @@
         ]
     },
     "schema": {
-        "name": "product-unordered-related-tables-actions",
+        "name": "product-unordered-related-tables-links",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/product-unordered-related-tables-actions.json"
+        "path": "test/e2e/data_setup/schema/record/product-unordered-related-tables-links.json"
     },
     "tables": {
         "createNew": true
