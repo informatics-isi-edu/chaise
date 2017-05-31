@@ -116,9 +116,9 @@ describe('Edit existing record,', function() {
                     it("should redirect to Record page", function() {
                         if (!hasErrors) {
                             // if there is a file upload
-                            if (tableParams.files.length) {
-                                browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
-                            }
+                            // if (tableParams.files.length) {
+                            //     browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
+                            // }
 
 
                             var redirectUrl = browser.params.url+ "/record/#" + browser.params.catalogId + "/product-edit:" + tableParams.table_name + '/' + keys.join('&');
