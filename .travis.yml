@@ -109,7 +109,6 @@ script:
   - make testfullfeatures
   - make testdeleteprohibited
   - make testnavbar
-  - make testsearch
 
 after_failure:
   - sudo cat ${HTTPD_ERROR_LOG}
