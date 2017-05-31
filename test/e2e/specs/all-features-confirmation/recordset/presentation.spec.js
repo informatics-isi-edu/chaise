@@ -408,14 +408,15 @@ describe('View recordset,', function() {
             });
         });
 
-        describe("For when no catalog or schema:table is specified,", function() {
-            var baseUrl;
+        if (!process.env.TRAVIS) {
+            describe("For when no catalog or schema:table is specified,", function() {
+                var baseUrl;
 
-            beforeAll(function () {
-                browser.ignoreSynchronization = true;
-            });
+                beforeAll(function () {
+                    browser.ignoreSynchronization = true;
+                });
 
-            if (!process.env.TRAVIS) {
+
                 it("should use the default catalog and schema:table defined in chaise config if no catalog or schema:table is present in the uri.", function() {
                     browser.get(process.env.CHAISE_BASE_URL + "/recordset");
 
@@ -435,19 +436,19 @@ describe('View recordset,', function() {
                         expect(title).toBe("Dataset");
                     });
                 });
-            }
 
-            it("should throw a malformed URI error when no default schema:table is set for a catalog.", function() {
-                browser.get(process.env.CHAISE_BASE_URL + "/recordset/#" + browser.params.catalogId);
+                it("should throw a malformed URI error when no default schema:table is set for a catalog.", function() {
+                    browser.get(process.env.CHAISE_BASE_URL + "/recordset/#" + browser.params.catalogId);
 
-                var modalTitle = chaisePage.recordEditPage.getModalTitle();
+                    var modalTitle = chaisePage.recordEditPage.getModalTitle();
 
-                chaisePage.waitForElement(modalTitle, browser.params.defaultTimeout).then(function() {
-                    return modalTitle.getText();
-                }).then(function (title) {
-                    expect(title).toBe("Error: MalformedUriError");
+                    chaisePage.waitForElement(modalTitle, browser.params.defaultTimeout).then(function() {
+                        return modalTitle.getText();
+                    }).then(function (title) {
+                        expect(title).toBe("Error: MalformedUriError");
+                    });
                 });
             });
-        });
+        }
     });
 });
