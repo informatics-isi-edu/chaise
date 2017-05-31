@@ -1,6 +1,6 @@
 {
   "tables": {
-    "accommodation": {
+    "search_accommodation": {
       "comment": "List of different types of accommodations",
       "kind": "table",
       "entityCount": 0,
@@ -19,7 +19,7 @@
           "names": [["product-search", "fk_category"]],
           "foreign_key_columns": [
             {
-              "table_name": "accommodation",
+              "table_name": "search_accommodation",
               "schema_name": "product-search",
               "column_name": "category"
             }
@@ -27,7 +27,7 @@
           "annotations": {},
           "referenced_columns": [
             {
-              "table_name": "category",
+              "table_name": "search_category",
               "schema_name": "product-search",
               "column_name": "term"
             }
@@ -38,7 +38,7 @@
           "names": [["product-search", "fk_thumbnail"]],
           "foreign_key_columns": [
             {
-              "table_name": "accommodation",
+              "table_name": "search_accommodation",
               "schema_name": "product-search",
               "column_name": "thumbnail"
             }
@@ -48,7 +48,7 @@
           },
           "referenced_columns": [
             {
-              "table_name": "file",
+              "table_name": "search_file",
               "schema_name": "product-search",
               "column_name": "id"
             }
@@ -59,7 +59,7 @@
           "names": [["product-search", "fk_cover"]],
           "foreign_key_columns": [
             {
-              "table_name": "accommodation",
+              "table_name": "search_accommodation",
               "schema_name": "product-search",
               "column_name": "cover"
             }
@@ -69,14 +69,14 @@
           },
           "referenced_columns": [
             {
-              "table_name": "file",
+              "table_name": "search_file",
               "schema_name": "product-search",
               "column_name": "id"
             }
           ]
         }
       ],
-      "table_name": "accommodation",
+      "table_name": "search_accommodation",
       "schema_name": "product-search",
       "column_definitions": [
         {
@@ -356,7 +356,7 @@
         }
       }
     },
-    "booking": {
+    "search_booking": {
       "comment": null,
       "kind": "table",
       "entityCount": 0,
@@ -376,7 +376,7 @@
           "comment": null,
           "foreign_key_columns": [
             {
-              "table_name": "booking",
+              "table_name": "search_booking",
               "schema_name": "product-search",
               "column_name": "accommodation_id"
             }
@@ -384,14 +384,14 @@
           "annotations": {},
           "referenced_columns": [
             {
-              "table_name": "accommodation",
+              "table_name": "search_accommodation",
               "schema_name": "product-search",
               "column_name": "id"
             }
           ]
         }
       ],
-      "table_name": "booking",
+      "table_name": "search_booking",
       "schema_name": "product-search",
       "column_definitions": [
         {
@@ -463,7 +463,7 @@
         }
       }
     },
-    "file": {
+    "search_file": {
       "comment": "asset/object",
       "kind": "table",
       "keys": [
@@ -477,7 +477,7 @@
       ],
       "entityCount": 0,
       "foreign_keys": [],
-      "table_name": "file",
+      "table_name": "search_file",
       "schema_name": "product-search",
       "column_definitions": [
         {
@@ -629,7 +629,7 @@
         }
       }
     },
-    "accommodation_image": {
+    "search_accommodation_image": {
       "comment": "this contains asset/thumbnails",
       "kind": "table",
       "keys": [
@@ -649,7 +649,7 @@
           "comment": null,
           "foreign_key_columns": [
             {
-              "table_name": "accommodation_image",
+              "table_name": "search_accommodation_image",
               "schema_name": "product-search",
               "column_name": "accommodation_id"
             }
@@ -657,7 +657,7 @@
           "annotations": {},
           "referenced_columns": [
             {
-              "table_name": "accommodation",
+              "table_name": "search_accommodation",
               "schema_name": "product-search",
               "column_name": "id"
             }
@@ -665,10 +665,10 @@
         },
         {
           "comment": null,
-          "names" : [["product-search-record", "fk_accommodation_image_2"]],
+          "names" : [["product-search_record", "fk_accommodation_image_2"]],
           "foreign_key_columns": [
             {
-              "table_name": "accommodation_image",
+              "table_name": "search_accommodation_image",
               "schema_name": "product-search",
               "column_name": "image_id"
             }
@@ -676,14 +676,14 @@
           "annotations": {},
           "referenced_columns": [
             {
-              "table_name": "file",
+              "table_name": "search_file",
               "schema_name": "product-search",
               "column_name": "id"
             }
           ]
         }
       ],
-      "table_name": "accommodation_image",
+      "table_name": "search_accommodation_image",
       "schema_name": "product-search",
       "column_definitions": [
         {
@@ -730,7 +730,7 @@
         }
       }
     },
-    "category": {
+    "search_category": {
       "comment": "domain",
       "kind": "table",
       "keys": [
@@ -751,7 +751,7 @@
       ],
       "entityCount": 0,
       "foreign_keys": [],
-      "table_name": "category",
+      "table_name": "search_category",
       "schema_name": "product-search",
       "column_definitions": [
         {
@@ -795,11 +795,11 @@
     }
   },
   "table_names": [
-    "category",
-    "file",
-    "accommodation",
-    "accommodation_image",
-    "booking"
+    "search_category",
+    "search_file",
+    "search_accommodation",
+    "search_accommodation_image",
+    "search_booking"
   ],
   "comment": null,
   "annotations": {
@@ -812,5 +812,8 @@
       "entry": "tag:isrd.isi.edu,2016:chaise:recordedit"
     }
   },
-  "schema_name": "product-search"
+  "schema_name": "product-search",
+  "annotations": {
+      "comment": ["default"]
+  }
 }

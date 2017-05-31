@@ -21,7 +21,7 @@ BIN=$(MODULES)/.bin
 ### Protractor scripts
 ## Sequential protractor scripts
 # Legacy apps tests
-E2Esearch=test/e2e/specs/search/conf.js
+E2Esearch=test/e2e/specs/default-config/search/presentation.conf.js
 E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 # Recordedit tests
 E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js

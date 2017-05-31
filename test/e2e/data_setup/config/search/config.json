@@ -11,6 +11,6 @@
     },
     "entities": {
         "createNew": true,
-        "path": "test/e2e/data_setup/data/product"
+        "path": "test/e2e/data_setup/data/product-search"
     }
 }

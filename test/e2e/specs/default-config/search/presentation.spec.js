@@ -1,7 +1,7 @@
 /**
  * Created by shuai on 2/2/16.
  */
-var chaisePage = require('../../utils/chaise.page.js');
+var chaisePage = require('../../../utils/chaise.page.js');
 var filterObj = chaisePage.resultContent.filter;
 var filterCount = 0;
 var testParams = {
