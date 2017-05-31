@@ -8,7 +8,7 @@
     "schema": {
         "name": "product-no-serial",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/product-no-serial.json"
+        "path": "test/e2e/data_setup/schema/recordedit/product-no-serial.json"
     },
     "tables": {
         "createNew": true

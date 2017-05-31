@@ -6,7 +6,7 @@
         ]
     },
     "schema": {
-        "name": "product",
+        "name": "product-add",
         "createNew": true,
         "path": "test/e2e/data_setup/schema/recordedit/product-add.json"
     },

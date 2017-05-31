@@ -8,7 +8,7 @@
     "schema": {
         "name": "multi-edit",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/multi-edit.json"
+        "path": "test/e2e/data_setup/schema/recordedit/multi-edit.json"
     },
     "tables": {
         "createNew": true

@@ -8,7 +8,7 @@
     "schema": {
         "name": "multi-column-types",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/multi-column-types.json"
+        "path": "test/e2e/data_setup/schema/recordedit/multi-column-types.json"
     },
     "tables": {
         "createNew": true

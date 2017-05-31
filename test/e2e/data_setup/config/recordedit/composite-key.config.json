@@ -8,7 +8,7 @@
     "schema": {
         "name": "product-person",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/product-person.json"
+        "path": "test/e2e/data_setup/schema/recordedit/product-person.json"
     },
     "tables": {
         "createNew": true
