@@ -12,7 +12,7 @@ exports.getConfig = function(options) {
       //Apache log shows firefox is not requesting the server.
       'chromeOptions' : {
          args: ['--lang=en',
-                '--window-size=2480,1920']
+                '--window-size=1920,1920']
       },
       'os': 'MacOS El Capitan 10.11',
       'platform': 'OS X 10.11',

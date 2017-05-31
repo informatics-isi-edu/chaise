@@ -1,4 +1,4 @@
-var pConfig = require('./../../../../utils/protractor.configuration.js');
+var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
     configFileName: 'recordedit/add.dev.json',

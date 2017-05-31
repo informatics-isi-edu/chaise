@@ -1,4 +1,4 @@
-var chaisePage = require('../../../../utils/chaise.page.js');
+var chaisePage = require('../../../utils/chaise.page.js');
 var testParams = {
     table_name: "accommodation",
     key: {
@@ -32,7 +32,7 @@ describe('Edit existing record,', function() {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
             browser.ignoreSynchronization=true;
-            browser.get(browser.params.url + "recordedit/#" + browser.params.catalogId + "/product-delete:" + testParams.table_name + "/" + keys.join("&"));
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-delete:" + testParams.table_name + "/" + keys.join("&"));
             table = browser.params.defaultSchema.content.tables[testParams.table_name];
 
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
@@ -50,10 +50,9 @@ describe('Edit existing record,', function() {
         });
 
         describe("delete existing record ", function () {
-            it("should load chaise-config.js and have confirmDelete=true and dataBrowser=''", function () {
+            it("should load chaise-config.js and have confirmDelete=true", function () {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     expect(chaiseConfig.confirmDelete).toBe(true);
-                    expect(chaiseConfig.dataBrowser).toBe("");
                 });
             });
 

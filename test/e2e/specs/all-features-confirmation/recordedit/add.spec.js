@@ -1,5 +1,5 @@
-var chaisePage = require('../../../../utils/chaise.page.js');
-var recordEditHelpers = require('../utils/recordedit-helpers.js'), chance = require('chance').Chance();
+var chaisePage = require('../../../utils/chaise.page.js');
+var recordEditHelpers = require('../../../utils/recordedit-helpers.js'), chance = require('chance').Chance();
 var exec = require('child_process').execSync;
 var testParams = {
     tables: [{
@@ -39,17 +39,17 @@ var testParams = {
             name: "testfile1MB.txt",
             size: "1024000",
             displaySize: "1MB",
-            path: "uploadFiles/testfile1MB.txt"
+            path: "all-features-confirmation/recordedit/uploadFiles/testfile1MB.txt"
         }, {
             name: "testfile500kb.png",
             size: "512000",
             displaySize: "500KB",
-            path: "uploadFiles/testfile500kb.png"
+            path: "all-features-confirmation/recordedit/uploadFiles/testfile500kb.png"
         }, {
             name: "testfile5MB.pdf",
             size: "5242880",
             displaySize: "5MB",
-            path: "uploadFiles/testfile5MB.pdf"
+            path: "all-features-confirmation/recordedit/uploadFiles/testfile5MB.pdf"
         }]
     }],
     multi_insert: {
@@ -70,7 +70,7 @@ describe('Record Add', function() {
 
                 beforeAll(function () {
                     browser.ignoreSynchronization=true;
-                    browser.get(browser.params.url + "recordedit/#" + browser.params.catalogId + "/product-add:" + tableParams.table_name);
+                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + tableParams.table_name);
                     chaisePage.waitForElement(element(by.id("submit-record-button")));
                 });
 
@@ -84,7 +84,7 @@ describe('Record Add', function() {
 
                         files.forEach(function(f) {
                             var path = require('path').join(__dirname , "/../../" + f.path);
-                            exec("perl -e 'print \"\1\" x " + f.size + "' > " + path);
+                            exec("perl -e 'print \"1\" x " + f.size + "' > " + path);
                             console.log(path + " created");
                         });
                     });
@@ -214,28 +214,11 @@ describe('Record Add', function() {
         })(testParams.tables[i], i);
     }
 
-    it('should load custom CSS and document title defined in chaise-config.js', function() {
-        var chaiseConfig;
-        browser.get(browser.params.url + "recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name);
-        chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-            return browser.executeScript('return chaiseConfig;');
-        }).then(function(config) {
-            chaiseConfig = config;
-            console.log(chaiseConfig);
-            return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
-        }).then(function(elemArray) {
-            expect(elemArray.length).toBeTruthy();
-            return browser.getTitle();
-        }).then(function(title) {
-            expect(title).toEqual(chaiseConfig.headTitle);
-        });
-    });
-
     describe('When url has a prefill query string param set, ', function() {
         var testCookie = {};
         beforeAll(function() {
             // Refresh the page
-            browser.get(browser.params.url + "recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name);
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name);
             browser.sleep(100);
 
             // Write a dummy cookie for creating a record in Accommodation table
@@ -249,7 +232,7 @@ describe('Record Add', function() {
             browser.manage().addCookie('test', JSON.stringify(testCookie));
 
             // Reload the page with prefill query param in url
-            browser.get(browser.params.url + "recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name + '?prefill=test');
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name + '?prefill=test');
         });
 
         it('should pre-fill fields from the prefill cookie', function() {

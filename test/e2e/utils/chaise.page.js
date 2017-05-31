@@ -711,7 +711,7 @@ var recordsetPage = function() {
     this.getPageSubtitleElement = function() {
         return element(by.id('page-subtitle'));
     };
-    
+
     this.getShowUnfilterdButton = function() {
         return element(by.id('show-unfiltered'));
     };

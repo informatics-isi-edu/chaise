@@ -1,7 +1,7 @@
 var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
-    configFileName: 'recordedit/edit.dev.json',
+    configFileName: 'recordedit/no-delete.dev.json',
     chaiseConfigFilePath: 'test/e2e/specs/delete-prohibited/chaise-config.js',
     specs: [
         "*.spec.js"

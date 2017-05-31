@@ -2,7 +2,6 @@
 
 var chaiseConfig = {
     name: "Delete Prohibited",
-    dataBrowser: "",
     editRecord: true,
     deleteRecord: false
 };

@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var testParams = {
+    table_name: "accommodation",
     key: {
         name: "id",
         value: "4004",

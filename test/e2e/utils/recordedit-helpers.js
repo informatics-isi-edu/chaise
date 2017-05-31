@@ -12,7 +12,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
     var visibleFields = [];
 
-    if (tableParams.keys) {
+    if (tableParams.key) {
         it("should have edit record title", function() {
             var EC = protractor.ExpectedConditions;
 
@@ -129,7 +129,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     } else {
                         chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(input) {
                             expect(input.isEnabled()).toBe(false);
-                            if (!tableParams.keys) {
+                            if (!tableParams.key) {
                                 expect(input.getAttribute('placeholder')).toBe('Automatically generated');
                             }
                         }).catch(function(e) {
@@ -1053,7 +1053,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                         var testFileSelect = function() {
                                             var file = tableParams.files.shift();
-                                            var filePath = require('path').resolve(__dirname, file.path);
+                                            var filePath = require('path').resolve(__dirname, file.path).replace('/utils/', '/specs/');
 
                                             column._value = file.name;
                                             fileInput.sendKeys(filePath);

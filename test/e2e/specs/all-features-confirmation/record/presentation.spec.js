@@ -1,6 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
-var recordHelpers = require('../utils/record-helpers.js');
-var testParms = {
+var recordHelpers = require('../../../utils/record-helpers.js');
+var testParams = {
     table_name: "accommodation",
     key: {
         name: "id",
@@ -62,9 +62,9 @@ describe('View existing record,', function() {
 
         beforeAll(function() {
             var keys = [];
-            keys.push(testParms.key.name + testParms.key.operator + testParms.key.value);
+            keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
             browser.ignoreSynchronization=true;
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product:" + testParams.table_name + "/" + keys.join("&");
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
             table = browser.params.defaultSchema.content.tables[testParams.table_name];
             var start = (new Date()).getTime();
@@ -91,23 +91,5 @@ describe('View existing record,', function() {
             var params = recordHelpers.testPresentation(testParams);
         });
 
-    });
-
-    it('should load custom CSS and document title defined in chaise-config.js', function() {
-        var chaiseConfig, keys = [];
-        keys.push(testParms.key.name + testParms.key.operator + testParms.key.value);
-        var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product:" + testParams.table_name + "/" + keys.join("&");
-        browser.get(url);
-        chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
-            return browser.executeScript('return chaiseConfig');
-        }).then(function(config) {
-            chaiseConfig = config;
-            return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
-        }).then(function(elemArray) {
-            expect(elemArray.length).toBeTruthy();
-            return browser.getTitle();
-        }).then(function(title) {
-            expect(title).toEqual(chaiseConfig.headTitle);
-        });
     });
 });

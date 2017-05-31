@@ -24,10 +24,9 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        it("should load chaise-config.js and have deleteRecord=false and dataBrowser=''", function() {
+        it("should load chaise-config.js and have deleteRecord=false", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.deleteRecord).toBe(false);
-                expect(chaiseConfig.dataBrowser).toBe("");
             });
         });
 

@@ -24,14 +24,13 @@ describe('View existing record,', function() {
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            chaisePage.waitForElement(element(by.id('tblRecord')));
+            chaisePage.waitForElement(element(by.id('rt-accommodation_image')));
         });
 
         describe("Show the related entity tables,", function() {
             var allWindows;
 
             it("action columns should show view button that redirects to the record page", function() {
-
                 var relatedTableName = testParams.related_associate_table; // association table
                 var linkedToTableName = testParams.related_linked_table; // linked to table
                 var linkedToTableFilter = testParams.related_linked_table_key_filter;
@@ -65,8 +64,7 @@ describe('View existing record,', function() {
                 }).then(function(cell) {
                     return cell[0].all(by.css(".edit-action-button"));
                 }).then(function(editButtons) {
-                    browser.sleep(1000);
-                    return editButtons[0].click();
+                    return chaisePage.clickButton(editButtons[0]);
                 }).then(function() {
                     return browser.getAllWindowHandles();
                 }).then(function(handles) {
@@ -103,8 +101,8 @@ describe('View existing record,', function() {
                     return table.all(by.css(".delete-action-button"));
                 }).then(function(deleteButtons) {
                     count = deleteButtons.length;
-                    deleteButton = deleteButtons[count-1];
-                    return deleteButton.click();
+                    deleteButton = deleteButtons[0];
+                    return chaisePage.clickButton(deleteButton);
                 }).then(function() {
                     var EC = protractor.ExpectedConditions;
                     var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
@@ -135,7 +133,7 @@ describe('View existing record,', function() {
                 }).then(function(deleteButtons) {
                     var count = deleteButtons.length;
                     deleteButton = deleteButtons[count-1];
-                    return deleteButton.click();
+                    return chaisePage.clickButton(deleteButton);
                 }).then(function() {
                     var EC = protractor.ExpectedConditions;
                     var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();

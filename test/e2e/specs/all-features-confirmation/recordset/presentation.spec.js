@@ -1,6 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');;
 var testParams = {
-    tuple: {
+    accommodation_tuple: {
         schemaName: "product-recordset",
         table_name: "accommodation",
         displayName: "Accommodations",
@@ -63,24 +63,25 @@ var testParams = {
 
 describe('View recordset,', function() {
 
-    var fileParams = testParams.file_tuple;
+    var accommodationParams = testParams.accommodation_tuple,
+        fileParams = testParams.file_tuple;
 
-    describe("For table " + testParams.table_name + ",", function() {
+    describe("For table " + accommodationParams.table_name + ",", function() {
 
         beforeAll(function () {
             var keys = [];
-            keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+            keys.push(accommodationParams.key.name + accommodationParams.key.operator + accommodationParams.key.value);
             browser.ignoreSynchronization=true;
-            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + testParams.table_name + "/" + keys.join("&") + "@sort(" + testParams.sortby + ")");
+            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
 
             chaisePage.waitForElement(element(by.id("divRecordSet")));
         });
 
         describe("Presentation ,", function() {
             var recEditUrl =  '';
-            it("should have '" + testParams.title +  "' as title", function() {
+            it("should have '" + accommodationParams.title +  "' as title", function() {
                 var title = chaisePage.recordsetPage.getPageTitleElement();
-                expect(title.getText()).toEqual(testParams.title);
+                expect(title.getText()).toEqual(accommodationParams.title);
             });
 
             it("should autofocus on search box", function() {
@@ -103,31 +104,31 @@ describe('View recordset,', function() {
                     for (var i = 0; i < rows.length; i++) {
                         (function(index) {
                             rows[index].all(by.tagName("td")).then(function (cells) {
-                                expect(cells.length).toBe(testParams.columns.length + 1);
-                                expect(cells[1].getText()).toBe(testParams.data[index].title);
-                                expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(testParams.data[index].website);
+                                expect(cells.length).toBe(accommodationParams.columns.length + 1);
+                                expect(cells[1].getText()).toBe(accommodationParams.data[index].title);
+                                expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website);
                                 expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website");
-                                expect(cells[3].getText()).toBe(testParams.data[index].rating);
-                                expect(cells[4].getText()).toBe(testParams.data[index].summary);
-                                expect(cells[5].getText()).toBe(testParams.data[index].opened_on);
-                                expect(cells[6].getText()).toBe(testParams.data[index].luxurious);
+                                expect(cells[3].getText()).toBe(accommodationParams.data[index].rating);
+                                expect(cells[4].getText()).toBe(accommodationParams.data[index].summary);
+                                expect(cells[5].getText()).toBe(accommodationParams.data[index].opened_on);
+                                expect(cells[6].getText()).toBe(accommodationParams.data[index].luxurious);
                             });
                         }(i))
                     }
                 });
             });
 
-            it("should have " + testParams.columns.length + " columns", function() {
+            it("should have " + accommodationParams.columns.length + " columns", function() {
                 chaisePage.recordsetPage.getColumnNames().then(function(columns) {
-                    expect(columns.length).toBe(testParams.columns.length);
+                    expect(columns.length).toBe(accommodationParams.columns.length);
                     for (var i = 0; i < columns.length; i++) {
-                        expect(columns[i].getText()).toEqual(testParams.columns[i].title);
+                        expect(columns[i].getText()).toEqual(accommodationParams.columns[i].title);
                     }
                 });
             });
 
             it("should show line under columns which have a comment and inspect the comment value too", function() {
-                var columns = testParams.columns.filter(function(c) {
+                var columns = accommodationParams.columns.filter(function(c) {
                     return (c.value != null && typeof c.comment == 'string');
                 });
                 chaisePage.recordsetPage.getColumnsWithUnderline().then(function(pageColumns) {
@@ -215,7 +216,7 @@ describe('View recordset,', function() {
                     expect(viewButtons.length).toBe(4);
                     return viewButtons[0].click();
                 }).then(function() {
-                    var result = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/id=" + testParams.data[0].id;
+                    var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
                     chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
                         expect(browser.driver.getCurrentUrl()).toContain(result);
                         browser.navigate().back();
@@ -236,7 +237,7 @@ describe('View recordset,', function() {
                     allWindows = handles;
                     return browser.switchTo().window(allWindows[1]);
                 }).then(function() {
-                    var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/id=" + testParams.data[0].id;
+                    var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
                     browser.driver.getCurrentUrl().then(function(url) {
                         // Store this for use in later spec.
                         recEditUrl = url;
@@ -387,21 +388,19 @@ describe('View recordset,', function() {
     describe("For chaise config properties", function () {
         var EC = protractor.ExpectedConditions;
 
-        it('should load custom CSS and document title defined in chaise-config.js', function() {
-            var chaiseConfig, testParams = testParams.tuples[0], keys = [];
-            keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-            var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + testParams.table_name + "/" + keys.join("&") + "@sort(" + testParams.sortby + ")";
+        it('should load chaise-config.js with confirmDelete=true && defaults catalog and table set', function() {
+            var chaiseConfig, keys = [];
+            keys.push(accommodationParams.key.name + accommodationParams.key.operator + accommodationParams.key.value);
+            var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")";
             browser.get(url);
             chaisePage.waitForElement(element(by.id('page-title')), browser.params.defaultTimeout).then(function() {
                 return browser.executeScript('return chaiseConfig');
             }).then(function(config) {
                 chaiseConfig = config;
-                return browser.executeScript('return $("link[href=\'' + chaiseConfig.customCSS + '\']")');
-            }).then(function(elemArray) {
-                expect(elemArray.length).toBeTruthy();
-                return browser.getTitle();
-            }).then(function(title) {
-                expect(title).toEqual(chaiseConfig.headTitle);
+                expect(chaiseConfig.confirmDelete).toBeTruthy();
+                expect(chaiseConfig.defaultCatalog).toBe(1);
+                expect(chaiseConfig.defaultTables['1'].schema).toBe("isa");
+                expect(chaiseConfig.defaultTables['1'].table).toBe("dataset");
             }).catch(function(error) {
                 console.log('ERROR:', error);
                 // Fail the test

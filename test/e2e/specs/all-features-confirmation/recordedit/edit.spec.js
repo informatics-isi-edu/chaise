@@ -1,5 +1,5 @@
 var chaisePage = require('../../../utils/chaise.page.js');
-var recordEditHelpers = require('../utils/recordedit-helpers.js');
+var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var mustache = require('../../../../../../ermrestjs/vendor/mustache.min.js');
 var testParams = {
     tables: [{
@@ -41,17 +41,17 @@ var testParams = {
             name: "testfile1MB.txt",
             size: "1024000",
             displaySize: "1MB",
-            path: "uploadFiles/testfile1MB.txt"
+            path: "all-features-confirmation/recordedit/uploadFiles/testfile1MB.txt"
         }, {
             name: "testfile500kb.png",
             size: "512000",
             displaySize: "500KB",
-            path: "uploadFiles/testfile500kb.png"
+            path: "all-features-confirmation/recordedit/uploadFiles/testfile500kb.png"
         }, {
             name: "testfile5MB.pdf",
             size: "5242880",
             displaySize: "5MB",
-            path: "uploadFiles/testfile5MB.pdf"
+            path: "all-features-confirmation/recordedit/uploadFiles/testfile5MB.pdf"
         }]
     }]
 };
@@ -96,9 +96,7 @@ describe('Edit existing record,', function() {
 
                     beforeAll(function() {
                         // Build the keys component of a url for checking whether record app is on the right url
-                        tableParams.keys.forEach(function(key) {
-                            keys.push(key.name + key.operator + key.value);
-                        });
+                        keys.push(tableParams.key.name + tableParams.key.operator + tableParams.key.value);
 
                         // Submit the form
                         chaisePage.recordEditPage.submitForm();
@@ -123,7 +121,7 @@ describe('Edit existing record,', function() {
                             }
 
 
-                            var redirectUrl = browser.params.url+ "/recordedit/#" + browser.params.catalogId + "/product-edit:" + tableParams.table_name + '/' + keys.join('&');
+                            var redirectUrl = browser.params.url+ "/record/#" + browser.params.catalogId + "/product-edit:" + tableParams.table_name + '/' + keys.join('&');
                             // Wait for #tblRecord on Record page to appear
                             chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
                                 expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);

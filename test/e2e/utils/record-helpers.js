@@ -1,5 +1,5 @@
-var chaisePage = require('../../utils/chaise.page.js');
-var mustache = require('../../../../../ermrestjs/vendor/mustache.min.js');
+var chaisePage = require('../utils/chaise.page.js');
+var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
@@ -137,8 +137,8 @@ exports.testPresentation = function (tableParams) {
     });
 
 	it('should display a permalink of the record', function() {
-		var key = tableParams.keys[0];
-		var expectedURL = browser.params.url + ':' + tableParams.table_name + '/' + key.name + key.operator + key.value;
+		var key = tableParams.key;
+		var expectedURL = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + tableParams.table_name + '/' + key.name + key.operator + key.value;
 		var actualURL = element(by.id('permalink'));
 		expect(actualURL.isDisplayed()).toBe(true);
 		actualURL.getAttribute('href').then(function(url) {

@@ -89,7 +89,7 @@ describe('View existing record,', function() {
                 var initialMarkdownDisplay = element(by.id('rt-heading-' + markdownRelatedTable)).element(by.css('.markdown-container'));
                 expect(initialMarkdownDisplay.isDisplayed()).toBeTruthy();
 
-                markdownToggleLink.click().then(function() {
+                chaisePage.clickButton(markdownToggleLink).then(function() {
                     // After clicking toggle link, the table should now be displayed as a regular table (which would have an id of "rt-media")
                     tableDisplay = element(by.id('rt-' + markdownRelatedTable));
                     var viewActions = tableDisplay.all(by.css(".view-action-button"));
@@ -98,7 +98,7 @@ describe('View existing record,', function() {
                     browser.wait(EC.elementToBeClickable(btns[0]), browser.params.defaultTimeout);
 
                     expect(tableDisplay.isDisplayed()).toBeTruthy();
-                    return markdownToggleLink.click();
+                    return chaisePage.clickButton(markdownToggleLink);
                 }).then(function() {
                     // After clicking the toggle link once more, expect the related table to revert to its markdown display
                     expect(initialMarkdownDisplay.isDisplayed()).toBeTruthy();
