@@ -23,7 +23,7 @@ exports.getConfig = function(options) {
     ],
     jasmineNodeOpts: {
       showColors: true,
-      defaultTimeoutInterval: 120000,
+      defaultTimeoutInterval: 300000,
       print: function() {}
     },
     params: {
