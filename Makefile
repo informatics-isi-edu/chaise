@@ -18,38 +18,43 @@ MODULES=node_modules
 # Node bin scripts
 BIN=$(MODULES)/.bin
 
-# Protractor scripts
+### Protractor scripts
+## Sequential protractor scripts
 # Legacy apps tests
-E2EDIsearch=test/e2e/specs/search/data-independent/protractor.conf.js
-E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
+E2Esearch=test/e2e/specs/default-config/search/presentation.conf.js
 E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 # Recordedit tests
-E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
-E2EDIrecordEditMultiColTypes=test/e2e/specs/recordedit/data-independent/edit-multi-col-types/protractor.conf.js
-E2EDIrecordDefaults=test/e2e/specs/recordedit/data-independent/add-defaults/protractor.conf.js
-E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
-E2EDIrecordEditDeleteRecord=test/e2e/specs/recordedit/data-independent/delete-record/protractor.conf.js
-E2EDIrecordMultiAdd=test/e2e/specs/recordedit/data-independent/multi-add/protractor.conf.js
-E2EDIrecordMultiEdit=test/e2e/specs/recordedit/data-independent/multi-edit/protractor.conf.js
-E2EDrecordEditCompositeKey=test/e2e/specs/recordedit/data-dependent/composite-key/protractor.conf.js
-E2EDrecordEditDomainFilter=test/e2e/specs/recordedit/data-dependent/domain-filter/protractor.conf.js
-E2EDrecordEditSubmissionDisabled=test/e2e/specs/recordedit/data-dependent/submission-disabled/protractor.conf.js
+E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
+E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
+E2EDIrecordDefaults=test/e2e/specs/default-config/recordedit/add-defaults.conf.js
+E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
+E2EDIrecordEditDeleteRecord=test/e2e/specs/delete-prohibited/recordedit/delete-btn.conf.js
+E2EDIrecordMultiAdd=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js
+E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
+E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.conf.js
+E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.conf.js
+E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submission-disabled.conf.js
 # Record tests
-E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
-E2EDrecordCopy=test/e2e/specs/record/copy-btn/protractor.conf.js
-E2ErecordNoDeleteBtn=test/e2e/specs/record/no-delete-btn/protractor.conf.js
-E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
+E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
+E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
+E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.conf.js
+E2EDrecordRelatedTable=test/e2e/specs/default-config/record/related-table.conf.js
 # Recordset tests
-E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
-E2EDrecordsetEdit=test/e2e/specs/recordset/edit/protractor.conf.js
-E2ErecordsetAdd=test/e2e/specs/recordset/add/protractor.conf.js
+E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
+E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
+E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 # Viewer tests
-E2EDviewer=test/e2e/specs/viewer/data-dependent/protractor.conf.js
+E2EDviewer=test/e2e/specs/default-config/viewer/presentation.conf.js
 # misc tests
-E2Elogin=test/e2e/specs/login/protractor.conf.js
 E2Enavbar=test/e2e/specs/navbar/base-config/protractor.conf.js
 E2EnavbarHeadTitle=test/e2e/specs/navbar/no-logo-no-brandtext/protractor.conf.js
-E2EmultiPermissionsVisibility=test/e2e/specs/multi-permissions/visibility/protractor.conf.js
+E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
+
+## Parallel protractor scripts
+FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
+FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
+DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
+DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)
@@ -445,7 +450,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch)
 
 # Rule to run karma
 .PHONY: karma
@@ -456,8 +461,9 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch)
 
+#### Sequential make commands - these commands will run tests in sequential order
 #Rule to run navbar tests
 .PHONY: testnavbar
 testnavbar:
@@ -466,7 +472,7 @@ testnavbar:
 #Rule to run search app tests
 .PHONY: testsearch
 testsearch:
-	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)
+	$(BIN)/protractor $(E2Esearch)
 
 #Rule to run detailed app tests
 .PHONY: testdetailed
@@ -502,10 +508,31 @@ testpermissions:
 testviewer:
 	$(BIN)/protractor $(E2EDviewer)
 
-#Rule to run detailed app tests
-.PHONY: testlogin
-testlogin:
-	$(BIN)/protractor $(E2Elogin)
+#### Parallel make commands - these commands will run tests in parallel
+#Rule to run all parallel test configurations
+.PHONY: testparallel
+testparallel:
+	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(FullFeaturesConfirmationParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(DefaultConfigParallel) && $(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2Esearch)
+
+#Rule to run the full features chaise configuration tests in parallel
+.PHONY: testfullfeatures
+testfullfeatures:
+	$(BIN)/protractor $(FullFeaturesParallel)
+
+#Rule to run the full features chaise configuration tests in parallel
+.PHONY: testfullfeaturesconfirmation
+testfullfeaturesconfirmation:
+	$(BIN)/protractor $(FullFeaturesConfirmationParallel)
+
+#Rule to run the delete prohibited chaise configuration tests in parallel
+.PHONY: testdeleteprohibited
+testdeleteprohibited:
+	$(BIN)/protractor $(DeleteProhibitedParallel)
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testdefaultconfig
+testdefaultconfig:
+	$(BIN)/protractor $(DefaultConfigParallel)
 
 # Rule to make html
 .PHONY: html

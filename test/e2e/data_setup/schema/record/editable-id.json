@@ -1,0 +1,132 @@
+{
+    "schema_name": "editable-id",
+    "tables": {
+        "editable-id-table": {
+            "comment": "Table to represent adding multiple entities",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "editable-id-table",
+            "schema_name": "editable-id",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int"
+                    },
+                    "annotations": {
+                        "comment": [
+                            "hidden"
+                        ]
+                    }
+                }, {
+                    "name": "text",
+                    "default": "default text",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "int",
+                    "default": 100,
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    }
+                }, {
+                    "name": "generated",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "*": ["id", "text", "int", "generated"]
+                },
+                "tag:misd.isi.edu,2015:display" : {
+                    "markdown_name": "**Editable Id Table**"
+                },
+                "tag:isrd.isi.edu,2016:table-display" : {
+                    "row_name": {
+                        "row_markdown_pattern": "**{{id}}**"
+                    }
+                }
+            }
+        },
+        "html-name-table": {
+            "comment": "Table to represent adding multiple entities",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "html-name-table",
+            "schema_name": "editable-id",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int"
+                    },
+                    "annotations": {
+                        "comment": [
+                            "hidden"
+                        ]
+                    }
+                }, {
+                    "name": "text",
+                    "default": "default text",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "int",
+                    "default": 100,
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "*": ["id", "text", "int"]
+                },
+                "tag:misd.isi.edu,2015:display" : {
+                    "name": "<strong>Html Name</strong>"
+                }
+            }
+        }
+    },
+    "table_names": [
+        "editable-id-table",
+        "html-name-table"
+    ],
+    "comment": null,
+    "annotations": {}
+}

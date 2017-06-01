@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordedit/delete.config.json",
+            "recordedit/edit.config.json"
+        ]
+    },
+    "cleanup" : true
+}

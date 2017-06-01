@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordedit/composite-key.config.json"
+        ],
+        "schema": "product-person"
+    },
+    "cleanup" : true
+}
