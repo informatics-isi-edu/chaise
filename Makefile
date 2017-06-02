@@ -1,7 +1,15 @@
 # Makefile rules
+docp:
+ifeq ($(P1),DevCP)
+		scp recordedit/index.html.in amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/recordedit/
+		scp recordedit/form.controller.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/recordedit/
+		scp common/modal.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/
+		scp common/templates/markdownPreview.modal.html  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/templates/
+endif
 
 # Disable built-in rules
 .SUFFIXES:
+
 
 # Install directory on dev.isrd
 CHAISEDIR=/var/www/html/chaise
