@@ -213,8 +213,10 @@
         };
 
         window.updated = function(id) {
-            updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
-            delete editRecordRequests[id];
+            if ($rootScope.loading === false) {
+                updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
+                delete editRecordRequests[id];
+            }
         }
     }]);
 })();
