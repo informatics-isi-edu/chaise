@@ -1,11 +1,11 @@
 <div class="modal-header">
-    <button class="btn btn-default pull-right modal-close" ng-show="ctrl.params.canClose" type="button" ng-click="ctrl.cancel()">X</button>
-    <h3 class="modal-title">{{ctrl.params.heading}}</h3>
+  <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
+  <h3 class="modal-title">{{ctrl.params.heading}}</h3>
 </div>
 <div class="modal-body">
-  
-  <div ng-bind-html="::ctrl.params.markdownOut"></div>
-</div>
-<div class="modal-footer">
-    <button class="btn btn-danger" type="button" ng-click="ctrl.ok()">OK</button>
+
+  <!-- new code -->
+  <div class="outer-table">
+    <div style="padding:10px" ng-bind-html="::ctrl.params.markdownOut"></div>
+  </div>
 </div>

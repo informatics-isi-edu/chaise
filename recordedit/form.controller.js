@@ -520,7 +520,7 @@
             resolve: {
               params: params
             },
-            size: "lg",
+            // size: "sm",
             templateUrl: "../common/templates/markdownPreview.modal.html"
           });
         }
@@ -564,7 +564,7 @@
           originalTuple = null;
           editOrCopy = false;
         }
-        console.log("in searchPopup");
+
         var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
 
         params.reference = column.filteredRef(submissionRow).contextualize.compactSelect;
