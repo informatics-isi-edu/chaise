@@ -1,0 +1,16 @@
+{
+    "catalog": {
+    },
+    "schema": {
+        "name": "product-search",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/product-search.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/product-search"
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordedit/domain-filter.config.json"
+        ],
+        "schema": "fk-filter-pattern"
+    },
+    "cleanup" : true
+}

@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordset/config.json"
+        ],
+        "schema": "product-recordset"
+    },
+    "cleanup" : true
+}
