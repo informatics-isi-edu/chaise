@@ -344,13 +344,14 @@
                 });
 
                 vm.checksumProgress = (progress/vm.totalSize)*100;
-                try {
-                    $timeout(function() {
+                
+                $timeout(function() {
+                    try {
                         $scope.$apply();
-                    });
-                } catch (e) {
-                    $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
-                }
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
+                });
             };
 
             // This function is called as a success promise callback by calculateChecksum function above for each file
@@ -397,13 +398,13 @@
                 vm.createUploadJobProgress = (progress/vm.noOfFiles)*100;
                 vm.createUploadJobCompleted = progress;
 
-                try {
-                    $timeout(function() {
+                $timeout(function() {
+                    try {
                         $scope.$apply();
-                    });
-                } catch (e) {
-                    $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
-                }
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
+                });
 
                 if (progress == vm.noOfFiles) {
                     checkFileExists();
@@ -434,13 +435,13 @@
                 vm.fileExistsProgress = (progress/vm.noOfFiles)*100;
                 vm.fileExistsCompleted = progress;
 
-                try {
-                    $timeout(function() {
+                $timeout(function() {
+                    try {
                         $scope.$apply();
-                    });
-                } catch (e) {
-                    $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
-                }
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
+                });
 
                 if (progress == vm.noOfFiles) {
                     startUpload();
@@ -473,13 +474,13 @@
 
                 vm.uploadProgress = (progress/vm.totalSize)*100;
 
-                try {
-                    $timeout(function() {
+                $timeout(function() {
+                    try {
                         $scope.$apply();
-                    });
-                } catch (e) {
-                    $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
-                }
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
+                });
             };
 
             // This function is called as a success promise callback by startUpload function above for each file
@@ -525,13 +526,13 @@
                 vm.uploadJobCompleteProgress = (progress/vm.noOfFiles)*100;
                 vm.uploadJobCompletedCount = progress;
 
-                try {
-                    $timeout(function() {
+                $timeout(function() {
+                    try {
                         $scope.$apply();
-                    });
-                } catch (e) {
-                    $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
-                }
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
+                });
 
                 // If all files have been uploaded and their completed upload job calls are done
                 if (progress == vm.noOfFiles) {
