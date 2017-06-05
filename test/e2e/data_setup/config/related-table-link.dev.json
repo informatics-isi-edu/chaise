@@ -43,9 +43,9 @@
                         }
                     ],
                     "tables_order": [
-                        "accommodation_image (2+)",
-                        "booking (6)",
-                        "media (1)"
+                        "accommodation_image (Showing first 2+ results)",
+                        "booking (Showing first 6 results)",
+                        "media (Showing first 1 results)"
                     ],
                     "booking_count": 6,
                     "page_size": 2,
