@@ -164,16 +164,16 @@
                     try {
                         var column = $rootScope.reference.columns.find(function(c) { return c.name == k;  });
                         if (column.isAsset) {
-                            
+
                             if (row[k].url == "" && !column.nullok) {
                                 isValid = false;
                                 AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
                             } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
                                 try {
                                     if (!row[k].hatracObj.validateURL(row)) {
-                                        isValid = false; 
+                                        isValid = false;
                                         AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
-                                    } 
+                                    }
                                 } catch(e) {
                                     isValid = false;
                                     AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
@@ -183,7 +183,7 @@
                     } catch(e) {
                         //NOthing to do
                     }
-                    
+
                 }
             });
 
@@ -211,7 +211,7 @@
                 }).result.then(onSuccess, function(exception) {
                     vm.readyToSubmit = false;
                     vm.submissionButtonDisabled = false;
-                    
+
                     if (exception) AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
@@ -232,9 +232,9 @@
 
             //call uploadFiles which will upload files and callback on success
             uploadFiles(submissionRowsCopy, isUpdate, function() {
-                
+
                 var fn = "create", fnScope = $rootScope.reference.unfilteredReference.contextualize.entryCreate, args = [submissionRowsCopy];
-                // If this is an update call 
+                // If this is an update call
                 if (isUpdate) {
 
                     // loop through model.submissionRows
@@ -247,18 +247,18 @@
                         }
                     }
 
-                    // submit $rootScope.tuples because we are changing and 
+                    // submit $rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
                     fn = "update", fnScope = $rootScope.reference, args = [$rootScope.tuples];
                 }
-                
+
                 fnScope[fn].apply(fnScope, args).then(function success(page) {
-                    
+
                     var resultsReference = page.reference;
 
                     if (isUpdate) {
                         resultsReference = $rootScope.reference.contextualize.compact;
-                        if (window.opener && window.opener.updated) {
+                        if (window.opener && window.opener.updated && context.queryParams.invalidate) {
                             window.opener.updated(context.queryParams.invalidate);
                         }
                     } else {
@@ -276,7 +276,7 @@
                         }
                     }
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                   
+
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
                     } else {
@@ -366,7 +366,7 @@
                 });
 
             });
-            
+
         }
 
         function submit() {
