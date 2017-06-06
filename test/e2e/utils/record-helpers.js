@@ -187,13 +187,13 @@ exports.testPresentation = function (tableParams) {
                         // Because this spec is reused in multiple recordedit tests, this if-else branching just ensures the correct expectation is used depending on which table is encountered
                         if (displayName == tableParams.related_table_name_with_page_size_annotation) {
                         // The annotation_image table has more rows than the page_size, so its heading will have a + after the row count
-                            expect(headings[i]).toBe(title + " (Showing first " + rowCount + "+  results)");
+                            expect(headings[i]).toBe(title + " (Showing first " + rowCount + "+ results)");
                         } else if(rowCount<=1){
                         // All other tables should not have the + at the end its heading
-                            expect(headings[i]).toBe(title + " (Showing first " +rowCount+ "  result)");
+                            expect(headings[i]).toBe(title + " (Showing first " +rowCount+ " result)");
                         }
 												else{
-													expect(headings[i]).toBe(title + " (Showing first " +rowCount+ "  results)");
+													expect(headings[i]).toBe(title + " (Showing first " +rowCount+ " results)");
 												}
                     });
                 })(i, displayName, title);
