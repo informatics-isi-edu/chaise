@@ -114,7 +114,7 @@
         vm.params = params;
         vm.ok = ok;
         vm.cancel = cancel;
-        console.log("in modal ctrl: "+params.markdownOut);
+        //console.log("in modal ctrl: "+params.markdownOut);
 
         function ok(tuple) {
             $uibModalInstance.close(tuple);

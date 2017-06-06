@@ -12,6 +12,7 @@
         'chaise.navbar',
         'chaise.upload',
         'chaise.record.table',
+        'chaise.markdown', //amit
         'chaise.utils',
         'chaise.validators',
         'chaise.html',
@@ -224,8 +225,8 @@
                                             value = (!isNaN(floatVal) ? floatVal : null);
                                             break;
                                         default:
-                                            if (column.isAsset) {                                            
-                                                value = { url: values[i] || "" }; 
+                                            if (column.isAsset) {
+                                                value = { url: values[i] || "" };
                                             } else {
                                                 value = values[i];
                                             }

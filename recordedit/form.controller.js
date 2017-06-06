@@ -506,41 +506,44 @@
         var originalTuple,
           editOrCopy = true,
           params = {};
-
-        //params.context = "compact/select";
-        params.textInput = vm.recordEditModel.rows[rowIndex][column];
-        if(angular.isUndefinedOrNull(params.textInput))
+          vm.markdownFlag = 1;
+          console.log(vm.markdownFlag);
           return;
-
-        function modalBox(params){
-          var modalInstance = $uibModal.open({
-            animation: false,
-            controller: "MarkdownPreviewController",
-            controllerAs: "ctrl",
-            resolve: {
-              params: params
-            },
-            // size: "sm",
-            templateUrl: "../common/templates/markdownPreview.modal.html"
-          });
-        }
-        $http({
-          url: mdGitApi,
-          method: 'POST',
-          data: {
-            text: params.textInput,
-            mode: 'gfm'
-          }
-        }).
-        then(function(response) {
-          params.heading = 'Markdown Preview'
-          params.markdownOut = response.data;
-          modalBox(params);
-        }, function(response) {
-          params.heading = 'Error!'
-          params.markdownOut = "An error encountered during markdown preview! \n"+response.data;
-          modalBox(params);
-        });
+        //params.context = "compact/select";
+        // params.textInput = vm.recordEditModel.rows[rowIndex][column];
+        // // console.log("d: "+d);
+        // if(angular.isUndefinedOrNull(params.textInput))
+        //   return;
+        //
+        // function modalBox(params){
+        //   var modalInstance = $uibModal.open({
+        //     animation: false,
+        //     controller: "MarkdownPreviewController",
+        //     controllerAs: "ctrl",
+        //     resolve: {
+        //       params: params
+        //     },
+        //     // size: "sm",
+        //     templateUrl: "../common/templates/markdownPreview.modal.html"
+        //   });
+        // }
+        // $http({
+        //   url: mdGitApi,
+        //   method: 'POST',
+        //   data: {
+        //     text: params.textInput,
+        //     mode: 'gfm'
+        //   }
+        // }).
+        // then(function(response) {
+        //   params.heading = 'Markdown Preview'
+        //   params.markdownOut = response.data;
+        //   modalBox(params);
+        // }, function(response) {
+        //   params.heading = 'Error!'
+        //   params.markdownOut = "An error encountered during markdown preview! \n"+response.data;
+        //   modalBox(params);
+        // });
 
 
       }

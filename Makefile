@@ -3,8 +3,10 @@ docp:
 ifeq ($(P1),DevCP)
 		scp recordedit/index.html.in amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/recordedit/
 		scp recordedit/form.controller.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/recordedit/
+		scp recordedit/recordEdit.app.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/recordedit/
 		scp common/modal.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/
 		scp common/templates/markdownPreview.modal.html  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/templates/
+		scp common/markdownPreview.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/
 endif
 
 # Disable built-in rules
@@ -317,6 +319,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/markdownPreview.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \
