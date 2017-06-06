@@ -104,12 +104,6 @@
                                                 </td>
                                                 <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.columnToDisplayType(column);">
 
-                                                    <!-- JSON Input-->
-                                                    <div ng-switch-when="json">
-                                                      <h1>Nitish Test</h1><textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
-                                                          name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></textarea>
-                                                    </div>
-
                                                     <!-- date input-->
                                                     <div ng-switch-when="date">
                                                         <div ng-show="form.isDisabled(column);" >
