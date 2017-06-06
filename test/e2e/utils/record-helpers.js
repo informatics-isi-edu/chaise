@@ -193,7 +193,7 @@ exports.testPresentation = function (tableParams) {
                             expect(headings[i]).toBe(title + " (Showing first " +rowCount+ "  result)");
                         }
 												else{
-													expect(headings[i]).toBe(title + " (Showing first " +rowCount+ "  result)");
+													expect(headings[i]).toBe(title + " (Showing first " +rowCount+ "  results)");
 												}
                     });
                 })(i, displayName, title);
