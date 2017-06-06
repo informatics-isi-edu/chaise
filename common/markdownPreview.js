@@ -2,7 +2,7 @@
   'use strict';
 
   angular.module('chaise.markdown', [])
-    .directive('markdownPreview', ['$uibModal', '$http', function($uibModal, $http) {
+    .directive('markdownPreview', ['$uibModal', function($uibModal) {
 
       return {
         restrict: 'EA',
@@ -10,18 +10,16 @@
           textinput: '=textinput'
         },
         link: function(scope, elem, attr) {
+          var md = new markdownit();
           elem.on('click', function(e) {
             scope.$apply(function() {
               if (angular.element(e.target).hasClass('live-preview')) {
-
-                var mdGitApi = 'https://api.github.com/markdown';
+                var result;
                 var textInput = scope.textinput;
+
                 angular.isUndefinedOrNull = function(val) {
                   return val == '' || angular.isUndefined(val) || val === null
                 }
-
-                if (angular.isUndefinedOrNull(textInput))
-                  return;
 
                 function modalBox(params) {
                   var modalInstance = $uibModal.open({
@@ -31,7 +29,7 @@
                     resolve: {
                       params: params
                     },
-                    // size: "sm",
+                    size: "lg",
                     // templateUrl: "../common/templates/markdownPreview.modal.html"
                     template: '<div class="modal-header"> \
                                   <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button> \
@@ -39,29 +37,23 @@
                                </div> \
                                 <div class="modal-body"> \
                                     <div class="outer-table"> \
-                                      <div style="padding:10px" ng-bind-html="::ctrl.params.markdownOut"></div> \
+                                      <div style="padding:10px" ng-bind-html="ctrl.params.markdownOut" class="markdown-container"></div> \
                                     </div> \
                                 </div> '
                   });
                 }
 
-                $http({
-                  url: mdGitApi,
-                  method: 'POST',
-                  data: {
-                    text: textInput,
-                    mode: 'gfm'
-                  }
-                }).
-                then(function(response) {
-                  scope.heading = 'Markdown Preview'
-                  scope.markdownOut = response.data;
-                  modalBox(scope);
-                }, function(response) {
+                if (angular.isUndefinedOrNull(textInput))
+                  return;
+                result = md.render(textInput);
+                if (angular.isUndefinedOrNull(result)) {
                   scope.heading = 'Error!'
-                  scope.markdownOut = "An error encountered during markdown preview! " + response.data.message;
-                  modalBox(scope);
-                });
+                  scope.markdownOut = '<p style="color:red;">An error was encountered during preview!';
+                } else {
+                  scope.heading = 'Markdown Preview'
+                  scope.markdownOut = result;
+                }
+                modalBox(scope);
               }
             });
           });
