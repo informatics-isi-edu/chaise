@@ -498,56 +498,7 @@
           });
         }
       }
-      //Issue 794 @Amit
-      angular.isUndefinedOrNull = function(val) {
-        return val == '' || angular.isUndefined(val) || val === null
-      }
-      vm.markdownPreview = function(rowIndex, column) {
-        var originalTuple,
-          editOrCopy = true,
-          params = {};
-          vm.markdownFlag = 1;
-          console.log(vm.markdownFlag);
-          return;
-        //params.context = "compact/select";
-        // params.textInput = vm.recordEditModel.rows[rowIndex][column];
-        // // console.log("d: "+d);
-        // if(angular.isUndefinedOrNull(params.textInput))
-        //   return;
-        //
-        // function modalBox(params){
-        //   var modalInstance = $uibModal.open({
-        //     animation: false,
-        //     controller: "MarkdownPreviewController",
-        //     controllerAs: "ctrl",
-        //     resolve: {
-        //       params: params
-        //     },
-        //     // size: "sm",
-        //     templateUrl: "../common/templates/markdownPreview.modal.html"
-        //   });
-        // }
-        // $http({
-        //   url: mdGitApi,
-        //   method: 'POST',
-        //   data: {
-        //     text: params.textInput,
-        //     mode: 'gfm'
-        //   }
-        // }).
-        // then(function(response) {
-        //   params.heading = 'Markdown Preview'
-        //   params.markdownOut = response.data;
-        //   modalBox(params);
-        // }, function(response) {
-        //   params.heading = 'Error!'
-        //   params.markdownOut = "An error encountered during markdown preview! \n"+response.data;
-        //   modalBox(params);
-        // });
 
-
-      }
-      //
 
       function searchPopup(rowIndex, column) {
 

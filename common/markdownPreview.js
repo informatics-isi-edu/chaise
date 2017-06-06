@@ -28,7 +28,16 @@
                       params: params
                     },
                     // size: "sm",
-                    templateUrl: "../common/templates/markdownPreview.modal.html"
+                    // templateUrl: "../common/templates/markdownPreview.modal.html"
+                    template: '<div class="modal-header"> \
+                                  <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button> \
+                                  <h3 class="modal-title">{{ctrl.params.heading}}</h3> \
+                               </div> \
+                                <div class="modal-body"> \
+                                    <div class="outer-table"> \
+                                      <div style="padding:10px" ng-bind-html="::ctrl.params.markdownOut"></div> \
+                                    </div> \
+                                </div> '
                   });
                 }
 
@@ -52,9 +61,6 @@
               }
             });
           });
-
-
-
         }
       };
     }])
@@ -68,6 +74,7 @@
       function ok(tuple) {
         $uibModalInstance.close(tuple);
       }
+
       function cancel() {
         $uibModalInstance.dismiss("cancel");
       }

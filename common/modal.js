@@ -108,20 +108,5 @@
             $uibModalInstance.dismiss("cancel");
         }
     }])
-    .controller('MarkdownPreviewController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function MarkdownPreviewController($scope, $uibModalInstance, DataUtils, params, Session) {
-        var vm = this;
 
-        vm.params = params;
-        vm.ok = ok;
-        vm.cancel = cancel;
-        //console.log("in modal ctrl: "+params.markdownOut);
-
-        function ok(tuple) {
-            $uibModalInstance.close(tuple);
-        }
-
-        function cancel() {
-            $uibModalInstance.dismiss("cancel");
-        }
-    }])
 })();
