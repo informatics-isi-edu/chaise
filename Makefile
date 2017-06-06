@@ -5,7 +5,6 @@ ifeq ($(P1),DevCP)
 		scp recordedit/form.controller.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/recordedit/
 		scp recordedit/recordEdit.app.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/recordedit/
 		scp common/modal.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/
-		scp common/templates/markdownPreview.modal.html  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/templates/
 		scp common/markdownPreview.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/
 endif
 

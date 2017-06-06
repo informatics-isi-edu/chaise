@@ -2,7 +2,7 @@
   'use strict';
 
   angular.module('chaise.markdown', [])
-    .directive('markdownPreview', ['$uibModal', '$window', '$http', function($uibModal, $window, $http) {
+    .directive('markdownPreview', ['$uibModal', '$http', function($uibModal, $http) {
 
       return {
         restrict: 'EA',
@@ -16,13 +16,17 @@
 
                 var mdGitApi = 'https://api.github.com/markdown';
                 var textInput = scope.textinput;
-                if (textInput == ' ')
+                angular.isUndefinedOrNull = function(val) {
+                  return val == '' || angular.isUndefined(val) || val === null
+                }
+
+                if (angular.isUndefinedOrNull(textInput))
                   return;
 
                 function modalBox(params) {
                   var modalInstance = $uibModal.open({
                     animation: false,
-                    controller: "NewMarkdownPreviewController",
+                    controller: "MarkdownPreviewController",
                     controllerAs: "ctrl",
                     resolve: {
                       params: params
@@ -64,7 +68,7 @@
         }
       };
     }])
-    .controller('NewMarkdownPreviewController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function MarkdownPreviewController($scope, $uibModalInstance, DataUtils, params, Session) {
+    .controller('MarkdownPreviewController', ['$scope', '$uibModalInstance', 'params', function MarkdownPreviewController($scope, $uibModalInstance, params) {
       var vm = this;
 
       vm.params = params;
