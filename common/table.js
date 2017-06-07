@@ -338,6 +338,7 @@
                 };
 
                 // allow child window to call to indicate table has been updated
+                // called from form.controller.js to communicate that an entity was just updated
                 window.updated = function() {
                     updated = true;
                 }

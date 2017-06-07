@@ -212,11 +212,10 @@
 
         };
 
+        // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
-            if ($rootScope.loading === false) {
-                updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
-                delete editRecordRequests[id];
-            }
+            updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
+            delete editRecordRequests[id];
         }
     }]);
 })();
