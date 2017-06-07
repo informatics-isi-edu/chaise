@@ -55,6 +55,7 @@ describe('Record Add with defaults', function() {
         it("should initialize timestamp columns properly if they are disabled without a default.", function() {
             timestampDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamp_disabled");
 
+            expect(timestampDisabledInput.getAttribute("value")).toBe("");
             expect(timestampDisabledInput.getAttribute("placeholder")).toBe(testParams.disabled_timestamp_value);
         });
 
