@@ -285,8 +285,10 @@
                                 } else {
                                     recordEditModel.rows[0][column.name] = column.default;
                                 }
-                                // no default is set or default is a function
-                                // we don't want to populate the model with empty objects that are just going to get set to null
+                            // no default is set or default is a function
+                            // checking for the cookie is done to verify whether that column was prefilled based on the prefill query params
+                            // Prefilled foreign keys are disabled but column.getInputDisabled() is not aware of this concept because the query param remains scoped to chaise
+                            // we don't want to populate the model with empty objects that are just going to get set to null
                             } else if (!column.getInputDisabled(context.appContext) && !(cookie && cookie.constraintName == column.name) ) {
                                 // setup if column is type timestamp[tz]
                                 if ((column.type.name === 'timestamp' || column.type.name === 'timestamptz')) {
