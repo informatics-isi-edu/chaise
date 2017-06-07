@@ -74,11 +74,21 @@
                     "annotations": {
                         "tag:isrd.isi.edu,2016:generated": null
                     }
+                }, {
+                    "name": "timestamp_disabled",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "timestamptz"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int", "boolean_true", "boolean_false", "text_disabled"]
+                    "*": ["id", "text", "int", "boolean_true", "boolean_false", "text_disabled", "timestamp_disabled"]
                 }
             }
         }
