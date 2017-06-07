@@ -164,16 +164,16 @@
                     try {
                         var column = $rootScope.reference.columns.find(function(c) { return c.name == k;  });
                         if (column.isAsset) {
-                            
+
                             if (row[k].url == "" && !column.nullok) {
                                 isValid = false;
                                 AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
                             } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
                                 try {
                                     if (!row[k].hatracObj.validateURL(row)) {
-                                        isValid = false; 
+                                        isValid = false;
                                         AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
-                                    } 
+                                    }
                                 } catch(e) {
                                     isValid = false;
                                     AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
@@ -183,7 +183,7 @@
                     } catch(e) {
                         //NOthing to do
                     }
-                    
+
                 }
             });
 
@@ -211,7 +211,7 @@
                 }).result.then(onSuccess, function(exception) {
                     vm.readyToSubmit = false;
                     vm.submissionButtonDisabled = false;
-                    
+
                     if (exception) AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
@@ -232,9 +232,9 @@
 
             //call uploadFiles which will upload files and callback on success
             uploadFiles(submissionRowsCopy, isUpdate, function() {
-                
+
                 var fn = "create", fnScope = $rootScope.reference.unfilteredReference.contextualize.entryCreate, args = [submissionRowsCopy];
-                // If this is an update call 
+                // If this is an update call
                 if (isUpdate) {
 
                     // loop through model.submissionRows
@@ -247,17 +247,20 @@
                         }
                     }
 
-                    // submit $rootScope.tuples because we are changing and 
+                    // submit $rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
                     fn = "update", fnScope = $rootScope.reference, args = [$rootScope.tuples];
                 }
-                
-                fnScope[fn].apply(fnScope, args).then(function success(page) {
-                    
+
+                fnScope[fn].apply(fnScope, args).then(function success(result) {
+
+                    var page = result.successful;
+                    var failedPage = result.failed;
+
+                    // the returned reference is contextualized and we don't need to contextualize it again
                     var resultsReference = page.reference;
 
                     if (isUpdate) {
-                        resultsReference = $rootScope.reference.contextualize.compact;
                         if (window.opener && window.opener.updated) {
                             window.opener.updated(context.queryParams.invalidate);
                         }
@@ -276,13 +279,14 @@
                         }
                     }
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                   
+
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
-                    } else {
+                    } else { // mutli create/edit: show result
                         AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+
                         // can't use page.reference because it reflects the specific values that were inserted
-                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
                         //set values for the view to flip to recordedit resultset view
                         vm.resultsetModel = {
                             hasLoaded: true,
@@ -294,70 +298,30 @@
                             sortOrder: null,
                             page: page,
                             pageLimit: model.rows.length,
-                            rowValues: [],
+                            rowValues: DataUtils.getRowValuesFromTuples(page.tuples),
                             search: null,
                             config: {}
+                        };
+
+                        // NOTE: This case is for a pseudo-failure case
+                        // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
+                        if (failedPage !== null) {
+                            vm.omittedResultsetModel = {
+                                hasLoaded: true,
+                                reference: resultsReference,
+                                tableDisplayName: resultsReference.displayname,
+                                columns: resultsReference.columns,
+                                enableSort: false,
+                                sortby: null,
+                                sortOrder: null,
+                                page: page,
+                                pageLimit: model.rows.length,
+                                rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
+                                search: null,
+                                config: {}
+                            };
                         }
 
-                        if (isUpdate) {
-                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData($rootScope.tuples, resultsReference.columns);
-
-                            // NOTE: This case is for a pseudo-failure case
-                            // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
-                            if (page.tuples.length < $rootScope.tuples.length) {
-                                var tuplesOmitted = [],
-                                    tuplesUpdated = [],
-                                    omittedResultsPage = {};
-
-                                for (var j = 0; j < $rootScope.tuples.length; j++) {
-                                    var submittedRow = $rootScope.tuples[j],
-                                        rowMatch = false;
-
-                                    for (var k = 0; k < page.tuples.length; k++) {
-                                        var updatedRow = page.tuples[k],
-                                            shortestKeySet = resultsReference.table.shortestKey,
-                                            keyMatch = true;
-
-                                        for (var keyNameIndex = 0; keyNameIndex < shortestKeySet.length; keyNameIndex++) {
-                                            var key = shortestKeySet[keyNameIndex].name;
-
-                                            if (submittedRow.data[key] !== updatedRow.data[key]) {
-                                                keyMatch = false;
-                                                break;
-                                            }
-                                        }
-                                        if (keyMatch) {
-                                            rowMatch = true;
-                                        }
-                                    }
-                                    if (!rowMatch) {
-                                        tuplesOmitted.push(submittedRow);
-                                    } else {
-                                        tuplesUpdated.push(submittedRow);
-                                    }
-                                }
-                                vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesUpdated, resultsReference.columns);
-
-                                vm.omittedResultsetModel = {
-                                    hasLoaded: true,
-                                    reference: resultsReference,
-                                    tableDisplayName: resultsReference.displayname,
-                                    columns: resultsReference.columns,
-                                    enableSort: false,
-                                    sortby: null,
-                                    sortOrder: null,
-                                    page: page,
-                                    pageLimit: model.rows.length,
-                                    rowValues: [],
-                                    search: null,
-                                    config: {}
-                                }
-                                vm.omittedResultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesOmitted, resultsReference.columns);
-                            }
-
-                        } else {
-                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                        }
                         vm.resultset = true;
                     }
                 }).catch(function (exception) {
@@ -366,7 +330,7 @@
                 });
 
             });
-            
+
         }
 
         function submit() {
