@@ -258,6 +258,9 @@
 
                     if (isUpdate) {
                         resultsReference = $rootScope.reference.contextualize.compact;
+                        // check if there is a window that opened the current one
+                        // make sure the update function is defined for that window
+                        // verify whether we still have a valid vaue to call that function with
                         if (window.opener && window.opener.updated && context.queryParams.invalidate) {
                             window.opener.updated(context.queryParams.invalidate);
                         }
