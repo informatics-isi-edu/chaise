@@ -242,19 +242,25 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	};
 
 	this.showFacetMatch = function showFacetMatch(facet) {
-		var ret = ($scope.FacetsData.searchFilter.length > 0) && (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']) &&
+		var ret = false;
+		try {
+			ret = ($scope.FacetsData.searchFilter.length > 0) && (new RegExp($scope.FacetsData.searchFilter, 'i')).test(facet['display']) &&
 			($scope.FacetsData.box[facet['table']][facet['name']]['facetcount'] > 0 ||
 					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'enum' && hasCheckedValues($scope.FacetsData.box, facet) ||
 					$scope.FacetsData.colsDescr[facet['table']][facet['name']]['type'] == 'date' && hasCheckedValues($scope.FacetsData.box, facet));
-		if (ret) {
-			$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = '';
-			if ($scope.filtersMatch[facet['table']] == null) {
-				$scope.filtersMatch[facet['table']] = [];
+			if (ret) {
+				$scope.FacetsData.searchFilterValue[facet['table']][facet['name']] = '';
+				if ($scope.filtersMatch[facet['table']] == null) {
+					$scope.filtersMatch[facet['table']] = [];
+				}
+				if (!$scope.filtersMatch[facet['table']].contains(facet['name'])) {
+					$scope.filtersMatch[facet['table']].push(facet['name']);
+					$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = true;
+				}
 			}
-			if (!$scope.filtersMatch[facet['table']].contains(facet['name'])) {
-				$scope.filtersMatch[facet['table']].push(facet['name']);
-				$scope.FacetsData.chooseColumns[facet['table']][facet['name']] = true;
-			}
+		}
+		catch(err) {
+			//ignore
 		}
 		return ret;
 	};
