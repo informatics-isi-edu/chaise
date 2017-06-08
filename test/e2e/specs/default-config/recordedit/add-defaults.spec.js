@@ -6,7 +6,9 @@ var testParams = {
     text_value: "default",
     int_value: "25",
     boolean_true_value: "true",
-    boolean_false_value: "false"
+    boolean_false_value: "false",
+    disabled_text_value: "Disabled input",
+    disabled_timestamp_value: "Automatically generated"
 };
 
 describe('Record Add with defaults', function() {
@@ -14,7 +16,7 @@ describe('Record Add with defaults', function() {
     describe("for when the user creates an entity with default values, ", function() {
         var EC = protractor.ExpectedConditions,
             textDisplayname = "<strong>text</strong>",
-            textInput, intInput, booleanTrueInput, booleanFalseInput;
+            textInput, textDisabledInput, intInput, booleanTrueInput, booleanFalseInput, timestampDisabledInput;
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
@@ -40,12 +42,21 @@ describe('Record Add with defaults', function() {
             intInput = chaisePage.recordEditPage.getInputById(0, "int");
             booleanTrueInput = chaisePage.recordEditPage.getInputById(0, "boolean_true");
             booleanFalseInput = chaisePage.recordEditPage.getInputById(0, "boolean_false");
+            textDisabledInput = chaisePage.recordEditPage.getInputById(0, "text_disabled");
 
             expect(textInput.getAttribute("value")).toBe(testParams.text_value);
             expect(intInput.getAttribute("value")).toBe(testParams.int_value);
+            expect(textDisabledInput.getAttribute("value")).toBe(testParams.disabled_text_value);
 
             expect(chaisePage.recordEditPage.getDropdownText(booleanTrueInput)).toBe(testParams.boolean_true_value);
             expect(chaisePage.recordEditPage.getDropdownText(booleanFalseInput)).toBe(testParams.boolean_false_value);
+        });
+
+        it("should initialize timestamp columns properly if they are disabled without a default.", function() {
+            timestampDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamp_disabled");
+
+            expect(timestampDisabledInput.getAttribute("value")).toBe("");
+            expect(timestampDisabledInput.getAttribute("placeholder")).toBe(testParams.disabled_timestamp_value);
         });
 
         // TODO write tests for default values for foreign keys when implemented

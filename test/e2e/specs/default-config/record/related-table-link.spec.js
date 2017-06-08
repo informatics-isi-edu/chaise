@@ -8,9 +8,9 @@ var testParams = {
         operator: "="
     },
     tables_order: [
-        "accommodation_image (2+)",
-        "booking (6)",
-        "media (1)"
+        "accommodation_image (Showing first 2+ results)",
+        "booking (Showing first 6 results)",
+        "media (Showing first 1 result)"
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     related_table_name_with_link_in_table: "accommodation_image",

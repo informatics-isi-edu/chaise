@@ -47,6 +47,15 @@ exports.getConfig = function(options) {
 
   var dataSetup = require('./protractor.parameterize.js');
 
+  // Look through schemaConfigurations, if any are strings (filenames), grab the json file and insert into the schemaConfigs array
+  var schemaConfigs = testConfiguration.setup.schemaConfigurations;
+  for (var i = 0; i < schemaConfigs.length; i++) {
+      var schemaConfig = schemaConfigs[i];
+      if (typeof schemaConfig === 'string') {
+          schemaConfigs[i] = require(process.env.PWD + "/test/e2e/data_setup/config/" + schemaConfig);
+      }
+  }
+
   var dateSetupOptions = {
     testConfiguration: testConfiguration
   };

@@ -7,7 +7,7 @@
             </span>
         </td>
         <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML">
-            <span ng-switch-when="true" class="markdown-container" bind-html-unsafe="::values[$index].value"></span>
+            <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
             <span ng-switch-default>{{::values[$index].value}}</span>
         </td>
     </tr>

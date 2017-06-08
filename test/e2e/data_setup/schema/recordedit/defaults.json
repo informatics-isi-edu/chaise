@@ -64,11 +64,31 @@
                     "type": {
                         "typename": "boolean"
                     }
+                }, {
+                    "name": "text_disabled",
+                    "default": "Disabled input",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, {
+                    "name": "timestamp_disabled",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "timestamptz"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int", "boolean_true", "boolean_false"]
+                    "*": ["id", "text", "int", "boolean_true", "boolean_false", "text_disabled", "timestamp_disabled"]
                 }
             }
         }

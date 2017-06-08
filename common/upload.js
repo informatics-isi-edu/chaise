@@ -22,7 +22,7 @@
                     $timeout(function() {
 
                         scope.fileEl = angular.element(element[0].querySelector('input[type="file"]'));
-                        
+
                         // Bind change event file input
                         scope.fileEl
                             .bind('change', function (event) {
@@ -58,7 +58,7 @@
         /*
             This controller basically starts the whole upload process once the user presses the submit button
             It is called before the actual save takes place
-            
+
             There're a sequence of operations that are performed to upload the files
 
             1.  The controller receives an array of raw rows from the recordedit app. These rows contain objects for file types.
@@ -85,9 +85,9 @@
 
             8.  During above steps if there is any checksum/Network error all uploads are aborted and the modal renders an error message.
 
-            
+
         */
-        .controller('UploadModalDialogController', ['$uibModalInstance', 'params', 'Session', '$scope', '$timeout', 'UiUtils', function UploadModalDialogController($uibModalInstance, params, Session, $scope, $timeout, UiUtils) {
+        .controller('UploadModalDialogController', ['$uibModalInstance', 'params', 'Session', '$log', '$scope', '$timeout', 'UiUtils', function UploadModalDialogController($uibModalInstance, params, Session, $log, $scope, $timeout, UiUtils) {
             var vm = this;
 
             // This will contains all the tuples who have files to be uploaded.
@@ -150,7 +150,7 @@
                     row.forEach(function(item) {
                         item.hatracObj.calculateChecksum(item.row).then(
                             item.onChecksumCompleted.bind(item),
-                            onError, 
+                            onError,
                             item.onChecksumProgressChanged.bind(item));
                     });
                 });
@@ -193,7 +193,7 @@
 
             // This function starts upload in hatrac.js for all files
             var startUpload = function() {
-                
+
                 if (vm.erred || vm.aborted) return;
 
                 vm.title = "Uploading files";
@@ -232,7 +232,7 @@
 
                 item.hatracObj.start().then(
                             item.onUploadCompleted.bind(item),
-                            onError, 
+                            onError,
                             item.onProgressChanged.bind(item));
             };
 
@@ -275,15 +275,15 @@
             // This function is called by all rejected promises form above functions
             var onError = function(err) {
                 if (vm.erred || vm.aborted) return;
-                
+
                 vm.erred = true;
-                
+
                 abortUploads();
 
                 $uibModalInstance.dismiss(err);
             };
 
-            
+
             /**
              * @function
              * @param {Object} data - data object for the file column
@@ -294,10 +294,10 @@
              */
             var uploadFile = function(data, column, row) {
                 var file = data.file;
-                
-                this.name = file.name; 
-                this.size = file.size; 
-                this.humanFileSize = UiUtils.humanFileSize(file.size); 
+
+                this.name = file.name;
+                this.size = file.size;
+                this.humanFileSize = UiUtils.humanFileSize(file.size);
                 this.checksumProgress = 0;
                 this.checksumPercent = 0;
                 this.checksumCompleted = false;
@@ -330,7 +330,7 @@
                 this.completeUploadJob = false;
                 this.checksumPercent = Math.floor((uploadedSize/this.size) * 100);
                 this.checksumProgress = uploadedSize;
-                
+
                 // This code updates the main progress bar for checksum
                 var progress  = 0;
                 vm.isUpload = false;
@@ -344,8 +344,13 @@
                 });
 
                 vm.checksumProgress = (progress/vm.totalSize)*100;
+                
                 $timeout(function() {
-                    $scope.$apply();
+                    try {
+                        $scope.$apply();
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
                 });
             };
 
@@ -357,11 +362,11 @@
 
                 this.checksumPercent = 100;
                 this.checksumProgress = this.size;
-                if (!this.checksumCompleted) { 
+                if (!this.checksumCompleted) {
                     this.checksumCompleted = true;
                     this.url = url;
                     vm.checksumCompleted++;
-                   
+
                     // Once all checksums have been calculated call createUploadJobs
                     // To create a job for each file
                     if (vm.checksumCompleted == vm.noOfFiles) {
@@ -381,7 +386,7 @@
                 this.fileExistsDone = false;
                 this.uploadStarted = false;
                 this.completeUploadJob = false;
-                
+
                 // This code updates the main progress bar for job creation progress for all files
                 var progress  = 0;
                 vm.rows.forEach(function(row) {
@@ -394,9 +399,13 @@
                 vm.createUploadJobCompleted = progress;
 
                 $timeout(function() {
-                    $scope.$apply();
+                    try {
+                        $scope.$apply();
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
                 });
-                
+
                 if (progress == vm.noOfFiles) {
                     checkFileExists();
                 }
@@ -427,9 +436,13 @@
                 vm.fileExistsCompleted = progress;
 
                 $timeout(function() {
-                    $scope.$apply();
+                    try {
+                        $scope.$apply();
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
                 });
-                
+
                 if (progress == vm.noOfFiles) {
                     startUpload();
                 }
@@ -446,7 +459,7 @@
                 this.completeUploadJob = false;
                 this.progressPercent = Math.floor((uploadedSize/this.size) * 100);
                 this.progress = uploadedSize;
-               
+
 
                 // This code updates the main progress bar for uploading file
                 var progress  = 0
@@ -462,7 +475,11 @@
                 vm.uploadProgress = (progress/vm.totalSize)*100;
 
                 $timeout(function() {
-                    $scope.$apply();
+                    try {
+                        $scope.$apply();
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
                 });
             };
 
@@ -477,8 +494,8 @@
                 if (!this.uploadCompleted) {
                     this.uploadCompleted = true;
                     vm.uploadCompleted++;
-                    
-                    // If all files have been uploaded then call completeUpload 
+
+                    // If all files have been uploaded then call completeUpload
                     // to sent requests to mark the job as done
                     if (vm.uploadCompleted == vm.noOfFiles) {
                         clearInterval(speedIntervalTimer);
@@ -496,7 +513,7 @@
                 if (vm.erred || vm.aborted) return;
 
                 this.completeUploadJob = true;
-                
+
 
                 // This code updates the main progress bar for job completion progress for all files
                 var progress  = 0;
@@ -510,13 +527,17 @@
                 vm.uploadJobCompletedCount = progress;
 
                 $timeout(function() {
-                    $scope.$apply();
+                    try {
+                        $scope.$apply();
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
                 });
-                
+
                 // If all files have been uploaded and their completed upload job calls are done
                 if (progress == vm.noOfFiles) {
                     var index = 0;
-                   
+
                      // Iterate over all rows that are passed as parameters to the modal controller
                     params.rows.forEach(function(row) {
                         var tuple = [];
@@ -524,7 +545,7 @@
 
                         // Iterate over each property/column of a row
                         for (var k in row) {
-                        
+
                             // If the column type is object and has a file property inside it
                             // then set the url in the corresonding column for the row as its value
                             var column = reference.columns.find(function(c) { return c.name == k;  });
@@ -554,13 +575,13 @@
                     // NOTE: each file object has an hatracObj property which is an hatrac object
                     var column = reference.columns.find(function(c) { return c.name == k;  });
                     if (column && column.isAsset) {
-                        
+
                         // If the column value of the row contains a file object then add it to the tuple to upload
                         // else if column contains url then set it in the column directly
                         // if the url is empty then set the column values as null
                         if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
                             vm.noOfFiles++;
-                            vm.totalSize += row[k].file.size; 
+                            vm.totalSize += row[k].file.size;
                             tuple.push(new uploadFile(row[k], column, row));
                         } else {
                             row[k] = (row[k].url && row[k].url.length) ? row[k].url : null;
