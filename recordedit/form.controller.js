@@ -261,7 +261,10 @@
                     var resultsReference = page.reference;
 
                     if (isUpdate) {
-                        if (window.opener && window.opener.updated) {
+                        // check if there is a window that opened the current one
+                        // make sure the update function is defined for that window
+                        // verify whether we still have a valid vaue to call that function with
+                        if (window.opener && window.opener.updated && context.queryParams.invalidate) {
                             window.opener.updated(context.queryParams.invalidate);
                         }
                     } else {
@@ -282,7 +285,7 @@
 
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
-                    } else { // mutli create/edit: show result
+                    } else { // multi create/edit: show result
                         AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
 
                         // can't use page.reference because it reflects the specific values that were inserted
