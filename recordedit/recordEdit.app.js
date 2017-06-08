@@ -264,54 +264,48 @@
                         $rootScope.displayname = $rootScope.reference.displayname;
 
                         // populate defaults
-                        angular.forEach($rootScope.reference.columns, function(column) {
-                            // if column.default == undefined, the second condition would be true so we need to check both if column.default is defined and it's not a function
-                            // only want to set values in the input fields so make sure it isn't a function
-                            // check the recordEditModel to make sure a value wasn't already set based on the prefill condition
-                            if (column.default !== undefined && typeof column.default !== "function" && !recordEditModel.rows[0][column.name]) {
-                                // default value is present, figure out what type the column is and set it's default obj appropriately
-                                if (column.type.name === 'timestamp' || column.type.name === 'timestamptz') {
-                                    if (column.default !== null) {
-                                        var ts = moment(column.default);
-                                        recordEditModel.rows[0][column.name] = {
-                                            date: ts.format('YYYY-MM-DD'),
-                                            time: ts.format('hh:mm:ss'),
-                                            meridiem: ts.format('A')
-                                        };
-                                    } else {
-                                        recordEditModel.rows[0][column.name] = {
-                                            date: null,
-                                            time: null,
-                                            meridiem: 'AM'
-                                        };
-                                    }
-                                } else if (column.isAsset) {
-                                    recordEditModel.rows[0][column.name] = {
-                                        url: column.default
-                                    }
-                                } else {
-                                    recordEditModel.rows[0][column.name] = (column.default !== null ? column.default : null);
-                                }
-                            // no default is set or default is a function
-                            // we don't want to populate the model with empty objects that are just going to get set to null
-                            } else if (!column.getInputDisabled(context.appContext)) {
-                                // setup if column is type asset
-                                if (column.isAsset) {
-                                    // If there are no defaults, initialize asset column with the app's default obj
-                                    recordEditModel.rows[0][column.name] = {
-                                        url: ""
-                                    }
-                                    // setup if column is type timestamp[tz]
-                                } else if ((column.type.name === 'timestamp' || column.type.name === 'timestamptz')) {
+                        for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+                            // default model initialiation is null
+                            var initialModelValue = null;
+                            var column = $rootScope.reference.columns[i];
+
+                            if (recordEditModel.rows[0][column.name]) {
+                                // check the recordEditModel to see if the value was set because of a prefill condition
+                                continue;
+                            }
+
+                            // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
+                            var defaultSet = (column.default !== undefined && typeof column.default !== "function" && column.default !== null);
+                            // if no default is set, certain inputs have different model structures based on the input being disabled or not
+                            var inputDisabled = (column.getInputDisabled(context.appContext));
+
+                            // timestamp[tx] and asset columns have default model objects if their inputs are NOT disabled
+                            if ((column.type.name === 'timestamp' || column.type.name === 'timestamptz')) {
+                                // setup if column is type timestamp[tz]
+                                if (defaultSet) {
+                                    var ts = moment(column.default);
+                                    initialModelValue = { date: ts.format('YYYY-MM-DD'), time: ts.format('hh:mm:ss'), meridiem: ts.format('A') };
+                                } else if (!inputDisabled) {
                                     // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
-                                    recordEditModel.rows[0][column.name] = {
-                                        date: null,
-                                        time: null,
-                                        meridiem: 'AM'
-                                    };
+                                    initialModelValue = { date: null, time: null, meridiem: 'AM' };
+                                }
+                            } else if (column.isAsset) {
+                                // setup if column is type asset
+                                if (defaultSet) {
+                                    initialModelValue = { url: column.default };
+                                } else if (!inputDisabled) {
+                                    // If there are no defaults, then just initialize asset columns with the app's default obj
+                                    initialModelValue = { url: "" }
+                                }
+                            } else {
+                                // all other column types
+                                if (defaultSet) {
+                                    initialModelValue = column.default;
                                 }
                             }
-                        });
+
+                            recordEditModel.rows[0][column.name] = initialModelValue;
+                        };
 
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create
