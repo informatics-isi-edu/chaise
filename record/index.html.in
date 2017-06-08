@@ -80,7 +80,7 @@
                     <div class="row">
                         <div class="col-xs-12">
                             <div ng-show="tableModels[$index].displayType == 'markdown'">
-                                <span class="markdown-container" bind-html-unsafe="::tableModels[$index].page.content"></span>
+                                <span class="markdown-container" ng-bind-html="::tableModels[$index].page.content | trustedHTML"></span>
                             </div>
                             <div ng-show="tableModels[$index].displayType != 'markdown'">
                                 <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::tableModels[$index]"></record-table>

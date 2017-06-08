@@ -594,6 +594,19 @@
             });
         }
 
+        function getRowValuesFromTuples(tuples) {
+          return tuples.map(function(tuple, index, array) {
+              var row = [];
+              tuple.values.forEach(function(value, index) {
+                  row.push({
+                      isHTML: tuple.isHTML[index],
+                      value: value
+                  });
+              });
+              return row;
+          });
+        }
+
         /**
          * @param {ERMrest.Tuple[]} tuples - array of tuples
          * @param {ERMrest.ReferenceColumn[]} columns - array of column names
@@ -679,6 +692,7 @@
         return {
             getRowValuesFromPage: getRowValuesFromPage,
             getRowValuesFromTupleData: getRowValuesFromTupleData,
+            getRowValuesFromTuples: getRowValuesFromTuples,
             makeSafeIdAttr: makeSafeIdAttr,
             verify: verify
         };

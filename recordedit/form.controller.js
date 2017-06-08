@@ -252,12 +252,15 @@
                     fn = "update", fnScope = $rootScope.reference, args = [$rootScope.tuples];
                 }
 
-                fnScope[fn].apply(fnScope, args).then(function success(page) {
+                fnScope[fn].apply(fnScope, args).then(function success(result) {
 
+                    var page = result.successful;
+                    var failedPage = result.failed;
+
+                    // the returned reference is contextualized and we don't need to contextualize it again
                     var resultsReference = page.reference;
 
                     if (isUpdate) {
-                        resultsReference = $rootScope.reference.contextualize.compact;
                         // check if there is a window that opened the current one
                         // make sure the update function is defined for that window
                         // verify whether we still have a valid vaue to call that function with
@@ -282,10 +285,11 @@
 
                     if (model.rows.length == 1) {
                         vm.redirectAfterSubmission(page);
-                    } else {
+                    } else { // multi create/edit: show result
                         AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+
                         // can't use page.reference because it reflects the specific values that were inserted
-                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
                         //set values for the view to flip to recordedit resultset view
                         vm.resultsetModel = {
                             hasLoaded: true,
@@ -297,70 +301,30 @@
                             sortOrder: null,
                             page: page,
                             pageLimit: model.rows.length,
-                            rowValues: [],
+                            rowValues: DataUtils.getRowValuesFromTuples(page.tuples),
                             search: null,
                             config: {}
+                        };
+
+                        // NOTE: This case is for a pseudo-failure case
+                        // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
+                        if (failedPage !== null) {
+                            vm.omittedResultsetModel = {
+                                hasLoaded: true,
+                                reference: resultsReference,
+                                tableDisplayName: resultsReference.displayname,
+                                columns: resultsReference.columns,
+                                enableSort: false,
+                                sortby: null,
+                                sortOrder: null,
+                                page: page,
+                                pageLimit: model.rows.length,
+                                rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
+                                search: null,
+                                config: {}
+                            };
                         }
 
-                        if (isUpdate) {
-                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData($rootScope.tuples, resultsReference.columns);
-
-                            // NOTE: This case is for a pseudo-failure case
-                            // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
-                            if (page.tuples.length < $rootScope.tuples.length) {
-                                var tuplesOmitted = [],
-                                    tuplesUpdated = [],
-                                    omittedResultsPage = {};
-
-                                for (var j = 0; j < $rootScope.tuples.length; j++) {
-                                    var submittedRow = $rootScope.tuples[j],
-                                        rowMatch = false;
-
-                                    for (var k = 0; k < page.tuples.length; k++) {
-                                        var updatedRow = page.tuples[k],
-                                            shortestKeySet = resultsReference.table.shortestKey,
-                                            keyMatch = true;
-
-                                        for (var keyNameIndex = 0; keyNameIndex < shortestKeySet.length; keyNameIndex++) {
-                                            var key = shortestKeySet[keyNameIndex].name;
-
-                                            if (submittedRow.data[key] !== updatedRow.data[key]) {
-                                                keyMatch = false;
-                                                break;
-                                            }
-                                        }
-                                        if (keyMatch) {
-                                            rowMatch = true;
-                                        }
-                                    }
-                                    if (!rowMatch) {
-                                        tuplesOmitted.push(submittedRow);
-                                    } else {
-                                        tuplesUpdated.push(submittedRow);
-                                    }
-                                }
-                                vm.resultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesUpdated, resultsReference.columns);
-
-                                vm.omittedResultsetModel = {
-                                    hasLoaded: true,
-                                    reference: resultsReference,
-                                    tableDisplayName: resultsReference.displayname,
-                                    columns: resultsReference.columns,
-                                    enableSort: false,
-                                    sortby: null,
-                                    sortOrder: null,
-                                    page: page,
-                                    pageLimit: model.rows.length,
-                                    rowValues: [],
-                                    search: null,
-                                    config: {}
-                                }
-                                vm.omittedResultsetModel.rowValues = DataUtils.getRowValuesFromTupleData(tuplesOmitted, resultsReference.columns);
-                            }
-
-                        } else {
-                            vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                        }
                         vm.resultset = true;
                     }
                 }).catch(function (exception) {
