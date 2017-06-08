@@ -103,6 +103,7 @@
                                                     </span>
                                                 </td>
                                                 <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.columnToDisplayType(column);">
+
                                                     <!-- date input-->
                                                     <div ng-switch-when="date">
                                                         <div ng-show="form.isDisabled(column);" >
