@@ -108,6 +108,7 @@
                 $rootScope.columns = $rootScope.reference.columns;
 
                 $rootScope.tableModels = [];
+                $rootScope.relatedString=[];
                 $rootScope.lastRendered = null;
 
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
@@ -119,6 +120,8 @@
                     } else {
                         pageSize = constants.defaultPageSize;
                     }
+
+
 
                     (function(i) {
                         $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
@@ -147,6 +150,16 @@
                                 selectable: false
                             };
                             $rootScope.tableModels[i] = model;
+
+                            if($rootScope.tableModels[i].rowValues.length == 0){
+                              $rootScope.relatedString[i]='(no results found)';
+                            }
+                            else if($rootScope.tableModels[i].hasNext){
+                              $rootScope.relatedString[i]='(showing first   '+ $rootScope.tableModels[i].rowValues.length +' results)';
+                            }
+                            else{
+                              $rootScope.relatedString[i]='(showing all '+$rootScope.tableModels[i].rowValues.length  +' results)';
+                            }
                         }, function readFail(error) {
                             var model = {
                                 hasLoaded: true
