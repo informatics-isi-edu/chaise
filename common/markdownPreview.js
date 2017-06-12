@@ -2,7 +2,7 @@
   'use strict';
 
   angular.module('chaise.markdown', [])
-    .directive('markdownPreview', ['$uibModal', function($uibModal) {
+    .directive('markdownPreview', ['$uibModal', 'ERMrest', '$sce', function($uibModal, ERMrest, $sce) {
 
       return {
         restrict: 'EA',
@@ -10,7 +10,7 @@
           textinput: '=textinput'
         },
         link: function(scope, elem, attr) {
-          var md = new markdownit();
+
           elem.on('click', function(e) {
             scope.$apply(function() {
               if (angular.element(e.target).hasClass('live-preview')) {
@@ -30,7 +30,6 @@
                       params: params
                     },
                     size: "lg",
-                    // templateUrl: "../common/templates/markdownPreview.modal.html"
                     template: '<div class="modal-header"> \
                                   <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button> \
                                   <h3 class="modal-title">{{ctrl.params.heading}}</h3> \
@@ -45,13 +44,14 @@
 
                 if (angular.isUndefinedOrNull(textInput))
                   return;
-                result = md.render(textInput);
+                result = ERMrest.renderMarkdown(textInput);
                 if (angular.isUndefinedOrNull(result)) {
                   scope.heading = 'Error!'
                   scope.markdownOut = '<p style="color:red;">An error was encountered during preview!';
                 } else {
                   scope.heading = 'Markdown Preview'
-                  scope.markdownOut = result;
+                  scope.markdownOut = $sce.trustAsHtml(result);
+                  console.log(scope.markdownOut);
                 }
                 modalBox(scope);
               }
