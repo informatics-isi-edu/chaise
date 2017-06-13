@@ -155,7 +155,7 @@
                               $rootScope.resultCountString[i]='(no results found)';
                             }
                             else if($rootScope.tableModels[i].hasNext){
-                              $rootScope.resultCountString[i]='(showing first   '+ $rootScope.tableModels[i].rowValues.length +' results)';
+                              $rootScope.resultCountString[i]='(showing first '+ $rootScope.tableModels[i].rowValues.length +' results)';
                             }
                             else{
                               $rootScope.resultCountString[i]='(showing all '+$rootScope.tableModels[i].rowValues.length  +' results)';
