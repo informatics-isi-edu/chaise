@@ -56,7 +56,7 @@
                 <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index" ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
                     <uib-accordion-heading>
                         <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': tableModels[$index].open, 'glyphicon-chevron-right': !tableModels[$index].open}"></i>
-                        <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> (Showing first {{::tableModels[$index].rowValues.length}}{{::tableModels[$index].hasNext ? '+' : ''}} {{::tableModels[$index].rowValues.length>1 ? 'results' : 'result'}})
+                        <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> {{resultCountString[$index]}}
                     </uib-accordion-heading>
 
                     <!-- for different elements inside the accordion -->

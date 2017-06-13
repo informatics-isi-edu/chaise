@@ -108,6 +108,7 @@
                 $rootScope.columns = $rootScope.reference.columns;
 
                 $rootScope.tableModels = [];
+                $rootScope.resultCountString=[];
                 $rootScope.lastRendered = null;
 
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
@@ -147,6 +148,17 @@
                                 selectable: false
                             };
                             $rootScope.tableModels[i] = model;
+
+                            if($rootScope.tableModels[i].rowValues.length == 0){
+                              $rootScope.resultCountString[i]='(no results found)';
+                            }
+                            else if($rootScope.tableModels[i].hasNext){
+                              $rootScope.resultCountString[i]='(showing first '+ $rootScope.tableModels[i].rowValues.length +' results)';
+                            }
+                            else{
+                              $rootScope.resultCountString[i]='(showing all '+$rootScope.tableModels[i].rowValues.length  +' results)';
+                            }
+
                         }, function readFail(error) {
                             var model = {
                                 hasLoaded: true
