@@ -227,8 +227,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         });
       });
 
-      //amit
-      it('should render correct markdown', function() {
+
+      it('should render correct markdown in modal box.', function() {
         var descColList = tableParams.columns.filter(function(c) {
           if ((c.type === "markdown") && !c.isForeignKey) return true;
         });

@@ -1,3 +1,10 @@
+/**
+     * @directive
+     * @usage: ELement or Atrribute
+     * @scope {Object} textinput The Markdown to transform
+     * @output {modal} A modal with markdown preview
+     * @desc Input that is needed to be transformed shall be paased to textinput attribute. Directive link function calls ERMrest.renderMarkdown() for the msrkdown generation.
+     */
 (function() {
   'use strict';
 
@@ -51,7 +58,6 @@
                 } else {
                   scope.heading = 'Markdown Preview'
                   scope.markdownOut = $sce.trustAsHtml(result);
-                  console.log(scope.markdownOut);
                 }
                 modalBox(scope);
               }
@@ -66,11 +72,9 @@
       vm.params = params;
       vm.ok = ok;
       vm.cancel = cancel;
-
       function ok(tuple) {
         $uibModalInstance.close(tuple);
       }
-
       function cancel() {
         $uibModalInstance.dismiss("cancel");
       }
