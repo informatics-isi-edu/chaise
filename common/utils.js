@@ -793,8 +793,21 @@
             return Math.floor(Math.random() * (max - min)) + min;
         }
 
+        /**
+         * Generates a unique uuid
+         * @returns {String} a string of length 24
+         */
+        function uuid() {
+            // gets a string of a deterministic length of 4
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000).toString(36);
+            }
+            return s4() + s4() + s4() + s4() + s4() + s4();
+        }
+
         return {
-            getRandomInt: getRandomInt
+            getRandomInt: getRandomInt,
+            uuid: uuid
         }
     }])
 
@@ -879,14 +892,14 @@
         };
     }])
 
-    .service('headInjector', function() {
+    .service('headInjector', ['$window', 'MathUtils', function($window, MathUtils) {
         function addCustomCSS() {
             if (chaiseConfig['customCSS'] !== undefined) {
-            	var fileref = document.createElement("link");
-            	fileref.setAttribute("rel", "stylesheet");
-            	fileref.setAttribute("type", "text/css");
-            	fileref.setAttribute("href", chaiseConfig['customCSS']);
-            	document.getElementsByTagName("head")[0].appendChild(fileref);
+                var fileref = document.createElement("link");
+                fileref.setAttribute("rel", "stylesheet");
+                fileref.setAttribute("type", "text/css");
+                fileref.setAttribute("href", chaiseConfig['customCSS']);
+                document.getElementsByTagName("head")[0].appendChild(fileref);
             }
         }
 
@@ -895,9 +908,25 @@
                 document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
             }
         }
+
+        // sets the WID if it doesn't already exist
+        function setWindowName() {
+            if (!$window.name) {
+                $window.name = MathUtils.uuid();
+            }
+        }
+
+        function setupHead() {
+            addCustomCSS();
+            addTitle();
+            setWindowName();
+        }
+
         return {
             addCustomCSS: addCustomCSS,
-            addTitle: addTitle
+            addTitle: addTitle,
+            setWindowName: setWindowName,
+            setupHead: setupHead
         };
-    });
+    }]);
 })();
