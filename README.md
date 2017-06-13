@@ -11,7 +11,7 @@ based on a small set of baseline assumptions, combined with its rendering
 [heuristics], and finally user preferences in order to support common user
 interactions with the data. Chaise is developed in JavaScript, HTML, and CSS which
 runs in most modern Web browsers. This includes Chrome 13 (or better), Firefox 7 (or better),
-Internet Explorer 10 (or better including ME Edge), and Safari 6 (or better). It is 
+Internet Explorer 10 (or better including ME Edge), and Safari 6 (or better). Chaise is 
 the front-end component of the suite of tools including [ERMrest], [Hatrac], and [IObox].
 
 [heuristics]: https://en.wikipedia.org/wiki/Heuristic_%28computer_science%29
