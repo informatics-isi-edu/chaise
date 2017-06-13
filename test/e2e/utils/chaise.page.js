@@ -839,6 +839,12 @@ function chaisePage() {
             expect(ele.getAttribute('class')).toContain(className);
         }
     };
+    this.getWindowName = function() {
+        return browser.executeScript("return window.name;");
+    };
+    this.getPageId = function() {
+        return browser.executeScript("return angular.element('body').scope().$root.context.pageId");
+    };
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {
             // Visit the default page and set the authorization cookie if required
