@@ -22,11 +22,11 @@
                     <span class="glyphicon glyphicon-copy"></span> <strong>Copy</strong>
                 </a>&nbsp;&nbsp;
                 <delete-link id="delete-record" callback="::ctrl.deleteRecord()" ng-if="::ctrl.canDelete()" label="Delete" uib-tooltip="Click here to delete this record." tooltip-placement="bottom" icon="true"></delete-link>&nbsp;&nbsp;
-                <a id="show-all-related-tables" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((ctrl.showEmptyRelatedTables) ? 'hide empty related entities.' : 'show empty related entities too.')}}" tooltip-placement="bottom">
-                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
+                <a id="show-all-related-tables" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related entities.' : 'show empty related entities too.')}}" tooltip-placement="bottom">
+                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !showEmptyRelatedTables, 'glyphicon-resize-small': showEmptyRelatedTables}"></span>
                     <strong>
-                        <span ng-show="!ctrl.showEmptyRelatedTables">Show All</span>
-                        <span ng-show="ctrl.showEmptyRelatedTables">Hide Empty</span>
+                        <span ng-show="!showEmptyRelatedTables">Show All</span>
+                        <span ng-show="showEmptyRelatedTables">Hide Empty</span>
                          Related Records
                     </strong>
                 </a>&nbsp;&nbsp;

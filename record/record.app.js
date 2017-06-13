@@ -42,6 +42,7 @@
         UriUtils.setOrigin();
         headInjector.setupHead();
 
+        $rootScope.showEmptyRelatedTables = false;
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
@@ -121,6 +122,9 @@
                     }
 
                     (function(i) {
+                        if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
+                            $rootScope.showEmptyRelatedTables = true;
+                        }
                         $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
                             var model = {
                                 reference: $rootScope.relatedReferences[i],
