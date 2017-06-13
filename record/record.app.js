@@ -121,6 +121,8 @@
                         pageSize = constants.defaultPageSize;
                     }
 
+
+
                     (function(i) {
                         $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
                             var model = {
@@ -158,7 +160,10 @@
                             else{
                               $rootScope.resultCountString[i]='(showing all '+$rootScope.tableModels[i].rowValues.length  +' results)';
                             }
+<<<<<<< HEAD
 
+=======
+>>>>>>> a85221f40a590d63aac97ba6e72e9762fced1511
                         }, function readFail(error) {
                             var model = {
                                 hasLoaded: true
