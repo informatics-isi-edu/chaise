@@ -385,6 +385,71 @@ describe('View recordset,', function() {
         });
     });
 
+    describe("For window ID and page ID", function() {
+        var windowId, pageId;
+
+        beforeEach(function () {
+            var keys = [];
+            keys.push(accommodationParams.key.name + accommodationParams.key.operator + accommodationParams.key.value);
+            browser.ignoreSynchronization=true;
+            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
+
+            chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function () {
+                return chaisePage.getWindowName();
+            }).then(function (name) {
+                windowId = name;
+                return chaisePage.getPageId();
+            }).then(function (id) {
+                pageId = id;
+            });
+        });
+
+        it("clicking view action should change current window with the same window ID and a new page ID.", function () {
+            chaisePage.recordsetPage.getViewActionButtons().then(function(viewButtons) {
+                return viewButtons[0].click();
+            }).then(function() {
+                var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                return chaisePage.waitForUrl(result, browser.params.defaultTimeout);
+            }).finally(function() {
+                expect(chaisePage.getWindowName()).toBe(windowId);
+                // pageId should change when the window changes page
+                expect(chaisePage.getPageId()).not.toBe(pageId);
+                browser.navigate().back();
+                return chaisePage.waitForElementInverse(element(by.id("spinner")));
+            }).then(function() {
+                expect(chaisePage.getWindowName()).toBe(windowId);
+                // pageId should change when navigating back
+                expect(chaisePage.getPageId()).not.toBe(pageId);
+            });
+        });
+
+        it("clicking edit action should open a new window with a new window ID and a new page ID.", function () {
+            var allWindows;
+
+            chaisePage.recordsetPage.getEditActionButtons().then(function(editButtons) {
+                return editButtons[0].click();
+            }).then(function() {
+                return browser.getAllWindowHandles();
+            }).then(function(handles) {
+                allWindows = handles;
+                return browser.switchTo().window(allWindows[1]);
+            }).then(function() {
+                var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                return chaisePage.waitForUrl(result, browser.params.defaultTimeout);
+            }).finally(function() {
+                expect(chaisePage.getWindowName()).not.toBe(windowId);
+                // pageId should change when a new window is opened
+                expect(chaisePage.getPageId()).not.toBe(pageId);
+                browser.close();
+                return browser.switchTo().window(allWindows[0]);
+            }).then(function () {
+                expect(chaisePage.getWindowName()).toBe(windowId);
+                // pageId should not have changed when a new window was opened
+                expect(chaisePage.getPageId()).toBe(pageId);
+            });
+        });
+    });
+
     describe("For chaise config properties", function () {
         var EC = protractor.ExpectedConditions;
 

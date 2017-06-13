@@ -492,7 +492,7 @@ testrecordadd:
 #Rule to run recordset app tests
 .PHONY: testrecordset
 testrecordset:
-	$(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit)
+	$(BIN)/protractor $(E2EDrecordset) #&& $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit)
 
 # Rule to run record edit app tests
 .PHONY: testrecordedit

@@ -35,8 +35,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
-        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
+        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -44,8 +44,7 @@
         $rootScope.displayReady = false;
 
         UriUtils.setOrigin();
-        headInjector.addTitle();
-        headInjector.addCustomCSS();
+        headInjector.setupHead();
 
         // This is to allow the dropdown button to open at the top/bottom depending on the space available
         UiUtils.setBootstrapDropdownButtonBehavior();
@@ -64,6 +63,7 @@
 
         context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
         context.appName = "recordedit";
+        context.pageId = MathUtils.uuid();
         context.MAX_ROWS_TO_ADD = 201;
 
         // modes = create, edit, copy
@@ -100,7 +100,7 @@
             Session.unsubscribeOnChange(subId);
 
             // On resolution
-            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
 
                 //contextualize the reference based on the mode (determined above) recordedit is in
                 if (context.mode == context.modes.EDIT) {
