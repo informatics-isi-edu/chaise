@@ -1053,7 +1053,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                         var testFileSelect = function() {
                                             var file = tableParams.files.shift();
-                                            var filePath = require('path').resolve(__dirname, file.path).replace('/utils/', '/specs/');
+                                            var filePath = require('path').resolve(__dirname, file.path).replace('/utils/', '/data_setup/');
 
                                             column._value = file.name;
                                             fileInput.sendKeys(filePath);

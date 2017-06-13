@@ -39,17 +39,17 @@ var testParams = {
             name: "testfile1MB.txt",
             size: "1024000",
             displaySize: "1MB",
-            path: "all-features-confirmation/recordedit/uploadFiles/testfile1MB.txt"
+            path: "data_setup/files/testfile1MB.txt"
         }, {
             name: "testfile500kb.png",
             size: "512000",
             displaySize: "500KB",
-            path: "all-features-confirmation/recordedit/uploadFiles/testfile500kb.png"
+            path: "data_setup/files/testfile500kb.png"
         }, {
             name: "testfile5MB.pdf",
             size: "5242880",
             displaySize: "5MB",
-            path: "all-features-confirmation/recordedit/uploadFiles/testfile5MB.pdf"
+            path: "data_setup/files/testfile5MB.pdf"
         }]
     }],
     multi_insert: {
@@ -83,7 +83,7 @@ describe('Record Add', function() {
                         if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
 
                         files.forEach(function(f) {
-                            var path = require('path').join(__dirname , "/../../" + f.path);
+                            var path = require('path').join(__dirname , "/../../../" + f.path);
                             exec("perl -e 'print \"1\" x " + f.size + "' > " + path);
                             console.log(path + " created");
                         });

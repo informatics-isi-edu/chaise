@@ -17,8 +17,8 @@ var testParams = {
             }
           ],
           results: [
-            ["4", "modified val"], 
-            ["66", "description 2"] 
+            ["1000", "modified val", "4"], 
+            ["1001", "description 2", "66"] 
           ]
         },
         {
@@ -41,9 +41,9 @@ var testParams = {
             }
           ],
           results: [
-            ["5", "changed it again"],
-            ["768", "description 3"],
-            ["934", "I am number 3"]
+            ["1000", "changed it again", "5"],
+            ["1001", "description 3", "768"],
+            ["1002", "I am number 3", "934"]
           ]
         }
     ]
@@ -65,7 +65,7 @@ var i, j, k;
 describe('Edit multiple existing record,', function() {
   
     for (i = 0; i < testParams.tables.length; i++) {
-      (function (tableParams, index, schemaName) {
+      (function (tableParams, tableIndex, schemaName) {
         describe("when the user edits " + tableParams.keys.length + " records at a time " + (tableParams.tableParams? "with files" : "") +", ", function() {
 
             beforeAll(function () {
@@ -136,15 +136,14 @@ describe('Edit multiple existing record,', function() {
                 it('should show correct table rows.', function () {
                   chaisePage.recordsetPage.getRows().then(function(rows) {
                       // same row count
-                      browser.pause();
-                      expect(rows.length).toBe(tableParams.results.length);
+                      expect(rows.length).toBe(tableParams.results.length, "number of rows are not as expected.");
                       
                       for (j = 0; j < rows.length; j++) {
                           (function(index) {
                               rows[index].all(by.tagName("td")).then(function (cells) {
                                 
                                 // same column count
-                                expect(cells.length).toBe(tableParams.results[index].length);
+                                expect(cells.length).toBe(tableParams.results[index].length, "number of columns are not as expected.");
                                 
                                 var result;
                                 
@@ -153,16 +152,17 @@ describe('Edit multiple existing record,', function() {
                                 for (k = 0; k < tableParams.results[index].length; k++) {
                                   result = tableParams.results[index][k];
                                   
-                                  if (result.link) {
+                                  if (typeof result.link === 'string') {
+                                    console.log('going for link');
                                     expect(cells[k].element(by.tagName("a")).getAttribute("href")).toBe(result.link);
                                     expect(cells[k].element(by.tagName("a")).getText()).toBe(result.value);
                                   } else {
-                                    expect(cells[k].getText()).toBe(result);
+                                    expect(cells[k].getText()).toBe(result, "in row with index="+  index + ", columns with index=" + k + " missmatch.");
                                   }
                                 }
                               });
                               
-                          }(j));
+                          })(j);
                       };
                       
                   });
