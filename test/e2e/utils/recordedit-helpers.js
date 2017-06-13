@@ -7,6 +7,44 @@ var chance = require('chance').Chance();
 var moment = require('moment');
 var EC = protractor.ExpectedConditions;
 var exec = require('child_process').execSync;
+//test params for markdownPreview
+var markdownTestParams = [{
+    "raw": "# RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf",
+    "markdown": "<h1>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf</h1>"
+  },
+  {
+    "raw": "+ Create a list by starting a line with `+`, `-`, or `*`\n" +
+      "+ Sub-lists are made by indenting 2 spaces:\n" +
+      "  - Marker character change forces new list start:\n" +
+      "    * Ac tristique libero volutpat at\n" +
+      "    + Facilisis in pretium nisl aliquet\n" +
+      "    - Nulla volutpat aliquam velit\n" +
+      "+ Very easy!",
+    "markdown": "<ul>\n" +
+      "<li>Marker character change forces new list start:\n" +
+      "<ul>\n" +
+      "<li>Ac tristique libero volutpat at</li>\n" +
+      "</ul>\n" +
+      "<ul>\n" +
+      "<li>Facilisis in pretium nisl aliquet</li>\n" +
+      "</ul>\n" +
+      "<ul>\n" +
+      "<li>Nulla volutpat aliquam velit</li>\n" +
+      "</ul>\n" +
+      "</li>\n" +
+      "</ul>\n" +
+      "</li>\n" +
+      "<li>Very easy!</li>\n" +
+      "</ul>"
+  },
+  {
+    "raw": "`inline code can be very helpful. This is why we should use them quite often. whu;ehfwuehu wifjeowhfuehuhfh`. **This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri**. _This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj_. ~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~",
+    "markdown": "<p><code>inline code can be very helpful. This is why we should use them quite often. whu;ehfwuehu wifjeowhfuehuhfh</code>. <strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri</strong>. <em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj</em>. <s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>"
+  }, {
+    "raw": "X^2^+Y^2^+Z^2^=0",
+    "markdown": "X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0"
+  }
+];
 
 exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
@@ -169,7 +207,38 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 });
             });
 
+            it('should render correct markdown in modal box.', function() {
+              var descColList = tableParams.columns.filter(function(c) {
+                if ((c.type === "markdown") && !c.isForeignKey) return true;
+              });
+              descColList.forEach(function(descCol) {
+                var markdownField = chaisePage.recordEditPage.getInputById(0, descCol.title);
+                var livePreviewLink = element(by.className('live-preview'));
+                for (i = 0; i < markdownTestParams.length; i++) {
+                  markdownField.clear();
+                  (function(input, markdownOut) {
+                    markdownField.sendKeys(input);
+                    livePreviewLink.click();
+                    browser.getAllWindowHandles().then(function(handles) {
+                      browser.switchTo().window(handles[0]).then(function() {
+                        let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
+                        browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
+                        try {
+                          mdDiv.getAttribute('outerHTML').then(function(value) {
+                            expect(value).toContain(markdownOut);
+                          })
+                        } catch (x) {
+                          console.log("Error during markdown generation");
+                        }
+                        element(by.className('modal-close')).click();
 
+                      });
+
+                    });
+                  })(markdownTestParams[i].raw, markdownTestParams[i].markdown);
+                } //for
+              })
+            });
 
             it("should show text input for shorttext and text datatype", function() {
 
