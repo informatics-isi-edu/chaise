@@ -1,10 +1,18 @@
 /**
-     * @directive
-     * @usage: ELement or Atrribute
-     * @scope {Object} textinput The Markdown to transform
-     * @output {modal} A modal with markdown preview
-     * @desc Input that is needed to be transformed shall be paased to textinput attribute. Directive link function calls ERMrest.renderMarkdown() for the msrkdown generation.
-     */
+* @desc
+* The markdownPreview directive can be used to display a modal preview box with
+* transformed markdown. It calls ERMrest.renderMarkdown() to perform markdown to
+* HTML transformtaion. The output of this public function is then bound to page
+* through ng-bind-html.
+* The markdownPreview directive can be used as an element tag (<markdown-preview></markdown-preview>)
+* or an attribute (<div markdown-preview></div>). Link function checks for class "live-preview" to identify
+* click event, therefore this should be added in html markup.
+* It accepts the following attribute:
+* @param {String} textinput The Markdown to transform
+* @example <a href class="live-preview"  markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]">Live Preview</a>
+* @example <markdown-preview class="live-preview" textinput="form.recordEditModel.rows[rowIndex][column.name]">Click</markdown-preview>
+*/
+
 (function() {
   'use strict';
 
