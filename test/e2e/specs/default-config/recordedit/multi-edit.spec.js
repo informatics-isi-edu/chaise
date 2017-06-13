@@ -1,204 +1,175 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var testParams = {
-    table_name: "multi-add-table",
-    int_column_name: "int",
-    text_column_name: "text",
-    keys_2: [{ name: "id", value: "1000", operator: "=" },
-             { name: "id", value: "1001", operator: "=" }],
-    keys_3: [{ name: "id", value: "1000", operator: "=" },
-             { name: "id", value: "1001", operator: "=" },
-             { name: "id", value: "1002", operator: "=" }]
+    schema_name: "multi-edit",
+    tables: [
+        {
+          table_name: "multi-add-table",
+          keys: [{ name: "id", value: "1000", operator: "=" },
+                   { name: "id", value: "1001", operator: "=" }],
+          rows: [
+            {
+              "int": {"value": "7", "input": "4"},
+              "text": {"value": "test text", "input": "modified val"}
+            },
+            {
+              "int": {"value": "12", "input": "66"},
+              "text": {"value": "description", "input": "description 2"}
+            }
+          ],
+          results: [
+            ["4", "modified val"], 
+            ["66", "description 2"] 
+          ]
+        },
+        {
+          table_name: "multi-add-table",
+          keys: [{ name: "id", value: "1000", operator: "=" },
+                   { name: "id", value: "1001", operator: "=" },
+                   { name: "id", value: "1002", operator: "=" }],
+          rows: [
+            {
+              "int": {"value": "4", "input": "5"},
+              "text": {"value": "modified val", "input": "changed it again"}
+            },
+            {
+              "int": {"value": "66", "input": "768"},
+              "text": {"value": "description 2", "input": "description 3"}
+            },
+            {
+              "int": {"value": "34", "input": "934"},
+              "text": {"value": "just text", "input": "I am number 3"}
+            }
+          ],
+          results: [
+            ["5", "changed it again"],
+            ["768", "description 3"],
+            ["934", "I am number 3"]
+          ]
+        }
+    ]
+    
 };
 
-describe('Edit existing record,', function() {
+var i, j, k;
 
-    var intDisplayName = testParams.int_column_name,
-        textDisplayName = testParams.text_column_name;
+/*
+{
+  table_name: "table_w_multiple_assets",
+  hasFile: true
+  keys: [{name: "id", value:"1", operator:"="},{name: "id", value:"2", operator:"="}],
+  rows: [],
+  files: []
+}
+ */
 
-    // database values before changes
-    var intInput1DefaultVal = "7",
-        textInput1DefaultVal = "test text",
-        intInput2DefaultVal = "12",
-        textInput2DefaultVal = "description",
-        intInput3DefaultVal = "34",
-        textInput3DefaultVal = "just text";
+describe('Edit multiple existing record,', function() {
+  
+    for (i = 0; i < testParams.tables.length; i++) {
+      (function (tableParams, index, schemaName) {
+        describe("when the user edits " + tableParams.keys.length + " records at a time " + (tableParams.tableParams? "with files" : "") +", ", function() {
 
-    // changes to values for case of 2 forms
-    var intInput1FirstVal = "4",
-        textInput1FirstVal = "modified val",
-        intInput2FirstVal = "66",
-        textInput2FirstVal = "decription 2";
-
-    // changes to values for case of 3 forms
-    var intInput1SecondVal = "5",
-        textInput1SecondVal = "changed it again",
-        intInput2SecondVal = "768",
-        textInput2SecondVal = "decription 3";
-        intInput3FirstVal = "934",
-        textInput3FirstVal = "I am number 3";
-
-    describe("when the user edits " + testParams.keys_2.length + " records at a time, ", function() {
-
-        beforeAll(function () {
-            var keys = [];
-            testParams.keys_2.forEach(function(key) {
-                keys.push(key.name + key.operator + key.value);
-            });
-            browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-edit:" + testParams.table_name + "/" + keys.join(";"));
-        });
-
-        it("should have the table displayname as part of the entity title.", function() {
-            // if submit button is visible, this means the recordedit page has loaded
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit multi-add-table Records")
-            });
-        });
-
-        it("should change their values and show a resultset table with 2 entities.", function() {
-            var intInput1 = chaisePage.recordEditPage.getInputById(0, intDisplayName),
-                intInput2 = chaisePage.recordEditPage.getInputById(1, intDisplayName),
-                textInput1 = chaisePage.recordEditPage.getInputById(0, textDisplayName),
-                textInput2 = chaisePage.recordEditPage.getInputById(1, textDisplayName);
-
-            // modify first form
-            // check value before that it loaded correctly
-            expect(intInput1.getAttribute("value")).toBe(intInput1DefaultVal);
-            chaisePage.recordEditPage.clearInput(intInput1);
-            browser.sleep(10);
-            intInput1.sendKeys(intInput1FirstVal);
-            // check value after it was changed
-            expect(intInput1.getAttribute("value")).toBe(intInput1FirstVal);
-
-            expect(textInput1.getAttribute("value")).toBe(textInput1DefaultVal);
-            chaisePage.recordEditPage.clearInput(textInput1);
-            browser.sleep(10);
-            textInput1.sendKeys(textInput1FirstVal);
-            expect(textInput1.getAttribute("value")).toBe(textInput1FirstVal);
-
-            // modify second form
-            expect(intInput2.getAttribute("value")).toBe(intInput2DefaultVal);
-            chaisePage.recordEditPage.clearInput(intInput2);
-            browser.sleep(10);
-            intInput2.sendKeys(intInput2FirstVal);
-            expect(intInput2.getAttribute("value")).toBe(intInput2FirstVal);
-
-            expect(textInput2.getAttribute("value")).toBe(textInput2DefaultVal);
-            chaisePage.recordEditPage.clearInput(textInput2);
-            browser.sleep(10);
-            textInput2.sendKeys(textInput2FirstVal);
-            expect(textInput2.getAttribute("value")).toBe(textInput2FirstVal);
-        });
-
-        describe("Submit " + testParams.keys_2.length + " records", function() {
-            beforeAll(function() {
-                // submit form
-                chaisePage.recordEditPage.submitForm();
+            beforeAll(function () {
+                var keys = [];
+                tableParams.keys.forEach(function(key) {
+                    keys.push(key.name + key.operator + key.value);
+                });
+                browser.ignoreSynchronization = true;
+                browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+ schemaName +":" + tableParams.table_name + "/" + keys.join(";"));
             });
 
-            it("should change the view to the resultset table and verify the count.", function() {
-                // Make sure the table shows up with the expected # of rows
-                browser.wait(function() {
-                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                        return (ct == testParams.keys_2.length);
+            it("should have the table displayname as part of the entity title.", function() {
+                // if submit button is visible, this means the recordedit page has loaded
+                chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+                    expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit "+ tableParams.table_name +" Records");
+                });
+            });
+
+            it("should change their values and show a resultset table with " + tableParams.keys.length + " entities.", function() {
+              
+              chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+                  for (j = 0; j < tableParams.rows.length; j++) {
+                    var row = tableParams.rows[j];
+                    for (var key in row) {
+                      var input = chaisePage.recordEditPage.getInputById(j, key);
+                      // test current value
+                      expect(input.getAttribute("value")).toBe(row[key].value);
+                      
+                      // change the value
+                      chaisePage.recordEditPage.clearInput(input);
+                      browser.sleep(10);
+                      input.sendKeys(row[key].input);
+                      
+                      // test that value has changed
+                      expect(input.getAttribute("value")).toBe(row[key].input);
+                    }
+                  }
+              });
+
+            });
+
+            describe("Submit " + tableParams.keys.length + " records", function() {
+                beforeAll(function(done) {
+                    // submit form
+                    chaisePage.recordEditPage.submitForm();
+                    
+                    // Make sure the table shows up with the expected # of rows
+                    browser.wait(function() {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return (ct == tableParams.keys.length);
+                        });
+                    }, browser.params.defaultTimeout);
+                    done();
+                });
+
+                it("should change the view to the resultset table and verify the count.", function(done) {
+
+                    browser.driver.getCurrentUrl().then(function(url) {
+                        expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
+                        done();
                     });
-                }, browser.params.defaultTimeout);
-
-                browser.driver.getCurrentUrl().then(function(url) {
-                    expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
-
-                    return chaisePage.recordsetPage.getRows().count();
-                }).then(function(ct) {
-                    expect(ct).toBe(testParams.keys_2.length);
+                });
+                
+                it("should have the correct title with correct uri", function() {
+                  
+                });
+                
+                it('should show correct table rows.', function () {
+                  chaisePage.recordsetPage.getRows().then(function(rows) {
+                      // same row count
+                      browser.pause();
+                      expect(rows.length).toBe(tableParams.results.length);
+                      
+                      for (j = 0; j < rows.length; j++) {
+                          (function(index) {
+                              rows[index].all(by.tagName("td")).then(function (cells) {
+                                
+                                // same column count
+                                expect(cells.length).toBe(tableParams.results[index].length);
+                                
+                                var result;
+                                
+                                // cells is what is being shown
+                                // tableParams.results is what we expect
+                                for (k = 0; k < tableParams.results[index].length; k++) {
+                                  result = tableParams.results[index][k];
+                                  
+                                  if (result.link) {
+                                    expect(cells[k].element(by.tagName("a")).getAttribute("href")).toBe(result.link);
+                                    expect(cells[k].element(by.tagName("a")).getText()).toBe(result.value);
+                                  } else {
+                                    expect(cells[k].getText()).toBe(result);
+                                  }
+                                }
+                              });
+                              
+                          }(j));
+                      };
+                      
+                  });
                 });
             });
         });
-    });
-
-    describe("when the user edits " + testParams.keys_3.length + " records at a time, ", function() {
-
-        beforeAll(function () {
-            var keys = [];
-            testParams.keys_3.forEach(function(key) {
-                keys.push(key.name + key.operator + key.value);
-            });
-            browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-edit:" + testParams.table_name + "/" + keys.join(";"));
-        });
-
-        it("should change their values and show a resultset table with 3 entities.", function() {
-            var intInput1 = chaisePage.recordEditPage.getInputById(0, intDisplayName),
-                intInput2 = chaisePage.recordEditPage.getInputById(1, intDisplayName),
-                intInput3 = chaisePage.recordEditPage.getInputById(2, intDisplayName),
-                textInput1 = chaisePage.recordEditPage.getInputById(0, textDisplayName),
-                textInput2 = chaisePage.recordEditPage.getInputById(1, textDisplayName),
-                textInput3 = chaisePage.recordEditPage.getInputById(2, textDisplayName);
-
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-
-                // modify first form
-                expect(intInput1.getAttribute("value")).toBe(intInput1FirstVal);
-                chaisePage.recordEditPage.clearInput(intInput1);
-                browser.sleep(10);
-                intInput1.sendKeys(intInput1SecondVal);
-                expect(intInput1.getAttribute("value")).toBe(intInput1SecondVal);
-
-                expect(textInput1.getAttribute("value")).toBe(textInput1FirstVal);
-                chaisePage.recordEditPage.clearInput(textInput1);
-                browser.sleep(10);
-                textInput1.sendKeys(textInput1SecondVal);
-                expect(textInput1.getAttribute("value")).toBe(textInput1SecondVal);
-
-                // modify second form
-                expect(intInput2.getAttribute("value")).toBe(intInput2FirstVal);
-                chaisePage.recordEditPage.clearInput(intInput2);
-                browser.sleep(10);
-                intInput2.sendKeys(intInput2SecondVal);
-                expect(intInput2.getAttribute("value")).toBe(intInput2SecondVal);
-
-                expect(textInput2.getAttribute("value")).toBe(textInput2FirstVal);
-                chaisePage.recordEditPage.clearInput(textInput2);
-                browser.sleep(10);
-                textInput2.sendKeys(textInput2SecondVal);
-                expect(textInput2.getAttribute("value")).toBe(textInput2SecondVal);
-
-                // modify third form
-                expect(intInput3.getAttribute("value")).toBe(intInput3DefaultVal);
-                chaisePage.recordEditPage.clearInput(intInput3);
-                browser.sleep(10);
-                intInput3.sendKeys(intInput3FirstVal);
-                expect(intInput3.getAttribute("value")).toBe(intInput3FirstVal);
-
-                expect(textInput3.getAttribute("value")).toBe(textInput3DefaultVal);
-                chaisePage.recordEditPage.clearInput(textInput3);
-                browser.sleep(10);
-                textInput3.sendKeys(textInput3FirstVal);
-                expect(textInput3.getAttribute("value")).toBe(textInput3FirstVal);
-            });
-        });
-
-        describe("Submit " + testParams.keys_3.length + " records", function() {
-            beforeAll(function() {
-                // submit form
-                chaisePage.recordEditPage.submitForm();
-            });
-
-            it("should change the view to the resultset table and verify the count.", function() {
-                // Make sure the table shows up with the expected # of rows
-                browser.wait(function() {
-                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                        return (ct == testParams.keys_3.length);
-                    });
-                }, browser.params.defaultTimeout);
-
-                browser.driver.getCurrentUrl().then(function(url) {
-                    expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
-
-                    return chaisePage.recordsetPage.getRows().count();
-                }).then(function(ct) {
-                    expect(ct).toBe(testParams.keys_3.length);
-                });
-            });
-        });
-    });
+        
+      })(testParams.tables[i], i, testParams.schema_name);
+    }
 });

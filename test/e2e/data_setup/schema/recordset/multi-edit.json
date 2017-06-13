@@ -50,11 +50,187 @@
                     "*": ["id", "text", "int"]
                 }
             }
+        },
+        "table_w_multiple_assets": {
+            "table_name": "table_w_multiple_assets",
+            "comment": "table with mutliple asset column",
+            "schema_name": "recordset-multi-edit",
+            "kind": "table",
+            "foreign_keys": [],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": ["id"]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                  "name": "col_visible",
+                  "type": {
+                    "typename": "text"
+                  }
+                },
+                {
+                  "name": "generated_col_visible",
+                  "nullok": true,
+                  "type": {
+                    "typename": "text"
+                  },
+                  "annotations": {
+                      "tag:isrd.isi.edu,2016:generated": null
+                  }
+                },
+                {
+                  "name": "generated_col_invisible",
+                  "nullok": true,
+                  "type": {
+                    "typename": "text"
+                  },
+                  "annotations": {
+                      "tag:isrd.isi.edu,2016:generated": null
+                  }
+                },
+                {
+                    "name": "file_1",
+                    "commnet": "url_pattern is combination of md5 and a visible column",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                      "url_pattern":"hatrac/js/chaise/{{{col_visible}}}/{{{uri.md5_hex}}}",
+                      "filename_column" : "file_1_filename",
+                      "byte_count_column": "file_1_byte",
+                      "md5": "file_1_md5"
+                    }
+                },
+                {
+                    "name": "file_1_filename",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "name": "file_1_bytes",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "name": "file_1_md5",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "name": "file_2",
+                    "commnet": "url_pattern is combination of md5 and a generated visible column",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                      "url_pattern":"hatrac/js/chaise/{{{generated_col_visible}}}/{{{file_2.md5_hex}}}",
+                      "filename_column" : "file_2_filename",
+                      "byte_count_column": "file_2_bytes",
+                      "md5": "file_2_md5"
+                    }
+                },
+                {
+                    "name": "file_2_filename",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "name": "file_2_bytes",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "name": "file_2_md5",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "name": "file_3",
+                    "commnet": "url_pattern is combination of md5 and a generated invisible column",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                      "url_pattern":"hatrac/js/chaise/{{{generated_col_invisible}}}/{{{file_3.md5_hex}}}",
+                      "filename_column" : "file_3_filename",
+                      "byte_count_column": "file_3_bytes",
+                      "md5": "file_3_md5"
+                    }
+                },
+                {
+                    "name": "file_3_filename",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "name": "file_3_bytes",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    },
+                    "annotations": {}
+                },
+                {
+                    "name": "file_3_md5",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {}
+                }
+            ],
+            "annotations": {
+              "tag:isrd.isi.edu,2016:visible-columns": {
+                "*": [
+                  "id", "col_visible", "generated_col_visible", "generated_col_invisible", 
+                  "file_1", "file_1_filename", "file_1_bytes", "file_1_md5",
+                  "file_2", "file_2_filename", "file_2_bytes", "file_2_md5",
+                  "file_3", "file_3_filename", "file_3_bytes", "file_3_md5",
+                ],
+                "entry/edit": [
+                  "id", "col_visible", "generated_col_visible", 
+                  "file_1", "file_1_filename", "file_1_bytes", "file_1_md5",
+                  "file_2", "file_2_filename", "file_2_bytes", "file_2_md5",
+                  "file_3", "file_3_filename", "file_3_bytes", "file_3_md5",
+                ]
+              }
+            }
         }
     },
-    "table_names": [
-        "multi-add-table"
-    ],
     "comment": null,
     "annotations": {}
 }
