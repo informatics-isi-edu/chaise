@@ -10,8 +10,8 @@ var testParams = {
     },
     tables_order: [
       "accommodation_image (showing first 2 results)",
-      "booking (showing all 6 results)",
-      "media (showing all 1 results)"
+   "booking (showing all 6 results)",
+   "media (showing all 1 results)"
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     related_table_name_with_link_in_table: "accommodation_image",
