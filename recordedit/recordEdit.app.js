@@ -12,6 +12,7 @@
         'chaise.navbar',
         'chaise.upload',
         'chaise.record.table',
+        'chaise.markdown',
         'chaise.utils',
         'chaise.validators',
         'chaise.html',

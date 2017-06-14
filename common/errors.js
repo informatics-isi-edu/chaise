@@ -126,9 +126,6 @@
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.login($window.location.href);
-            } else if (ERMrest && exception instanceof ERMrest.PreconditionFailedError) {
-                // A more useful general message for 412 Precondition Failed
-                AlertsService.addAlert({type: 'warning', message: messageMap.generalPreconditionFailed});
             } else {
 
                 var errName = exception.constructor.name;

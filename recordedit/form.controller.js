@@ -383,28 +383,8 @@
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (response instanceof ERMrest.PreconditionFailedError) {
-                        $uibModal.open({
-                            templateUrl: "../common/templates/refresh.modal.html",
-                            controller: "ErrorDialogController",
-                            controllerAs: "ctrl",
-                            size: "sm",
-                            resolve: {
-                                params: {
-                                    title: messageMap.pageRefreshRequired.title,
-                                    message: messageMap.pageRefreshRequired.message
-                                }
-                            },
-                            backdrop: 'static',
-                            keyboard: false
-                        }).result.then(function reload() {
-                            // Reload the page
-                            $window.location.reload();
-                        });
-                    } else {
-                        if (response !== 'cancel') {
-                            throw response;
-                        }
+                    if (response !== 'cancel') {
+                        throw response;
                     }
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
@@ -414,26 +394,7 @@
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (response instanceof ERMrest.PreconditionFailedError) {
-                        $uibModal.open({
-                            templateUrl: "../common/templates/refresh.modal.html",
-                            controller: "ErrorDialogController",
-                            controllerAs: "ctrl",
-                            size: "sm",
-                            resolve: {
-                                params: {
-                                    message: messageMap.pageRefreshRequired
-                                }
-                            },
-                            backdrop: 'static',
-                            keyboard: false
-                        }).result.then(function reload() {
-                            // Reload the page
-                            $window.location.reload();
-                        });
-                    } else {
-                        throw response;
-                    }
+                    throw response;
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
                 });
