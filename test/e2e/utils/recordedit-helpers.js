@@ -217,24 +217,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 for (i = 0; i < markdownTestParams.length; i++) {
                   markdownField.clear();
                   (function(input, markdownOut) {
-                    markdownField.sendKeys(input);
-                    livePreviewLink.click();
-                    browser.getAllWindowHandles().then(function(handles) {
-                      browser.switchTo().window(handles[0]).then(function() {
+                        markdownField.sendKeys(input);
+                        livePreviewLink.click();
                         let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
                         browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
-                        try {
-                          mdDiv.getAttribute('outerHTML').then(function(value) {
-                            expect(value).toContain(markdownOut);
-                          })
-                        } catch (x) {
-                          console.log("Error during markdown generation");
-                        }
+                        expect(mdDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown generation");
                         element(by.className('modal-close')).click();
 
-                      });
-
-                    });
                   })(markdownTestParams[i].raw, markdownTestParams[i].markdown);
                 } //for
               })
