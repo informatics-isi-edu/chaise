@@ -129,10 +129,13 @@
                         var columnNames = Object.keys(cookie.keys);
                         columnNames.forEach(function(colName) {
                             if(colName=="json"){
-                                var colValue = JSON.parse(cookie.keys[colName]);
+                                var myJson = JSON.parse(cookie.keys[colName]);
+                                var colValue= $.parseJSON(myJson);
+                                console.log(colValue);
                             }
                             else{
                                 var colValue = cookie.keys[colName];
+                                console.log(colName+ "  "+ colValue);
                             }
                             recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
                         });
@@ -230,7 +233,7 @@
                                             value = (!isNaN(floatVal) ? floatVal : null);
                                             break;
                                         case "json":
-                                            var jsonVal= JSON.stringify(values[i],null, 1);
+                                            var jsonVal= JSON.stringify(values[i]);
                                             value = jsonVal;
                                             break;
                                         default:
