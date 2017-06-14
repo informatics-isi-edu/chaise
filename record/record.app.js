@@ -147,6 +147,7 @@
                                 selectable: false
                             };
                             $rootScope.tableModels[i] = model;
+
                         }, function readFail(error) {
                             var model = {
                                 hasLoaded: true
