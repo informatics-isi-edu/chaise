@@ -83,6 +83,7 @@ describe('View existing record,', function() {
                 var deleteButton;
                 var relatedTableName = testParams.related_regular_table;
                 var count, rowCells, oldValue;
+                var relatedTableHeading = chaisePage.recordPage.getRelatedTableHeadingTitle(relatedTableName);
 
                 var EC = protractor.ExpectedConditions;
                 var e = element(by.id('rt-' + relatedTableName));
@@ -111,6 +112,7 @@ describe('View existing record,', function() {
                     return confirmButton.click();
                 }).then(function() {
                     browser.wait(EC.stalenessOf(rowCells[1]), browser.params.defaultTimeout);
+                    expect(relatedTableHeading.getText()).toBe("booking (showing all 5 results)");
                 });
             });
 
@@ -118,6 +120,7 @@ describe('View existing record,', function() {
                 var deleteButton;
                 var relatedTableName = testParams.related_associate_table;
                 var count, rowCells, oldValue;
+                var relatedTableHeading = chaisePage.recordPage.getRelatedTableHeadingTitle(relatedTableName);
 
                 var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
 
@@ -142,7 +145,8 @@ describe('View existing record,', function() {
                     return confirmButton.click();
                 }).then(function() {
                     browser.wait(function() {return rowCells[1].getAttribute('innerHTML') !== oldValue}, browser.params.defaultTimeout);
-                })
+                    expect(relatedTableHeading.getText()).toBe("accommodation_image (showing first 2 results)");
+                });
             });
         });
     });

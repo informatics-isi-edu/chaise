@@ -621,6 +621,11 @@ var recordPage = function() {
         return element(by.id("rt-heading-" + displayName));
     };
 
+    this.getRelatedTableHeadingTitle = function(displayname) {
+        displayName = makeSafeIdAttr(displayname);
+        return element(by.id("rt-heading-" + displayName)).element(by.css('.panel-title'))
+    };
+
     this.getRelatedTableColumnNamesByTable = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));

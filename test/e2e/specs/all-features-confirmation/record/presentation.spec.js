@@ -58,7 +58,7 @@ var testParams = {
             value: "4004",
             operator: "="
         },
-        tables_order: ["booking (Showing first 0 result)", "accommodation_image (Showing first 0 result)", "media (Showing first 0 result)"]
+        tables_order: ["booking (no results found)", "accommodation_image (no results found)", "media (no results found)"]
     }
 };
 
