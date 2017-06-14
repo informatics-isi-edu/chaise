@@ -138,14 +138,13 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
         try {
             var session;
 
-            headInjector.addTitle();
-            headInjector.addCustomCSS();
+            headInjector.setupHead();
 
             UriUtils.setOrigin();
 
@@ -178,6 +177,7 @@
 
             context.catalogID = p_context.catalogID;
             context.tableName = p_context.tableName;
+            context.pageId = MathUtils.uuid();
 
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
@@ -190,7 +190,7 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
-                ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
                     session = Session.getSessionValue();
 
                     recordsetModel.reference = reference.contextualize.compact;
