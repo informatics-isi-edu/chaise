@@ -3,6 +3,7 @@
 # Disable built-in rules
 .SUFFIXES:
 
+
 # Install directory on dev.isrd
 CHAISEDIR=/var/www/html/chaise
 
@@ -309,6 +310,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/markdownPreview.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \

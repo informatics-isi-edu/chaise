@@ -9,7 +9,7 @@ var testParams = {
     },
     title: "Sherathon Hotel",
     subTitle: "Accommodations",
-    tables_order: ["booking (Showing first 2 results)", "accommodation_image (Showing first 2+ results)", "media (Showing first 0 result)"],
+    tables_order: ["booking (showing all 2 results)", "accommodation_image (showing first 2 results)", "media (no results found)"],
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
