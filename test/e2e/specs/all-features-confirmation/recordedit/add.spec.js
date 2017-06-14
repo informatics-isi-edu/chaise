@@ -3,26 +3,6 @@ var recordEditHelpers = require('../../../utils/recordedit-helpers.js'), chance 
 var exec = require('child_process').execSync;
 var testParams = {
     tables: [{
-        table_name: "accommodation",
-        create_entity_displayname: "Accommodations",
-        columns: [
-            { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
-            { name: "title", title: "Name of Accommodation", type: "text", nullok: false},
-            { name: "website", isUrl: true, title: "Website", type: "text", comment: "A valid url of the accommodation"},
-            { name: "category", isForeignKey: true, title: "Category", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/id=10003"}, nullok: false},
-            { name: "rating", title: "User Rating", type: "float4", nullok: false},
-            { name: "summary", title: "Summary", type: "longtext", nullok: false},
-            { name: "description", title: "Description", type: "markdown"},
-            { name: "no_of_rooms", title: "Number of Rooms", type: "int2"},
-            { name: "cover", isForeignKey: true, title: "Cover Image", type: "int2", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-add:file/id=3005"} },
-            { name: "thumbnail", isForeignKey: true, title: "Thumbnail", type: "int4"},
-            { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
-            { name: "luxurious", title: "Is Luxurious", type: "boolean" }
-        ],
-        primary_keys: ["id"],
-        records: 2,
-        files: []
-    }, {
         table_name: "file",
         columns: [
             { name: "fileid", title: "fileid", type: "int4" },
@@ -39,17 +19,17 @@ var testParams = {
             name: "testfile1MB.txt",
             size: "1024000",
             displaySize: "1MB",
-            path: "data_setup/files/testfile1MB.txt"
+            path: "testfile1MB.txt"
         }, {
             name: "testfile500kb.png",
             size: "512000",
             displaySize: "500KB",
-            path: "data_setup/files/testfile500kb.png"
+            path: "testfile500kb.png"
         }, {
             name: "testfile5MB.pdf",
             size: "5242880",
             displaySize: "5MB",
-            path: "data_setup/files/testfile5MB.pdf"
+            path: "testfile5MB.pdf"
         }]
     }],
     multi_insert: {
@@ -76,18 +56,12 @@ describe('Record Add', function() {
 
                 describe("Presentation and validation,", function() {
 
-
-                    beforeAll(function() {
-
-                        var files = tableParams.files;
-                        if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
-
-                        files.forEach(function(f) {
-                            var path = require('path').join(__dirname , "/../../../" + f.path);
-                            exec("perl -e 'print \"1\" x " + f.size + "' > " + path);
-                            console.log(path + " created");
+                    if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                        beforeAll(function() {
+                            // create files that will be uploaded
+                            recordEditHelpers.createFiles(tableParams.files);
                         });
-                    });
+                    }
 
                     var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
                 });
@@ -199,16 +173,13 @@ describe('Record Add', function() {
                             }
                         }
                     });
-
-                    afterAll(function(done) {
-                        var files = tableParams.files;
-                        if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
-
-                        files.forEach(function(f) {
-                            exec('rm ' + f.path);
+                    
+                    if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                        afterAll(function(done) {
+                            recordEditHelpers.deleteFiles(tableParams.files);
+                            done();
                         });
-                        done();
-                    });
+                    }
                 });
             });
         })(testParams.tables[i], i);
