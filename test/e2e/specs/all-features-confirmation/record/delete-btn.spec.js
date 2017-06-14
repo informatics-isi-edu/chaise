@@ -32,8 +32,9 @@ describe('View existing record,', function() {
 
         describe("Clicking the delete record button ,", function() {
             var allWindows, EC = protractor.ExpectedConditions;
-
-            it("should display a modal when attempting to delete a record that has been modified by someone else beforehand", function() {
+            
+            // etags are not supported in ermrestjs
+            xit("should display a modal when attempting to delete a record that has been modified by someone else beforehand", function() {
                 // Set up a mismatching ETag scenario before attempting delete to ensure that
                 // that the delete operation doesn't throw a 412 error when ETags are mismatching
                 // but the referenced tuples haven't changed from the tuples in the DB.
@@ -91,7 +92,7 @@ describe('View existing record,', function() {
                     console.dir(error);
                     expect('Something went wrong with this promise chain.').toBe('Please see error message.');
                 });
-            });
+            }).pend("412 support has been dropped from ermestjs.");
 
             it("should redirect to data browser if ETags match (like normal).", function () {
                 var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
