@@ -190,7 +190,7 @@ describe('View existing record,', function() {
                         return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count();
                     }).then(function(count) {
                         expect(count).toBe(testParams.booking_count + 1);
-                        expect(relatedTableHeading.getText()).toBe("booking (showing all 7 results)");
+                        expect(relatedTableHeading.getText()).toBe("booking (showing all 7 results)", "Booking related table heading did not update");
                         expect(relatedTableLink.isDisplayed()).toBeTruthy();
                         return relatedTableLink.click();
                     }).then(function() {

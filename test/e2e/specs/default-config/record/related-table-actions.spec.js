@@ -112,7 +112,7 @@ describe('View existing record,', function() {
                     return confirmButton.click();
                 }).then(function() {
                     browser.wait(EC.stalenessOf(rowCells[1]), browser.params.defaultTimeout);
-                    expect(relatedTableHeading.getText()).toBe("booking (showing all 5 results)");
+                    expect(relatedTableHeading.getText()).toBe("booking (showing all 5 results)", "Booking related table heading did not update");
                 });
             });
 
@@ -145,7 +145,7 @@ describe('View existing record,', function() {
                     return confirmButton.click();
                 }).then(function() {
                     browser.wait(function() {return rowCells[1].getAttribute('innerHTML') !== oldValue}, browser.params.defaultTimeout);
-                    expect(relatedTableHeading.getText()).toBe("accommodation_image (showing first 2 results)");
+                    expect(relatedTableHeading.getText()).toBe("accommodation_image (showing first 2 results)", "Accomodation image related table heading did not update");
                 });
             });
         });

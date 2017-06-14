@@ -119,17 +119,17 @@ describe('View existing record,', function() {
             }, browser.params.defaultTimeout);
 
             chaisePage.recordPage.getRelatedTables().count().then(function(count) {
-                expect(count).toBe(testParams.no_related_data.tables_order.length);
+                expect(count).toBe(testParams.no_related_data.tables_order.length, "Number of related tables is not correct");
 
                 return chaisePage.recordPage.getRelatedTableTitles();
             }).then(function(headings) {
-                expect(headings).toEqual(testParams.no_related_data.tables_order);
+                expect(headings).toEqual(testParams.no_related_data.tables_order, "Related tables in the wrong order or the name is wrong");
 
-                expect(showAllRTButton.getText()).toBe("Hide Empty Related Records");
+                expect(showAllRTButton.getText()).toBe("Hide Empty Related Records", "Sow all Related tables button has wrong text");
                 return showAllRTButton.click();
             }).then(function() {
-                expect(chaisePage.recordPage.getRelatedTables().count()).toBe(0);
-                expect(chaisePage.recordPage.getRelatedTables().count()).not.toBe(testParams.no_related_data.tables_order.length);
+                expect(chaisePage.recordPage.getRelatedTables().count()).toBe(0, "Not all the related tables were hidden");
+                expect(chaisePage.recordPage.getRelatedTables().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
             })
         });
     });
