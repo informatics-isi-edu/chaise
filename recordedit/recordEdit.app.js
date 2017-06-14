@@ -230,7 +230,7 @@
                                             value = (!isNaN(floatVal) ? floatVal : null);
                                             break;
                                         case "json":
-                                            var jsonVal= JSON.stringify(values[i], undefined, 1);
+                                            var jsonVal= JSON.stringify(values[i],null, 1);
                                             value = jsonVal;
                                             break;
                                         default:
