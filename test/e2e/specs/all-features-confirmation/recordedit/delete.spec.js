@@ -55,8 +55,8 @@ describe('Edit existing record,', function() {
                     expect(chaiseConfig.confirmDelete).toBe(true);
                 });
             });
-
-            it("should display a modal when attempting to delete a record that has been modified by someone else beforehand", function() {
+            
+            xit("should display a modal when attempting to delete a record that has been modified by someone else beforehand", function() {
                 var EC = protractor.ExpectedConditions, allWindows;
                 // Set up a mismatching ETag scenario before attempting delete to ensure that
                 // that the delete operation doesn't throw a 412 error when ETags are mismatching
@@ -114,7 +114,7 @@ describe('Edit existing record,', function() {
                     console.dir(error);
                     expect(error).not.toBeDefined();
                 });
-            });
+            }).pend("412 support has been dropped from ermestjs.");
 
             it("from recordedit page and redirect to data browser.", function () {
                 var EC = protractor.ExpectedConditions,
