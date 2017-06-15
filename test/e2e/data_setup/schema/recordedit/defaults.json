@@ -13,7 +13,45 @@
                     ]
                 }
             ],
-            "foreign_keys": [],
+            "foreign_keys": [
+                {
+                    "comment": "Foreign key that represents a not disabled foreign key input.",
+                    "names": [["defaults", "fk_text"]],
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "defaults-table",
+                            "schema_name": "defaults",
+                            "column_name": "foreign_key"
+                        }
+                    ],
+                    "annotations": {},
+                    "referenced_columns": [
+                        {
+                            "table_name": "foreign-text-table",
+                            "schema_name": "defaults",
+                            "column_name": "id"
+                        }
+                    ]
+                }, {
+                    "comment": "Foreign key that represents a disabled foreign key input.",
+                    "names": [["defaults", "fk_text_disabled"]],
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "defaults-table",
+                            "schema_name": "defaults",
+                            "column_name": "foreign_key_disabled"
+                        }
+                    ],
+                    "annotations": {},
+                    "referenced_columns": [
+                        {
+                            "table_name": "foreign-text-disabled-table",
+                            "schema_name": "defaults",
+                            "column_name": "id"
+                        }
+                    ]
+                }
+            ],
             "table_name": "defaults-table",
             "schema_name": "defaults",
             "column_definitions": [
@@ -44,11 +82,82 @@
                         }
                     }
                 }, {
+                    "name": "text_disabled",
+                    "default": "Disabled input",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, {
+                    "name": "markdown",
+                    "default": "**bold**",
+                    "nullok": true,
+                    "type": {
+                        "typename": "markdown"
+                    }
+                }, {
+                    "name": "markdown_disabled",
+                    "default": "*italics*",
+                    "nullok": true,
+                    "type": {
+                        "typename": "markdown"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, {
+                    "name": "foreign_key",
+                    "default": 2,
+                    "nullok": true,
+                    "type": {
+                        "typename": "int4"
+                    }
+                }, {
+                    "name": "foreign_key_disabled",
+                    "default": 5,
+                    "nullok": true,
+                    "type": {
+                        "typename": "int4"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, {
                     "name": "int",
                     "default": 25,
                     "nullok": true,
                     "type": {
                         "typename": "int"
+                    }
+                }, {
+                    "name": "int_disabled",
+                    "default": 20,
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, {
+                    "name": "float",
+                    "default": 1.6478,
+                    "nullok": true,
+                    "type": {
+                        "typename": "float4"
+                    }
+                }, {
+                    "name": "float_disabled",
+                    "default": 93.2182,
+                    "nullok": true,
+                    "type": {
+                        "typename": "float4"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
                     }
                 }, {
                     "name": "boolean_true",
@@ -65,17 +174,51 @@
                         "typename": "boolean"
                     }
                 }, {
-                    "name": "text_disabled",
-                    "default": "Disabled input",
+                    "name": "boolean_disabled",
+                    "default": "false",
                     "nullok": true,
                     "type": {
-                        "typename": "text"
+                        "typename": "boolean"
                     },
                     "annotations": {
                         "tag:isrd.isi.edu,2016:generated": null
                     }
                 }, {
+                    "name": "date",
+                    "default": "2010-06-08",
+                    "nullok": true,
+                    "type": {
+                        "typename": "date"
+                    }
+                }, {
+                    "name": "date_disabled",
+                    "default": "2014-05-12",
+                    "nullok": true,
+                    "type": {
+                        "typename": "date"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, {
+                    "name": "timestamp",
+                    "default": "2014-05-07T14:40:00-07:00",
+                    "nullok": true,
+                    "type": {
+                        "typename": "timestamptz"
+                    }
+                }, {
                     "name": "timestamp_disabled",
+                    "default": "2010-06-13T17:22:00-07:00",
+                    "nullok": true,
+                    "type": {
+                        "typename": "timestamptz"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, {
+                    "name": "timestamp_disabled_no_default",
                     "default": null,
                     "nullok": true,
                     "type": {
@@ -85,16 +228,93 @@
                         "tag:isrd.isi.edu,2016:generated": null
                     }
                 }
-            ],
-            "annotations": {
-                "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int", "boolean_true", "boolean_false", "text_disabled", "timestamp_disabled"]
+            ]
+        },
+        "foreign-text-table": {
+            "comment": "Table to represent a foreign related entity.",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
                 }
-            }
+            ],
+            "foreign_keys": [],
+            "table_name": "foreign-text-table",
+            "schema_name": "defaults",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    },
+                    "annotations": {
+                        "comment": [
+                            "hidden"
+                        ],
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }, {
+                    "name": "name",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ]
+        },
+        "foreign-text-disabled-table": {
+            "comment": "Table to represent a foreign related entity where the column is disabled.",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "foreign-text-disabled-table",
+            "schema_name": "defaults",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    },
+                    "annotations": {
+                        "comment": [
+                            "hidden"
+                        ],
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }, {
+                    "name": "name",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ]
         }
     },
     "table_names": [
-        "defaults-table"
+        "defaults-table",
+        "foreign-text-table",
+        "foreign-text-disabled-table"
     ],
     "comment": null,
     "annotations": {}
