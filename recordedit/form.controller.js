@@ -132,7 +132,14 @@
                             }
                             break;
                         case "json":
-                            rowVal=JSON.parse(rowVal);
+                            try{
+                                rowVal=JSON.parse(rowVal);
+                            }
+                            catch(e){
+                                AlertsService.addAlert('Invalid JSON Data', 'error');
+                                vm.readyToSubmit = false;
+                                return false;
+                            }
                             break;
                         default:
                             if (col.isAsset) {
