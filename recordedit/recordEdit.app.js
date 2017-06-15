@@ -131,7 +131,6 @@
                             if(colName=="json"){
                                 var myJson = JSON.parse(cookie.keys[colName]);
                                 var colValue= $.parseJSON(myJson);
-                                console.log(colValue);
                             }
                             else{
                                 var colValue = cookie.keys[colName];
@@ -233,7 +232,7 @@
                                             value = (!isNaN(floatVal) ? floatVal : null);
                                             break;
                                         case "json":
-                                            var jsonVal= JSON.stringify(values[i]);
+                                            var jsonVal= JSON.stringify(values[i],undefined,4);
                                             value = jsonVal;
                                             break;
                                         default:

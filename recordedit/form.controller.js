@@ -132,14 +132,7 @@
                             }
                             break;
                         case "json":
-                            try{
-                                rowVal=JSON.parse(rowVal);
-                            }
-                            catch(e){
-                                AlertsService.addAlert('Invalid JSON Data', 'error');
-                                vm.readyToSubmit = false;
-                                return false;
-                            }
+                            rowVal=JSON.parse(rowVal);
                             break;
                         default:
                             if (col.isAsset) {
@@ -253,6 +246,7 @@
                         var data = $rootScope.tuples[i].data;
                         // assign each value from the form to the data object on tuple
                         for (var key in row) {
+                            console.log(row[key]);
                             data[key] = (row[key] === '' ? null : row[key]);
                         }
                     }
