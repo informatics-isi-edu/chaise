@@ -8,9 +8,9 @@ var testParams = {
         operator: "="
     },
     tables_order: [
-        "accommodation_image (Showing first 2+ results)",
-        "booking (Showing first 6 results)",
-        "media (Showing first 1 result)"
+        "accommodation_image (showing first 2 results)",
+        "booking (showing all 6 results)",
+        "media (showing all 1 results)"
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     related_table_name_with_link_in_table: "accommodation_image",
@@ -176,7 +176,8 @@ describe('View existing record,', function() {
                         relatedTableName = testParams.related_regular_table,
                         relatedTableSubtitle = testParams.related_regular_subtitle,
                         relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName),
-                        relatedUnfilteredLink = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
+                        relatedUnfilteredLink = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName,
+                        relatedTableHeading = chaisePage.recordPage.getRelatedTableHeadingTitle(relatedTableName);
 
                     browser.wait(EC.visibilityOf(relatedTableLink), browser.params.defaultTimeout).then(function() {
                         // waits until the count is what we expect, so we know the refresh occured
@@ -189,6 +190,7 @@ describe('View existing record,', function() {
                         return chaisePage.recordPage.getRelatedTableRows(relatedTableName).count();
                     }).then(function(count) {
                         expect(count).toBe(testParams.booking_count + 1);
+                        expect(relatedTableHeading.getText()).toBe("booking (showing all 7 results)", "Booking related table heading did not update");
                         expect(relatedTableLink.isDisplayed()).toBeTruthy();
                         return relatedTableLink.click();
                     }).then(function() {

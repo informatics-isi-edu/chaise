@@ -10,7 +10,6 @@
         var updated = {};
 
         vm.alerts = AlertsService.alerts;
-        vm.showEmptyRelatedTables = false;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         vm.canCreate = function() {
@@ -47,25 +46,7 @@
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
-                if (error instanceof ERMrest.PreconditionFailedError) {
-                    return $uibModal.open({
-                        templateUrl: "../common/templates/refresh.modal.html",
-                        controller: "ErrorDialogController",
-                        controllerAs: "ctrl",
-                        size: "sm",
-                        resolve: {
-                            params: {
-                                title: messageMap.pageRefreshRequired.title,
-                                message: messageMap.pageRefreshRequired.message
-                            }
-                        }
-                    }).result.then(function reload() {
-                        // Reload the page
-                        return $window.location.reload();
-                    });
-                } else {
-                    throw error;
-                }
+                throw error;
             });
         };
 
@@ -97,7 +78,7 @@
                     $rootScope.loading = false;
                 }
 
-                if (vm.showEmptyRelatedTables) {
+                if ($rootScope.showEmptyRelatedTables) {
                     return isFirst || prevTableHasLoaded;
                 }
 
@@ -118,15 +99,11 @@
         };
 
         vm.toggleRelatedTables = function() {
-            vm.showEmptyRelatedTables = !vm.showEmptyRelatedTables;
+            $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
         };
 
         vm.canCreateRelated = function(relatedRef) {
-            var canCreate = (relatedRef.canCreate && $rootScope.modifyRecord);
-            if (canCreate && !vm.showEmptyRelatedTables) {
-                vm.showEmptyRelatedTables = canCreate;
-            }
-            return canCreate;
+            return (relatedRef.canCreate && $rootScope.modifyRecord);
         };
 
         // Send user to RecordEdit to create a new row in this related table

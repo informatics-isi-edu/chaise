@@ -22,11 +22,11 @@
                     <span class="glyphicon glyphicon-copy"></span> <strong>Copy</strong>
                 </a>&nbsp;&nbsp;
                 <delete-link id="delete-record" callback="::ctrl.deleteRecord()" ng-if="::ctrl.canDelete()" label="Delete" uib-tooltip="Click here to delete this record." tooltip-placement="bottom" icon="true"></delete-link>&nbsp;&nbsp;
-                <a id="show-all-related-tables" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((ctrl.showEmptyRelatedTables) ? 'hide empty related entities.' : 'show empty related entities too.')}}" tooltip-placement="bottom">
-                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
+                <a id="show-all-related-tables" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related entities.' : 'show empty related entities too.')}}" tooltip-placement="bottom">
+                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !showEmptyRelatedTables, 'glyphicon-resize-small': showEmptyRelatedTables}"></span>
                     <strong>
-                        <span ng-show="!ctrl.showEmptyRelatedTables">Show All</span>
-                        <span ng-show="ctrl.showEmptyRelatedTables">Hide Empty</span>
+                        <span ng-show="!showEmptyRelatedTables">Show All</span>
+                        <span ng-show="showEmptyRelatedTables">Hide Empty</span>
                          Related Records
                     </strong>
                 </a>&nbsp;&nbsp;
@@ -56,7 +56,7 @@
                 <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index" ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
                     <uib-accordion-heading>
                         <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': tableModels[$index].open, 'glyphicon-chevron-right': !tableModels[$index].open}"></i>
-                        <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> (Showing first {{::tableModels[$index].rowValues.length}}{{::tableModels[$index].hasNext ? '+' : ''}} {{::tableModels[$index].rowValues.length>1 ? 'results' : 'result'}})
+                        <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> <span ng-if="tableModels[$index].rowValues.length==0">(no results found)</span><span ng-if="tableModels[$index].rowValues.length!=0">(showing {{::tableModels[$index].hasNext ? 'first' : 'all'}} {{tableModels[$index].rowValues.length}} results)</span>
                     </uib-accordion-heading>
 
                     <!-- for different elements inside the accordion -->

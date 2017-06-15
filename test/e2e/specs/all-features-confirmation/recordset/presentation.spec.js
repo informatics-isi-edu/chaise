@@ -248,7 +248,7 @@ describe('View recordset,', function() {
                 });
             });
 
-            it('should show a modal if user tries to delete (via action column) a record that has been modified by someone else (412 error)', function() {
+            xit('should show a modal if user tries to delete (via action column) a record that has been modified by someone else (412 error)', function() {
                 var EC = protractor.ExpectedConditions, allWindows, config;
                 // Edit a record in a new tab in order to change the ETag
                 recEditUrl = recEditUrl.replace('id=2003', 'id=4004');
@@ -306,7 +306,7 @@ describe('View recordset,', function() {
                     console.dir(error);
                     expect(error).not.toBeDefined();
                 });
-            });
+            }).pend("412 support has been dropped from ermestjs.");
 
             it("action columns should show delete button that deletes record", function() {
                 var deleteButton;
