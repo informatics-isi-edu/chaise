@@ -87,7 +87,6 @@ COMMON=common
 MDEDIT_CSS_DEPS=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.css
-	#$(COMMON)/vendor/MarkdownEditor/styles/markdownEdit.css
 
 MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/jquery.min.js \
 	$(COMMON)/vendor/MarkdownEditor/marked.js \

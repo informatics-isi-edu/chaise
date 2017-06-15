@@ -73,73 +73,89 @@ angular
  * @return mixed additionButtons
  */
 function addNewButtons() {
-  return [[{
-        name: "groupFont",
-        data: [{
-          name: "cmdStrikethrough",
-          toggle: false,
-          title: "Strikethrough",
-          icon: {
-            fa: "fa fa-strikethrough",
-            glyph: "glyphicon glyphicon-minus"
-          },
-          callback: function(e) {
-            // Give/remove ~~ surround the selection
-            var chunk, cursor, selected = e.getSelection(),
-              content = e.getContent();
-
-            if (selected.length === 0) {
-              // Give extra word
-              chunk = e.__localize('strikethrough');
-            } else {
-              chunk = selected.text;
-            }
-
-            // transform selection and set the cursor into chunked text
-            if (content.substr(selected.start - 2, 2) === '~~' &&
-              content.substr(selected.end, 2) === '~~') {
-              e.setSelection(selected.start - 2, selected.end + 2);
-              e.replaceSelection(chunk);
-              cursor = selected.start - 2;
-            } else {
-              e.replaceSelection('~~' + chunk + '~~');
-              cursor = selected.start + 2;
-            }
-
-            // Set the cursor
-            e.setSelection(cursor, cursor + chunk.length);
-          }
-        }]
-  },
+  return [[
+        // {
+  //       name: "groupFont",
+  //       data: [{
+  //         name: "cmdStrikethrough",
+  //         toggle: false,
+  //         title: "Strikethrough",
+  //         icon: {
+  //           fa: "fa fa-strikethrough",
+  //           glyph: "glyphicon glyphicon-minus"
+  //         },
+  //         callback: function(e) {
+  //           // Give/remove ~~ surround the selection
+  //           var chunk, cursor, selected = e.getSelection(),
+  //             content = e.getContent();
+  //
+  //           if (selected.length === 0) {
+  //             // Give extra word
+  //             chunk = e.__localize('strikethrough');
+  //           } else {
+  //             chunk = selected.text;
+  //           }
+  //
+  //           // transform selection and set the cursor into chunked text
+  //           if (content.substr(selected.start - 2, 2) === '~~' &&
+  //             content.substr(selected.end, 2) === '~~') {
+  //             e.setSelection(selected.start - 2, selected.end + 2);
+  //             e.replaceSelection(chunk);
+  //             cursor = selected.start - 2;
+  //           } else {
+  //             e.replaceSelection('~~' + chunk + '~~');
+  //             cursor = selected.start + 2;
+  //           }
+  //
+  //           // Set the cursor
+  //           e.setSelection(cursor, cursor + chunk.length);
+  //         }
+  //       }]
+  // },
+  // {
+  //       name: "groupMisc",
+  //       data: [{
+  //         name: "cmdTable",
+  //         toggle: false,
+  //         title: "Table",
+  //         icon: {
+  //           fa: "fa fa-table",
+  //           glyph: "glyphicon glyphicon-th"
+  //         },
+  //         callback: function(e) {
+  //           // Replace selection with some drinks
+  //           var chunk, cursor,
+  //               selected = e.getSelection(), content = e.getContent(),
+  //               chunk = "\n| Tables        | Are           | Cool  | \n"
+  //               + "| ------------- |:-------------:| -----:| \n"
+  //               + "| col 3 is      | right-aligned | $1600 | \n"
+  //               + "| col 2 is      | centered      |   $12 | \n"
+  //               + "| zebra stripes | are neat      |    $1 |"
+  //
+  //           // transform selection and set the cursor into chunked text
+  //           e.replaceSelection(chunk)
+  //           cursor = selected.start
+  //
+  //           // Set the cursor
+  //           e.setSelection(cursor,cursor+chunk.length);
+  //         }
+  //       }]
+  // },
   {
-        name: "groupMisc",
+        name: "groupHelp",
         data: [{
-          name: "cmdTable",
-          toggle: false,
-          title: "Table",
+          name: "cmdHelp",
+          title: "Help",
           icon: {
-            fa: "fa fa-table",
-            glyph: "glyphicon glyphicon-th"
+            fa: "fa fa-question",
+            glyph: "glyphicon glyphicon-question-sign"
           },
           callback: function(e) {
-            // Replace selection with some drinks
-            var chunk, cursor,
-                selected = e.getSelection(), content = e.getContent(),
-                chunk = "\n| Tables        | Are           | Cool  | \n"
-                + "| ------------- |:-------------:| -----:| \n"
-                + "| col 3 is      | right-aligned | $1600 | \n"
-                + "| col 2 is      | centered      |   $12 | \n"
-                + "| zebra stripes | are neat      |    $1 |"
-
-            // transform selection and set the cursor into chunked text
-            e.replaceSelection(chunk)
-            cursor = selected.start
-
-            // Set the cursor
-            e.setSelection(cursor,cursor+chunk.length);
+              window.open('http://commonmark.org/help/');
           }
         }]
-  }]];
+  }
+]];
 }
 
 /** Evaluate a function name passed as string and run it from the scope.
