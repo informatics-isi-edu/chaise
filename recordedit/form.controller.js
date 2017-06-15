@@ -71,7 +71,6 @@
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
-
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
         function redirectAfterSubmission(page) {
             var rowset = vm.recordEditModel.rows,
