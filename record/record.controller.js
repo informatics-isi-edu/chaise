@@ -10,7 +10,6 @@
         var updated = {};
 
         vm.alerts = AlertsService.alerts;
-        vm.showEmptyRelatedTables = false;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         vm.canCreate = function() {
@@ -79,7 +78,7 @@
                     $rootScope.loading = false;
                 }
 
-                if (vm.showEmptyRelatedTables) {
+                if ($rootScope.showEmptyRelatedTables) {
                     return isFirst || prevTableHasLoaded;
                 }
 
@@ -100,15 +99,11 @@
         };
 
         vm.toggleRelatedTables = function() {
-            vm.showEmptyRelatedTables = !vm.showEmptyRelatedTables;
+            $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
         };
 
         vm.canCreateRelated = function(relatedRef) {
-            var canCreate = (relatedRef.canCreate && $rootScope.modifyRecord);
-            if (canCreate && !vm.showEmptyRelatedTables) {
-                vm.showEmptyRelatedTables = canCreate;
-            }
-            return canCreate;
+            return (relatedRef.canCreate && $rootScope.modifyRecord);
         };
 
         // Send user to RecordEdit to create a new row in this related table
