@@ -2,7 +2,12 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var testParams = {
     table_name: "accommodation",
-    column_names: ["first_name", "last_name", "product-person_product-person-fk"]
+    column_names: ["first_name", "last_name", "product-person_product-person-fk"],
+    column_values: {
+        first_name: "John",
+        last_name: "Doe",
+        "product-person_product-person-fk": "John Doe"
+    }
 };
 
 describe('Add a record,', function() {
@@ -44,17 +49,16 @@ describe('Add a record,', function() {
                     // count is needed for clicking a random row
                     return rows.count();
                 }).then(function(ct) {
-                    expect(ct).toBeGreaterThan(0);
+                    expect(ct).toBe(3);
 
-                    var index = Math.floor(Math.random() * ct);
-                    return rows.get(index).all(by.css(".select-action-button"));
+                    return rows.get(0).all(by.css(".select-action-button"));
                 }).then(function(selectButtons) {
                     return selectButtons[0].click();
                 }).then(function() {
                     browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
-                    var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue("Person", 0);
-                    expect(foreignKeyInput.getAttribute("value")).toBeDefined();
+                    var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("Person", 0);
+                    expect(foreignKeyInput.getText()).toBe(testParams.column_values["product-person_product-person-fk"], "Foreign Key input display value is incorrect");
                 });
             });
         });
@@ -89,7 +93,7 @@ describe('Add a record,', function() {
                     chaisePage.waitForUrl(redirectUrl, browser.params.defaultTimeout).then(function() {
                         expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
 
-                        recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names);
+                        recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.column_values);
                     }, function() {
                         console.log("          Timed out while waiting for the url to be the new one");
                         expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);

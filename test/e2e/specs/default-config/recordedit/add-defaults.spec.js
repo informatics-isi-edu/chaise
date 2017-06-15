@@ -4,34 +4,59 @@ var testParams = {
     // for verifying data is present
     column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "defaults_fk_text", "defaults_fk_text_disabled", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled"],
     table_name: "defaults-table",
+    default_column_values: {
     // data values
-    text_value: "default",
-    text_disabled_value: "Disabled input",
-    markdown_value: "**bold**",
-    markdown_disabled_value: "*italics*",
-    foreign_key_value: "2",
-    foreign_key_disabled_value: "5",
-    int_value: "25",
-    int_disabled_value: "20",
-    float_value: "1.6478",
-    float_disabled_value: "93.2182",
-    boolean_true_value: "true",
-    boolean_false_value: "false",
-    boolean_disabled_value: "false",
-    date_value: "2010-06-08",
-    date_disabled_value: "2014-05-12",
-    timestamp_date_value: "2014-05-07",
-    timestamp_time_value: "02:40:00",
-    timestamp_meridiem_value: "PM",
-    timestamp_disabled_value: "2010-06-13 17:22:00-07",
-    timestamp_disabled_no_default_value: "Automatically generated"
+        text_value: "default",
+        text_disabled_value: "Disabled input",
+        markdown_value: "**bold**",
+        markdown_disabled_value: "*italics*",
+        foreign_key_value: "2",
+        foreign_key_disabled_value: "5",
+        int_value: "25",
+        int_disabled_value: "20",
+        float_value: "1.6478",
+        float_disabled_value: "93.2182",
+        boolean_true_value: "true",
+        boolean_false_value: "false",
+        boolean_disabled_value: "false",
+        date_value: "2010-06-08",
+        date_disabled_value: "2014-05-12",
+        timestamp_date_value: "2014-05-07",
+        timestamp_time_value: "02:40:00",
+        timestamp_meridiem_value: "PM",
+        timestamp_disabled_value: "2010-06-13 17:22:00-07",
+        timestamp_disabled_no_default_value: "Automatically generated"
+    },
+    record_column_values: {
+    // data values
+        text: "default",
+        text_disabled: "Disabled input",
+        markdown: "bold",
+        markdown_disabled: "italics",
+        // Value of "name" column on foreign related entity
+        defaults_fk_text: "Default for foreign_key column",
+        // Value of "name" column on foreign related entity
+        defaults_fk_text_disabled: "Default for foreign_key_disabled column",
+        int: "25",
+        int_disabled: "20",
+        float: "1.6478",
+        float_disabled: "93.2182",
+        boolean_true: "true",
+        boolean_false: "false",
+        boolean_disabled: "false",
+        date: "2010-06-08",
+        date_disabled: "2014-05-12",
+        timestamp: "2014-05-07 14:40:00",
+        timestamp_disabled: "2010-06-13 17:22:00",
+        timestamp_disabled_no_default: "Automatically generated"
+    }
 };
 
 describe('Record Add with defaults', function() {
 
     describe("for when the user creates an entity with default values, ", function() {
         var EC = protractor.ExpectedConditions,
-            textDisplayname = "<strong>text</strong>",
+            textDisplayname = "<strong>text</strong>", values = testParams.default_column_values,
             textInput, textDisabledInput, markdownInput, markdownDisabledInput, foreignKeyInput, foreignKeyDisabledInput, intInput, intDisabledInput,
             floatInput, floatDisabledInput, booleanTrueInput, booleanFalseInput, booleanDisabledInput, dateInput, dateDisabledInput, timestampInputs, timestampDisabledInput;
 
@@ -63,13 +88,14 @@ describe('Record Add with defaults', function() {
             booleanFalseInput = chaisePage.recordEditPage.getInputById(0, "boolean_false");
             dateInput = chaisePage.recordEditPage.getInputById(0, "date");
 
-            expect(textInput.getAttribute("value")).toBe(testParams.text_value, "Text input default is incorrect");
-            expect(markdownInput.getAttribute("value")).toBe(testParams.markdown_value, "Markdown input default is incorrect");
-            expect(intInput.getAttribute("value")).toBe(testParams.int_value, "Int input default is incorrect");
-            // expect(floatInput.getAttribute("value")).toBe(testParams.float_value, "Float input default is incorrect");
-            expect(chaisePage.recordEditPage.getDropdownText(booleanTrueInput)).toBe(testParams.boolean_true_value, "Boolean input is not set to true");
-            expect(chaisePage.recordEditPage.getDropdownText(booleanFalseInput)).toBe(testParams.boolean_false_value, "Boolean input is not set to false");
-            expect(dateInput.getAttribute("value")).toBe(testParams.date_value, "Date input default is incorrect");
+            expect(textInput.getAttribute("value")).toBe(values.text_value, "Text input default is incorrect");
+            expect(markdownInput.getAttribute("value")).toBe(values.markdown_value, "Markdown input default is incorrect");
+            expect(intInput.getAttribute("value")).toBe(values.int_value, "Int input default is incorrect");
+            // TODO: when float introspection is supported, uncomment below case
+            // expect(floatInput.getAttribute("value")).toBe(values.float_value, "Float input default is incorrect");
+            expect(chaisePage.recordEditPage.getDropdownText(booleanTrueInput)).toBe(values.boolean_true_value, "Boolean input is not set to true");
+            expect(chaisePage.recordEditPage.getDropdownText(booleanFalseInput)).toBe(values.boolean_false_value, "Boolean input is not set to false");
+            expect(dateInput.getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
         });
 
         it("should prefill simple input fields that are disabled with their default value.", function() {
@@ -80,37 +106,38 @@ describe('Record Add with defaults', function() {
             booleanDisabledInput = chaisePage.recordEditPage.getInputById(0, "boolean_disabled");
             dateDisabledInput = chaisePage.recordEditPage.getInputById(0, "date_disabled");
 
-            expect(textDisabledInput.getAttribute("value")).toBe(testParams.text_disabled_value, "Text disabled input default is incorrect");
-            expect(markdownDisabledInput.getAttribute("value")).toBe(testParams.markdown_disabled_value, "Markdown disabled input default is incorrect");
-            expect(intDisabledInput.getAttribute("value")).toBe(testParams.int_disabled_value, "Int disabled input default is incorrect");
-            // expect(floatDisabledInput.getAttribute("value")).toBe(testParams.float_disabled_value, "Float disabled input default is incorrect");
-            expect(chaisePage.recordEditPage.getDropdownText(booleanDisabledInput)).toBe(testParams.boolean_disabled_value, "Boolean disabled input default is incorrect");
-            expect(dateDisabledInput.getAttribute("value")).toBe(testParams.date_disabled_value, "Date disabled input default is incorrect");
+            expect(textDisabledInput.getAttribute("value")).toBe(values.text_disabled_value, "Text disabled input default is incorrect");
+            expect(markdownDisabledInput.getAttribute("value")).toBe(values.markdown_disabled_value, "Markdown disabled input default is incorrect");
+            expect(intDisabledInput.getAttribute("value")).toBe(values.int_disabled_value, "Int disabled input default is incorrect");
+            // TODO: when float introspection is supported, uncomment below case
+            // expect(floatDisabledInput.getAttribute("value")).toBe(values.float_disabled_value, "Float disabled input default is incorrect");
+            expect(chaisePage.recordEditPage.getDropdownText(booleanDisabledInput)).toBe(values.boolean_disabled_value, "Boolean disabled input default is incorrect");
+            expect(dateDisabledInput.getAttribute("value")).toBe(values.date_disabled_value, "Date disabled input default is incorrect");
         });
 
         it("should intialize timestamp columns properly with a default value.", function() {
             timestampInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn("timestamp", 0);
             timestampDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamp_disabled");
 
-            expect(timestampInputs.date.getAttribute('value')).toBe(testParams.timestamp_date_value, "Timestamp date default is incorrect");
-            expect(timestampInputs.time.getAttribute('value')).toBe(testParams.timestamp_time_value, "Timestamp time default is incorrect");
-            expect(timestampInputs.meridiem.getText()).toBe(testParams.timestamp_meridiem_value, "Timestamp meridiem default is incorrect");
-            expect(timestampDisabledInput.getAttribute('value')).toBe(testParams.timestamp_disabled_value, "Timestamp disabled value is incorrect");
+            expect(timestampInputs.date.getAttribute('value')).toBe(values.timestamp_date_value, "Timestamp date default is incorrect");
+            expect(timestampInputs.time.getAttribute('value')).toBe(values.timestamp_time_value, "Timestamp time default is incorrect");
+            expect(timestampInputs.meridiem.getText()).toBe(values.timestamp_meridiem_value, "Timestamp meridiem default is incorrect");
+            expect(timestampDisabledInput.getAttribute('value')).toBe(values.timestamp_disabled_value, "Timestamp disabled value is incorrect");
         });
 
         it("should initialize timestamp columns properly if they are disabled without a default.", function() {
             timestampDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamp_disabled_no_default");
 
             expect(timestampDisabledInput.getAttribute("value")).toBe("", "The disabled timestamp value is incorrect");
-            expect(timestampDisabledInput.getAttribute("placeholder")).toBe(testParams.timestamp_disabled_no_default_value, "The disabled timestamp placeholder is incorrect");
+            expect(timestampDisabledInput.getAttribute("placeholder")).toBe(values.timestamp_disabled_no_default_value, "The disabled timestamp placeholder is incorrect");
         });
 
         it("should initialize foreign key inputs with their default value.", function() {
             foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key", 0);
             foreignKeyDisabledInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key_disabled", 0);
 
-            expect(foreignKeyInput.getText()).toBe(testParams.foreign_key_value, "Foreign key input default is incorrect");
-            expect(foreignKeyDisabledInput.getText()).toBe(testParams.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
+            expect(foreignKeyInput.getText()).toBe(values.foreign_key_value, "Foreign key input default is incorrect");
+            expect(foreignKeyDisabledInput.getText()).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
         });
 
         // TODO write tests for default values for composite foreign keys when implemented
@@ -129,7 +156,7 @@ describe('Record Add with defaults', function() {
                 chaisePage.waitForUrl(redirectUrl).then(function() {
                     expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
 
-                    recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names);
+                    recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.record_column_values);
                 });
             });
         });
