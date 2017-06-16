@@ -381,6 +381,11 @@ var recordEditPage = function() {
         return element(by.id("entity-title"));
     };
 
+    this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("row-" + index + '-' + columnDisplayName + "-display"));
+    };
+
     this.getForeignKeyInputValue = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
         return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
