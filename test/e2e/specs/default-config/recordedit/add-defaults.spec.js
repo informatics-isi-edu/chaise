@@ -56,7 +56,7 @@ describe('Record Add with defaults', function() {
 
     describe("for when the user creates an entity with default values, ", function() {
         var EC = protractor.ExpectedConditions,
-            textDisplayname = "<strong>text</strong>", values = testParams.default_column_values,
+            values = testParams.default_column_values,
             textInput, textDisabledInput, markdownInput, markdownDisabledInput, foreignKeyInput, foreignKeyDisabledInput, intInput, intDisabledInput,
             floatInput, floatDisabledInput, booleanTrueInput, booleanFalseInput, booleanDisabledInput, dateInput, dateDisabledInput, timestampInputs, timestampDisabledInput;
 
@@ -65,25 +65,11 @@ describe('Record Add with defaults', function() {
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/defaults:" + testParams.table_name);
         });
 
-        // adding this test here to avoid making a whole new spec
-        it("should render columns based on their markdown pattern.", function() {
-            // way to know recordedit has loaded
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                return chaisePage.recordEditPage.getColumnCaptionsWithHtml();
-            }).then(function(pageColumns) {
-                expect(pageColumns[0].getText()).toBe("text");
-
-                return pageColumns[0].getAttribute("innerHTML");
-            }).then(function(html) {
-                expect(html).toBe(textDisplayname);
-            });
-        });
-
         it("should prefill simple input fields that are not disabled with their default value.", function() {
-            textInput = chaisePage.recordEditPage.getInputById(0, textDisplayname);
+            textInput = chaisePage.recordEditPage.getInputById(0, "text");
             markdownInput = chaisePage.recordEditPage.getInputById(0, "markdown");
             intInput = chaisePage.recordEditPage.getInputById(0, "int");
-            // floatInput = chaisePage.recordEditPage.getInputById(0, "float");
+            floatInput = chaisePage.recordEditPage.getInputById(0, "float");
             booleanTrueInput = chaisePage.recordEditPage.getInputById(0, "boolean_true");
             booleanFalseInput = chaisePage.recordEditPage.getInputById(0, "boolean_false");
             dateInput = chaisePage.recordEditPage.getInputById(0, "date");
@@ -91,8 +77,7 @@ describe('Record Add with defaults', function() {
             expect(textInput.getAttribute("value")).toBe(values.text_value, "Text input default is incorrect");
             expect(markdownInput.getAttribute("value")).toBe(values.markdown_value, "Markdown input default is incorrect");
             expect(intInput.getAttribute("value")).toBe(values.int_value, "Int input default is incorrect");
-            // TODO: when float introspection is supported, uncomment below case
-            // expect(floatInput.getAttribute("value")).toBe(values.float_value, "Float input default is incorrect");
+            expect(floatInput.getAttribute("value")).toBe(values.float_value, "Float input default is incorrect");
             expect(chaisePage.recordEditPage.getDropdownText(booleanTrueInput)).toBe(values.boolean_true_value, "Boolean input is not set to true");
             expect(chaisePage.recordEditPage.getDropdownText(booleanFalseInput)).toBe(values.boolean_false_value, "Boolean input is not set to false");
             expect(dateInput.getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
@@ -102,15 +87,14 @@ describe('Record Add with defaults', function() {
             textDisabledInput = chaisePage.recordEditPage.getInputById(0, "text_disabled");
             markdownDisabledInput = chaisePage.recordEditPage.getInputById(0, "markdown_disabled");
             intDisabledInput = chaisePage.recordEditPage.getInputById(0, "int_disabled");
-            // floatDisabledInput = chaisePage.recordEditPage.getInputById(0, "float_disabled");
+            floatDisabledInput = chaisePage.recordEditPage.getInputById(0, "float_disabled");
             booleanDisabledInput = chaisePage.recordEditPage.getInputById(0, "boolean_disabled");
             dateDisabledInput = chaisePage.recordEditPage.getInputById(0, "date_disabled");
 
             expect(textDisabledInput.getAttribute("value")).toBe(values.text_disabled_value, "Text disabled input default is incorrect");
             expect(markdownDisabledInput.getAttribute("value")).toBe(values.markdown_disabled_value, "Markdown disabled input default is incorrect");
             expect(intDisabledInput.getAttribute("value")).toBe(values.int_disabled_value, "Int disabled input default is incorrect");
-            // TODO: when float introspection is supported, uncomment below case
-            // expect(floatDisabledInput.getAttribute("value")).toBe(values.float_disabled_value, "Float disabled input default is incorrect");
+            expect(floatDisabledInput.getAttribute("value")).toBe(values.float_disabled_value, "Float disabled input default is incorrect");
             expect(chaisePage.recordEditPage.getDropdownText(booleanDisabledInput)).toBe(values.boolean_disabled_value, "Boolean disabled input default is incorrect");
             expect(dateDisabledInput.getAttribute("value")).toBe(values.date_disabled_value, "Date disabled input default is incorrect");
         });

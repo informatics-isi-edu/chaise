@@ -75,11 +75,6 @@
                     "nullok": true,
                     "type": {
                         "typename": "text"
-                    },
-                    "annotations": {
-                        "tag:misd.isi.edu,2015:display": {
-                            "markdown_name": "**text**"
-                        }
                     }
                 }, {
                     "name": "text_disabled",
