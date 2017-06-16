@@ -1100,7 +1100,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         console.log("\n       File Input Fields");
                         var columns = tableParams.columns.filter(function(c){ if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
                         columns.forEach(function(column) {
-                            exports.testFileInput(column.name, recordIndex, tableParams.files.shift());
+                            exports.testFileInput(column.name, recordIndex, tableParams.files.shift(), true);
                         });
                     });
 
@@ -1155,6 +1155,7 @@ exports.createFiles = function(files) {
 exports.deleteFiles = function(files) {
     files.forEach(function(f) {
         var path = require('path').join(__dirname , "/../data_setup/uploaded_files/" + f.path);
+        console.log(path + " deleted");
         exec('rm ' + f.path);
     });
 };
@@ -1162,13 +1163,19 @@ exports.deleteFiles = function(files) {
 /**
  * test a file input with the given column name, and file that we want to test 
  * the file input against it.
- * @param  {string} colName     name of the column
- * @param  {int}    recordIndex index of record in the view
- * @param  {obj}    file        object with at least path, and name attributes.
+ * @param  {string}         colName         name of the column
+ * @param  {int}            recordIndex     index of record in the view
+ * @param  {obj}            file            object with at least path, and name attributes.
+ * @param  {string=}        currentValue    if you want to test the current value.   
+ * @param  {boolean=false}  print           should it print the file names or not.
  */
-exports.testFileInput = function (colName, recordIndex, file) {
+exports.testFileInput = function (colName, recordIndex, file, currentValue, print) {
     chaisePage.recordEditPage.getInputForAColumn(colName, recordIndex).then(function(fileInput) {
-        console.log("         ->" + colName);
+        print = typeof print !== "boolean" ? false : print;
+        if (print) {
+            console.log("         ->" + colName);
+        }
+        
         if (fileInput) {
             chaisePage.recordEditPage.getInputForAColumn("txt" + colName, recordIndex).then(function(txtInput) {
 
@@ -1193,7 +1200,7 @@ exports.testFileInput = function (colName, recordIndex, file) {
 
                             browser.sleep(50);
 
-                            expect(txtInput.getAttribute('value')).toBe("");
+                            expect(txtInput.getAttribute('value')).toBe("", "couldn't clear the button.");
 
                             selectFile();
                         });

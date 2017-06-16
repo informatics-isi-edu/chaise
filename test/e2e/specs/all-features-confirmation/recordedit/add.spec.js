@@ -3,6 +3,26 @@ var recordEditHelpers = require('../../../utils/recordedit-helpers.js'), chance 
 var exec = require('child_process').execSync;
 var testParams = {
     tables: [{
+        table_name: "accommodation",
+        create_entity_displayname: "Accommodations",
+        columns: [
+            { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
+            { name: "title", title: "Name of Accommodation", type: "text", nullok: false},
+            { name: "website", isUrl: true, title: "Website", type: "text", comment: "A valid url of the accommodation"},
+            { name: "category", isForeignKey: true, title: "Category", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/id=10003"}, nullok: false},
+            { name: "rating", title: "User Rating", type: "float4", nullok: false},
+            { name: "summary", title: "Summary", type: "longtext", nullok: false},
+            { name: "description", title: "Description", type: "markdown"},
+            { name: "no_of_rooms", title: "Number of Rooms", type: "int2"},
+            { name: "cover", isForeignKey: true, title: "Cover Image", type: "int2", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-add:file/id=3005"} },
+            { name: "thumbnail", isForeignKey: true, title: "Thumbnail", type: "int4"},
+            { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
+            { name: "luxurious", title: "Is Luxurious", type: "boolean" }
+        ],
+        primary_keys: ["id"],
+        records: 2,
+        files: []
+    }, {
         table_name: "file",
         columns: [
             { name: "fileid", title: "fileid", type: "int4" },
@@ -134,7 +154,7 @@ describe('Record Add', function() {
                             if (tableParams.records > 1) {
 
                                 // if there is a file upload
-                                if (tableParams.files.length) {
+                                if (!process.env.TRAVIS && tableParams.files.length > 0) {
                                     browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
                                 }
 
