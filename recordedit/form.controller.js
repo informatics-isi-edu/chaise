@@ -131,6 +131,10 @@
                                 }
                             }
                             break;
+                        case "json":
+                        case "jsonb":
+                            rowVal=JSON.parse(rowVal);
+                            break;
                         default:
                             if (col.isAsset) {
                                 if (!vm.readyToSubmit) {
@@ -243,7 +247,6 @@
                         var data = $rootScope.tuples[i].data;
                         // assign each value from the form to the data object on tuple
                         for (var key in row) {
-                            console.log(row[key]);
                             data[key] = (row[key] === '' ? null : row[key]);
                         }
                     }
