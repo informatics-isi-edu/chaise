@@ -1122,14 +1122,18 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
 };
 
-// params must include the names of the columns that you want to check for values of
-exports.testRecordAppValuesAfterSubmission = function(column_names) {
+/**
+ * column_names - array of string column_names
+ * column_values - hash of column_name: column_value
+ * Checks for if values are defined and set properly
+ */
+exports.testRecordAppValuesAfterSubmission = function(column_names, column_values) {
     chaisePage.waitForElement(element(by.id('tblRecord')));
 
     for (var i = 0; i < column_names.length; i++) {
         var columnName = column_names[i];
         var column = chaisePage.recordPage.getColumnValue(columnName);
-        expect(column.getText()).toBeDefined();
+        expect(column.getText()).toBe(column_values[columnName], "Value for " + columnName + " is not what was expected");
     }
 };
 

@@ -116,8 +116,8 @@
               "display": "Name of Accommodation"
             },
             "tag:misd.isi.edu,2015:display" : {
-              "name" : "Name of Accommodation"
-            },
+              "markdown_name" : "**Name of Accommodation**"
+          },
             "facetOrder": [
               "1"
             ]

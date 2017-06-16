@@ -8,7 +8,7 @@ var testParams = {
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", value: "2002", type: "serial4", nullok: false},
-            { name: "title", title: "Name of Accommodation", value: "Sherathon Hotel", type: "text", nullok: false},
+            { name: "title", title: "<strong>Name of Accommodation</strong>", value: "Sherathon Hotel", type: "text", nullok: false},
             { name: "website", isUrl: true, title: "Website", value: "<p class=\"ng-scope\"><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>", type: "text", comment: "A valid url of the accommodation"},
             { name: "category",isForeignKey: true, title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10003"}, nullok: false},
             { name: "rating", title: "User Rating", value: "4.3000", type: "float4", nullok: false},

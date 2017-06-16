@@ -381,6 +381,11 @@ var recordEditPage = function() {
         return element(by.id("entity-title"));
     };
 
+    this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("row-" + index + '-' + columnDisplayName + "-display"));
+    };
+
     this.getForeignKeyInputValue = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
         return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
@@ -619,6 +624,11 @@ var recordPage = function() {
     this.getRelatedTableHeading = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-heading-" + displayName));
+    };
+
+    this.getRelatedTableHeadingTitle = function(displayname) {
+        displayName = makeSafeIdAttr(displayname);
+        return element(by.id("rt-heading-" + displayName)).element(by.css('.panel-title'))
     };
 
     this.getRelatedTableColumnNamesByTable = function(displayName) {
