@@ -128,14 +128,7 @@
                         // Update submission model
                         var columnNames = Object.keys(cookie.keys);
                         columnNames.forEach(function(colName) {
-                            if(colName=="json"){
-                                var myJson = JSON.parse(cookie.keys[colName]);
-                                var colValue= $.parseJSON(myJson);
-                            }
-                            else{
-                                var colValue = cookie.keys[colName];
-                                console.log(colName+ "  "+ colValue);
-                            }
+                            var colValue = cookie.keys[colName];
                             recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
                         });
                     }
@@ -230,10 +223,6 @@
                                         case "numeric":
                                             var floatVal = parseFloat(values[i]);
                                             value = (!isNaN(floatVal) ? floatVal : null);
-                                            break;
-                                        case "json":
-                                            var jsonVal= JSON.stringify(values[i],undefined,4);
-                                            value = jsonVal;
                                             break;
                                         default:
                                             if (column.isAsset) {

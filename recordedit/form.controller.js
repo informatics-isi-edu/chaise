@@ -131,9 +131,6 @@
                                 }
                             }
                             break;
-                        case "json":
-                            rowVal=JSON.parse(rowVal);
-                            break;
                         default:
                             if (col.isAsset) {
                                 if (!vm.readyToSubmit) {
