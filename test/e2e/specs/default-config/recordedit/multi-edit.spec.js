@@ -5,6 +5,7 @@ var testParams = {
     schema_name: "multi-edit",
     tables: [{
             table_name: "multi-add-table",
+            sortColumns: "id",
             keys: [
                 {name: "id", value: "1000", operator: "="},
                 {name: "id", value: "1001", operator: "="}
@@ -23,6 +24,7 @@ var testParams = {
             ]
         }, {
             table_name: "multi-add-table",
+            sortColumns: "id",
             keys: [
                 {name: "id", value: "1000", operator: "="},
                 {name: "id", value: "1001", operator: "="},
@@ -47,6 +49,7 @@ var testParams = {
             ]
         }, {
             table_name: 'table_w_multiple_assets',
+            sortColumns: "id",
             keys: [
                 {name: "id",value: "1", operator: "="},
                 {name: "id",value: "2",operator: "="}
@@ -106,6 +109,10 @@ describe('Edit multiple existing record,', function() {
         (function(tableParams, tableIndex, schemaName) {
             var hasFile = tableParams.files && tableParams.files.length > 0;
             var hasErrors = false;
+            var keyPairs = [];
+            tableParams.keys.forEach(function(key) {
+                keyPairs.push(key.name + key.operator + key.value);
+            });
 
             // don't run upload test cases on travis
             if (process.env.TRAVIS && hasFile) {
@@ -122,12 +129,8 @@ describe('Edit multiple existing record,', function() {
             describe("when the user edits " + tableParams.keys.length + " records at a time " + (hasFile ? "with files" : "") + ", ", function() {
 
                 beforeAll(function() {
-                    var keys = [];
-                    tableParams.keys.forEach(function(key) {
-                        keys.push(key.name + key.operator + key.value);
-                    });
                     browser.ignoreSynchronization = true;
-                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keys.join(";"));
+                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";"));
                 });
 
                 it("should have the table displayname as part of the entity title.", function() {
@@ -189,42 +192,52 @@ describe('Edit multiple existing record,', function() {
                             done();
                         });
                     });
+                    
+                    describe("result page", function () {
+                        it("should have the correct title.", function() {
+                            expect(chaisePage.recordEditPage.getResultTitle().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length + " "+ tableParams.table_name +" Records Updated Successfully");
+                        });
+                        
+                        it('should point to the correct link with caption.', function () {
+                            var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")";
+                            
+                            chaisePage.recordEditPage.getResultTitleLink().then(function (titleLink) {
+                                expect(titleLink[0].getText()).toBe(tableParams.table_name, "Title of result page doesn't have the expected caption.");
+                                expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
+                            });
+                        });
 
-                    it("should have the correct title with correct uri", function() {
+                        it('should show correct table rows.', function() {
+                            chaisePage.recordsetPage.getRows().then(function(rows) {
+                                // same row count
+                                expect(rows.length).toBe(tableParams.results.length, "number of rows are not as expected.");
 
-                    });
+                                for (j = 0; j < rows.length; j++) {
+                                    (function(index) {
+                                        rows[index].all(by.tagName("td")).then(function(cells) {
 
-                    it('should show correct table rows.', function() {
-                        chaisePage.recordsetPage.getRows().then(function(rows) {
-                            // same row count
-                            expect(rows.length).toBe(tableParams.results.length, "number of rows are not as expected.");
+                                            // same column count
+                                            expect(cells.length).toBe(tableParams.results[index].length, "number of columns are not as expected.");
 
-                            for (j = 0; j < rows.length; j++) {
-                                (function(index) {
-                                    rows[index].all(by.tagName("td")).then(function(cells) {
+                                            var result;
 
-                                        // same column count
-                                        expect(cells.length).toBe(tableParams.results[index].length, "number of columns are not as expected.");
+                                            // cells is what is being shown
+                                            // tableParams.results is what we expect
+                                            for (k = 0; k < tableParams.results[index].length; k++) {
+                                                result = tableParams.results[index][k];
 
-                                        var result;
-
-                                        // cells is what is being shown
-                                        // tableParams.results is what we expect
-                                        for (k = 0; k < tableParams.results[index].length; k++) {
-                                            result = tableParams.results[index][k];
-
-                                            if (typeof result.link === 'string') {
-                                                expect(cells[k].element(by.tagName("a")).getAttribute("href")).toContain(result.link);
-                                                expect(cells[k].element(by.tagName("a")).getText()).toBe(result.value, "data missmatch in row with index=" + index + ", columns with index=" + k);
-                                            } else {
-                                                expect(cells[k].getText()).toBe(result, "data missmatch in row with index=" + index + ", columns with index=" + k);
+                                                if (typeof result.link === 'string') {
+                                                    expect(cells[k].element(by.tagName("a")).getAttribute("href")).toContain(result.link);
+                                                    expect(cells[k].element(by.tagName("a")).getText()).toBe(result.value, "data missmatch in row with index=" + index + ", columns with index=" + k);
+                                                } else {
+                                                    expect(cells[k].getText()).toBe(result, "data missmatch in row with index=" + index + ", columns with index=" + k);
+                                                }
                                             }
-                                        }
-                                    });
+                                        });
 
-                                })(j);
-                            };
-
+                                    })(j);
+                                };
+                            });
                         });
                     });
                 });
