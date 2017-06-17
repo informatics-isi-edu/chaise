@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap', 'ERMrest',function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap, ERMrest) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap', 'ERMrest','$scope','$injector',function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap, ERMrest,$scope,$injector) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -73,14 +73,31 @@
 
         //amit
         vm.onPreview = function(e){
-            vm.previewOpen = 'X';
-            console.log("on preview clicked: "+ vm.previewOpen);
-            console.log(e.getContent());
-            vm.res = ERMrest.renderMarkdown(e.getContent());
-        }
-        vm.onPreviewEnd = function(e){
-            vm.previewOpen = '';
-            console.log("on preview end: "+ vm.previewOpen);
+            // vm.previewOpen = 'X';
+            // console.log("on preview clicked: "+ vm.previewOpen);
+            // console.log(e.getContent());
+            // vm.res = ERMrest.renderMarkdown(e.getContent());
+
+
+
+            vm.prevCont = e.getContent();
+            // console.log(e.$element[0].id);
+                //     angular.element('#prevLink').attr("textinput",vm.prevCont);
+                //     var el = angular.element('#prevLink');
+                //   $scope = el.scope();
+                //     $injector = el.injector();
+                //     $injector.invoke(function($compile){
+                //        $compile(el)($scope)
+                //     })
+            //     var idToS = '#previewLinkId-'+e.$element[0].name;
+            //     console.log(idToS);
+            //
+            //     $timeout(function () {
+            //         angular.element(document.querySelector(idToS)).click();
+            //
+            //         // angular.element("#form-0-Description-input").triggerHandler('click');
+            // }, 0);
+
         }
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri

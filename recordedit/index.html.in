@@ -234,11 +234,14 @@
                                                     <!-- longtext/textarea input -->
                                                     <div ng-switch-when="longtext">
                                                         <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
-                                                            name="{{::column.name}}" class="form-control content-box" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}" ></textarea>
-
+                                                            name="{{::column.name}}" class="form-control content-box" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}" on-preview="form.onPreview()"></textarea>
+                                                            <a href id="previewLinkId-{{::column.name}}" class="live-preview"  markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]"></a>
                                                         <!-- <span ng-if="::column.type.name === 'markdown'" class="help-block">
-                                                            <a href class="live-preview"  markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]">Live Preview</a>. </small>
+                                                            <small>
+
+                                                        </small>
                                                         </span> -->
+
                                                     </div>
 
                                                     <!-- File input -->

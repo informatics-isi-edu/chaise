@@ -39,13 +39,8 @@ angular
                   //  NOTE: If you want this one to work, you will have to manually download the JS file, not sure why but they haven't released any versions in a while
                   //       https://github.com/toopay/bootstrap-markdown/tree/master/js
                   onPreview: function (e) {
-                      //console.log(e);
-                    //   element.addClass('live-preview');
-
+                     
                       var previewContent = ERMrest.renderMarkdown(e.getContent());
-                      console.log(previewContent);
-                    //   e.setContent(previewContent);
-                    //scope.bindval = previewContent;
                       runScopeFunction(scope, attrs.onPreview, e);
                       return previewContent;
                    },
@@ -154,17 +149,21 @@ function addNewButtons() {
   {
         name: "groupPrev",
         data: [{
-          name: "cmdPrev",
-          title: "Modal",
+          name: "cmdModalPrev",
+          title: "ModalPrev",
           btnText: "Modal",
-          btnClass: 'btn btn-primary live-preview',
+          btnClass: 'btn btn-primary',
           btnAttr:'markdown-preview',
           icon: {
             fa: "fa fa-search",
             glyph: "glyphicon glyphicon-sunglasses"
           },
           callback: function(e) {
-              //window.open('http://commonmark.org/help/');
+            //   var textContent = e.getContent();
+              var idToS = '#previewLinkId-'+e.$element[0].name;
+              angular.element(document.querySelector(idToS)).click();
+
+
           }
         }]
   }

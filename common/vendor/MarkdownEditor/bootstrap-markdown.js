@@ -113,7 +113,6 @@
                 tabIndex = button.tabIndex ? button.tabIndex : '-1',
                 hotkey = typeof button.hotkey !== 'undefined' ? button.hotkey : '',
                 hotkeyCaption = typeof jQuery.hotkeys !== 'undefined' && hotkey !== '' ? ' ('+hotkey+')' : '';
-
             // Construct the button object
             buttonContainer = $('<button></button>');
             buttonContainer.text(' ' + this.__localize(btnText)).addClass('btn-default btn-sm').addClass(btnClass);
@@ -128,6 +127,7 @@
                 'data-handler': buttonHandler,
                 'data-hotkey': hotkey
             });
+            
             if (button.toggle === true){
               buttonContainer.attr('data-toggle', 'button');
             }
@@ -518,7 +518,7 @@
       callbackContent = options.onPreview(this);
       // Set the content based from the callback content if string otherwise parse value from textarea
       content = typeof callbackContent == 'string' ? callbackContent : his.parseContent();
-      console.log(content);
+
       // Build preview element
       replacementContainer.html(content);
 
