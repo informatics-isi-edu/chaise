@@ -2,7 +2,7 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var testParams = {
     // for verifying data is present
-    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "defaults_fk_text", "defaults_fk_text_disabled", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled"],
+    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "defaults_fk_text", "defaults_fk_text_disabled", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled"],
     table_name: "defaults-table",
     default_column_values: {
     // data values
@@ -21,11 +21,16 @@ var testParams = {
         boolean_disabled_value: "false",
         date_value: "2010-06-08",
         date_disabled_value: "2014-05-12",
-        timestamp_date_value: "2014-05-07",
-        timestamp_time_value: "02:40:00",
+        timestamp_date_value: "2016-05-14",
+        timestamp_time_value: "05:30:00",
         timestamp_meridiem_value: "PM",
-        timestamp_disabled_value: "2010-06-13 17:22:00-07",
-        timestamp_disabled_no_default_value: "Automatically generated"
+        timestamp_disabled_value: "2012-06-22 18:36:00",
+        timestamp_disabled_no_default_value: "Automatically generated",
+        timestamptz_date_value: "2014-05-07",
+        timestamptz_time_value: "02:40:00",
+        timestamptz_meridiem_value: "PM",
+        timestamptz_disabled_value: "2010-06-13 17:22:00-07:00",
+        timestamptz_disabled_no_default_value: "Automatically generated"
     },
     record_column_values: {
     // data values
@@ -46,9 +51,10 @@ var testParams = {
         boolean_disabled: "false",
         date: "2010-06-08",
         date_disabled: "2014-05-12",
-        timestamp: "2014-05-07 14:40:00",
-        timestamp_disabled: "2010-06-13 17:22:00",
-        timestamp_disabled_no_default: "Automatically generated"
+        timestamp: "2016-05-14 17:30:00",
+        timestamp_disabled: "2012-06-22 18:36:00",
+        timestamptz: "2014-05-07 14:40:00",
+        timestamptz_disabled: "2010-06-13 17:22:00"
     }
 };
 
@@ -58,7 +64,7 @@ describe('Record Add with defaults', function() {
         var EC = protractor.ExpectedConditions,
             values = testParams.default_column_values,
             textInput, textDisabledInput, markdownInput, markdownDisabledInput, foreignKeyInput, foreignKeyDisabledInput, intInput, intDisabledInput,
-            floatInput, floatDisabledInput, booleanTrueInput, booleanFalseInput, booleanDisabledInput, dateInput, dateDisabledInput, timestampInputs, timestampDisabledInput;
+            floatInput, floatDisabledInput, booleanTrueInput, booleanFalseInput, booleanDisabledInput, dateInput, dateDisabledInput, timestamptzInputs, timestamptzDisabledInput;
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
@@ -99,6 +105,7 @@ describe('Record Add with defaults', function() {
             expect(dateDisabledInput.getAttribute("value")).toBe(values.date_disabled_value, "Date disabled input default is incorrect");
         });
 
+        // Timestamp columns
         it("should intialize timestamp columns properly with a default value.", function() {
             timestampInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn("timestamp", 0);
             timestampDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamp_disabled");
@@ -116,6 +123,25 @@ describe('Record Add with defaults', function() {
             expect(timestampDisabledInput.getAttribute("placeholder")).toBe(values.timestamp_disabled_no_default_value, "The disabled timestamp placeholder is incorrect");
         });
 
+        // Timestamptz columns
+        it("should intialize timestamptz columns properly with a default value.", function() {
+            timestamptzInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn("timestamptz", 0);
+            timestamptzDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamptz_disabled");
+
+            expect(timestamptzInputs.date.getAttribute('value')).toBe(values.timestamptz_date_value, "Timestamptz date default is incorrect");
+            expect(timestamptzInputs.time.getAttribute('value')).toBe(values.timestamptz_time_value, "Timestamptz time default is incorrect");
+            expect(timestamptzInputs.meridiem.getText()).toBe(values.timestamptz_meridiem_value, "Timestamptz meridiem default is incorrect");
+            expect(timestamptzDisabledInput.getAttribute('value')).toBe(values.timestamptz_disabled_value, "Timestamptz disabled value is incorrect");
+        });
+
+        it("should initialize timestamptz columns properly if they are disabled without a default.", function() {
+            timestamptzDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamptz_disabled_no_default");
+
+            expect(timestamptzDisabledInput.getAttribute("value")).toBe("", "The disabled timestamptz value is incorrect");
+            expect(timestamptzDisabledInput.getAttribute("placeholder")).toBe(values.timestamptz_disabled_no_default_value, "The disabled timestamptz placeholder is incorrect");
+        });
+
+        // Foreign key columns
         it("should initialize foreign key inputs with their default value.", function() {
             foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key", 0);
             foreignKeyDisabledInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key_disabled", 0);

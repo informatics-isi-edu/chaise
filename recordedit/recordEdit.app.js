@@ -284,10 +284,10 @@
                             if ((column.type.name === 'timestamp' || column.type.name === 'timestamptz')) {
                                 // setup if column is type timestamp[tz]
                                 if (defaultSet) {
+                                    var ts = moment(column.default);
                                     if (inputDisabled) {
-                                        initialModelValue = column.default;
+                                        initialModelValue = ( column.type.name === 'timestamp' ? ts.format("YYYY-MM-DD HH:mm:ss") : ts.format("YYYY-MM-DD HH:mm:ssZ") );
                                     } else {
-                                        var ts = moment(column.default);
                                         initialModelValue = { date: ts.format('YYYY-MM-DD'), time: ts.format('hh:mm:ss'), meridiem: ts.format('A') };
                                     }
                                 } else if (!inputDisabled) {

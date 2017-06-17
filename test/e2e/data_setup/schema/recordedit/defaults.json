@@ -197,13 +197,40 @@
                     }
                 }, {
                     "name": "timestamp",
+                    "default": "2016-05-014T17:30:00",
+                    "nullok": true,
+                    "type": {
+                        "typename": "timestamp"
+                    }
+                }, {
+                    "name": "timestamp_disabled",
+                    "default": "2012-06-22T18:36:00",
+                    "nullok": true,
+                    "type": {
+                        "typename": "timestamp"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, {
+                    "name": "timestamp_disabled_no_default",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "timestamp"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, {
+                    "name": "timestamptz",
                     "default": "2014-05-07T14:40:00-07:00",
                     "nullok": true,
                     "type": {
                         "typename": "timestamptz"
                     }
                 }, {
-                    "name": "timestamp_disabled",
+                    "name": "timestamptz_disabled",
                     "default": "2010-06-13T17:22:00-07:00",
                     "nullok": true,
                     "type": {
@@ -213,7 +240,7 @@
                         "tag:isrd.isi.edu,2016:generated": null
                     }
                 }, {
-                    "name": "timestamp_disabled_no_default",
+                    "name": "timestamptz_disabled_no_default",
                     "default": null,
                     "nullok": true,
                     "type": {
