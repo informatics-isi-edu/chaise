@@ -1,6 +1,6 @@
 angular
   .module('angular-markdown-editor', [])
-  .directive('markdownEditor', ['$rootScope', function ($rootScope) {
+  .directive('markdownEditor', ['$rootScope','ERMrest', function ($rootScope,ERMrest) {
     return {
         restrict: 'A',
         require:  'ngModel',
@@ -38,7 +38,17 @@ angular
                   // example: <textarea markdown-editor="{'iconlibrary': 'fa'}" on-fullscreen-exit="vm.exitFullScreenCallback()"></textarea>
                   //  NOTE: If you want this one to work, you will have to manually download the JS file, not sure why but they haven't released any versions in a while
                   //       https://github.com/toopay/bootstrap-markdown/tree/master/js
-                  onPreview: function (e) { runScopeFunction(scope, attrs.onPreview, e); },
+                  onPreview: function (e) {
+                      //console.log(e);
+                    //   element.addClass('live-preview');
+
+                      var previewContent = ERMrest.renderMarkdown(e.getContent());
+                      console.log(previewContent);
+                    //   e.setContent(previewContent);
+                    //scope.bindval = previewContent;
+                      runScopeFunction(scope, attrs.onPreview, e);
+                      return previewContent;
+                   },
                   onPreviewEnd: function (e) { runScopeFunction(scope, attrs.onPreviewEnd, e); },
                   onSave: function (e) { runScopeFunction(scope, attrs.onSave, e); },
                   onBlur: function (e) { runScopeFunction(scope, attrs.onBlur, e); },
@@ -142,16 +152,19 @@ function addNewButtons() {
   //       }]
   // },
   {
-        name: "groupHelp",
+        name: "groupPrev",
         data: [{
-          name: "cmdHelp",
-          title: "Help",
+          name: "cmdPrev",
+          title: "Modal",
+          btnText: "Modal",
+          btnClass: 'btn btn-primary live-preview',
+          btnAttr:'markdown-preview',
           icon: {
-            fa: "fa fa-question",
-            glyph: "glyphicon glyphicon-question-sign"
+            fa: "fa fa-search",
+            glyph: "glyphicon glyphicon-sunglasses"
           },
           callback: function(e) {
-              window.open('http://commonmark.org/help/');
+              //window.open('http://commonmark.org/help/');
           }
         }]
   }

@@ -37,8 +37,8 @@
   var Markdown = function (element, options) {
     // @TODO : remove this BC on next major release
     // @see : https://github.com/toopay/bootstrap-markdown/issues/109
-    var opts = ['autofocus', 'savable', 'hideable', 'width', 
-      'height', 'resize', 'iconlibrary', 'language', 
+    var opts = ['autofocus', 'savable', 'hideable', 'width',
+      'height', 'resize', 'iconlibrary', 'language',
       'footer', 'fullscreen', 'hiddenButtons', 'disabledButtons'];
     $.each(opts,function(_, opt){
       if (typeof $(element).data(opt) !== 'undefined') {
@@ -272,7 +272,7 @@
         if (options.additionalButtons.length > 0) {
           // iterate the additional button groups
           $.each(options.additionalButtons[0], function(idx, buttonGroup){
-            
+
             // see if the group name of the addional group matches an existing group
             var matchingGroups = $.grep(allBtnGroups, function(allButtonGroup, allIdx){
               return allButtonGroup.name === buttonGroup.name;
@@ -281,12 +281,12 @@
             // if it matches add the addional buttons to that group, if not just add it to the all buttons group
             if(matchingGroups.length > 0) {
               matchingGroups[0].data = matchingGroups[0].data.concat(buttonGroup.data);
-            } else {              
+            } else {
               allBtnGroups.push(options.additionalButtons[0][idx]);
             }
 
           });
-        } 
+        }
 
         // Reduce and/or reorder the button groups
         if (options.reorderButtonGroups.length > 0) {
@@ -307,9 +307,14 @@
         }
 
         if (options.fullscreen.enable) {
-          editorHeader.append('<div class="md-controls"><a class="md-control md-control-fullscreen" href="#"><span class="'+this.__getIcon(options.fullscreen.icons.fullscreenOn)+'"></span></a></div>').on('click', '.md-control-fullscreen', function(e) {
+          editorHeader.append('<div class="md-controls"  style="float:none"><a class="md-control md-control-fullscreen" href="#" title="Toggle Fullscreen"><span class="'+this.__getIcon(options.fullscreen.icons.fullscreenOn)+'"></span></a></div>').on('click', '.md-control-fullscreen', function(e) {
               e.preventDefault();
-              instance.setFullscreen(true);
+              if(instance.$isFullscreen){
+                instance.setFullscreen(false);
+            }else{
+                instance.setFullscreen(true);
+            }
+
           });
         }
 
@@ -449,7 +454,7 @@
       }
 
       if (options.fullscreen.enable && options.fullscreen !== false) {
-        this.$editor.append('<div class="md-fullscreen-controls">'
+        this.$editor.append('<div class="md-fullscreen-controls" style="display:none">'
                         + '<a href="#" class="exit-fullscreen" title="Exit fullscreen"><span class="' + this.__getIcon(options.fullscreen.icons.fullscreenOff) + '">'
                         + '</span></a>'
                         + '</div>');
@@ -494,7 +499,7 @@
       var options = this.$options,
           container = this.$textarea,
           afterContainer = container.next(),
-          replacementContainer = $('<div/>',{'class':'md-preview','data-provider':'markdown-preview'}),
+          replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'width:100% !important; height:450px !important; background-color: #F5F5F5 !important; '}),
           content,
           callbackContent;
 
@@ -503,7 +508,7 @@
         // @see https://github.com/toopay/bootstrap-markdown/issues/170
         return this;
       }
-      
+
       // Give flag that tell the editor enter preview mode
       this.$isPreview = true;
       // Disable all buttons
@@ -512,8 +517,8 @@
       // Try to get the content from callback
       callbackContent = options.onPreview(this);
       // Set the content based from the callback content if string otherwise parse value from textarea
-      content = typeof callbackContent == 'string' ? callbackContent : this.parseContent();
-
+      content = typeof callbackContent == 'string' ? callbackContent : his.parseContent();
+      console.log(content);
       // Build preview element
       replacementContainer.html(content);
 
@@ -526,10 +531,10 @@
       }
 
       // Set the preview element dimensions
-      replacementContainer.css({
-        width: container.outerWidth() + 'px',
-        height: container.outerHeight() + 'px'
-      });
+    //   replacementContainer.css({
+    //     width: container.outerWidth() + 'px',
+    //     height: container.outerHeight() + 'px'
+    //   });
 
       if (this.$options.resize) {
         replacementContainer.css('resize',this.$options.resize);
@@ -1278,6 +1283,20 @@
           }
         }]
       },{
+              name: "groupHelp",
+              data: [{
+                name: "cmdHelp",
+                title: "Help",
+                // btnClass: 'live-preview',
+                icon: {
+                  fa: "fa fa-question",
+                  glyph: "glyphicon glyphicon-question-sign"
+                },
+                callback: function(e) {
+                    window.open('http://commonmark.org/help/');
+                }
+              }]
+        },{
         name: 'groupUtil',
         data: [{
           name: 'cmdPreview',
@@ -1301,11 +1320,6 @@
         }]
       }]
     ],
-    additionalButtons:[], // Place to hook more buttons by code
-    reorderButtonGroups:[],
-    hiddenButtons:[], // Default hidden buttons
-    disabledButtons:[], // Default disabled buttons
-    footer: '',
     fullscreen: {
       enable: true,
       icons: {
@@ -1321,6 +1335,12 @@
         }
       }
     },
+    additionalButtons:[], // Place to hook more buttons by code
+    reorderButtonGroups:[],
+    hiddenButtons:[], // Default hidden buttons
+    disabledButtons:[], // Default disabled buttons
+    footer: '',
+
 
     /* Events hook */
     onShow: function (e) {},

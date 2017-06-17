@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap', function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap', 'ERMrest',function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap, ERMrest) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -70,6 +70,18 @@
         };
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+
+        //amit
+        vm.onPreview = function(e){
+            vm.previewOpen = 'X';
+            console.log("on preview clicked: "+ vm.previewOpen);
+            console.log(e.getContent());
+            vm.res = ERMrest.renderMarkdown(e.getContent());
+        }
+        vm.onPreviewEnd = function(e){
+            vm.previewOpen = '';
+            console.log("on preview end: "+ vm.previewOpen);
+        }
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
         function redirectAfterSubmission(page) {
