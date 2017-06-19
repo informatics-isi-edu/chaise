@@ -127,7 +127,7 @@
                 'data-handler': buttonHandler,
                 'data-hotkey': hotkey
             });
-            
+
             if (button.toggle === true){
               buttonContainer.attr('data-toggle', 'button');
             }
@@ -942,6 +942,40 @@
       [{
         name: 'groupFont',
         data: [{
+          name: 'cmdHeading',
+          title: 'Heading',
+          hotkey: 'Ctrl+H',
+          icon: { glyph: 'glyphicon glyphicon-header', fa: 'fa fa-header', 'fa-3': 'icon-font' },
+          callback: function(e){
+            // Append/remove ### surround the selection
+            var chunk, cursor, selected = e.getSelection(), content = e.getContent(), pointer, prevChar;
+
+            if (selected.length === 0) {
+              // Give extra word
+              chunk = e.__localize('heading text');
+            } else {
+              chunk = selected.text + '\n';
+            }
+
+            // transform selection and set the cursor into chunked text
+            if ((pointer = 4, content.substr(selected.start-pointer,pointer) === '### ')
+                || (pointer = 3, content.substr(selected.start-pointer,pointer) === '###')) {
+              e.setSelection(selected.start-pointer,selected.end);
+              e.replaceSelection(chunk);
+              cursor = selected.start-pointer;
+            } else if (selected.start > 0 && (prevChar = content.substr(selected.start-1,1), !!prevChar && prevChar != '\n')) {
+              e.replaceSelection('\n\n### '+chunk);
+              cursor = selected.start+6;
+            } else {
+              // Empty string before element
+              e.replaceSelection('### '+chunk);
+              cursor = selected.start+4;
+            }
+
+            // Set the cursor
+            e.setSelection(cursor,cursor+chunk.length);
+          }
+        },{
           name: 'cmdBold',
           hotkey: 'Ctrl+B',
           title: 'Bold',
@@ -996,40 +1030,6 @@
             } else {
               e.replaceSelection('_'+chunk+'_');
               cursor = selected.start+1;
-            }
-
-            // Set the cursor
-            e.setSelection(cursor,cursor+chunk.length);
-          }
-        },{
-          name: 'cmdHeading',
-          title: 'Heading',
-          hotkey: 'Ctrl+H',
-          icon: { glyph: 'glyphicon glyphicon-header', fa: 'fa fa-header', 'fa-3': 'icon-font' },
-          callback: function(e){
-            // Append/remove ### surround the selection
-            var chunk, cursor, selected = e.getSelection(), content = e.getContent(), pointer, prevChar;
-
-            if (selected.length === 0) {
-              // Give extra word
-              chunk = e.__localize('heading text');
-            } else {
-              chunk = selected.text + '\n';
-            }
-
-            // transform selection and set the cursor into chunked text
-            if ((pointer = 4, content.substr(selected.start-pointer,pointer) === '### ')
-                || (pointer = 3, content.substr(selected.start-pointer,pointer) === '###')) {
-              e.setSelection(selected.start-pointer,selected.end);
-              e.replaceSelection(chunk);
-              cursor = selected.start-pointer;
-            } else if (selected.start > 0 && (prevChar = content.substr(selected.start-1,1), !!prevChar && prevChar != '\n')) {
-              e.replaceSelection('\n\n### '+chunk);
-              cursor = selected.start+6;
-            } else {
-              // Empty string before element
-              e.replaceSelection('### '+chunk);
-              cursor = selected.start+4;
             }
 
             // Set the cursor

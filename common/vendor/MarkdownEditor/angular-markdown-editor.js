@@ -39,7 +39,7 @@ angular
                   //  NOTE: If you want this one to work, you will have to manually download the JS file, not sure why but they haven't released any versions in a while
                   //       https://github.com/toopay/bootstrap-markdown/tree/master/js
                   onPreview: function (e) {
-                     
+
                       var previewContent = ERMrest.renderMarkdown(e.getContent());
                       runScopeFunction(scope, attrs.onPreview, e);
                       return previewContent;
@@ -160,8 +160,10 @@ function addNewButtons() {
           },
           callback: function(e) {
             //   var textContent = e.getContent();
-              var idToS = '#previewLinkId-'+e.$element[0].name;
-              angular.element(document.querySelector(idToS)).click();
+            var name = e.$element[0].name;//.replace("&nbsp;"," ");
+              var idToS = '#previewLinkId-'+name;
+            //   angular.element(document.querySelector(idToS)).click();
+              angular.element(idToS).triggerHandler('click');
 
 
           }

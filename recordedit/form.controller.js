@@ -92,12 +92,10 @@
             //     var idToS = '#previewLinkId-'+e.$element[0].name;
             //     console.log(idToS);
             //
-            //     $timeout(function () {
-            //         angular.element(document.querySelector(idToS)).click();
-            //
-            //         // angular.element("#form-0-Description-input").triggerHandler('click');
-            // }, 0);
 
+            //     $timeout(function () {
+            //         angular.element(e.$element[0].id).triggerHandler('click');
+            // }, 0);
         }
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
