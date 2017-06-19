@@ -51,12 +51,7 @@ var testParams = {
             displaySize: "5MB",
             path: "testfile5MB.pdf"
         }]
-    }],
-    multi_insert: {
-        table_name: "accommodation",
-        records: 1,
-        max_input_rows: 200
-    }
+    }]
 }
 
 describe('Record Add', function() {
@@ -209,24 +204,26 @@ describe('Record Add', function() {
         var testCookie = {};
         beforeAll(function() {
             // Refresh the page
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name);
-            browser.sleep(100);
+            var url = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name;
+            browser.get(url);
+            chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
+                // Write a dummy cookie for creating a record in Accommodation table
+                testCookie = {
+                    constraintName: 'product-add_fk_category', // A FK that Accommodation table has with Category table
+                    rowname: {
+                        value: chance.sentence()
+                    },
+                    keys: {id: 1}
+                };
+                browser.manage().addCookie('test', JSON.stringify(testCookie));
+            });
 
-            // Write a dummy cookie for creating a record in Accommodation table
-            testCookie = {
-                constraintName: 'product-add_fk_category', // A FK that Accommodation table has with Category table
-                rowname: {
-                    value: chance.sentence()
-                },
-                keys: {id: 1}
-            };
-            browser.manage().addCookie('test', JSON.stringify(testCookie));
-
-            // Reload the page with prefill query param in url
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name + '?prefill=test');
         });
 
         it('should pre-fill fields from the prefill cookie', function() {
+            // Reload the page with prefill query param in url
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name + '?prefill=test');
+            
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 return browser.manage().getCookie('test');
             }).then(function(cookie) {
