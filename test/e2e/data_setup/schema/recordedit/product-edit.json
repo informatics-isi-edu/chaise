@@ -116,8 +116,8 @@
               "display": "Name of Accommodation"
             },
             "tag:misd.isi.edu,2015:display" : {
-              "name" : "Name of Accommodation"
-            },
+              "markdown_name" : "**Name of Accommodation**"
+          },
             "facetOrder": [
               "1"
             ]
@@ -534,7 +534,7 @@
               "download"
             ],
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"hatrac/{{{fileid}}}/{{{uri.md5_hex}}}",
+              "url_pattern":"hatrac/js/chaise/{{{_fileid}}}/{{{_uri.md5_hex}}}",
               "filename_column" : "filename",
               "byte_count_column": "bytes",
               "md5": "preview"

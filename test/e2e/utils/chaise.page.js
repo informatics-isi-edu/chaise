@@ -270,6 +270,14 @@ var recordEditPage = function() {
     this.getEntityTitleElement = function() {
         return element(by.id('entity-title'));
     };
+    
+    this.getResultTitle = function () {
+        return element(by.id('result-title'));
+    };
+    
+    this.getResultTitleLink = function () {
+        return element.all(by.css('#result-title > a'));
+    };
 
     this.getAllColumnCaptions = function() {
         return browser.executeScript("return $('td.entity-key > span.column-displayname > span')");
@@ -379,6 +387,11 @@ var recordEditPage = function() {
 
     this.getFormTitle = function() {
         return element(by.id("entity-title"));
+    };
+
+    this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("row-" + index + '-' + columnDisplayName + "-display"));
     };
 
     this.getForeignKeyInputValue = function(columnDisplayName, index) {

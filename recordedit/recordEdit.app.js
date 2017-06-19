@@ -286,7 +286,11 @@
                                 // setup if column is type timestamp[tz]
                                 if (defaultSet) {
                                     var ts = moment(column.default);
-                                    initialModelValue = { date: ts.format('YYYY-MM-DD'), time: ts.format('hh:mm:ss'), meridiem: ts.format('A') };
+                                    if (inputDisabled) {
+                                        initialModelValue = ( column.type.name === 'timestamp' ? ts.format("YYYY-MM-DD HH:mm:ss") : ts.format("YYYY-MM-DD HH:mm:ssZ") );
+                                    } else {
+                                        initialModelValue = { date: ts.format('YYYY-MM-DD'), time: ts.format('hh:mm:ss'), meridiem: ts.format('A') };
+                                    }
                                 } else if (!inputDisabled) {
                                     // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
                                     initialModelValue = { date: null, time: null, meridiem: 'AM' };

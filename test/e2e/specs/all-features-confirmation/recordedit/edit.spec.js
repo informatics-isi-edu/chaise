@@ -8,7 +8,7 @@ var testParams = {
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", value: "2002", type: "serial4", nullok: false},
-            { name: "title", title: "Name of Accommodation", value: "Sherathon Hotel", type: "text", nullok: false},
+            { name: "title", title: "<strong>Name of Accommodation</strong>", value: "Sherathon Hotel", type: "text", nullok: false},
             { name: "website", isUrl: true, title: "Website", value: "<p class=\"ng-scope\"><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>", type: "text", comment: "A valid url of the accommodation"},
             { name: "category",isForeignKey: true, title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10003"}, nullok: false},
             { name: "rating", title: "User Rating", value: "4.3000", type: "float4", nullok: false},
@@ -38,20 +38,10 @@ var testParams = {
         edit_entity_displayname: "90007",
         delete_keys: [],
         files: [{
-            name: "testfile1MB.txt",
-            size: "1024000",
-            displaySize: "1MB",
-            path: "all-features-confirmation/recordedit/uploadFiles/testfile1MB.txt"
-        }, {
             name: "testfile500kb.png",
             size: "512000",
             displaySize: "500KB",
-            path: "all-features-confirmation/recordedit/uploadFiles/testfile500kb.png"
-        }, {
-            name: "testfile5MB.pdf",
-            size: "5242880",
-            displaySize: "5MB",
-            path: "all-features-confirmation/recordedit/uploadFiles/testfile5MB.pdf"
+            path: "testfile500kb.png"
         }]
     }]
 };
@@ -61,16 +51,26 @@ describe('Edit existing record,', function() {
     for (var i=0; i< testParams.tables.length; i++) {
 
         (function(tableParams, index) {
+            
+            if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                beforeAll(function() {
+                    // create files that will be uploaded
+                    recordEditHelpers.createFiles(tableParams.files);
+                });
+            }
 
             describe("For table " + tableParams.table_name + ",", function() {
 
                 var record;
 
                 beforeAll(function () {
+                
                     var keys = [];
                     keys.push(tableParams.key.name + tableParams.key.operator + tableParams.key.value);
                     browser.ignoreSynchronization=true;
                     browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-edit:" + tableParams.table_name + "/" + keys.join("&"));
+                    
+                
 
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                         return chaisePage.recordEditPage.getViewModelRows();
@@ -115,11 +115,11 @@ describe('Edit existing record,', function() {
 
                     it("should redirect to Record page", function() {
                         if (!hasErrors) {
-                            // if there is a file upload
-                            // if (tableParams.files.length) {
-                            //     browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
-                            // }
 
+                            // if there is a file upload
+                            if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                                browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
+                            }
 
                             var redirectUrl = browser.params.url+ "/record/#" + browser.params.catalogId + "/product-edit:" + tableParams.table_name + '/' + keys.join('&');
                             // Wait for #tblRecord on Record page to appear
@@ -131,6 +131,13 @@ describe('Edit existing record,', function() {
                         }
                     });
                 });
+                
+                if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                    afterAll(function(done) {
+                        recordEditHelpers.deleteFiles(tableParams.files);
+                        done();
+                    });
+                }
 
             });
 

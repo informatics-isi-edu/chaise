@@ -175,7 +175,7 @@
                                                     <!-- modal popup input -->
                                                     <div ng-switch-when="popup-select" class="form-group has-feedback input-group modal-popup">
                                                         <label class="sr-only"></label>
-                                                        <div contenteditable="false" ng-disabled="::form.isDisabled(column);" class="form-control popup-select-value" ng-style="form.isDisabled(column) ? {'cursor': 'default'} : {'cursor': 'pointer'}" ng-click="::form.searchPopup(rowIndex, column)"
+                                                        <div id="row-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" ng-disabled="::form.isDisabled(column);" class="form-control popup-select-value" ng-style="form.isDisabled(column) ? {'cursor': 'default'} : {'cursor': 'pointer'}" ng-click="::form.searchPopup(rowIndex, column)"
                                                             ng-bind-html="(form.recordEditModel.rows[rowIndex][column.name] ? form.recordEditModel.rows[rowIndex][column.name] : form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]))"></div>
                                                         <div class="form-control-feedback coltooltip" ng-hide="(form.isDisabled(column)) || (!form.recordEditModel.rows[rowIndex][column.name])" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
                                                             <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::form.clearForeignKey(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
@@ -278,12 +278,13 @@
                 </div>
 
                 <div ng-show="form.resultset" class="container-fluid">
-                    <h2>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}
+                    <h2 id="result-title">
+                        <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
                         <a ng-href="{{::form.recordsetLink}}">
                             <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.resultsetModel.tableDisplayName.value"></span>
                             <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="::form.resultsetModel.tableDisplayName.value"></span>
                         </a>
-                        Records Updated Successfully
+                        <span>Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
                     </h2>
                     <div class="side-padding-15">
                         <h3>{{ form.resultsetModel.rowValues.length }} Successful <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>

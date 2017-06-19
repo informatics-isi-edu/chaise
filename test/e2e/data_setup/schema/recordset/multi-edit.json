@@ -52,9 +52,6 @@
             }
         }
     },
-    "table_names": [
-        "multi-add-table"
-    ],
     "comment": null,
     "annotations": {}
 }
