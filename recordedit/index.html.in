@@ -253,12 +253,13 @@
                     </div>
                 </div>
                 <div ng-show="form.resultset" class="container-fluid">
-                    <h2>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}
+                    <h2 id="result-title">
+                        <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
                         <a ng-href="{{::form.recordsetLink}}">
                             <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.resultsetModel.tableDisplayName.value"></span>
                             <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="::form.resultsetModel.tableDisplayName.value"></span>
                         </a>
-                        Records Updated Successfully
+                        <span>Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
                     </h2>
                     <div class="side-padding-15">
                         <h3>{{ form.resultsetModel.rowValues.length }} Successful <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
