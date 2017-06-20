@@ -160,8 +160,11 @@ function addNewButtons() {
           },
           callback: function(e) {
             //   var textContent = e.getContent();
-            var name = e.$element[0].name;//.replace("&nbsp;"," ");
-              var idToS = '#previewLinkId-'+name;
+            var name = e.$element[0].name;
+            var id = e.$element[0].id;
+            console.log("Width in dir:"+e.$element[0].offsetWidth);
+            console.log("Heiht in dir:"+e.$element[0].offsetHeight);
+              var idToS = '#previewLinkId-'+id.slice(0,id.indexOf("-",6))+'-'+name;
             //   angular.element(document.querySelector(idToS)).click();
               angular.element(idToS).triggerHandler('click');
 

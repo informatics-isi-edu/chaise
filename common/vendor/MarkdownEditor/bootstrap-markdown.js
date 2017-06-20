@@ -47,7 +47,8 @@
       }
     });
     // End BC
-
+    //prevOffW = 305;  //default width
+    //prevOffH = 122;  //default height
     // Class Properties
     this.$ns           = 'bootstrap-markdown';
     this.$element      = $(element);
@@ -499,9 +500,12 @@
       var options = this.$options,
           container = this.$textarea,
           afterContainer = container.next(),
-          replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'width:100% !important; height:450px !important; background-color: #F5F5F5 !important; '}),
+        //   replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'width:100% !important; height:122px !important; background-color: #F5F5F5 !important; '}),
+          replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'background-color: #F5F5F5 !important; '}),
           content,
           callbackContent;
+     var previewWidth = this.$element[0].offsetWidth,
+        previewHeight = this.$element[0].offsetHeight;
 
       if (this.$isPreview == true) {
         // Avoid sequenced element creation on missused scenario
@@ -517,7 +521,7 @@
       // Try to get the content from callback
       callbackContent = options.onPreview(this);
       // Set the content based from the callback content if string otherwise parse value from textarea
-      content = typeof callbackContent == 'string' ? callbackContent : his.parseContent();
+      content = typeof callbackContent == 'string' ? callbackContent : this.parseContent();
 
       // Build preview element
       replacementContainer.html(content);
@@ -531,10 +535,12 @@
       }
 
       // Set the preview element dimensions
-    //   replacementContainer.css({
-    //     width: container.outerWidth() + 'px',
-    //     height: container.outerHeight() + 'px'
-    //   });
+      console.log("Width:"+previewWidth);
+      console.log("Heiht:"+previewHeight);
+      replacementContainer.css({
+        "width": previewWidth + 'px',
+        "height": previewHeight + 'px'
+      });
 
       if (this.$options.resize) {
         replacementContainer.css('resize',this.$options.resize);
@@ -1344,7 +1350,8 @@
 
     /* Events hook */
     onShow: function (e) {},
-    onPreview: function (e) {},
+    onPreview: function (e) {
+    },
     onSave: function (e) {},
     onBlur: function (e) {},
     onFocus: function (e) {},
