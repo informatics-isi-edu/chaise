@@ -27,26 +27,6 @@
                     scope.$emit('record-modified');
 
                 }, function deleteFailure(response) {
-                    if (response instanceof ERMrest.PreconditionFailedError) {
-                        // If a 412 is encountered, it means this row's info doesn't match
-                        // with the info in the DB currently.
-                        return $uibModal.open({
-                            templateUrl: "../common/templates/uiChange.modal.html",
-                            controller: "ErrorDialogController",
-                            controllerAs: "ctrl",
-                            size: "sm",
-                            resolve: {
-                                params: {
-                                    title: messageMap.reviewModifiedRecord.title,
-                                    message: messageMap.reviewModifiedRecord.message
-                                }
-                            },
-                            backdrop: 'static',
-                            keyboard: false
-                        }).result.then(function reload() {
-                            scope.$emit('record-modified');
-                        });
-                    }
                     throw error;
                 }).catch(function (error) {
                     throw error;
@@ -59,26 +39,6 @@
                     scope.$emit('record-modified');
 
                 }, function deleteFailure(response) {
-                    if (response instanceof ERMrest.PreconditionFailedError) {
-                        // If a 412 is encountered, it means this row's info doesn't match
-                        // with the info in the DB currently.
-                        return $uibModal.open({
-                            templateUrl: "../common/templates/uiChange.modal.html",
-                            controller: "ErrorDialogController",
-                            controllerAs: "ctrl",
-                            size: "sm",
-                            resolve: {
-                                params: {
-                                    title: messageMap.reviewModifiedRecord.title,
-                                    message: messageMap.reviewModifiedRecord.message
-                                }
-                            },
-                            backdrop: 'static',
-                            keyboard: false
-                        }).result.then(function reload() {
-                            scope.$emit('record-modified');
-                        });
-                    }
                     throw response;
                 }).catch(function (error) {
                     throw error;

@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "col_visible": "value",
+    "generated_col_visible": "generated",
+    "generated_col_invisible": "generated_inv",
+    "file_1": "/hatrac/js/chaise/prev/111111",
+    "file_1_filename": "prev_name_1",
+    "file_1_bytes": 123,
+    "file_1_md5": "prev_md5_1",
+    "file_2": "/hatrac/js/chaise/prev/222222",
+    "file_2_filename": "prev_name_2",
+    "file_2_bytes": 123,
+    "file_2_md5": "prev_md5_3",
+    "file_3": "/hatrac/js/chaise/prev/333333",
+    "file_3_filename": "prev_name_3",
+    "file_3_bytes": 123,
+    "file_3_md5": "prev_md5_3"
+  },
+  {
+    "id": 2,
+    "col_visible": "value",
+    "generated_col_visible": "generated",
+    "generated_col_invisible": "generated_inv",
+    "file_1": "/hatrac/js/chaise/prev/111111",
+    "file_1_filename": "prev_name_1",
+    "file_1_bytes": 123,
+    "file_1_md5": "prev_md5_1",
+    "file_2": "/hatrac/js/chaise/prev/222222",
+    "file_2_filename": "prev_name_2",
+    "file_2_bytes": 123,
+    "file_2_md5": "prev_md5_3",
+    "file_3": "/hatrac/js/chaise/prev/333333",
+    "file_3_filename": "prev_name_3",
+    "file_3_bytes": 123,
+    "file_3_md5": "prev_md5_3"
+  }
+]

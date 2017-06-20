@@ -197,7 +197,7 @@
         function uploadFiles(submissionRowsCopy, isUpdate, onSuccess) {
 
             // If url is valid
-            if (areFilesValid(vm.recordEditModel.submissionRows)) {
+            if (areFilesValid(submissionRowsCopy)) {
 
                 $uibModal.open({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
@@ -227,21 +227,50 @@
         function addRecords(isUpdate) {
             var model = vm.recordEditModel;
             var form = vm.formContainer;
-
+            
+            // this will include updated and previous raw values.
             var submissionRowsCopy = [];
-
+            
             model.submissionRows.forEach(function(row) {
                 submissionRowsCopy.push(Object.assign({}, row));
             });
+            
+            /**
+             * Add raw values that are not visible to submissionRowsCopy:
+             * 
+             * submissionRowsCopy is the datastructure that will be used for creating
+             * the upload url. It must have all the visible and invisible data.
+             * The following makes sure that submissionRowsCopy has all the underlying data
+             */
+            if (isUpdate) {
+                for (var i = 0; i < submissionRowsCopy.length; i++) {
+                    var newData = submissionRowsCopy[i];
+                    var oldData = $rootScope.tuples[i].data;
+                    
+                    // make sure submissionRowsCopy has all the data
+                    for (var key in oldData) {
+                        if (key in newData) continue;
+                        newData[key] = oldData[key];
+                    }
+                }
+            }
 
             //call uploadFiles which will upload files and callback on success
             uploadFiles(submissionRowsCopy, isUpdate, function() {
 
                 var fn = "create", fnScope = $rootScope.reference.unfilteredReference.contextualize.entryCreate, args = [submissionRowsCopy];
+                
                 // If this is an update call
                 if (isUpdate) {
-
-                    // loop through model.submissionRows
+                    
+                    /**
+                     * After uploading files, the returned submissionRowsCopy contains
+                     * new file data. This includes filename, filebyte, and md5.
+                     * The following makes sure that all the data are updated.
+                     * That's why this for loop must be after uploading files and not before.
+                     * And we cannot just pass submissionRowsCopy to update function, because 
+                     * update function only accepts array of tuples (and not just key-value pair).
+                     */
                     for (var i = 0; i < submissionRowsCopy.length; i++) {
                         var row = submissionRowsCopy[i];
                         var data = $rootScope.tuples[i].data;
@@ -250,7 +279,7 @@
                             data[key] = (row[key] === '' ? null : row[key]);
                         }
                     }
-
+                    
                     // submit $rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
                     fn = "update", fnScope = $rootScope.reference, args = [$rootScope.tuples];
@@ -265,6 +294,15 @@
                     var resultsReference = page.reference;
 
                     if (isUpdate) {
+                        for (var i = 0; i < submissionRowsCopy.length; i++) {
+                            var row = submissionRowsCopy[i];
+                            var data = $rootScope.tuples[i].data;
+                            // assign each value from the form to the data object on tuple
+                            for (var key in row) {
+                                data[key] = (row[key] === '' ? null : row[key]);
+                            }
+                        }
+
                         // check if there is a window that opened the current one
                         // make sure the update function is defined for that window
                         // verify whether we still have a valid vaue to call that function with
@@ -387,28 +425,8 @@
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (response instanceof ERMrest.PreconditionFailedError) {
-                        $uibModal.open({
-                            templateUrl: "../common/templates/refresh.modal.html",
-                            controller: "ErrorDialogController",
-                            controllerAs: "ctrl",
-                            size: "sm",
-                            resolve: {
-                                params: {
-                                    title: messageMap.pageRefreshRequired.title,
-                                    message: messageMap.pageRefreshRequired.message
-                                }
-                            },
-                            backdrop: 'static',
-                            keyboard: false
-                        }).result.then(function reload() {
-                            // Reload the page
-                            $window.location.reload();
-                        });
-                    } else {
-                        if (response !== 'cancel') {
-                            throw response;
-                        }
+                    if (response !== 'cancel') {
+                        throw response;
                     }
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
@@ -418,26 +436,7 @@
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (response instanceof ERMrest.PreconditionFailedError) {
-                        $uibModal.open({
-                            templateUrl: "../common/templates/refresh.modal.html",
-                            controller: "ErrorDialogController",
-                            controllerAs: "ctrl",
-                            size: "sm",
-                            resolve: {
-                                params: {
-                                    message: messageMap.pageRefreshRequired
-                                }
-                            },
-                            backdrop: 'static',
-                            keyboard: false
-                        }).result.then(function reload() {
-                            // Reload the page
-                            $window.location.reload();
-                        });
-                    } else {
-                        throw response;
-                    }
+                    throw response;
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
                 });

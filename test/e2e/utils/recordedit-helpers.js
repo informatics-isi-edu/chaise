@@ -1093,60 +1093,14 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
             });
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.TRAVIS && tableParams.files.length > 0) {
                 describe("File fields,", function() {
 
                     it("should render input type as file input ", function() {
                         console.log("\n       File Input Fields");
                         var columns = tableParams.columns.filter(function(c){ if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
                         columns.forEach(function(column) {
-                            chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(fileInput) {
-                                console.log("         ->" + column.name);
-                                if (fileInput) {
-
-                                    expect(true).toBeDefined();
-                                    fileInput.column = column;
-
-                                    chaisePage.recordEditPage.getInputForAColumn("txt" + column.name, recordIndex).then(function(txtInput) {
-
-                                        var testFileSelect = function() {
-                                            var file = tableParams.files.shift();
-                                            var filePath = require('path').resolve(__dirname, file.path).replace('/utils/', '/specs/');
-
-                                            column._value = file.name;
-                                            fileInput.sendKeys(filePath);
-
-                                            browser.sleep(100);
-
-                                            expect(fileInput.getAttribute('value')).toContain(file.name);
-                                            expect(txtInput.getAttribute('value')).toBe(file.name);
-                                        };
-
-                                        txtInput.getAttribute('value').then(function(value) {
-                                            // Incase of edit first clear the fileinput field by pressing the dismiss button
-                                            // and then set new file
-                                            if (value.trim().length > 0) {
-
-                                                chaisePage.recordEditPage.getClearButton(txtInput).then(function(clearButton) {
-                                                    clearButton.click();
-
-                                                    browser.sleep(50);
-
-                                                    expect(txtInput.getAttribute('value')).toBe("");
-
-                                                    testFileSelect();
-                                                });
-                                            } else {
-                                                testFileSelect();
-                                            }
-                                        });
-
-                                    });
-
-                                } else {
-                                    expect(undefined).toBeDefined("Unable to find file input field for column " + column.name);
-                                }
-                            });
+                            exports.testFileInput(column.name, recordIndex, tableParams.files.shift(), true);
                         });
                     });
 
@@ -1168,13 +1122,101 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
 };
 
-// params must include the names of the columns that you want to check for values of
-exports.testRecordAppValuesAfterSubmission = function(column_names) {
+/**
+ * column_names - array of string column_names
+ * column_values - hash of column_name: column_value
+ * Checks for if values are defined and set properly
+ */
+exports.testRecordAppValuesAfterSubmission = function(column_names, column_values) {
     chaisePage.waitForElement(element(by.id('tblRecord')));
 
     for (var i = 0; i < column_names.length; i++) {
         var columnName = column_names[i];
         var column = chaisePage.recordPage.getColumnValue(columnName);
-        expect(column.getText()).toBeDefined();
+        expect(column.getText()).toBe(column_values[columnName], "Value for " + columnName + " is not what was expected");
     }
-}
+};
+
+/**
+ * create files in the given path. This should be called before test cases
+ * parent directory that these files will be uploaded into is test/e2e/data_setup/uploaded_files. 
+ * That means the given path should be a path that is valid in uploaded_files folder. 
+ * 
+ * @param  {obj[]} files array of objects with at least path, and size as attributes.
+ */
+exports.createFiles = function(files) {
+    files.forEach(function(f) {
+        var path = require('path').join(__dirname , "/../data_setup/uploaded_files/" + f.path);
+        exec("perl -e 'print \"1\" x " + f.size + "' > " + path);
+        console.log(path + " created");
+    });
+};
+
+/**
+ * removes the given files. read the createFiles documentation for more info about files and path
+ * @param  {obj[]} files array of objects with at least path, and size as attributes.
+ */
+exports.deleteFiles = function(files) {
+    files.forEach(function(f) {
+        var path = require('path').join(__dirname , "/../data_setup/uploaded_files/" + f.path);
+        console.log(path + " deleted");
+        exec('rm ' + f.path);
+    });
+};
+
+/**
+ * test a file input with the given column name, and file that we want to test 
+ * the file input against it.
+ * @param  {string}         colName         name of the column
+ * @param  {int}            recordIndex     index of record in the view
+ * @param  {obj}            file            object with at least path, and name attributes.
+ * @param  {string=}        currentValue    if you want to test the current value.   
+ * @param  {boolean=false}  print           should it print the file names or not.
+ */
+exports.testFileInput = function (colName, recordIndex, file, currentValue, print) {
+    chaisePage.recordEditPage.getInputForAColumn(colName, recordIndex).then(function(fileInput) {
+        print = typeof print !== "boolean" ? false : print;
+        if (print) {
+            console.log("         ->" + colName);
+        }
+        
+        if (fileInput) {
+            chaisePage.recordEditPage.getInputForAColumn("txt" + colName, recordIndex).then(function(txtInput) {
+
+                var selectFile = function() {
+                    var filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
+                    
+                    fileInput.sendKeys(filePath);
+
+                    browser.sleep(100);
+
+                    expect(fileInput.getAttribute('value')).toContain(file.name, "didn't select the correct file.");
+                    expect(txtInput.getAttribute('value')).toBe(file.name, "didn't show the correct file name after selection.");
+                };
+
+                txtInput.getAttribute('value').then(function(value) {
+                    // Incase of edit first clear the fileinput field by pressing the dismiss button
+                    // and then set new file
+                    if (value.trim().length > 0) {
+
+                        chaisePage.recordEditPage.getClearButton(txtInput).then(function(clearButton) {
+                            clearButton.click();
+
+                            browser.sleep(50);
+
+                            expect(txtInput.getAttribute('value')).toBe("", "couldn't clear the button.");
+
+                            selectFile();
+                        });
+                    } else {
+                        selectFile();
+                    }
+                });
+
+            });
+
+        } else {
+            expect(undefined).toBeDefined("Unable to find file input field for column " + colName);
+        }
+    });
+};

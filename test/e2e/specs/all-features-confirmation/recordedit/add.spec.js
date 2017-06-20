@@ -39,24 +39,19 @@ var testParams = {
             name: "testfile1MB.txt",
             size: "1024000",
             displaySize: "1MB",
-            path: "all-features-confirmation/recordedit/uploadFiles/testfile1MB.txt"
+            path: "testfile1MB.txt"
         }, {
             name: "testfile500kb.png",
             size: "512000",
             displaySize: "500KB",
-            path: "all-features-confirmation/recordedit/uploadFiles/testfile500kb.png"
+            path: "testfile500kb.png"
         }, {
             name: "testfile5MB.pdf",
             size: "5242880",
             displaySize: "5MB",
-            path: "all-features-confirmation/recordedit/uploadFiles/testfile5MB.pdf"
+            path: "testfile5MB.pdf"
         }]
-    }],
-    multi_insert: {
-        table_name: "accommodation",
-        records: 1,
-        max_input_rows: 200
-    }
+    }]
 }
 
 describe('Record Add', function() {
@@ -76,18 +71,12 @@ describe('Record Add', function() {
 
                 describe("Presentation and validation,", function() {
 
-
-                    beforeAll(function() {
-
-                        var files = tableParams.files;
-                        if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
-
-                        files.forEach(function(f) {
-                            var path = require('path').join(__dirname , "/../../" + f.path);
-                            exec("perl -e 'print \"1\" x " + f.size + "' > " + path);
-                            console.log(path + " created");
+                    if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                        beforeAll(function() {
+                            // create files that will be uploaded
+                            recordEditHelpers.createFiles(tableParams.files);
                         });
-                    });
+                    }
 
                     var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
                 });
@@ -160,7 +149,7 @@ describe('Record Add', function() {
                             if (tableParams.records > 1) {
 
                                 // if there is a file upload
-                                if (tableParams.files.length) {
+                                if (!process.env.TRAVIS && tableParams.files.length > 0) {
                                     browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
                                 }
 
@@ -199,16 +188,13 @@ describe('Record Add', function() {
                             }
                         }
                     });
-
-                    afterAll(function(done) {
-                        var files = tableParams.files;
-                        if (process.env.TRAVIS)   files = tableParams.files.filter(function(f) { if (!f.doNotRunInTravis) return f; });
-
-                        files.forEach(function(f) {
-                            exec('rm ' + f.path);
+                    
+                    if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                        afterAll(function(done) {
+                            recordEditHelpers.deleteFiles(tableParams.files);
+                            done();
                         });
-                        done();
-                    });
+                    }
                 });
             });
         })(testParams.tables[i], i);
@@ -218,24 +204,26 @@ describe('Record Add', function() {
         var testCookie = {};
         beforeAll(function() {
             // Refresh the page
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name);
-            browser.sleep(100);
+            var url = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name;
+            browser.get(url);
+            chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
+                // Write a dummy cookie for creating a record in Accommodation table
+                testCookie = {
+                    constraintName: 'product-add_fk_category', // A FK that Accommodation table has with Category table
+                    rowname: {
+                        value: chance.sentence()
+                    },
+                    keys: {id: 1}
+                };
+                browser.manage().addCookie('test', JSON.stringify(testCookie));
+            });
 
-            // Write a dummy cookie for creating a record in Accommodation table
-            testCookie = {
-                constraintName: 'product-add_fk_category', // A FK that Accommodation table has with Category table
-                rowname: {
-                    value: chance.sentence()
-                },
-                keys: {id: 1}
-            };
-            browser.manage().addCookie('test', JSON.stringify(testCookie));
-
-            // Reload the page with prefill query param in url
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name + '?prefill=test');
         });
 
         it('should pre-fill fields from the prefill cookie', function() {
+            // Reload the page with prefill query param in url
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:" + testParams.tables[0].table_name + '?prefill=test');
+            
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 return browser.manage().getCookie('test');
             }).then(function(cookie) {
