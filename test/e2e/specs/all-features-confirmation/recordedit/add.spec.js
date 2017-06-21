@@ -1,59 +1,73 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js'), chance = require('chance').Chance();
 var exec = require('child_process').execSync;
+var moment = require('moment');
+
+// take a look at the comments in recordedit-helpers.js for the expected structure of tableParams.
 var testParams = {
     tables: [{
         table_name: "accommodation",
-        create_entity_displayname: "Accommodations",
+        table_displayname: "Accommodations",
+        primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
             { name: "title", title: "Name of Accommodation", type: "text", nullok: false},
-            { name: "website", isUrl: true, title: "Website", type: "text", comment: "A valid url of the accommodation"},
-            { name: "category", isForeignKey: true, title: "Category", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/id=10003"}, nullok: false},
+            { name: "website", title: "Website", type: "text", comment: "A valid url of the accommodation"},
+            { name: "category", title: "Category", type: "text", nullok: false, isForeignKey: true,  count: 5, table_title: "Categories", comment: "Type of accommodation ('Resort/Hotel/Motel')"},
             { name: "rating", title: "User Rating", type: "float4", nullok: false},
             { name: "summary", title: "Summary", type: "longtext", nullok: false},
             { name: "description", title: "Description", type: "markdown"},
             { name: "no_of_rooms", title: "Number of Rooms", type: "int2"},
-            { name: "cover", isForeignKey: true, title: "Cover Image", type: "int2", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-add:file/id=3005"} },
-            { name: "thumbnail", isForeignKey: true, title: "Thumbnail", type: "int4"},
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
+            { name: "date_col", title: "date_col", type: "date"},
             { name: "luxurious", title: "Is Luxurious", type: "boolean" }
         ],
-        primary_keys: ["id"],
-        records: 2,
-        files: []
-    }, {
-        table_name: "file",
-        columns: [
-            { name: "fileid", title: "fileid", type: "int4" },
-            { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" },
-            { name: "content_type", title: "content_type", type: "text"},
-            { name: "timestamp", title: "timestamp", type: "timestamptz"},
-            { name: "image_width", title: "image_width", type: "int8"},
-            { name: "image_height", title: "image_height", type: "int8"}
+        inputs: [
+            {"title": "new title 1", "website": "https://example1.com", "category": {index: 0, value: "Hotel"}, 
+             "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1", 
+             "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:00", "YYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false},
+            {"title": "new title 2", "website": "https://example2.com", "category": {index: 1, value: "Ranch"}, 
+             "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description", 
+             "no_of_rooms": "2", "opened_on": moment("2017-02-02 02:02:00", "YYY-MM-DD hh:mm:ss"), "date_col": "2017-02-02", "luxurious":  true}
         ],
-        primary_keys: ["id"],
-        create_entity_displayname: "file",
-        records: 2,
-        files : [{
-            name: "testfile1MB.txt",
-            size: "1024000",
-            displaySize: "1MB",
-            path: "testfile1MB.txt"
-        }, {
-            name: "testfile500kb.png",
-            size: "512000",
-            displaySize: "500KB",
-            path: "testfile500kb.png"
-        }, {
-            name: "testfile5MB.pdf",
-            size: "5242880",
-            displaySize: "5MB",
-            path: "testfile5MB.pdf"
-        }]
+        results: [
+            ["new title 1",  "https://example1.com", undefined, "1.0000", "This is the summary of this column 1.", "## Description 1", "1", undefined, false],
+            ["new title 2",  "https://example2.com", undefined, "2.0000", "This is the summary of this column 2.", "## Description 2", "2", undefined, true]
+        ],
+        files: []
     }]
-}
+};
 
+// {
+//    table_name: "file",
+//    table_displayname: "file",
+//    primary_keys: ["id"],
+//    columns: [
+//        { name: "fileid", title: "fileid", type: "int4" },
+//        { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" },
+//        { name: "content_type", title: "content_type", type: "text"},
+//        { name: "timestamp", title: "timestamp", type: "timestamptz"},
+//        { name: "image_width", title: "image_width", type: "int8"},
+//        { name: "image_height", title: "image_height", type: "int8"}
+//    ],
+//    inputs: 2,
+//    files : [{
+//        name: "testfile1MB.txt",
+//        size: "1024000",
+//        displaySize: "1MB",
+//        path: "testfile1MB.txt"
+//    }, {
+//        name: "testfile500kb.png",
+//        size: "512000",
+//        displaySize: "500KB",
+//        path: "testfile500kb.png"
+//    }, {
+//        name: "testfile5MB.pdf",
+//        size: "5242880",
+//        displaySize: "5MB",
+//        path: "testfile5MB.pdf"
+//    }]
+// }
 describe('Record Add', function() {
 
     for (var i=0; i< testParams.tables.length; i++) {
@@ -61,7 +75,7 @@ describe('Record Add', function() {
         (function(tableParams, index) {
 
             describe("======================================================================= \n    "
-            + tableParams.records + " record(s) for table " + tableParams.table_name + ",", function() {
+            + tableParams.inputs.length + " record(s) for table " + tableParams.table_name + ",", function() {
 
                 beforeAll(function () {
                     browser.ignoreSynchronization=true;
@@ -78,16 +92,22 @@ describe('Record Add', function() {
                         });
                     }
 
-                    var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams);
+                    var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams, false);
                 });
 
-                describe("delete record, ", function() {
+                describe("remove record, ", function() {
 
-                    if (tableParams.records > 1) {
+                    if (tableParams.inputs.length > 1) {
+                        
+                        it("should click and add an extra record.", function() {
+                            chaisePage.recordEditPage.getAddRowButton().then(function(button) {
+                                chaisePage.clickButton(button);
+                            });
+                        });
 
-                        it(tableParams.records + " buttons should be visible and enabled", function() {
+                        it((tableParams.inputs.length+1) + " buttons should be visible and enabled", function() {
                             chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
-                                expect(buttons.length).toBe(tableParams.records + 1);
+                                expect(buttons.length).toBe(tableParams.inputs.length + 1);
                                 buttons.forEach(function(btn) {
                                     expect(btn.isDisplayed()).toBe(true);
                                     expect(btn.isEnabled()).toBe(true);
@@ -95,10 +115,8 @@ describe('Record Add', function() {
                             });
                         });
 
-                        var randomNo = chaisePage.recordEditPage.getRandomInt(0, tableParams.records - 1);
-
-                        it("click any delete button", function() {
-                            chaisePage.recordEditPage.getDeleteRowButton(randomNo).then(function(button)	 {
+                        it("should click and remove the last record", function() {
+                            chaisePage.recordEditPage.getDeleteRowButton(tableParams.inputs.length).then(function(button)	 {
                                 chaisePage.clickButton(button);
 
                                 browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id('delete-confirmation'))), browser.params.defaultTimeout);
@@ -107,7 +125,7 @@ describe('Record Add', function() {
                                     chaisePage.clickButton(modalBtn);
                                     browser.sleep(50);
                                     chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
-                                        expect(buttons.length).toBe(tableParams.records);
+                                        expect(buttons.length).toBe(tableParams.inputs.length);
                                     });
                                 });
                             });
@@ -124,7 +142,7 @@ describe('Record Add', function() {
                     }
                 });
 
-                describe("Submit " + tableParams.records + " records", function() {
+                describe("Submit " + tableParams.inputs.length + " records", function() {
                     beforeAll(function() {
                         // Submit the form
                         chaisePage.recordEditPage.submitForm();
@@ -146,11 +164,11 @@ describe('Record Add', function() {
                     it("should be redirected to record page", function() {
                         if (!hasErrors) {
                             // doesn't redirect to record
-                            if (tableParams.records > 1) {
+                            if (tableParams.inputs.length > 1) {
 
                                 // if there is a file upload
                                 if (!process.env.TRAVIS && tableParams.files.length > 0) {
-                                    browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.records * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
+                                    browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.inputs.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
                                 }
 
                                 // wait for url change
@@ -161,7 +179,7 @@ describe('Record Add', function() {
                                 }, browser.params.defaultTimeout);
                                 // verify url and ct
                                 browser.driver.getCurrentUrl().then(function(url) {
-                                    expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
+                                    expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true, "url has not been changed for table with index=" + index);
 
                                     browser.wait(function () {
                                         return chaisePage.recordsetPage.getRows().count().then(function (ct) {
@@ -170,7 +188,7 @@ describe('Record Add', function() {
                                     });
 
                                     chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                        expect(ct).toBe(tableParams.records);
+                                        expect(ct).toBe(tableParams.inputs.length, "number of records is not as expected for table with index=" + index);
                                     });
                                 });
                                 // redirects to record

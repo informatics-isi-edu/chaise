@@ -10,6 +10,7 @@
   "thumbnail": 3001,
   "cover": 3001,
   "opened_on": "1976-06-15T00:00:00-07:00",
+  "date_col": "12/9/2008",
   "luxurious": true
  },
  {
@@ -24,6 +25,7 @@
   "thumbnail": 3002,
   "cover": 3002,
   "opened_on": "2002-01-22T00:00:00-08:00",
+  "date_col": "12/9/2008",
   "luxurious": true
  },
  {
@@ -38,6 +40,7 @@
   "thumbnail": null,
   "cover": 3005,
   "opened_on": "2008-12-09T00:00:00-08:00",
+  "date_col": "12/9/2008",
   "luxurious": true
  },
  {
@@ -52,6 +55,7 @@
   "thumbnail": 3004,
   "cover": 3011,
   "opened_on": "2013-06-11T00:00:00-07:00",
+  "date_col": "12/9/2008",
   "luxurious": false
 },
 {
@@ -64,5 +68,21 @@
  "summary": "Great Hotel. We've got the best prices out of anyone. Stay here to make America great again. Located near shopping areas with easy access to parking. Professional staff and clean rooms. Poorly-maintained rooms.",
  "description": "** CARING. SHARING. DARING.**\nRadisson^®^ is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding `Yes I Can!` ^SM^ service, comfort and style where you need us.\n\n**THE RADISSON^®^ WAY** Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to `Yes I Can!` ^SM^ hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.",
  "opened_on": "2013-06-11T00:00:00-07:00",
+ "date_col": "12/9/2008",
+ "luxurious": true
+},
+{
+ "id": 2008,
+ "no_of_rooms": 23,
+ "title": "Sherathon Hotel",
+ "website": "http://www.starwoodhotels.com/sheraton/index.html",
+ "category": "Hotel",
+ "rating": 4.3,
+ "summary": "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
+ "description": "**CARING. SHARING. DARING.**",
+ "thumbnail": null,
+ "cover": 3005,
+ "opened_on": "2008-12-09T00:00:00-08:00",
+ "date_col": "12/9/2008",
  "luxurious": true
 }]
