@@ -442,22 +442,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             
             if (foreignKeyCols.length > 0) {
                 describe("Foreign key fields,", function() {
-                    var pageColumns = [], dropdowns = [];
-
-                    beforeAll(function() {
-                        chaisePage.recordEditPage.getAllColumnCaptions().then(function(pcs) {
-                            pcs.forEach(function(pc) {
-                                pc.getAttribute('innerHTML').then(function(txt) {
-                                    txt = txt.trim();
-                                    var col = foreignKeyCols.find(function(cl) { return txt == cl.title });
-                                    if (col) {
-                                        pc.column = col;
-                                        pageColumns.push(pc);
-                                    }
-                                });
-                            });
-                        });
-                    });
 
                     it('should show an uneditable field for each foreign key column', function() {
                         var expectedNumOfPopupFields = foreignKeyCols.length * (recordIndex + 1);
@@ -470,21 +454,27 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
 
-                    // TODO test the current value.
+                    it('should have correct values.', function () {
+                        foreignKeyCols.forEach(function (fkCol) {
+                            if (fkCol.value === undefined) return;
+                            
+                            var input = chaisePage.recordEditPage.getForeignKeyInputDisplay(fkCol.title, recordIndex);
+                            
+                            expect(input.getText()).toEqual(getRecordValue(fkCol.name));
+                        });
+                    });
 
-                    // in the edit case
                     if (isEditMode) {
                         it("clicking the 'x' should remove the value in the foreign key field.", function () {
-                            var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(foreignKeyCols[0].title, recordIndex);
-                            //the first foreignkey input for editing should be pre-filled
-                            expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-
-                            chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(foreignKeyInputRemoveBtn) {
-                                return chaisePage.clickButton(foreignKeyInputRemoveBtn[0]);
-                            }).then(function() {
-                                // value is empty string after removing it
-                                expect(foreignKeyInput.getAttribute("value")).toBe('');
-                            });
+                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(foreignKeyCols[0].title, recordIndex);
+                                //the first foreignkey input for editing should be pre-filled
+                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
+                                chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(foreignKeyInputRemoveBtn) {
+                                    return chaisePage.clickButton(foreignKeyInputRemoveBtn[0]);
+                                }).then(function() {
+                                    // value is empty string after removing it
+                                    expect(foreignKeyInput.getAttribute("value")).toBe('');
+                                });
                         });
 
                         it("clicking 'x' in the model should close it without returning a value.", function () {
@@ -1302,7 +1292,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             }
         });
         
-        // TODO it's creating one extra!!!!!
         if (Array.isArray(tableParams.inputs) && recordIndex < tableParams.inputs.length-1) {
             testMultipleRecords(recordIndex + 1);
         }
