@@ -499,7 +499,7 @@
       var options = this.$options,
           container = this.$textarea,
           afterContainer = container.next(),
-          replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'background-color: #d8d8dc !important; '}),
+          replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'width: 100% !important; background-color: #d8d8dc !important; '}),
           content,
           callbackContent;
      var previewWidth = this.$element[0].offsetWidth,
@@ -534,7 +534,6 @@
 
       // Set the preview element dimensions
       replacementContainer.css({
-        "width": previewWidth + 'px',
         "height": previewHeight + 'px'
       });
 
