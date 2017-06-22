@@ -109,6 +109,7 @@ describe('View existing record,', function() {
 
             describe("for a related entity without an association table", function() {
                 it('should have an "Add" link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
+                                    
                     var EC = protractor.ExpectedConditions, newTabUrl,
                         relatedTableName = testParams.related_regular_table,
                         addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
@@ -156,7 +157,7 @@ describe('View existing record,', function() {
                         return chaisePage.recordEditPage.getInputById(0, "price");
                     }).then(function(input) {
                         input.sendKeys(testParams.price);
-                        var nowBtn = element.all(by.css('button[name="booking_date"]')).get(1);
+                        var nowBtn = element.all(by.css('button[name="booking_date-now"]')).get(0);
                         return nowBtn.click();
                     }).then(function() {
                         return chaisePage.recordEditPage.submitForm();

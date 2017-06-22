@@ -132,12 +132,6 @@
             "typename": "text"
           },
           "annotations": {
-            "comment": [
-              "url"
-            ],
-            "description": {
-              "display": "Website"
-            },
             "tag:misd.isi.edu,2015:url" : {
               "url" : "{cname}"
             },
@@ -160,13 +154,6 @@
             "typename": "text"
           },
           "annotations": {
-            "comment": ["top"],
-            "description": {
-              "display": "Category"
-            },
-            "facetOrder": [
-              "2"
-            ],
             "tag:misd.isi.edu,2015:display": {
               "name": "Category"
             }
@@ -181,13 +168,6 @@
             "typename": "float4"
           },
           "annotations": {
-            "comment": ["top"],
-            "description": {
-              "display": "User Rating"
-            },
-            "facetOrder": [
-              "3"
-            ],
             "tag:misd.isi.edu,2015:display": {
               "name": "User Rating"
             }
@@ -202,12 +182,6 @@
             "typename": "longtext"
           },
           "annotations": {
-            "comment": [
-              "text",
-              "unsortable",
-              "summary",
-              "hidden"
-            ],
             "tag:misd.isi.edu,2015:display": {
               "name": "Summary"
             }
@@ -222,12 +196,6 @@
             "typename": "markdown"
           },
           "annotations": {
-            "comment": [
-              "text",
-              "unsortable",
-              "html",
-              "hidden"
-            ],
             "tag:misd.isi.edu,2015:display": {
               "name": "Description"
             }
@@ -257,9 +225,6 @@
             "typename": "int4"
           },
           "annotations": {
-            "comment": [
-              "hidden"
-            ],
             "tag:misd.isi.edu,2015:display": {
               "name": "Thumbnail"
             }
@@ -274,12 +239,6 @@
             "typename": "int4"
           },
           "annotations": {
-            "description": {
-              "display": "Cover Image"
-            },
-            "comment": [
-              "hidden"
-            ],
             "tag:misd.isi.edu,2015:display": {
               "name": "Cover Image"
             }
@@ -294,12 +253,6 @@
             "typename": "timestamptz"
           },
           "annotations": {
-            "comment": [
-              "bottom"
-            ],
-            "description": {
-              "display": "Operational Since"
-            },
             "tag:misd.isi.edu,2015:display": {
               "name": "Operational Since"
             }
@@ -314,15 +267,17 @@
             "typename": "boolean"
           },
           "annotations": {
-            "comment": ["top"],
-            "description": {
-              "display": "Luxurious"
-            },
             "tag:misd.isi.edu,2015:display": {
               "name": "Is Luxurious"
             },
             "tag:isrd.isi.edu,2016:ignore" : ["record"]
           }
+        },
+        {
+            "name": "date_col",
+            "type": {
+                "typename": "date"
+            }
         }
       ],
       "annotations": {
@@ -332,15 +287,11 @@
         "tag:misd.isi.edu,2015:display": {
           "name": "Accommodations"
         },
-        "description": {
-          "display": "Accommodations",
-          "top_columns": ["title", "rating", "category", "opened_on"]
-        },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", ["product-add", "fk_category"], "website", "rating", "summary", "description", ["product-add", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
-          "entry/create": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-add", "fk_thumbnail"], ["product-add", "fk_cover"],"terms", "opened_on","luxurious"],
-          "entry/edit": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-add", "fk_thumbnail"], ["product-add", "fk_cover"],"terms", "opened_on","luxurious"],
-          "compact" : ["title", "website", "rating", "summary","terms", "opened_on", "luxurious"]
+          "detailed" : ["id", "title", "website", ["product-add", "fk_category"],  "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"],
+          "entry/create": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious"],
+          "entry/edit": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious"],
+          "compact" : ["title", "website", ["product-add", "fk_category"],  "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
@@ -452,12 +403,6 @@
         }
       ],
       "annotations": {
-        "comment": [
-          "association"
-        ],
-        "description": {
-          "display": "Bookings"
-        },
         "tag:isrd.isi.edu,2016:visible-columns": {
           "*": ["id", ["product-add", "fk_booking_accommodation"], "price", "booking_date"]
         }
@@ -489,9 +434,6 @@
             "typename": "serial4"
           },
           "annotations": {
-            "comment": [
-              "hidden"
-            ],
             "tag:isrd.isi.edu,2016:generated": null
           }
         },
@@ -502,22 +444,6 @@
           "nullok": true,
           "type": {
             "typename": "int4"
-          },
-          "annotations": {
-          }
-        },
-        {
-          "comment": null,
-          "name": "filename",
-          "default": null,
-          "nullok": true,
-          "type": {
-            "typename": "text"
-          },
-          "annotations": {
-            "comment": [
-              "name"
-            ]
           }
         },
         {
@@ -529,30 +455,21 @@
             "typename": "text"
           },
           "annotations": {
-            "comment": [
-              "thumbnail",
-              "download"
-            ],
             "tag:isrd.isi.edu,2017:asset": {
               "url_pattern":"hatrac/js/chaise/{{{_fileid}}}/{{{_uri.md5_hex}}}",
               "filename_column" : "filename",
               "byte_count_column": "bytes",
-              "md5": "preview"
+              "md5": "md5"
             }
           }
         },
         {
           "comment": null,
-          "name": "content_type",
+          "name": "filename",
           "default": null,
           "nullok": true,
           "type": {
             "typename": "text"
-          },
-          "annotations": {
-            "comment": [
-              "type"
-            ]
           }
         },
         {
@@ -562,70 +479,27 @@
           "nullok": true,
           "type": {
             "typename": "int8"
-          },
-          "annotations": {
-            "comment": [
-              "orderby"
-            ]
           }
         },
         {
           "comment": null,
-          "name": "timestamp",
-          "default": null,
-          "nullok": true,
-          "type": {
-            "typename": "timestamptz"
-          },
-          "annotations": {}
-        },
-        {
-          "comment": null,
-          "name": "image_width",
-          "default": null,
-          "nullok": true,
-          "type": {
-            "typename": "int8"
-          },
-          "annotations": {
-            "comment": [
-              "image"
-            ]
-          }
-        },
-        {
-          "comment": null,
-          "name": "image_height",
-          "default": null,
-          "nullok": true,
-          "type": {
-            "typename": "int8"
-          },
-          "annotations": {}
-        },
-        {
-          "comment": "asset/thumbnail",
-          "name": "preview",
+          "name": "md5",
           "default": null,
           "nullok": true,
           "type": {
             "typename": "text"
-          },
-          "annotations": {
-            "comment": [
-              "preview"
-            ]
           }
         }
       ],
       "annotations": {
-        "comment": [
-          "exclude"
-        ],
         "tag:isrd.isi.edu,2016:table-display": {
           "compact": {
             "page_size": 5
           }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+            "*": ["fileid", "uri", "filename", "bytes"],
+            "entry": ["fileid", "uri"]
         }
       }
     },
