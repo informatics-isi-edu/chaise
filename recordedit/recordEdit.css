@@ -342,17 +342,3 @@ table.upload-table .progress {
   width: 0%;
   background-color: #8cacc7 !important;
 }
-
-.md-editor>textarea{
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
-    font-size: 14px !important;
-    line-height: 1.42857143 !important;
-    /*color: #333 !important;*/
-    background-color: #fff !important;
-}
-/*.md-preview>div{
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
-    font-size: 14px !important;
-    line-height: 1.42857143 !important;
-    color: #333 !important;
-}*/

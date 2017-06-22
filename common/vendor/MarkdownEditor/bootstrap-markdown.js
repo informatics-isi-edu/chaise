@@ -47,8 +47,7 @@
       }
     });
     // End BC
-    //prevOffW = 305;  //default width
-    //prevOffH = 122;  //default height
+
     // Class Properties
     this.$ns           = 'bootstrap-markdown';
     this.$element      = $(element);
@@ -500,7 +499,6 @@
       var options = this.$options,
           container = this.$textarea,
           afterContainer = container.next(),
-        //   replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'width:100% !important; height:122px !important; background-color: #F5F5F5 !important; '}),
           replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'background-color: #d8d8dc !important; '}),
           content,
           callbackContent;
@@ -535,8 +533,6 @@
       }
 
       // Set the preview element dimensions
-      console.log("Width:"+previewWidth);
-      console.log("Heiht:"+previewHeight);
       replacementContainer.css({
         "width": previewWidth + 'px',
         "height": previewHeight + 'px'
@@ -735,26 +731,26 @@
   , disableButtons: function(name) {
       var buttons = this.__parseButtonNameParam(name),
         that = this;
-if(buttons){
+    if(buttons){
       $.each(buttons, function(i, v) {
         that.__alterButtons(buttons[i], function (el) {
           el.attr('disabled','disabled');
         });
       });
-}
+    }
       return this;
     }
 
   , hideButtons: function(name) {
       var buttons = this.__parseButtonNameParam(name),
         that = this;
-if(buttons){
+    if(buttons){
       $.each(buttons, function(i, v) {
         that.__alterButtons(buttons[i], function (el) {
           el.addClass('hidden');
         });
       });
-}
+    }
       return this;
     }
 
@@ -1309,7 +1305,6 @@ if(buttons){
           toggle: true,
           hotkey: 'Ctrl+P',
           title: 'Preview',
-        //   btnText: '',
           btnClass: 'btn btn-primary btn-sm',
           icon: { glyph: 'glyphicon glyphicon-eye-open', fa: 'fa fa-eye', 'fa-3': 'icon-eye-open' },
           callback: function(e){

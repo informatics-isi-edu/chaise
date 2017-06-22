@@ -76,7 +76,9 @@ angular
 /**
  * Add new extra buttons: Strikethrough & Table
  * @return mixed additionButtons
+ * Few buttons are commented to be added in future versions.
  */
+
 function addNewButtons() {
   return [[
         // {
@@ -151,9 +153,7 @@ function addNewButtons() {
         data: [{
           name: "cmdModalPrev",
           title: "Fullscreen Preview",
-        //   btnText: "",
           btnClass: 'btn btn-primary',
-        //   btnAttr:'markdown-preview',
           icon: {
             fa: "fa fa-arrows-alt",
             glyph: "glyphicon glyphicon-fullscreen"
@@ -162,11 +162,8 @@ function addNewButtons() {
             var name = e.$element[0].name;
             var id = e.$element[0].id;
 
-              var idToS = '#previewLinkId-'+id.slice(0,id.indexOf("-",6))+'-'+name;
-            //   angular.element(document.querySelector(idToS)).click();
+              var idToS = '#previewLinkId-'+id.slice(0,id.indexOf("-",6))+'-'+name;     //Get rowIndex so that correct form is used during multi-edit preview
               angular.element(idToS).triggerHandler('click');
-
-
           }
         }]
   }
