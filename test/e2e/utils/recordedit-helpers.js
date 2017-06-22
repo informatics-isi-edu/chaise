@@ -9,42 +9,45 @@ var EC = protractor.ExpectedConditions;
 var exec = require('child_process').execSync;
 //test params for markdownPreview
 var markdownTestParams = [{
-    "raw": "RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf",
-    "markdown": "<h1>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf</h1>"
+    "raw": "RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh",
+    "markdown": "<h3>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh</h3>",
+    "comm":"Ctrl+H"
+},
+  {
+    "raw":"E15.5 embryonic kidneys for sections\n" +
+          "E18.5 embryonic kidneys for cDNA synthesis\n"+
+          "Sterile PBS\n" +
+          "QIAShredder columns (Qiagen, cat no. 79654)\n" +
+          "DEPC-Treated Water",
+   "markdown":  "<ul>\n"+
+                "<li>E15.5 embryonic kidneys for sections</li>\n" +
+                "<li>E18.5 embryonic kidneys for cDNA synthesis</li>\n" +
+                "<li>Sterile PBS</li>\n" +
+                "<li>QIAShredder columns (Qiagen, cat no. 79654)</li>\n" +
+                "<li>DEPC-Treated Water</li>\n" +
+                "</ul>",
+    "comm":"Ctrl+U"
+  },
+  {
+    "raw": "This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru",
+    "markdown": "<p><strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</strong></p>",
+    "comm":"Ctrl+B"
+  },
+  {
+    "raw":"This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.",
+    "markdown":"<p><em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.</em></p>",
+    "comm":"Ctrl+I"
+  },
+  {
+    "raw":"~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~",
+    "markdown":"<p><s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>",
+    "comm":" "
+  },
+  {
+    "raw": "X^2^+Y^2^+Z^2^=0",
+    "markdown": "X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0",
+    "comm":" "
   }
-  // {
-  //   "raw": "+ Create a list by starting a line with `+`, `-`, or `*`\n" +
-  //     "+ Sub-lists are made by indenting 2 spaces:\n" +
-  //     "  - Marker character change forces new list start:\n" +
-  //     "    * Ac tristique libero volutpat at\n" +
-  //     "    + Facilisis in pretium nisl aliquet\n" +
-  //     "    - Nulla volutpat aliquam velit\n" +
-  //     "+ Very easy!",
-  //   "markdown": "<ul>\n" +
-  //     "<li>Marker character change forces new list start:\n" +
-  //     "<ul>\n" +
-  //     "<li>Ac tristique libero volutpat at</li>\n" +
-  //     "</ul>\n" +
-  //     "<ul>\n" +
-  //     "<li>Facilisis in pretium nisl aliquet</li>\n" +
-  //     "</ul>\n" +
-  //     "<ul>\n" +
-  //     "<li>Nulla volutpat aliquam velit</li>\n" +
-  //     "</ul>\n" +
-  //     "</li>\n" +
-  //     "</ul>\n" +
-  //     "</li>\n" +
-  //     "<li>Very easy!</li>\n" +
-  //     "</ul>"
-  // },
-  // {
-  //   "raw": "`inline code can be very helpful. This is why we should use them quite often. whu;ehfwuehu wifjeowhfuehuhfh`. **This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri**. _This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj_. ~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~",
-  //   "markdown": "<p><code>inline code can be very helpful. This is why we should use them quite often. whu;ehfwuehu wifjeowhfuehuhfh</code>. <strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri</strong>. <em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj</em>. <s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>"
-  // },
-  // {
-  //   "raw": "X^2^+Y^2^+Z^2^=0",
-  //   "markdown": "X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0"
-  // }
 ];
 
 exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
@@ -208,31 +211,46 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 });
             });
 
-            it('should render correct markdown in modal box.', function() {
+            it('should render correct markdown with preview button.', function() {
               var descColList = tableParams.columns.filter(function(c) {
                 if ((c.type === "markdown") && !c.isForeignKey) return true;
               });
-
+              //Both preview is being tested.
               descColList.forEach(function(descCol) {
-                var markdownField = chaisePage.recordEditPage.getInputById(0, descCol.title);
-                var livePreviewLink = element(by.className('live-preview'));
-                var modalPrevBtn = element(by.css('button[title=ModalPrev]'));
+                var markdownField = chaisePage.recordEditPage.getInputById(recordIndex, descCol.title);
+                // if (recordIndex == 0){
+                //     btnIndex = 1;
+                // }else{
+                //     console.log(tableParams.records);
+                //     btnIndex = recordIndex + (tableParams.records);
+                // }
+                btnIndex = (recordIndex * 2) + 1;
+                var PrevBtn = element.all(by.css('button[title="Preview"]')).get(btnIndex);       //test inline preview
+                var modalPrevBtn = element.all(by.css('button[title="Fullscreen Preview"]')).get(btnIndex);       //test modal preview
                 var ctrlA = protractor.Key.chord(protractor.Key.CONTROL, "a");
                 for (i = 0; i < markdownTestParams.length; i++) {
                   markdownField.clear();
-                  (function(input, markdownOut) {
+                  (function(input, markdownOut, comm, btnIdx) {
 
                         markdownField.sendKeys(input,ctrlA);
+                        if(comm !=' ')
+                        { //If keyboard shortcut found for markdown elements then send click command.
+                                let v = "button[data-hotkey='"+comm+"']";
+                                element.all(by.css(v)).get(btnIdx).click();
+                        }
 
-                        element(by.css('button[data-hotkey="Ctrl+H"]')).click();
-                        // livePreviewLink.click();
                         modalPrevBtn.click();
                         let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
                         browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
-                        expect(mdDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown generation");
+                        expect(mdDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown pop-up generation");
                         element(by.className('modal-close')).click();
+                        PrevBtn.click();        //generate preview
+                        let mdPrevDiv = element(by.className("md-preview"));
+                        browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
+                        expect(mdPrevDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown preview generation");
+                        PrevBtn.click();        //editing mode
 
-                  })(markdownTestParams[i].raw, markdownTestParams[i].markdown);
+                  })(markdownTestParams[i].raw, markdownTestParams[i].markdown, markdownTestParams[i].comm, btnIndex);
                 } //for
               })
             });
@@ -1147,9 +1165,9 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
 
 /**
  * create files in the given path. This should be called before test cases
- * parent directory that these files will be uploaded into is test/e2e/data_setup/uploaded_files. 
- * That means the given path should be a path that is valid in uploaded_files folder. 
- * 
+ * parent directory that these files will be uploaded into is test/e2e/data_setup/uploaded_files.
+ * That means the given path should be a path that is valid in uploaded_files folder.
+ *
  * @param  {obj[]} files array of objects with at least path, and size as attributes.
  */
 exports.createFiles = function(files) {
@@ -1173,12 +1191,12 @@ exports.deleteFiles = function(files) {
 };
 
 /**
- * test a file input with the given column name, and file that we want to test 
+ * test a file input with the given column name, and file that we want to test
  * the file input against it.
  * @param  {string}         colName         name of the column
  * @param  {int}            recordIndex     index of record in the view
  * @param  {obj}            file            object with at least path, and name attributes.
- * @param  {string=}        currentValue    if you want to test the current value.   
+ * @param  {string=}        currentValue    if you want to test the current value.
  * @param  {boolean=false}  print           should it print the file names or not.
  */
 exports.testFileInput = function (colName, recordIndex, file, currentValue, print) {
@@ -1187,13 +1205,13 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
         if (print) {
             console.log("         ->" + colName);
         }
-        
+
         if (fileInput) {
             chaisePage.recordEditPage.getInputForAColumn("txt" + colName, recordIndex).then(function(txtInput) {
 
                 var selectFile = function() {
                     var filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
-                    
+
                     fileInput.sendKeys(filePath);
 
                     browser.sleep(100);

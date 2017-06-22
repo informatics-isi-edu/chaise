@@ -26,18 +26,7 @@
 <link rel="stylesheet" href="../common/vendor/MarkdownEditor/styles/github.css">
 <link rel="stylesheet" href="../common/vendor/MarkdownEditor/styles/angular-markdown-editor.css"> -->
 
-<!-- Scripts -->
-<!-- <script type="text/javascript" src="../common/vendor/MarkdownEditor/jquery.min.js"></script>
-<script type="text/javascript" src="../common/vendor/MarkdownEditor/marked.js"></script>
-<script type="text/javascript" src="../common/vendor/MarkdownEditor/angular-marked.min.js"></script>
-<script type="text/javascript" src="../common/vendor/MarkdownEditor/bootstrap-markdown.js"></script>
-<script type="text/javascript" src="../common/vendor/MarkdownEditor/highlight.js"></script>
-<script type="text/javascript" src="../common/vendor/MarkdownEditor/angular-highlightjs.js"></script>
-<script type="text/javascript" src="../common/vendor/MarkdownEditor/angular-markdown-editor.js"></script>
-<script type="text/javascript" src="../common/vendor/MarkdownEditor/bootstrap-markdown.fr.js"></script>
-<link rel="stylesheet" href="../common/vendor/MarkdownEditor/styles/markdownEdit.css" /> -->
-      <!-- angular-markdown-editor -->
-      <!-- <script type="text/javascript" src="../common/vendor/MarkdownEditor/mdSource.js"></script> -->
+
 
 </head>
 <body>
@@ -234,7 +223,7 @@
                                                     <!-- longtext/textarea input -->
                                                     <div ng-switch-when="longtext">
                                                         <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
-                                                            name="{{::column.name}}" class="form-control content-box" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}" on-preview="form.onPreview()"></textarea>
+                                                            name="{{::column.name}}" class="form-control content-box" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
                                                             <a href id="previewLinkId-form-{{rowIndex}}-{{::column.name}}" class="live-preview"  markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]"></a>
                                                         <!-- <span ng-if="::column.type.name === 'markdown'" class="help-block">
                                                             <small>

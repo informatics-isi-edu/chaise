@@ -501,7 +501,7 @@
           container = this.$textarea,
           afterContainer = container.next(),
         //   replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'width:100% !important; height:122px !important; background-color: #F5F5F5 !important; '}),
-          replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'background-color: #F5F5F5 !important; '}),
+          replacementContainer = $('<div/>',{'class':'md-preview markdown-container','data-provider':'markdown-preview','style':'background-color: #d8d8dc !important; '}),
           content,
           callbackContent;
      var previewWidth = this.$element[0].offsetWidth,
@@ -735,26 +735,26 @@
   , disableButtons: function(name) {
       var buttons = this.__parseButtonNameParam(name),
         that = this;
-
+if(buttons){
       $.each(buttons, function(i, v) {
         that.__alterButtons(buttons[i], function (el) {
           el.attr('disabled','disabled');
         });
       });
-
+}
       return this;
     }
 
   , hideButtons: function(name) {
       var buttons = this.__parseButtonNameParam(name),
         that = this;
-
+if(buttons){
       $.each(buttons, function(i, v) {
         that.__alterButtons(buttons[i], function (el) {
           el.addClass('hidden');
         });
       });
-
+}
       return this;
     }
 
@@ -1202,45 +1202,45 @@
             e.setSelection(cursor,cursor+chunk.length);
           }
         },
-        {
-          name: 'cmdCode',
-          hotkey: 'Ctrl+K',
-          title: 'Code',
-          icon: { glyph: 'glyphicon glyphicon-asterisk', fa: 'fa fa-code', 'fa-3': 'icon-code' },
-          callback: function(e) {
-            // Give/remove ** surround the selection
-            var chunk, cursor, selected = e.getSelection(), content = e.getContent();
-
-            if (selected.length === 0) {
-              // Give extra word
-              chunk = e.__localize('code text here');
-            } else {
-              chunk = selected.text;
-            }
-
-            // transform selection and set the cursor into chunked text
-            if (content.substr(selected.start-4,4) === '```\n'
-                && content.substr(selected.end,4) === '\n```') {
-              e.setSelection(selected.start-4, selected.end+4);
-              e.replaceSelection(chunk);
-              cursor = selected.start-4;
-            } else if (content.substr(selected.start-1,1) === '`'
-                && content.substr(selected.end,1) === '`') {
-              e.setSelection(selected.start-1,selected.end+1);
-              e.replaceSelection(chunk);
-              cursor = selected.start-1;
-            } else if (content.indexOf('\n') > -1) {
-              e.replaceSelection('```\n'+chunk+'\n```');
-              cursor = selected.start+4;
-            } else {
-              e.replaceSelection('`'+chunk+'`');
-              cursor = selected.start+1;
-            }
-
-            // Set the cursor
-            e.setSelection(cursor,cursor+chunk.length);
-          }
-        },
+        // {
+        //   name: 'cmdCode',
+        //   hotkey: 'Ctrl+K',
+        //   title: 'Code',
+        //   icon: { glyph: 'glyphicon glyphicon-asterisk', fa: 'fa fa-code', 'fa-3': 'icon-code' },
+        //   callback: function(e) {
+        //     // Give/remove ** surround the selection
+        //     var chunk, cursor, selected = e.getSelection(), content = e.getContent();
+        //
+        //     if (selected.length === 0) {
+        //       // Give extra word
+        //       chunk = e.__localize('code text here');
+        //     } else {
+        //       chunk = selected.text;
+        //     }
+        //
+        //     // transform selection and set the cursor into chunked text
+        //     if (content.substr(selected.start-4,4) === '```\n'
+        //         && content.substr(selected.end,4) === '\n```') {
+        //       e.setSelection(selected.start-4, selected.end+4);
+        //       e.replaceSelection(chunk);
+        //       cursor = selected.start-4;
+        //     } else if (content.substr(selected.start-1,1) === '`'
+        //         && content.substr(selected.end,1) === '`') {
+        //       e.setSelection(selected.start-1,selected.end+1);
+        //       e.replaceSelection(chunk);
+        //       cursor = selected.start-1;
+        //     } else if (content.indexOf('\n') > -1) {
+        //       e.replaceSelection('```\n'+chunk+'\n```');
+        //       cursor = selected.start+4;
+        //     } else {
+        //       e.replaceSelection('`'+chunk+'`');
+        //       cursor = selected.start+1;
+        //     }
+        //
+        //     // Set the cursor
+        //     e.setSelection(cursor,cursor+chunk.length);
+        //   }
+        // },
         {
           name: 'cmdQuote',
           hotkey: 'Ctrl+Q',
@@ -1309,9 +1309,9 @@
           toggle: true,
           hotkey: 'Ctrl+P',
           title: 'Preview',
-          btnText: 'Preview',
+        //   btnText: '',
           btnClass: 'btn btn-primary btn-sm',
-          icon: { glyph: 'glyphicon glyphicon-search', fa: 'fa fa-search', 'fa-3': 'icon-search' },
+          icon: { glyph: 'glyphicon glyphicon-eye-open', fa: 'fa fa-eye', 'fa-3': 'icon-eye-open' },
           callback: function(e){
             // Check the preview mode and toggle based on this flag
             var isPreview = e.$isPreview,content;

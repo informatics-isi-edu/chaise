@@ -150,20 +150,18 @@ function addNewButtons() {
         name: "groupPrev",
         data: [{
           name: "cmdModalPrev",
-          title: "ModalPrev",
-          btnText: "Modal",
+          title: "Fullscreen Preview",
+        //   btnText: "",
           btnClass: 'btn btn-primary',
-          btnAttr:'markdown-preview',
+        //   btnAttr:'markdown-preview',
           icon: {
-            fa: "fa fa-search",
-            glyph: "glyphicon glyphicon-sunglasses"
+            fa: "fa fa-arrows-alt",
+            glyph: "glyphicon glyphicon-fullscreen"
           },
           callback: function(e) {
-            //   var textContent = e.getContent();
             var name = e.$element[0].name;
             var id = e.$element[0].id;
-            console.log("Width in dir:"+e.$element[0].offsetWidth);
-            console.log("Heiht in dir:"+e.$element[0].offsetHeight);
+
               var idToS = '#previewLinkId-'+id.slice(0,id.indexOf("-",6))+'-'+name;
             //   angular.element(document.querySelector(idToS)).click();
               angular.element(idToS).triggerHandler('click');
