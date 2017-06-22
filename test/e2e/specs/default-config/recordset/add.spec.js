@@ -66,7 +66,7 @@ describe('Recordset add record,', function() {
                 return chaisePage.recordEditPage.getTextAreaForAcolumn("summary");
             }).then(function(input) {
                 input.sendKeys(testParams.summary);
-                var nowBtn = element.all(by.css('button[name="opened_on"]')).get(1);
+                var nowBtn = element.all(by.css('button[name="opened_on-now"]')).get(0);
                 return nowBtn.click();
             }).then(function() {
                 return chaisePage.recordEditPage.submitForm();
