@@ -344,11 +344,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
 
                     it('should render correct markdown with inline preview and full preview button.', function() {
-                      var descColList = tableParams.columns.filter(function(c) {
-                        if ((c.type === "markdown") && !c.isForeignKey) return true;
-                      });
+                    
                       //Both preview is being tested.
-                      descColList.forEach(function(descCol) {
+                      markdownCols.forEach(function(descCol) {
                         var markdownField = chaisePage.recordEditPage.getInputById(recordIndex, descCol.title);
                         btnIndex = (recordIndex * 2) + 1;
                         var PrevBtn = element.all(by.css('button[title="Preview"]')).get(btnIndex);       //test inline preview
