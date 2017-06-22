@@ -49,38 +49,36 @@ var testParams = {
             "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"]
         ],
         files: []
+    }, {
+       schema_name: "product-edit",
+       table_name: "file",
+       table_displayname: "90008",
+       primary_keys: ["id"],
+       key: { name: "id", value: "90008", operator: "="},
+       columns: [
+           { name: "fileid", title: "fileid", type: "int4" },
+           { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" }
+       ],
+       values: [
+           {"fileid":"","uri":"http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg"}
+       ],
+       inputs: [
+           {"fileid": "4", "uri": 0}
+       ],
+       result_columns: [
+           "fileid", "uri", "filename", "bytes"
+       ],
+       results: [
+           ["4", {"link": "{{{chaise_url}}}/record/hatrac/js/chaise/4/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+       ],
+       files : [{
+           name: "testfile500kb.png",
+           size: "512000",
+           displaySize: "500KB",
+           path: "testfile500kb.png"
+       }]
     }]
 };
-
-// , {
-//    schema_name: "product-edit",
-//    table_name: "file",
-//    table_displayname: "90008",
-//    primary_keys: ["id"],
-//    key: { name: "id", value: "90008", operator: "="},
-//    columns: [
-//        { name: "fileid", title: "fileid", type: "int4" },
-//        { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" }
-//    ],
-//    values: [
-//        {"fileid":"","uri":"http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg"}
-//    ],
-//    inputs: [
-//        {"fileid": "4", "uri": 0}
-//    ],
-//    result_columns: [
-//        "fileid", "uri", "filename", "bytes"
-//    ],
-//    results: [
-//        ["4", {"link": "{{{chaise_url}}}/record/hatrac/js/chaise/4/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
-//    ],
-//    files : [{
-//        name: "testfile500kb.png",
-//        size: "512000",
-//        displaySize: "500KB",
-//        path: "testfile500kb.png"
-//    }]
-// }
 
 describe('Edit existing record,', function() {
 
