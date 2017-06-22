@@ -1,3 +1,8 @@
+/**
+ * This test case is for testing editing a single record
+ * 
+ */
+
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var mustache = require('../../../../../../ermrestjs/vendor/mustache.min.js');
@@ -5,15 +10,16 @@ var moment = require('moment');
 
 var testParams = {
     tables: [{
+        schema_name: "product-edit",
         table_name: "accommodation",
         table_displayname: "Sherathon Hotel",
-        key: { name: "id", value: "2008", operator: "="},
+        key: { name: "id", value: "2000", operator: "="},
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
             { name: "title", title: "<strong>Name of Accommodation</strong>", type: "text", nullok: false},
             { name: "website", title: "Website", type: "text", comment: "A valid url of the accommodation"},
-            { name: "category",  title: "Category", type: "text", isForeignKey: true, count: 5, table_title: "Categories", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10003"}, nullok: false},
+            { name: "category",  title: "Category", type: "text", isForeignKey: true, count: 5, table_title: "Categories", comment: "Type of accommodation ('Resort/Hotel/Motel')", nullok: false},
             { name: "rating", title: "User Rating", type: "float4", nullok: false},
             { name: "summary", title: "Summary", nullok: false, type: "longtext"},
             { name: "description", title: "Description", type: "markdown"},
@@ -23,7 +29,7 @@ var testParams = {
             { name: "luxurious", title: "Is Luxurious", type: "boolean" }
         ],
         values: [
-            {"id": "2008", "title": "Sherathon Hotel", "website": "http://www.starwoodhotels.com/sheraton/index.html", "category": "Hotel", "rating": "4.3",
+            {"id": "2000", "title": "Sherathon Hotel", "website": "http://www.starwoodhotels.com/sheraton/index.html", "category": "Hotel", "rating": "4.3",
              "summary": "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
              "description": "**CARING. SHARING. DARING.**", "no_of_rooms": "23", "opened_on": moment("12/9/2008, 12:00:00 AM", "MM/DD/YYYY, HH:mm:ss A"),
              "date_col": "2008-12-09", "luxurious": "true"
@@ -32,36 +38,47 @@ var testParams = {
         inputs: [
             {"title": "new title 1", "website": "https://example1.com", "category": {index: 0, value: "Hotel"}, 
              "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1", 
-             "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:00", "YYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false},
+             "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false},
+        ],
+        result_columns: [
+            "title", "website", "product-edit_fk_category", "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"
         ],
         results: [
-            
+            ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, 
+            {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10003", "value":"Hotel"}, 
+            "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"]
         ],
         files: []
+    }, {
+       schema_name: "product-edit",
+       table_name: "file",
+       table_displayname: "90008",
+       primary_keys: ["id"],
+       key: { name: "id", value: "90008", operator: "="},
+       columns: [
+           { name: "fileid", title: "fileid", type: "int4" },
+           { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" }
+       ],
+       values: [
+           {"fileid":"","uri":"http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg"}
+       ],
+       inputs: [
+           {"fileid": "4", "uri": 0}
+       ],
+       result_columns: [
+           "fileid", "uri", "filename", "bytes"
+       ],
+       results: [
+           ["4", {"link": "{{{chaise_url}}}/record/hatrac/js/chaise/4/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+       ],
+       files : [{
+           name: "testfile500kb.png",
+           size: "512000",
+           displaySize: "500KB",
+           path: "testfile500kb.png"
+       }]
     }]
 };
-
-// {
-//     table_name: "file",
-//     key: { name: "id", value: "90007", operator: "="},
-//     primary_keys: ["id"],
-//     columns: [
-//         { name: "fileid", title: "fileid", type: "int4" },
-//         { name: "uri", title: "uri", type: "text", "isFile": true, comment: "asset/reference" },
-//         { name: "content_type", title: "content_type", type: "text"},
-//         { name: "timestamp", title: "timestamp", type: "timestamptz"},
-//         { name: "image_width", title: "image_width", type: "int8"},
-//         { name: "image_height", title: "image_height", type: "int8"}
-//     ],
-//     table_displayname: "90007",
-//     delete_keys: [],
-//     files: [{
-//         name: "testfile500kb.png",
-//         size: "512000",
-//         displaySize: "500KB",
-//         path: "testfile500kb.png"
-//     }]
-// }
 
 describe('Edit existing record,', function() {
 
@@ -73,6 +90,7 @@ describe('Edit existing record,', function() {
                 beforeAll(function() {
                     // create files that will be uploaded
                     recordEditHelpers.createFiles(tableParams.files);
+                    console.log("\n");
                 });
             }
 
@@ -85,9 +103,7 @@ describe('Edit existing record,', function() {
                     var keys = [];
                     keys.push(tableParams.key.name + tableParams.key.operator + tableParams.key.value);
                     browser.ignoreSynchronization=true;
-                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-edit:" + tableParams.table_name + "/" + keys.join("&"));
-                    
-                
+                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+ tableParams.schema_name +":" + tableParams.table_name + "/" + keys.join("&"));
 
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                         return chaisePage.recordEditPage.getViewModelRows();
@@ -109,49 +125,13 @@ describe('Edit existing record,', function() {
                 });
 
                 describe("Submitting an existing record,", function() {
-                    var keys = [], hasErrors = false;
-
-                    beforeAll(function() {
-                        // Build the keys component of a url for checking whether record app is on the right url
-                        keys.push(tableParams.key.name + tableParams.key.operator + tableParams.key.value);
-
-                        // Submit the form
-                        chaisePage.recordEditPage.submitForm();
-                    });
-
-                    it("should have no errors", function() {
-                        chaisePage.recordEditPage.getAlertError().then(function(err) {
-                            if (err) {
-                                expect("Page has errors").toBe("No errors");
-                                hasErrors = true;
-                            } else {
-                                expect(true).toBe(true);
-                            }
-                        });
-                    });
-
-                    it("should redirect to Record page", function() {
-                        if (!hasErrors) {
-
-                            // if there is a file upload
-                            if (!process.env.TRAVIS && tableParams.files.length > 0) {
-                                browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.inputs.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
-                            }
-
-                            var redirectUrl = browser.params.url+ "/record/#" + browser.params.catalogId + "/product-edit:" + tableParams.table_name + '/' + keys.join('&');
-                            // Wait for #tblRecord on Record page to appear
-                            chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
-                                expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
-                            }, function() {
-                                expect('Expected Record page to load an entity table').toBe('but the wait timed out.');
-                            });
-                        }
-                    });
+                    recordEditHelpers.testSubmission(tableParams, true);
                 });
                 
                 if (!process.env.TRAVIS && tableParams.files.length > 0) {
                     afterAll(function(done) {
                         recordEditHelpers.deleteFiles(tableParams.files);
+                        console.log("\n");
                         done();
                     });
                 }

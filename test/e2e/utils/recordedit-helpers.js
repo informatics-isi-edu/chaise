@@ -1,12 +1,9 @@
-var chaisePage = require('./chaise.page.js'),
-IGNORE = "tag:isrd.isi.edu,2016:ignore",
-HIDDEN = "tag:misd.isi.edu,2015:hidden",
-IMMUTABLE = "tag:isrd.isi.edu,2016:immutable",
-GENERATED = "tag:isrd.isi.edu,2016:generated";
-var chance = require('chance').Chance();
+var chaisePage = require('./chaise.page.js');
 var moment = require('moment');
-var EC = protractor.ExpectedConditions;
+var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
+var chance = require('chance').Chance();
 var exec = require('child_process').execSync;
+var EC = protractor.ExpectedConditions;
 
 //test params for markdownPreview
 var markdownTestParams = [{
@@ -53,10 +50,12 @@ var markdownTestParams = [{
  *
  * NOTE: tableParams structure:
  * It includes the following:
+ *  schema_name
  *  table_name
  *  table_displayname 
  *  primary_key: list of column names
  *  key (optional): it's used in edit mode for retrieving a record.
+ *  sortColumns (optional): it's used in edit mode, if there are more than one result (only in this case it's required).
  *  columns:
  *      - it must include `name`, `title`, and `type`.
  *      - it can have `generated` (bool), `immutable` (bool), `nullok` (bool), `comment`.
@@ -73,8 +72,8 @@ var markdownTestParams = [{
  *      - for date: it must be in `YYYY-MM-DD` format
  *      - for files: it must be the index of file that you want to select from provided `files`.
  *      - for other columns: it must be the url of that column.
+ *  result_columns (optional) if you want to test the inputs. Array of strings.
  *  results (optional) if you want to test the inputs, it must be in the same order of expected values. It's an array and includes only value of cells.
- *  TODO document results when implemented
  *  files (optional): if you want to test file upload. it's a list of objects with `name`, `size`, and `path`.
  * 
  * @param  {Object}  tableParams take a look at the note above.
@@ -662,21 +661,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                     
-                    it('should select a valid value.', function () {
-                        datePickerFields.forEach(function(dp) {
-                            var column = dp.column, inp = dp.date;
-                            if (column.generated || column.immutable) return;
-                            
-                            chaisePage.recordEditPage.clearInput(inp);
-                            browser.sleep(10);
-                            
-                            var value = getRecordInput(column.name, '2016-01-01');
-                            inp.sendKeys(value);
-                            expect(inp.getAttribute('value')).toEqual(value, colError(column.name, "value didn't change."));
-                        });
-                    });
-                    
-                    // NOTE: the following test cases are pending (need to be changed)
                     it("should have a datepicker element", function() {
                         dateCols.forEach(function(column) {
                             chaisePage.recordEditPage.getInputValue(column.name, recordIndex).then(function(dateInput) {
@@ -740,6 +724,21 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             });
                         });
                     }).pend('Postpone test until a datepicker is re-implemented');
+                    
+                    // this should be the last test case
+                    it('should select a valid value.', function () {
+                        datePickerFields.forEach(function(dp) {
+                            var column = dp.column, inp = dp.date;
+                            if (column.generated || column.immutable) return;
+                            
+                            chaisePage.recordEditPage.clearInput(inp);
+                            browser.sleep(10);
+                            
+                            var value = getRecordInput(column.name, '2016-01-01');
+                            inp.sendKeys(value);
+                            expect(inp.getAttribute('value')).toEqual(value, colError(column.name, "value didn't change."));
+                        });
+                    });
                 });
             }
               
@@ -1318,6 +1317,164 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 };
 
 /**
+ * used for checking the success page
+ * @param  {[type]}  tableParams [description]
+ * @param  {Boolean} isEditMode  [description]
+ * @return {[type]}              [description]
+ */
+exports.testSubmission = function (tableParams, isEditMode) {
+    beforeAll(function() {
+        // Submit the form
+        chaisePage.recordEditPage.submitForm();
+    });
+
+    var hasErrors = false;
+
+    it("should have no errors.", function() {
+        chaisePage.recordEditPage.getAlertError().then(function(err) {
+            if (err) {
+                expect("Page has errors").toBe("No errors", "expected pge to have no errors");
+                hasErrors = true;
+            } else {
+                expect(true).toBe(true);
+            }
+        });
+        
+        // if there is a file upload
+        if (!process.env.TRAVIS && tableParams.files.length > 0) {
+            var timeout =  tableParams.files.length ? (tableParams.results.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout;
+            browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')),timeout).catch(function (err) {
+                // if the element is not available (there is no file) it will return error which we should ignore.
+            });
+        }
+    });
+
+    if (tableParams.results.length > 1) {  // multi edit/create
+        it("should change the view to the resultset table and verify the count.", function () {
+            if (hasErrors) {
+                expect(undefined).toBeDefined('submission had errors.');
+                return;
+            }
+            
+            // verify url and ct
+            browser.driver.getCurrentUrl().then(function(url) {
+                expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true, "url has not been changed.");
+
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                        return (ct > 0);
+                    });
+                });
+
+                chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                    expect(ct).toBe(tableParams.results.length, "number of records is not as expected.");
+                });
+            });
+        });
+        
+        describe('result page, ', function () {
+            it("should have the correct title.", function() {
+                var title = tableParams.results.length + "/" + tableParams.results.length + " "+ tableParams.table_displayname +" Records "+(isEditMode? "Updated": "Created")+" Successfully";
+                expect(chaisePage.recordEditPage.getResultTitle().getText()).toBe(title);
+            });
+            
+            it('should point to the correct link with caption.', function () {
+                var linkModifier = "";
+                if (isEditMode) {
+                    var keyPairs = [];
+                    tableParams.keys.forEach(function(key) {
+                        keyPairs.push(key.name + key.operator + key.value);
+                    });
+                    linkModifier = "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns.join(",") + ")"
+                }
+            
+                var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
+                
+                chaisePage.recordEditPage.getResultTitleLink().then(function (titleLink) {
+                    expect(titleLink[0].getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
+                    expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
+                });
+            });
+            
+            it('table must show correct resutls.', function() {
+                chaisePage.recordsetPage.getRows().then(function(rows) {
+                    // same row count
+                    expect(rows.length).toBe(tableParams.results.length, "number of rows are not as expected.");
+
+                    for (j = 0; j < rows.length; j++) {
+                        (function(index) {
+                            rows[index].all(by.tagName("td")).then(function(cells) {
+
+                                // same column count
+                                expect(cells.length).toBe(tableParams.results[index].length, "number of columns are not as expected.");
+
+                                var result;
+
+                                // cells is what is being shown
+                                // tableParams.results is what we expect
+                                for (k = 0; k < tableParams.results[index].length; k++) {
+                                    result = tableParams.results[index][k];
+
+                                    if (typeof result.link === 'string') {
+                                        var link = mustache.render(result.link, {
+                                            "catalog_id": process.env.catalogId,
+                                            "chaise_url": process.env.CHAISE_BASE_URL,
+                                        });
+                                        
+                                        expect(cells[k].element(by.tagName("a")).getAttribute("href")).toContain(link);
+                                        expect(cells[k].element(by.tagName("a")).getText()).toBe(result.value, "data missmatch in row with index=" + index + ", columns with index=" + k);
+                                    } else {
+                                        expect(cells[k].getText()).toBe(result, "data missmatch in row with index=" + index + ", columns with index=" + k);
+                                    }
+                                }
+                            });
+
+                        })(j);
+                    };
+                });
+            });
+        });
+        
+        
+    } else { // single edit/create
+        it("should be redirected to record page", function() {
+            if (hasErrors) {
+                expect(undefined).toBeDefined('submission had errors.');
+                return;
+            }
+            
+            // wait for url change
+            browser.wait(function () {
+                return browser.driver.getCurrentUrl().then(function(url) {
+                    return url.startsWith(process.env.CHAISE_BASE_URL + "/record/");
+                });
+            }, browser.params.defaultTimeout);
+            
+            // verify url
+            browser.driver.getCurrentUrl().then(function(url) {
+                expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
+            });
+        });
+        
+        it('should have the correct submitted values.', function () {
+            if (hasErrors) {
+                expect(undefined).toBeDefined('submission had errors.');
+                return;
+            }
+            
+            var column_values = {};
+            for (var i = 0; i < tableParams.result_columns.length; i++) {
+                column_values[tableParams.result_columns[i]] = tableParams.results[0][i];
+            }
+            
+            exports.testRecordAppValuesAfterSubmission(tableParams.result_columns, column_values);
+        });
+    }
+
+}
+
+
+/**
  * column_names - array of string column_names
  * column_values - hash of column_name: column_value
  * Checks for if values are defined and set properly
@@ -1328,7 +1485,18 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
     for (var i = 0; i < column_names.length; i++) {
         var columnName = column_names[i];
         var column = chaisePage.recordPage.getColumnValue(columnName);
-        expect(column.getText()).toBe(column_values[columnName], "Value for " + columnName + " is not what was expected");
+        if (typeof column_values[columnName].link === 'string') {
+            column = column.element(by.css("a"));
+            var link = mustache.render(column_values[columnName].link, {
+                "catalog_id": process.env.catalogId,
+                "chaise_url": process.env.CHAISE_BASE_URL,
+            });
+            expect(column.getText()).toEqual(column_values[columnName].value, "Value for " + columnName + " is not what was expected");
+            expect(column.getAttribute('href')).toContain(link, "link for " + columnName + " is not what was expected");
+        } else {
+            expect(column.getText()).toBe(column_values[columnName], "Value for " + columnName + " is not what was expected");
+        }
+        
     }
 };
 
@@ -1354,8 +1522,8 @@ exports.createFiles = function(files) {
 exports.deleteFiles = function(files) {
     files.forEach(function(f) {
         var path = require('path').join(__dirname , "/../data_setup/uploaded_files/" + f.path);
+        exec('rm ' + path);
         console.log(path + " deleted");
-        exec('rm ' + f.path);
     });
 };
 
