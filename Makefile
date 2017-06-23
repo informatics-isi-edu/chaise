@@ -88,13 +88,10 @@ MDEDIT_CSS_DEPS=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.cs
 	$(COMMON)/vendor/MarkdownEditor/styles/github.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.css
 
-MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/marked.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-marked.min.js \
-	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
+MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
-	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.fr.js
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
 
 # CSS source
 CSS=styles
@@ -324,6 +321,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/markdownPreview.js \
+	$(COMMON)/rowResize.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \
