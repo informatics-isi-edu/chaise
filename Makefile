@@ -339,7 +339,8 @@ RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/angular-datepicker.css \
 	$(CSS)/vendor/rzslider.css \
 	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css
+	$(COMMON)/styles/appheader.css \
+	$(COMMON)/styles/appfooter.css
 
 RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
 

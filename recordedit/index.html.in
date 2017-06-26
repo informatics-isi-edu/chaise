@@ -244,10 +244,15 @@
                                                 </td>
                                             </tr>
                                         </table>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <!-- Footer -->
+                                <div class="footer1">
+                                    <div class="container1 footer1-text" ng-bind-html="form.footerText"></div>
+                                </div>
                     </div>
                 </div>
 
@@ -274,6 +279,8 @@
                 </div>
             </div>
         </div>
+
     </div>
+
 </body>
 </html>

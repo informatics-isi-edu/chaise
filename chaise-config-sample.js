@@ -62,6 +62,11 @@ var chaiseConfig = {
             //     url: "/chaise/recordedit/#1/YOUR_CATALOG:YOUR_SCHEMA"
             // }
         ]
+    },
+    footer:{
+        recordEdit:"<p>Help for record Edit.<a href='https://github.com/amitjha21'>Click Me!</a></p>",
+        recordSet:"<p>Help for record Set.<a href='https://github.com/amitjha21'>Click Me!</a></p>",
+        record:"<p>Help for record<a href='https://github.com/amitjha21'>Click Me!</a></p>"
     }
 };
 

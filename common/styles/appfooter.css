@@ -1,0 +1,19 @@
+/*@media screen and (min-width: 500px) {*/
+.footer1 {
+	height: 60px;
+	width: auto;
+	background-color: #000;
+}
+
+.footer1 > .container1 {
+    padding-right: 15px;
+    padding-left: 15px;
+	padding-top: 10px;
+}
+
+.footer1-text {
+	margin: 20px 0px;
+	color:#59C4FF;
+}
+
+/*}*/
