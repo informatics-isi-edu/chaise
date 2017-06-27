@@ -18,7 +18,9 @@ var testParams = {
             { name: "cover", isForeignKey: true, title: "Cover Image", value: "3,005" , type: "int2", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:file/id=3005"} },
             { name: "thumbnail", isForeignKey: true, title: "Thumbnail", value: null, type: "int4"},
             { name: "opened_on", title: "Operational Since", value: "12/9/2008, 12:00:00 AM", type: "timestamptz", nullok: false },
-            { name: "luxurious", title: "Is Luxurious", value: "false", type: "boolean" }
+            { name: "luxurious", title: "Is Luxurious", value: "false", type: "boolean" },
+            { name: "json_col", title: "json_col", value:'<pre>'+JSON.stringify({"name": "testing"},undefined,2)+'</pre>' , type: "json" },
+            { name: "jsonb_col", title: "jsonb_col", value: '<pre>'+JSON.stringify({"name": "testing_jsonb"},undefined,2)+'</pre>', type: "jsonb" }
         ],
         delete_keys: [{ name: "id", value: "4004", operator: "="}],
         edit_entity_displayname: "Sherathon Hotel",
