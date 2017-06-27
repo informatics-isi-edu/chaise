@@ -225,13 +225,16 @@
                                                         <upload reference="::reference"  column="::column" values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]"></upload>
                                                     </div>
 
-                                                    <!--JSON data -->
+                                                    <!--JSON input -->
                                                     <div ng-switch-when="json">
                                                         <textarea json id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
                                                             name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);"  empty-to-null></textarea>
-                                                        <span ng-if="::column.type.name === 'markdown'" class="help-block">
-                                                            <small><a ng-href="{{::form.mdHelpLinks.cheatsheet}}" target="_blank">Markdown reference sheet</a> | <a ng-href="{{::form.mdHelpLinks.editor}}" target="_blank">Live preview editor</a>.</small>
-                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!--JSONB input -->
+                                                    <div ng-switch-when="jsonb">
+                                                        <textarea json id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
+                                                            name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);"  empty-to-null></textarea>
                                                     </div>
 
                                                     <!-- shorttext/default text input -->

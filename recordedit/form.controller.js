@@ -632,6 +632,9 @@
                     case 'longtext':
                             displayType = 'longtext';
                         break;
+                    case 'jsonb':
+                            displayType= 'jsonb';
+                        break;
                     case 'json':
                             displayType= 'json';
                         break;
