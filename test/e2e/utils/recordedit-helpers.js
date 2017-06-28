@@ -296,7 +296,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             JSONDataTypeFields.push(jsonTxtArea);
 
                             if (c.value != undefined) {
-                                expect(jsonTxtArea.getAttribute('value')).toBe(c.value);
+                                expect(jsonTxtArea.getAttribute('value')).toBe(c._value);
                             }
 
                             if (isEditMode && (c.generated || c.immutable)) return;

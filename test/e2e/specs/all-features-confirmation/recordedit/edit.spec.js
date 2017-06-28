@@ -19,8 +19,8 @@ var testParams = {
             { name: "thumbnail", isForeignKey: true, title: "Thumbnail", value: null, type: "int4"},
             { name: "opened_on", title: "Operational Since", value: "12/9/2008, 12:00:00 AM", type: "timestamptz", nullok: false },
             { name: "luxurious", title: "Is Luxurious", value: "false", type: "boolean" },
-            { name: "json_col", title: "json_col", value:'<pre>'+JSON.stringify({"name": "testing"},undefined,2)+'</pre>' , type: "json" },
-            { name: "jsonb_col", title: "jsonb_col", value: '<pre>'+JSON.stringify({"name": "testing_jsonb"},undefined,2)+'</pre>', type: "jsonb" }
+            { name: "json_col", title: "json_col", value:JSON.stringify({"name": "testing"},undefined,2) , type: "json" },
+            { name: "jsonb_col", title: "jsonb_col", value: JSON.stringify({"name": "testing_jsonb"},undefined,2), type: "jsonb" }
         ],
         delete_keys: [{ name: "id", value: "4004", operator: "="}],
         edit_entity_displayname: "Sherathon Hotel",
