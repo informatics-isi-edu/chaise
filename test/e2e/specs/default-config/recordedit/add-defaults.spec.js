@@ -63,12 +63,20 @@ describe('Record Add with defaults', function() {
     describe("for when the user creates an entity with default values, ", function() {
         var EC = protractor.ExpectedConditions,
             values = testParams.default_column_values,
-            textInput, textDisabledInput, markdownInput, markdownDisabledInput, foreignKeyInput, foreignKeyDisabledInput, intInput, intDisabledInput,
-            floatInput, floatDisabledInput, booleanTrueInput, booleanFalseInput, booleanDisabledInput, dateInput, dateDisabledInput, timestamptzInputs, timestamptzDisabledInput;
+            textInput, textDisabledInput,
+            markdownInput, markdownDisabledInput,
+            foreignKeyInput, foreignKeyDisabledInput,
+            intInput, intDisabledInput,
+            floatInput, floatDisabledInput,
+            booleanTrueInput, booleanFalseInput, booleanDisabledInput,
+            dateInput, dateDisabledInput,
+            timestampInputs, timestampDisabledInput, timestampDisabledNoDefaultInput,
+            timestamptzInputs, timestamptzDisabledInput, timestamptzDisabledNoDefaultInput;
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/defaults:" + testParams.table_name);
+            chaisePage.waitForElement(element(by.id("submit-record-button")));
         });
 
         it("should prefill simple input fields that are not disabled with their default value.", function() {
@@ -117,10 +125,10 @@ describe('Record Add with defaults', function() {
         });
 
         it("should initialize timestamp columns properly if they are disabled without a default.", function() {
-            timestampDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamp_disabled_no_default");
+            timestampDisabledNoDefaultInput = chaisePage.recordEditPage.getInputById(0, "timestamp_disabled_no_default");
 
-            expect(timestampDisabledInput.getAttribute("value")).toBe("", "The disabled timestamp value is incorrect");
-            expect(timestampDisabledInput.getAttribute("placeholder")).toBe(values.timestamp_disabled_no_default_value, "The disabled timestamp placeholder is incorrect");
+            expect(timestampDisabledNoDefaultInput.getAttribute("value")).toBe("", "The disabled timestamp value is incorrect");
+            expect(timestampDisabledNoDefaultInput.getAttribute("placeholder")).toBe(values.timestamp_disabled_no_default_value, "The disabled timestamp placeholder is incorrect");
         });
 
         // Timestamptz columns
@@ -135,10 +143,10 @@ describe('Record Add with defaults', function() {
         });
 
         it("should initialize timestamptz columns properly if they are disabled without a default.", function() {
-            timestamptzDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamptz_disabled_no_default");
+            timestamptzDisabledNoDefaultInput = chaisePage.recordEditPage.getInputById(0, "timestamptz_disabled_no_default");
 
-            expect(timestamptzDisabledInput.getAttribute("value")).toBe("", "The disabled timestamptz value is incorrect");
-            expect(timestamptzDisabledInput.getAttribute("placeholder")).toBe(values.timestamptz_disabled_no_default_value, "The disabled timestamptz placeholder is incorrect");
+            expect(timestamptzDisabledNoDefaultInput.getAttribute("value")).toBe("", "The disabled timestamptz value is incorrect");
+            expect(timestamptzDisabledNoDefaultInput.getAttribute("placeholder")).toBe(values.timestamptz_disabled_no_default_value, "The disabled timestamptz placeholder is incorrect");
         });
 
         // Foreign key columns
