@@ -12,15 +12,19 @@ var testParams = {
             ],
             rows: [{
                     "int": {"value": "7", "input": "4"},
-                    "text": {"value": "test text", "input": "modified val"}
+                    "text": {"value": "test text", "input": "modified val"},
+                    "json_col":{"value":JSON.stringify({"name":"testing json column"},undefined,2),"input" : "{\"name\":\"This is the edited value of json\"}"},
+                    "jsonb_col":{"value":JSON.stringify({"name":"testing jsonB column"},undefined,2),"input" : "{\"name\":\"This is the edited value of jsonB\"}"}
                 }, {
                     "int": {"value": "12", "input": "66"},
-                    "text": {"value": "description", "input": "description 2"}
+                    "text": {"value": "description", "input": "description 2"},
+                    "json_col":{"value":JSON.stringify({"quantity":"6"},undefined,2),"input" : "{\"quantity\":\"6\"}"},
+                    "jsonb_col":{"value":JSON.stringify({"quantity":"9"},undefined,2), "input" : "{\"quantity\":\"9\"}"}
                 }
             ],
             results: [
-                ["1000", "modified val", "4"],
-                ["1001", "description 2", "66"]
+                ["1000", "modified val", "4",JSON.stringify({"name":"This is the edited value of json"},undefined,2),JSON.stringify({"name":"This is the edited value of jsonB"},undefined,2)],
+                ["1001", "description 2", "66",JSON.stringify({"quantity":"6"},undefined,2),JSON.stringify({"quantity":"9"},undefined,2)]
             ]
         }, {
             table_name: "multi-add-table",
@@ -43,9 +47,9 @@ var testParams = {
                 }
             ],
             results: [
-                ["1000", "changed it again", "5"],
-                ["1001", "description 3", "768"],
-                ["1002", "I am number 3", "934"]
+                ["1000", "changed it again", "5",JSON.stringify({"name":"This is the edited value of json"},undefined,2),JSON.stringify({"name":"This is the edited value of jsonB"},undefined,2)],
+                ["1001", "description 3", "768",JSON.stringify({"quantity":"6"},undefined,2),JSON.stringify({"quantity":"9"},undefined,2)],
+                ["1002", "I am number 3", "934",JSON.stringify(979.998,undefined,2),JSON.stringify(98.00243,undefined,2)]
             ]
         }, {
             table_name: 'table_w_multiple_assets',
@@ -214,8 +218,7 @@ describe('Edit multiple existing record,', function() {
 
                                 for (j = 0; j < rows.length; j++) {
                                     (function(index) {
-                                        rows[index].all(by.tagName("td")).then(function(cells) {
-
+                                        rows[index].all(by.tagName("td")).then(function(cells) {    
                                             // same column count
                                             expect(cells.length).toBe(tableParams.results[index].length, "number of columns are not as expected.");
 

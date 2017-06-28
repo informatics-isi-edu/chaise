@@ -316,7 +316,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                                 expect(expectedValue).toBeFalsy();
                                             }
                                             else{
-                                                expect(expectedValue).toBeTruthy();                                                }
+                                                expect(expectedValue).toBeTruthy();                                                
+                                                }
                                             });                                        
                                     })(JSONTestParams[i].stringVal, JSONTestParams[i].expectedValue);
                             }               
@@ -355,7 +356,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                                 expect(expectedValue).toBeFalsy();
                                             }
                                             else{
-                                                expect(expectedValue).toBeTruthy();                                                }
+                                                expect(expectedValue).toBeTruthy();                                                
+                                                }
                                             });                                        
                                     })(JSONBTestParams[i].stringVal, JSONBTestParams[i].expectedValue);
                             }  
