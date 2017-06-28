@@ -276,7 +276,7 @@
                             }
 
                             // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
-                            var defaultSet = (column.default !== undefined && typeof column.default !== "function" && column.default !== null);
+                            var defaultSet = (column.default !== undefined && column.default !== null);
                             // if no default is set, certain inputs have different model structures based on the input being disabled or not
                             var inputDisabled = (column.getInputDisabled(context.appContext));
 
