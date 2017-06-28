@@ -46,6 +46,86 @@ var markdownTestParams = [{
   }
 ];
 
+var JSONTestParams=[
+    {
+        stringVal:"{}",
+        expectedValue:true
+    },
+    {
+        stringVal:"{}}",
+        expectedValue:false
+    },
+    {
+        stringVal:"{\"name\":\"tester\"}",
+        expectedValue:true
+    },
+    {
+        stringVal:"6534.9987",
+        expectedValue:true
+    },
+    {
+        stringVal:"null",
+        expectedValue:true
+    },
+    {
+        stringVal:"          ",
+        expectedValue:true
+    },
+    {
+        stringVal:"{\\\\\\\\(*(*(&^&^^$%^)))}",
+        expectedValue:false
+    },
+    {
+        stringVal:"+++++++$$$$$$$$#######",
+        expectedValue:false
+    },
+    {
+        stringVal:"",
+        expectedValue:true
+    }
+    
+];
+
+var JSONBTestParams=[
+    {
+        stringVal:"{}",
+        expectedValue:true
+    },
+    {
+        stringVal:"{}}}}}}}}}}}}}}}}}}}}",
+        expectedValue:false
+    },
+    {
+        stringVal:"{\"name\":\"jsonb testing\"}",
+        expectedValue:true
+    },
+    {
+        stringVal:"99.645763",
+        expectedValue:true
+    },
+    {
+        stringVal:"null",
+        expectedValue:true
+    },
+    {
+        stringVal:"          ",
+        expectedValue:true
+    },
+    {
+        stringVal:"{!@@#%^%*&**(*(*(&*&&)))}",
+        expectedValue:false
+    },
+    {
+        stringVal:"+++++++$$$$$$$$#######",
+        expectedValue:false
+    },
+    {
+        stringVal:"",
+        expectedValue:true
+    }
+    
+];
+
 exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
     var visibleFields = [];
@@ -152,7 +232,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 });
             };
 
-            var longTextDataTypeFields = [], textDataTypeFields = [], booleanDataTypeFields = [], foreignKeyFields = [], datePickerFields = [], integerDataTypeFields = [], floatDataTypeFields = [];
+            var JSONDataTypeFields = [], JSONBDataTypeFields= [], longTextDataTypeFields = [], textDataTypeFields = [], booleanDataTypeFields = [], foreignKeyFields = [], datePickerFields = [], integerDataTypeFields = [], floatDataTypeFields = [];
 
             it("should show columns with generated or immutable annotations as disabled", function() {
                 var disabledCols = tableParams.columns.filter(function(c) { if (c.generated || c.immutable) return true; });
@@ -177,29 +257,108 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 });
             });
 
-            it("should show textarea input for longtext datatype and then set the value", function() {
-                var columns = tableParams.columns.filter(function(c) { if ((c.type === "longtext" ) && !c.isForeignKey) return true; });
+            // it("should show textarea input for longtext datatype and then set the value", function() {
+            //     var columns = tableParams.columns.filter(function(c) { if ((c.type === "longtext" ) && !c.isForeignKey) return true; });
+            //     columns.forEach(function(c) {
+            //         chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(txtArea) {
+            //             if (txtArea) {
+            //                 expect(true).toBeDefined();
+            //                 longTextDataTypeFields.push(txtArea);
+            // 
+            //                 if (c._value != undefined) {
+            //                     expect(txtArea.getAttribute('value')).toBe(c._value);
+            //                 }
+            // 
+            //                 if (isEditMode && (c.generated || c.immutable)) return;
+            // 
+            //                 chaisePage.recordEditPage.clearInput(txtArea);
+            //                 browser.sleep(10);
+            // 
+            //                 txtArea.column = c;
+            //                 var text = chance.paragraph();
+            //                 c._value = text;
+            //                 txtArea.sendKeys(text);
+            // 
+            //                 expect(txtArea.getAttribute('value')).toBeDefined(text);
+            //             } else {
+            //                 expect(undefined).toBeDefined();
+            //             }
+            //         });
+            //     });
+            // });
+            
+            it("should show textarea input for JSON datatype and then set the value", function() {
+                var columns = tableParams.columns.filter(function(c) { if ((c.type === "json" ) && !c.isForeignKey) return true; });
                 columns.forEach(function(c) {
-                    chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(txtArea) {
-                        if (txtArea) {
+                    chaisePage.recordEditPage.getJSONtextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
+                        if (jsonTxtArea) {
                             expect(true).toBeDefined();
-                            longTextDataTypeFields.push(txtArea);
+                            JSONDataTypeFields.push(jsonTxtArea);
 
                             if (c._value != undefined) {
-                                expect(txtArea.getAttribute('value')).toBe(c._value);
+                                expect(jsonTxtArea.getAttribute('value')).toBe(c._value);
                             }
 
                             if (isEditMode && (c.generated || c.immutable)) return;
 
-                            chaisePage.recordEditPage.clearInput(txtArea);
+                            chaisePage.recordEditPage.clearInput(jsonTxtArea);
                             browser.sleep(10);
 
-                            txtArea.column = c;
-                            var text = chance.paragraph();
-                            c._value = text;
-                            txtArea.sendKeys(text);
+                            jsonTxtArea.column = c;
+                            
+                            for (i = 0; i < JSONTestParams.length; i++) {
+                                  jsonTxtArea.clear();
+                                  (function(input, expectedValue) {
+                                      c._value = input;
+                                      jsonTxtArea.sendKeys(input);
+                                      chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json').then(function(error) {
+                                            if(error){
+                                                expect(expectedValue).toBeFalsy();
+                                            }
+                                            else{
+                                                expect(expectedValue).toBeTruthy();                                                }
+                                            });                                        
+                                    })(JSONTestParams[i].stringVal, JSONTestParams[i].expectedValue);
+                            }               
+                        } else {
+                            expect(undefined).toBeDefined();
+                        }
+                    });
+                });
+            });
+            
+            it("should show textarea input for JSONB datatype and then set the value", function() {
+                var columns = tableParams.columns.filter(function(c) { if ((c.type === "jsonb" ) && !c.isForeignKey) return true; });
+                columns.forEach(function(c) {
+                    chaisePage.recordEditPage.getJSONBtextAreaForAcolumn(c.name, recordIndex).then(function(jsonBTxtArea) {
+                        if (jsonBTxtArea) {
+                            expect(true).toBeDefined();
+                            JSONBDataTypeFields.push(jsonBTxtArea);
 
-                            expect(txtArea.getAttribute('value')).toBeDefined(text);
+                            if (c._value != undefined) {
+                                expect(jsonBTxtArea.getAttribute('value')).toBe(c._value);
+                            }
+
+                            if (isEditMode && (c.generated || c.immutable)) return;
+
+                            chaisePage.recordEditPage.clearInput(jsonBTxtArea);
+                            browser.sleep(10);
+
+                            jsonBTxtArea.column = c;
+                            for (i = 0; i < JSONTestParams.length; i++) {
+                                  jsonBTxtArea.clear();
+                                  (function(input, expectedValue) {
+                                      c._value = input;
+                                      jsonBTxtArea.sendKeys(input);
+                                      chaisePage.recordEditPage.getJSONBInputErrorMessage(jsonBTxtArea, 'json').then(function(error) {
+                                            if(error){
+                                                expect(expectedValue).toBeFalsy();
+                                            }
+                                            else{
+                                                expect(expectedValue).toBeTruthy();                                                }
+                                            });                                        
+                                    })(JSONBTestParams[i].stringVal, JSONBTestParams[i].expectedValue);
+                            }  
                         } else {
                             expect(undefined).toBeDefined();
                         }
@@ -223,7 +382,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
                         expect(mdDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown generation");
                         element(by.className('modal-close')).click();
-
+            
                   })(markdownTestParams[i].raw, markdownTestParams[i].markdown);
                 } //for
               })
@@ -262,12 +421,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             });
 
             describe("Boolean fields,", function() {
-
+            
                 var pageColumns = [], columns = [], dropdowns = [];
-
+            
                 beforeAll(function() {
                     columns = tableParams.columns.filter(function(c) { if (c.type === "boolean" && !c.isForeignKey) return true; });
-
+            
                     chaisePage.recordEditPage.getAllColumnCaptions().then(function(pcs) {
                         pcs.forEach(function(pc) {
                             pc.getAttribute('innerHTML').then(function(txt) {
@@ -281,8 +440,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 });
-
-
+            
+            
                 it("should show a dropdown", function() {
                     console.log("\n        Boolean Fields");
                     pageColumns.forEach(function(pc) {
@@ -291,11 +450,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             if (dropdown) {
                                 expect(true).toBeDefined();
                                 dropdown.column = pc.column;
-
+            
                                 if (dropdown.column._value != undefined) {
                                     expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(dropdown.column._value.length == 0 ? 'Select a value' : (dropdown.column._value + ""));
                                 }
-
+            
                                 dropdowns.push(dropdown);
                                 booleanDataTypeFields.push(dropdown);
                             } else {
@@ -304,7 +463,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 });
-
+            
                 it("should render 3 options for a boolean field if nullok is true else 2", function() {
                     dropdowns.forEach(function(dropdown) {
                         browser.executeScript("return $(arguments[0]).data().$scope.$select.items", dropdown).then(function(items) {
@@ -316,14 +475,14 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 });
-
+            
                 it("should select an option (true, false, none)", function() {
                     dropdowns.forEach(function(dropdown) {
-
+            
                         if (isEditMode && (dropdown.column.generated || dropdown.column.immutable)) return;
-
+            
                         var value = chance.bool();
-
+            
                         dropdown.column._value = value;
                         chaisePage.recordEditPage.selectDropdownValue(dropdown, value).then(function() {
                             browser.sleep(10);
@@ -331,19 +490,19 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 });
-
+            
             });
-
+            
             describe("Foreign key fields,", function() {
-
+            
                 var pageColumns = [], dropdowns = [];
-
+            
                 var columns  = tableParams.columns.filter(function(c) { if (c.isForeignKey) return true; });
-
+            
                 if (columns.length > 0) {
-
+            
                     beforeAll(function() {
-
+            
                         chaisePage.recordEditPage.getAllColumnCaptions().then(function(pcs) {
                             pcs.forEach(function(pc) {
                                 pc.getAttribute('innerHTML').then(function(txt) {
@@ -357,7 +516,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             });
                         });
                     });
-
+            
                     it('should show an uneditable field for each foreign key column', function() {
                         var expectedNumOfPopupFields = columns.length * (recordIndex + 1);
                         var popupFields = element.all(by.css('.popup-select-value'));
@@ -368,15 +527,15 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(field.getAttribute('contenteditable')).toBe('false');
                         });
                     });
-
+            
                     // in the edit case
                     if (!tableParams.records) {
-
+            
                         it("clicking the 'x' should remove the value in the foreign key field.", function () {
                             var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(columns[0].title, recordIndex);
                             //the first foreignkey input for editing should be pre-filled
                             expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-
+            
                             chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(foreignKeyInputRemoveBtn) {
                                 return chaisePage.clickButton(foreignKeyInputRemoveBtn[0]);
                             }).then(function() {
@@ -384,11 +543,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(foreignKeyInput.getAttribute("value")).toBe('');
                             });
                         });
-
+            
                         it("clicking 'x' in the model should close it without returning a value.", function () {
                             var modalClose = chaisePage.recordEditPage.getModalCloseBtn(),
                             EC = protractor.ExpectedConditions;
-
+            
                             chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
                                 return chaisePage.clickButton(popupBtns[0]);
                             }).then(function() {
@@ -401,14 +560,14 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             });
                         });
                     }
-
+            
                     it("should open a modal search and select a foreign key value.", function () {
                         chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
                             var modalTitle = chaisePage.recordEditPage.getModalTitle(),
                             EC = protractor.ExpectedConditions;
-
+            
                             expect(popupBtns.length).toBe(columns.length * (recordIndex + 1));
-
+            
                             for (var i=0; i<columns.length; i++) {
                                 (function(i) {
                                     var rows;
@@ -443,7 +602,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                         return rows.count();
                                     }).then(function(ct) {
                                         expect(ct).toBeGreaterThan(0);
-
+            
                                         var index = Math.floor(Math.random() * ct);
                                         return rows.get(index).all(by.css(".select-action-button"));
                                     }).then(function(selectButtons) {
@@ -480,11 +639,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 })(i);
                             }
                         });
-
+            
                     });
                 }
             });
-
+            
             describe("Date fields,", function() {
                 it('should show input fields and validate for date columns', function() {
                     var columns = tableParams.columns.filter(function(c) { if (c.type == "date" && !c.isForeignKey) return true; });
@@ -494,19 +653,19 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         if (column._value != undefined) {
                             expect(dateInput.getAttribute('value')).toBe(column._value);
                         }
-
+            
                         if (isEditMode && (column.generated || column.immutable)) return;
-
+            
                         chaisePage.recordEditPage.clearInput(dateInput);
-
+            
                         dateInput.sendKeys('1234-13-31');
                         expect(dateInput.getAttribute('value')).toBeFalsy();
                         chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
                             expect(error).toBeTruthy();
                         });
-
+            
                         chaisePage.recordEditPage.clearInput(dateInput);
-
+            
                         dateInput.sendKeys('2016-01-01');
                         expect(dateInput.getAttribute('value')).toEqual('2016-01-01');
                         chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
@@ -514,29 +673,29 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 });
-
+            
                 it('\"Today\" button should enter the current date into the input', function() {
                     var today = moment().format('YYYY-MM-DD');
                     datePickerFields.forEach(function(dp) {
-
+            
                         if (isEditMode && (dp.column.generated || dp.column.immutable)) return;
-
+            
                         var todayBtn = dp.all(by.css('.input-group-btn > button'))[0];
                         todayBtn.click();
                         expect(dp.getAttribute('value')).toEqual(today);
                     });
                 });
-
+            
                 it('\"Clear\" button clear the date input respectively', function() {
                     datePickerFields.forEach(function(dp) {
-
+            
                         if (isEditMode && (dp.column.generated || dp.column.immutable)) return;
-
+            
                         var clearBtn = dp.all(by.css('.input-group-btn > button'))[1];
                         expect(dp.getAttribute('value')).toBeFalsy();
                     });
                 });
-
+            
                 it("should have a datepicker element", function() {
                     console.log("\n        Date/Timestamptz fields");
                     var columns = tableParams.columns.filter(function(c) { if (c.type == "date" && !c.isForeignKey) return true; });
@@ -547,7 +706,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBeDefined();
                                 dateInput.column = column;
                                 datePickerFields.push(dateInput);
-
+            
                                 if (column._value != undefined) {
                                     expect(dateInput.getAttribute('value')).toBe(column._value);
                                 }
@@ -557,12 +716,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 }).pend('Postpone test until a datepicker is re-implemented');
-
+            
                 it("should render open datepicker on click", function() {
                     datePickerFields.forEach(function(dp) {
-
+            
                         if (isEditMode && (dp.column.generated || dp.column.immutable)) return;
-
+            
                         chaisePage.clickButton(dp);
                         browser.sleep(10);
                         chaisePage.recordEditPage.getDatePickerForAnInput(dp).then(function(datePicker) {
@@ -575,27 +734,27 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 }).pend('Postpone test until a datepicker is re-implemented');
-
+            
                 it("should select a date , and check the value", function() {
                     datePickerFields.forEach(function(dateInput) {
                         if (isEditMode && (dateInput.column.generated || dateInput.column.immutable)) return;
-
+            
                         chaisePage.clickButton(dateInput);
                         browser.sleep(10);
                         chaisePage.recordEditPage.getDayButtonsForDatePicker(dateInput.datePicker).then(function(dayBtns) {
                             var day = chaisePage.recordEditPage.getRandomInt(1, dayBtns.length);
                             console.log(dayBtns.length);
                             dayBtns[day-1].click();
-
+            
                             var month = ((new Date()).getMonth() + 1);
                             month = (month < 10) ? "0" + month : month;
                             day = (day < 10) ? "0" + day : day;
-
+            
                             var date = (new Date()).getFullYear() + "-" + month + "-"  + day;
                             expect(dateInput.getAttribute('value')).toBe(date);
-
+            
                             dateInput.column._value = date;
-
+            
                             // Required error message should disappear
                             chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'required').then(function(err) {
                                 if (err) {
@@ -608,24 +767,24 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
                 }).pend('Postpone test until a datepicker is re-implemented');
             });
-
+            
             describe("Timestamp fields,", function() {
                 var timeInputFields = [];
                 var columns;
-
+            
                 it('should have 3 inputs with validation for each timestamp column', function() {
                     columns = tableParams.columns.filter(function(c) { if (( c.type == "timestamptz" || c.type == "timestamp") && !c.isForeignKey ) return true; });
-
+            
                     columns.forEach(function(column) {
                         var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex);
                         var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemBtn = timeInputs.meridiem;
-
+            
                         expect(dateInput).toBeDefined();
                         expect(timeInput).toBeDefined();
                         expect(meridiemBtn).toBeDefined();
-
+            
                         if (isEditMode && (column.generated || column.immutable)) return;
-
+            
                         // Test toggling of meridiem button
                         // Testing meridiem before the time input test because toggling btn should work
                         // with or without input in the other fields (i.e. date and time input fields).
@@ -650,9 +809,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             console.log(error);
                             expect('There was an error in this promise chain.').toBe('Please see the error message.');
                         });
-
+            
                         if (isEditMode && (column.generated || column.immutable)) return;
-
+            
                         // If user enters an invalid time an error msg should appear
                         timeInput.clear();
                         timeInput.sendKeys('24:12:00'); // this is invalid because we're only accepting 24-hr time formats from 0-23
@@ -662,7 +821,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBe(true);
                             }
                         });
-
+            
                         // If user enters a valid time, then error msg should disappear
                         timeInput.clear();
                         timeInput.sendKeys('12:00:00');
@@ -723,7 +882,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBe(true);
                             }
                         });
-
+            
                         // Invalid date + good time = error
                         // If user enters a valid time but no date, an error msg should appear
                         dateInput.clear();
@@ -757,7 +916,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBe(true);
                             }
                         });
-
+            
                         // toggle after data is input as well
                         meridiemBtn.click().then(function() {
                             return meridiemBtn.getText();
@@ -776,7 +935,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             console.log(error);
                             expect('There was an error in this promise chain.').toBe('Please see the error message.');
                         });
-
+            
                         timeInputFields.push({
                             date: dateInput,
                             time: timeInput,
@@ -785,11 +944,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 });
-
+            
                 it('should clear the input after clicking the \"Clear\" button', function() {
                     timeInputFields.forEach(function(obj) {
                         if (isEditMode && (obj.column.generated || obj.column.immutable)) return;
-
+            
                         var clearBtn = element.all(by.css('button[name="' + obj.column.name + '"]')).get(2);
                         clearBtn.click();
                         expect(obj.date.getAttribute('value')).toBeFalsy();
@@ -797,19 +956,19 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         expect(obj.meridiem.getText()).toEqual('AM');
                     });
                 });
-
+            
                 it('should have the current time after clicking the \"Now\" button', function() {
                     timeInputFields.forEach(function(obj) {
-
+            
                         if (isEditMode && (obj.column.generated || obj.column.immutable)) return;
-
+            
                         var nowBtn = element.all(by.css('button[name="' + obj.column.name + '"]')).get(1);
                         var UIdate, date = moment().format('YYYY-MM-DD');
                         var UItime, time = moment().format('x'); // in milliseconds
                         var timeDelta = 60 * 1000; // 1 minute, in milliseconds
                         var startTime = time - timeDelta, endTime = time + timeDelta;
                         var meridiem = moment().format('A');
-
+            
                         nowBtn.click();
                         obj.date.getAttribute('value').then(function(dateVal) {
                             // Check date input
@@ -831,41 +990,41 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
                 });
             });
-
+            
             describe("Integer fields,", function() {
                 it("should render input type as number with integer attribute", function() {
                     console.log("\n       Integer Fields");
-
+            
                     var columns = tableParams.columns.filter(function(c) { if (c.type.startsWith("int") && !c.isForeignKey && !c.generated) return true; });
-
+            
                     columns.forEach(function(column) {
                         chaisePage.recordEditPage.getIntegerInputForAColumn(column.name, recordIndex).then(function(intInput) {
                             console.log("         ->" + column.name);
                             if (intInput) {
-
+            
                                 expect(true).toBeDefined();
                                 intInput.column = column;
                                 integerDataTypeFields.push(intInput);
-
+            
                                 if (column._value != undefined) {
                                     expect(intInput.getAttribute('value')).toBe(column._value);
                                 }
-
+            
                             } else {
                                 expect(undefined).toBeDefined();
                             }
                         });
                     });
                 });
-
+            
                 it("should validate required and invalid text input", function() {
-
+            
                     integerDataTypeFields.forEach(function(intInput) {
-
+            
                         if (isEditMode && (intInput.column.generated || intInput.column.immutable)) return;
-
+            
                         var prevValue = "";
-
+            
                         // Clear value if it is in edit mode
                         if (tableParams.primary_keys.indexOf(intInput.column.name) != -1) {
                             intInput.getAttribute("value").then(function(value) {
@@ -873,7 +1032,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             });
                         }
                         chaisePage.recordEditPage.clearInput(intInput);
-
+            
                         if (intInput.column.nullok == false && !intInput.column.generated && !intInput.column.immutable) {
                             chaisePage.recordEditPage.submitForm();
                             chaisePage.recordEditPage.getInputErrorMessage(intInput, 'required').then(function(err) {
@@ -884,13 +1043,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 }
                             });
                         }
-
+            
                         // Invalid text value
                         var text = "1j2yu", actualValue = "12";
                         intInput.sendKeys(text);
                         expect(intInput.getAttribute('value')).toBe(actualValue);
-
-
+            
+            
                         // Required Error message should disappear;
                         chaisePage.recordEditPage.getInputErrorMessage(intInput, 'required').then(function(err) {
                             if (err) {
@@ -899,44 +1058,44 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBeDefined();
                             }
                         });
-
+            
                         // Clear value
                         chaisePage.recordEditPage.clearInput(intInput);
                         expect(intInput.getAttribute('value')).toBe("");
-
+            
                         //Restore the value to the original one
                         if (tableParams.primary_keys.indexOf(intInput.column.name) != -1) {
                             intInput.sendKeys(prevValue);
                         }
-
+            
                     });
                 });
-
+            
                 it("should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values", function() {
-
+            
                     integerDataTypeFields.forEach(function(intInput) {
-
+            
                         if (isEditMode && (intInput.column.generated || intInput.column.immutable)) return;
-
+            
                         var min = -9223372036854776000, max = 9223372036854776000, invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
                         if (intInput.column.type == 'int2') {
                             min = -32768, max = 32767, invalidMaxNo = "8375832757832", invalidMinNo = "-237587565";
                         } else if (intInput.column.type == 'int4') {
                             min = -2147483648, max = 2147483647, invalidMaxNo = "3827374576453", invalidMinNo = "-326745374576375";
                         }
-
+            
                         var validNo = chaisePage.recordEditPage.getRandomInt(min, max) + "", invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
-
+            
                         // Store original value to reset it for avoiding any conflicts or referece issues due to unique or foreign key issue
                         if (tableParams.primary_keys.indexOf(intInput.column.name) != -1) {
                             intInput.getAttribute("value").then(function(value) {
                                 validNo = value + "";
                             });
                         }
-
+            
                         // Clear value if it is in edit mode
                         chaisePage.recordEditPage.clearInput(intInput);
-
+            
                         // Check for invalid maximum number
                         intInput.sendKeys(invalidMaxNo);
                         chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
@@ -946,12 +1105,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(undefined).toBe("Integer input " + intInput.column.name + " Max Error message to be displayed");
                             }
                         });
-
-
+            
+            
                         // Clear value
                         chaisePage.recordEditPage.clearInput(intInput);
                         expect(intInput.getAttribute('value')).toBe("");
-
+            
                         chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
                             if (err) {
                                 expect(undefined).toBe("Integer input " + intInput.column.name + " Max Error message to be hidden");
@@ -959,7 +1118,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBeDefined();
                             }
                         });
-
+            
                         // Check for invalid minimum number
                         intInput.sendKeys(invalidMinNo);
                         chaisePage.recordEditPage.getInputErrorMessage(intInput, 'min').then(function(err) {
@@ -969,11 +1128,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(undefined).toBe("Integer input " + intInput.column.name + " Min Error message to be displayed");
                             }
                         });
-
+            
                         // Clear value
                         chaisePage.recordEditPage.clearInput(intInput);
                         expect(intInput.getAttribute('value')).toBe("");
-
+            
                         chaisePage.recordEditPage.getInputErrorMessage(intInput, 'min').then(function(err) {
                             if (err) {
                                 expect(undefined).toBe("Integer input " + intInput.column.name + " Min Error message to be hidden");
@@ -981,13 +1140,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBeDefined();
                             }
                         });
-
+            
                         // Check for a valid number
                         intInput.sendKeys(validNo);
                         expect(intInput.getAttribute('value')).toBe(validNo);
-
+            
                         intInput.column._value = validNo;
-
+            
                         chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
                             if (err) {
                                 expect(undefined).toBe("Integer input " + intInput.column.name + " Max Error message to be hidden");
@@ -995,7 +1154,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBeDefined();
                             }
                         });
-
+            
                         chaisePage.recordEditPage.getInputErrorMessage(intInput, 'min').then(function(err) {
                             if (err) {
                                 expect(undefined).toBe("Integer input " + intInput.column.name + " Min Error message to be hidden");
@@ -1003,15 +1162,15 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBeDefined();
                             }
                         });
-
+            
                     });
-
+            
                 });
-
+            
             });
-
+            
             describe("Float fields,", function() {
-
+            
                 it("should render input type as number with float attribute", function() {
                     console.log("\n       Float Fields");
                     var columns = tableParams.columns.filter(function(c){ if ((c.type.startsWith('float') ||  c.type.startsWith('numeric')) && !c.isForeignKey) return true; });
@@ -1031,14 +1190,14 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 });
-
+            
                 it("should validate invalid text input", function() {
                     floatDataTypeFields.forEach(function(floatInput) {
-
+            
                         if (isEditMode && (floatInput.column.generated || floatInput.column.immutable)) return;
-
+            
                         var validNo = chaisePage.recordEditPage.getRandomArbitrary() + "";
-
+            
                         // Clear value if it is in edit mode
                         if (tableParams.primary_keys.indexOf(floatInput.column.name) != -1) {
                             floatInput.getAttribute("value").then(function(value) {
@@ -1046,7 +1205,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             });
                         }
                         chaisePage.recordEditPage.clearInput(floatInput);
-
+            
                         if (floatInput.column.nullok == false) {
                             chaisePage.recordEditPage.submitForm();
                             chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required').then(function(err) {
@@ -1057,7 +1216,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 }
                             });
                         }
-
+            
                         // Invalid text value
                         var text = "1j2yu.5", actualValue = "12.5";
                         floatInput.sendKeys(text).then(function() {
@@ -1068,7 +1227,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             console.log('ERROR:', error);
                             expect('Something went wrong in this promise chain to check the value of an input field.').toBe('See error msg for more info.')
                         });
-
+            
                         // Required Error message should disappear;
                         chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required').then(function(err) {
                             if (err) {
@@ -1077,20 +1236,20 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 expect(true).toBeDefined();
                             }
                         });
-
+            
                         // Clear value
                         chaisePage.recordEditPage.clearInput(floatInput);
                         expect(floatInput.getAttribute('value')).toBe("");
-
+            
                         //Restore the value to the original one or a valid input
                         floatInput.sendKeys(validNo);
                         expect(floatInput.getAttribute('value')).toBe(validNo);
-
+            
                         floatInput.column._value = validNo;
-
+            
                     });
                 });
-
+            
             });
 
             if (!process.env.TRAVIS && tableParams.files.length > 0) {
