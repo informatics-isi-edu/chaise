@@ -73,7 +73,7 @@
         // $timeout(function () {
         //     vm.showfooter = 1;
         // }, 1);
-        vm.footerText = chaiseConfig.footer.recordEdit;//"<p><strong>Hello  <a href='https://github.com/amitjha21'>Amit</a></strong></p>";
+        // vm.footerText = ERMrest.renderMarkdown(chaiseConfig.footer.recordEdit);
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
         function redirectAfterSubmission(page) {

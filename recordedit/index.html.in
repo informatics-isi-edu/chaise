@@ -249,11 +249,9 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Footer -->
-                                <div class="footer1">
-                                    <div class="container1 footer1-text" ng-bind-html="form.footerText"></div>
-                                </div>
+
                     </div>
+
                 </div>
 
                 <div ng-show="form.resultset" class="container-fluid">
@@ -277,10 +275,13 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
     </div>
-
+<div ng-controller="FormController as form">
+    <footer></footer>
+</div>
 </body>
 </html>

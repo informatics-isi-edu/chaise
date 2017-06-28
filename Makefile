@@ -235,6 +235,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/footer.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
@@ -243,7 +244,8 @@ RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css
+	$(COMMON)/styles/appheader.css \
+	$(COMMON)/styles/appfooter.css
 
 RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 
@@ -321,6 +323,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/markdownPreview.js \
+	$(COMMON)/footer.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \
@@ -362,7 +365,8 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
 	$(COMMON)/navbar.js \
-	$(COMMON)/bindHtmlUnsafe.js
+	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/footer.js
 
 RECSET_JS_SOURCE=$(COMMON)/authen.js \
     $(COMMON)/utils.js \
@@ -373,7 +377,8 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 
 RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css \
     $(COMMON)/styles/app.css \
-    $(COMMON)/styles/appheader.css
+    $(COMMON)/styles/appheader.css \
+	$(COMMON)/styles/appfooter.css
 
 # Config file
 JS_CONFIG=chaise-config.js
