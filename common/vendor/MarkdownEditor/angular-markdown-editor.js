@@ -1,3 +1,33 @@
+/**
+* @desc
+* The angular-markdown-editor is a third party directive to manipulate markdown in textarea.
+* The source can be found at: https://github.com/ghiscoding/angular-markdown-editor
+
+* The directive can be used as an attribute tag.
+* <textarea name="editor1" class="content-box"
+*		ng-model="editor1"
+*		markdown-editor="{'iconlibrary': 'glyph', addExtraButtons: true, resize: 'vertical'}"
+*		on-fullscreen="onFullScreenCallback()"
+*		on-fullscreen-exit="onFullScreenExitCallback()"
+*		rows="10" >
+* </textarea>
+* It also privdes hooks to write custom handlers for these methods :
+* onPreview
+* onSave
+* onBlur
+* onFocus
+* onFullscreen
+* onFullscreenExit (*)
+* onChange
+* onSelect
+* onShow
+*
+* These are few optons to manipulate editor behavior:
+* 'autofocus', 'saveable', 'iconlibrary', 'hideable', 'width','height','resize','language',
+* 'footer','fullscreen','hiddenButtons','initialstate','showButtons','additionalButtons'.
+* Note:Only editor feature was used from this module. Preview was implemented through 
+* ERMrest markdownIt component
+*/
 angular
   .module('angular-markdown-editor', [])
   .directive('markdownEditor', ['$rootScope','ERMrest', function ($rootScope,ERMrest) {

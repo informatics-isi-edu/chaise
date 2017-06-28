@@ -344,7 +344,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
 
                     it('should render correct markdown with inline preview and full preview button.', function() {
-                    
+
                       //Both preview is being tested.
                       markdownCols.forEach(function(descCol) {
                         var markdownField = chaisePage.recordEditPage.getInputById(recordIndex, descCol.title);
@@ -366,12 +366,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 modalPrevBtn.click();
                                 let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
                                 browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
-                                expect(mdDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown pop-up generation");
+                                expect(mdDiv.getAttribute('outerHTML')).toContain(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
                                 element(by.className('modal-close')).click();
                                 PrevBtn.click();        //generate preview
                                 let mdPrevDiv = element(by.className("md-preview"));
                                 browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
-                                expect(mdPrevDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown preview generation");
+                                expect(mdPrevDiv.getAttribute('outerHTML')).toContain(markdownOut,colError(descCol.name, "Error during markdown preview generation"));
                                 PrevBtn.click();        //editing mode
 
                           })(markdownTestParams[i].raw, markdownTestParams[i].markdown, markdownTestParams[i].comm, btnIndex);
@@ -1431,7 +1431,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                                                 "catalog_id": process.env.catalogId,
                                                 "chaise_url": process.env.CHAISE_BASE_URL,
                                             });
-                                            
+
                                             expect(cells[k].element(by.tagName("a")).getAttribute("href")).toContain(link);
                                             expect(cells[k].element(by.tagName("a")).getText()).toBe(result.value, "data missmatch in row with index=" + index + ", columns with index=" + k);
                                         } else {
@@ -1467,7 +1467,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
             });
         });
-        
+
         //NOTE: in travis we're not uploading the file and therefore this test case will fail
         if (!process.env.TRAVIS && tableParams.files.length > 0) {
             it('should have the correct submitted values.', function () {
@@ -1475,12 +1475,12 @@ exports.testSubmission = function (tableParams, isEditMode) {
                     expect(undefined).toBeDefined('submission had errors.');
                     return;
                 }
-                
+
                 var column_values = {};
                 for (var i = 0; i < tableParams.result_columns.length; i++) {
                     column_values[tableParams.result_columns[i]] = tableParams.results[0][i];
                 }
-                
+
                 exports.testRecordAppValuesAfterSubmission(tableParams.result_columns, column_values);
             });
         }
