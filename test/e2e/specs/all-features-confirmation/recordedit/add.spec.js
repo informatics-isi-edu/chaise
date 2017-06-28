@@ -17,7 +17,9 @@ var testParams = {
             { name: "cover", isForeignKey: true, title: "Cover Image", type: "int2", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-add:file/id=3005"} },
             { name: "thumbnail", isForeignKey: true, title: "Thumbnail", type: "int4"},
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
-            { name: "luxurious", title: "Is Luxurious", type: "boolean" }
+            { name: "luxurious", title: "Is Luxurious", type: "boolean" },
+            { name: "json_col", title: "json_col", type:"json"},
+            { name: "jsonb_col", title: "jsonb_col", type:"jsonb"}
         ],
         primary_keys: ["id"],
         records: 2,

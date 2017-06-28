@@ -234,6 +234,24 @@
           }
         },
         {
+          "name": "json_col",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "json"
+          },
+          "annotations": {}
+        },
+        {
+          "name": "jsonb_col",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "jsonb"
+          },
+          "annotations": {}
+        },
+        {
           "comment": null,
           "name": "no_of_rooms",
           "default": null,
@@ -337,9 +355,9 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", ["product-add", "fk_category"], "website", "rating", "summary", "description", ["product-add", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
-          "entry/create": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-add", "fk_thumbnail"], ["product-add", "fk_cover"],"terms", "opened_on","luxurious"],
-          "entry/edit": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-add", "fk_thumbnail"], ["product-add", "fk_cover"],"terms", "opened_on","luxurious"],
+          "detailed" : ["id", ["product-add", "fk_category"], "website", "rating", "summary", "description","json_col","jsonb_col", ["product-add", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
+          "entry/create": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description", "json_col","jsonb_col","no_of_rooms", ["product-add", "fk_thumbnail"], ["product-add", "fk_cover"],"terms", "opened_on","luxurious"],
+          "entry/edit": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description","json_col","jsonb_col", "no_of_rooms", ["product-add", "fk_thumbnail"], ["product-add", "fk_cover"],"terms", "opened_on","luxurious"],
           "compact" : ["title", "website", "rating", "summary","terms", "opened_on", "luxurious"]
         },
 

@@ -80,7 +80,7 @@ var JSONTestParams=[
         expectedValue:false
     },
     {
-        stringVal:"",
+        stringVal:JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
         expectedValue:true
     }
     
@@ -120,7 +120,7 @@ var JSONBTestParams=[
         expectedValue:false
     },
     {
-        stringVal:"",
+        stringVal:JSON.stringify({"items": {"qty": 20,"product": "iphone7"},"customer": "Nitish Sahu"},undefined,2),
         expectedValue:true
     }
     
@@ -257,35 +257,35 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 });
             });
 
-            // it("should show textarea input for longtext datatype and then set the value", function() {
-            //     var columns = tableParams.columns.filter(function(c) { if ((c.type === "longtext" ) && !c.isForeignKey) return true; });
-            //     columns.forEach(function(c) {
-            //         chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(txtArea) {
-            //             if (txtArea) {
-            //                 expect(true).toBeDefined();
-            //                 longTextDataTypeFields.push(txtArea);
-            // 
-            //                 if (c._value != undefined) {
-            //                     expect(txtArea.getAttribute('value')).toBe(c._value);
-            //                 }
-            // 
-            //                 if (isEditMode && (c.generated || c.immutable)) return;
-            // 
-            //                 chaisePage.recordEditPage.clearInput(txtArea);
-            //                 browser.sleep(10);
-            // 
-            //                 txtArea.column = c;
-            //                 var text = chance.paragraph();
-            //                 c._value = text;
-            //                 txtArea.sendKeys(text);
-            // 
-            //                 expect(txtArea.getAttribute('value')).toBeDefined(text);
-            //             } else {
-            //                 expect(undefined).toBeDefined();
-            //             }
-            //         });
-            //     });
-            // });
+            it("should show textarea input for longtext datatype and then set the value", function() {
+                var columns = tableParams.columns.filter(function(c) { if ((c.type === "longtext" ) && !c.isForeignKey) return true; });
+                columns.forEach(function(c) {
+                    chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(txtArea) {
+                        if (txtArea) {
+                            expect(true).toBeDefined();
+                            longTextDataTypeFields.push(txtArea);
+            
+                            if (c._value != undefined) {
+                                expect(txtArea.getAttribute('value')).toBe(c._value);
+                            }
+            
+                            if (isEditMode && (c.generated || c.immutable)) return;
+            
+                            chaisePage.recordEditPage.clearInput(txtArea);
+                            browser.sleep(10);
+            
+                            txtArea.column = c;
+                            var text = chance.paragraph();
+                            c._value = text;
+                            txtArea.sendKeys(text);
+            
+                            expect(txtArea.getAttribute('value')).toBeDefined(text);
+                        } else {
+                            expect(undefined).toBeDefined();
+                        }
+                    });
+                });
+            });
             
             it("should show textarea input for JSON datatype and then set the value", function() {
                 var columns = tableParams.columns.filter(function(c) { if ((c.type === "json" ) && !c.isForeignKey) return true; });
@@ -295,8 +295,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(true).toBeDefined();
                             JSONDataTypeFields.push(jsonTxtArea);
 
-                            if (c._value != undefined) {
-                                expect(jsonTxtArea.getAttribute('value')).toBe(c._value);
+                            if (c.value != undefined) {
+                                expect(jsonTxtArea.getAttribute('value')).toBe(c.value);
                             }
 
                             if (isEditMode && (c.generated || c.immutable)) return;
@@ -336,8 +336,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(true).toBeDefined();
                             JSONBDataTypeFields.push(jsonBTxtArea);
 
-                            if (c._value != undefined) {
-                                expect(jsonBTxtArea.getAttribute('value')).toBe(c._value);
+                            if (c.value != undefined) {
+                                expect(jsonBTxtArea.getAttribute('value')).toBe(c.value);
                             }
 
                             if (isEditMode && (c.generated || c.immutable)) return;
