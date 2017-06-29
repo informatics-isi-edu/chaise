@@ -7,40 +7,44 @@ var EC = protractor.ExpectedConditions;
 
 //test params for markdownPreview
 var markdownTestParams = [{
-    "raw": "# RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf",
-    "markdown": "<h1>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf</h1>"
+    "raw": "RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh",
+    "markdown": "<h3>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh</h3>\n",
+    "comm":"Ctrl+H"
+},
+  {
+    "raw":"E15.5 embryonic kidneys for sections\n" +
+          "- E18.5 embryonic kidneys for cDNA synthesis\n"+
+          "- Sterile PBS\n" +
+          "- QIAShredder columns (Qiagen, cat no. 79654)\n" +
+          "- DEPC-Treated Water",
+   "markdown":  "<ul>\n"+
+                "<li>E15.5 embryonic kidneys for sections</li>\n" +
+                "<li>E18.5 embryonic kidneys for cDNA synthesis</li>\n" +
+                "<li>Sterile PBS</li>\n" +
+                "<li>QIAShredder columns (Qiagen, cat no. 79654)</li>\n" +
+                "<li>DEPC-Treated Water</li>\n" +
+                "</ul>\n",
+    "comm":"Ctrl+U"
   },
   {
-    "raw": "+ Create a list by starting a line with `+`, `-`, or `*`\n" +
-      "+ Sub-lists are made by indenting 2 spaces:\n" +
-      "  - Marker character change forces new list start:\n" +
-      "    * Ac tristique libero volutpat at\n" +
-      "    + Facilisis in pretium nisl aliquet\n" +
-      "    - Nulla volutpat aliquam velit\n" +
-      "+ Very easy!",
-    "markdown": "<ul>\n" +
-      "<li>Marker character change forces new list start:\n" +
-      "<ul>\n" +
-      "<li>Ac tristique libero volutpat at</li>\n" +
-      "</ul>\n" +
-      "<ul>\n" +
-      "<li>Facilisis in pretium nisl aliquet</li>\n" +
-      "</ul>\n" +
-      "<ul>\n" +
-      "<li>Nulla volutpat aliquam velit</li>\n" +
-      "</ul>\n" +
-      "</li>\n" +
-      "</ul>\n" +
-      "</li>\n" +
-      "<li>Very easy!</li>\n" +
-      "</ul>"
+    "raw": "This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru",
+    "markdown": "<p><strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</strong></p>\n",
+    "comm":"Ctrl+B"
   },
   {
-    "raw": "`inline code can be very helpful. This is why we should use them quite often. whu;ehfwuehu wifjeowhfuehuhfh`. **This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri**. _This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj_. ~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~",
-    "markdown": "<p><code>inline code can be very helpful. This is why we should use them quite often. whu;ehfwuehu wifjeowhfuehuhfh</code>. <strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri</strong>. <em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj</em>. <s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>"
-  }, {
+    "raw":"This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.",
+    "markdown":"<p><em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.</em></p>\n",
+    "comm":"Ctrl+I"
+  },
+  {
+    "raw":"~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~",
+    "markdown":"<p><s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>\n",
+    "comm":" "
+  },
+  {
     "raw": "X^2^+Y^2^+Z^2^=0",
-    "markdown": "X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0"
+    "markdown": "<p>X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0</p>\n",
+    "comm":" "
   }
 ];
 
@@ -52,7 +56,7 @@ var markdownTestParams = [{
  * It includes the following:
  *  schema_name
  *  table_name
- *  table_displayname 
+ *  table_displayname
  *  primary_key: list of column names
  *  key (optional): it's used in edit mode for retrieving a record.
  *  sortColumns (optional): it's used in edit mode, if there are more than one result (only in this case it's required).
@@ -75,9 +79,9 @@ var markdownTestParams = [{
  *  result_columns (optional) if you want to test the inputs. Array of strings.
  *  results (optional) if you want to test the inputs, it must be in the same order of expected values. It's an array and includes only value of cells.
  *  files (optional): if you want to test file upload. it's a list of objects with `name`, `size`, and `path`.
- * 
+ *
  * @param  {Object}  tableParams take a look at the note above.
- * @param  {Boolean} isEditMode  true if in editmode, used for testing the title. 
+ * @param  {Boolean} isEditMode  true if in editmode, used for testing the title.
  */
 exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
@@ -165,16 +169,16 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     });
 
     var testMultipleRecords = function(recordIndex) {
-        
+
         // helper functions:
         var filterColumns = function (filterFn) {
             return tableParams.columns.filter(filterFn);
         }
-        
+
         /**
          * returns the record input for a column.
          * if value is not defiend will return undefined, then we don't need to change the value.
-         * 
+         *
          * @param  {[type]} colName [description]
          * @return {[type]}         [description]
          */
@@ -184,20 +188,20 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             }
             return defaultValue;
         }
-        
+
         var getRecordValue = function(colName) {
             if (Array.isArray(tableParams.values) && tableParams.values.length > recordIndex && typeof tableParams.values[recordIndex][colName] !== undefined) {
                 return tableParams.values[recordIndex][colName];
             }
         }
-        
+
         var colError = function (colName, message) {
             return "recordIndex=" + recordIndex + ", column=" + colName + ". " + message;
         }
 
         // values
         var title = (isEditMode ? "Editing " : "Adding") + " row with index=" + recordIndex;
-        
+
         var disabledCols = filterColumns(function(c) { if (c.generated || c.immutable) return true; });
         var longTextCols = filterColumns(function(c) { if ((c.type === "longtext" ) && !c.isForeignKey) return true; });
         var textCols = filterColumns(function(c) { if ((c.type === "shorttext" || c.type === "text") && !c.isForeignKey && !c.isFile) return true; });
@@ -209,10 +213,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         var intCols = filterColumns(function(c) { if (c.type.startsWith("int") && !c.isForeignKey && !c.generated) return true; });
         var timestampCols = filterColumns(function(c) { if (( c.type == "timestamptz" || c.type == "timestamp") && !c.isForeignKey ) return true; });;
         var fileCols = filterColumns(function(c) { if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
-        
+
         var longTextDataTypeFields = [], textDataTypeFields = [], markdownDataTypeFields = [],
         booleanDataTypeFields = [], foreignKeyFields = [], datePickerFields = [], integerDataTypeFields = [], floatDataTypeFields = [], timeInputFields = [];
-        
+
         // test cases:
         describe(title + ",",function() {
             if (recordIndex > 0) {
@@ -227,7 +231,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
                 });
             };
-  
+
             if (disabledCols.length > 0) {
                 it("should show columns with generated or immutable annotations as disabled", function() {
                     disabledCols.forEach(function(column) {
@@ -248,18 +252,18 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             });
                         }
                     });
-                });                
+                });
             }
-            
+
             if (longTextCols.length > 0) {
                 describe("longText fields, ", function () {
-                    it("should show textarea input for longtext datatype and then set the value.", function() {                    
+                    it("should show textarea input for longtext datatype and then set the value.", function() {
                         longTextCols.forEach(function(c) {
                             chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(txtArea) {
                                 if (txtArea) {
                                     expect(true).toBeDefined();
                                     longTextDataTypeFields.push(txtArea);
-                                    
+
                                     var value = getRecordValue(c.name);
                                     if (value != undefined) {
                                         expect(txtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
@@ -283,7 +287,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
                 });
             }
-            
+
             if (textCols.length > 0) {
                 describe("Text fields, ", function () {
                     it("should show text input for text and set the value.", function() {
@@ -292,9 +296,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 if (txtInput) {
                                     expect(true).toBeDefined();
                                     txtInput.column = c;
-                                    
-                                    textDataTypeFields.push(txtInput);                                    
-                                    
+
+                                    textDataTypeFields.push(txtInput);
+
                                     var value = getRecordValue(c.name);
                                     if (value !== undefined) {
                                         expect(txtInput.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
@@ -304,7 +308,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                     chaisePage.recordEditPage.clearInput(txtInput);
                                     browser.sleep(10);
-                                    
+
                                     var text = getRecordInput(c.name, c.isUrl ? chance.url() : chance.sentence({ words: 5 }));
                                     txtInput.sendKeys(text);
 
@@ -317,7 +321,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
                 });
             }
-            
+
             if (markdownCols.length > 0) {
                 describe("Markdown fields, ", function () {
                     it('should have the correct value.', function () {
@@ -325,54 +329,68 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             var inp = chaisePage.recordEditPage.getInputById(recordIndex, c.title);
                             if (inp.isPresent()) {
                                 inp.column = c;
-                                
+
                                 markdownDataTypeFields.push(inp);
-                                
+
                                 var value = getRecordValue(c.name);
                                 if (value !== undefined) {
                                     expect(inp.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
                                 }
-                                
+
                             } else {
                                 expect(undefined).toBeDefined(colError(c.name, "Couldn't find the input field (type: longtext)."));
                             }
                         });
                     });
-                    
-                    // TODO 
-                    xit('should render correct markdown in modal box.', function() {
-                        markdownDataTypeFields.forEach(function(markdownField) {
-                            var livePreviewLink = element.all(by.className('live-preview'));
-                            for (i = 0; i < markdownTestParams.length; i++) {
-                                chaisePage.recordEditPage.clearInput(markdownField);
-                                browser.sleep(10);
-                                
-                                (function(input, markdownOut) {
-                                    markdownField.sendKeys(input);
-                                    livePreviewLink.click();
-                                    let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
-                                    browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
-                                    expect(mdDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown generation");
-                                    element(by.className('modal-close')).click();
-                                })(markdownTestParams[i].raw, markdownTestParams[i].markdown);
-                            } //for
-                        });
-                    }).pend("should be changed because the live-preview selector is not unique, and also it will changed");
-                    
+
+                    it('should render correct markdown with inline preview and full preview button.', function() {
+
+                      //Both preview is being tested.
+                      markdownCols.forEach(function(descCol) {
+                        var markdownField = chaisePage.recordEditPage.getInputById(recordIndex, descCol.title);
+                        btnIndex = (recordIndex * 2) + 1;
+                        var PrevBtn = element.all(by.css('button[title="Preview"]')).get(btnIndex);       //test inline preview
+                        var modalPrevBtn = element.all(by.css('button[title="Fullscreen Preview"]')).get(btnIndex);       //test modal preview
+                        for (i = 0; i < markdownTestParams.length; i++) {
+                          markdownField.clear();
+                          (function(input, markdownOut, comm, btnIdx) {
+
+                                if(comm !=' ')
+                                { //If keyboard shortcut found for markdown elements then send click command.
+                                        let v = "button[data-hotkey='"+comm+"']";
+                                        element.all(by.css(v)).get(btnIdx).click();
+                                }
+                                markdownField.sendKeys(input);
+                                modalPrevBtn.click();
+                                let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
+                                browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
+                                expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
+                                element(by.className('modal-close')).click();
+                                PrevBtn.click();        //generate preview
+                                let mdPrevDiv = element(by.className("md-preview"));
+                                browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
+                                expect(mdPrevDiv.getAttribute('innerHTML')).toBe(markdownOut,colError(descCol.name, "Error during markdown preview generation"));
+                                PrevBtn.click();        //editing mode
+
+                          })(markdownTestParams[i].raw, markdownTestParams[i].markdown, markdownTestParams[i].comm, btnIndex);
+                        } //for
+                      })
+                    });
+
                     it('should be able to change the value.', function () {
                         markdownDataTypeFields.forEach(function(markdownField) {
                             chaisePage.recordEditPage.clearInput(markdownField);
                             browser.sleep(10);
-                            
+
                             var input = getRecordInput(markdownField.column.name, "");
                             markdownField.sendKeys(input);
-                            
+
                             expect(markdownField.getAttribute('value')).toEqual(input, colError(markdownField.column.name, "Couldn't change the value."));
                         });
                     });
-                });                
+                });
             }
-            
+
             if (booleanCols.length > 0) {
                 describe("Boolean fields,", function() {
                     var pageColumns = [], dropdowns = [];
@@ -397,7 +415,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             chaisePage.recordEditPage.getDropdown(pc, recordIndex).then(function(dropdown) {
                                 if (dropdown) {
                                     dropdown.column = pc.column;
-                                    
+
                                     var value = getRecordValue(dropdown.column.name);
                                     if (value != undefined) {
                                         expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(value.length == 0 ? 'Select a value' : (value + ""), colError(dropdown.column.name, "Doesn't have the expected value."));
@@ -430,7 +448,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             if (isEditMode && (dropdown.column.generated || dropdown.column.immutable)) return;
 
                             var value = getRecordInput(dropdown.column.name, chance.bool());
-                            
+
                             chaisePage.recordEditPage.selectDropdownValue(dropdown, value).then(function() {
                                 browser.sleep(10);
                                 expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(value.length == 0 ? 'Select a value' : (value + ""), colError(dropdown.column.name, "Couldn't select a value."));
@@ -439,7 +457,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
                 });
             }
-            
+
             if (foreignKeyCols.length > 0) {
                 describe("Foreign key fields,", function() {
 
@@ -457,9 +475,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it('should have correct values.', function () {
                         foreignKeyCols.forEach(function (fkCol) {
                             if (fkCol.value === undefined) return;
-                            
+
                             var input = chaisePage.recordEditPage.getForeignKeyInputDisplay(fkCol.title, recordIndex);
-                            
+
                             expect(input.getText()).toEqual(getRecordValue(fkCol.name));
                         });
                     });
@@ -504,10 +522,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             for (var i=0; i<foreignKeyCols.length; i++) {
                                 (function(i) {
                                     var col = foreignKeyCols[i];
-                                    
+
                                     // this will have the index and the presentational value
                                     var fkSelectedValue = getRecordInput(col.name);
-                                    
+
                                     var rows;
                                     chaisePage.clickButton(popupBtns[(foreignKeyCols.length * recordIndex) + i ]).then(function() {
                                         // wait for the modal to open
@@ -540,17 +558,17 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                         return rows.count();
                                     }).then(function(ct) {
                                         expect(ct).toBe(col.count, colError(col.name, "number of foreign key rows are not as expected."));
-                                        
-                                        
+
+
                                         return rows.get(fkSelectedValue.index).all(by.css(".select-action-button"));
                                     }).then(function(selectButtons) {
                                         return selectButtons[0].click();
                                     }).then(function() {
                                         browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-                                        
+
                                         var foreignKeyInputDisplay = chaisePage.recordEditPage.getForeignKeyInputDisplay(col.title, recordIndex);
                                         expect(foreignKeyInputDisplay.getText()).toEqual(fkSelectedValue.value, colError(col.name, "Didn't select the expected foreign key."));
-                                        
+
                                         // Open the same modal again to make sure search box is autofocused again
                                         return chaisePage.clickButton(popupBtns[(foreignKeyCols.length * recordIndex) + i ]);
                                     }).then(function() {
@@ -589,23 +607,23 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it('should show input fields and validate for date columns', function() {
                         dateCols.forEach(function(column) {
                             var dateInputs = chaisePage.recordEditPage.getDateInputsForAColumn(column.name, recordIndex);
-                            
+
                             dateInputs.column = column;
-                            
+
                             datePickerFields.push(dateInputs);
-                            
+
                             var dateInput = dateInputs.date;
-                            
+
                             var value = getRecordValue(column.name);
                             if (value != undefined) {
                                 expect(dateInput.getAttribute('value')).toBe(value, colError(column.name, "doesn't have the expected value."));
                             }
 
                             if (column.generated || column.immutable) return;
-                            
+
                             chaisePage.recordEditPage.clearInput(dateInput);
                             browser.sleep(10);
-                            
+
                             dateInput.sendKeys('1234-13-31');
                             chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
                                 if (error) {
@@ -635,7 +653,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         datePickerFields.forEach(function(dp) {
 
                             if (dp.column.generated || dp.column.immutable) return;
-                            
+
                             dp.todayBtn.click();
                             expect(dp.date.getAttribute('value')).toEqual(today, colError(dp.column.name, "selected date is not correct."));
                         });
@@ -650,7 +668,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(dp.date.getAttribute('value')).toBeFalsy(colError(dp.column.name, "Couldn't clear the input."));
                         });
                     });
-                    
+
                     it("should have a datepicker element", function() {
                         dateCols.forEach(function(column) {
                             chaisePage.recordEditPage.getInputValue(column.name, recordIndex).then(function(dateInput) {
@@ -658,7 +676,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     expect(true).toBeDefined();
                                     dateInput.column = column;
                                     datePickerFields.push(dateInput);
-                                    
+
                                     var value = getRecordValue(column.name);
                                     if (value != undefined) {
                                         expect(dateInput.getAttribute('value')).toBe(value);
@@ -714,16 +732,16 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             });
                         });
                     }).pend('Postpone test until a datepicker is re-implemented');
-                    
+
                     // this should be the last test case
                     it('should select a valid value.', function () {
                         datePickerFields.forEach(function(dp) {
                             var column = dp.column, inp = dp.date;
                             if (column.generated || column.immutable) return;
-                            
+
                             chaisePage.recordEditPage.clearInput(inp);
                             browser.sleep(10);
-                            
+
                             var value = getRecordInput(column.name, '2016-01-01');
                             inp.sendKeys(value);
                             expect(inp.getAttribute('value')).toEqual(value, colError(column.name, "value didn't change."));
@@ -731,7 +749,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
                 });
             }
-              
+
             if (timestampCols.length > 0) {
                 describe("Timestamp fields,", function() {
                     it('should have 3 inputs with validation for each timestamp column', function() {
@@ -743,7 +761,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(dateInput).toBeDefined(colError(column.name, "Date input is not defined."));
                             expect(timeInput).toBeDefined(colError(column.name, "Time input is not defined."));
                             expect(meridiemBtn).toBeDefined(colError(column.name, "Meridiem button is not defined."));
-                            
+
                             // NOTE: value is a moment object
                             var value = getRecordValue(column.name);
                             if (value != undefined) {
@@ -949,31 +967,31 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             });
                         });
                     });
-                    
+
                     it('should select a valid value.', function () {
                         timeInputFields.forEach(function(obj) {
 
                             if (obj.column.generated || obj.column.immutable) return;
-                            
+
                             var value = getRecordInput(obj.column.name, moment());
-                            
+
                             obj.date.clear();
                             obj.time.clear();
                             browser.sleep(10);
-                            
+
                             // change the date
                             obj.date.sendKeys(value.format("YYYY-MM-DD"));
-                            
+
                             expect(obj.date.getAttribute('value')).toEqual(value.format("YYYY-MM-DD"), colError(obj.column.name, "column date didn't change."));
-                                
+
                             // change the time
                             obj.time.sendKeys(value.format("hh:mm:ss"));
-                                
+
                             // Check time input value is within an interval
                             expect(obj.time.getAttribute('value')).toEqual(value.format("hh:mm:ss"), colError(obj.column.name, "column time didn't change."));
-                            
+
                             var meridiemValue = value.format("A");
-                            
+
                             obj.meridiem.getText().then(function(initialMeridiem) {
                                 if (initialMeridiem !== meridiemValue) {
                                     obj.meridiem.click();
@@ -985,13 +1003,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             }).catch(function(error) {
                                 console.log(error);
                                 expect('There was an error in this promise chain.').toBe('Please see the error message.', colError(obj.column.name, ""));
-                            });            
-                            
+                            });
+
                         });
                     });
-                    
+
                 });
-            }    
+            }
 
             if (intCols.length > 0) {
                 describe("Integer fields,", function() {
@@ -1018,7 +1036,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should validate required and invalid text input", function() {
                         integerDataTypeFields.forEach(function(intInput) {
                             var c = intInput.column;
-                            
+
                             if (c.generated || c.immutable) return;
 
                             var prevValue = "";
@@ -1071,7 +1089,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it("should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values", function() {
                         integerDataTypeFields.forEach(function(intInput) {
-                            
+
                             var c = intInput.column;
 
                             if (c.generated || c.immutable) return;
@@ -1162,19 +1180,19 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                         });
                     });
-                    
+
                     it("should input the given values.", function () {
                         integerDataTypeFields.forEach(function(intInput) {
                             var c = intInput.column;
-                            
+
                             if (c.generated || c.immutable) return;
-                            
+
                             chaisePage.recordEditPage.clearInput(intInput);
                             browser.sleep(10);
-                            
+
                             var text = getRecordInput(c.name, chaisePage.recordEditPage.getRandomInt(1, 100));
                             intInput.sendKeys(text);
-                            
+
                             expect(intInput.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
                         });
                     });
@@ -1192,7 +1210,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     expect(true).toBeDefined();
                                     floatInput.column = column;
                                     floatDataTypeFields.push(floatInput);
-                                    
+
                                     var value = getRecordValue(column.name);
                                     if (value != undefined) {
                                         expect(floatInput.getAttribute('value')).toBe(value, colError(column.name, "Didn't have the expected value."));
@@ -1207,7 +1225,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should validate invalid text input", function() {
                         floatDataTypeFields.forEach(function(floatInput) {
                             var c = floatInput.column;
-                            
+
                             if (c.generated || c.immutable) return;
 
                             var validNo = chaisePage.recordEditPage.getRandomArbitrary() + "";
@@ -1261,19 +1279,19 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                         });
                     });
-                    
+
                     it("should input the given values.", function () {
                         floatDataTypeFields.forEach(function(inp) {
                             var c = inp.column;
-                            
+
                             if (c.generated || c.immutable) return;
-                            
+
                             chaisePage.recordEditPage.clearInput(inp);
                             browser.sleep(10);
-                            
+
                             var text = getRecordInput(c.name, "1.1");
                             inp.sendKeys(text);
-                            
+
                             expect(inp.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
                         });
                     });
@@ -1291,7 +1309,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 });
             }
         });
-        
+
         if (Array.isArray(tableParams.inputs) && recordIndex < tableParams.inputs.length-1) {
             testMultipleRecords(recordIndex + 1);
         }
@@ -1328,7 +1346,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 expect(true).toBe(true);
             }
         });
-        
+
         // if there is a file upload
         if (!process.env.TRAVIS && tableParams.files.length > 0) {
             var timeout =  tableParams.files.length ? (tableParams.results.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout;
@@ -1344,7 +1362,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 expect(undefined).toBeDefined('submission had errors.');
                 return;
             }
-            
+
             // verify url and ct
             browser.driver.getCurrentUrl().then(function(url) {
                 expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true, "url has not been changed.");
@@ -1360,13 +1378,13 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 });
             });
         });
-        
+
         describe('result page, ', function () {
             it("should have the correct title.", function() {
                 var title = tableParams.results.length + "/" + tableParams.results.length + " "+ tableParams.table_displayname +" Records "+(isEditMode? "Updated": "Created")+" Successfully";
                 expect(chaisePage.recordEditPage.getResultTitle().getText()).toBe(title);
             });
-            
+
             it('should point to the correct link with caption.', function () {
                 var linkModifier = "";
                 if (isEditMode) {
@@ -1376,15 +1394,15 @@ exports.testSubmission = function (tableParams, isEditMode) {
                     });
                     linkModifier = "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns.join(",") + ")"
                 }
-            
+
                 var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
-                
+
                 chaisePage.recordEditPage.getResultTitleLink().then(function (titleLink) {
                     expect(titleLink[0].getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
                     expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
                 });
             });
-            
+
             //NOTE: in travis we're not uploading the file and therefore this test case will fail
             if (!process.env.TRAVIS && tableParams.files.length > 0) {
                 it('table must show correct resutls.', function() {
@@ -1411,7 +1429,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                                                 "catalog_id": process.env.catalogId,
                                                 "chaise_url": process.env.CHAISE_BASE_URL,
                                             });
-                                            
+
                                             expect(cells[k].element(by.tagName("a")).getAttribute("href")).toContain(link);
                                             expect(cells[k].element(by.tagName("a")).getText()).toBe(result.value, "data missmatch in row with index=" + index + ", columns with index=" + k);
                                         } else {
@@ -1426,28 +1444,28 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 });
             }
         });
-        
-        
+
+
     } else { // single edit/create
         it("should be redirected to record page", function() {
             if (hasErrors) {
                 expect(undefined).toBeDefined('submission had errors.');
                 return;
             }
-            
+
             // wait for url change
             browser.wait(function () {
                 return browser.driver.getCurrentUrl().then(function(url) {
                     return url.startsWith(process.env.CHAISE_BASE_URL + "/record/");
                 });
             }, browser.params.defaultTimeout);
-            
+
             // verify url
             browser.driver.getCurrentUrl().then(function(url) {
                 expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
             });
         });
-        
+
         //NOTE: in travis we're not uploading the file and therefore this test case will fail
         if (!process.env.TRAVIS && tableParams.files.length > 0) {
             it('should have the correct submitted values.', function () {
@@ -1455,12 +1473,12 @@ exports.testSubmission = function (tableParams, isEditMode) {
                     expect(undefined).toBeDefined('submission had errors.');
                     return;
                 }
-                
+
                 var column_values = {};
                 for (var i = 0; i < tableParams.result_columns.length; i++) {
                     column_values[tableParams.result_columns[i]] = tableParams.results[0][i];
                 }
-                
+
                 exports.testRecordAppValuesAfterSubmission(tableParams.result_columns, column_values);
             });
         }
@@ -1491,15 +1509,15 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
         } else {
             expect(column.getText()).toBe(column_values[columnName], "Value for " + columnName + " is not what was expected");
         }
-        
+
     }
 };
 
 /**
  * create files in the given path. This should be called before test cases
- * parent directory that these files will be uploaded into is test/e2e/data_setup/uploaded_files. 
- * That means the given path should be a path that is valid in uploaded_files folder. 
- * 
+ * parent directory that these files will be uploaded into is test/e2e/data_setup/uploaded_files.
+ * That means the given path should be a path that is valid in uploaded_files folder.
+ *
  * @param  {obj[]} files array of objects with at least path, and size as attributes.
  */
 exports.createFiles = function(files) {
@@ -1523,24 +1541,25 @@ exports.deleteFiles = function(files) {
 };
 
 /**
- * test a file input with the given column name, and file that we want to test 
+ * test a file input with the given column name, and file that we want to test
  * the file input against it.
  * @param  {string}         colName         name of the column
  * @param  {int}            recordIndex     index of record in the view
  * @param  {obj}            file            object with at least path, and name attributes.
- * @param  {string=}        currentValue    if you want to test the current value.   
+ * @param  {string=}        currentValue    if you want to test the current value.
  * @param  {boolean=false}  print           should it print the file names or not.
  */
 exports.testFileInput = function (colName, recordIndex, file, currentValue, print) {
     chaisePage.recordEditPage.getInputForAColumn(colName, recordIndex).then(function(fileInput) {
         print = typeof print !== "boolean" ? false : print;
-        
+
+
         if (fileInput) {
             chaisePage.recordEditPage.getInputForAColumn("txt" + colName, recordIndex).then(function(txtInput) {
 
                 var selectFile = function() {
                     var filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
-                    
+
                     fileInput.sendKeys(filePath);
 
                     browser.sleep(100);

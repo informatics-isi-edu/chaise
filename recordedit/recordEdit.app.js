@@ -22,7 +22,8 @@
         'ngSanitize',
         'ui.bootstrap',
         'ui.mask',
-        'ui.select'
+        'ui.select',
+        'angular-markdown-editor'
     ])
 
     .config(['$cookiesProvider', function($cookiesProvider) {
