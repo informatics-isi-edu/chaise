@@ -10,6 +10,8 @@
         <div class="container-fluid">
         %TEMPLATES%
         </div>
-        <footer></footer>
+        <div ng-controller="recordsetController">
+            <footer ng-show="vm.hasLoaded"></footer>
+        </div>       
     </body>
 </html>

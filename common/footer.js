@@ -9,7 +9,7 @@
     'use strict';
 
     angular.module('chaise.footer', [])
-        .directive('footer', ['ERMrest', '$sce', '$window', '$document', '$timeout', function(ERMrest, $sce, $window, $document, $timeout) {
+        .directive('footer', ['ERMrest', '$sce', '$timeout', function(ERMrest, $sce, $timeout) {
 
             return {
                 restrict: 'E',
@@ -20,31 +20,41 @@
                     angular.isUndefinedOrNull = function(val) {
                         return val == '' || angular.isUndefined(val) || val === null
                     }
-                    $timeout(function() {
-                        scope.posStyle = {
-                            width: 'auto',
-                            height: '30px',
-                            'background-color': '#f2f2f2',
-                            right: 0,
-                            bottom: 0,
-                            left: 0
-                        };
 
-                        if ($(document).height() > $(window).height()) { //scrolling
-                            scope.posStyle.position = 'relative';
-                        } else {
-                            scope.posStyle.position = 'absolute';
-                        }
-                        if (angular.isUndefinedOrNull(footerText))
-                            scope.privacyResult = "**Default Privacy Policy**";
-                        else {
-                            ERMrest._onload().then(function() {
-                                scope.privacyResult = ERMrest.renderMarkdown(footerText);
-                            })
+                    function setClass() {
+                        $timeout(function() {
+                            scope.posStyle = {
+                                width: 'auto',
+                                height: '30px',
+                                'background-color': '#ededed',
+                                right: 0,
+                                bottom: 0,
+                                left: 0
+                            };
+                            //console.log('in TO: '+$(document).height()+'  '+$(window).height())
+                            if ($(document).height() > $(window).height()) { //scrolling
+                                scope.posStyle.position = 'relative';
+                            } else {
+                                scope.posStyle.position = 'absolute';
+                            }
+                            if (angular.isUndefinedOrNull(footerText))
+                                scope.privacyResult = "**Default Privacy Policy**";
+                            else {
+                                ERMrest._onload().then(function() {
+                                    scope.privacyResult = ERMrest.renderMarkdown(footerText);
+                                })
 
-                        }
-                        // });
-                    }, 1500);
+                            }
+                            // });
+                        }, 1000);
+                    }
+                    setClass();
+                    scope.$watch(function() {
+                        return $(document).height();
+                    }, function(o, n) {
+                        //console.log(o +' : '+n);
+                        setClass();
+                    });
                 }
             };
         }])

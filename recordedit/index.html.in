@@ -280,8 +280,6 @@
         </div>
 
     </div>
-<div ng-controller="FormController as form">
-    <footer></footer>
-</div>
+    <footer ng-show="displayReady"></footer>
 </body>
 </html>
