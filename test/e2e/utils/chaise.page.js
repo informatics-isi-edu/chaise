@@ -431,13 +431,24 @@ var recordEditPage = function() {
     this.getDatePickerForAnInput = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().find('.ng-scope._720kb-datepicker-open')[0];", el);
     };
+    
+    this.getDateInputsForAColumn = function(name, index) {
+        index = index || 0;
+        var inputs = {};
+        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).get(index);
+        inputs.todayBtn = inputs.date.element(by.xpath('..')).all(by.css(".input-group-btn > button")).get(0);
+        inputs.clearBtn = inputs.date.element(by.xpath('..')).all(by.css(".input-group-btn > button")).get(1);
+        return inputs;
+    };
 
     this.getTimestampInputsForAColumn = function(name, index) {
         index = index || 0;
         var inputs = {};
-        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).first();
-        inputs.time = element.all(by.css('input[name="' + name + '"][time]')).first();
-        inputs.meridiem = element.all(by.css('button[name="' + name + '"]')).first();
+        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).get(index);
+        inputs.time = element.all(by.css('input[name="' + name + '"][time]')).get(index);
+        inputs.meridiem = element.all(by.css('button[name="' + name + '"]')).get(index);
+        inputs.nowBtn = element.all(by.css('button[name="' + name + '-now"]')).get(index);
+        inputs.clearBtn = element.all(by.css('button[name="' + name + '-clear"]')).get(index);
         return inputs;
     };
 
@@ -459,18 +470,19 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
-    this.getDateInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parent().siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
-    };
-
     this.getTimestampInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"timestamp\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
+
     this.getJSONInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"json\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
     this.getJSONBInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"jsonb\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    
+    this.getDateInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"date\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+
     };
 
     this.clearInput = function(el) {
