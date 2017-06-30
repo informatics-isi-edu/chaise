@@ -478,7 +478,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 it("should show textarea input for JSON datatype and then set the value", function() {
                     var columns = tableParams.columns.filter(function(c) { if ((c.type === "json" ) && !c.isForeignKey) return true; });
                     columns.forEach(function(c) {
-                    chaisePage.recordEditPage.getJSONtextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
+                    chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
                         if (jsonTxtArea) {
                             expect(true).toBeDefined();
                             JSONDataTypeFields.push(jsonTxtArea);
@@ -523,7 +523,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should show textarea input for JSONB datatype and then set the value", function() {
                     var columns = tableParams.columns.filter(function(c) { if ((c.type === "jsonb" ) && !c.isForeignKey) return true; });
                     columns.forEach(function(c) {
-                    chaisePage.recordEditPage.getJSONBtextAreaForAcolumn(c.name, recordIndex).then(function(jsonBTxtArea) {
+                    chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonBTxtArea) {
                         if (jsonBTxtArea) {
                             expect(true).toBeDefined();
                             JSONBDataTypeFields.push(jsonBTxtArea);

@@ -313,16 +313,6 @@ var recordEditPage = function() {
         index = index || 0;
         return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
     };
-
-    this.getJSONtextAreaForAcolumn = function(name, index) {
-       index = index || 0;
-       return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
-   };
-   
-   this.getJSONBtextAreaForAcolumn = function(name, index) {
-       index = index || 0;
-       return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
-   };
    
     this.getHelpTextBlock = function(el) {
         return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
