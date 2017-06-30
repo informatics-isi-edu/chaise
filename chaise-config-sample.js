@@ -63,11 +63,7 @@ var chaiseConfig = {
             // }
         ]
     },
-    footer:{
-        recordEdit:"<p>Help for record Edit.<a href='https://github.com/amitjha21'>Click Me!</a></p>",
-        recordSet:"<p>Help for record Set.<a href='https://github.com/amitjha21'>Click Me!</a></p>",
-        record:"<p>Help for record<a href='https://github.com/amitjha21'>Click Me!</a></p>"
-    }
+    footerMarkdown:"**Privacy Policy Maintained in Chaise Configuration.** Click [here](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js){target='_blank'}"
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {
