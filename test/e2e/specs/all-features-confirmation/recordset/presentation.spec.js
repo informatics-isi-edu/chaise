@@ -220,7 +220,6 @@ describe('View recordset,', function() {
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
                 noResultsMessage = "No Results Found";
-                
                 searchBox.sendKeys('testing_json');
                 searchSubmitButton.click().then(function() {
                     return chaisePage.waitForElementInverse(element(by.id("spinner")));
@@ -230,17 +229,7 @@ describe('View recordset,', function() {
                     expect(rows.length).toBe(1);
                     // clear search
                     return clearSearchButton.click();
-                }).then(function(){
-                    searchBox.sendKeys('testing_jsonb');
-                    return searchSubmitButton.click();
-                }).then(function(){
-                    return chaisePage.recordsetPage.getRows();
-                }).then(function(rows) {
-                    expect(rows.length).toBe(0);
-                    // clear search
-                    return clearSearchButton.click();
-                });
-                
+                })
             });
             
             it("action columns should show view button that redirects to the record page", function() {
