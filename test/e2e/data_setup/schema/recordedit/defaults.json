@@ -154,7 +154,44 @@
                     "annotations": {
                         "tag:isrd.isi.edu,2016:generated": null
                     }
+                },
+                {
+                    "name": "json",
+                    "default": "{\"name\":\"testing_json\"}",
+                    "nullok": true,
+                    "type": {
+                        "typename": "json"
+                    }
                 }, {
+                    "name": "json_disabled",
+                    "default": 98.786,
+                    "nullok": true,
+                    "type": {
+                        "typename": "json"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                },
+                {
+                    "name": "jsonb",
+                    "default": "{\"name\":\"testing_jsonb\"}",
+                    "nullok": true,
+                    "type": {
+                        "typename": "jsonb"
+                    }
+                }, {
+                    "name": "jsonb_disabled",
+                    "default": -89766.98,
+                    "nullok": true,
+                    "type": {
+                        "typename": "jsonb"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
+                    }
+                }, 
+                {
                     "name": "boolean_true",
                     "default": "true",
                     "nullok": true,
