@@ -29,15 +29,13 @@ describe('View existing record,', function() {
 
     describe("For table " + testParams.table_name + ",", function() {
 
-        beforeAll(function(done) {
+        beforeAll(function() {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
-                done();
-            });
+            chaisePage.waitForElement(element(by.id('rt-accommodation_image')));
         });
 
         describe("Show the related entity tables,", function() {
@@ -109,7 +107,7 @@ describe('View existing record,', function() {
 
             describe("for a related entity without an association table", function() {
                 it('should have an "Add" link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
-                                    
+
                     var EC = protractor.ExpectedConditions, newTabUrl,
                         relatedTableName = testParams.related_regular_table,
                         addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);

@@ -8,42 +8,42 @@ var EC = protractor.ExpectedConditions;
 //test params for markdownPreview
 var markdownTestParams = [{
     "raw": "RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh",
-    "markdown": "<h3>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh</h3>",
+    "markdown": "<h3>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh</h3>\n",
     "comm":"Ctrl+H"
 },
   {
     "raw":"E15.5 embryonic kidneys for sections\n" +
-          "E18.5 embryonic kidneys for cDNA synthesis\n"+
-          "Sterile PBS\n" +
-          "QIAShredder columns (Qiagen, cat no. 79654)\n" +
-          "DEPC-Treated Water",
+          "- E18.5 embryonic kidneys for cDNA synthesis\n"+
+          "- Sterile PBS\n" +
+          "- QIAShredder columns (Qiagen, cat no. 79654)\n" +
+          "- DEPC-Treated Water",
    "markdown":  "<ul>\n"+
                 "<li>E15.5 embryonic kidneys for sections</li>\n" +
                 "<li>E18.5 embryonic kidneys for cDNA synthesis</li>\n" +
                 "<li>Sterile PBS</li>\n" +
                 "<li>QIAShredder columns (Qiagen, cat no. 79654)</li>\n" +
                 "<li>DEPC-Treated Water</li>\n" +
-                "</ul>",
+                "</ul>\n",
     "comm":"Ctrl+U"
   },
   {
     "raw": "This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru",
-    "markdown": "<p><strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</strong></p>",
+    "markdown": "<p><strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</strong></p>\n",
     "comm":"Ctrl+B"
   },
   {
     "raw":"This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.",
-    "markdown":"<p><em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.</em></p>",
+    "markdown":"<p><em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.</em></p>\n",
     "comm":"Ctrl+I"
   },
   {
     "raw":"~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~",
-    "markdown":"<p><s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>",
+    "markdown":"<p><s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>\n",
     "comm":" "
   },
   {
     "raw": "X^2^+Y^2^+Z^2^=0",
-    "markdown": "X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0",
+    "markdown": "<p>X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0</p>\n",
     "comm":" "
   }
 ];
@@ -344,34 +344,32 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
 
                     it('should render correct markdown with inline preview and full preview button.', function() {
-                    
+
                       //Both preview is being tested.
                       markdownCols.forEach(function(descCol) {
                         var markdownField = chaisePage.recordEditPage.getInputById(recordIndex, descCol.title);
                         btnIndex = (recordIndex * 2) + 1;
                         var PrevBtn = element.all(by.css('button[title="Preview"]')).get(btnIndex);       //test inline preview
                         var modalPrevBtn = element.all(by.css('button[title="Fullscreen Preview"]')).get(btnIndex);       //test modal preview
-                        var ctrlA = protractor.Key.chord(protractor.Key.CONTROL, "a");
                         for (i = 0; i < markdownTestParams.length; i++) {
                           markdownField.clear();
                           (function(input, markdownOut, comm, btnIdx) {
 
-                                markdownField.sendKeys(input,ctrlA);
                                 if(comm !=' ')
                                 { //If keyboard shortcut found for markdown elements then send click command.
                                         let v = "button[data-hotkey='"+comm+"']";
                                         element.all(by.css(v)).get(btnIdx).click();
                                 }
-
+                                markdownField.sendKeys(input);
                                 modalPrevBtn.click();
                                 let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
                                 browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
-                                expect(mdDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown pop-up generation");
+                                expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
                                 element(by.className('modal-close')).click();
                                 PrevBtn.click();        //generate preview
                                 let mdPrevDiv = element(by.className("md-preview"));
                                 browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
-                                expect(mdPrevDiv.getAttribute('outerHTML')).toContain(markdownOut, "Error during markdown preview generation");
+                                expect(mdPrevDiv.getAttribute('innerHTML')).toBe(markdownOut,colError(descCol.name, "Error during markdown preview generation"));
                                 PrevBtn.click();        //editing mode
 
                           })(markdownTestParams[i].raw, markdownTestParams[i].markdown, markdownTestParams[i].comm, btnIndex);
@@ -1431,7 +1429,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                                                 "catalog_id": process.env.catalogId,
                                                 "chaise_url": process.env.CHAISE_BASE_URL,
                                             });
-                                            
+
                                             expect(cells[k].element(by.tagName("a")).getAttribute("href")).toContain(link);
                                             expect(cells[k].element(by.tagName("a")).getText()).toBe(result.value, "data missmatch in row with index=" + index + ", columns with index=" + k);
                                         } else {
@@ -1467,7 +1465,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 expect(url.startsWith(process.env.CHAISE_BASE_URL + "/record/")).toBe(true);
             });
         });
-        
+
         //NOTE: in travis we're not uploading the file and therefore this test case will fail
         if (!process.env.TRAVIS && tableParams.files.length > 0) {
             it('should have the correct submitted values.', function () {
@@ -1475,12 +1473,12 @@ exports.testSubmission = function (tableParams, isEditMode) {
                     expect(undefined).toBeDefined('submission had errors.');
                     return;
                 }
-                
+
                 var column_values = {};
                 for (var i = 0; i < tableParams.result_columns.length; i++) {
                     column_values[tableParams.result_columns[i]] = tableParams.results[0][i];
                 }
-                
+
                 exports.testRecordAppValuesAfterSubmission(tableParams.result_columns, column_values);
             });
         }
