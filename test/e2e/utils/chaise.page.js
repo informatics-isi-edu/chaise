@@ -467,9 +467,6 @@ var recordEditPage = function() {
     this.getJSONInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"json\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
-    this.getJSONBInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"jsonb\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
-    }
     
     this.getDateInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"date\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);

@@ -518,50 +518,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             });
             }
 
-            if (jsonbCols.length > 0) {
-                describe("JSONB fields, ", function () {
-                    it("should show textarea input for JSONB datatype and then set the value", function() {
-                    var columns = tableParams.columns.filter(function(c) { if ((c.type === "jsonb" ) && !c.isForeignKey) return true; });
-                    columns.forEach(function(c) {
-                    chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonBTxtArea) {
-                        if (jsonBTxtArea) {
-                            expect(true).toBeDefined();
-                            JSONBDataTypeFields.push(jsonBTxtArea);
-
-                            if (c.value != undefined) {
-                                expect(jsonBTxtArea.getAttribute('value')).toBe(c._value);
-                            }
-
-                            if (isEditMode && (c.generated || c.immutable)) return;
-
-                            chaisePage.recordEditPage.clearInput(jsonBTxtArea);
-                            browser.sleep(10);
-
-                            jsonBTxtArea.column = c;
-                            for (i = 0; i < JSONTestParams.length; i++) {
-                                  jsonBTxtArea.clear();
-                                  (function(input, expectedValue) {
-                                      c._value = input;
-                                      jsonBTxtArea.sendKeys(input);
-                                      chaisePage.recordEditPage.getJSONBInputErrorMessage(jsonBTxtArea, 'json').then(function(error) {
-                                            if(error){
-                                                expect(expectedValue).toBeFalsy();
-                                            }
-                                            else{
-                                                expect(expectedValue).toBeTruthy();                                                
-                                                }
-                                            });                                        
-                                    })(JSONBTestParams[i].stringVal, JSONBTestParams[i].expectedValue);
-                            }  
-                        } else {
-                            expect(undefined).toBeDefined();
-                        }
-                    });
-                });
-            });
-            });
-            }
-
             if (booleanCols.length > 0) {
                 describe("Boolean fields,", function() {
                     var pageColumns = [], dropdowns = [];
