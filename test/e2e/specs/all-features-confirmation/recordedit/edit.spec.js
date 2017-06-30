@@ -27,8 +27,7 @@ var testParams = {
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
             { name: "date_col", title: "date_col", type: "date"},
             { name: "luxurious", title: "Is Luxurious", type: "boolean" },
-            { name: "json_col", title: "json_col", value:JSON.stringify({"name": "testing"},undefined,2) , type: "json" },
-            { name: "jsonb_col", title: "jsonb_col", value: JSON.stringify({"name": "testing_jsonb"},undefined,2), type: "jsonb" }
+            { name: "json_col", title: "json_col", value:JSON.stringify({"name": "testing"},undefined,2) , type: "json" }
         ],
         values: [
             {"id": "2000", "title": "Sherathon Hotel", "website": "http://www.starwoodhotels.com/sheraton/index.html", "category": "Hotel", "rating": "4.3",

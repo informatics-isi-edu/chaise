@@ -3,7 +3,7 @@ var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var testParams = {
     // for verifying data is present
     column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "defaults_fk_text", "defaults_fk_text_disabled", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled",
-                    "json", "json_disabled", "jsonb", "jsonb_disabled"],
+                    "json", "json_disabled"],
     table_name: "defaults-table",
     default_column_values: {
     // data values
@@ -33,9 +33,7 @@ var testParams = {
         timestamptz_disabled_value: "2010-06-13 17:22:00-07:00",
         timestamptz_disabled_no_default_value: "Automatically generated",
         json_value:JSON.stringify({"name":"testing_json"}),
-        json_disabled_value:JSON.stringify(98.786),
-        jsonb_value:"{\"name\":\"testing_jsonb\"}",
-        jsonb_disabled_value:JSON.stringify(-89766.98)
+        json_disabled_value:JSON.stringify(98.786)
     },
     record_column_values: {
     // data values
@@ -61,9 +59,7 @@ var testParams = {
         timestamptz: "2014-05-07 14:40:00",
         timestamptz_disabled: "2010-06-13 17:22:00",
         json:JSON.stringify({"name":"testing_json"},undefined,2),
-        json_disabled:JSON.stringify(98.786),
-        jsonb:JSON.stringify({"name":"testing_jsonb"},undefined,2),
-        jsonb_disabled:JSON.stringify(-89766.98)
+        json_disabled:JSON.stringify(98.786)
     }
 };
 
@@ -81,7 +77,7 @@ describe('Record Add with defaults', function() {
             dateInput, dateDisabledInput,
             timestampInputs, timestampDisabledInput, timestampDisabledNoDefaultInput,
             timestamptzInputs, timestamptzDisabledInput, timestamptzDisabledNoDefaultInput,
-            jsonInput, jsonDisabledInput, jsonbInput, jsonbDisabledInput;
+            jsonInput, jsonDisabledInput
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
@@ -98,7 +94,6 @@ describe('Record Add with defaults', function() {
             booleanFalseInput = chaisePage.recordEditPage.getInputById(0, "boolean_false");
             dateInput = chaisePage.recordEditPage.getInputById(0, "date");
             jsonInput= chaisePage.recordEditPage.getInputById(0, "json");
-            jsonbInput= chaisePage.recordEditPage.getInputById(0, "jsonb");
 
             expect(textInput.getAttribute("value")).toBe(values.text_value, "Text input default is incorrect");
             expect(markdownInput.getAttribute("value")).toBe(values.markdown_value, "Markdown input default is incorrect");
@@ -108,7 +103,6 @@ describe('Record Add with defaults', function() {
             expect(chaisePage.recordEditPage.getDropdownText(booleanFalseInput)).toBe(values.boolean_false_value, "Boolean input is not set to false");
             expect(dateInput.getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
             expect(jsonInput.getAttribute("value")).toBe(values.json_value, "JSON input default is incorrect");
-            expect(jsonbInput.getAttribute("value")).toBe(values.jsonb_value, "JSONB input default is incorrect");
         });
 
         it("should prefill simple input fields that are disabled with their default value.", function() {
@@ -119,7 +113,6 @@ describe('Record Add with defaults', function() {
             booleanDisabledInput = chaisePage.recordEditPage.getInputById(0, "boolean_disabled");
             dateDisabledInput = chaisePage.recordEditPage.getInputById(0, "date_disabled");
             jsonInputDisabled= chaisePage.recordEditPage.getInputById(0, "json_disabled");
-            jsonbInputDisabled= chaisePage.recordEditPage.getInputById(0, "jsonb_disabled");
             
             expect(textDisabledInput.getAttribute("value")).toBe(values.text_disabled_value, "Text disabled input default is incorrect");
             expect(markdownDisabledInput.getAttribute("value")).toBe(values.markdown_disabled_value, "Markdown disabled input default is incorrect");
@@ -128,7 +121,6 @@ describe('Record Add with defaults', function() {
             expect(chaisePage.recordEditPage.getDropdownText(booleanDisabledInput)).toBe(values.boolean_disabled_value, "Boolean disabled input default is incorrect");
             expect(dateDisabledInput.getAttribute("value")).toBe(values.date_disabled_value, "Date disabled input default is incorrect");
             expect(jsonInputDisabled.getAttribute("value")).toBe(values.json_disabled_value, "JSON disabled input default is incorrect");
-            expect(jsonbInputDisabled.getAttribute("value")).toBe(values.jsonb_disabled_value, "JSONB disabled input default is incorrect");
 
         });
 

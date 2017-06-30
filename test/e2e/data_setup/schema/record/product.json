@@ -315,16 +315,6 @@
         },
         {
           "comment": null,
-          "name": "jsonb_col",
-          "default": null,
-          "nullok": true,
-          "type": {
-            "typename": "jsonb"
-          },
-          "annotations": {}
-        },
-        {
-          "comment": null,
           "name": "luxurious",
           "default": null,
           "nullok": true,
@@ -352,10 +342,10 @@
         },
         "description": {
           "display": "Accommodations",
-          "top_columns": ["title", "rating", "category", "opened_on","json_col","jsonb_col"]
+          "top_columns": ["title", "rating", "category", "opened_on","json_col"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", "title", "website", ["product-record", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-record", "fk_cover"], ["product-record", "fk_thumbnail"], "opened_on", "luxurious","json_col","jsonb_col"]
+          "detailed" : ["id", "title", "website", ["product-record", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-record", "fk_cover"], ["product-record", "fk_thumbnail"], "opened_on", "luxurious","json_col"]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {

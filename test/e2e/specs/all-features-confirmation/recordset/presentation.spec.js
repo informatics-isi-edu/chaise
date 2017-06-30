@@ -14,8 +14,7 @@ var testParams = {
             { title: "Summary", value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
             { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
             { title: "Is Luxurious", value: "true", type: "boolean" },
-            { title: "json_col", value:JSON.stringify({"name":"testing JSON"},undefined,2), type: "json" },
-            { title: "jsonb_col", value:JSON.stringify({"name":"testing JSONB"},undefined,2), type: "jsonb"}
+            { title: "json_col", value:JSON.stringify({"name":"testing JSON"},undefined,2), type: "json" }
         ],
         data: [
             {
@@ -26,8 +25,7 @@ var testParams = {
                 summary: "NH Hotels has six resorts in the city of Munich. Very close to Munich Main Train Station -- the train being one of the most interesting choices of transport for travelling around Germany -- is the four-star NH München Deutscher Kaiser Hotel. In addition to the excellent quality of accommodation that it offers, the hotel is located close to Marienplatz, the monumental central square in the city, the Frauenkirche church, Stachus (Karlsplatz) and the Viktualienmarkt. Other places of interest to explore in Munich are the English garden, the spectacular Nymphenburg Palace and the German Museum, a museum of science and technology very much in keeping with the industrial spirit of the city. Do not forget to visit Munich at the end of September and beginning of October, the time for its most famous international festival: Oktoberfest! Beer, sausages, baked knuckles and other gastronomic specialities await you in a festive atmosphere on the grasslands of Theresienwiese. Not to be missed! And with NH Hotels you can choose the hotels in Munich which best suit your travel plans, with free WiFi and the possibility to bring your pets with you.\n... more",
                 opened_on: "1976-06-15 00:00:00",
                 luxurious: "true",
-                json_col: JSON.stringify({"name":"testing_json"},undefined,2),
-                jsonb_col: JSON.stringify({"name":"testing_jsonb"},undefined,2)
+                json_col: JSON.stringify({"name":"testing_json"},undefined,2)
             },
             {
                 id: 2002,
@@ -37,8 +35,7 @@ var testParams = {
                 summary: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
                 opened_on: "2008-12-09 00:00:00",
                 luxurious: "true",
-                json_col: JSON.stringify(null,undefined,2),
-                jsonb_col: JSON.stringify(null,undefined,2)
+                json_col: JSON.stringify(null,undefined,2)
             },
             {
                 id: 2004,
@@ -48,8 +45,7 @@ var testParams = {
                 rating: "2.8000",
                 opened_on: "2013-06-11 00:00:00",
                 luxurious: "false",
-                json_col: JSON.stringify({"name": "Testing","age": 25},undefined,2),
-                jsonb_col: JSON.stringify({"age":30,"cars": {"car1":"Merc"}},undefined,2),
+                json_col: JSON.stringify({"name": "Testing","age": 25},undefined,2)
             },
             {
                 id: 4004,
@@ -59,8 +55,7 @@ var testParams = {
                 rating: "4.2000",
                 opened_on: "2013-06-11 00:00:00",
                 luxurious: "true",
-                json_col: "9876.3543",
-                jsonb_col:  "989238682.98329"
+                json_col: "9876.3543"
             }
         ]
     },
@@ -123,7 +118,6 @@ describe('View recordset,', function() {
                                 expect(cells[5].getText()).toBe(accommodationParams.data[index].opened_on);
                                 expect(cells[6].getText()).toBe(accommodationParams.data[index].luxurious);
                                 expect(cells[7].getText()).toBe(accommodationParams.data[index].json_col);
-                                expect(cells[8].getText()).toBe(accommodationParams.data[index].jsonb_col);
                             });
                         }(i))
                     }
@@ -221,7 +215,7 @@ describe('View recordset,', function() {
 
             });
 
-            it("JSON and JSONB Column value should be searchable", function(){
+            it("JSON Column value should be searchable", function(){
                 var searchBox = chaisePage.recordsetPage.getSearchBox(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
@@ -242,7 +236,7 @@ describe('View recordset,', function() {
                 }).then(function(){
                     return chaisePage.recordsetPage.getRows();
                 }).then(function(rows) {
-                    expect(rows.length).toBe(1);
+                    expect(rows.length).toBe(0);
                     // clear search
                     return clearSearchButton.click();
                 });

@@ -22,8 +22,7 @@ var testParams = {
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
             { name: "date_col", title: "date_col", type: "date"},
             { name: "luxurious", title: "Is Luxurious", type: "boolean" },
-            { name: "json_col", title: "json_col", type:"json"},
-            { name: "jsonb_col", title: "jsonb_col", type:"jsonb"}
+            { name: "json_col", title: "json_col", type:"json"}
         ],
         inputs: [
             {"title": "new title 1", "website": "https://example1.com", "category": {index: 0, value: "Hotel"}, 

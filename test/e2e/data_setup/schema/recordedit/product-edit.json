@@ -245,16 +245,6 @@
         },
         {
           "comment": null,
-          "name": "jsonb_col",
-          "default": null,
-          "nullok": true,
-          "type": {
-            "typename": "jsonb"
-          },
-          "annotations": {}
-        },
-        {
-          "comment": null,
           "name": "no_of_rooms",
           "default": null,
           "nullok": true,
@@ -356,12 +346,12 @@
         },
         "description": {
           "display": "Accommodations",
-          "top_columns": ["title", "rating", "category", "opened_on","json_col","jsonb_col"]
+          "top_columns": ["title", "rating", "category", "opened_on","json_col"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["title", "website", ["product-edit", "fk_category"], "rating", "summary","description", "no_of_rooms", "opened_on", "date_col", "luxurious","json_col","jsonb_col"],
-          "entry/create": ["id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col","jsonb_col"],
-          "entry/edit": ["id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col","jsonb_col"],
+          "detailed" : ["title", "website", ["product-edit", "fk_category"], "rating", "summary","description", "no_of_rooms", "opened_on", "date_col", "luxurious","json_col"],
+          "entry/create": ["id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col"],
+          "entry/edit": ["id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col"],
           "compact" : ["title", "website", ["product-edit", "fk_category"], "rating", "summary","description", "no_of_rooms", "opened_on", "date_col", "luxurious"]
         },
 
