@@ -228,12 +228,6 @@
                                                         <textarea json id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
                                                             name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);"  empty-to-null></textarea>
                                                     </div>
-                                                    
-                                                    <!--JSONB input -->
-                                                    <div ng-switch-when="jsonb">
-                                                        <textarea json id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
-                                                            name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);"  empty-to-null></textarea>
-                                                    </div>
 
                                                     <!-- shorttext/default text input -->
                                                     <input ng-switch-default id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
