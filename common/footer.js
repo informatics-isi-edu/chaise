@@ -9,7 +9,7 @@
     'use strict';
 
     angular.module('chaise.footer', [])
-        .directive('footer', ['ERMrest', '$sce', '$timeout', function(ERMrest, $sce, $timeout) {
+        .directive('footer', ['ERMrest', '$timeout', function(ERMrest, $timeout) {
 
             return {
                 restrict: 'E',
@@ -31,22 +31,18 @@
                                 bottom: 0,
                                 left: 0
                             };
-                            //console.log('in TO: '+$(document).height()+'  '+$(window).height())
                             if ($(document).height() > $(window).height()) { //scrolling
                                 scope.posStyle.position = 'relative';
                             } else {
                                 scope.posStyle.position = 'absolute';
                             }
                             if (angular.isUndefinedOrNull(footerText))
-                                scope.privacyResult = "**Default Privacy Policy**";
-                            else {
-                                ERMrest._onload().then(function() {
-                                    scope.privacyResult = ERMrest.renderMarkdown(footerText);
-                                })
+                                footerText = "**Default Privacy Policy.** Click [here](https://dev.isrd.isi.edu/){target='_blank'}";
 
-                            }
-                            // });
-                        }, 1000);
+                            ERMrest._onload().then(function() {
+                                scope.privacyResult = ERMrest.renderMarkdown(footerText);
+                            })
+                        }, 500);
                     }
                     setClass();
                     scope.$watch(function() {
