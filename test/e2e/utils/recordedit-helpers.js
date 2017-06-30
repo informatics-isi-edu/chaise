@@ -51,35 +51,18 @@ var markdownTestParams = [{
 var JSONTestParams=[
     {
         stringVal:"{}",
-        expectedValue:true
-    },
-    {
-        stringVal:"{}}",
-        expectedValue:false
     },
     {
         stringVal:"{\"name\":\"tester\"}",
-        expectedValue:true
     },
     {
         stringVal:"6534.9987",
-        expectedValue:true
     },
     {
         stringVal:"null",
-        expectedValue:true
     },
     {
         stringVal:"          ",
-        expectedValue:true
-    },
-    {
-        stringVal:"{\\\\\\\\(*(*(&^&^^$%^)))}",
-        expectedValue:false
-    },
-    {
-        stringVal:"+++++++$$$$$$$$#######",
-        expectedValue:false
     },
     {
         stringVal:JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
@@ -88,45 +71,7 @@ var JSONTestParams=[
     
 ];
 
-var JSONBTestParams=[
-    {
-        stringVal:"{}",
-        expectedValue:true
-    },
-    {
-        stringVal:"{}}}}}}}}}}}}}}}}}}}}",
-        expectedValue:false
-    },
-    {
-        stringVal:"{\"name\":\"jsonb testing\"}",
-        expectedValue:true
-    },
-    {
-        stringVal:"99.645763",
-        expectedValue:true
-    },
-    {
-        stringVal:"null",
-        expectedValue:true
-    },
-    {
-        stringVal:"          ",
-        expectedValue:true
-    },
-    {
-        stringVal:"{!@@#%^%*&**(*(*(&*&&)))}",
-        expectedValue:false
-    },
-    {
-        stringVal:"+++++++$$$$$$$$#######",
-        expectedValue:false
-    },
-    {
-        stringVal:JSON.stringify({"items": {"qty": 20,"product": "iphone7"},"customer": "Nitish Sahu"},undefined,2),
-        expectedValue:true
-    }
-    
-];
+
 
 /**
  * Test presentation, validation, and inputting a value for different column types in recordedit app.
@@ -293,10 +238,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         var timestampCols = filterColumns(function(c) { if (( c.type == "timestamptz" || c.type == "timestamp") && !c.isForeignKey ) return true; });;
         var fileCols = filterColumns(function(c) { if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
         var jsonCols = filterColumns(function(c) { if ((c.type === "json") && !c.isForeignKey) return true; });
-        var jsonbCols = filterColumns(function(c) { if ((c.type === "jsonb") && !c.isForeignKey) return true; });
 
 
-        var JSONDataTypeFields = [], JSONBDataTypeFields= [],longTextDataTypeFields = [], textDataTypeFields = [], markdownDataTypeFields = [],
+        var JSONDataTypeFields = [],longTextDataTypeFields = [], textDataTypeFields = [], markdownDataTypeFields = [],
         booleanDataTypeFields = [], foreignKeyFields = [], datePickerFields = [], integerDataTypeFields = [], floatDataTypeFields = [], timeInputFields = [];
 
         // test cases:
@@ -403,7 +347,51 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
                 });
             }
+            
+            if (jsonCols.length > 0) {
+                describe("JSON fields, ", function () {
+                    it("should show textarea input for JSON datatype and then set the value", function() {
+                        jsonCols.forEach(function(c) {
+                        chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
+                            if (jsonTxtArea) {
+                                expect(true).toBeDefined();
+                                jsonTxtArea.column = c;
+                                
+                                JSONDataTypeFields.push(jsonTxtArea);
+                                var value = getRecordValue(c.name);
 
+                                if (value != undefined) {
+                                    expect(jsonTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                                }              
+                            }
+                            else{
+                                expect(undefined).toBeDefined();
+                            }
+                        });
+                    });
+                 });
+                 
+                 it("should only allow valid JSON values", function(){
+                     jsonCols.forEach(function(c) {
+                         chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
+                             for (i = 0; i < JSONTestParams.length; i++) {
+                                 jsonTxtArea.clear();
+                                 (function(input){
+                                     c._value = input;
+                                     jsonTxtArea.sendKeys(input);
+                                     chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json').then(function(error){
+                                         if(error){
+                                             expect(false).toBe(true, colError(c.name , "Some Valid JSON Values were not accepted"));
+                                         }
+                                     });                                        
+                                 })(JSONTestParams[i].stringVal);
+                             }//for 
+                         });
+                     });
+                 });
+             });
+         }
+            
             if (markdownCols.length > 0) {
                 describe("Markdown fields, ", function () {
                     it('should have the correct value.', function () {
@@ -471,51 +459,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                 });
-            }
-            
-            if (jsonCols.length > 0) {
-            describe("JSON fields, ", function () {
-                it("should show textarea input for JSON datatype and then set the value", function() {
-                    var columns = tableParams.columns.filter(function(c) { if ((c.type === "json" ) && !c.isForeignKey) return true; });
-                    columns.forEach(function(c) {
-                    chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
-                        if (jsonTxtArea) {
-                            expect(true).toBeDefined();
-                            JSONDataTypeFields.push(jsonTxtArea);
-
-                            if (c.value != undefined) {
-                                expect(jsonTxtArea.getAttribute('value')).toBe(c._value);
-                            }
-
-                            if (isEditMode && (c.generated || c.immutable)) return;
-
-                            chaisePage.recordEditPage.clearInput(jsonTxtArea);
-                            browser.sleep(10);
-
-                            jsonTxtArea.column = c;
-                            
-                            for (i = 0; i < JSONTestParams.length; i++) {
-                                  jsonTxtArea.clear();
-                                  (function(input, expectedValue) {
-                                      c._value = input;
-                                      jsonTxtArea.sendKeys(input);
-                                      chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json').then(function(error) {
-                                            if(error){
-                                                expect(expectedValue).toBeFalsy();
-                                            }
-                                            else{
-                                                expect(expectedValue).toBeTruthy();                                                
-                                                }
-                                            });                                        
-                                    })(JSONTestParams[i].stringVal, JSONTestParams[i].expectedValue);
-                            }               
-                        } else {
-                            expect(undefined).toBeDefined();
-                        }
-                    });
-                });
-            });
-            });
             }
 
             if (booleanCols.length > 0) {
