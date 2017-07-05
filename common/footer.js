@@ -1,8 +1,7 @@
-/**
- * @desc
- * @param {String} textinput The Markdown to transform
- * @example <a href class="live-preview"  markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]">Live Preview</a>
- * @example <markdown-preview class="live-preview" textinput="form.recordEditModel.rows[rowIndex][column.name]">Click</markdown-preview>
+/**footer diretive: to create page footer
+ * styleing is controoled dynamically based on scroll height. If these is scroll on the page then footer is 'relative'
+ * else it is 'absolute'.
+ * @example <footer></footer>
  */
 
 (function() {
