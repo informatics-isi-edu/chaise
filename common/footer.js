@@ -48,7 +48,6 @@
                     scope.$watch(function() {
                         return $(document).height();
                     }, function(o, n) {
-                        //console.log(o +' : '+n);
                         setClass();
                     });
                 }
