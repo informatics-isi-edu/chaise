@@ -83,6 +83,16 @@ ERMRESTJS_DEPS=ermrest.js
 # Shared utilities
 COMMON=common
 
+# Markdown Editor dependencies
+MDEDIT_CSS_DEPS=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css
+
+MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
+	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
+
 # CSS source
 CSS=styles
 
@@ -657,13 +667,13 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 
-.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_CSS_SOURCE) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG)
+.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_CSS_SOURCE) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG) $(MDEDIT_JS_DEPS) $(MDEDIT_CSS_DEPS)
 	> .make-de-asset-block
 	for file in $(RE_SHARED_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
-	for file in $(RE_CSS_SOURCE); do \
+	for file in $(RE_CSS_SOURCE) $(MDEDIT_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
@@ -677,7 +687,7 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
 		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
-	for file in $(RE_JS_SOURCE); do \
+	for file in $(RE_JS_SOURCE) $(MDEDIT_JS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
