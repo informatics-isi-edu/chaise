@@ -23,7 +23,6 @@ describe('Page Footer', function() {
                     beforeAll(function() {
                         browser.ignoreSynchronization = true;
                         url = browser.params.url + location;
-                        console.log(url);
                         browser.get(url);
                         footerMain = element(by.id('footerStyle'));
                         chaisePage.waitForElementCondition(EC.visibilityOf(footerMain));
@@ -31,7 +30,7 @@ describe('Page Footer', function() {
                     });
                     it('Page footer should appear at the bottom of the page', function() {
 
-                        browser.executeScript('return $(document).height()').then(function(docH) {                            
+                        browser.executeScript('return $(document).height()').then(function(docH) {
                             docHeight = docH;
                             return footerMain.getLocation();
                         }).then(function(loc) {
