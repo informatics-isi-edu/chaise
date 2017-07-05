@@ -37,7 +37,7 @@
                                 scope.posStyle.position = 'absolute';
                             }
                             if (angular.isUndefinedOrNull(footerText))
-                                footerText = "**Default Privacy Policy.** Click [here](https://dev.isrd.isi.edu/){target='_blank'}";
+                                footerText = "**Default Privacy Policy.** [Privacy Policy](/privacy-policy/){target='_blank'}";
 
                             ERMrest._onload().then(function() {
                                 scope.privacyResult = ERMrest.renderMarkdown(footerText);

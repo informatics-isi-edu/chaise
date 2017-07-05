@@ -63,7 +63,7 @@ var chaiseConfig = {
             // }
         ]
     },
-    footerMarkdown:"**Privacy Policy Maintained in Chaise Configuration.** Click [here](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js){target='_blank'}"
+    footerMarkdown:"**Please check ** [Privacy Policy](/privacy-policy/){target='_blank'}"
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {
