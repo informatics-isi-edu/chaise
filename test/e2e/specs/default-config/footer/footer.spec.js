@@ -5,7 +5,6 @@ var chaiseConfig = {
 };
 var EC = protractor.ExpectedConditions;
 describe('Page Footer', function() {
-    // console.log(browser.params.defaultTable);
             chaiseConfig.apps.forEach(function(val){
 
                 var flocation = "/" + val + "/#" + browser.params.catalogId + "/"+browser.params.defaultTable.schema_name+":" + browser.params.defaultTable.table_name;
@@ -22,15 +21,12 @@ describe('Page Footer', function() {
                     it('Page footer should appear at the bottom of the page', function() {
 
                         browser.executeScript('return $(document).height()').then(function(docH) {
-                            console.log(docH);
                             docHeight = docH;
                             return footerMain.getLocation();
                         }).then(function(loc) {
                             elemLoc = loc.y;
-                            console.log(elemLoc);
                             return footerMain.getSize();
                         }).then(function(elemH) {
-                            console.log(elemH.height);
                             var totalH = elemLoc + elemH.height;
                             expect(totalH).toEqual(docHeight, 'Footer is not at the bottom of the page!');
                         }).catch(function(error) {
