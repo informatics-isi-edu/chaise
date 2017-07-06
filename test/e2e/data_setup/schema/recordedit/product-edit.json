@@ -513,7 +513,7 @@
           },
           "annotations": {
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"hatrac/js/chaise/{{{_fileid}}}/{{{_uri.md5_hex}}}",
+              "url_pattern":"hatrac/js/chaise/{{{_timestamp_txt}}}/{{{_fileid}}}/{{{_uri.md5_hex}}}",
               "filename_column" : "filename",
               "byte_count_column": "bytes",
               "md5": "md5"
@@ -546,7 +546,14 @@
           "type": {
             "typename": "text"
           }
-        }
+        },
+        {
+         "comment": null,
+         "name": "timestamp_txt",
+         "type": {
+           "typename": "text"
+         }
+       }
       ],
       "annotations": {
         "tag:isrd.isi.edu,2016:table-display": {
@@ -556,7 +563,7 @@
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
             "*": ["fileid", "uri", "filename", "bytes"],
-            "entry": ["fileid", "uri"]
+            "entry": ["fileid", "uri", "timestamp_txt"]
         }
       }
     },

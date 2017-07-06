@@ -8,6 +8,7 @@ var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var mustache = require('../../../../../../ermrestjs/vendor/mustache.min.js');
 var moment = require('moment');
 
+var currentTimestampTime = moment().format("x");
 var testParams = {
     tables: [{
         schema_name: "product-edit",
@@ -57,19 +58,20 @@ var testParams = {
        key: { name: "id", value: "90008", operator: "="},
        columns: [
            { name: "fileid", title: "fileid", type: "int4" },
-           { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" }
+           { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" },
+           { name: "timestamp_txt", title: "timestamp_txt", type: "text"}
        ],
        values: [
            {"fileid":"","uri":"http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg"}
        ],
        inputs: [
-           {"fileid": "4", "uri": 0}
+           {"fileid": "4", "uri": 0, "timestamp_txt": currentTimestampTime}
        ],
        result_columns: [
            "fileid", "uri", "filename", "bytes"
        ],
        results: [
-           ["4", {"link": "{{{chaise_url}}}/record/hatrac/js/chaise/4/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+           ["4", {"link": "{{{chaise_url}}}/record/hatrac/js/chaise/"+currentTimestampTime+"/4/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
        ],
        files : [{
            name: "testfile500kb.png",

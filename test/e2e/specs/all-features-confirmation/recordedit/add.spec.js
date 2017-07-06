@@ -4,6 +4,7 @@ var exec = require('child_process').execSync;
 var moment = require('moment');
 
 // take a look at the comments in recordedit-helpers.js for the expected structure of tableParams.
+var currentTimestampTime = moment().format("x");
 var testParams = {
     tables: [{
         schema_name: "product-add",
@@ -24,11 +25,11 @@ var testParams = {
             { name: "luxurious", title: "Is Luxurious", type: "boolean" }
         ],
         inputs: [
-            {"title": "new title 1", "website": "https://example1.com", "category": {index: 0, value: "Hotel"}, 
-             "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1", 
+            {"title": "new title 1", "website": "https://example1.com", "category": {index: 0, value: "Hotel"},
+             "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1",
              "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false},
-            {"title": "new title 2", "website": "https://example2.com", "category": {index: 1, value: "Ranch"}, 
-             "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description 2", 
+            {"title": "new title 2", "website": "https://example2.com", "category": {index: 1, value: "Ranch"},
+             "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description 2",
              "no_of_rooms": "2", "opened_on": moment("2017-02-02 02:02:02", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-02-02", "luxurious":  true}
         ],
         result_columns: [
@@ -46,18 +47,19 @@ var testParams = {
        primary_keys: ["id"],
        columns: [
            { name: "fileid", title: "fileid", type: "int4" },
-           { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" }
+           { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" },
+           { name: "timestamp_txt", title: "timestamp_txt", type: "text"},
        ],
        inputs: [
-           {"fileid": "1", "uri": 0},
-           {"fileid": "2", "uri": 1}
+           {"fileid": "1", "uri": 0, "timestamp_txt": currentTimestampTime},
+           {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime}
        ],
        result_columns: [
            "fileid", "uri", "filename", "bytes"
        ],
        results: [
-           ["1", {"link": "{{{chaise_url}}}/recordedit/hatrac/js/chaise/1/", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
-           ["2", {"link": "{{{chaise_url}}}/recordedit/hatrac/js/chaise/2/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+           ["1", {"link": "{{{chaise_url}}}/recordedit/hatrac/js/chaise/" + currentTimestampTime + "/1", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
+           ["2", {"link": "{{{chaise_url}}}/recordedit/hatrac/js/chaise/" + currentTimestampTime + "/2", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
        ],
        files : [{
            name: "testfile1MB.txt",
@@ -109,7 +111,7 @@ describe('Record Add', function() {
                 describe("remove record, ", function() {
 
                     if (tableParams.inputs.length > 1) {
-                        
+
                         it("should click and add an extra record.", function() {
                             chaisePage.recordEditPage.getAddRowButton().then(function(button) {
                                 chaisePage.clickButton(button);
@@ -156,7 +158,7 @@ describe('Record Add', function() {
                 describe("Submit " + tableParams.inputs.length + " records", function() {
                     recordEditHelpers.testSubmission(tableParams);
                 });
-                
+
                 if (!process.env.TRAVIS && tableParams.files.length > 0) {
                     afterAll(function(done) {
                         recordEditHelpers.deleteFiles(tableParams.files);
@@ -190,7 +192,7 @@ describe('Record Add', function() {
         it('should pre-fill fields from the prefill cookie', function() {
             // Reload the page with prefill query param in url
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation?prefill=test");
-            
+
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 return browser.manage().getCookie('test');
             }).then(function(cookie) {
