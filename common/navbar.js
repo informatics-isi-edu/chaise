@@ -65,7 +65,9 @@
                 Session.getSession();
 
                 scope.login = function login() {
-                    Session.login($window.location.href);
+                    Session.loginInANewWindow(function() {
+                        window.location.reload();
+                    });
                 };
 
                 scope.logout = function logout() {
