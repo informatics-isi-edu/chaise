@@ -528,18 +528,7 @@
           "type": {
             "typename": "text"
           },
-          "annotations": {
-            "comment": [
-              "thumbnail",
-              "download"
-            ],
-            "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"hatrac/js/chaise/{{{_fileid}}}/{{{_uri.md5_hex}}}",
-              "filename_column" : "filename",
-              "byte_count_column": "bytes",
-              "md5": "preview"
-            }
-          }
+          "annotations": {}
         },
         {
           "comment": null,

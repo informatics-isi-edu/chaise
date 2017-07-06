@@ -1,6 +1,9 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
+var moment = require('moment');
 
+
+var currentTimestampTime = moment().format("x");
 var testParams = {
     schema_name: "multi-edit",
     tables: [{
@@ -62,23 +65,25 @@ var testParams = {
                     "file_1": {"isFile": true, "value": "/hatrac/js/chaise/prev/111111", "input": 0},
                     "file_2": {"isFile": true, "value": "/hatrac/js/chaise/prev/222222", "input": 1},
                     "file_3": {"isFile": true, "value": "/hatrac/js/chaise/prev/333333", "input": 2},
+                    "timestamp_txt": {"input": currentTimestampTime, "value": ""}
                 },
                 {
                     "file_1": {"isFile": true, "value": "/hatrac/js/chaise/prev/111111", "input": 0},
                     "file_2": {"isFile": true, "value": "/hatrac/js/chaise/prev/222222", "input": 1},
                     "file_3": {"isFile": true, "value": "/hatrac/js/chaise/prev/333333", "input": 2},
+                    "timestamp_txt": {"input": currentTimestampTime, "value": ""}
                 }
             ],
             results: [
                 [
-                    {"link": "/hatrac/js/chaise/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
-                    {"link": "/hatrac/js/chaise/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
-                    {"link": "/hatrac/js/chaise/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
                 ],
                 [
-                    {"link": "/hatrac/js/chaise/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
-                    {"link": "/hatrac/js/chaise/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
-                    {"link": "/hatrac/js/chaise/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
                 ]
             ],
             files: [{
@@ -104,6 +109,11 @@ var testParams = {
     ]
 
 };
+
+if (!process.env.TRAVIS) {
+    // keep track of namespaces that we use, so we can delete them afterwards
+    browser.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
+}
 
 var i, j, k;
 

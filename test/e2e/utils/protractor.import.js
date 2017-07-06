@@ -2,6 +2,7 @@
 
 var ermrestUtils = require(process.env.PWD + "/../ErmrestDataUtils/import.js");
 var Q = require('q');
+var http = require('request-q');
 
 //**********************************************************************
 // function waitfor - Wait until a condition is met
@@ -200,3 +201,29 @@ exports.tear = function(testConfiguration, catalogId, defer) {
 
     return defer.promise;
 };
+
+/**
+ * Delete the given list of namespaces
+ * @param  {String} authCookie webauthn cookie
+ * @param  {String[]} namespaces Array of namespaces. They must be absolute path.
+ */
+exports.deleteHatracNamespaces = function (authCookie, namespaces) {    
+    var promises = [];
+    http.setDefaults({headers: {'Cookie': authCookie}});
+    namespaces.forEach(function (ns) {
+        var defer = Q.defer();
+        
+        http.delete(ns).then(function() {
+            console.log("namespace " + ns + " deleted from hatrac.");
+            defer.resolve();
+        }, function (error) {
+            console.log("namespace " + ns + " could not be deleted.");
+            console.log(error)
+            defer.reject(error);
+        });
+        
+        promises.push(defer.promise);
+    });
+    
+    return Q.all(promises);
+}
