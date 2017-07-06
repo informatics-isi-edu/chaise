@@ -313,7 +313,7 @@ var recordEditPage = function() {
         index = index || 0;
         return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
     };
-
+   
     this.getHelpTextBlock = function(el) {
         return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
     };
@@ -462,6 +462,10 @@ var recordEditPage = function() {
 
     this.getTimestampInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"timestamp\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+    
+    this.getJSONInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"json\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
     
     this.getDateInputErrorMessage = function(el, type) {

@@ -43,11 +43,29 @@
                     "type": {
                         "typename": "int"
                     }
+                },
+                {
+                  "name": "json_col",
+                  "default": null,
+                  "nullok": true,
+                  "type": {
+                    "typename": "json"
+                  },
+                  "annotations": {}
+                },
+                {
+                  "name": "jsonb_col",
+                  "default": null,
+                  "nullok": true,
+                  "type": {
+                    "typename": "jsonb"
+                  },
+                  "annotations": {}
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int"]
+                    "*": ["id", "text", "int","json_col","jsonb_col"]
                 }
             }
         },

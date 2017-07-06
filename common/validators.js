@@ -70,6 +70,30 @@
         };
     })
 
+
+    //Validation directive for JSON for testing if an input value is valid JSON
+    // Use: <input type="textarea" json>
+    .directive('json', function() {
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$validators.json = function(modelValue, viewValue) {
+                    var value = modelValue || viewValue;
+                    if (ctrl.$isEmpty(value)) {
+                        return true;
+                    }
+                    try{
+                        JSON.parse(value);
+                        return true;
+                    }
+                    catch(e){
+                        return false;
+                    }
+                };
+            }
+        };
+    })
+
     // Validation directive for testing if an input value is a time
     // Use: <input type="text" time>
     .directive('time', function() {
