@@ -38,6 +38,7 @@
 
         var session,
             context = {};
+        $rootScope.displayReady = false;
 
         UriUtils.setOrigin();
         headInjector.setupHead();
@@ -151,12 +152,14 @@
                                 selectable: false
                             };
                             $rootScope.tableModels[i] = model;
+                            $rootScope.displayReady = true;
 
                         }, function readFail(error) {
                             var model = {
                                 hasLoaded: true
                             };
                             $rootScope.tableModels[i] = model;
+                            $rootScope.displayReady = true;
                             throw error;
                         }).catch(function(e) {
                             // The .catch from the outer promise won't catch errors from this closure
