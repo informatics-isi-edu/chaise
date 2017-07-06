@@ -48,6 +48,30 @@ var markdownTestParams = [{
   }
 ];
 
+var JSONTestParams=[
+    {
+        stringVal:"{}",
+    },
+    {
+        stringVal:"{\"name\":\"tester\"}",
+    },
+    {
+        stringVal:"6534.9987",
+    },
+    {
+        stringVal:"null",
+    },
+    {
+        stringVal:"          ",
+    },
+    {
+        stringVal:JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
+        expectedValue:true
+    }
+    
+];
+
+
 
 /**
  * Test presentation, validation, and inputting a value for different column types in recordedit app.
@@ -213,8 +237,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         var intCols = filterColumns(function(c) { if (c.type.startsWith("int") && !c.isForeignKey && !c.generated) return true; });
         var timestampCols = filterColumns(function(c) { if (( c.type == "timestamptz" || c.type == "timestamp") && !c.isForeignKey ) return true; });;
         var fileCols = filterColumns(function(c) { if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
+        var jsonCols = filterColumns(function(c) { if ((c.type === "json") && !c.isForeignKey) return true; });
 
-        var longTextDataTypeFields = [], textDataTypeFields = [], markdownDataTypeFields = [],
+
+        var JSONDataTypeFields = [],longTextDataTypeFields = [], textDataTypeFields = [], markdownDataTypeFields = [],
         booleanDataTypeFields = [], foreignKeyFields = [], datePickerFields = [], integerDataTypeFields = [], floatDataTypeFields = [], timeInputFields = [];
 
         // test cases:
@@ -260,8 +286,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should show textarea input for longtext datatype and then set the value.", function() {
                         longTextCols.forEach(function(c) {
                             chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(txtArea) {
-                                if (txtArea) {
-                                    expect(true).toBeDefined();
+                                    expect(txtArea.isDisplayed()).toBeTruthy();
                                     longTextDataTypeFields.push(txtArea);
 
                                     var value = getRecordValue(c.name);
@@ -279,9 +304,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     txtArea.sendKeys(text);
 
                                     expect(txtArea.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
-                                } else {
-                                    expect(undefined).toBeDefined(colError(c.name, "Couldn't find the input field (type: longtext)."));
-                                }
+                                 
                             });
                         });
                     });
@@ -293,8 +316,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should show text input for text and set the value.", function() {
                         textCols.forEach(function(c) {
                             chaisePage.recordEditPage.getInputForAColumn(c.name, recordIndex).then(function(txtInput) {
-                                if (txtInput) {
-                                    expect(true).toBeDefined();
+                                    expect(txtInput.isDisplayed()).toBeTruthy();
                                     txtInput.column = c;
 
                                     textDataTypeFields.push(txtInput);
@@ -313,15 +335,49 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     txtInput.sendKeys(text);
 
                                     expect(txtInput.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
-                                } else {
-                                    expect(undefined).toBeDefined(colError(c.name, "Couldn't find the input field (type: longtext)."));
-                                }
                             });
                         });
                     });
                 });
             }
+            
+            if (jsonCols.length > 0) {
+                describe("JSON fields, ", function () {
+                    it("should show textarea input for JSON datatype and then set the value", function() {
+                        jsonCols.forEach(function(c) {
+                        chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
+                            expect(jsonTxtArea.isDisplayed()).toBeTruthy();
+                            jsonTxtArea.column = c;
+                                
+                            JSONDataTypeFields.push(jsonTxtArea);
+                            var value = getRecordValue(c.name);
 
+                            if (value != undefined) {
+                                expect(jsonTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                            }
+                        });
+                    });
+                 });
+                 
+                 it("should only allow valid JSON values", function(){
+                     jsonCols.forEach(function(c) {
+                         chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
+                             for (i = 0; i < JSONTestParams.length; i++) {
+                                 jsonTxtArea.clear();
+                                 (function(input){
+                                     c._value = input;
+                                     jsonTxtArea.sendKeys(input);
+                                     chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json').then(function(error){
+                                         expect(error).toBe(null, colError(c.name , "Some Valid JSON Values were not accepted"));
+                                     });                                        
+                                 })(JSONTestParams[i].stringVal);
+                             }//for 
+                         });
+                     });
+                 });
+             });
+         }
+            
             if (markdownCols.length > 0) {
                 describe("Markdown fields, ", function () {
                     it('should have the correct value.', function () {
@@ -413,7 +469,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should show a dropdown", function() {
                         pageColumns.forEach(function(pc) {
                             chaisePage.recordEditPage.getDropdown(pc, recordIndex).then(function(dropdown) {
-                                if (dropdown) {
+                                    expect(dropdown.isDisplayed()).toBeTruthy();
                                     dropdown.column = pc.column;
 
                                     var value = getRecordValue(dropdown.column.name);
@@ -423,9 +479,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                     dropdowns.push(dropdown);
                                     booleanDataTypeFields.push(dropdown);
-                                } else {
-                                    expect(undefined).toBeDefined(colError(pc.column.name , "Couldn't find the boolean dropdown."));
-                                }
+                                
                             });
                         });
                     });
@@ -626,11 +680,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             dateInput.sendKeys('1234-13-31');
                             chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
-                                if (error) {
-                                    expect(true).toBe(true);
-                                } else {
-                                    expect('An error message was supposed to appear.').toBe('But was not found.', colError(column.name, "Expected to show a error on invalid input."));
-                                }
+                                expect(error.isDisplayed()).toBeTruthy(colError(column.name , "Expected to show a error on invalid input."));
                             });
 
                             chaisePage.recordEditPage.clearInput(dateInput);
@@ -639,11 +689,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             dateInput.sendKeys('2016-01-01');
                             expect(dateInput.getAttribute('value')).toEqual('2016-01-01', colError(column.name, "value didn't change."));
                             chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
-                                if (error) {
-                                    expect('An error message was not supposed to appear.').toBe('But one was found.', colError(column.name, "Expected to not show any error on valid input."));
-                                } else {
-                                    expect(true).toBe(true);
-                                }
+                                expect(error).toBeNull(colError(column.name , "Expected to not show any error on valid input."));
                             });
                         });
                     });
@@ -672,8 +718,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should have a datepicker element", function() {
                         dateCols.forEach(function(column) {
                             chaisePage.recordEditPage.getInputValue(column.name, recordIndex).then(function(dateInput) {
-                                if (dateInput) {
-                                    expect(true).toBeDefined();
+                                    expect(dateInput.isDisplayed()).toBeTruthy();
+
                                     dateInput.column = column;
                                     datePickerFields.push(dateInput);
 
@@ -681,9 +727,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     if (value != undefined) {
                                         expect(dateInput.getAttribute('value')).toBe(value);
                                     }
-                                } else {
-                                    expect(undefined).toBeDefined();
-                                }
                             });
                         });
                     }).pend('Postpone test until a datepicker is re-implemented');
@@ -695,11 +738,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             chaisePage.clickButton(dp);
                             browser.sleep(10);
                             chaisePage.recordEditPage.getDatePickerForAnInput(dp).then(function(datePicker) {
-                                if (datePicker) {
-                                    expect(true).toBeDefined();
-                                } else {
-                                    expect(undefined).toBeDefined();
-                                }
+                                expect(datePicker.isDisplayed()).toBeTruthy();
+
                                 dp.datePicker = datePicker;
                             });
                         });
@@ -723,11 +763,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                 // Required error message should disappear
                                 chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'required').then(function(err) {
-                                    if (err) {
-                                        expect(undefined).toBe("Date input " + dateInput.column.name + " Required Error message to be hidden");
-                                    } else {
-                                        expect(true).toBeDefined();
-                                    }
+                                    expect(err).toBeNull(colError("Date input " + dateInput.column.name + " Required Error message to be hidden"));
                                 });
                             });
                         });
@@ -812,72 +848,44 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             timeInput.clear();
                             timeInput.sendKeys('24:12:00'); // this is invalid because we're only accepting 24-hr time formats from 0-23
                             chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                if (error) {
-                                    expect(true).toBe(true);
-                                } else {
-                                    expect('An error message was supposed to appear.').toBe('But was not found.', colError(column.name, "Accepted an invalid time."));
-                                }
+                                expect(error.isDisplayed()).toBeTruthy(colError(column.name , "Accepted an invalid time."));
                             });
 
                             // If user enters a valid time, then error msg should disappear
                             timeInput.clear();
                             timeInput.sendKeys('12:00:00');
                             chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                if (error) {
-                                    expect('An error message was not supposed to appear.').toBe('But one was found.', colError(column.name, ""));
-                                } else {
-                                    expect(true).toBe(true);
-                                }
+                                expect(error).toBeNull("An error message was not supposed to appear. But one was found", colError(column.name, ""));
                             });
                             timeInput.clear();
                             // users can enter 1 digit in any place
                             timeInput.sendKeys('2:00:00');
                             chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                if (error) {
-                                    expect('An error message was not supposed to appear.').toBe('But one was found.', colError(column.name, ""));
-                                } else {
-                                    expect(true).toBe(true);
-                                }
+                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
                             });
                             timeInput.clear();
                             // users can enter just the hours
                             timeInput.sendKeys('08');
                             chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                if (error) {
-                                    expect('An error message was not supposed to appear.').toBe('But one was found.', colError(column.name, ""));
-                                } else {
-                                    expect(true).toBe(true);
-                                }
+                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
                             });
                             timeInput.clear();
                             // users can enter less than the full string
                             timeInput.sendKeys('2:10');
                             chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                if (error) {
-                                    expect('An error message was not supposed to appear.').toBe('But one was found.', colError(column.name, ""));
-                                } else {
-                                    expect(true).toBe(true);
-                                }
+                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
                             });
                             timeInput.clear();
                             // users can enter time in 24 hr format
                             timeInput.sendKeys('20:00:00');
                             chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                if (error) {
-                                    expect('An error message was not supposed to appear.').toBe('But one was found.', colError(column.name, ""));
-                                } else {
-                                    expect(true).toBe(true);
-                                }
+                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
                             });
                             timeInput.clear();
                             // users can enter 0 for the time
                             timeInput.sendKeys('00:00:00');
                             chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                if (error) {
-                                    expect('An error message was not supposed to appear.').toBe('But one was found.', colError(column.name, ""));
-                                } else {
-                                    expect(true).toBe(true);
-                                }
+                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
                             });
 
                             // Invalid date + good time = error
@@ -886,32 +894,21 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             timeInput.clear();
                             timeInput.sendKeys('12:00:00');
                             chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampDate').then(function(error) {
-                                if (error) {
-                                    expect(true).toBe(true);
-                                } else {
-                                    expect('An error message was supposed to appear.').toBe('But none were found.', colError(column.name, "Accepted an invalid date."));
-                                }
+                                expect(error.isDisplayed()).toBeTruthy(colError(column.name, "Accepted an invalid date."));
+                                
                                 // Good date + good time = no error
                                 // Now, if user enters a valid date, then no error message should appear
                                 return dateInput.sendKeys('2016-01-01');
                             }).then(function() {
                                 return chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampDate');
                             }).then(function(error) {
-                                if (error) {
-                                    expect('An error message was not supposed to appear.').toBe('But one was found.', colError(column.name, ""));
-                                } else {
-                                    expect(true).toBe(true);
-                                }
+                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
                                 // Good date + null time = no error
                                 return timeInput.clear();
                             }).then(function() {
                                 return chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampTime');
                             }).then(function(error) {
-                                if (error) {
-                                    expect('An error message was not supposed to appear.').toBe('But one was found.', colError(column.name, ""));
-                                } else {
-                                    expect(true).toBe(true);
-                                }
+                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
                             });
 
                             timeInputFields.push({
@@ -1016,8 +1013,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should render input type as number with integer attribute", function() {
                         intCols.forEach(function(column) {
                             chaisePage.recordEditPage.getIntegerInputForAColumn(column.name, recordIndex).then(function(intInput) {
-                                if (intInput) {
-                                    expect(true).toBeDefined();
+                                    expect(intInput.isDisplayed()).toBeTruthy();
+
                                     intInput.column = column;
                                     integerDataTypeFields.push(intInput);
 
@@ -1025,10 +1022,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     if (value != undefined) {
                                         expect(intInput.getAttribute('value')).toBe(value, colError(column.name , "Doesn't have the expected value."));
                                     }
-
-                                } else {
-                                    expect(undefined).toBeDefined(colError(column.name, "Couldn't find the input field."));
-                                }
                             });
                         });
                     });
@@ -1052,11 +1045,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             if (c.nullok == false && !c.generated && !c.immutable) {
                                 chaisePage.recordEditPage.submitForm();
                                 chaisePage.recordEditPage.getInputErrorMessage(intInput, 'required').then(function(err) {
-                                    if(err) {
-                                        expect(true).toBeDefined();
-                                    } else {
-                                        expect(undefined).toBeDefined(colError(c, "Expected to show error."));
-                                    }
+                                    expect(err).toBe(null, colError(c, "Expected to show error."));
                                 });
                             }
 
@@ -1068,11 +1057,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             // Required Error message should disappear;
                             chaisePage.recordEditPage.getInputErrorMessage(intInput, 'required').then(function(err) {
-                                if (err) {
-                                    expect(undefined).toBeDefined(colError(c, "Expected to clear the error message on changing the value."));
-                                } else {
-                                    expect(true).toBeDefined();
-                                }
+                                expect(err).toBeNull(colError(c, "Expected to clear the error message on changing the value."));
                             });
 
                             // Clear value
@@ -1116,11 +1101,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             // Check for invalid maximum number
                             intInput.sendKeys(invalidMaxNo);
                             chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
-                                if (err) {
-                                    expect(true).toBeDefined();
-                                } else {
-                                    expect(undefined).toBeDefined(colError(c.name, "Expected to show error when using maximum number."));
-                                }
+                                expect(err.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using maximum number."));
                             });
 
 
@@ -1129,21 +1110,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(intInput.getAttribute('value')).toBe("");
 
                             chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
-                                if (err) {
-                                    expect(undefined).toBeDefined(colError(c.name, "Expected to clear error message after clearing maximum number."));
-                                } else {
-                                    expect(true).toBeDefined();
-                                }
+                                expect(err).toBeNull(colError(c.name , "Expected to clear error message after clearing maximum number."));
                             });
 
                             // Check for invalid minimum number
                             intInput.sendKeys(invalidMinNo);
                             chaisePage.recordEditPage.getInputErrorMessage(intInput, 'min').then(function(err) {
-                                if (err) {
-                                    expect(true).toBeDefined();
-                                } else {
-                                    expect(undefined).toBeDefined(colError(c.name, "Expected to show error when using minimum number."));
-                                }
+                                expect(err.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using minimum number."));
                             });
 
                             // Clear value
@@ -1151,11 +1124,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(intInput.getAttribute('value')).toBe("");
 
                             chaisePage.recordEditPage.getInputErrorMessage(intInput, 'min').then(function(err) {
-                                if (err) {
-                                    expect(undefined).toBeDefined(colError(c.name, "Expected to clear error message after clearing maximum number."));
-                                } else {
-                                    expect(true).toBeDefined();
-                                }
+                                expect(err).toBeNull(colError(c.name , "Expected to clear error message after clearing maximum number."));
                             });
 
                             // Check for a valid number
@@ -1163,19 +1132,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(intInput.getAttribute('value')).toBe(validNo);
 
                             chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
-                                if (err) {
-                                    expect(undefined).toBeDefined(colError(c.name, "Expected to not show max error on valid number."));
-                                } else {
-                                    expect(true).toBeDefined();
-                                }
+                                expect(err).toBeNull(colError(c.name , "Expected to not show max error on valid number."));
                             });
 
                             chaisePage.recordEditPage.getInputErrorMessage(intInput, 'min').then(function(err) {
-                                if (err) {
-                                    expect(undefined).toBeDefined(colError(c.name, "Expected to not show max error on valid number."));
-                                } else {
-                                    expect(true).toBeDefined();
-                                }
+                                expect(err).toBeNull(colError(c.name , "Expected to not show max error on valid number."));
                             });
 
                         });
@@ -1206,8 +1167,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should render input type as number with float attribute", function() {
                         floatCols.forEach(function(column) {
                             chaisePage.recordEditPage.getFloatInputForAColumn(column.name, recordIndex).then(function(floatInput) {
-                                if (floatInput) {
-                                    expect(true).toBeDefined();
+                                    expect(floatInput.isDisplayed()).toBeTruthy();
+
                                     floatInput.column = column;
                                     floatDataTypeFields.push(floatInput);
 
@@ -1215,9 +1176,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     if (value != undefined) {
                                         expect(floatInput.getAttribute('value')).toBe(value, colError(column.name, "Didn't have the expected value."));
                                     }
-                                } else {
-                                    expect(undefined).toBeDefined();
-                                }
                             });
                         });
                     });
@@ -1241,11 +1199,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             if (c.nullok == false) {
                                 chaisePage.recordEditPage.submitForm();
                                 chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required').then(function(err) {
-                                    if(err) {
-                                        expect(true).toBeDefined();
-                                    } else {
-                                        expect(undefined).toBeDefined(colError(c.name, "Expected to show required error."));
-                                    }
+                                    expect(err.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
                                 });
                             }
 
@@ -1262,11 +1216,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             // Required Error message should disappear;
                             chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required').then(function(err) {
-                                if (err) {
-                                    expect(undefined).toBeDefined(colError(c.name, "Expected to not show reqyured error."));
-                                } else {
-                                    expect(true).toBeDefined();
-                                }
+                                expect(err).toBeNull(colError(c.name , "Expected to not show reqyured error."));
                             });
 
                             // Clear value
