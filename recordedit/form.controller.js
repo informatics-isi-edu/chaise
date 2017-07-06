@@ -132,6 +132,10 @@
                                 }
                             }
                             break;
+                        case "json":
+                        case "jsonb":
+                            rowVal=JSON.parse(rowVal);
+                            break;
                         default:
                             if (col.isAsset) {
                                 if (!vm.readyToSubmit) {
@@ -628,6 +632,10 @@
                     case 'markdown':
                     case 'longtext':
                             displayType = 'longtext';
+                        break;
+                    case 'json':
+                    case 'jsonb':
+                            displayType= 'json';
                         break;
                     case 'shorttext':
                     default:

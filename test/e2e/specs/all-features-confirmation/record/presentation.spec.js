@@ -50,7 +50,8 @@ var testParams = {
         { title: "Cover Image", value: "3,005", type: "int2", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/id=3005"} },
         { title: "Thumbnail", value: null, type: "int4"},
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
-        { title: "Is Luxurious", value: "true", type: "boolean" }
+        { title: "Is Luxurious", value: "true", type: "boolean" },
+        { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>'}
     ],
     no_related_data: {
         key: {
