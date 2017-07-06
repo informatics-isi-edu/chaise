@@ -1,9 +1,11 @@
 var chaisePage = require('./../../../utils/chaise.page.js');
 var chaiseConfig = {
     name: "Footer",
-    apps:['recordedit','recordset']
+    apps:['recordedit','recordset'],
+    footerMarkdown:"**Please check:** [Privacy Policy](/privacy-policy/){target='_blank'}"
 };
 var EC = protractor.ExpectedConditions;
+if(chaiseConfig.footerMarkdown){
 describe('Page Footer', function() {
             chaiseConfig.apps.forEach(function(val){
 
@@ -15,11 +17,10 @@ describe('Page Footer', function() {
                         url = browser.params.url + location;
                         browser.get(url);
                         footerMain = element(by.id('footerStyle'));
-                        chaisePage.waitForElementCondition(EC.visibilityOf(footerMain));
-
+                        browser.wait(EC.visibilityOf(footerMain),browser.params.defaultTimeout,'No footer');
                     });
-                    it('Page footer should appear at the bottom of the page', function() {
 
+                    it('Page footer should appear at the bottom of the page', function() {
                         browser.executeScript('return $(document).height()').then(function(docH) {
                             docHeight = docH;
                             return footerMain.getLocation();
@@ -48,3 +49,4 @@ describe('Page Footer', function() {
             })(flocation,val);
         });
 });
+}

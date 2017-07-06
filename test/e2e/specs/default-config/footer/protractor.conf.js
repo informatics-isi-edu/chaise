@@ -13,7 +13,7 @@ var config = pConfig.getConfig({
       return browser.params.url;
     },
 	// Specify chaiseConfigPath
-    chaiseConfigFilePath: 'test/e2e/specs/footer/chaise-config.js'
+    chaiseConfigFilePath: 'test/e2e/specs/default-config/footer/chaise-config.js'
 });
 config.rootElement = '#main-content';
 exports.config = config;
