@@ -1,8 +1,11 @@
 //footer
-var pConfig = require('./../../utils/protractor.configuration.js');
+var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
     configFileName: 'sample.json',
+    specs: [
+        "footer.spec.js"
+    ],
     page: 'search',
 
     setBaseUrl: function(browser, data) {

@@ -51,7 +51,7 @@ E2Enavbar=test/e2e/specs/navbar/base-config/protractor.conf.js
 E2EnavbarHeadTitle=test/e2e/specs/navbar/no-logo-no-brandtext/protractor.conf.js
 E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
 # footer test
-E2Efooter=test/e2e/specs/footer/protractor.conf.js
+E2Efooter=test/e2e/specs/default-config/footer/protractor.conf.js
 ## Parallel protractor scripts
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
@@ -245,8 +245,7 @@ RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css \
-	$(COMMON)/styles/appfooter.css
+	$(COMMON)/styles/appheader.css
 
 RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 
@@ -343,8 +342,7 @@ RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/angular-datepicker.css \
 	$(CSS)/vendor/rzslider.css \
 	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css \
-	$(COMMON)/styles/appfooter.css
+	$(COMMON)/styles/appheader.css
 
 RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
 
@@ -378,8 +376,7 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 
 RECSET_CSS_SOURCE=$(RECSET_ASSETS)/app.css \
     $(COMMON)/styles/app.css \
-    $(COMMON)/styles/appheader.css \
-	$(COMMON)/styles/appfooter.css
+    $(COMMON)/styles/appheader.css
 
 # Config file
 JS_CONFIG=chaise-config.js

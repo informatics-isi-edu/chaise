@@ -1,25 +1,16 @@
-var chaisePage = require('./../../utils/chaise.page.js');
+var chaisePage = require('./../../../utils/chaise.page.js');
 var chaiseConfig = {
     name: "Footer",
-    apps:['record','recordedit','recordset'],
-    defaultTables: {
-        "1": {
-            "schema": "isa",
-            "table": "dataset",
-            "id": "269"
-        }
-    }
+    apps:['recordedit','recordset']
 };
 var EC = protractor.ExpectedConditions;
 describe('Page Footer', function() {
+    // console.log(browser.params.defaultTable);
             chaiseConfig.apps.forEach(function(val){
 
-                let flocation = "/" + val + "/#1/" + chaiseConfig.defaultTables[1].schema + ":" + chaiseConfig.defaultTables[1].table + "/id=" + chaiseConfig.defaultTables[1].id;
-
+                var flocation = "/" + val + "/#" + browser.params.catalogId + "/"+browser.params.defaultTable.schema_name+":" + browser.params.defaultTable.table_name;
                 (function(location, appPage){
-
                 describe('Checking footer in ' + appPage +' page:', function() {
-
                     beforeAll(function() {
                         browser.ignoreSynchronization = true;
                         url = browser.params.url + location;
@@ -31,13 +22,16 @@ describe('Page Footer', function() {
                     it('Page footer should appear at the bottom of the page', function() {
 
                         browser.executeScript('return $(document).height()').then(function(docH) {
+                            console.log(docH);
                             docHeight = docH;
                             return footerMain.getLocation();
                         }).then(function(loc) {
                             elemLoc = loc.y;
+                            console.log(elemLoc);
                             return footerMain.getSize();
                         }).then(function(elemH) {
-                            let totalH = elemLoc + elemH.height;
+                            console.log(elemH.height);
+                            var totalH = elemLoc + elemH.height;
                             expect(totalH).toEqual(docHeight, 'Footer is not at the bottom of the page!');
                         }).catch(function(error) {
                             console.dir(error);
@@ -49,7 +43,7 @@ describe('Page Footer', function() {
                         var footerLink = element(by.id('footerStyle')).element(by.tagName('a'));
                         chaisePage.waitForElementCondition(EC.visibilityOf(footerLink));
                         footerLink.getAttribute('href').then(function(prevLink) {
-                            let plink = prevLink.slice(0, -1);
+                            var plink = prevLink.slice(0, -1);
                             expect(plink.substring(plink.lastIndexOf('/') + 1)).toBe("privacy-policy", "Privacy Policy is not defined. Check chaise-config.js")
                         })
                     })

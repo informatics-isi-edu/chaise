@@ -70,10 +70,8 @@
         };
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
-        // $timeout(function () {
-        //     vm.showfooter = 1;
-        // }, 1);
-        // vm.footerText = ERMrest.renderMarkdown(chaiseConfig.footer.recordEdit);
+
+
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
         function redirectAfterSubmission(page) {
