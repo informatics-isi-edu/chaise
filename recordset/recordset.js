@@ -80,8 +80,9 @@
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
 
         $scope.login = function() {
-            Session.login($window.location.href);
-        };
+            Session.loginInANewWindow(function() {
+                window.location.reload();
+            });        };
 
         $scope.logout = function() {
             Session.logout();
