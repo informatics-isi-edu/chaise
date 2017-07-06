@@ -8,7 +8,7 @@
 </head>
 <body>
     <navbar></navbar>
-
+    <loading-spinner ng-show="!displayReady"></loading-spinner>
     <div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
             <div id="record-bookmark-container" class="col-xs-12 meta-icons">
