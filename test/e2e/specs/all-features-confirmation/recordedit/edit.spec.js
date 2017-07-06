@@ -71,7 +71,7 @@ var testParams = {
            "fileid", "uri", "filename", "bytes"
        ],
        results: [
-           ["4", {"link": "{{{chaise_url}}}/record/hatrac/js/chaise/"+currentTimestampTime+"/4/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+           ["4", {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/4/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
        ],
        files : [{
            name: "testfile500kb.png",
@@ -81,6 +81,11 @@ var testParams = {
        }]
     }]
 };
+
+if (!process.env.TRAVIS) {
+    // keep track of namespaces that we use, so we can delete them afterwards
+    browser.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
+}
 
 describe('Edit existing record,', function() {
 

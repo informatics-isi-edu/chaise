@@ -1,3 +1,4 @@
+var Q = require("q");
 
 exports.parameterize = function(config, configParams) {
 
@@ -105,6 +106,9 @@ exports.parameterize = function(config, configParams) {
         browser.params.defaultSchema = data.defaultSchema;
         browser.params.defaultTable = data.defaultTable;
         browser.params.catalogId = data.catalogId;
+        
+        // Set hatrac namespaces that should be deleted (test cases will add to this)
+        browser.hatracNamespaces = [];
 
         // Set the base url to the page that we are running the tests for
         browser.baseUrl = process.env.CHAISE_BASE_URL;
@@ -130,11 +134,20 @@ exports.parameterize = function(config, configParams) {
 
   // This method will be called after executing the test suite
   config.afterLaunch = function(exitCode) {
-    catalogId = process.env.CATALOGID;
-    console.log("catalogId:" + catalogId);
+    var promises = [];
+    
+    // cleanup the hatrac namespaces
+    promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, browser.hatracNamespaces));
+
     // If cleanup is true and setup was also true in the configuration then
     // call cleanup to remove the created schema/catalog/tables if catalogId is not null
-    if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) return pImport.tear(testConfiguration, catalogId);
+    catalogId = process.env.CATALOGID;
+    console.log("catalogId:" + catalogId);
+    if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) {
+        promises.push(pImport.tear(testConfiguration, catalogId));
+    }
+    
+    return Q.all(promises);
   };
 
   // If an uncaught exception is caught then simply call cleanup

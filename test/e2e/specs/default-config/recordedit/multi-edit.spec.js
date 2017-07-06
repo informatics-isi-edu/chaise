@@ -106,6 +106,11 @@ var testParams = {
 
 };
 
+if (!process.env.TRAVIS) {
+    // keep track of namespaces that we use, so we can delete them afterwards
+    browser.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
+}
+
 var i, j, k;
 
 describe('Edit multiple existing record,', function() {

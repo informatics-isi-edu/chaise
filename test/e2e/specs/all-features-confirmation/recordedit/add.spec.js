@@ -58,8 +58,8 @@ var testParams = {
            "fileid", "uri", "filename", "bytes"
        ],
        results: [
-           ["1", {"link": "{{{chaise_url}}}/recordedit/hatrac/js/chaise/" + currentTimestampTime + "/1", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
-           ["2", {"link": "{{{chaise_url}}}/recordedit/hatrac/js/chaise/" + currentTimestampTime + "/2", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+           ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
+           ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
        ],
        files : [{
            name: "testfile1MB.txt",
@@ -79,6 +79,11 @@ var testParams = {
        }]
     }]
 };
+
+// keep track of namespaces that we use, so we can delete them afterwards
+if (!process.env.TRAVIS) {
+    browser.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
+}
 
 describe('Record Add', function() {
 
