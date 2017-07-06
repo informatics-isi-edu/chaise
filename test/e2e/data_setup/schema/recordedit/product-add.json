@@ -202,6 +202,15 @@
           }
         },
         {
+          "name": "json_col",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "json"
+          },
+          "annotations": {}
+        },
+        {
           "comment": null,
           "name": "no_of_rooms",
           "default": null,
@@ -288,10 +297,10 @@
           "name": "Accommodations"
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", "title", "website", ["product-add", "fk_category"],  "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"],
-          "entry/create": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious"],
-          "entry/edit": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious"],
-          "compact" : ["title", "website", ["product-add", "fk_category"],  "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"]
+          "detailed" : ["id", "title", "website", ["product-add", "fk_category"],  "rating", "summary", "description", "json_col","no_of_rooms", "opened_on", "date_col", "luxurious"],
+          "entry/create": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description","json_col", "no_of_rooms", "opened_on", "date_col","luxurious"],
+          "entry/edit": ["id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description","json_col", "no_of_rooms", "opened_on", "date_col","luxurious"],
+          "compact" : ["title", "website", ["product-add", "fk_category"],  "rating", "summary", "description","json_col", "no_of_rooms", "opened_on", "date_col", "luxurious"]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
