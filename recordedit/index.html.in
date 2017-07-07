@@ -287,6 +287,6 @@
         </div>
 
     </div>
-    <footer ng-show="displayReady"></footer>
+    <footer></footer>
 </body>
 </html>

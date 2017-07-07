@@ -14,7 +14,7 @@
                 restrict: 'E',
                 scope: {},
                 templateUrl: '../common/templates/footer.html',
-                link: function(scope,ele) {
+                link: function(scope, ele) {
                     var footerText = chaiseConfig.footerMarkdown;
                     angular.isUndefinedOrNull = function(val) {
                         return val == '' || angular.isUndefined(val) || val === null
@@ -35,14 +35,14 @@
                             } else {
                                 scope.posStyle.position = 'absolute';
                             }
-                            if (angular.isUndefinedOrNull(footerText)){
+                            if (angular.isUndefinedOrNull(footerText)) {
                                 ele.hide();
-                            }else{
+                            } else {
                                 ele.show();
-                            ERMrest._onload().then(function() {
-                                scope.privacyResult = ERMrest.renderMarkdown(footerText);
-                            })
-                        }
+                                ERMrest._onload().then(function() {
+                                    scope.privacyResult = ERMrest.renderMarkdown(footerText);
+                                })
+                            }
                         }, 500);
                     }
                     setClass();
