@@ -17,7 +17,9 @@
             }
 
             var q = [root];
-
+            var reloadCb = function() {
+                                window.location.reload();
+                            }; 
             while (q.length > 0) {
                 var obj = q.shift();
                 var parentNewTab = obj.newTab;
@@ -65,9 +67,7 @@
                 Session.getSession();
 
                 scope.login = function login() {
-                    Session.loginInANewWindow(function() {
-                        window.location.reload();
-                    });
+                    Session.loginInANewWindow(reloadCb);
                 };
 
                 scope.logout = function logout() {

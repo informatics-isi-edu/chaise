@@ -76,14 +76,16 @@
                 delete modalProperties.backdrop;
                 params.canClose = true;
             }
-
+            
             var modalInstance = $uibModal.open(modalProperties);
-
+            var reloadCb = function() {
+                                window.location.reload();
+                            }; 
+                    
             modalInstance.result.then(function () {
                 if (errorCode == errorNames.unauthorized && !providedLink) {
-                    Session.loginInANewWindow(function() {
-                        window.location.reload();
-                    });                } else {
+                    Session.loginInANewWindow(reloadCb);                
+                } else {
                     $window.location.replace(redirectLink);
                 }
             });
@@ -126,11 +128,8 @@
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
-                Session.loginInANewWindow(function() {
-                    window.location.reload();
-                });
+                Session.loginInANewWindow(reloadCb);
             } else {
-
                 var errName = exception.constructor.name;
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 
