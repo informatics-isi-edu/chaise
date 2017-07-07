@@ -21,7 +21,7 @@
             }
         };
         
-        var popUpLoginCb = function(params, referrerId, reloadCb){
+        var popUpLoginCb = function(params, referrerId, cb){
             var x = window.innerWidth/2 - 800/2;
             var y = window.innerHeight/2 - 600/2;
 
@@ -31,7 +31,7 @@
                 $cookies.put("chaise-" + referrerId, true, { path: "/" });
                 var intervalId;
                 var watchChangeInReferrerId = function () {
-                    if (!closed && !$cookies.get("chaise-" + referrerId)) {
+                    if (!$cookies.get("chaise-" + referrerId)) {
                         $interval.cancel(intervalId);
                         if (typeof cb== 'function') {
                             cb();
@@ -47,7 +47,6 @@
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             cb();
                         }
-                        reloadCb();
                     }
                 });
             }
