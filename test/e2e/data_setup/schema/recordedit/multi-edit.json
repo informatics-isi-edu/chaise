@@ -120,7 +120,7 @@
                     },
                     "annotations": {
                         "tag:isrd.isi.edu,2017:asset": {
-                          "url_pattern":"hatrac/js/chaise/{{{_col_visible}}}/{{{_file_1.md5_hex}}}",
+                          "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{_col_visible}}}/{{{_file_1.md5_hex}}}",
                           "filename_column" : "file_1_filename",
                           "byte_count_column": "file_1_bytes",
                           "md5": "file_1_md5"
@@ -149,7 +149,7 @@
                     },
                     "annotations": {
                         "tag:isrd.isi.edu,2017:asset": {
-                          "url_pattern":"hatrac/js/chaise/{{{_generated_col_visible}}}/{{{_file_2.md5_hex}}}",
+                          "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{_generated_col_visible}}}/{{{_file_2.md5_hex}}}",
                           "filename_column" : "file_2_filename",
                           "byte_count_column": "file_2_bytes",
                           "md5": "file_2_md5"
@@ -178,7 +178,7 @@
                     },
                     "annotations": {
                         "tag:isrd.isi.edu,2017:asset": {
-                          "url_pattern":"hatrac/js/chaise/{{{_generated_col_invisible}}}/{{{_file_3.md5_hex}}}",
+                          "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{_generated_col_invisible}}}/{{{_file_3.md5_hex}}}",
                           "filename_column" : "file_3_filename",
                           "byte_count_column": "file_3_bytes",
                           "md5": "file_3_md5"
@@ -199,6 +199,12 @@
                     "type": {
                         "typename": "text"
                     }
+                }, {
+                  "comment": null,
+                  "name": "timestamp_txt",
+                  "type": {
+                    "typename": "text"
+                  }
                 }
             ],
             "annotations": {
@@ -209,7 +215,7 @@
                         "file_3", "file_3_filename", "file_3_bytes"
                     ],
                     "entry": [
-                        "col_visible", "generated_col_visible", "file_1", "file_2", "file_3"
+                        "col_visible", "generated_col_visible", "file_1", "file_2", "file_3", "timestamp_txt"
                     ]
                 }
             }
