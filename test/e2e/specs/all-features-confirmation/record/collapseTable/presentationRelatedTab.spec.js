@@ -1,5 +1,6 @@
 var chaisePage = require('../../../../utils/chaise.page.js');
 var recordHelpers = require('../../../../utils/record-helpers.js');
+var EC = protractor.ExpectedConditions;
 var testParams = {
     table_name: "accommodation",
     key: {
@@ -72,15 +73,18 @@ describe('Collapse Related tables, ', function() {
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
+            console.log(url);
             browser.get(url);
+            broswer.sleep(4000);
             var accordionSet = element.all(by.className('related-table-heading'));
-            chaisePage.waitForElement(accordionSet);
+            browser.wait(EC.accordionSet, browser.params.defaultTimeout);
         });
 
-        it('should collapse related table after cutoff value',function(){
-
+        it('should collapse related tables after cutoff value',function(){
+            (function(accordionSet1){
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-            accordionSet.count().then(function(accrCount){
+                console.log(accordionSet1)
+            accordionSet1.count().then(function(accrCount){
                 console.log(accrCount);
                 if(accrCount>chaiseConfig.maxRelatedTab)
                     console.log("hello");
@@ -89,6 +93,7 @@ describe('Collapse Related tables, ', function() {
                 }
             })
         });
+    })(accordionSet);
         });
 
 
