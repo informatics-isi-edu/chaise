@@ -63,7 +63,7 @@ var testParams = {
     }
 };
 
-describe('View existing record,', function() {
+describe('Collapse Related tables, ', function() {
 
     describe("For table " + testParams.table_name + ",", function() {
 
