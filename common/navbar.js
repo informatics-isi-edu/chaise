@@ -67,7 +67,7 @@
                 Session.getSession();
 
                 scope.login = function login() {
-                    Session.loginInANewWindow(reloadCb);
+                    Session.loginInAPopUp(reloadCb);
                 };
 
                 scope.logout = function logout() {
