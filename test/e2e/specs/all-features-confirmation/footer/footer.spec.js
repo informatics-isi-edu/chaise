@@ -1,14 +1,8 @@
-var chaisePage = require('./../../../utils/chaise.page.js');
-var chaiseConfig = {
-    name: "Footer",
-    apps:['recordedit','recordset'],
-    footerMarkdown:"**Please check:** [Privacy Policy](/privacy-policy/){target='_blank'}"
-};
-var EC = protractor.ExpectedConditions;
-if(chaiseConfig.footerMarkdown){
+var chaisePage = require('../../../utils/chaise.page.js');
+var appName = ['recordedit','recordset'],
+EC = protractor.ExpectedConditions;
 describe('Page Footer', function() {
-            chaiseConfig.apps.forEach(function(val){
-
+            appName.forEach(function(val){
                 var flocation = "/" + val + "/#" + browser.params.catalogId + "/"+browser.params.defaultTable.schema_name+":" + browser.params.defaultTable.table_name;
                 (function(location, appPage){
                 describe('Checking footer in ' + appPage +' page:', function() {
@@ -49,4 +43,3 @@ describe('Page Footer', function() {
             })(flocation,val);
         });
 });
-}

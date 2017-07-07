@@ -1,7 +1,7 @@
+// Configure deployment-specific data here
+
 var chaiseConfig = {
-    name: "Footer",
-    apps:['recordedit','recordset'],
-    footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}"
+     name: "Default Config"
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {
