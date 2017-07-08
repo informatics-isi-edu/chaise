@@ -78,17 +78,7 @@
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
-        var reloadCb = function() {
-                            window.location.reload();
-                        }; 
-        $scope.login = function() {
-                            Session.loginInANewWindow(reloadCb);
-                        };
-
-        $scope.logout = function() {
-            Session.logout();
-        };
-
+        
         // row data updated from directive
         // update permalink, address bar without reload
         $scope.$on('recordset-update', function() {
