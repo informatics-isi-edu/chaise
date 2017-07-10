@@ -77,7 +77,7 @@
                 $log.info("Reference: ", $rootScope.reference);
 
                 // There should only ever be one entity related to this reference
-                return $rootScope.reference.read(1);
+                return $rootScope.reference.read(2);
             }, function error(exception) {
                 throw exception;
             }).then(function getPage(page) {
@@ -86,6 +86,9 @@
                 if (page.tuples.length < 1) {
                     var noDataError = ErrorService.noRecordError(context.filter.filters);
                     throw noDataError;
+                }
+                else if(page.tuples.length > 1){
+                    console.log("Multiple Data re baba");
                 }
 
                 var tuple = $rootScope.tuple = page.tuples[0];
