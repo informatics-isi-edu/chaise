@@ -10,5 +10,6 @@
         <div class="container-fluid">
         %TEMPLATES%
         </div>
+            <footer></footer>       
     </body>
 </html>

@@ -251,11 +251,14 @@
                                                 </td>
                                             </tr>
                                         </table>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
+
                 </div>
 
                 <div ng-show="form.resultset" class="container-fluid">
@@ -279,8 +282,11 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
+
     </div>
+    <footer></footer>
 </body>
 </html>

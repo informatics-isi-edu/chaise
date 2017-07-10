@@ -10,7 +10,10 @@
             "recordedit/edit.config.json",
             "recordedit/delete.config.json",
 
-            "recordset/config.json"
+            "recordset/config.json",
+
+            "navbar/config.json",
+            "footer/config.json"
         ]
     },
     "cleanup" : true

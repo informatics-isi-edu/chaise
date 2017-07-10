@@ -26,6 +26,7 @@
         'chaise.errors',
         'chaise.modal',
         'chaise.html',
+        'chaise.footer',
         'chaise.record.table',
         'ui.bootstrap',
         'ngCookies',
