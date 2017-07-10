@@ -10,6 +10,7 @@ describe('Page Footer', function() {
                         browser.ignoreSynchronization = true;
                         url = browser.params.url + location;
                         browser.get(url);
+                        browser.waitForAngular()
                         footerMain = element(by.id('footerStyle'));
                         browser.wait(EC.visibilityOf(footerMain),browser.params.defaultTimeout,'No footer');
                     });
