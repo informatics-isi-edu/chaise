@@ -182,9 +182,34 @@
             }
             return url;
         }
+        
+        
+        /**
+         * Return query params
+         * @param  {Object} location window.location object
+         * @return {Object} key-value pairs of query params
+         */
+        function getQueryParams(location) {
+            var queryParams = {}, 
+                modifierPath = location.hash,
+                q_parts, i;
+
+            if (modifierPath.indexOf("?") !== -1) {
+                var queries = modifierPath.match(/\?(.+)/)[1].split("&");
+                for (i = 0; i < queries.length; i++) {
+                    q_parts = queries[i].split("=");
+                    queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
+                }
+            }
+            return queryParams;
+        }
 
         /**
+         * NOTE: DO NOT USE THIS FUNCTION, EMRESTJS will take care of parsing.
+         * old apps is using are, that's why we should still keep this function.
+         * 
          * @function
+         * @deprecated
          * @param {Object} location should be $window.location object
          * @param {context} context object; can be null
          * Parses the URL to create the context object
@@ -524,7 +549,8 @@
             setOrigin: setOrigin,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             setLocationChangeHandling: setLocationChangeHandling,
-            isBrowserIE: isBrowserIE
+            isBrowserIE: isBrowserIE,
+            getQueryParams: getQueryParams
         }
     }])
 
