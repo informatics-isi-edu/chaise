@@ -21,11 +21,45 @@
             }
         };
         
-        var popUpLoginCb = function(params, referrerId, cb){
-            var x = window.innerWidth/2 - 800/2;
-            var y = window.innerHeight/2 - 600/2;
+        
+        var loginWindowCb = function (params, referrerId, cb, type){
+            if(type.indexOf('modal')!== -1){
+                if (_session) {
+                    params.title = messageMap.sessionExpired.title;
+                    params.message = messageMap.sessionExpired.message;
+                } else {
+                    params.title = messageMap.noSession.title;
+                    params.message = messageMap.noSession.message;
+                }
+                var modalInstance, closed = false;
+                modalInstance = $uibModal.open({
+                    windowClass: "modal-login-instruction",
+                    templateUrl: "../common/templates/loginDialog.modal.html",
+                    controller: 'LoginDialogController',
+                    controllerAs: 'ctrl',
+                    resolve: {
+                        params: params
+                    },
+                    openedClass: 'modal-login',
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                
+                var onModalClose = function() {
+                    $interval.cancel(intervalId);
+                    $cookies.remove("chaise-" + referrerId, { path: "/" });
+                    closed = true;
+                };
+                
+                // To avoid problems when user explicitly close the modal
+                modalInstance.result.then(onModalClose, onModalClose);
+            }
+            else{
+                var x = window.innerWidth/2 - 800/2;
+                var y = window.innerHeight/2 - 600/2;
 
-            window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
+                window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
+            }
             
             if (UriUtils.isBrowserIE()) {
                 $cookies.put("chaise-" + referrerId, true, { path: "/" });
@@ -34,91 +68,41 @@
                     if (!$cookies.get("chaise-" + referrerId)) {
                         $interval.cancel(intervalId);
                         if (typeof cb== 'function') {
-                            cb();
+                            if(type.indexOf('modal')!== -1){
+                                intervalId = $interval(watchChangeInReferrerId, 50);
+                                modalInstance.close("Done");
+                                cb();
+                                closed = true;
+                            }
+                            else{
+                                cb();
+                            }
                         }
                         return;
                     }
                 }
-                intervalId = $interval(watchChangeInReferrerId, 50);
-            } else {
+            } 
+            else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
-                            cb();
+                            if(type.indexOf('modal')!== -1){
+                                modalInstance.close("Done");
+                                cb();
+                                closed = true;
+                            }
+                            else{
+                                cb();
+                            }
                         }
                     }
                 });
             }
         };
         
-        var modalLoginCb= function(params,referrerId, cb){
-            if (_session) {
-                params.title = messageMap.sessionExpired.title;
-                params.message = messageMap.sessionExpired.message;
-            } else {
-                params.title = messageMap.noSession.title;
-                params.message = messageMap.noSession.message;
-            }
-            var modalInstance, closed = false;
-            modalInstance = $uibModal.open({
-                windowClass: "modal-login-instruction",
-                templateUrl: "../common/templates/loginDialog.modal.html",
-                controller: 'LoginDialogController',
-                controllerAs: 'ctrl',
-                resolve: {
-                    params: params
-                },
-                openedClass: 'modal-login',
-                backdrop: 'static',
-                keyboard: false
-            });
-
-            /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
-             * variable
-             */
-            if (UriUtils.isBrowserIE()) {
-                $cookies.put("chaise-" + referrerId, true, { path: "/" });
-                var intervalId;
-                var watchChangeInReferrerId = function () {
-                    if (!closed && !$cookies.get("chaise-" + referrerId)) {
-                        $interval.cancel(intervalId);
-                        if (typeof cb== 'function') {
-                            modalInstance.close("Done");
-                            cb();
-                            closed = true;
-                        }
-                        return;
-                    }
-                }
-
-                var onModalClose = function() {
-                    $interval.cancel(intervalId);
-                    $cookies.remove("chaise-" + referrerId, { path: "/" });
-                    closed = true;
-                }
-
-                // To avoid problems when user explicitly close the modal
-                modalInstance.result.then(onModalClose, onModalClose);
-
-                intervalId = $interval(watchChangeInReferrerId, 50);
-
-            } else {
-                window.addEventListener('message', function(args) {
-                    if (args && args.data && (typeof args.data == 'string')) {
-                        var obj = UriUtils.queryStringToJSON(args.data);
-                        if (obj.referrerid == referrerId && (typeof cb== 'function')) {
-                            modalInstance.close("Done");
-                            cb();
-                            closed = true;
-                        }
-                    }
-                });
-            }
-        };
         
-        var logInHelper = function(logInTypeCb, cb){
-            console.log(cb);
+        var logInHelper = function(logInTypeCb, cb, type){
             var referrerId = (new Date().getTime());
             var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href.substring(0,window.location.href.indexOf('chaise')) + "chaise/login?referrerid=" + referrerId);
             var config = {
@@ -156,8 +140,7 @@
                     login_url: login_url
                 };
 
-                
-                logInTypeCb(params,referrerId, cb);
+                logInTypeCb(params,referrerId, cb, type);
             }, function(error) {
                 throw error;
             });
@@ -196,11 +179,11 @@
             },
             
             loginInAPopUp: function(reloadCb) {
-                logInHelper(popUpLoginCb,reloadCb);
+                logInHelper(loginWindowCb,reloadCb,'popUp');
             },
 
             loginInAModal: function(notifyErmrestCB) {
-                logInHelper(modalLoginCb,notifyErmrestCB);
+                logInHelper(loginWindowCb,notifyErmrestCB,'modal');
             },
 
             logout: function() {
@@ -236,7 +219,7 @@
             ERMrest.setHttpUnauthorizedFn(function() {
                 var defer = $q.defer();
 
-                // Call login in a new window to perform authentication
+                // Call login in a new modal window to perform authentication
                 // and return a promise to notify ermrestjs that the user has loggedin
                 Session.loginInAModal(function() {
 
