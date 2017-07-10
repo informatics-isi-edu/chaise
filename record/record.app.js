@@ -49,13 +49,11 @@
 
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-        context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
+        $rootScope.context = context;
 
         // The context object won't change unless the app is reloaded
         context.appName = "record";
         context.pageId = MathUtils.uuid();
-
-        DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
 
@@ -66,6 +64,8 @@
             Session.unsubscribeOnChange(subId);
 
             ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
+                DataUtils.verify(reference.location.filter, 'No filter was defined. Cannot find a record without a filter.');
+                
                 // if the user can fetch the reference, they can see the content for the rest of the page
                 // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
                 session = Session.getSessionValue();
