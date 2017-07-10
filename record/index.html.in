@@ -93,4 +93,5 @@
             <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
     </div>
+    <footer></footer>
 </body>

@@ -122,12 +122,10 @@ var defaultPlotFormats =
 	{
 		name:"Histogram",
 		type:"histogram",
-	    histnorm: "count",
-		autobinx: true,
 		marker: {
 			opacity: 0.75
 		},
-		coordinates:['x'],
+		coordinates:['x','y'],
 		layout:{
 			hovermode: 'closest',
 			bargap: 0.2,

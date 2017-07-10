@@ -1,16 +1,14 @@
 describe('Navbar ', function() {
     var navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
 
-    beforeAll(function (done) {
+    beforeAll(function () {
         browser.ignoreSynchronization=true;
-        browser.get(browser.params.url || "");
+        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product:accommodation");
         navbar = element(by.id('mainnav'));
         menu = element(by.id('navbar-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
-            return browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
-        }).then(function() {
-            done();
+            browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
         });
     });
 
@@ -20,15 +18,12 @@ describe('Navbar ', function() {
 
     it('should display the right title from chaiseConfig', function() {
         var actualTitle = element(by.id('brand-text'));
-        var expectedTitle = chaiseConfig.navbarBrandText;
+        var expectedTitle = chaiseConfig.headTitle;
         expect(actualTitle.getText()).toEqual(expectedTitle);
     });
 
-    it('should use the brand image/logo specified in chaiseConfig', function() {
-        var actualLogo = element(by.id('brand-image'));
-        var expectedLogo = chaiseConfig.navbarBrandImage;
-        expect(actualLogo.isDisplayed()).toBeTruthy();
-        expect(actualLogo.getAttribute('src')).toMatch(expectedLogo);
+    it('should not display a brand image/logo', function() {
+        expect(element(by.id('brand-image')).isPresent()).toBeFalsy();
     });
 
     it('for the menu, should generate the correct # of list items', function() {
@@ -59,27 +54,21 @@ describe('Navbar ', function() {
         });
     }).pend("Pending until we handle tests logging in via Globus/other services");
 
-    xit('should have a "Sign Up" link with the right href from chaiseConfig', function(done) {
-        var actualLink = element(by.id('signup-link'));
-        browser.wait(EC.elementToBeClickable(actualLink), browser.params.defaultTimeout).then(function() {
-            expect(actualLink.isDisplayed()).toBeTruthy();
-            expect(actualLink.getAttribute('href')).toMatch(chaiseConfig.signUpURL);
-            done();
-        });
+    xit('should not display a "Sign Up" link', function() {
+        expect(element(by.id('signup-link')).isPresent()).toBeFalsy();
     }).pend("Pending until we handle tests logging in via Globus/other services");
 
-    xit('should display a "Log Out" link', function(done) {
+    xit('should display a "Log Out" link', function() {
         var logOutLink = element(by.id('logout-link'));
         browser.wait(EC.elementToBeClickable(logOutLink), browser.params.defaultTimeout).then(function() {
             browser.ignoreSynchronization = true;
             expect(logOutLink.isDisplayed()).toBeTruthy();
-            done();
         });
     }).pend("Pending until we handle tests logging in via Globus/other services");
 
-    xit('should link to the profile URL from chaiseConfig', function() {
+    xit('should not link to a profile URL on the username', function() {
         var actual = element.all(by.css('.username'));
         expect(actual.count()).toEqual(1);
-        expect(actual.getAttribute('href')).toEqual(chaiseConfig.profileURL);
+        expect(actual.getAttribute('href')).toBeFalsy();
     }).pend("Pending until we handle tests logging in via Globus/other services");
 });

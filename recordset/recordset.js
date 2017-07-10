@@ -26,6 +26,7 @@
         'chaise.errors',
         'chaise.modal',
         'chaise.html',
+        'chaise.footer',
         'chaise.record.table',
         'ui.bootstrap',
         'ngCookies',
@@ -152,23 +153,10 @@
 
             $rootScope.alerts = AlertsService.alerts;
 
-            // parse the URL
-            var p_context = UriUtils.parseURLFragment($window.location);
-
             $rootScope.location = $window.location.href;
             recordsetModel.hasLoaded = false;
             $rootScope.context = context;
 
-            context.mainURI = p_context.mainURI;
-
-            // only allowing single column sort here
-            if (p_context.sort) {
-                recordsetModel.sortby = p_context.sort[0].column;
-                recordsetModel.sortOrder = (p_context.sort[0].descending ? "desc" : "asc");
-            }
-
-            context.catalogID = p_context.catalogID;
-            context.tableName = p_context.tableName;
             context.pageId = MathUtils.uuid();
 
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
@@ -184,6 +172,16 @@
 
                 ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
                     session = Session.getSessionValue();
+                    
+                    var location = reference.location;
+                    
+                    // only allowing single column sort here
+                    if (reference.sortObject) {
+                        recordsetModel.sortby = location.sortObject[0].column;
+                        recordsetModel.sortOrder = (location.sortObject[0].descending ? "desc" : "asc");
+                    }
+                    context.catalogID = reference.table.schema.catalog.id;
+                    context.tableName = reference.table.name;
 
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = "compact";
@@ -191,17 +189,18 @@
 
                     $log.info("Reference:", recordsetModel.reference);
 
-                    if (p_context.queryParams.limit)
-                        recordsetModel.pageLimit = parseInt(p_context.queryParams.limit);
-                    else if (recordsetModel.reference.display.defaultPageSize)
+                    if (location.queryParams.limit) {
+                        recordsetModel.pageLimit = parseInt(location.queryParams.limit);
+                    } else if (recordsetModel.reference.display.defaultPageSize) {
                         recordsetModel.pageLimit = recordsetModel.reference.display.defaultPageSize;
-                    else
+                    } else {
                         recordsetModel.pageLimit = 25;
+                    }
                     recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
 
                      // the additional provided name
-                    if (p_context.queryParams && p_context.queryParams.subset) {
-                        recordsetModel.subTitle = p_context.queryParams.subset;
+                    if (location.queryParams && location.queryParams.subset) {
+                        recordsetModel.subTitle = location.queryParams.subset;
                     }
 
                     recordsetModel.columns = recordsetModel.reference.columns;

@@ -47,10 +47,11 @@ E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 # Viewer tests
 E2EDviewer=test/e2e/specs/default-config/viewer/presentation.conf.js
 # misc tests
-E2Enavbar=test/e2e/specs/navbar/base-config/protractor.conf.js
-E2EnavbarHeadTitle=test/e2e/specs/navbar/no-logo-no-brandtext/protractor.conf.js
+E2Enavbar=test/e2e/specs/all-features/navbar/protractor.conf.js
+E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/protractor.conf.js
 E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
-
+# footer test
+E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
 ## Parallel protractor scripts
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
@@ -235,6 +236,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/footer.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
@@ -321,6 +323,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/markdownPreview.js \
+	$(COMMON)/footer.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \
@@ -361,7 +364,8 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
 	$(COMMON)/navbar.js \
-	$(COMMON)/bindHtmlUnsafe.js
+	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/footer.js
 
 RECSET_JS_SOURCE=$(COMMON)/authen.js \
     $(COMMON)/utils.js \
@@ -462,7 +466,7 @@ distclean: clean
 # Rule to run tests
 .PHONY: test
 test:
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch) && $(BIN)/protractor $(E2Efooter)
 
 # Rule to run karma
 .PHONY: karma
@@ -473,7 +477,7 @@ karma:
 .PHONY: testall
 testall:
 	$(BIN)/karma start
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch)
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch) && $(BIN)/protractor $(E2Efooter)
 
 #### Sequential make commands - these commands will run tests in sequential order
 #Rule to run navbar tests
@@ -524,7 +528,7 @@ testviewer:
 #Rule to run all parallel test configurations
 .PHONY: testparallel
 testparallel:
-	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(FullFeaturesConfirmationParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(DefaultConfigParallel) && $(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2Esearch)
+	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(FullFeaturesConfirmationParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(DefaultConfigParallel) && $(BIN)/protractor $(E2Esearch)
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures
@@ -545,6 +549,11 @@ testdeleteprohibited:
 .PHONY: testdefaultconfig
 testdefaultconfig:
 	$(BIN)/protractor $(DefaultConfigParallel)
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testfooter
+testfooter:
+	$(BIN)/protractor $(E2Efooter)
 
 # Rule to make html
 .PHONY: html

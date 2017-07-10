@@ -1,10 +1,9 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "record/copy-btn.config.json",
-            "multi-permissions/config.json",
             "navbar/config.json"
-        ]
+        ],
+        "schema": "product"
     },
     "cleanup": true
 }

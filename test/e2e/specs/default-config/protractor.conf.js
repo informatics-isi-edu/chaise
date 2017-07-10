@@ -9,7 +9,8 @@ var config = pConfig.getConfig({
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;
         return browser.params.url;
-    }
+    },
+    chaiseConfigFilePath: 'test/e2e/specs/default-config/chaise-config.js'
 });
 
 exports.config = config;
