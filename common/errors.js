@@ -78,9 +78,10 @@
             }
             
             var modalInstance = $uibModal.open(modalProperties);
-            var reloadCb = function() {
+
+            var reloadCb = function(){
                 window.location.reload();
-            };
+            }; 
                     
             modalInstance.result.then(function () {
                 if (errorCode == errorNames.unauthorized && !providedLink) {

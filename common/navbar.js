@@ -17,9 +17,9 @@
             }
 
             var q = [root];
-            var reloadCb = function() {
-                                window.location.reload();
-                            }; 
+            var reloadCb = function(){
+                 window.location.reload();
+            }; 
             while (q.length > 0) {
                 var obj = q.shift();
                 var parentNewTab = obj.newTab;
