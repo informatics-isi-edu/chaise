@@ -1,7 +1,7 @@
 var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
-    configFileName: 'footer.dev.json',
+    configFileName: 'footer/dev.json',
     specs: [
         "footer.spec.js"
     ],

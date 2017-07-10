@@ -12,7 +12,7 @@
 
             "recordset/config.json",
 
-            "footer.config.json"
+            "footer/config.json"
         ]
     },
     "cleanup" : true
