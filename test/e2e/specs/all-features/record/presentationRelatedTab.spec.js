@@ -1,5 +1,5 @@
-var chaisePage = require('../../../../utils/chaise.page.js');
-var recordHelpers = require('../../../../utils/record-helpers.js');
+var chaisePage = require('../../../utils/chaise.page.js');
+
 var EC = protractor.ExpectedConditions;
 var testParams = {
     table_name: "accommodation",
@@ -66,36 +66,30 @@ var testParams = {
 
 describe('Collapse Related tables, ', function() {
 
-    describe("For table " + testParams.table_name + ",", function() {
-
         beforeAll(function() {
             var keys = [];
+            browser.ignoreSynchronization = true;
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-            browser.ignoreSynchronization=true;
+
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
-            console.log(url);
             browser.get(url);
-            broswer.sleep(4000);
-            var accordionSet = element.all(by.className('related-table-heading'));
-            browser.wait(EC.accordionSet, browser.params.defaultTimeout);
+            accordionSet = element.all(by.css('.related-table-heading'));
+            // browser.sleep(2000);
+            chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
+            // browser.wait(EC.presenceOf(,browser.params.defaultTimeout);
         });
 
         it('should collapse related tables after cutoff value',function(){
-            (function(accordionSet1){
+            // (function(accordionSet){
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                console.log(accordionSet1)
-            accordionSet1.count().then(function(accrCount){
-                console.log(accrCount);
-                if(accrCount>chaiseConfig.maxRelatedTab)
-                    console.log("hello");
-                else {
-                    console.log("world");
+            accordionSet.count().then(function(accrCount){
+                if(accrCount>chaiseConfig.maxRelatedTab){
+                    expect(element.all(by.css('.panel-open')).count()).toEqual(0);
+                }else {
+                    expect(element.all(by.css('.panel-open')).count()).toEqual(accrCount);
                 }
             })
         });
-    })(accordionSet);
+    // })(accordionSet);
         });
-
-
-    });
 });

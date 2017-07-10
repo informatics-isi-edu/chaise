@@ -3,5 +3,6 @@
 var chaiseConfig = {
     name: "All Features",
     editRecord: true,
-    deleteRecord: true
+    deleteRecord: true,
+    maxRelatedTab:1
 };

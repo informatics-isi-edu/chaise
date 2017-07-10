@@ -40,7 +40,7 @@ E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
 E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.conf.js
 E2EDrecordRelatedTable=test/e2e/specs/default-config/record/related-table.conf.js
-E2EDrecordCollapseRT=test/e2e/specs/all-features-confirmation/record/collapseTable/protractor.conf.js
+E2EDrecordCollapseRT=test/e2e/specs/all-features/record/presentationRelatedTab.conf.js
 # Recordset tests
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
