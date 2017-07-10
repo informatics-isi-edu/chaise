@@ -1,7 +1,7 @@
 {
     "setup": {
         "schemaConfigurations": [
-                "footer/config.json"
+            "footer/config.json"
         ],
         "schema": "product"
     },

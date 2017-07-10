@@ -12,6 +12,7 @@
 
             "recordset/config.json",
 
+            "navbar/config.json",
             "footer/config.json"
         ]
     },
