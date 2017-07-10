@@ -10,25 +10,8 @@ describe('Page Footer', function() {
                         browser.ignoreSynchronization = true;
                         url = browser.params.url + location;
                         browser.get(url);
-                        browser.waitForAngular()
                         footerMain = element(by.id('footerStyle'));
                         browser.wait(EC.visibilityOf(footerMain),browser.params.defaultTimeout,'No footer');
-                    });
-
-                    it('Page footer should appear at the bottom of the page', function() {
-                        browser.executeScript('return $(document).height()').then(function(docH) {
-                            docHeight = docH;
-                            return footerMain.getLocation();
-                        }).then(function(loc) {
-                            elemLoc = loc.y;
-                            return footerMain.getSize();
-                        }).then(function(elemH) {
-                            var totalH = elemLoc + elemH.height;
-                            expect(totalH).toEqual(docHeight, 'Footer is not at the bottom of the page!');
-                        }).catch(function(error) {
-                            console.dir(error);
-                            expect('Something went wrong in this promise chain').toBe('Please see error message.', 'While checking footer position on the page.');
-                        });
                     });
 
                     it('Page footer link should match with "privacy-policy"', function() {
