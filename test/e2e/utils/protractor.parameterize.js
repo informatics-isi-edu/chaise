@@ -136,8 +136,10 @@ exports.parameterize = function(config, configParams) {
   config.afterLaunch = function(exitCode) {
     var promises = [];
     
-    // cleanup the hatrac namespaces
-    promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, browser.hatracNamespaces));
+    if (browser && browser.hatracNamespaces) {
+        // cleanup the hatrac namespaces
+        promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, browser.hatracNamespaces));
+    }
 
     // If cleanup is true and setup was also true in the configuration then
     // call cleanup to remove the created schema/catalog/tables if catalogId is not null

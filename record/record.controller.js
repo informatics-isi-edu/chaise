@@ -51,10 +51,7 @@
         };
 
         vm.permalink = function getPermalink() {
-            if (!$rootScope.reference) {
-                return $window.location.href;
-            }
-            return $rootScope.context.mainURI;
+            return $window.location.href;
         };
 
         vm.toRecordSet = function(ref) {

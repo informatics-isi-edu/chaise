@@ -14,7 +14,7 @@
                 restrict: 'E',
                 scope: {},
                 templateUrl: '../common/templates/footer.html',
-                link: function(scope) {
+                link: function(scope, ele) {
                     var footerText = chaiseConfig.footerMarkdown;
                     angular.isUndefinedOrNull = function(val) {
                         return val == '' || angular.isUndefined(val) || val === null
@@ -35,12 +35,14 @@
                             } else {
                                 scope.posStyle.position = 'absolute';
                             }
-                            if (angular.isUndefinedOrNull(footerText))
-                                footerText = "**Default Privacy Policy.** [Privacy Policy](/privacy-policy/){target='_blank'}";
-
-                            ERMrest._onload().then(function() {
-                                scope.privacyResult = ERMrest.renderMarkdown(footerText);
-                            })
+                            if (angular.isUndefinedOrNull(footerText)) {
+                                ele.hide();
+                            } else {
+                                ele.show();
+                                ERMrest._onload().then(function() {
+                                    scope.privacyResult = ERMrest.renderMarkdown(footerText);
+                                })
+                            }
                         }, 500);
                     }
                     setClass();

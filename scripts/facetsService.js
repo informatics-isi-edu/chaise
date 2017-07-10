@@ -810,16 +810,18 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		var coordinates = FacetsData.plotOptions.coordinates;
 		var formatCoordinates = FacetsData.plotOptions.format.coordinates;
 
-		if ((formatCoordinates.length == 3) &&
+		if ((formatCoordinates.length === 3) &&
 			(formatCoordinates.contains('x') && coordinates.x.column) &&
 			(formatCoordinates.contains('y') && coordinates.y.column) &&
 			(formatCoordinates.contains('z') && coordinates.z.column)) {
 			canRender = true;
-		} else if ((formatCoordinates.length == 2) &&
-			(formatCoordinates.contains('x') && coordinates.x.column) &&
-			(formatCoordinates.contains('y') && coordinates.y.column)) {
-			canRender = true;
-		} else if ((formatCoordinates.length == 1) &&
+		} else if (formatCoordinates.length === 2) {
+			if ((formatCoordinates.contains('x') && coordinates.x.column) &&
+				(formatCoordinates.contains('y') && coordinates.y.column) ||
+				('histogram' == FacetsData.plotOptions.format.type)) {
+    			canRender = true;
+			}
+		} else if ((formatCoordinates.length === 1) &&
 			(formatCoordinates.contains('x') && coordinates.x.column)) {
 			canRender = true;
 		}
@@ -842,13 +844,13 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			}
 			plotUrl += 'A:' + fixedEncodeURIComponent(plotKeys[k]);
 		}
-		if (coordinates.x.column != null) {
+		if (coordinates.x.column) {
 			plotUrl += ',x:=A:' + fixedEncodeURIComponent(coordinates.x.column);
 		}
-		if (coordinates.y.column != null) {
+		if (coordinates.y.column) {
 			plotUrl += ',y:=A:' + fixedEncodeURIComponent(coordinates.y.column);
 		}
-		if (coordinates.z.column != null) {
+		if (coordinates.z.column) {
 			plotUrl += ',z:=A:' + fixedEncodeURIComponent(coordinates.z.column);
 		}
 		plotUrl += '?limit=none';
@@ -945,6 +947,15 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 				marker: plotOpts.format.marker
 			}
 		];
+		if ('histogram' == plotOpts.format.type) {
+			if (formatCoordinates.contains('y') &&  plotOpts.coordinates.y.column) {
+				plotData[0].histfunc = "max";
+				plotData[0].histnorm = "";
+			} else {
+				plotData[0].histfunc = "count";
+				plotData[0].histnorm = "";
+			}
+		}
         var plotDiv = 'results-plot-view';
 		var plotlyParams = {displaylogo: false, showLink: false, modeBarButtonsToRemove:['sendDataToCloud']};
 		if (plotOpts.reset) {

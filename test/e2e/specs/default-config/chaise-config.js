@@ -1,11 +1,7 @@
+// Configure deployment-specific data here
+
 var chaiseConfig = {
-    name: "Footer",
-    defaultTables: {
-        "1": {
-            "schema": "isa",
-            "table": "dataset"            
-        }
-    }
+     name: "Default Config"
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {

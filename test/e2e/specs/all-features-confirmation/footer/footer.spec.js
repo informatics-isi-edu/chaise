@@ -1,12 +1,8 @@
-var chaisePage = require('./../../../utils/chaise.page.js');
-var chaiseConfig = {
-    name: "Footer",
-    apps:['recordedit','recordset']
-};
-var EC = protractor.ExpectedConditions;
+var chaisePage = require('../../../utils/chaise.page.js');
+var appName = ['recordedit','recordset'],
+EC = protractor.ExpectedConditions;
 describe('Page Footer', function() {
-            chaiseConfig.apps.forEach(function(val){
-
+            appName.forEach(function(val){
                 var flocation = "/" + val + "/#" + browser.params.catalogId + "/"+browser.params.defaultTable.schema_name+":" + browser.params.defaultTable.table_name;
                 (function(location, appPage){
                 describe('Checking footer in ' + appPage +' page:', function() {
@@ -15,24 +11,7 @@ describe('Page Footer', function() {
                         url = browser.params.url + location;
                         browser.get(url);
                         footerMain = element(by.id('footerStyle'));
-                        chaisePage.waitForElementCondition(EC.visibilityOf(footerMain));
-
-                    });
-                    it('Page footer should appear at the bottom of the page', function() {
-
-                        browser.executeScript('return $(document).height()').then(function(docH) {
-                            docHeight = docH;
-                            return footerMain.getLocation();
-                        }).then(function(loc) {
-                            elemLoc = loc.y;
-                            return footerMain.getSize();
-                        }).then(function(elemH) {
-                            var totalH = elemLoc + elemH.height;
-                            expect(totalH).toEqual(docHeight, 'Footer is not at the bottom of the page!');
-                        }).catch(function(error) {
-                            console.dir(error);
-                            expect('Something went wrong in this promise chain').toBe('Please see error message.', 'While checking footer position on the page.');
-                        });
+                        browser.wait(EC.visibilityOf(footerMain),browser.params.defaultTimeout,'No footer');
                     });
 
                     it('Page footer link should match with "privacy-policy"', function() {
