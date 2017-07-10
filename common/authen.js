@@ -53,6 +53,13 @@
         };
         
         var modalLoginCb= function(params,referrerId, cb){
+            if (_session) {
+                params.title = messageMap.sessionExpired.title;
+                params.message = messageMap.sessionExpired.message;
+            } else {
+                params.title = messageMap.noSession.title;
+                params.message = messageMap.noSession.message;
+            }
             var modalInstance, closed = false;
             modalInstance = $uibModal.open({
                 windowClass: "modal-login-instruction",
@@ -111,6 +118,7 @@
         };
         
         var logInHelper = function(logInTypeCb, cb){
+            console.log(cb);
             var referrerId = (new Date().getTime());
             var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href.substring(0,window.location.href.indexOf('chaise')) + "chaise/login?referrerid=" + referrerId);
             var config = {
@@ -148,13 +156,7 @@
                     login_url: login_url
                 };
 
-                if (_session) {
-                    params.title = messageMap.sessionExpired.title;
-                    params.message = messageMap.sessionExpired.message;
-                } else {
-                    params.title = messageMap.noSession.title;
-                    params.message = messageMap.noSession.message;
-                }
+                
                 logInTypeCb(params,referrerId, cb);
             }, function(error) {
                 throw error;
@@ -193,8 +195,8 @@
                 delete _changeCbs[id];
             },
             
-            loginInAPopUp: function(reLoadcb) {
-                logInHelper(popUpLoginCb,reLoadcb);
+            loginInAPopUp: function(reloadCb) {
+                logInHelper(popUpLoginCb,reloadCb);
             },
 
             loginInAModal: function(notifyErmrestCB) {

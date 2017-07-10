@@ -79,12 +79,12 @@
             
             var modalInstance = $uibModal.open(modalProperties);
             var reloadCb = function() {
-                                window.location.reload();
-                            }; 
+                window.location.reload();
+            };
                     
             modalInstance.result.then(function () {
                 if (errorCode == errorNames.unauthorized && !providedLink) {
-                    Session.loginInANewWindow(reloadCb);                
+                    Session.loginInAPopUp(reloadCb);                
                 } else {
                     $window.location.replace(redirectLink);
                 }
@@ -124,11 +124,13 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-
+            var reloadCb = function() {
+                window.location.reload();
+            }; 
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
-                Session.loginInANewWindow(reloadCb);
+                Session.loginInAPopUp(reloadCb);
             } else {
                 var errName = exception.constructor.name;
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
