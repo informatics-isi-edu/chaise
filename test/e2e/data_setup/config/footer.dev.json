@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+                "footer.config.json"
+        ],
+        "schema": "product"
+    },
+    "cleanup": true
+}
