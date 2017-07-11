@@ -78,7 +78,7 @@
 
                 $log.info("Reference: ", $rootScope.reference);
 
-                // There should only ever be one entity related to this reference
+                // There should only ever be one entity related to this reference, we are reading 2 entities now and if we get more than 1 entity than we throw a multipleRecordError.
                 return $rootScope.reference.read(2);
             }, function error(exception) {
                 throw exception;
