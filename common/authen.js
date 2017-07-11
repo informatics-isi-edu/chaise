@@ -20,6 +20,134 @@
                 _changeCbs[k]();
             }
         };
+        
+        
+        var loginWindowCb = function (params, referrerId, cb, type){
+            if(type.indexOf('modal')!== -1){
+                if (_session) {
+                    params.title = messageMap.sessionExpired.title;
+                    params.message = messageMap.sessionExpired.message;
+                } else {
+                    params.title = messageMap.noSession.title;
+                    params.message = messageMap.noSession.message;
+                }
+                var modalInstance, closed = false;
+                modalInstance = $uibModal.open({
+                    windowClass: "modal-login-instruction",
+                    templateUrl: "../common/templates/loginDialog.modal.html",
+                    controller: 'LoginDialogController',
+                    controllerAs: 'ctrl',
+                    resolve: {
+                        params: params
+                    },
+                    openedClass: 'modal-login',
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                
+                var onModalClose = function() {
+                    $interval.cancel(intervalId);
+                    $cookies.remove("chaise-" + referrerId, { path: "/" });
+                    closed = true;
+                };
+                
+                // To avoid problems when user explicitly close the modal
+                modalInstance.result.then(onModalClose, onModalClose);
+            }
+            else{
+                var x = window.innerWidth/2 - 800/2;
+                var y = window.innerHeight/2 - 600/2;
+
+                window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
+            }
+            
+            /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
+             * variable
+             */
+            if (UriUtils.isBrowserIE()) {
+                $cookies.put("chaise-" + referrerId, true, { path: "/" });
+                var intervalId;
+                var watchChangeInReferrerId = function () {
+                    if (!$cookies.get("chaise-" + referrerId)) {
+                        $interval.cancel(intervalId);
+                        if (typeof cb== 'function') {
+                            if(type.indexOf('modal')!== -1){
+                                intervalId = $interval(watchChangeInReferrerId, 50);
+                                modalInstance.close("Done");
+                                cb();
+                                closed = true;
+                            }
+                            else{
+                                cb();
+                            }
+                        }
+                        return;
+                    }
+                }
+            } 
+            else {
+                window.addEventListener('message', function(args) {
+                    if (args && args.data && (typeof args.data == 'string')) {
+                        var obj = UriUtils.queryStringToJSON(args.data);
+                        if (obj.referrerid == referrerId && (typeof cb== 'function')) {
+                            if(type.indexOf('modal')!== -1){
+                                modalInstance.close("Done");
+                                cb();
+                                closed = true;
+                            }
+                            else{
+                                cb();
+                            }
+                        }
+                    }
+                });
+            }
+        };
+        
+        
+        var logInHelper = function(logInTypeCb, cb, type){
+            var referrerId = (new Date().getTime());
+            var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href.substring(0,window.location.href.indexOf('chaise')) + "chaise/login?referrerid=" + referrerId);
+            var config = {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'Accept': 'application/json'
+                }
+            };
+
+            $http.get(url, config).then(function(response){
+                var data = response.data;
+
+                var login_url = "";
+                if (data['redirect_url'] !== undefined) {
+                    login_url = data['redirect_url'];
+                } else if (data['login_form'] !== undefined) {
+                    var login_form = data['login_form'];
+                    login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
+                    var method = login_form['method'];
+                    var action = UriUtils.fixedEncodeURIComponent(login_form['action']);
+                    var text = '';
+                    var hidden = '';
+                    for (var i = 0; i < login_form['input_fields'].length; i++) {
+                        var field = login_form['input_fields'][i];
+                        if (field.type === 'text') {
+                            text = UriUtils.fixedEncodeURIComponent(field.name);
+                        } else {
+                            hidden = UriUtils.fixedEncodeURIComponent(field.name);
+                        }
+                    }
+                    login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden + '&?referrerid=' + referrerId;
+                }
+
+                var params = {
+                    login_url: login_url
+                };
+
+                logInTypeCb(params,referrerId, cb, type);
+            }, function(error) {
+                throw error;
+            });
+        };
 
         return {
 
@@ -52,153 +180,13 @@
             unsubscribeOnChange: function(id) {
                 delete _changeCbs[id];
             },
-
-            login: function (referrer) {
-                var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
-                var config = {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'Accept': 'application/json'
-                    }
-                };
-
-                $http.get(url, config).then(function(response){
-                    var data = response.data;
-                    if (data['redirect_url'] !== undefined) {
-                        var url = data['redirect_url'];
-                        $window.open(url, '_self');
-                    } else if (data['login_form'] !== undefined) {
-                        var login_form = data['login_form'];
-                        var login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
-                        var method = login_form['method'];
-                        var action = UriUtils.fixedEncodeURIComponent(login_form['action']);
-                        var text = '';
-                        var hidden = '';
-                        for (var i = 0; i < login_form['input_fields'].length; i++) {
-                            var field = login_form['input_fields'][i];
-                            if (field.type === 'text') {
-                                text = UriUtils.fixedEncodeURIComponent(field.name);
-                            } else {
-                                hidden = UriUtils.fixedEncodeURIComponent(field.name);
-                            }
-                        }
-                        login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden;
-                        $window.location = login_url;
-                    }
-                }, function(error) {
-                    throw error;
-                });
+            
+            loginInAPopUp: function(reloadCb) {
+                logInHelper(loginWindowCb,reloadCb,'popUp');
             },
 
-            loginInANewWindow: function(cb) {
-                var referrerId = (new Date().getTime());
-                var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href.substring(0,window.location.href.indexOf('chaise')) + "chaise/login?referrerid=" + referrerId);
-                var config = {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'Accept': 'application/json'
-                    }
-                };
-                var modalInstance, closed = false;
-
-                $http.get(url, config).then(function(response){
-                    var data = response.data;
-
-                    var login_url = "";
-                    if (data['redirect_url'] !== undefined) {
-                        login_url = data['redirect_url'];
-                    } else if (data['login_form'] !== undefined) {
-                        var login_form = data['login_form'];
-                        login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
-                        var method = login_form['method'];
-                        var action = UriUtils.fixedEncodeURIComponent(login_form['action']);
-                        var text = '';
-                        var hidden = '';
-                        for (var i = 0; i < login_form['input_fields'].length; i++) {
-                            var field = login_form['input_fields'][i];
-                            if (field.type === 'text') {
-                                text = UriUtils.fixedEncodeURIComponent(field.name);
-                            } else {
-                                hidden = UriUtils.fixedEncodeURIComponent(field.name);
-                            }
-                        }
-                        login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden + '&?referrerid=' + referrerId;
-                    }
-
-                    var params = {
-                        login_url: login_url
-                    };
-
-                    if (_session) {
-                        params.title = messageMap.sessionExpired.title;
-                        params.message = messageMap.sessionExpired.message;
-                    } else {
-                        params.title = messageMap.noSession.title;
-                        params.message = messageMap.noSession.message;
-                    }
-
-                    modalInstance = $uibModal.open({
-                        windowClass: "modal-login-instruction",
-                        templateUrl: "../common/templates/loginDialog.modal.html",
-                        controller: 'LoginDialogController',
-                        controllerAs: 'ctrl',
-                        resolve: {
-                            params: params
-                        },
-                        openedClass: 'modal-login',
-                        backdrop: 'static',
-                        keyboard: false
-                    });
-
-
-                    /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
-                     * variable
-                     */
-                    if (UriUtils.isBrowserIE()) {
-
-
-                        $cookies.put("chaise-" + referrerId, true, { path: "/" });
-                        var intervalId;
-                        var watchChangeInReferrerId = function () {
-                            if (!closed && !$cookies.get("chaise-" + referrerId)) {
-                                $interval.cancel(intervalId);
-                                if (typeof cb== 'function') {
-                                    modalInstance.close("Done");
-                                    cb();
-                                    closed = true;
-                                }
-                                return;
-                            }
-                        }
-
-                        var onModalClose = function() {
-                            $interval.cancel(intervalId);
-                            $cookies.remove("chaise-" + referrerId, { path: "/" });
-                            closed = true;
-                        }
-
-                        // To avoid problems when user explicitly close the modal
-                        modalInstance.result.then(onModalClose, onModalClose);
-
-                        intervalId = $interval(watchChangeInReferrerId, 50);
-
-                    } else {
-
-                        window.addEventListener('message', function(args) {
-                            if (args && args.data && (typeof args.data == 'string')) {
-                                var obj = UriUtils.queryStringToJSON(args.data);
-                                if (obj.referrerid == referrerId && (typeof cb== 'function')) {
-                                    modalInstance.close("Done");
-                                    cb();
-                                    closed = true;
-                                }
-                            }
-                        });
-                    }
-
-                }, function(error) {
-                    throw error;
-                });
+            loginInAModal: function(notifyErmrestCB) {
+                logInHelper(loginWindowCb,notifyErmrestCB,'modal');
             },
 
             logout: function() {
@@ -234,9 +222,9 @@
             ERMrest.setHttpUnauthorizedFn(function() {
                 var defer = $q.defer();
 
-                // Call login in a new window to perform authentication
+                // Call login in a new modal window to perform authentication
                 // and return a promise to notify ermrestjs that the user has loggedin
-                Session.loginInANewWindow(function() {
+                Session.loginInAModal(function() {
 
                     // Once the user has logged in fetch the new session and set the session value
                     // and resolve the promise to notify ermrestjs that the user has logged in
