@@ -6,7 +6,8 @@
     .constant('errorNames', {
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
-        notFound: "Not Found"
+        notFound: "Not Found",
+        multipleRecords: "Multiple Records Found"
     })
 
     .factory('Errors', [function() {
@@ -105,8 +106,7 @@
         function multipleRecordError() {
             var multipleDataMessage = messageMap.multipleDataMessage;
             var error = new Error(multipleDataMessage);
-            error.code = errorNames.notFound;
-
+            error.code = errorNames.multipleRecords;
             return error;
         }
 
@@ -129,7 +129,10 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-
+            
+            if (window.location.pathname.indexOf('/record/') !== -1 && exception.code.indexOf(messageMap.multipleDataMessage) !== -1){
+                return errorPopup(messageMap.multipleDataMessage, "300: "+messageMap.multipleDataMessage, "RecordSet Page to view all results", exception.redirectUrl, "There are more than 1 records for the filters provided. Click OK to redirect to recordset page to display all results");
+            }
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
