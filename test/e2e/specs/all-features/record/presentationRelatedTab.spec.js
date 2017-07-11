@@ -74,13 +74,10 @@ describe('Collapse Related tables, ', function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
             accordionSet = element.all(by.css('.related-table-heading'));
-            // browser.sleep(2000);
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
-            // browser.wait(EC.presenceOf(,browser.params.defaultTimeout);
         });
 
         it('should collapse related tables after cutoff value',function(){
-            // (function(accordionSet){
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
             accordionSet.count().then(function(accrCount){
                 if(accrCount>chaiseConfig.maxRelatedTab){
@@ -90,6 +87,5 @@ describe('Collapse Related tables, ', function() {
                 }
             })
         });
-    // })(accordionSet);
-        });
+    });
 });
