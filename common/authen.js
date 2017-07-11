@@ -61,6 +61,9 @@
                 window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
             }
             
+            /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
+             * variable
+             */
             if (UriUtils.isBrowserIE()) {
                 $cookies.put("chaise-" + referrerId, true, { path: "/" });
                 var intervalId;
