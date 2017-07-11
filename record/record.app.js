@@ -64,7 +64,9 @@
             Session.unsubscribeOnChange(subId);
 
             ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
-                DataUtils.verify(reference.location.filter, 'No filter was defined. Cannot find a record without a filter.');
+                context.filter = reference.location.filter;
+                
+                DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
                 
                 // if the user can fetch the reference, they can see the content for the rest of the page
                 // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing

@@ -77,12 +77,16 @@
                 delete modalProperties.backdrop;
                 params.canClose = true;
             }
-
+            
             var modalInstance = $uibModal.open(modalProperties);
 
+            var reloadCb = function(){
+                window.location.reload();
+            }; 
+                    
             modalInstance.result.then(function () {
                 if (errorCode == errorNames.unauthorized && !providedLink) {
-                    Session.login($window.location.href);
+                    Session.loginInAPopUp(reloadCb);                
                 } else {
                     $window.location.replace(redirectLink);
                 }
@@ -133,12 +137,14 @@
             if (window.location.pathname.indexOf('/record/') !== -1 && exception.code.indexOf(messageMap.multipleDataMessage) !== -1){
                 return errorPopup(messageMap.multipleDataMessage, "300: "+messageMap.multipleDataMessage, "RecordSet Page to view all results", exception.redirectUrl, "There are more than 1 records for the filters provided. Click OK to redirect to recordset page to display all results");
             }
+            var reloadCb = function() {
+                window.location.reload();
+            }; 
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
-                Session.login($window.location.href);
+                Session.loginInAPopUp(reloadCb);
             } else {
-
                 var errName = exception.constructor.name;
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 

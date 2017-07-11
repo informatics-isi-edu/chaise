@@ -23,7 +23,8 @@
         'ui.bootstrap',
         'ui.mask',
         'ui.select',
-        'angular-markdown-editor'
+        'angular-markdown-editor',
+        'chaise.footer'
     ])
 
     .config(['$cookiesProvider', function($cookiesProvider) {

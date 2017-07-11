@@ -4,11 +4,13 @@ var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
         var title = chaisePage.recordPage.getEntityTitleElement();
+		chaisePage.waitForElement(title);
         expect(title.getText()).toEqual(tableParams.title);
 	});
 
 	it("should have '" + tableParams.subTitle.toUpperCase() +"' as subTitle", function() {
         var subtitle = chaisePage.recordPage.getEntitySubTitleElement();
+		chaisePage.waitForElement(subtitle);
         expect(subtitle.getText()).toEqual(tableParams.subTitle.toUpperCase());
 	});
 

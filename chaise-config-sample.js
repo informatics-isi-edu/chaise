@@ -62,7 +62,8 @@ var chaiseConfig = {
             //     url: "/chaise/recordedit/#1/YOUR_CATALOG:YOUR_SCHEMA"
             // }
         ]
-    }
+    },
+    footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}"
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {
