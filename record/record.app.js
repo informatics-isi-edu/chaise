@@ -88,7 +88,8 @@
                     throw noDataError;
                 }
                 else if(page.tuples.length > 1){
-                    console.log("Multiple Data re baba");
+                    var multipleRecordError = ErrorService.multipleRecordError();
+                    throw multipleRecordError;
                 }
 
                 var tuple = $rootScope.tuple = page.tuples[0];
