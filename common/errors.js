@@ -102,15 +102,9 @@
             return error;
         }
         
-        function multipleRecordError(filters) {
-            var noDataMessage = messageMap.noDataMessage;
-            for (var k = 0; k < filters.length; k++) {
-                noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
-                if (k != filters.length-1) {
-                    noDataMessage += " or ";
-                }
-            }
-            var error = new Error(noDataMessage);
+        function multipleRecordError() {
+            var multipleDataMessage = messageMap.multipleDataMessage;
+            var error = new Error(multipleDataMessage);
             error.code = errorNames.notFound;
 
             return error;
@@ -154,6 +148,7 @@
         return {
             errorPopup: errorPopup,
             noRecordError: noRecordError,
+            multipleRecordError: multipleRecordError,
             handleException: handleException
         };
     }])
