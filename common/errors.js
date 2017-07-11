@@ -134,8 +134,8 @@
         function handleException(exception) {
             $log.info(exception);
             
-            if (window.location.pathname.indexOf('/record/') !== -1 && exception.code.indexOf(messageMap.multipleDataMessage) !== -1){
-                return errorPopup(messageMap.multipleDataMessage, "300: "+messageMap.multipleDataMessage, "RecordSet Page to view all results", exception.redirectUrl, "There are more than 1 records for the filters provided. Click OK to redirect to recordset page to display all results");
+            if (window.location.pathname.indexOf('/record/') !== -1 && exception.code.indexOf(messageMap.multipleDataErrorCode) !== -1){
+                return errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
             }
             var reloadCb = function() {
                 window.location.reload();
