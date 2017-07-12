@@ -94,6 +94,7 @@
                     var recordSetLink = page.reference.contextualize.compact.appLink;
                     var multipleRecordError = ErrorService.multipleRecordError();
                     multipleRecordError.redirectUrl=recordSetLink;
+                    $rootScope.displayReady = true;
                     throw multipleRecordError;
                 }
 
