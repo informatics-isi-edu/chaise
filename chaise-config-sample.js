@@ -64,7 +64,7 @@ var chaiseConfig = {
         ]
     },
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
-    maxRelatedTab:15
+    maxRelatedTablesOpen:15
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {

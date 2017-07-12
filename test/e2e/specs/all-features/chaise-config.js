@@ -9,6 +9,7 @@ var chaiseConfig = {
     navbarBrandImage: 'test123.jpg',
     navbarBrandText: 'test123',
     headTitle: 'this one should be ignored in favor of navbarBrandText',
+    maxRelatedTablesOpen: 2,
     navbarMenu: {
        newTab: true,
        children: [

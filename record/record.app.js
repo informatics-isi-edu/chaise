@@ -65,7 +65,9 @@
             Session.unsubscribeOnChange(subId);
 
             ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
-                DataUtils.verify(reference.location.filter, 'No filter was defined. Cannot find a record without a filter.');
+                context.filter = reference.location.filter;
+
+                DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
 
                 // if the user can fetch the reference, they can see the content for the rest of the page
                 // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
@@ -112,7 +114,7 @@
 
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
-                var cutOff = (angular.isUndefined(chaiseConfig.maxRelatedTab) || chaiseConfig.maxRelatedTab === null || chaiseConfig.maxRelatedTab == " ")?Infinity:chaiseConfig.maxRelatedTab;
+                var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
                 var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                     $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;

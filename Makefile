@@ -5,7 +5,7 @@
 
 
 # Install directory on dev.isrd
-CHAISEDIR=/var/www/html/chaise
+CHAISEDIR?=/var/www/html/chaise
 
 # Install directory on travis
 CHAISETRAVISDIR=/var/www/html/chaise

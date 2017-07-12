@@ -137,8 +137,10 @@ exports.parameterize = function(config, configParams) {
     var promises = [];
     
     if (browser && browser.hatracNamespaces) {
-        // cleanup the hatrac namespaces
-        promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, browser.hatracNamespaces));
+        (function (authCookie, hatracNamespaces) {
+            // cleanup the hatrac namespaces
+            promises.push(pImport.deleteHatracNamespaces(authCookie, hatracNamespaces));
+        })(testConfiguration.authCookie, browser.hatracNamespaces);
     }
 
     // If cleanup is true and setup was also true in the configuration then
