@@ -34,8 +34,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window','AlertsService',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, Session, UiUtils, UriUtils, $log, $rootScope, $window,AlertsService) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
         var session,
             context = {};
@@ -93,7 +93,6 @@
                 else if(page.tuples.length > 1){
                     var recordPageLink = page._ref.appLink;
                     var recordSetLink = recordPageLink.replace("record","recordset");
-                    AlertsService.addAlert('More than one records found for your query filters, Redirecting you to Recordset Page.....', 'warning');
                     var multipleRecordError = ErrorService.multipleRecordError();
                     multipleRecordError.redirectUrl=recordSetLink;
                     throw multipleRecordError;
