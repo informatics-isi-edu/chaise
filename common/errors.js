@@ -142,7 +142,7 @@
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.loginInAPopUp(reloadCb);
             }
-            else if (window.location.pathname.indexOf('/record/') !== -1 && exception.code && exception.code.indexOf(messageMap.multipleDataErrorCode) !== -1){
+            else if (exception.code && exception.code.indexOf(messageMap.multipleDataErrorCode) !== -1){
                 errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
             } 
             else {
