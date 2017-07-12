@@ -437,7 +437,7 @@ $(JSDOC): $(JS_SOURCE) $(BIN)
 
 # Rule to ensure Node bin scripts are present
 $(BIN): $(MODULES)
-	node_modules/.bin/webdriver-manager update --standalone
+	node_modules/protractor/bin/webdriver-manager update
 
 # Rule to install Node modules locally
 $(MODULES): package.json
@@ -465,54 +465,52 @@ distclean: clean
 
 # Rule to run tests
 .PHONY: test
-test:
+test: deps
 	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch) && $(BIN)/protractor $(E2Efooter)
 
 # Rule to run karma
 .PHONY: karma
-karma:
+karma: deps
 	$(BIN)/karma start
 
 # Rule to run tests
 .PHONY: testall
-testall:
-	$(BIN)/karma start
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch) && $(BIN)/protractor $(E2Efooter)
+testall: test karma
 
 #### Sequential make commands - these commands will run tests in sequential order
 #Rule to run navbar tests
 .PHONY: testnavbar
-testnavbar:
+testnavbar: deps
 	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle)
 
 #Rule to run search app tests
 .PHONY: testsearch
-testsearch:
+testsearch: deps
 	$(BIN)/protractor $(E2Esearch)
 
 #Rule to run detailed app tests
 .PHONY: testdetailed
-testdetailed:
+testdetailed: deps
 	$(BIN)/protractor $(E2EDdetailed)
 
 #Rule to run record app tests
 .PHONY: testrecord
-testrecord:
+testrecord: deps
 	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordCopy)
 
 #Rule to run record add app tests
 .PHONY: testrecordadd
-testrecordadd:
+testrecordadd: deps
 	$(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordDefaults)
 
 #Rule to run recordset app tests
 .PHONY: testrecordset
-testrecordset:
+testrecordset: deps
 	$(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit)
 
 # Rule to run record edit app tests
 .PHONY: testrecordedit
-testrecordedit:
+testrecordedit: deps
 	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter)
 
 .PHONY: testpermissions
@@ -521,38 +519,38 @@ testpermissions:
 
 #Rule to run viewer app tests
 .PHONY: testviewer
-testviewer:
+testviewer: deps
 	$(BIN)/protractor $(E2EDviewer)
 
 #### Parallel make commands - these commands will run tests in parallel
 #Rule to run all parallel test configurations
 .PHONY: testparallel
-testparallel:
+testparallel: deps
 	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(FullFeaturesConfirmationParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(DefaultConfigParallel) && $(BIN)/protractor $(E2Esearch)
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures
-testfullfeatures:
+testfullfeatures: deps
 	$(BIN)/protractor $(FullFeaturesParallel)
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeaturesconfirmation
-testfullfeaturesconfirmation:
+testfullfeaturesconfirmation: deps
 	$(BIN)/protractor $(FullFeaturesConfirmationParallel)
 
 #Rule to run the delete prohibited chaise configuration tests in parallel
 .PHONY: testdeleteprohibited
-testdeleteprohibited:
+testdeleteprohibited: deps
 	$(BIN)/protractor $(DeleteProhibitedParallel)
 
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testdefaultconfig
-testdefaultconfig:
+testdefaultconfig: deps
 	$(BIN)/protractor $(DefaultConfigParallel)
 
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testfooter
-testfooter:
+testfooter: deps
 	$(BIN)/protractor $(E2Efooter)
 
 # Rule to make html
@@ -755,8 +753,7 @@ $(JS_CONFIG): chaise-config-sample.js
 # Rule for installing on dev.isrd
 .PHONY: install
 install: $(HTML)
-	test -d $(dir $(CHAISEDIR)) && mkdir -p $(CHAISEDIR)
-	rsync -a --exclude='.*' --exclude=chaise-config.js ./. $(CHAISEDIR)/
+	rsync -avz --exclude='.*' --exclude=chaise-config.js . $(CHAISEDIR)
 
 # Rule for installing on Travis
 .PHONY: installTravis
@@ -778,7 +775,7 @@ usage:
 	@echo "    lint      		- lint the source"
 	@echo "    build     		- builds the package"
 	@echo "    test      		- runs e2e tests"
-	@echo "    karma     		- runs the karma tests"
+	@echo "    karma     		- runs the karma tests (only a scaffolding at present)"
 	@echo "    testall   		- runs e2e and Karma tests"
 	@echo "    doc       		- make autogenerated markdown docs"
 	@echo "    jsdoc     		- make autogenerated html docs"
