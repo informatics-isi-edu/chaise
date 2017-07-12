@@ -13,7 +13,8 @@
         'chaise.html',
         'chaise.utils',
         'ermrestjs',
-        'ui.bootstrap'
+        'ui.bootstrap',
+        'chaise.footer'
     ])
 
     .factory('constants', [function(){
