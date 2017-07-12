@@ -91,8 +91,7 @@
                     throw noDataError;
                 }
                 else if(page.tuples.length > 1){
-                    var recordPageLink = page._ref.appLink;
-                    var recordSetLink = recordPageLink.replace("record","recordset");
+                    var recordSetLink = page.reference.contextualize.compact.appLink;
                     var multipleRecordError = ErrorService.multipleRecordError();
                     multipleRecordError.redirectUrl=recordSetLink;
                     throw multipleRecordError;
