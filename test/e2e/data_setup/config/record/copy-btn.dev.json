@@ -1,7 +1,7 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "record/config.json",
+            "record/related-table/max-related.config.json",
             "record/copy-btn.config.json"
         ],
         "schema": "editable-id"

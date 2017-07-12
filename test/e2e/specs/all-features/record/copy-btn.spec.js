@@ -29,14 +29,14 @@ describe('View existing record,', function() {
             var keys = [];
             browser.ignoreSynchronization = true;
             keys.push(relatedTableTestParams.key.name + relatedTableTestParams.key.operator + relatedTableTestParams.key.value);
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + relatedTableTestParams.table_name + "/" + keys.join("&");
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-max-RT:" + relatedTableTestParams.table_name + "/" + keys.join("&");
             browser.get(url);
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
         });
 
         it("should load chaise-config.js and have maxRelatedTablesOpen=2", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.maxRelatedTablesOpen).toBe(2);
+                expect(chaiseConfig.maxRelatedTablesOpen).toBe(4);
             });
         });
 
