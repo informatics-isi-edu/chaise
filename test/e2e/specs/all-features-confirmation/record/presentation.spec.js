@@ -157,11 +157,14 @@ describe('View existing record,', function() {
         
         it('On click of OK button the page should redirect to recordset page', function(){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                btn.click();
-            });
-            browser.executeScript('return window.location.href;').then(function(currentUrl) {
+                return btn.click();
+            }).then (function (){
+                return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
                 expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
-            });            
+            }).catch( function(err) {
+                console.log(error);
+            }); 
         });
     });
 
