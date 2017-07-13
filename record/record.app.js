@@ -172,9 +172,11 @@
                         });
                     })(i);
                 }
+                $rootScope.displayReady = true;
             }).catch(function genericCatch(exception) {
                 throw exception;
             });
+            
         })
 
 
