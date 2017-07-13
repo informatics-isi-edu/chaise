@@ -163,7 +163,7 @@
 
 
             ERMrest.appLinkFn(UriUtils.appTagToURL);
-
+            
             // Subscribe to on change event for session
             var subId = Session.subscribeOnChange(function() {
 
@@ -172,7 +172,7 @@
 
                 ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
                     session = Session.getSessionValue();
-                    
+                    $rootScope.downloadCSVLink = reference.csvDownloadLink;
                     var location = reference.location;
                     
                     // only allowing single column sort here
