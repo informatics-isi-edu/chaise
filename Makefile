@@ -39,13 +39,13 @@ E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submis
 E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
 E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.conf.js
-E2EDrecordRelatedTable=test/e2e/specs/default-config/record/related-table.conf.js
+E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.conf.js
 # Recordset tests
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 # Viewer tests
-E2EDviewer=test/e2e/specs/default-config/viewer/presentation.conf.js
+E2EDviewer=test/e2e/specs/all-features/viewer/presentation.conf.js
 # misc tests
 E2Enavbar=test/e2e/specs/all-features/navbar/protractor.conf.js
 E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/protractor.conf.js
