@@ -100,7 +100,8 @@
         };
 
         vm.canCreateRelated = function(relatedRef) {
-            return (relatedRef.canCreate && $rootScope.modifyRecord);
+           var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
+           return (ref.canCreate && $rootScope.modifyRecord);
         };
 
         // Send user to RecordEdit to create a new row in this related table
