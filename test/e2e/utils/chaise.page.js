@@ -726,6 +726,14 @@ var recordPage = function() {
     this.getModalText = function() {
         return element(by.css(".modal-body"));
     };
+    
+    this.getErrorModalTitle = function(){
+        return browser.executeScript("return $('.modal-title')[0].innerHTML;");
+    };
+    
+    this.getErrorModalOkButton = function(){
+        return browser.executeScript("return $('button')[1]");
+    };
 };
 
 var recordsetPage = function() {

@@ -2,6 +2,7 @@ var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
     configFileName: 'recordedit/edit-multi.dev.json',
+    chaiseConfigFilePath: 'test/e2e/specs/default-config/chaise-config.js',
     specs: [
         "multi-edit.spec.js"
     ],
