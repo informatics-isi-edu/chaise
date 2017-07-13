@@ -14,7 +14,7 @@
                     <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                 </a>&nbsp;&nbsp;
                 <!-- Download Link -->
-                <a ng-if="vm.rowValues.length>0" ng-href="{{ csvLink() }}">
+                <a id="downloadCSV-link" ng-if="vm.rowValues.length>0" ng-href="{{ csvLink() }}">
                     <button data-toggle="tooltip" data-placement="top" title="" type="button" class="btn btn-default" data-original-title="Download">
                             <i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i>
                     </button>
