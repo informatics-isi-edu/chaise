@@ -2,6 +2,7 @@ var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
     configFileName: 'recordedit/multi-column-types.dev.json',
+    chaiseConfigFilePath: 'test/e2e/specs/default-config/chaise-config.js',
     specs: [
         "multi-col-types.spec.js"
     ],

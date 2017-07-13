@@ -2,6 +2,7 @@ var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
     configFileName: 'recordedit/submission-disabled.dev.json',
+    chaiseConfigFilePath: 'test/e2e/specs/default-config/chaise-config.js',
     specs: [
         "submission-disabled.spec.js"
     ],

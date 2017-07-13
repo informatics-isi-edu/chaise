@@ -65,8 +65,10 @@
             Session.unsubscribeOnChange(subId);
 
             ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
-                DataUtils.verify(reference.location.filter, 'No filter was defined. Cannot find a record without a filter.');
-                
+                context.filter = reference.location.filter;
+
+                DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
+
                 // if the user can fetch the reference, they can see the content for the rest of the page
                 // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
                 session = Session.getSessionValue();
@@ -77,8 +79,8 @@
 
                 $log.info("Reference: ", $rootScope.reference);
 
-                // There should only ever be one entity related to this reference
-                return $rootScope.reference.read(1);
+                // There should only ever be one entity related to this reference, we are reading 2 entities now and if we get more than 1 entity than we throw a multipleRecordError.
+                return $rootScope.reference.read(2);
             }, function error(exception) {
                 throw exception;
             }).then(function getPage(page) {
@@ -87,6 +89,13 @@
                 if (page.tuples.length < 1) {
                     var noDataError = ErrorService.noRecordError(context.filter.filters);
                     throw noDataError;
+                }
+                else if(page.tuples.length > 1){
+                    var recordSetLink = page.reference.contextualize.compact.appLink;
+                    var multipleRecordError = ErrorService.multipleRecordError();
+                    multipleRecordError.redirectUrl=recordSetLink;
+                    $rootScope.displayReady = true;
+                    throw multipleRecordError;
                 }
 
                 var tuple = $rootScope.tuple = page.tuples[0];
@@ -112,7 +121,8 @@
 
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
-
+                var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
+                var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                     $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
 
@@ -135,7 +145,7 @@
                                 pageLimit: ($rootScope.relatedReferences[i].display.defaultPageSize ? $rootScope.relatedReferences[i].display.defaultPageSize : constants.defaultPageSize),
                                 hasNext: page.hasNext,      // used to determine if a link should be shown
                                 hasLoaded: true,            // used to determine if the current table and next table should be rendered
-                                open: true,                 // to define if the accordion is open or closed
+                                open: boolIsOpen,                 // to define if the accordion is open or closed
                                 enableSort: true,           // allow sorting on table
                                 sortby: null,               // column name, user selected or null
                                 sortOrder: null,            // asc (default) or desc
@@ -169,9 +179,11 @@
                         });
                     })(i);
                 }
+                $rootScope.displayReady = true;
             }).catch(function genericCatch(exception) {
                 throw exception;
             });
+            
         })
 
 
