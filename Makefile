@@ -528,7 +528,7 @@ testviewer:
 #Rule to run all parallel test configurations
 .PHONY: testparallel
 testparallel:
-	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(FullFeaturesConfirmationParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(DefaultConfigParallel) && $(BIN)/protractor $(E2Esearch)
+	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(FullFeaturesConfirmationParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(DefaultConfigParallel)
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures

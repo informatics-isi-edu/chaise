@@ -43,3 +43,4 @@ The below table explains the usage of the default parameters:
 | allowErrorDismissal | Boolean | false | "allowErrorDismissal" : true | NA | All terminal error message display an error message dialog that is not dismissable by default. Set this property to true if you want to allow dismissable error message dialogs.
 | searchPageSize | An integer | 25 | "searchPageSize" : \<value\> | N/A | If present, its value represents the number of records to be displayed on a page in the search view.
 | footerMarkdown | A footer markdown string | N/A | "footerMarkdown" : \<value\> | N/A | If present, it creates a footer at the bottom of the app with the markdown text.
+| maxRelatedTablesOpen | An integer | N/A | "maxRelatedTablesOpen" : \<value\> | N/A | It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.

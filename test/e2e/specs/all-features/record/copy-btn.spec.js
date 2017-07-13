@@ -11,8 +11,41 @@ var testParams = {
     html_keys: [{"name": "id", "value": 1, "operator": "="}]
 };
 
+var relatedTableTestParams = {
+    table_name: "accommodation",
+    key: {
+        name: "id",
+        value: "2002",
+        operator: "="
+    },
+};
+
 describe('View existing record,', function() {
 
+    describe("For table " + relatedTableTestParams.table_name + ",", function() {
+
+        // this test is for verifying the related tables option, maxRelatedTablesOpen
+        beforeAll(function() {
+            var keys = [];
+            browser.ignoreSynchronization = true;
+            keys.push(relatedTableTestParams.key.name + relatedTableTestParams.key.operator + relatedTableTestParams.key.value);
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-max-RT:" + relatedTableTestParams.table_name + "/" + keys.join("&");
+            browser.get(url);
+            chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
+        });
+
+        it("should load chaise-config.js and have maxRelatedTablesOpen=2", function() {
+            browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                expect(chaiseConfig.maxRelatedTablesOpen).toBe(4);
+            });
+        });
+
+        it('should collapse related tables after it exceeds the maxRelatedTablesOpen value',function(){
+            expect(element.all(by.css('.panel-open')).count()).toEqual(0);
+        });
+    });
+
+    // below are the tests for the copy button
     describe("For table " + testParams.html_table_name + ",", function() {
         beforeAll(function() {
             var keys = [];
