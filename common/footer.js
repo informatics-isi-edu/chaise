@@ -21,7 +21,7 @@
                     }
 
                     function setClass() {
-                        $timeout(function() {
+                         $timeout(function() {
                             scope.posStyle = {
                                 width: 'auto',
                                 height: '30px',
@@ -49,7 +49,9 @@
                     scope.$watch(function() {
                         return $(document).height();
                     }, function(o, n) {
+                        if(Math.abs(o-n)>1){
                         setClass();
+                    }
                     });
                 }
             };
