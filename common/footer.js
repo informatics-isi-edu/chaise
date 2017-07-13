@@ -21,7 +21,7 @@
                     }
 
                     function setClass() {
-                        $timeout(function() {
+                         $timeout(function() {
                             scope.posStyle = {
                                 width: 'auto',
                                 height: '30px',
@@ -45,11 +45,15 @@
                             }
                         }, 500);
                     }
+                    var docHeightVal = $(document).height();
                     setClass();
                     scope.$watch(function() {
                         return $(document).height();
                     }, function(o, n) {
+                        console.log('old: '+o +' new: '+n);
+                        if(Math.abs(o-n)>1){
                         setClass();
+                    }
                     });
                 }
             };
