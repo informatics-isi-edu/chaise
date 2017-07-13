@@ -5,7 +5,7 @@
 <div class="modal-body">
     {{::ctrl.params.message}}
     <br><br>
-    Click OK to {{ctrl.params.errorCode == 'Multiple Records Found'? 'redirect ': 'return '}} to the {{::ctrl.params.pageName}}.
+    Click OK to go to the {{::ctrl.params.pageName}}.
 
     <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">{{ctrl.linkText}}</a>
     <br>
