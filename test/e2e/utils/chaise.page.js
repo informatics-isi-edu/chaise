@@ -838,6 +838,10 @@ var recordsetPage = function() {
     this.getPageLimitSelector = function (limit) {
         return element(by.id("page-size-" + limit));
     };
+    
+    this.getDownloadButton = function (limit) {
+        return element(by.css("downloadCSV-link"));
+    };
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.
