@@ -66,9 +66,9 @@
 
             ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
                 context.filter = reference.location.filter;
-                
+
                 DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
-                
+
                 // if the user can fetch the reference, they can see the content for the rest of the page
                 // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
                 session = Session.getSessionValue();
@@ -114,7 +114,8 @@
 
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
-
+                var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
+                var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                     $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
 
@@ -137,7 +138,7 @@
                                 pageLimit: ($rootScope.relatedReferences[i].display.defaultPageSize ? $rootScope.relatedReferences[i].display.defaultPageSize : constants.defaultPageSize),
                                 hasNext: page.hasNext,      // used to determine if a link should be shown
                                 hasLoaded: true,            // used to determine if the current table and next table should be rendered
-                                open: true,                 // to define if the accordion is open or closed
+                                open: boolIsOpen,                 // to define if the accordion is open or closed
                                 enableSort: true,           // allow sorting on table
                                 sortby: null,               // column name, user selected or null
                                 sortOrder: null,            // asc (default) or desc
@@ -171,9 +172,11 @@
                         });
                     })(i);
                 }
+                $rootScope.displayReady = true;
             }).catch(function genericCatch(exception) {
                 throw exception;
             });
+            
         })
 
 

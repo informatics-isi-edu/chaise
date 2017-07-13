@@ -108,7 +108,7 @@ exports.parameterize = function(config, configParams) {
         browser.params.catalogId = data.catalogId;
         
         // Set hatrac namespaces that should be deleted (test cases will add to this)
-        browser.hatracNamespaces = [];
+        testConfiguration.hatracNamespaces = [];
 
         // Set the base url to the page that we are running the tests for
         browser.baseUrl = process.env.CHAISE_BASE_URL;
@@ -136,11 +136,9 @@ exports.parameterize = function(config, configParams) {
   config.afterLaunch = function(exitCode) {
     var promises = [];
     
-    if (browser && browser.hatracNamespaces) {
-        (function (authCookie, hatracNamespaces) {
-            // cleanup the hatrac namespaces
-            promises.push(pImport.deleteHatracNamespaces(authCookie, hatracNamespaces));
-        })(testConfiguration.authCookie, browser.hatracNamespaces);
+    if (testConfiguration.hatracNamespaces && testConfiguration.hatracNamespaces.length > 0) {
+        // cleanup the hatrac namespaces
+        promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, testConfiguration.hatracNamespaces));
     }
 
     // If cleanup is true and setup was also true in the configuration then

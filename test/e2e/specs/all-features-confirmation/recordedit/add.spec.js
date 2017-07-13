@@ -1,3 +1,4 @@
+var testConfiguration = browser.params.configuration;
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js'), chance = require('chance').Chance();
 var exec = require('child_process').execSync;
@@ -83,7 +84,7 @@ var testParams = {
 
 // keep track of namespaces that we use, so we can delete them afterwards
 if (!process.env.TRAVIS) {
-    browser.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
+    testConfiguration.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
 }
 
 describe('Record Add', function() {

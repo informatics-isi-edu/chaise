@@ -2,7 +2,7 @@
  * This test case is for testing editing a single record
  * 
  */
-
+var testConfiguration = browser.params.configuration;
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var mustache = require('../../../../../../ermrestjs/vendor/mustache.min.js');
@@ -85,7 +85,7 @@ var testParams = {
 
 if (!process.env.TRAVIS) {
     // keep track of namespaces that we use, so we can delete them afterwards
-    browser.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
+    testConfiguration.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
 }
 
 describe('Edit existing record,', function() {
