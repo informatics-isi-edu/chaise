@@ -79,8 +79,8 @@
 
                 $log.info("Reference: ", $rootScope.reference);
 
-                // There should only ever be one entity related to this reference
-                return $rootScope.reference.read(1);
+                // There should only ever be one entity related to this reference, we are reading 2 entities now and if we get more than 1 entity than we throw a multipleRecordError.
+                return $rootScope.reference.read(2);
             }, function error(exception) {
                 throw exception;
             }).then(function getPage(page) {
@@ -89,6 +89,13 @@
                 if (page.tuples.length < 1) {
                     var noDataError = ErrorService.noRecordError(context.filter.filters);
                     throw noDataError;
+                }
+                else if(page.tuples.length > 1){
+                    var recordSetLink = page.reference.contextualize.compact.appLink;
+                    var multipleRecordError = ErrorService.multipleRecordError();
+                    multipleRecordError.redirectUrl=recordSetLink;
+                    $rootScope.displayReady = true;
+                    throw multipleRecordError;
                 }
 
                 var tuple = $rootScope.tuple = page.tuples[0];

@@ -6,7 +6,8 @@
     .constant('errorNames', {
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
-        notFound: "Not Found"
+        notFound: "Not Found",
+        multipleRecords: "Multiple Records Found"
     })
 
     .factory('Errors', [function() {
@@ -105,6 +106,13 @@
 
             return error;
         }
+        
+        function multipleRecordError() {
+            var multipleDataMessage = messageMap.multipleDataMessage;
+            var error = new Error(multipleDataMessage);
+            error.code = errorNames.multipleRecords;
+            return error;
+        }
 
         function MalformedUriError(message) {
             this.message = message;
@@ -125,6 +133,7 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
+            
             var reloadCb = function() {
                 window.location.reload();
             }; 
@@ -132,19 +141,24 @@
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.loginInAPopUp(reloadCb);
-            } else {
+            }
+            else if (exception.code && exception.code == errorNames.multipleRecords){
+                errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
+            } 
+            else {
                 var errName = exception.constructor.name;
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 
                 errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", errName, "Home Page", $window.location.origin,  exception.message , exception.stack);
             }
-
+            
             exceptionFlag = true;
         }
 
         return {
             errorPopup: errorPopup,
             noRecordError: noRecordError,
+            multipleRecordError: multipleRecordError,
             handleException: handleException
         };
     }])
