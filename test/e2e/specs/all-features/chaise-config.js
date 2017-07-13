@@ -9,6 +9,8 @@ var chaiseConfig = {
     navbarBrandImage: 'test123.jpg',
     navbarBrandText: 'test123',
     headTitle: 'this one should be ignored in favor of navbarBrandText',
+    // config for biewer spec
+    customCSS: '/path/to/custom/css',
     maxRelatedTablesOpen: 4,
     navbarMenu: {
        newTab: true,
