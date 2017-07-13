@@ -749,8 +749,7 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 
-
-# Rule for installing on dev.isrd
+# Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
 install: $(HTML) dont_install_in_root
 	rsync -avz --exclude='.*' --exclude=node_modules --exclude='wiki-images' --exclude=chaise-config.js . $(CHAISEDIR)
