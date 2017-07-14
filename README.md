@@ -94,8 +94,7 @@ Chaise depends on the following server- and client-side software.
 
 Development dependencies include:
 
-* [Make](https://en.wikipedia.org/wiki/Make_%28software%29): usually present on
-on any unix/linux/osx host.
+* [Make](https://en.wikipedia.org/wiki/Make_%28software%29): usually present on any unix/linux/osx host.
 * rsync: usually present on any unix/linux/osx host.
 * [Node](https://nodejs.org/) version 6.x: Mac users, we recommend downloading
 direct from the node site as we have seen problems with the version installed
@@ -147,7 +146,7 @@ $ make install
 
 ## How to configure
 
-See the [configuration guide](./doc/configuration.md).
+See the [configuration guide](./doc/configuration.md). For more information on how Chaise uses the ERMrest annotations see [the contexts guide](./doc/contexts.md).
 
 ## How to run
 
@@ -159,7 +158,7 @@ Once deployed the apps can be found at `http://<hostname>/chaise/<app>`, where `
 
 This section assumes you have already installed _and tested_ [ermrestjs]. If you have not, stop here and do that first, then return this step.
 
-Before running the test cases you need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables.
+Before running the test cases you need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables. See [How to Get Your AUTH_COOKIE](https://github.com/informatics-isi-edu/chaise/wiki/E2E-tests-guide#how-to-get-your-auth_cookie).
 
 The example here is based on the assumption that the tests are installed and executed against a deployment to a userdir.
 
@@ -183,18 +182,3 @@ dependencies under the local `node_modules` directory relative to the project
 directory.
 
 For more information, see the [E2E tests guide](https://github.com/informatics-isi-edu/chaise/wiki/E2E-tests-guide).
-
-# Chaise and Annotation Contexts
-
-This sections describes the "contexts" used by Chaise. For more on annotation
-contexts see the ERMrest user documentation on annotations.
-
-|              | compact         | compact/brief | detailed        | entry | entry/edit | entry/create | filter | name | * |
-|--------------|-----------------|---------------|-----------------|-------|------------|--------------|--------|------|---|
-| [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)    | Pertains to the data that loads inside the recordset table       | -             | -        | -     | -          | -            | -      | -    | - |
-| [record](https://github.com/informatics-isi-edu/chaise/blob/master/record/readme.md)   | General case that is used if `compact/brief` is not defined.       | Pertains to the data inside the related tables that are loaded after the record. Inherits from `compact` if not defined.             | Pertains to the record itself and the way that the record data will be displayed on the page.         | -     | -          | -            | -      | -    | - |
-| [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md)   | -       | -             | -        | General case that is used during creation if  `entry/create` is not defined and used for editing if `entry/edit` is not defined.    | Modifies the form that shows for editing. Inherits from `entry` if not defined.          | Modifies the form that shows for creation. Inherits from `entry` if not defined.            | -      | -    | - |
-| [viewer](https://github.com/informatics-isi-edu/chaise/blob/master/viewer/readme.md)       | -       | -             | -        | -     | -          | -            | -      | -    | - |
-
-More information about what each context does for each app can be found in each
-Chaise app's readme.md file.
