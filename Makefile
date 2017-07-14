@@ -440,7 +440,7 @@ $(BIN): $(MODULES)
 
 # Rule to install Node modules locally
 $(MODULES): package.json
-	npm install --force
+	npm install
 
 .PHONY: deps
 deps: $(BIN)
