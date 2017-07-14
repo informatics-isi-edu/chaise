@@ -168,6 +168,7 @@ export CHAISE_BASE_URL=https://HOST/~USERNAME/chaise
 export ERMREST_URL=https://HOST/ermrest
 export AUTH_COOKIE=YOUR_ERMREST_COOKIE
 export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
+export CHAISEDIR=$REMOTE_CHAISE_DIR_PATH # when testing on remote host these should be the same
 ```
 
 Then run the tests (install, if you haven't already).
