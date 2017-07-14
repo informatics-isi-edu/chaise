@@ -95,7 +95,7 @@ Chaise depends on the following server- and client-side software.
 Development dependencies include:
 
 * [Make](https://en.wikipedia.org/wiki/Make_%28software%29): usually present on any unix/linux/osx host.
-* rsync: usually present on any unix/linux/osx host.
+* [Rsync](https://en.wikipedia.org/wiki/Rsync): usually present on any unix/linux/osx host.
 * [Node](https://nodejs.org/) version 6.x: Mac users, we recommend downloading
 direct from the node site as we have seen problems with the version installed
 by Homebrew.
