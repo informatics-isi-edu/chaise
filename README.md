@@ -1,7 +1,7 @@
 # Chaise [![Build Status](https://travis-ci.org/informatics-isi-edu/chaise.svg?branch=master)](https://travis-ci.org/informatics-isi-edu/chaise)
 _Computer-human access interface with schema evolution!_
 
-## Introduction
+## Overview
 
 Chaise is a model-driven web interface (more formally a [user agent]) for data
 discovery, analysis, visualization, editing, sharing and collaboration over
@@ -9,10 +9,11 @@ tabular data (more specifically [relational data]) served up as [Web resources]
 by the [ERMrest] service. Chaise dynamically renders relational data resources
 based on a small set of baseline assumptions, combined with its rendering
 [heuristics], and finally user preferences in order to support common user
-interactions with the data. Chaise is developed in JavaScript, HTML, and CSS which
-runs in most modern Web browsers. This includes Chrome 13 (or better), Firefox 7 (or better),
-Internet Explorer 10 (or better including ME Edge), and Safari 6 (or better). Chaise is 
-the front-end component of the suite of tools including [ERMrest], [Hatrac], and [IObox].
+interactions with the data. Chaise is developed in JavaScript, HTML, and CSS
+which runs in most modern Web browsers. This includes Chrome 13 (or better),
+Firefox 7 (or better), Internet Explorer 10 (or better including ME Edge), and
+Safari 6 (or better). Chaise is the front-end component of the suite of tools
+including [ERMrest], [Hatrac], and [IObox].
 
 [heuristics]: https://en.wikipedia.org/wiki/Heuristic_%28computer_science%29
 [relational data]: https://en.wikipedia.org/wiki/Relational_database
@@ -63,18 +64,10 @@ and rows flipped).
 
 See the [heuristics guide](./doc/heuristics.md) for more information.
 
-## Chaise Apps and their Contexts
+# Quick start guide
 
-|              | compact         | compact/brief | detailed        | entry | entry/edit | entry/create | filter | name | * |
-|--------------|-----------------|---------------|-----------------|-------|------------|--------------|--------|------|---|
-| [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)    | Pertains to the data that loads inside the recordset table       | -             | -        | -     | -          | -            | -      | -    | - |
-| [record](https://github.com/informatics-isi-edu/chaise/blob/master/record/readme.md)   | General case that is used if `compact/brief` is not defined.       | Pertains to the data inside the related tables that are loaded after the record. Inherits from `compact` if not defined.             | Pertains to the record itself and the way that the record data will be displayed on the page.         | -     | -          | -            | -      | -    | - |
-| [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md)   | -       | -             | -        | General case that is used during creation if  `entry/create` is not defined and used for editing if `entry/edit` is not defined.    | Modifies the form that shows for editing. Inherits from `entry` if not defined.          | Modifies the form that shows for creation. Inherits from `entry` if not defined.            | -      | -    | - |
-| [viewer](https://github.com/informatics-isi-edu/chaise/blob/master/viewer/readme.md)       | -       | -             | -        | -     | -          | -            | -      | -    | - |
+## Dependencies
 
-More information about what each context does for each app can be found in that app's readme.md file.
-
-## Quick Start Guide
 ### Runtime Dependencies
 
 Chaise depends on the following server- and client-side software.
@@ -101,44 +94,106 @@ Chaise depends on the following server- and client-side software.
 
 Development dependencies include:
 
-* [Make](https://en.wikipedia.org/wiki/Make_%28software%29)
-* [Node](https://nodejs.org/) version 6.x
-* Additional dependencies specified in [package.json](./package.json)
+* [Make](https://en.wikipedia.org/wiki/Make_%28software%29): usually present on
+on any unix/linux/osx host.
+* rsync: usually present on any unix/linux/osx host.
+* [Node](https://nodejs.org/) version 6.x: Mac users, we recommend downloading
+direct from the node site as we have seen problems with the version installed
+by Homebrew.
+* Additional dependencies specified in [package.json](./package.json) will be
+automatically retrieved by NPM.
 
-### How to Install
+### Stop! Before going forward read this!
 
-Get the source and run `make`. See `make help` for information on alternative
-make targets.
+Before proceeding, first install ermrestjs. See [ermrestjs] for more
+information. If you plan to run Chaise tests, you should first run the
+ermrestjs tests, which will also instruct you to get shared dependencies needed
+for testing Chaise.
+
+## How to get Chaise
+
+Get the source from its git repo.
 
 ```sh
-git clone https://github.com/informatics-isi-edu/chaise.git
-cd chaise
-sudo make install
+$ git clone https://github.com/informatics-isi-edu/chaise.git
+$ cd chaise
+```
+
+## How to deploy
+
+### Set the deployment directory (optional)
+
+Set `CHAISEDIR` to specify a target deployment location. By default, the
+install target is `/var/www/html/chaise`. If this directory does not exist,
+it will first create it. You may need to run `make install` with _super user_
+privileges depending on the installation directory you choose.
+
+### Deploy for production usage
+
+This example is for **production** deployments or other deployments to the document root of a Web server. As noted above, this will install to `/var/www/html/chaise`.
+
+```
+# make install
+```
+
+### Deploy to a remote userdir
+
+This example is how you would install the software on a remote server, for example a test server. Replacing `username` and `hostname` with real values.
+
+```sh
+$ export CHAISEDIR=username@hostname:public_html/chaise
+$ make install
+```
+
+## How to configure
+
+See the [configuration guide](./doc/configuration.md).
+
+## How to run
+
+Once deployed the apps can be found at `http://<hostname>/chaise/<app>`, where `<app>` must be replaced with one of the app names (i.e., `search`, `recordset`).
+
+**TODO**: We need to document how to use these apps because without additional details the bare app name without additional parameters is not sufficient.
+
+## How to test
+
+This section assumes you have already installed _and tested_ [ermrestjs]. If you have not, stop here and do that first, then return this step.
+
+Before running the test cases you need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables.
+
+The example here is based on the assumption that the tests are installed and executed against a deployment to a userdir.
+
+```sh
+export CHAISE_BASE_URL=https://HOST/~USERNAME/chaise
+export ERMREST_URL=https://HOST/ermrest
+export AUTH_COOKIE=YOUR_ERMREST_COOKIE
+export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
+```
+
+Then run the tests (install, if you haven't already).
+
+```sh
+$ make install  # if not already installed
+$ make test
 ```
 
 Make will invoke `npm install` to download and install all additional
 dependencies under the local `node_modules` directory relative to the project
 directory.
 
+For more information, see the [E2E tests guide](https://github.com/informatics-isi-edu/chaise/wiki/E2E-tests-guide).
 
-### How to Deploy
+# Chaise and Annotation Contexts
 
-To generate HTML and minimal stuff to deploy Chaise you need to run
+This sections describes the "contexts" used by Chaise. For more on annotation
+contexts see the ERMrest user documentation on annotations.
 
-```sh
-make all
-```
+|              | compact         | compact/brief | detailed        | entry | entry/edit | entry/create | filter | name | * |
+|--------------|-----------------|---------------|-----------------|-------|------------|--------------|--------|------|---|
+| [recordset](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/readme.md)    | Pertains to the data that loads inside the recordset table       | -             | -        | -     | -          | -            | -      | -    | - |
+| [record](https://github.com/informatics-isi-edu/chaise/blob/master/record/readme.md)   | General case that is used if `compact/brief` is not defined.       | Pertains to the data inside the related tables that are loaded after the record. Inherits from `compact` if not defined.             | Pertains to the record itself and the way that the record data will be displayed on the page.         | -     | -          | -            | -      | -    | - |
+| [recordedit](https://github.com/informatics-isi-edu/chaise/blob/master/recordedit/readme.md)   | -       | -             | -        | General case that is used during creation if  `entry/create` is not defined and used for editing if `entry/edit` is not defined.    | Modifies the form that shows for editing. Inherits from `entry` if not defined.          | Modifies the form that shows for creation. Inherits from `entry` if not defined.            | -      | -    | - |
+| [viewer](https://github.com/informatics-isi-edu/chaise/blob/master/viewer/readme.md)       | -       | -             | -        | -     | -          | -            | -      | -    | - |
 
-After running (above), copy to your host (i.e., `/var/www/path/to/chaise`).
-
-### How to Configure
-
-See the [configuration guide](./doc/configuration.md).
-
-### How to Run
-
-Point a modern web browser at `http://<hostname>/path/to/chaise/search`.
-
-### How to run E2E (End to End) Test
-
-See the [E2E tests guide](https://github.com/informatics-isi-edu/chaise/wiki/E2E-tests-guide).
+More information about what each context does for each app can be found in each
+Chaise app's readme.md file.

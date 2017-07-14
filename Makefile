@@ -3,7 +3,6 @@
 # Disable built-in rules
 .SUFFIXES:
 
-
 # Install directory on dev.isrd
 CHAISEDIR?=/var/www/html/chaise
 
