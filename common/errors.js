@@ -144,7 +144,7 @@
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
-                Session.loginInAPopUp(reloadCb);
+                Session.loginInAModal(reloadCb);
             }
             else if (exception.code && exception.code == errorNames.multipleRecords){
                 errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
