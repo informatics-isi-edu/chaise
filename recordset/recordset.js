@@ -127,14 +127,6 @@
         $scope.unfiltered = function () {
             return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;
         };
-        
-        $scope.csvLink = function () {
-            // before run, use window location
-            if (!recordsetModel.reference) {
-                return $window.location.href.csvDownloadLink;
-            }
-            return recordsetModel.reference.csvDownloadLink;
-        };
 
     }])
 
@@ -171,7 +163,7 @@
 
 
             ERMrest.appLinkFn(UriUtils.appTagToURL);
-            
+
             // Subscribe to on change event for session
             var subId = Session.subscribeOnChange(function() {
 
@@ -194,8 +186,7 @@
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = "compact";
                     recordsetModel.reference.session = session;
-                    recordsetModel.downloadCSVLink = reference.csvDownloadLink;
-                    
+
                     $log.info("Reference:", recordsetModel.reference);
 
                     if (location.queryParams.limit) {
