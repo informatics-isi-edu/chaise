@@ -54,12 +54,7 @@
                 // To avoid problems when user explicitly close the modal
                 modalInstance.result.then(onModalClose, onModalClose);
             }
-            else{
-                var x = window.innerWidth/2 - 800/2;
-                var y = window.innerHeight/2 - 600/2;
-
-                window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
-            }
+            
             
             /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
              * variable
@@ -105,7 +100,7 @@
         };
         
         
-        var logInHelper = function(logInTypeCb, cb, type){
+        var logInHelper = function(logInTypeCb, win, cb, type){
             var referrerId = (new Date().getTime());
             var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href.substring(0,window.location.href.indexOf('chaise')) + "chaise/login?referrerid=" + referrerId);
             var config = {
@@ -142,7 +137,9 @@
                 var params = {
                     login_url: login_url
                 };
-
+                if(win){
+                        win.location=params.login_url;
+                }
                 logInTypeCb(params,referrerId, cb, type);
             }, function(error) {
                 throw error;
@@ -181,12 +178,12 @@
                 delete _changeCbs[id];
             },
             
-            loginInAPopUp: function(reloadCb) {
-                logInHelper(loginWindowCb,reloadCb,'popUp');
+            loginInAPopUp: function(win,reloadCb) {
+                logInHelper(loginWindowCb,win,reloadCb,'popUp');
             },
 
             loginInAModal: function(notifyErmrestCB) {
-                logInHelper(loginWindowCb,notifyErmrestCB,'modal');
+                logInHelper(loginWindowCb,"",notifyErmrestCB,'modal');
             },
 
             logout: function() {
