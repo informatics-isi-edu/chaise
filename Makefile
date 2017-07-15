@@ -333,8 +333,9 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 
 RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
 	$(RE_ASSETS)/model.js \
-	$(RE_ASSETS)/form.controller.js \
-	$(RE_ASSETS)/mdHelp.controller.js
+	$(RE_ASSETS)/form.controller.js
+
+RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.controller.js
 
 
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
@@ -346,8 +347,9 @@ RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/app.css \
 	$(COMMON)/styles/appheader.css
 
-RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css \
-	$(RE_ASSETS)/mdHelpStyle.min.css
+RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
+
+RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
 
 # JavaScript and CSS source for RecordSet app
 RECSET_ASSETS=recordset
@@ -756,13 +758,13 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 
-.make-md-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_CSS_SOURCE) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG)
+.make-md-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_SHARED_JS_DEPS) $(JS_CONFIG) $(RE_JS_MDHELP) $(RE_CSS_MDHELP)
 	> .make-md-asset-block
 	for file in $(RE_SHARED_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-md-asset-block ; \
 	done
-	for file in $(RE_CSS_SOURCE); do \
+	for file in $(RE_CSS_MDHELP); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-md-asset-block ; \
 	done
@@ -776,7 +778,7 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
 		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-md-asset-block ; \
 	done
-	for file in $(RE_JS_SOURCE); do \
+	for file in $(RE_JS_MDHELP); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
 	done
