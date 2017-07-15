@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="chaise.mdHelp">
+
+<head>
+    <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
+    <title>Markdown Help</title>
+    <!-- <link rel="stylesheet" href="./mdHelpStyle.min.css"> -->
+
+    <!-- <script src='../chaise-config.js'></script>
+    <script src='../scripts/vendor/jquery-latest.min.js'></script>
+    <script src='../scripts/vendor/angular.js'></script>
+    <script src='../scripts/vendor/angular-sanitize.js'></script>
+    <script src='../scripts/vendor/angular-messages.min.js'></script>
+    <script src='../common/vendor/angular-cookies.min.js'></script>
+    <script src='../common/vendor/mask.min.js'></script>
+    <script src='../common/authen.js'></script>
+    <script src='../common/errors.js'></script>
+    <script src='../common/modal.js'></script>
+    <script src='../common/alerts.js'></script>
+    <script src='../common/filters.js'></script>
+    <script src='../common/bindHtmlUnsafe.js'></script>
+    <script src='../common/utils.js'></script>
+    <script src='../common/navbar.js'></script>
+    <script src='../common/footer.js'></script>
+    <script src='../scripts/vendor/bootstrap.js'></script>
+    <script src='../scripts/vendor/ui-bootstrap-tpls.js'></script>
+    <script src='../scripts/vendor/select.js'></script>
+    <script src='../scripts/vendor/angular-datepicker.js'></script>
+    <script src='../scripts/vendor/rzslider.js'></script>
+    <script src='../../ermrestjs/build/ermrest.js'></script>
+    <script src='./mdHelp.controller.js'></script> -->
+    %ASSETS%
+</head>
+
+<body cz-shortcut-listen="true" ng-controller="mdHelpController as ctrl">
+    <!-- <div ng-controller="mdHelpController as ctrl"> -->
+        <navbar></navbar>
+        <div class="container-mdhelp">
+            <div class="twelve columns center">
+
+                <table class="markdown-reference">
+                    <thead>
+                        <tr>
+                            <th>{{ctrl.hdg1}} </th>
+                            <th>Raw</th>
+                            <th>Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="preformatted">**Something Bold**</td>
+                            <td class="preformatted second-example">__Something Bold__</td>
+                            <td><strong>Something Bold</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">*Some Italic*</td>
+                            <td class="preformatted second-example">_Some Italic_</td>
+                            <td><em>Some Italic</em></td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">~~strikethrough text~~</td>
+                            <td class="preformatted"></td>
+                            <td><strike>strikethrough text</strike></td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                # Large Heading
+                            </td>
+                            <td class="preformatted">
+                                Large Heading<br> =========
+                            </td>
+                            <td>
+                                <h1 class="smaller-h1">Large Heading</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                ## Heading
+                            </td>
+                            <td class="preformatted">
+                                Heading<br> ---------
+                            </td>
+                            <td>
+                                <h2 class="smaller-h2">Heading</h2>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                [Link](http://usc.edu)
+                            </td>
+                            <td class="preformatted second-example">
+                                [Link][1]<br> ⋮
+                                <br> [1]: http://usc.edu
+                            </td>
+                            <td><a href="#" target="_blank">Link</a></td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                ![Image](http://xyz/a.png)
+                            </td>
+                            <td class="preformatted second-example">
+                                ![Image][1]<br> ⋮
+                                <br> [1]: http://xyz/a.png
+                            </td>
+                            <td>
+                                <img src="{{::ctrl.img}}"  height="50" alt="Markdown">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                &gt; This is<br> blockquote
+
+                            </td>
+                            <td class="preformatted second-example">
+                                &nbsp;
+                            </td>
+                            <td>
+                                <blockquote><p>This is<br> blockquote</p></blockquote>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                <p>
+                                    * List Item 1<br> * List Item 2<br> * List Item 3
+                                </p>
+                            </td>
+                            <td class="preformatted second-example">
+                                <p>
+                                    - List Item 1<br> - List Item 2<br> - List Item 3<br>
+                                </p>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>List Item 1</li>
+                                    <li>List Item 2</li>
+                                    <li>List Item 3</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                <p>
+                                    1. One<br> 2. Two<br> 3. Three
+                                </p>
+                            </td>
+                            <td class="preformatted second-example">
+                                <p>
+                                    1) One<br> 2) Two<br> 3) Three
+                                </p>
+                            </td>
+                            <td>
+                                <ol>
+                                    <li>One</li>
+                                    <li>Two</li>
+                                    <li>Three</li>
+                                </ol>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                Horizontal Rule<br>
+                                <br> ---
+                            </td>
+                            <td class="preformatted second-example">
+                                Horizontal Rule<br>
+                                <br> ***
+                            </td>
+                            <td>
+                                Horizontal Rule
+                                <hr class="custom-hr">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                `Inline code` with backticks
+                            </td>
+                            <td class="preformatted second-example">
+                                &nbsp;
+                            </td>
+                            <td>
+                                <code class="preformatted">Inline code</code> with backticks
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                ```<br> # code block<br> print '3 backticks or'<br> print 'indent 4 spaces'<br> ```
+                            </td>
+                            <td class="preformatted second-example">
+                                <span class="spaces">····</span># code block<br>
+                                <span class="spaces">····</span>print '3 backticks or'<br>
+                                <span class="spaces">····</span>print 'indent 4 spaces'
+                            </td>
+                            <td>
+                                <div class="code-block">
+                                    # code block
+                                    <br> print '3 backticks or'
+                                    <br> print 'indent 4 spaces'
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="preformatted">
+                                ```<br> # code block<br> print '3 backticks or'<br> print 'indent 4 spaces'<br> ```
+                            </td>
+                            <td class="preformatted second-example">
+                                <span class="spaces">····</span># code block<br>
+                                <span class="spaces">····</span>print '3 backticks or'<br>
+                                <span class="spaces">····</span>print 'indent 4 spaces'
+                            </td>
+                            <td>
+                                <div class="code-block">
+                                    # code block
+                                    <br> print '3 backticks or'
+                                    <br> print 'indent 4 spaces'
+                                </div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <!-- </div> -->
+</body>
+
+</html>
