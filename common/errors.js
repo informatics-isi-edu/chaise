@@ -86,7 +86,11 @@
                     
             modalInstance.result.then(function () {
                 if (errorCode == errorNames.unauthorized && !providedLink) {
-                    Session.loginInAPopUp(reloadCb);                
+                    var x = window.innerWidth/2 - 800/2;
+                    var y = window.innerHeight/2 - 600/2;
+
+                    var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
+                    Session.loginInAPopUp(win, reloadCb);                
                 } else {
                     $window.location.replace(redirectLink);
                 }
@@ -140,7 +144,7 @@
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
-                Session.loginInAPopUp(reloadCb);
+                Session.loginInAModal(reloadCb);
             }
             else if (exception.code && exception.code == errorNames.multipleRecords){
                 errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
