@@ -247,14 +247,23 @@ th {
 .container-mdhelp {
   position: relative;
   width: 100%;
-  height:90%;
   max-width: 960px;
   margin: 2em auto;
   padding: 0 20px;
   display: block;
   border: 2px solid #31b7e1;
-  overflow-x: scroll;
-  box-sizing: border-box; }
+  box-sizing: border-box;
+}
+.highlight-pre{
+    background-color: #FFF !important;
+    border: 0px !important;
+}
+.hdrStyle{
+    font-style: italic;
+    font-weight: bold;
+    color: #0792bc;
+    text-decoration: underline;
+}
 .column,
 .columns {
   width: 100%;
@@ -557,10 +566,10 @@ p {
 	border: 1px #666 solid;
 	margin-bottom: 0em;
 }
-code, kbd, pre, samp, .editor, .html-pad, .preformatted {
+code, kbd, pre, samp, .editor, .html-pad, .rawInput {
 	font: 1em/normal 'Roboto Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
 }
-.preformatted {
+.rawInput {
     font-size: 0.9em;
 }
 

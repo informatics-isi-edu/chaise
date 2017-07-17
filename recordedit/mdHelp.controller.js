@@ -10,10 +10,13 @@
         'chaise.navbar',
         'ermrestjs',
         'ngSanitize',
-        'ui.bootstrap'
+        'ui.bootstrap',
+        'chaise.footer'
     ]).controller('mdHelpController',[function() {
         var ctrl = this;
-        ctrl.hdg1 = "Raw";
+        ctrl.hdr1 = "Raw";
+        ctrl.hdr2 = "Raw (Alternative)";
+        ctrl.hdr3 = "Output";
         ctrl.img = "../images/USC-Shield.png";
     }])
 })();
