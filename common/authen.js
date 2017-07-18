@@ -101,8 +101,10 @@
         
         
         var logInHelper = function(logInTypeCb, win, cb, type){
-            var referrerId = (new Date().getTime());
-            var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.href.substring(0,window.location.href.indexOf('chaise')) + "chaise/login?referrerid=" + referrerId);
+            var referrerId = (new Date().getTime());    
+            var location = window.location;
+            var subUrl =  location.pathname.split('/')[1].indexOf('~')!= -1 ? location.pathname.split('/')[2]: location.pathname.split('/')[1];
+            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent(location.origin+"/"+subUrl + "/login?referrerid=" + referrerId);
             var config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
