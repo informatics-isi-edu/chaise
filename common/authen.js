@@ -21,6 +21,10 @@
             }
         };
         
+        /**
+         * Return deployment specific path name
+         * @return {String} string representation of the path name "~username/chaise", "chaise", "path/to/deployment/data"
+         */
         var getDepPathName = function() {
             var location = window.location;
             var splits = location.pathname.split('/');
@@ -28,7 +32,7 @@
             if(splits[splits.length-1] == ""){
                 splits.splice(splits.length-1, 1);
             }
-            if(splits[splits.length-1].indexOf('index.html') != -1){
+            if(splits[splits.length-1] == 'index.html'){
                 splits.splice(splits.length-1, 1);
             }
             splits.splice(splits.length-1, 1);
