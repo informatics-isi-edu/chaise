@@ -63,7 +63,7 @@ var chaiseConfig = {
             // }
         ]
     },
-    footerMarkdown:"* Please check [Privacy Policy](/privacy-policy/){target='_blank'}",
+    footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     maxRelatedTablesOpen:15
 };
 
