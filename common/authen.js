@@ -21,6 +21,19 @@
             }
         };
         
+        var getDepPathName = function() {
+            var location = window.location;
+            var splits = location.pathname.split('/');
+            splits.splice(0, 1);
+            if(splits[splits.length-1] == ""){
+                splits.splice(splits.length-1, 1);
+            }
+            if(splits[splits.length-1].indexOf('index.html') != -1){
+                splits.splice(splits.length-1, 1);
+            }
+            splits.splice(splits.length-1, 1);
+            return splits.join('/');
+        };
         
         var loginWindowCb = function (params, referrerId, cb, type){
             if(type.indexOf('modal')!== -1){
@@ -102,9 +115,8 @@
         
         var logInHelper = function(logInTypeCb, win, cb, type){
             var referrerId = (new Date().getTime());    
-            var location = window.location;
-            var subUrl =  location.pathname.split('/')[1].indexOf('~')!= -1 ? location.pathname.split('/')[2]: location.pathname.split('/')[1];
-            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent(location.origin+"/"+subUrl + "/login?referrerid=" + referrerId);
+            
+            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent(location.origin+"/"+getDepPathName() + "/login?referrerid=" + referrerId);
             var config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
