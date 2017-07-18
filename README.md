@@ -135,6 +135,8 @@ This example is for **production** deployments or other deployments to the docum
 # make install
 ```
 
+**Important** For production usage, we strongly recommend that Chaise only be installed in `/var/www/html/chaise`. This is the only configuration that we actively support.
+
 ### Deploy to a remote userdir
 
 This example is how you would install the software on a remote server, for example a test server. Replacing `username` and `hostname` with real values.
