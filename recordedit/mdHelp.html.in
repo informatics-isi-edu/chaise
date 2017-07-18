@@ -7,12 +7,12 @@
     %ASSETS%
 </head>
 
-<body cz-shortcut-listen="true" ng-controller="mdHelpController as ctrl">
+<body ng-controller="mdHelpController as ctrl">
     <navbar></navbar>
-    <div class="container-mdhelp">
+    <div class="container-mdhelp" id="mdhelp-record">
         <div class="twelve columns center">
 
-            <table class="markdown-reference">
+            <table class="markdown-reference" id="mainTable">
                 <thead class="hdrStyle">
                     <tr>
                         <th>{{ctrl.hdr1}} </th>
@@ -22,39 +22,39 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="rawInput">**Something Bold**</td>
-                        <td class="rawInput">__Something Bold__</td>
-                        <td><strong>Something Bold</strong></td>
+                        <td class="rawInput" id="rBold1">**Something Bold**</td>
+                        <td class="rawInput" id="rBold2">__Something Bold__</td>
+                        <td id="oBold"><strong>Something Bold</strong></td>
                     </tr>
                     <tr>
-                        <td class="rawInput">*Some Italic*</td>
-                        <td class="rawInput">_Some Italic_</td>
-                        <td><em>Some Italic</em></td>
+                        <td class="rawInput" id="rItalic1">*Some Italic*</td>
+                        <td class="rawInput" id="rItalic2">_Some Italic_</td>
+                        <td id="oItalic"><em>Some Italic</em></td>
                     </tr>
                     <tr>
-                        <td class="rawInput">~~strikethrough text~~</td>
-                        <td class="rawInput"></td>
-                        <td><strike>strikethrough text</strike></td>
+                        <td class="rawInput" id="rStrike1">~~strikethrough text~~</td>
+                        <td class="rawInput" id="rStrike2"></td>
+                        <td id="oStrike"><strike>strikethrough text</strike></td>
                     </tr>
                     <tr>
-                        <td class="rawInput">
+                        <td class="rawInput" id="rLargeHdr1">
                             # Large Heading
                         </td>
-                        <td class="rawInput">
+                        <td class="rawInput" id="rLargeHdr2">
                             Large Heading<br> =========
                         </td>
-                        <td>
+                        <td id="oLargeHdr">
                             <h1 class="smaller-h1">Large Heading</h1>
                         </td>
                     </tr>
                     <tr>
-                        <td class="rawInput">
+                        <td class="rawInput" id="rSmallHdr1">
                             ## Heading
                         </td>
-                        <td class="rawInput">
+                        <td class="rawInput" id="rSmallHdr2">
                             Heading<br> ---------
                         </td>
-                        <td>
+                        <td id="oSmallHdr">
                             <h2 class="smaller-h2">Heading</h2>
                         </td>
                     </tr>
