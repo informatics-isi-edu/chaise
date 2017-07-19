@@ -24,17 +24,17 @@
                     <tr>
                         <td class="rawInput" id="rBold1">**Something Bold**</td>
                         <td class="rawInput" id="rBold2">__Something Bold__</td>
-                        <td id="oBold"><strong>Something Bold</strong></td>
+                        <td id="oBold" class="markdown-container"><strong>Something Bold</strong></td>
                     </tr>
                     <tr>
                         <td class="rawInput" id="rItalic1">*Some Italic*</td>
                         <td class="rawInput" id="rItalic2">_Some Italic_</td>
-                        <td id="oItalic"><em>Some Italic</em></td>
+                        <td id="oItalic" class="markdown-container"><em>Some Italic</em></td>
                     </tr>
                     <tr>
                         <td class="rawInput" id="rStrike1">~~strikethrough text~~</td>
                         <td class="rawInput" id="rStrike2"></td>
-                        <td id="oStrike"><strike>strikethrough text</strike></td>
+                        <td id="oStrike" class="markdown-container"><strike>strikethrough text</strike></td>
                     </tr>
                     <tr>
                         <td class="rawInput" id="rLargeHdr1">
@@ -43,7 +43,7 @@
                         <td class="rawInput" id="rLargeHdr2">
                             Large Heading<br> =========
                         </td>
-                        <td id="oLargeHdr">
+                        <td id="oLargeHdr" class="markdown-container">
                             <h1 class="smaller-h1">Large Heading</h1>
                         </td>
                     </tr>
@@ -54,7 +54,7 @@
                         <td class="rawInput" id="rSmallHdr2">
                             Heading<br> ---------
                         </td>
-                        <td id="oSmallHdr">
+                        <td id="oSmallHdr" class="markdown-container">
                             <h2 class="smaller-h2">Heading</h2>
                         </td>
                     </tr>
@@ -66,7 +66,7 @@
                             [Link][1]<br> ⋮
                             <br> [1]: http://usc.edu
                         </td>
-                        <td><a href="#" target="_blank">Link</a></td>
+                        <td class="markdown-container"><a href="#" target="_blank">Link</a></td>
                     </tr>
                     <tr>
                         <td class="rawInput">
@@ -76,7 +76,7 @@
                             ![Image][1]<br> ⋮
                             <br> [1]: http://xyz/a.png
                         </td>
-                        <td>
+                        <td class="markdown-container">
                             <img src="{{::ctrl.img}}" height="50" alt="Markdown">
                         </td>
                     </tr>
@@ -88,7 +88,7 @@
                         <td class="rawInput ">
                             &nbsp;
                         </td>
-                        <td>
+                        <td class="markdown-container">
                             <blockquote>
                                 <p>This is<br> blockquote</p>
                             </blockquote>
@@ -102,7 +102,7 @@
                         <td class="rawInput">
                             &nbsp;
                         </td>
-                        <td>
+                        <td class="markdown-container">
                             <code class="rawInput">Inline code</code> is very usefull
                         </td>
                     </tr>
@@ -117,7 +117,7 @@
                                 - List Item 1<br> - List Item 2<br> - List Item 3<br>
                             </p>
                         </td>
-                        <td>
+                        <td class="markdown-container">
                             <ul>
                                 <li>List Item 1</li>
                                 <li>List Item 2</li>
@@ -136,7 +136,7 @@
                                 1) One<br> 2) Two<br> 3) Three
                             </p>
                         </td>
-                        <td>
+                        <td class="markdown-container">
                             <ol>
                                 <li>One</li>
                                 <li>Two</li>
@@ -153,7 +153,7 @@
                             Horizontal Rule<br>
                             <br> ***
                         </td>
-                        <td>
+                        <td class="markdown-container">
                             Horizontal Rule
                             <hr class="custom-hr">
                         </td>
@@ -168,7 +168,7 @@
                             <span class="spaces">····</span>log 'my name to'<br>
                             <span class="spaces">····</span>log 'ym mane ot'
                         </td>
-                        <td>
+                        <td class="markdown-container">
                             <div class="code-block">
                                 # neo eth
                                 <br> log 'my name to'
@@ -187,7 +187,7 @@ Cell 3 | Cell 4
                             </pre>
                         </td>
                         <td></td>
-                        <td>
+                        <td class="markdown-container">
                             <table>
                                 <thead>
                                     <tr>
