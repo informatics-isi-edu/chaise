@@ -131,6 +131,7 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/bootstrap-tour.min.js \
 	$(JS)/vendor/plotly-latest.min.js
 
+
 JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \
@@ -237,7 +238,8 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/footer.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js
+	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(JS)/vendor/lodash.js
 
 RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 	$(RECORD_ASSETS)/record.controller.js

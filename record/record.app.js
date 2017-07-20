@@ -59,6 +59,9 @@
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
 
+        function getPageSize(obj){
+            return ((!angular.isUndefined(obj) && obj.display.defaultPageSize)?obj.display.defaultPageSize:constants.defaultPageSize);
+        }
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {
 
@@ -119,14 +122,26 @@
                 });
 
                 $rootScope.columns = $rootScope.reference.columns;
-                $rootScope.columns[1].reference.read(2).then(function (newpage) {                    
-                    var col1Data = DataUtils.getRowValuesFromPage(newpage);
-
-                    $rootScope.recordValues[1].isHTML = col1Data[0][0].isHTML;
-                    $rootScope.recordValues[1].value = col1Data[0][0].value;
+                var allInbFKColsIdx = [];
+                var allInbFKCols = _.filter($rootScope.columns,function(o,i){
+                    if(o.isInboundForeignKey){
+                        allInbFKColsIdx.push(i);
+                        return o;
+                }
+            });
+                if(allInbFKCols.length>0){
+                for(var i =0;i<allInbFKCols.length;i++){
+                    var ifkPageSize = getPageSize(allInbFKCols[i].reference);
+                    allInbFKCols[i].reference.read(ifkPageSize).then(function (ifkPage) {
+                    var col1Data = DataUtils.getRowValuesFromPage(ifkPage);
+                    $rootScope.recordValues[allInbFKColsIdx[i]].isHTML = col1Data[0][0].isHTML;
+                    $rootScope.recordValues[allInbFKColsIdx[i]].value = col1Data[0][0].value;
                     $rootScope.recDisplayReady =  true;
-
                 });
+            }
+        }else{
+            $rootScope.recDisplayReady =  true;
+        }
 
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
@@ -135,12 +150,7 @@
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                     $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
 
-                    var pageSize;
-                    if ($rootScope.relatedReferences[i].display.defaultPageSize) {
-                        pageSize = $rootScope.relatedReferences[i].display.defaultPageSize;
-                    } else {
-                        pageSize = constants.defaultPageSize;
-                    }
+                    var pageSize = getPageSize($rootScope.relatedReferences[i]);
 
                     (function(i) {
                         if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
