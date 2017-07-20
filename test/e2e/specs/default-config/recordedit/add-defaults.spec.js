@@ -62,16 +62,7 @@ var testParams = {
         json_disabled:JSON.stringify(98.786)
     }
 };
-var mdHelp ={
-        raw_bold1:"**Something Bold**",
-        raw_bold2:"__Something Bold__",
-        md_bold:"<strong>Something Bold</strong>",
-        raw_italic1:"*Some Italic*",
-        raw_italic2:"_Some Italic_",
-        md_italic:"<em>Some Italic</em>",
-        raw_strike:"~~strikethrough text~~",
-        md_strike:"<strike>strikethrough text</strike>"
-};
+
 describe('Record Add with defaults', function() {
 
     describe("for when the user creates an entity with default values, ", function() {
@@ -177,37 +168,7 @@ describe('Record Add with defaults', function() {
             expect(foreignKeyInput.getText()).toBe(values.foreign_key_value, "Foreign key input default is incorrect");
             expect(foreignKeyDisabledInput.getText()).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
         });
-        //mdhelp page
-        it("should open a new window with help page.",function(){
-            var helpBtn = element.all(by.css('button[title=Help]')).get(0);
-            chaisePage.waitForElement(helpBtn);
-            helpBtn.click();
-            browser.getAllWindowHandles().then(function(handles){
-                return handles;
-            }).then(function(handles) {
-                allWindows = handles;
-                return browser.switchTo().window(allWindows[1]);
-            }).then(function() {
-                return chaisePage.waitForElement(element(by.id("mdhelp-record")));
-            }).then(function() {
-                expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(18,'Table row count could not be matched.');
-                expect(element(by.id('rBold1')).getText()).toBe(mdHelp.raw_bold1,'First raw Bold text help not found');
-                expect(element(by.id('rBold2')).getText()).toBe(mdHelp.raw_bold2,'Second raw Bold text help not found');
-                expect(element(by.id('oBold')).getAttribute('innerHTML')).toBe(mdHelp.md_bold,'Markdown Bold text help not found');
-                expect(element(by.id('rItalic1')).getText()).toBe(mdHelp.raw_italic1,'First raw Italic text help not found');
-                expect(element(by.id('rItalic2')).getText()).toBe(mdHelp.raw_italic2,'Second raw Italic text help not found');
-                expect(element(by.id('oItalic')).getAttribute('innerHTML')).toBe(mdHelp.md_italic,'Markdown Italic text help not found');
-                expect(element(by.id('rStrike1')).getText()).toBe(mdHelp.raw_strike,'Strikethrough text help not found');
-                expect(element(by.id('oStrike')).getAttribute('innerHTML')).toBe(mdHelp.md_strike,'Markdown Strike text help not found');
-            }).then(function() {
-                // - Go back to initial Record page
-                browser.close();
-                browser.switchTo().window(allWindows[0]);
-            }).catch(function(error) {
-                console.dir(error);
-                expect('Something went wrong with this promise chain.').toBe('Please see error message.','While checking markdown help page');
-            });
-        });
+        
         // TODO write tests for default values for composite foreign keys when implemented
 
         describe("Submit the form", function() {
