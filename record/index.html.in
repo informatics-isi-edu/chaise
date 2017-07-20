@@ -48,7 +48,7 @@
             </div>
 
             <!-- defined on $rootScope in run function -->
-            <record-display columns="::columns" values="::recordValues"></record-display>
+            <record-display columns="::columns" values="::recordValues" ng-if="recDisplayReady"></record-display>
 
             <!-- used to delay empty accordions from displaying before simple record display -->
             <div ng-if="recordValues">

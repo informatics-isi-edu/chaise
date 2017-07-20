@@ -40,6 +40,7 @@
         var session,
             context = {};
         $rootScope.displayReady = false;
+        $rootScope.recDisplayReady = false;
 
         UriUtils.setOrigin();
         headInjector.setupHead();
@@ -118,6 +119,14 @@
                 });
 
                 $rootScope.columns = $rootScope.reference.columns;
+                $rootScope.columns[1].reference.read(2).then(function (newpage) {                    
+                    var col1Data = DataUtils.getRowValuesFromPage(newpage);
+
+                    $rootScope.recordValues[1].isHTML = col1Data[0][0].isHTML;
+                    $rootScope.recordValues[1].value = col1Data[0][0].value;
+                    $rootScope.recDisplayReady =  true;
+
+                });
 
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
@@ -183,7 +192,7 @@
             }).catch(function genericCatch(exception) {
                 throw exception;
             });
-            
+
         })
 
 
