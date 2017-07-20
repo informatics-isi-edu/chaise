@@ -25,9 +25,8 @@
          * Return deployment specific path name
          * @return {String} string representation of the path name "~username/chaise", "chaise", "path/to/deployment/data"
          */
-        var getDepPathName = function() {
-            var location = window.location;
-            var splits = location.pathname.split('/');
+        var getDeploymentPathName = function() {
+            var splits = $window.location.pathname.split('/');
             splits.splice(0, 1);
             if(splits[splits.length-1] == ""){
                 splits.splice(splits.length-1, 1);
@@ -120,7 +119,7 @@
         var logInHelper = function(logInTypeCb, win, cb, type){
             var referrerId = (new Date().getTime());    
             
-            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent(location.origin+"/"+getDepPathName() + "/login?referrerid=" + referrerId);
+            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin+"/"+getDeploymentPathName() + "/login?referrerid=" + referrerId);
             var config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
