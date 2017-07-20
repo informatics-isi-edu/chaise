@@ -133,6 +133,8 @@
                 for(var i =0;i<allInbFKCols.length;i++){
                     var ifkPageSize = getPageSize(allInbFKCols[i].reference);
                     allInbFKCols[i].reference.read(ifkPageSize).then(function (ifkPage) {
+
+
                     var col1Data = DataUtils.getRowValuesFromPage(ifkPage);
                     $rootScope.recordValues[allInbFKColsIdx[i]].isHTML = col1Data[0][0].isHTML;
                     $rootScope.recordValues[allInbFKColsIdx[i]].value = col1Data[0][0].value;
