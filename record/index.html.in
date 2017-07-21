@@ -48,12 +48,12 @@
             </div>
 
             <!-- defined on $rootScope in run function -->
-            <record-display columns="::columns" values="::recordValues"></record-display>
+            <record-display columns="::columns" values="::recordValues" ifk="inbFK" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::colTableModels[0]"></record-display>
 
 
-            <div ng-show="colTableModels[$index].displayType != 'markdown'">
+            <!-- <div ng-show="colTableModels[$index].displayType != 'markdown'">
                 <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::colTableModels[0]"></record-table>
-            </div>
+            </div> -->
 
             <!-- used to delay empty accordions from displaying before simple record display -->
             <div ng-if="recordValues">

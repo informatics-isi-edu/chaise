@@ -7,8 +7,14 @@
             </span>
         </td>
         <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML">
-            <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
-            <span ng-switch-default>{{::values[$index].value}}</span>
+
+            <span ng-if="ifk!=true">"ifk1: " {{::!scope.ifk}}
+                <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
+                <span ng-switch-default>{{::values[$index].value}}</span>
+            </span>
+            <span ng-if="ifk">"ifk2: " {{ifk}}
+                <record-table class="related-table" id="::rectabid" vm="::vm"></record-table>
+            </span>
         </td>
     </tr>
 </table>

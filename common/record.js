@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.record.display', [])
+    angular.module('chaise.record.display', ['chaise.record.table'])
 
     .filter('trustedHTML', ['$sce', function($sce){
         return function(text) {
@@ -14,7 +14,10 @@
             restrict: 'E',
             scope: {
                 columns: '=',
-                values: '='
+                values: '=',
+                ifk:'=',
+                rectabid: '=',
+                vm:'='
             },
             templateUrl: '../common/templates/record.html'
         };

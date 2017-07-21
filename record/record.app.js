@@ -41,6 +41,7 @@
             context = {};
         $rootScope.displayReady = false;
         $rootScope.recDisplayReady = false;
+        $rootScope.inbFK = false;
 
         UriUtils.setOrigin();
         headInjector.setupHead();
@@ -163,7 +164,7 @@
                         };
                         $rootScope.colTableModels[i] = model;
                         $rootScope.displayReady = true;
-
+                        $rootScope.inbFK = true;
 
                         //
                     // var col1Data = DataUtils.getRowValuesFromPage(ifkPage);
