@@ -373,7 +373,11 @@
                     }
                 }).catch(function (exception) {
                     vm.submissionButtonDisabled = false;
-                    AlertsService.addAlert(exception.message, 'error');
+                    if (exception instanceof ERMrest.NoDataChangedError) {
+                        AlertsService.addAlert(exception.message, 'warning');
+                    } else {
+                        AlertsService.addAlert(exception.message, 'error');
+                    }
                 });
 
             });
