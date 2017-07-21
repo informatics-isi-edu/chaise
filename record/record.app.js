@@ -134,7 +134,7 @@
                     $rootScope.colTableModels = [];
                 for(var i =0;i<allInbFKCols.length;i++){
                     var ifkPageSize = getPageSize(allInbFKCols[i].reference);
-
+                    (function(i) {
                     allInbFKCols[i].reference.read(ifkPageSize).then(function (ifkPage) {
 
                         //
@@ -162,19 +162,14 @@
                             deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
                             selectable: false
                         };
-                        $rootScope.colTableModels[i] = model;
-                        $rootScope.displayReady = true;
-                        $rootScope.inbFK = true;
-
+                        $rootScope.colTableModels[allInbFKColsIdx[i]] = model;
                         //
                     // var col1Data = DataUtils.getRowValuesFromPage(ifkPage);
                     // $rootScope.recordValues[allInbFKColsIdx[i]].isHTML = col1Data[0][0].isHTML;
-                    // $rootScope.recordValues[allInbFKColsIdx[i]].value = col1Data[0][0].value;
-                    $rootScope.recDisplayReady =  true;
-
-
-
+                    // $rootScope.recordValues[allInbFKColsIdx[i]].value = 'inb_FK';
+                    $rootScope.recDisplayReady =  (i==allInbFKCols.length-1)?true:false;
                 });
+            })(i);
             }
         }else{
             $rootScope.recDisplayReady =  true;

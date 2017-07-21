@@ -15,9 +15,7 @@
             scope: {
                 columns: '=',
                 values: '=',
-                ifk:'=',
-                rectabid: '=',
-                vm:'='
+                rectab:'='
             },
             templateUrl: '../common/templates/record.html'
         };

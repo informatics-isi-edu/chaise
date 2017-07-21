@@ -8,12 +8,17 @@
         </td>
         <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML">
 
-            <span ng-if="ifk!=true">"ifk1: " {{::!scope.ifk}}
+            <span ng-if="::values[$index].value != null">
                 <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
                 <span ng-switch-default>{{::values[$index].value}}</span>
             </span>
-            <span ng-if="ifk">"ifk2: " {{ifk}}
-                <record-table class="related-table" id="::rectabid" vm="::vm"></record-table>
+            <span ng-if="::values[$index].value == ''">
+                <span ng-show="rectab[$index].displayType == 'markdown'">
+                    <span class="markdown-container" ng-bind-html="::rectab[$index].page.content | trustedHTML"></span>
+                </span>
+            <span ng-show="rectab[$index].displayType != 'markdown'">
+                <record-table class="related-table" vm="::rectab[$index]"></record-table>
+            </span>
             </span>
         </td>
     </tr>
