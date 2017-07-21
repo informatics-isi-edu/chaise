@@ -43,6 +43,7 @@
   "cover": 3005,
   "opened_on": "2008-12-09T00:00:00-08:00",
   "json_col":null,
+  "json_col_with_markdown": "delivered",
   "date_col": "12/9/2008",
   "luxurious": true
  },
