@@ -130,15 +130,49 @@
                 }
             });
                 if(allInbFKCols.length>0){
+                    $rootScope.colTableModels = [];
                 for(var i =0;i<allInbFKCols.length;i++){
                     var ifkPageSize = getPageSize(allInbFKCols[i].reference);
+
                     allInbFKCols[i].reference.read(ifkPageSize).then(function (ifkPage) {
 
+                        //
+                        var model = {
+                            reference: allInbFKCols[i].reference,
+                            columns: allInbFKCols[i].reference.columns,
+                            page: ifkPage,
+                            pageLimit: (allInbFKCols[i].reference.display.defaultPageSize ? allInbFKCols[i].reference.display.defaultPageSize : constants.defaultPageSize),
+                            hasNext: page.hasNext,      // used to determine if a link should be shown
+                            hasLoaded: true,            // used to determine if the current table and next table should be rendered
+                            open: true,                 // to define if the accordion is open or closed
+                            enableSort: true,           // allow sorting on table
+                            sortby: null,               // column name, user selected or null
+                            sortOrder: null,            // asc (default) or desc
+                            rowValues: [],              // array of rows values
+                            search: null,                // search term
+                            displayType: allInbFKCols[i].reference.display.type,
+                            context: "compact/brief",
+                            fromTuple: $rootScope.tuple
+                        };
+                        model.rowValues = DataUtils.getRowValuesFromPage(ifkPage);
+                        model.config = {
+                            viewable: true,
+                            editable: $rootScope.modifyRecord,
+                            deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
+                            selectable: false
+                        };
+                        $rootScope.colTableModels[i] = model;
+                        $rootScope.displayReady = true;
 
-                    var col1Data = DataUtils.getRowValuesFromPage(ifkPage);
-                    $rootScope.recordValues[allInbFKColsIdx[i]].isHTML = col1Data[0][0].isHTML;
-                    $rootScope.recordValues[allInbFKColsIdx[i]].value = col1Data[0][0].value;
+
+                        //
+                    // var col1Data = DataUtils.getRowValuesFromPage(ifkPage);
+                    // $rootScope.recordValues[allInbFKColsIdx[i]].isHTML = col1Data[0][0].isHTML;
+                    // $rootScope.recordValues[allInbFKColsIdx[i]].value = col1Data[0][0].value;
                     $rootScope.recDisplayReady =  true;
+
+
+
                 });
             }
         }else{
