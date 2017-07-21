@@ -768,7 +768,6 @@
                     if (counter == rowKeys.length) {
                         vm.noInputsModifed = true;
                     }
-                    console.log(counter);
                 }
             }
         }, true);
