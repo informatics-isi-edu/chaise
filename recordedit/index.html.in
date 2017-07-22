@@ -48,7 +48,7 @@
                                     <div class="col-xs-5 padding-top-10">
                                         <div class="pull-right">
                                             <button ng-if="::(form.editMode && form.showDeleteButton && reference.canDelete)" id="delete-button" class="btn btn-default" type="button" ng-disabled="::form.submissionButtonDisabled" ng-click="::form.deleteRecord();">Delete Record</button>
-                                            <button id="submit-record-button" class="btn" ng-class="::form.submissionButtonDisabled ? 'btn-default' : 'btn-primary'" type="submit" ng-disabled="form.submissionButtonDisabled || form.noInputsModifed" ng-click="::form.submit();">Submit Data</button>
+                                            <button id="submit-record-button" class="btn" ng-class="::form.submissionButtonDisabled ? 'btn-default' : 'btn-primary'" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit();">Submit Data</button>
                                         </div>
                                     </div>
                                 </div>

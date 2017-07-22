@@ -27,7 +27,6 @@
         vm.submit = submit;
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
-        vm.noInputsModifed = true;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
@@ -739,38 +738,6 @@
         function blurElement(e) {
             e.currentTarget.blur();
         }
-
-        $rootScope.$watch(function () { return recordEditModel.rows }, function(newValue) {
-            if ($rootScope.displayReady) {
-                // checks if the value is an object, if so it's converted to a string for easy comparison
-                // this is the case for file upload values
-                function formatVal(val) {
-                    return (typeof val !== "object" ? val : JSON.stringify(val));
-                }
-
-                for (var i = 0; i < recordEditModel.rows.length; i++) {
-                    var currentRow = recordEditModel.rows[i];
-                    var oldRow = recordEditModel.oldRows[i];
-                    var rowKeys = Object.keys(currentRow);
-
-                    var counter = 0;
-                    for (var j = 0; j < rowKeys.length; j++) {
-                        var currentKey = rowKeys[j];
-                        // guard against file upload because it creates objects and comparing objects is odd
-                        var currentVal = formatVal(currentRow[currentKey]);
-                        var oldVal = formatVal(oldRow[currentKey]);
-                        if (currentVal !== oldVal) {
-                            vm.noInputsModifed = false;
-                        } else {
-                            counter++;
-                        }
-                    }
-                    if (counter == rowKeys.length) {
-                        vm.noInputsModifed = true;
-                    }
-                }
-            }
-        }, true);
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
