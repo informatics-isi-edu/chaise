@@ -113,7 +113,7 @@ describe('Record Add with defaults', function() {
             booleanDisabledInput = chaisePage.recordEditPage.getInputById(0, "boolean_disabled");
             dateDisabledInput = chaisePage.recordEditPage.getInputById(0, "date_disabled");
             jsonInputDisabled= chaisePage.recordEditPage.getInputById(0, "json_disabled");
-            
+
             expect(textDisabledInput.getAttribute("value")).toBe(values.text_disabled_value, "Text disabled input default is incorrect");
             expect(markdownDisabledInput.getAttribute("value")).toBe(values.markdown_disabled_value, "Markdown disabled input default is incorrect");
             expect(intDisabledInput.getAttribute("value")).toBe(values.int_disabled_value, "Int disabled input default is incorrect");
@@ -168,7 +168,7 @@ describe('Record Add with defaults', function() {
             expect(foreignKeyInput.getText()).toBe(values.foreign_key_value, "Foreign key input default is incorrect");
             expect(foreignKeyDisabledInput.getText()).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
         });
-
+        
         // TODO write tests for default values for composite foreign keys when implemented
 
         describe("Submit the form", function() {
