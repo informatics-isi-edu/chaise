@@ -1,7 +1,7 @@
 {
-    "schema_name": "recordset-multi-edit",
+    "schema_name": "submission-disabled",
     "tables": {
-        "multi-add-table": {
+        "submission-disabled-table": {
             "comment": "Table to represent adding multiple entities",
             "kind": "table",
             "keys": [
@@ -14,8 +14,8 @@
                 }
             ],
             "foreign_keys": [],
-            "table_name": "multi-edit-table",
-            "schema_name": "recordset-multi-edit",
+            "table_name": "submission-disabled-table",
+            "schema_name": "submission-disabled",
             "column_definitions": [
                 {
                     "name": "id",
@@ -52,6 +52,9 @@
             }
         }
     },
+    "table_names": [
+        "submission-disabled-table"
+    ],
     "comment": null,
     "annotations": {}
 }
