@@ -1,7 +1,7 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var testParams = {
     schemaName: "recordset-multi-edit",
-    table_name: "multi-add-table",
+    table_name: "multi-edit-table",
     default_page_limit: 25,
     limit: 10,
     int_23_count: 11

@@ -14,7 +14,7 @@
                 }
             ],
             "foreign_keys": [],
-            "table_name": "multi-add-table",
+            "table_name": "multi-edit-table",
             "schema_name": "recordset-multi-edit",
             "column_definitions": [
                 {
