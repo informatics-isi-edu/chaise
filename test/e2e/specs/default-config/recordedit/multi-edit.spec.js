@@ -8,7 +8,7 @@ var currentTimestampTime = moment().format("x");
 var testParams = {
     schema_name: "multi-edit",
     tables: [{
-            table_name: "multi-add-table",
+            table_name: "multi-edit-table",
             sortColumns: "id",
             keys: [
                 {name: "id", value: "1000", operator: "="},
@@ -31,7 +31,7 @@ var testParams = {
                 ["1001", "description 2", "66",JSON.stringify({"quantity":"6"},undefined,2),JSON.stringify({"quantity":"9"},undefined,2)]
             ]
         }, {
-            table_name: "multi-add-table",
+            table_name: "multi-edit-table",
             sortColumns: "id",
             keys: [
                 {name: "id", value: "1000", operator: "="},
@@ -207,15 +207,15 @@ describe('Edit multiple existing record,', function() {
                             done();
                         });
                     });
-                    
+
                     describe("result page", function () {
                         it("should have the correct title.", function() {
                             expect(chaisePage.recordEditPage.getResultTitle().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length + " "+ tableParams.table_name +" Records Updated Successfully");
                         });
-                        
+
                         it('should point to the correct link with caption.', function () {
                             var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")";
-                            
+
                             chaisePage.recordEditPage.getResultTitleLink().then(function (titleLink) {
                                 expect(titleLink[0].getText()).toBe(tableParams.table_name, "Title of result page doesn't have the expected caption.");
                                 expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
@@ -229,7 +229,7 @@ describe('Edit multiple existing record,', function() {
 
                                 for (j = 0; j < rows.length; j++) {
                                     (function(index) {
-                                        rows[index].all(by.tagName("td")).then(function(cells) {    
+                                        rows[index].all(by.tagName("td")).then(function(cells) {
                                             // same column count
                                             expect(cells.length).toBe(tableParams.results[index].length, "number of columns are not as expected.");
 
