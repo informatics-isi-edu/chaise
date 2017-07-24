@@ -73,7 +73,8 @@ HTML=search/index.html \
 	 recordset/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
-	 record/index.html
+	 record/index.html \
+	 recordedit/mdHelp.html
 
 # ERMrestjs Deps
 ERMRESTJS_RT_DIR=../../ermrestjs
@@ -332,7 +333,10 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 
 RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
 	$(RE_ASSETS)/model.js \
-	$(RE_ASSETS)/form.controller.js \
+	$(RE_ASSETS)/form.controller.js
+
+RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.controller.js
+
 
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
@@ -344,6 +348,8 @@ RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/appheader.css
 
 RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
+
+RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
 
 # JavaScript and CSS source for RecordSet app
 RECSET_ASSETS=recordset
@@ -588,6 +594,10 @@ recordedit/index.html: recordedit/index.html.in .make-de-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
 		recordedit/index.html.in > recordedit/index.html
 
+recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-md-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
+	recordedit/mdHelp.html.in > recordedit/mdHelp.html
+
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
@@ -746,6 +756,31 @@ $(JS_CONFIG): chaise-config-sample.js
 	for file in $(RECORD_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
+	done
+
+.make-md-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_SHARED_JS_DEPS) $(JS_CONFIG) $(RE_JS_MDHELP) $(RE_CSS_MDHELP)
+	> .make-md-asset-block
+	for file in $(RE_SHARED_CSS_DEPS); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-md-asset-block ; \
+	done
+	for file in $(RE_CSS_MDHELP); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-md-asset-block ; \
+	done
+	for file in $(JS_CONFIG) $(RE_SHARED_JS_DEPS); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
+	done
+	for script in $(ERMRESTJS_DEPS); do \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-md-asset-block ; \
+	done
+	for file in $(RE_JS_MDHELP); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
 	done
 
 # Rule for installing for normal deployment

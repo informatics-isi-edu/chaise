@@ -1294,7 +1294,7 @@
                   glyph: "glyphicon glyphicon-question-sign"
                 },
                 callback: function(e) {
-                    window.open('http://commonmark.org/help/');
+                    window.open('./mdHelp.html');
                 }
               }]
         },{
