@@ -63,6 +63,48 @@
         function getPageSize(obj){
             return ((!angular.isUndefined(obj) && obj.display.defaultPageSize)?obj.display.defaultPageSize:constants.defaultPageSize);
         }
+
+        function getRelatedTableData(refObj){
+
+            var pageSize = getPageSize(refObj);
+            refObj.read(pageSize).then(function (page) {
+                var model = {
+                    reference: refObj,
+                    columns: refObj.columns,
+                    page: page,
+                    pageLimit: pageSize,
+                    hasNext: page.hasNext,      // used to determine if a link should be shown
+                    hasLoaded: true,            // used to determine if the current table and next table should be rendered
+                    open: true,                 // to define if the accordion is open or closed
+                    enableSort: true,           // allow sorting on table
+                    sortby: null,               // column name, user selected or null
+                    sortOrder: null,            // asc (default) or desc
+                    rowValues: [],              // array of rows values
+                    search: null,                // search term
+                    displayType: refObj.reference.display.type,
+                    context: "compact/brief",
+                    fromTuple: $rootScope.tuple
+                };
+                model.rowValues = DataUtils.getRowValuesFromPage(page);
+                model.config = {
+                    viewable: true,
+                    editable: $rootScope.modifyRecord,
+                    deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
+                    selectable: false
+                };
+                return model;
+        },function readFail(error) {
+            var model = {
+                hasLoaded: true
+            };
+            return model;
+            throw error;
+        }).catch(function(e) {
+            // The .catch from the outer promise won't catch errors from this closure
+            // so a .catch needs to be appended here.
+            throw e;
+        });
+}
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {
 
@@ -181,9 +223,7 @@
                 var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
                     $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
-
                     var pageSize = getPageSize($rootScope.relatedReferences[i]);
-
                     (function(i) {
                         if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
                             $rootScope.showEmptyRelatedTables = true;

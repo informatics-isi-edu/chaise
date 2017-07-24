@@ -16,9 +16,9 @@
                 <span ng-show="rectab[$index].displayType == 'markdown'">
                     <span class="markdown-container" ng-bind-html="::rectab[$index].page.content | trustedHTML"></span>
                 </span>
-            <span ng-show="rectab[$index].displayType != 'markdown'">
-                <record-table class="related-table" vm="::rectab[$index]"></record-table>
-            </span>
+                <span ng-show="rectab[$index].displayType != 'markdown'">
+                    <record-table class="related-table" vm="::rectab[$index]"></record-table>
+                </span>
             </span>
         </td>
     </tr>
