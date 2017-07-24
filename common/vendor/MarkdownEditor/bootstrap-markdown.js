@@ -1294,7 +1294,6 @@
                   glyph: "glyphicon glyphicon-question-sign"
                 },
                 callback: function(e) {
-                    // window.open(window.location.origin+window.location.pathname+'mdHelp.html');
                     window.open('./mdHelp.html');
                 }
               }]

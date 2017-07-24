@@ -110,7 +110,7 @@ describe('Record Add', function() {
                     browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+tableParams.schema_name+":" + tableParams.table_name);
                     chaisePage.waitForElement(element(by.id("submit-record-button")));
                 });
-                
+
                 describe("Presentation and validation,", function() {
 
                     if (!process.env.TRAVIS && tableParams.files.length > 0) {
@@ -221,43 +221,63 @@ describe('Record Add', function() {
                 }
             });
         });
-        describe('Markdown Editor Help button is clicked, ', function() {
-        //mdhelp page
-        it("should open a new window with the help page.",function(){
-            var helpBtn = element.all(by.css('button[title=Help]')).get(0);
-            chaisePage.waitForElement(helpBtn);
-            helpBtn.click();
-            browser.getAllWindowHandles().then(function(handles){
-                return handles;
-            }).then(function(handles) {
-                allWindows = handles;
-                return browser.switchTo().window(allWindows[1]);
-            }).then(function() {
-                return chaisePage.waitForElement(element(by.id("mdhelp-record")));
-            }).then(function() {
-                expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(18,'Table row count could not be matched.');
-                expect(element(by.id('rBold1')).getText()).toBe(mdHelp.raw_bold1,'First raw Bold text help not found');
-                expect(element(by.id('rBold2')).getText()).toBe(mdHelp.raw_bold2,'Second raw Bold text help not found');
-                expect(element(by.id('oBold')).getAttribute('innerHTML')).toBe(mdHelp.md_bold,'Markdown Bold text help not found');
-                expect(element(by.id('rItalic1')).getText()).toBe(mdHelp.raw_italic1,'First raw Italic text help not found');
-                expect(element(by.id('rItalic2')).getText()).toBe(mdHelp.raw_italic2,'Second raw Italic text help not found');
-                expect(element(by.id('oItalic')).getAttribute('innerHTML')).toBe(mdHelp.md_italic,'Markdown Italic text help not found');
-                expect(element(by.id('rStrike1')).getText()).toBe(mdHelp.raw_strike,'Strikethrough text help not found');
-                expect(element(by.id('oStrike')).getAttribute('innerHTML')).toBe(mdHelp.md_strike,'Markdown Strike text help not found');
-            }).then(function() {
-                // - Go back to initial Record page
-                browser.close();
-                browser.switchTo().window(allWindows[0]);
-            }).catch(function(error) {
-                console.dir(error);
-                expect('Something went wrong with this promise chain.').toBe('Please see error message.','While checking markdown help page');
-            });
-        });
-    });
+
         afterAll(function() {
             browser.manage().deleteCookie('test');
         });
     });
 
+    describe('Markdown Editor Help button is clicked, ', function() {
+        var testCookie = {};
+        beforeAll(function() {
+            // Refresh the page
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
+            chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
+                // Write a dummy cookie for creating a record in Accommodation table
+                testCookie = {
+                    constraintName: 'product-add_fk_category', // A FK that Accommodation table has with Category table
+                    rowname: {
+                        value: chance.sentence()
+                    },
+                    keys: {id: 1}
+                };
+                browser.manage().addCookie('mdtest', JSON.stringify(testCookie));
+            });
 
+        });
+    //mdhelp page
+    it("should open a new window with the help page.",function(){
+        var helpBtn = element.all(by.css('button[title=Help]')).get(0);
+        chaisePage.waitForElement(helpBtn);
+        helpBtn.click();
+        browser.getAllWindowHandles().then(function(handles){
+            return handles;
+        }).then(function(handles) {
+            allWindows = handles;
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function() {
+            return chaisePage.waitForElement(element(by.id("mdhelp-record")));
+        }).then(function() {
+            expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(18,'Table row count could not be matched.');
+            expect(element(by.id('rBold1')).getText()).toBe(mdHelp.raw_bold1,'First raw Bold text help not found');
+            expect(element(by.id('rBold2')).getText()).toBe(mdHelp.raw_bold2,'Second raw Bold text help not found');
+            expect(element(by.id('oBold')).getAttribute('innerHTML')).toBe(mdHelp.md_bold,'Markdown Bold text help not found');
+            expect(element(by.id('rItalic1')).getText()).toBe(mdHelp.raw_italic1,'First raw Italic text help not found');
+            expect(element(by.id('rItalic2')).getText()).toBe(mdHelp.raw_italic2,'Second raw Italic text help not found');
+            expect(element(by.id('oItalic')).getAttribute('innerHTML')).toBe(mdHelp.md_italic,'Markdown Italic text help not found');
+            expect(element(by.id('rStrike1')).getText()).toBe(mdHelp.raw_strike,'Strikethrough text help not found');
+            expect(element(by.id('oStrike')).getAttribute('innerHTML')).toBe(mdHelp.md_strike,'Markdown Strike text help not found');
+        }).then(function() {
+            // - Go back to initial Record page
+            browser.close();
+            browser.switchTo().window(allWindows[0]);
+        }).catch(function(error) {
+            console.dir(error);
+            expect('Something went wrong with this promise chain.').toBe('Please see error message.','While checking markdown help page');
+        });
+    });
+    afterAll(function() {
+        browser.manage().deleteCookie('mdtest');
+    });
+});
 });
