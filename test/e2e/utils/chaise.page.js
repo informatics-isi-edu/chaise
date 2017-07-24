@@ -270,11 +270,11 @@ var recordEditPage = function() {
     this.getEntityTitleElement = function() {
         return element(by.id('entity-title'));
     };
-    
+
     this.getResultTitle = function () {
         return element(by.id('result-title'));
     };
-    
+
     this.getResultTitleLink = function () {
         return element.all(by.css('#result-title > a'));
     };
@@ -313,7 +313,7 @@ var recordEditPage = function() {
         index = index || 0;
         return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
     };
-   
+
     this.getHelpTextBlock = function(el) {
         return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
     };
@@ -421,7 +421,7 @@ var recordEditPage = function() {
     this.getDatePickerForAnInput = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().find('.ng-scope._720kb-datepicker-open')[0];", el);
     };
-    
+
     this.getDateInputsForAColumn = function(name, index) {
         index = index || 0;
         var inputs = {};
@@ -463,11 +463,11 @@ var recordEditPage = function() {
     this.getTimestampInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"timestamp\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
-    
+
     this.getJSONInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"json\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
-    
+
     this.getDateInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"date\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
@@ -525,6 +525,10 @@ var recordEditPage = function() {
 
     this.getAlertError = function() {
         return browser.executeScript("return $('.alert-danger:visible')[0];");
+    };
+
+    this.getAlertWarning = function() {
+        return browser.executeScript("return $('.alert-warning:visible')[0];");
     };
 
     this.getViewModelRows = function() {
@@ -726,11 +730,11 @@ var recordPage = function() {
     this.getModalText = function() {
         return element(by.css(".modal-body"));
     };
-    
+
     this.getErrorModalTitle = function(){
         return browser.executeScript("return $('.modal-title')[0].innerHTML;");
     };
-    
+
     this.getErrorModalOkButton = function(){
         return browser.executeScript("return $('button')[1]");
     };
@@ -846,7 +850,7 @@ var recordsetPage = function() {
     this.getPageLimitSelector = function (limit) {
         return element(by.id("page-size-" + limit));
     };
-    
+
     this.getDownloadButton = function (limit) {
         return element(by.css("downloadCSV-link"));
     };

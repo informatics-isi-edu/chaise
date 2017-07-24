@@ -14,7 +14,7 @@
                 }
             ],
             "foreign_keys": [],
-            "table_name": "multi-add-table",
+            "table_name": "multi-edit-table",
             "schema_name": "multi-edit",
             "column_definitions": [
                 {
@@ -222,7 +222,8 @@
         }
     },
     "table_names": [
-        "multi-add-table"
+        "multi-edit-table",
+        "table_w_multiple_assets"
     ],
     "comment": null,
     "annotations": {}
