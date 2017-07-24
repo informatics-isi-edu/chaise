@@ -289,6 +289,26 @@
                         "typename": "int2"
                     },
                     "annotations": {}
+                },
+                {
+                  "comment": "A JSON column with initial value of null",
+                  "name": "json_null_col",
+                  "default": null,
+                  "nullok": true,
+                  "type": {
+                    "typename": "json"
+                  },
+                  "annotations": {}
+                },
+                {
+                  "comment": "A JSON column with initial not null value",
+                  "name": "json_col",
+                  "default": null,
+                  "nullok": true,
+                  "type": {
+                    "typename": "json"
+                  },
+                  "annotations": {}
                 }
             ],
             "keys": [
