@@ -6,15 +6,15 @@
         ]
     },
     "schema": {
-        "name": "product-no-serial",
+        "name": "submission-disabled",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/recordedit/product-no-serial.json"
+        "path": "test/e2e/data_setup/schema/recordedit/submission-disabled.json"
     },
     "tables": {
         "createNew": true
     },
     "entities": {
         "createNew": true,
-        "path": "test/e2e/data_setup/data/product"
+        "path": "test/e2e/data_setup/data/submission-disabled"
     }
 }

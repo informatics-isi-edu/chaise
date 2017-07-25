@@ -31,7 +31,7 @@
                         <!-- Alerts section -->
                         <div ng-repeat="alert in form.alerts" class="row">
                             <div class="col-xs-12">
-                                <div class="alert alert-dismissible" ng-class="{'alert-danger': alert.type == 'error', 'alert-success': alert.type == 'success'}" role="alert">
+                                <div class="alert alert-dismissible" ng-class="{'alert-danger': alert.type == 'error', 'alert-success': alert.type == 'success', 'alert-warning': alert.type == 'warning'}" role="alert">
                                     <button type="button" class="close" ng-click="::form.closeAlert(alert);" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                     <strong>{{alert.type | toTitleCase}}</strong> {{alert.message}}
                                 </div>

@@ -1,9 +1,9 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var testParams = {
-    table_name: "accommodation",
+    table_name: "submission-disabled-table",
     key: {
         name: "id",
-        value: "2002",
+        value: "1000",
         operator: "="
     }
 };
@@ -12,25 +12,41 @@ describe('Add a record,', function() {
 
     describe("For table " + testParams.table_name + ",", function() {
 
-        var record;
+        var record,
+            submitBtn;
 
         beforeAll(function () {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
 
             browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-no-serial:" + testParams.table_name + "/" + keys.join("&"));
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/submission-disabled:" + testParams.table_name + "/" + keys.join("&"));
+
+            submitBtn = chaisePage.recordEditPage.getSubmitRecordButton();
+            chaisePage.waitForElement(submitBtn);
+        });
+
+        // NOTE: adding this test here because eventually we are going to change the behavior
+        // of updating an entity with no changes. Currently the update function throws an error,
+        // whereas, later we will be disabling the submission button until changes were made in the form
+        it("warn the user when submitting data when no data was changed.", function() {
+            chaisePage.recordEditPage.submitForm();
+
+            browser.wait(function() {
+                return chaisePage.recordEditPage.getAlertWarning();
+            }, browser.params.defaultTimeout).then(function(error) {
+                return error.getText();
+            }).then(function(text) {
+                expect(text.indexOf("Warning No data was changed in the update request. Please check the form content and resubmit the data.")).toBeGreaterThan(-1, "The alert warning message was incorrect");
+            });
         });
 
         xit("the delete button should be disabled during submission and re-enabled after a conflict error.", function() {
             var EC = protractor.ExpectedConditions,
-            deleteBtn = chaisePage.recordEditPage.getDeleteRecordButton(),
-            submitBtn = chaisePage.recordEditPage.getSubmitRecordButton();
+                deleteBtn = chaisePage.recordEditPage.getDeleteRecordButton();
 
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
 
-                return chaisePage.recordEditPage.getInputForAColumn("id", 0);
-            }).then(function(idInput) {
+            chaisePage.recordEditPage.getInputForAColumn("id", 0).then(function(idInput) {
                 chaisePage.recordEditPage.clearInput(idInput);
                 browser.sleep(10);
 
