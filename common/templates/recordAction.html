@@ -1,0 +1,17 @@
+<div class="pull-right" style="margin-top:-25px;">
+    <span ng-if="rtrefDisType == 'markdown'">
+        <a class="toggle-display-link" ng-click="toggleRelatedtabDisptype()">
+            <span ng-show="tabModelDisplay == 'markdown'">
+                <span ng-if="canEdit()">Edit</span>
+                <span ng-if="!canEdit()">Table Display</span>
+            </span>
+            <span ng-show="tabModelDisplay != 'markdown'">
+                <span ng-if="canEdit()">Display</span>
+                <span ng-if="!canEdit()">Revert Display</span>
+            </span>
+        </a>&nbsp;|</span>
+    <span ng-if="canCreateRelated()">
+        <a class="add-records-link" ng-click="addRelatedRecord()">Add</a>
+        &nbsp;|</span>
+    <span><a class="more-results-link" ng-click="toRecordSet()">View More</a></span>
+</div>

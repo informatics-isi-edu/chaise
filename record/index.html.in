@@ -49,7 +49,10 @@
 
             <!-- defined on $rootScope in run function -->
             <div ng-if="recDisplayReady">
-                <record-display columns="::columns" values="::recordValues"  rectab="::colTableModels"></record-display>
+                <record-display columns="::columns" values="::recordValues"  rectab="::colTableModels" rtref-dis-typetable0="::rtrefDisTypetable"
+                toggle-relatedtab-disptype0='::ctrl.toggleRelatedTableDisplayType()' can-edit0="ctrl.canEdit()" can-create-related0="::ctrl.canCreateRelated()"
+                add-related-record0="::ctrl.addRelatedRecord()" to-record-set0="::ctrl.toRecordSet()">
+                </record-display>
             </div>
             <!-- used to delay empty accordions from displaying before simple record display -->
             <div ng-if="recordValues">
@@ -61,7 +64,12 @@
                         </uib-accordion-heading>
 
                         <!-- for different elements inside the accordion -->
-                        <div class="pull-right" style="margin-top:-25px;">
+                        <record-action-bar rtref-dis-type="relatedRef.display.type" tab-model-display="tableModels[$index].displayType"
+                        toggle-relatedtab-disptype='::ctrl.toggleRelatedTableDisplayType($index)' can-edit="ctrl.canEdit()" can-create-related="::ctrl.canCreateRelated(relatedRef)"
+                        add-related-record="::ctrl.addRelatedRecord(relatedRef)" to-record-set="::ctrl.toRecordSet(relatedRef)">
+                        </record-action-bar>
+
+                        <!-- <div class="pull-right" style="margin-top:-25px;">
                             <span ng-if="relatedRef.display.type == 'markdown'">
                                 <a class="toggle-display-link" ng-click="::ctrl.toggleRelatedTableDisplayType($index)">
                                     <span ng-show="tableModels[$index].displayType == 'markdown'">
@@ -77,7 +85,7 @@
                                 <a class="add-records-link" ng-click="::ctrl.addRelatedRecord(relatedRef)">Add</a>
                                 &nbsp;|</span>
                             <span><a class="more-results-link" ng-click="::ctrl.toRecordSet(relatedRef)">View More</a></span>
-                        </div>
+                        </div> -->
                         <div class="row">
                             <div class="col-xs-12">
                                 <div ng-show="tableModels[$index].displayType == 'markdown'">

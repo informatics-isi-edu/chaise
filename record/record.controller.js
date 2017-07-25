@@ -82,7 +82,6 @@
                 if ((isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues && $rootScope.tableModels[i].rowValues.length > 0) {
                     return (i == $rootScope.lastRendered);
                 }
-                console.log(i + ": false");
                 return false;
             }
         };
@@ -100,6 +99,8 @@
         };
 
         vm.canCreateRelated = function(relatedRef) {
+            if(angular.isUndefined(relatedRef))
+            return false;
            var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
            return (ref.canCreate && $rootScope.modifyRecord);
         };

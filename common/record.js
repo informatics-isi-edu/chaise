@@ -15,9 +15,30 @@
             scope: {
                 columns: '=',
                 values: '=',
-                rectab:'='
+                rectab:'=',
+                rtrefDisTypetable0: '=',
+                toggleRelatedtabDisptype0: '&',
+                canEdit0:'&',
+                canCreateRelated0:'&',
+                addRelatedRecord0:'&',
+                toRecordSet0:'&'
             },
             templateUrl: '../common/templates/record.html'
+        };
+    }])
+    .directive('recordActionBar', [function() {
+        return {
+            restrict: 'E',
+            scope: {
+                rtrefDisType: '=',
+                tabModelDisplay: '=',
+                toggleRelatedtabDisptype: '&',
+                canEdit:'&',
+                canCreateRelated:'&',
+                addRelatedRecord:'&',
+                toRecordSet:'&'
+            },
+            templateUrl: '../common/templates/recordAction.html'
         };
     }]);
 })();
