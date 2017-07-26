@@ -18,7 +18,7 @@
                 values: '=',
                 rectab:'=',
                 rtrefDisTypetable0: '=',
-                toggleRelatedtabDisplayType: '&',
+                toggleRelatedTableDisplayType: '&',
                 canEdit:'&',
                 canCreateRelated0:'&',
                 addRelatedRecord:'&',
@@ -41,7 +41,7 @@
             scope: {
                 rtrefDisType: '=',
                 tabModelDisplay: '=',
-                toggleRelatedtabDisplayType: '&',
+                toggleRelatedTableDisplayType: '&',
                 canEdit:'&',
                 canCreateRelated:'&',
                 addRelatedRecord:'&',
