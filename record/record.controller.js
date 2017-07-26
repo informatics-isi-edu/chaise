@@ -25,7 +25,7 @@
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
             // Otherwise, canEdit will be undefined, so no need to change anything b/c showEmptyRelatedTables is already false.
 
-            return canEdit;
+            return true;//canEdit;
         };
 
         vm.editRecord = function() {
@@ -53,10 +53,15 @@
         vm.permalink = function getPermalink() {
             return $window.location.href;
         };
-
+        vm.ref = {};
         vm.toRecordSet = function(ref) {
+            console.log(ref);
             return $window.location.href = ref.appLink;
         };
+        vm.k = 0;
+        vm.dummytest = function(k){
+            return ("ehllo "+k);
+        }
 
         vm.showRelatedTable = function(i) {
             var isFirst = false, prevTableHasLoaded = false;
@@ -85,12 +90,12 @@
                 return false;
             }
         };
-
-        vm.toggleRelatedTableDisplayType = function(i) {
-            if ($rootScope.tableModels[i].displayType == 'markdown') {
-                $rootScope.tableModels[i].displayType = 'table';
+        vm.dataModel= {};
+        vm.toggleRelatedTableDisplayType = function(dataModel) {
+            if (dataModel.displayType == 'markdown') {
+                dataModel.displayType = 'table';
             } else {
-                $rootScope.tableModels[i].displayType = 'markdown';
+                dataModel.displayType = 'markdown';
             }
         };
 

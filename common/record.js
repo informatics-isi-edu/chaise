@@ -12,33 +12,48 @@
     .directive('recordDisplay', [function() {
         return {
             restrict: 'E',
+            transclude: true,
             scope: {
                 columns: '=',
                 values: '=',
                 rectab:'=',
                 rtrefDisTypetable0: '=',
-                toggleRelatedtabDisptype0: '&',
-                canEdit0:'&',
+                toggleRelatedtabDisplayType: '&',
+                canEdit:'&',
                 canCreateRelated0:'&',
-                addRelatedRecord0:'&',
-                toRecordSet0:'&'
+                addRelatedRecord:'&',
+                toRecordSet:'&',
+                dummytest:'&'
             },
-            templateUrl: '../common/templates/record.html'
+            templateUrl: '../common/templates/record.html',
+            controller: function ($scope) {
+            //    $scope.toRecordSet()($scope.rtrefDisType);
+            //console.log($scope.rtrefDisTypetable0[1]);
+            // return $scope;
+            }
+
         };
     }])
     .directive('recordActionBar', [function() {
         return {
             restrict: 'E',
+            transclude: true,
             scope: {
                 rtrefDisType: '=',
                 tabModelDisplay: '=',
-                toggleRelatedtabDisptype: '&',
+                toggleRelatedtabDisplayType: '&',
                 canEdit:'&',
                 canCreateRelated:'&',
                 addRelatedRecord:'&',
-                toRecordSet:'&'
+                toRecordSet:'&',
+                dummytest:'&'
             },
-            templateUrl: '../common/templates/recordAction.html'
+            templateUrl: '../common/templates/recordAction.html',
+            controller: function ($scope) {
+
+                //$scope.dummytest({$scope.k:56777});
+
+            }
         };
     }]);
 })();

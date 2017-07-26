@@ -1,5 +1,11 @@
 # Makefile rules
-
+docp:
+		scp record/index.html.in    amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/record
+		scp record/record.controller.js     amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/record
+		scp record/record.app.js     amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/record
+		scp common/templates/recordAction.html  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/templates
+		scp common/templates/record.html  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common/templates
+		scp common/record.js  amit@dev.isrd.isi.edu:/home/amit/public_html/chaise/common
 # Disable built-in rules
 .SUFFIXES:
 
