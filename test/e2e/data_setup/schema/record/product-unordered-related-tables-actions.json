@@ -830,6 +830,104 @@
             "*": ["id", ["product-unordered-related-tables-actions", "fk_booking_accommodation"], "price", "bookin_date"]
         }
       }
+  },
+  "related_table": {
+      "comment":"This is a related table and will have entries of facility in an accommodation",
+      "kind": "table",
+      "keys": [
+        {
+          "comment": null,
+          "annotations": {},
+          "unique_columns": [
+            "id"
+          ]
+        }
+      ],
+      "foreign_keys": [],
+      "table_name": "related_table",
+      "schema_name": "product-unordered-related-tables-actions",
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facility",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {}
+  },
+  "association_table": {
+      "comment":"This is an association table to hold the association of accomodation and facility",
+      "kind": "table",
+      "keys": [
+        {
+          "comment": null,
+          "annotations": {},
+          "unique_columns": [
+            "id_related", "id_base"
+          ]
+        }
+      ],
+      "foreign_keys": [
+          {
+              "comment": "",
+              "foreign_key_columns": [{
+                  "table_name": "association_table",
+                  "schema_name": "product-unordered-related-tables-actions",
+                  "column_name": "id_related"
+              }],
+              "referenced_columns": [{
+                  "table_name": "related_table",
+                  "schema_name": "product-unordered-related-tables-actions",
+                  "column_name": "id"
+              }],
+              "annotations": {}
+          },
+          {
+              "comment": "",
+              "foreign_key_columns": [{
+                  "table_name": "association_table",
+                  "schema_name": "product-unordered-related-tables-actions",
+                  "column_name": "id_base"
+              }],
+              "referenced_columns": [{
+                  "table_name": "accommodation",
+                  "schema_name": "product-unordered-related-tables-actions",
+                  "column_name": "id"
+              }],
+              "annotations": {
+                  "tag:isrd.isi.edu,2016:foreign-key": {
+                      "to_name": "base table association related"
+                  }
+              }
+          }
+      ],
+      "table_name": "association_table",
+      "schema_name": "product-unordered-related-tables-actions",
+      "column_definitions": [
+        {
+          "name": "id_related",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "id_base",
+          "nullok": false,
+          "type": {
+            "typename": "serial4"
+          }
+        }
+      ],
+      "annotations": {}
     }
   },
   "table_names": [
@@ -838,7 +936,9 @@
     "accommodation",
     "accommodation_image",
     "booking",
-    "media"
+    "media",
+    "related_table",
+    "association_table"
   ],
   "comment": null,
   "annotations": {
