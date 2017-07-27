@@ -29,7 +29,9 @@
         'chaise.record.table',
         'ui.bootstrap',
         'ngCookies',
-        'ngSanitize'])
+        'ngSanitize',
+        'chaise.resizable',
+        'chaise.faceting'])
 
     .config(['$cookiesProvider', function($cookiesProvider) {
         $cookiesProvider.defaults.path = '/';
@@ -67,7 +69,8 @@
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
         search: null,       // search term
         pageLimit: 25,       // number of rows per page
-        config: {}
+        config: {},
+        AppliedFilters: []
     })
 
     // Register the recordset controller
@@ -181,6 +184,11 @@
 
 
             ERMrest.appLinkFn(UriUtils.appTagToURL);
+
+            recordsetModel.initialized = true;
+            recordsetModel.hasLoaded = true;
+
+            /*
             Session.getSession().then(function getSession(_session) {
                 session = _session;
 
@@ -224,6 +232,7 @@
                 else
                     ErrorService.errorPopup(exception.message, exception.code, "home page");
             });
+            */
 
             /**
              * Whenever recordset updates the url (no reloading and no history stack),

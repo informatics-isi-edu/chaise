@@ -1,0 +1,34 @@
+<div class="faceting-container">
+    <div class="columns-container">
+        <div class="panel-group" id="ft-cols-1">
+            <div class="panel panel-default" ng-repeat="col in columns track by $index">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <!-- data-parent="#ft-cols-1" -->
+                        <a data-toggle="collapse" href="#ft-col-1-{{$index}}" ng-bind="col.name"></a>
+                        <span ng-show="anyDirty()" ng-click="updateAppliedFilters()" class="btn btn-primary btn-xs update-btn">
+                            <span class="glyphicon glyphicon-refresh"></span>
+                            <span>Update</span>
+                        </span>
+                    </h4>
+                    <section class="applied-filters" ng-show="hasFilter($index)">
+                        <span class="label label-default">
+                            <a class="remove-link" ng-click="removeFilter($index)">clear all</a>
+                        </span>
+                        <span class="label label-default" ng-repeat="(id, filter) in filters[$index]">
+                            <a class="remove-link" ng-click="removeFilter($parent.$index, id)"><i class="glyphicon glyphicon-remove"></i></a>
+                            <span ng-bind="filter.content"></span>
+                        </span>
+                    </section>
+                </div>
+                <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
+                    <div class="panel-body" ng-switch="col.type">
+                        <integer-range-picker ng-switch-when="int" reference="reference" applied-filters="filters[$index]" is-dirty="isDirty[0]"></integer-range-picker>
+                        <vocabulary-picker ng-switch-when="vocab" reference="reference" applied-filters="filters[$index]" is-dirty="isDirty[0]"></vocabulary-picker>
+                        <string-picker ng-switch-default reference="reference" applied-filters="filters[$index]" is-dirty="isDirty[0]"></string-picker>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

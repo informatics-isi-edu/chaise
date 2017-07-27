@@ -1,4 +1,4 @@
-<div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
+<div ng-show="vm.initialized" class="row">
     <div class="col-lg-4 col-md-5 col-sm-6 col-xs-7">
         <!-- search box -->
         <div class="input-group has-feedback">
@@ -47,6 +47,23 @@
         </button>
     </div>
 </div>
+
+<div class="row total-filters" style="margin: 10px -15px;">
+    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+        <a class="remove-link" ng-click="vm.removeFilter()">
+            <span class="filter-label label label-primary" ng-if="vm.AppliedFilters.length > 1">
+                clear all
+            </span>
+        </a>
+        <div class="filter-label label label-primary" ng-repeat="filter in vm.AppliedFilters">
+            <a class="remove-link" ng-click="vm.removeFilter(filter.colId)"><i class="glyphicon glyphicon-remove"></i></a>
+            <span ng-bind="filter.name"></span>:
+            <span ng-bind="filter.content"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row-count">54 results found.</div>
 
 <!-- record table -->
 <div ng-if="vm.hasLoaded">

@@ -1,16 +1,12 @@
 <div ng-controller="recordsetController">
-
     <navbar></navbar>
-
     <div id="mainContent" class="container-fluid">
-
         <alerts alerts="alerts"></alerts>
-
         <div class="row">
             <div id="recordset-bookmark-container" class="col-xs-12">
                 <!-- edit -->
-                <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable" ng-disabled="vm.pageLimit > vm.RECORDEDIT_MAX_ROWS" ng-href="{{ edit() }}" tooltip-placement="bottom"
-                    uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
+                <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable" ng-disabled="vm.pageLimit > vm.RECORDEDIT_MAX_ROWS"
+                    ng-href="{{ edit() }}" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
                     <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                 </a>&nbsp;&nbsp;
                 <!-- permalink -->
@@ -18,24 +14,24 @@
                     <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
                 </a>
             </div>
-
             <h2 id="page-title">
                 <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value"></span>
                 <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value"></span>
+                <span>TABLE NAME</span>
             </h2>
-
         </div>
-
-        <!-- loading spinner -->
-        <div ng-show="!vm.hasLoaded && !vm.backgroundSearch" id="spinner">
-            <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;"/>
-            <div style="margin-top: 15px;">Loading...</div>
+        <div class="row">
+            <div class="col-md-4" resizable r-directions=["right"]>
+                <faceting reference="vm.reference" total-applied-filters="vm.AppliedFilters" vm="vm"></faceting>
+            </div>
+            <div class="col-md-8">
+                <!-- loading spinner -->
+                <div ng-show="!vm.hasLoaded && !vm.backgroundSearch" id="spinner">
+                    <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;" />
+                    <div style="margin-top: 15px;">Loading...</div>
+                </div>
+                <recordset vm="vm" default-row-linking="true"></recordset>
+            </div>
         </div>
-
-        <div>
-            <recordset vm="vm" default-row-linking="true"></recordset>
-        </div>
-
     </div>
-
 </div>

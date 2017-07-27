@@ -338,7 +338,11 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
 	$(COMMON)/navbar.js \
-	$(COMMON)/bindHtmlUnsafe.js
+	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/resizable.js \
+	$(JS)/vendor/plotly-latest.min.js \
+	$(JS)/vendor/angular-plotly.js \
+	$(COMMON)/faceting.js \
 
 RECSET_JS_SOURCE=$(COMMON)/authen.js \
     $(COMMON)/utils.js \
