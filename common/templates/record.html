@@ -12,17 +12,16 @@
                 <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
                 <span ng-switch-default>{{::values[$index].value}}</span>
             </span>
-            <span ng-if="::values[$index].value == ''">{{$index}} Hello: {{rtrefDisTypetable0[$index].display.type}}
-
-                  <div ng-transclude></div>
+            <span ng-if="::values[$index].value == ''">
+                  <!-- <div ng-transclude></div> -->
+                  <record-action-bar rtref-dis-type="rtrefDisTypetable0[$index].display.type" tab-model-display="rectab[$index].displayType"
+                  toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:rectab[$index]})' can-edit-related="canEditRelated({ref:rtrefDisTypetable0[$index]})"
+                  can-create-related="canCreateRelated0({ref:rtrefDisTypetable0[$index]})"
+                  add-related-record="addRelatedRecord({ref:rtrefDisTypetable0[$index]})" to-record-set="toRecordSet({ref:rtrefDisTypetable0[$index]})"
+                  dummytest="dummytest({k:rtrefDisTypetable0[$index].display.type})">
+                  </record-action-bar>
                   <div class="row">
                       <div class="col-xs-12">
-                          <record-action-bar rtref-dis-type="rtrefDisTypetable0[$index].display.type" tab-model-display="rectab[$index].displayType"
-                          toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:rectab[$index]})' can-edit="canEdit()"
-                          can-create-related="canCreateRelated0({ref:rtrefDisTypetable0[$index]})"
-                          add-related-record="addRelatedRecord({ref:rtrefDisTypetable0[$index]})" to-record-set="toRecordSet({ref:rtrefDisTypetable0[$index]})"
-                          dummytest="dummytest({k:rtrefDisTypetable0[$index].display.type})">
-                          </record-action-bar>
                 <span ng-show="rectab[$index].displayType == 'markdown'">
                     <span class="markdown-container" ng-bind-html="::rectab[$index].page.content | trustedHTML"></span>
                 </span>

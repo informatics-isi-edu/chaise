@@ -25,7 +25,7 @@
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
             // Otherwise, canEdit will be undefined, so no need to change anything b/c showEmptyRelatedTables is already false.
 
-            return true;//canEdit;
+            return canEdit;
         };
 
         vm.editRecord = function() {
@@ -101,6 +101,12 @@
 
         vm.toggleRelatedTables = function() {
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
+        };
+
+        vm.canEditRelated = function(ref) {
+            if(angular.isUndefined(ref))
+            return false;
+           return (ref.canUpdate && $rootScope.modifyRecord);
         };
 
         vm.canCreateRelated = function(relatedRef) {
