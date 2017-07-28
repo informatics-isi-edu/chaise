@@ -100,7 +100,13 @@ describe('View recordset,', function() {
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
                 chaisePage.recordsetPage.getCustomPageSize().then(function(text) {
                     expect(text).toBe("15 (Custom)");
-                })
+                });
+            });
+
+            it("should display the proper row count and total row count.", function () {
+                chaisePage.recordsetPage.getTotalCount().getText().then(function(text) {
+                    expect(text).toBe("Displaying 15 of 50 Records");
+                });
             });
 
             it("should show correct table rows", function() {

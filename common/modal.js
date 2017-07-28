@@ -93,6 +93,8 @@
                 vm.tableModel.initialized = true;
                 vm.tableModel.page = page;
                 vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
+
+                $scope.$broadcast('get-table-aggregate-count', true);
             }, function(exception) {
                 throw exception;
             });

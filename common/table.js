@@ -344,7 +344,7 @@
                 }
 
                 // get the total row count to display above the table
-                scope.$on('recordset-loaded', function($event, hasLoaded) {
+                scope.$on('get-table-aggregate-count', function($event, hasLoaded) {
                     if (hasLoaded) {
                         scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
                             scope.vm.totalRowsCnt = response[0];
