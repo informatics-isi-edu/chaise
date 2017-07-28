@@ -8,7 +8,12 @@
             return $sce.trustAsHtml(text);
         };
     }])
-
+    .factory('templates',function(){
+        return{
+        entity: 'ent',
+        related: 'rel'
+    };
+})
     .directive('recordDisplay', [function() {
         return {
             restrict: 'E',
@@ -34,7 +39,7 @@
 
         };
     }])
-    .directive('recordActionBar', [function() {
+    .directive('recordActionBar', ['templates',function(templates) {
         return {
             restrict: 'E',
             transclude: true,
@@ -48,12 +53,40 @@
                 toRecordSet:'&',
                 dummytest:'&'
             },
-            templateUrl: '../common/templates/recordAction.html',
-            controller: function ($scope) {
+            templateUrl:function(elem, attr){
+                var temp = '../common/templates/recordAction-' + templates[attr.tabtype] + '.html';
+                return (temp);
+            },
 
-                //$scope.dummytest({$scope.k:56777});
+            link: function(scope, ele) {
+                var footerText = chaiseConfig.footerMarkdown;
+                angular.isUndefinedOrNull = function(val) {
+                    return val == '' || angular.isUndefined(val) || val === null
+                }
+                scope.actionStyle = {};
+                scope.actionStyle['font-size']='11px';
+                scope.actionStyle['border-radius']= '8px';
 
-            }
+                function setClass(f) {
+                        scope.actionStyle.display =f? 'block':'';
+                        scope.actionStyle.border= f?'2px solid #31b7e1':'';
+                        scope.actionStyle.float= f?'left':'right';
+                        scope.actionStyle['margin-bottom'] = f?'5px':'';
+                        scope.actionStyle['background-color'] = f?'azure':'';
+                    }
+                function checkDisplayType(){
+                        if (scope.tabModelDisplay=='markdown'){
+                            setClass(true);
+                        } else {
+                            //scope.actionStyle.float= 'right';
+                            setClass(false)
+                        }
+                    }
+                    checkDisplayType();
+                    scope.$watch('tabModelDisplay', function(){
+                        checkDisplayType();
+                    })
+                }
         };
     }]);
 })();

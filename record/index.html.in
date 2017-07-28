@@ -64,7 +64,7 @@
                         </uib-accordion-heading>
 
                         <!-- for different elements inside the accordion -->
-                        <record-action-bar rtref-dis-type="relatedRef.display.type" tab-model-display="tableModels[$index].displayType"
+                        <record-action-bar tabtype="related" rtref-dis-type="relatedRef.display.type" tab-model-display="tableModels[$index].displayType"
                         toggle-related-table-display-type='::ctrl.toggleRelatedTableDisplayType(tableModels[$index])' can-edit-related="ctrl.canEditRelated(relatedRef)" can-create-related="::ctrl.canCreateRelated(relatedRef)"
                         add-related-record="::ctrl.addRelatedRecord(relatedRef)" to-record-set="::ctrl.toRecordSet(relatedRef)" dummytest="::ctrl.dummytest(k)">
                         </record-action-bar>

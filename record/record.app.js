@@ -177,6 +177,7 @@
                     $rootScope.colTableModels = [];
 
                 for(var i =0;i<allInbFKCols.length;i++){
+                    allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBrief;
                     var ifkPageSize = getPageSize(allInbFKCols[i].reference);
                     (function(i) {
                         // getRelatedTableData(allInbFKCols[i].reference);
@@ -200,7 +201,7 @@
                             context: "compact/brief",
                             fromTuple: $rootScope.tuple
                         };
-                        
+
                         model.rowValues = DataUtils.getRowValuesFromPage(ifkPage);
                         model.config = {
                             viewable: true,
