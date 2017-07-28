@@ -1,9 +1,8 @@
 {
   "catalog": {
-    "acls": [
-      {"name": "content_write_user", "user": "*" },
-      {"name": "content_read_user", "user": "*" }
-    ]
+      "acls": {
+          "write": ["*"]
+      }
   },
   "schema": {
     "name": "product-viewer",
