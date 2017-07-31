@@ -94,7 +94,7 @@
                 vm.tableModel.page = page;
                 vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
 
-                $scope.$broadcast('get-table-aggregate-count', true);
+                $scope.$broadcast('recordset-update');
             }, function(exception) {
                 throw exception;
             });

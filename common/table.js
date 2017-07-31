@@ -131,7 +131,9 @@
                 }, 200);
 
                 // tell parent controller data updated
-                scope.$emit('recordset-update');
+                if (!scope.vm.foregroundSearch) {
+                    scope.$emit('recordset-update');
+                }
 
             }, function error(exception) {
                 scope.vm.hasLoaded = true;
@@ -344,14 +346,12 @@
                 }
 
                 // get the total row count to display above the table
-                scope.$on('get-table-aggregate-count', function($event, hasLoaded) {
-                    if (hasLoaded) {
-                        scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
-                            scope.vm.totalRowsCnt = response[0];
-                        }, function error(response) {
-                            throw response;
-                        });
-                    }
+                scope.$on('recordset-update', function($event) {
+                    scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
+                        scope.vm.totalRowsCnt = response[0];
+                    }, function error(response) {
+                        throw response;
+                    });
                 });
             }
         };

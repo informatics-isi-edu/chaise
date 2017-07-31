@@ -215,7 +215,7 @@
                     recordsetModel.initialized = true;
                     recordsetModel.hasLoaded = true;
 
-                    $rootScope.$broadcast('get-table-aggregate-count', true);
+                    $rootScope.$broadcast('recordset-update');
 
                 }, function error(response) {
                     throw response;
