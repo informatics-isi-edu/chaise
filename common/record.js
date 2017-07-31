@@ -32,6 +32,7 @@
             },
             templateUrl: '../common/templates/record.html',
             controller: function ($scope) {
+                $scope.repeater = [1,2];
             //    $scope.toRecordSet()($scope.rtrefDisType);
             //console.log($scope.rtrefDisTypetable0[1]);
             // return $scope;
@@ -66,20 +67,21 @@
                 scope.actionStyle = {};
                 scope.actionStyle['font-size']='11px';
                 scope.actionStyle['border-radius']= '8px';
+                scope.actionStyle['font-weight']='bold';
 
                 function setClass(f) {
                         scope.actionStyle.display =f? 'block':'';
-                        scope.actionStyle.border= f?'2px solid #31b7e1':'';
+                        //scope.actionStyle.border= f?'2px solid #31b7e1':'';
                         scope.actionStyle.float= f?'left':'right';
                         scope.actionStyle['margin-bottom'] = f?'5px':'';
-                        scope.actionStyle['background-color'] = f?'azure':'';
+                        //scope.actionStyle['background-color'] = f?'azure':'';
                     }
                 function checkDisplayType(){
                         if (scope.tabModelDisplay=='markdown'){
                             setClass(true);
                         } else {
                             //scope.actionStyle.float= 'right';
-                            setClass(false)
+                            setClass(true)
                         }
                     }
                     checkDisplayType();

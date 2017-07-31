@@ -8,7 +8,7 @@
 </head>
 <body>
     <navbar></navbar>
-    <loading-spinner ng-show="!displayReady"></loading-spinner>
+    <loading-spinner ng-show="!recDisplayReady"></loading-spinner>
     <div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
             <div id="record-bookmark-container" class="col-xs-12 meta-icons">
@@ -53,9 +53,10 @@
                 toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="ctrl.canEditRelated(ref)" can-create-related0="ctrl.canCreateRelated(ref)"
                 add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" dummytest="ctrl.dummytest(k)">
                 </record-display>
+                
             </div>
             <!-- used to delay empty accordions from displaying before simple record display -->
-            <div ng-if="recordValues">
+            <div ng-if="recordValues" ng-show="recDisplayReady">
                 <uib-accordion close-others="false">
                     <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index"  ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
                         <uib-accordion-heading>
