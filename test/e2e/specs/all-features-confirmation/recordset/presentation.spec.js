@@ -103,12 +103,6 @@ describe('View recordset,', function() {
                 });
             });
 
-            it("should display the proper row count and total row count.", function () {
-                chaisePage.recordsetPage.getTotalCount().getText().then(function(text) {
-                    expect(text).toBe("Displaying 15 of 50 Records");
-                });
-            });
-
             it("should show correct table rows", function() {
                 chaisePage.recordsetPage.getRows().then(function(rows) {
                     expect(rows.length).toBe(4);
@@ -410,6 +404,12 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.custom_page_size);
+            });
+        });
+
+        it("should display the proper row count and total row count.", function () {
+            chaisePage.recordsetPage.getTotalCount().getText().then(function(text) {
+                expect(text).toBe("Displaying 5 of 14 Records");
             });
         });
 

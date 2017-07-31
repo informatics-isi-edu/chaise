@@ -100,6 +100,7 @@
         */
         function read(scope, isBackground) {
 
+            if (scope.vm.search == '') scope.vm.search = null;
             var searchTerm = scope.vm.search;
 
             scope.vm.hasLoaded = false;
@@ -131,9 +132,7 @@
                 }, 200);
 
                 // tell parent controller data updated
-                if (!scope.vm.foregroundSearch) {
-                    scope.$emit('recordset-update');
-                }
+                scope.$emit('recordset-update');
 
             }, function error(exception) {
                 scope.vm.hasLoaded = true;
@@ -347,11 +346,15 @@
 
                 // get the total row count to display above the table
                 scope.$on('recordset-update', function($event) {
-                    scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
-                        scope.vm.totalRowsCnt = response[0];
-                    }, function error(response) {
-                        throw response;
-                    });
+                    console.log("Search term: ", scope.vm.search);
+                    console.log(scope.vm.reference.location.searchTerm);
+                    if(scope.vm.search == scope.vm.reference.location.searchTerm) {
+                        scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
+                            scope.vm.totalRowsCnt = response[0];
+                        }, function error(response) {
+                            throw response;
+                        });
+                    }
                 });
             }
         };
