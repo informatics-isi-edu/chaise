@@ -76,6 +76,7 @@
 
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
+        recordsetModel.selectedRows = [];
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
@@ -87,6 +88,17 @@
             $window.location.replace($scope.permalink());
             $rootScope.location = $window.location.href;
         });
+
+        $scope.onSelect = function(tuple) {
+            var rowIndex = recordsetModel.selectedRows.indexOf(tuple);
+
+            // add the tuple to the list of selected rows
+            if (rowIndex === -1) {
+                recordsetModel.selectedRows.push(tuple);
+            } else {
+                recordsetModel.selectedRows.splice(rowIndex, 1);
+            }
+        };
 
         $scope.permalink = function() {
 
@@ -144,12 +156,23 @@
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
-            recordsetModel.config = {
-                viewable: true,
-                editable: modifyEnabled,
-                deletable: modifyEnabled && deleteEnabled,
-                selectable: false
-            };
+            if (true) {
+                recordsetModel.config = {
+                    viewable: false,
+                    editable: false,
+                    deletable: false,
+                    selectable: true,
+                    multiSelect: true
+                };
+            } else {
+                recordsetModel.config = {
+                    viewable: true,
+                    editable: modifyEnabled,
+                    deletable: modifyEnabled && deleteEnabled,
+                    selectable: false,
+                    multiSelect: false
+                };
+            }
 
             $rootScope.alerts = AlertsService.alerts;
 
@@ -172,9 +195,9 @@
 
                 ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
                     session = Session.getSessionValue();
-                    
+
                     var location = reference.location;
-                    
+
                     // only allowing single column sort here
                     if (reference.sortObject) {
                         recordsetModel.sortby = location.sortObject[0].column;

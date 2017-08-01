@@ -65,6 +65,7 @@
                     scope.hideContent = false;
                     scope.linkText = "more";
                     scope.maxHeightStyle = { };
+                    scope.selected = false;
 
 
                     var editLink = null;

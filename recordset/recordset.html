@@ -38,7 +38,7 @@
         <loading-spinner ng-show="!vm.hasLoaded && !vm.backgroundSearch"></loading-spinner>
 
         <div>
-            <recordset vm="vm" default-row-linking="true"></recordset>
+            <recordset vm="vm" on-row-click="onSelect(tuple)" default-row-linking="true"></recordset>
         </div>
 
     </div>

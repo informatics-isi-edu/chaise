@@ -160,7 +160,8 @@
                                 viewable: true,
                                 editable: $rootScope.modifyRecord,
                                 deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                                selectable: false
+                                selectable: false,
+                                multiSelect: false
                             };
                             $rootScope.tableModels[i] = model;
                             $rootScope.displayReady = true;
@@ -183,7 +184,7 @@
             }).catch(function genericCatch(exception) {
                 throw exception;
             });
-            
+
         })
 
 

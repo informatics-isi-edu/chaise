@@ -12,9 +12,10 @@
         <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button btn btn-xs btn-default btn-no-focus" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
             <span class="glyphicon glyphicon-trash" style="color: black"></span>
         </button>
-        <button ng-if="config.selectable" type="button" class="select-action-button btn btn-xs btn-default btn-no-focus" ng-click="onSelect()" tooltip-placement="bottom" uib-tooltip="Select" >
+        <button ng-if="config.selectable && !config.multiSelect" type="button" class="select-action-button btn btn-xs btn-default btn-no-focus" ng-click="onSelect()" tooltip-placement="bottom" uib-tooltip="Select" >
             <span class="glyphicon glyphicon-check"></span>
         </button>
+        <input ng-if="config.selectable && config.multiSelect" type="checkbox" ng-checked="selected" ng-click="onSelect()">
     </div>
 </td>
 <td ng-repeat="val in rowValues track by $index">
