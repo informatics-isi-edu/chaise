@@ -65,15 +65,15 @@
                     return val == '' || angular.isUndefined(val) || val === null
                 }
                 scope.actionStyle = {};
-                scope.actionStyle['font-size']='11px';
-                scope.actionStyle['border-radius']= '8px';
-                scope.actionStyle['font-weight']='bold';
+                // scope.actionStyle['font-size']='11px';
+                scope.actionStyle['padding-left']= '5px';
+                // scope.actionStyle['font-weight']='bold';
 
                 function setClass(f) {
                         scope.actionStyle.display =f? 'block':'';
                         //scope.actionStyle.border= f?'2px solid #31b7e1':'';
-                        scope.actionStyle.float= f?'left':'right';
-                        scope.actionStyle['margin-bottom'] = f?'5px':'';
+                        scope.actionStyle.float= 'right';// f?'left':'right';
+                        //scope.actionStyle['margin-bottom'] = f?'5px':'';
                         //scope.actionStyle['background-color'] = f?'azure':'';
                     }
                 function checkDisplayType(){

@@ -21,164 +21,19 @@
                   add-related-record="addRelatedRecord({ref:rtrefDisTypetable0[$index]})" to-record-set="toRecordSet({ref:rtrefDisTypetable0[$index]})"
                   dummytest="dummytest({k:rtrefDisTypetable0[$index].display.type})">
                   </record-action-bar>
-                  <div class="row">
-                      <div class="col-xs-12">
+
                 <span ng-show="rectab[$index].displayType == 'markdown'">
                     <span class="markdown-container" ng-bind-html="::rectab[$index].page.content | trustedHTML"></span>
                 </span>
                     <span ng-show="rectab[$index].displayType != 'markdown'">
                         <record-table class="related-table" vm="::rectab[$index]"></record-table>
                     </span>
-                </div>
-            </div>
+
 
          </span>
         </td>
     </tr>
     <!--  delete-->
-    <tr ng-repeat="column in columns" ng-if="::values[$index].value != null" id="row-schema_inbound_fk_to_refernce_new" class="ng-scope">
-        <td class="entity-key col-xs-2">
-            <span class="column-displayname" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}">
-                <!-- ngIf: ::column.displayname.isHTML -->
-                <!-- ngIf: ::!column.displayname.isHTML --><span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value" class="ng-binding ng-scope">inbound_related_new</span><!-- end ngIf: ::!column.displayname.isHTML -->
-            </span>
-        </td>
-        <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML">
 
-            <!-- ngIf: ::values[$index].value != null --><span ng-if="::values[$index].value != null" class="ng-scope">
-                <!-- ngSwitchWhen: true --><span ng-switch-when="true" class="markdown-container ng-binding ng-scope" ng-bind-html="::values[$index].value | trustedHTML"></span><!-- end ngSwitchWhen:  -->
-                <!-- ngSwitchDefault:  -->
-            </span><!-- end ngIf: ::values[$index].value != null -->
-            <!-- ngIf: ::values[$index].value == '' --><span ng-if="::values[$index].value == ''" class="ng-scope">
-
-                  <!-- <div ng-transclude></div> -->
-                  <!-- <record-action-bar tabtype="entity" rtref-dis-type="rtrefDisTypetable0[$index].display.type" tab-model-display="rectab[$index].displayType" toggle-related-table-display-type="toggleRelatedTableDisplayType({dataModel:rectab[$index]})" can-edit-related="canEditRelated({ref:rtrefDisTypetable0[$index]})" can-create-related="canCreateRelated0({ref:rtrefDisTypetable0[$index]})" add-related-record="addRelatedRecord({ref:rtrefDisTypetable0[$index]})" to-record-set="toRecordSet({ref:rtrefDisTypetable0[$index]})" dummytest="dummytest({k:rtrefDisTypetable0[$index].display.type})" class="ng-isolate-scope"> -->
-                      <div ng-style="actionStyle" style="font-size: 11px; border-radius: 8px; font-weight: bold; display: block; float: left; margin-bottom: 5px;">
-    <!-- ngIf: rtrefDisType == 'markdown' --><span ng-if="rtrefDisType == 'markdown'" class="ng-scope">
-        <a class="toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
-
-        </a>&nbsp;|</span><!-- end ngIf: rtrefDisType == 'markdown' -->
-    <!-- ngIf: canCreateRelated({ref:ref}) -->
-    <span><a class="more-results-link" ng-click="toRecordSet({ref:ref})">View More</a></span>
-    <!-- <span> &nbsp;|</span><a class="more-results-link" data-ng-bind="dummytest({k:rtrefDisType})"></a></span> -->
-    <div ng-transclude="">
-                  </div>
-</div>
-<!-- </record-action-bar> -->
-                  <div class="row">
-                      <div class="col-xs-12">
-                <span ng-show="rectab[$index].displayType == 'markdown'">
-                    <span class="markdown-container ng-binding" ng-bind-html="::rectab[$index].page.content | trustedHTML"><ul>
-<li><strong class="vocab">3300</strong> <strong class="vocab">1</strong> <strong class="vocab">791</strong></li>
-<li><strong class="vocab">6660</strong> <strong class="vocab">1</strong> <strong class="vocab">794</strong></li>
-</ul>
-</span>
-                </span>
-                    <span ng-show="rectab[$index].displayType != 'markdown'" class="ng-hide">
-                        <record-table class="related-table ng-isolate-scope" vm="::rectab[$index]"><div class="outer-table recordset-table" id="divRecordSet">
-    <table class="table table-striped table-bordered table-hover">
-        <!-- sortable column header -->
-        <thead class="table-heading">
-            <tr>
-                <!-- ngIf: ::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectable) --><th ng-if="::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectable)" class="ng-scope">Actions</th><!-- end ngIf: ::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectable) -->
-                <!-- ngRepeat: col in vm.columns track by $index --><th nowrap="" ng-repeat="col in vm.columns track by $index" class="ng-scope">
-                    <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.comment) ? col.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.comment) ? 'top' : undefined}}" title="" ng-click="col.sortable &amp;&amp; vm.enableSort &amp;&amp; sortby(col.name)">
-                        <!-- ngIf: ::col.displayname.isHTML -->
-                        <!-- ngIf: ::!col.displayname.isHTML --><span ng-if="::!col.displayname.isHTML" ng-bind="::col.displayname.value" class="ng-binding ng-scope">id_col</span><!-- end ngIf: ::!col.displayname.isHTML -->
-                    </span>
-                    <span ng-show="col.sortable &amp;&amp; vm.enableSort &amp;&amp; vm.sortby==col.name &amp;&amp; vm.sortOrder=='asc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes ng-hide" ng-style="{'cursor': 'pointer'}" style="cursor: pointer;"></span>
-                    <span ng-show="col.sortable &amp;&amp; vm.enableSort &amp;&amp; vm.sortby==col.name &amp;&amp; vm.sortOrder=='desc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes-alt ng-hide" ng-style="{'cursor': 'pointer'}" style="cursor: pointer;"></span>
-                    <span ng-show="col.sortable &amp;&amp; vm.enableSort &amp;&amp; vm.sortby!==col.name" class="glyphicon glyphicon-sort" ng-click="::sortby(col.name)" ng-style="{'cursor': 'pointer'}" style="cursor: pointer;"></span>
-                </th><!-- end ngRepeat: col in vm.columns track by $index --><th nowrap="" ng-repeat="col in vm.columns track by $index" class="ng-scope">
-                    <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.comment) ? col.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.comment) ? 'top' : undefined}}" title="" ng-click="col.sortable &amp;&amp; vm.enableSort &amp;&amp; sortby(col.name)">
-                        <!-- ngIf: ::col.displayname.isHTML -->
-                        <!-- ngIf: ::!col.displayname.isHTML --><span ng-if="::!col.displayname.isHTML" ng-bind="::col.displayname.value" class="ng-binding ng-scope">fk2_to_reference_new</span><!-- end ngIf: ::!col.displayname.isHTML -->
-                    </span>
-                    <span ng-show="col.sortable &amp;&amp; vm.enableSort &amp;&amp; vm.sortby==col.name &amp;&amp; vm.sortOrder=='asc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes ng-hide" ng-style="{'cursor': 'pointer'}" style="cursor: pointer;"></span>
-                    <span ng-show="col.sortable &amp;&amp; vm.enableSort &amp;&amp; vm.sortby==col.name &amp;&amp; vm.sortOrder=='desc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes-alt ng-hide" ng-style="{'cursor': 'pointer'}" style="cursor: pointer;"></span>
-                    <span ng-show="col.sortable &amp;&amp; vm.enableSort &amp;&amp; vm.sortby!==col.name" class="glyphicon glyphicon-sort" ng-click="::sortby(col.name)" ng-style="{'cursor': 'pointer'}" style="cursor: pointer;"></span>
-                </th><!-- end ngRepeat: col in vm.columns track by $index -->
-            </tr>
-        </thead>
-
-        <!-- rows -->
-        <tbody>
-            <!-- ngRepeat: row in vm.rowValues track by $index --><tr class="table-row ng-scope ng-isolate-scope" ellipses="" ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" config="vm.config" context="vm.context" on-row-click-bind="onRowClickBind"><!-- ngIf: config.viewable || config.editable || config.deletable || config.selectable --><td ng-if="config.viewable || config.editable || config.deletable || config.selectable" class="block ng-scope" style="width: 1px; white-space: nowrap">
-    <div class="btn-group" style="display: flex">
-        <!-- ngIf: config.viewable --><a ng-if="config.viewable" type="button" class="view-action-button btn btn-xs btn-default btn-no-focus ng-scope" ng-href="https://dev.isrd.isi.edu/~amit/chaise/record/#30557/schema:inbound_related_new/id_col=3300" tooltip-placement="bottom" uib-tooltip="View" href="https://dev.isrd.isi.edu/~amit/chaise/record/#30557/schema:inbound_related_new/id_col=3300">
-            <span class="glyphicon glyphicon-eye-open"></span>
-        </a><!-- end ngIf: config.viewable -->
-        <!-- ngIf: config.editable && tuple.reference.canUpdate --><button ng-if="config.editable &amp;&amp; tuple.reference.canUpdate" type="button" class="edit-action-button btn btn-xs btn-default btn-no-focus ng-scope" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
-            <span class="glyphicon glyphicon-pencil"></span>
-        </button><!-- end ngIf: config.editable && tuple.reference.canUpdate -->
-        <!-- ngIf: config.deletable && unlink && associationRef.canDelete -->
-        <!-- ngIf: config.deletable && delete && tuple.reference.canDelete --><button ng-if="config.deletable &amp;&amp; delete &amp;&amp; tuple.reference.canDelete" type="button" class="delete-action-button btn btn-xs btn-default btn-no-focus ng-scope" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
-            <span class="glyphicon glyphicon-trash" style="color: black"></span>
-        </button><!-- end ngIf: config.deletable && delete && tuple.reference.canDelete -->
-        <!-- ngIf: config.selectable -->
-    </div>
-</td><!-- end ngIf: config.viewable || config.editable || config.deletable || config.selectable -->
-<!-- ngRepeat: val in rowValues track by $index --><td ng-repeat="val in rowValues track by $index" class="ng-scope">
-    <div ng-switch="val.isHTML">
-        <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" ng-style="overflow[$index+1] &amp;&amp; maxHeightStyle" class="showContent">
-            <!-- ngSwitchWhen: true --><span ng-switch-when="true" class="markdown-container ng-binding ng-scope" ng-bind-html="val.value | trustedHTML"><a href="https://dev.isrd.isi.edu/~amit/chaise/record/#30557/schema:inbound_related_new/id_col=3300">3300</a></span><!-- end ngSwitchWhen:  -->
-            <!-- ngSwitchDefault:  -->
-        </div>
-        <!-- ngIf: overflow[$index+1] -->
-    </div>
-</td><!-- end ngRepeat: val in rowValues track by $index --><td ng-repeat="val in rowValues track by $index" class="ng-scope">
-    <div ng-switch="val.isHTML">
-        <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" ng-style="overflow[$index+1] &amp;&amp; maxHeightStyle" class="showContent">
-            <!-- ngSwitchWhen: true -->
-            <!-- ngSwitchDefault:  --><span ng-switch-default="" ng-bind="val.value" class="ng-binding ng-scope">791</span><!-- end ngSwitchWhen:  -->
-        </div>
-        <!-- ngIf: overflow[$index+1] -->
-    </div>
-</td><!-- end ngRepeat: val in rowValues track by $index -->
-</tr><!-- end ngRepeat: row in vm.rowValues track by $index --><tr class="table-row ng-scope ng-isolate-scope" ellipses="" ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" config="vm.config" context="vm.context" on-row-click-bind="onRowClickBind"><!-- ngIf: config.viewable || config.editable || config.deletable || config.selectable --><td ng-if="config.viewable || config.editable || config.deletable || config.selectable" class="block ng-scope" style="width: 1px; white-space: nowrap">
-    <div class="btn-group" style="display: flex">
-        <!-- ngIf: config.viewable --><a ng-if="config.viewable" type="button" class="view-action-button btn btn-xs btn-default btn-no-focus ng-scope" ng-href="https://dev.isrd.isi.edu/~amit/chaise/record/#30557/schema:inbound_related_new/id_col=6660" tooltip-placement="bottom" uib-tooltip="View" href="https://dev.isrd.isi.edu/~amit/chaise/record/#30557/schema:inbound_related_new/id_col=6660">
-            <span class="glyphicon glyphicon-eye-open"></span>
-        </a><!-- end ngIf: config.viewable -->
-        <!-- ngIf: config.editable && tuple.reference.canUpdate --><button ng-if="config.editable &amp;&amp; tuple.reference.canUpdate" type="button" class="edit-action-button btn btn-xs btn-default btn-no-focus ng-scope" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
-            <span class="glyphicon glyphicon-pencil"></span>
-        </button><!-- end ngIf: config.editable && tuple.reference.canUpdate -->
-        <!-- ngIf: config.deletable && unlink && associationRef.canDelete -->
-        <!-- ngIf: config.deletable && delete && tuple.reference.canDelete --><button ng-if="config.deletable &amp;&amp; delete &amp;&amp; tuple.reference.canDelete" type="button" class="delete-action-button btn btn-xs btn-default btn-no-focus ng-scope" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
-            <span class="glyphicon glyphicon-trash" style="color: black"></span>
-        </button><!-- end ngIf: config.deletable && delete && tuple.reference.canDelete -->
-        <!-- ngIf: config.selectable -->
-    </div>
-</td><!-- end ngIf: config.viewable || config.editable || config.deletable || config.selectable -->
-<!-- ngRepeat: val in rowValues track by $index --><td ng-repeat="val in rowValues track by $index" class="ng-scope">
-    <div ng-switch="val.isHTML">
-        <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" ng-style="overflow[$index+1] &amp;&amp; maxHeightStyle" class="showContent">
-            <!-- ngSwitchWhen: true --><span ng-switch-when="true" class="markdown-container ng-binding ng-scope" ng-bind-html="val.value | trustedHTML"><a href="https://dev.isrd.isi.edu/~amit/chaise/record/#30557/schema:inbound_related_new/id_col=6660">6660</a></span><!-- end ngSwitchWhen:  -->
-            <!-- ngSwitchDefault:  -->
-        </div>
-        <!-- ngIf: overflow[$index+1] -->
-    </div>
-</td><!-- end ngRepeat: val in rowValues track by $index --><td ng-repeat="val in rowValues track by $index" class="ng-scope">
-    <div ng-switch="val.isHTML">
-        <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" ng-style="overflow[$index+1] &amp;&amp; maxHeightStyle" class="showContent">
-            <!-- ngSwitchWhen: true -->
-            <!-- ngSwitchDefault:  --><span ng-switch-default="" ng-bind="val.value" class="ng-binding ng-scope">794</span><!-- end ngSwitchWhen:  -->
-        </div>
-        <!-- ngIf: overflow[$index+1] -->
-    </div>
-</td><!-- end ngRepeat: val in rowValues track by $index -->
-</tr><!-- end ngRepeat: row in vm.rowValues track by $index -->
-            <!-- ngIf: vm.rowValues.length < 1 -->
-        </tbody>
-    </table>
-</div>
-</record-table>
-                    </span>
-                </div>
-            </div>
-
-         </span><!-- end ngIf: ::values[$index].value == '' -->
-        </td>
-    </tr>
     <!--  -->
 </table>
