@@ -1,6 +1,11 @@
 <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
-    <div ng-repeat="value in vm.selectedRows track by $index">
-        <div>{{value}}</div>
+    <div class="row total-filters">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="filter-label label label-primary" ng-repeat="value in vm.selectedRows track by $index">
+                <a class="remove-link" ng-click="removePill(value)"><i class="glyphicon glyphicon-remove"></i></a>
+                <span ng-bind="value"></span>
+            </div>
+        </div>
     </div>
     <div class="col-lg-4 col-md-5 col-sm-6 col-xs-7">
         <!-- search box -->

@@ -666,3 +666,16 @@ footer .container1 {
      color: #333;
      background-color: #F5F5F5;
  }
+
+
+ /********** faceting ************/
+ .total-filters .filter-label {
+     font-size: 1em;
+     margin-right: 5px;
+     margin-bottom: 5px;
+     display: inline-block;
+ }
+
+ .total-filters .remove-link {
+     color: white;
+ }

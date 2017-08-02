@@ -319,6 +319,10 @@
                     $window.open(appLink, '_blank');
                 };
 
+                scope.removePill = function(displayname) {
+                    scope.vm.selectedRows.splice(scope.vm.selectedRows.indexOf(displayname), 1);
+                }
+
                 // on window focus, if has pending add record requests
                 // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
                 $window.onfocus = function() {
