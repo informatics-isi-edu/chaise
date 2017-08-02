@@ -22,7 +22,7 @@ describe('Navbar ', function() {
         expect(actualTitle.getText()).toEqual(expectedTitle);
     });
 
-    it('should use the brand image/logo specified in chaiseConfig', function() {
+    xit('should use the brand image/logo specified in chaiseConfig', function() {
         var actualLogo = element(by.id('brand-image'));
         var expectedLogo = chaiseConfig.navbarBrandImage;
         expect(actualLogo.isDisplayed()).toBeTruthy();

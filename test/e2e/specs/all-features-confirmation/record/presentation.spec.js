@@ -41,7 +41,7 @@ var testParams = {
     columns: [
         { title: "Id", value: "2002", type: "serial4"},
         { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
-        { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>\n", type: "text", comment : "A valid url of the accommodation"},
+        { title: "Website", value: "Link to Website", type: "text", comment : "A valid url of the accommodation"},
         { title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/id=10003"} },
         { title: "User Rating", value: "4.3000", type: "float4", annotations: { "tag:misd.isi.edu,2015:display": { markdown_name: "<strong>User Rating</strong>"}} },
         { title: "Summary", value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
@@ -140,21 +140,21 @@ describe('View existing record,', function() {
             })
         });
     });
-    
+
     describe("For multiple records fetched for particular filters", function() {
-        
+
         beforeAll(function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/luxurious=true";
             browser.get(url);
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
-        
+
         it('A error modal window should appear with multiple records found error with correct title', function(){
             var modalTitle = chaisePage.recordPage.getErrorModalTitle();
             expect(modalTitle).toBe(testParams.multipleData.title, "The title of multiple record error pop is not correct");
-            
+
         });
-        
+
         it('On click of OK button the page should redirect to recordset page', function(){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
@@ -164,7 +164,7 @@ describe('View existing record,', function() {
                 expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
             }).catch( function(err) {
                 console.log(error);
-            }); 
+            });
         });
     });
 
