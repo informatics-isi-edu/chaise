@@ -67,7 +67,8 @@
                 scope.actionStyle = {};
                 // scope.rowStyle = {};
                 // scope.actionStyle['font-size']='11px';
-                //scope.actionStyle['padding-left']= '5px';
+                scope.actionStyle['padding-left']= '5px';
+                scope.actionStyle['padding-bottom']= '5px';
                 // scope.actionStyle['font-weight']='bold';
 
                 function setClass(f) {
