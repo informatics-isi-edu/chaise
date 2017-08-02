@@ -140,21 +140,21 @@ describe('View existing record,', function() {
             })
         });
     });
-    
+
     describe("For multiple records fetched for particular filters", function() {
-        
+
         beforeAll(function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/luxurious=true";
             browser.get(url);
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
-        
+
         it('A error modal window should appear with multiple records found error with correct title', function(){
             var modalTitle = chaisePage.recordPage.getErrorModalTitle();
             expect(modalTitle).toBe(testParams.multipleData.title, "The title of multiple record error pop is not correct");
-            
+
         });
-        
+
         it('On click of OK button the page should redirect to recordset page', function(){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
@@ -164,7 +164,7 @@ describe('View existing record,', function() {
                 expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
             }).catch( function(err) {
                 console.log(error);
-            }); 
+            });
         });
     });
 
