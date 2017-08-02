@@ -533,6 +533,18 @@
                     }
                 },
                 {
+                    "comment": "A generated json column with an initial non-null value",
+                    "name": "json_col_gen",
+                    "default": 82.89,
+                    "nullok": true,
+                    "type": {
+                        "typename": "json"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": 82.89
+                    }
+                },
+                {
                     "comment": "A generated foreign key column with an initial non-null value",
                     "name": "fk_col_gen",
                     "default": null,
