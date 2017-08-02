@@ -231,13 +231,13 @@ describe('View recordset,', function() {
                     return clearSearchButton.click();
                 })
             });
-            
+
             it("action columns should show Download CSV button if records present else should not show download button", function() {
                 var downloadButton;
                 var searchBox = chaisePage.recordsetPage.getSearchBox(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton();
-                
+
                 searchBox.sendKeys('testing_json');
                 searchSubmitButton.click().then(function() {
                     return chaisePage.waitForElementInverse(element(by.id("spinner")));
@@ -259,7 +259,7 @@ describe('View recordset,', function() {
                     return clearSearchButton.click();
                 });
             });
-            
+
             it("action columns should show view button that redirects to the record page", function() {
                 chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
                     return chaisePage.recordsetPage.getViewActionButtons();
@@ -382,8 +382,8 @@ describe('View recordset,', function() {
                     expect(rows.length).toBe(3);
                 });
             });
-            
-            
+
+
         });
 
     });
@@ -434,6 +434,24 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.page_size);
+            });
+        });
+
+        it("should have 14 rows and paging buttons disabled when changing the page size to 25.", function() {
+            var nextBtn = chaisePage.recordsetPage.getNextButton(),
+                prevBtn = chaisePage.recordsetPage.getPreviousButton();
+
+            chaisePage.recordsetPage.getPageLimitDropdown().click().then(function() {
+
+                return chaisePage.recordsetPage.getPageLimitSelector(25).click();
+            }).then(function() {
+                browser.wait(EC.not(EC.elementToBeClickable(nextBtn)), browser.params.defaultTimeout);
+
+                expect(nextBtn.isEnabled()).toBeFalsy();
+                expect(prevBtn.isEnabled()).toBeFalsy();
+                return chaisePage.recordsetPage.getRows().count();
+            }).then(function(ct) {
+                expect(ct).toBe(14);
             });
         });
     });
