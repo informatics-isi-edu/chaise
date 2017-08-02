@@ -351,6 +351,13 @@
                 scope.$on('recordset-update', function($event) {
                     if(scope.vm.search == scope.vm.reference.location.searchTerm) {
                         scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
+                            // NOTE: scenario: A user triggered a foreground search. Once it returns the aggregate count request is queued.
+                            // While that request is running, the user triggers another foreground search.
+                            // How do we avoid one aggregate count query to not show when it isn't relevant to the displayed data?
+                            // Maybe comparing reference.location.searchTerm and vm.search here instead and if they don't match,
+                            // set the value to null so the count displayed is just the count of the shown rows until the latter
+                            // aggregate count request returns. If the latter one never returns (because of a server error or something),
+                            // at least the UI doesn't show any misleading information.
                             scope.vm.totalRowsCnt = response[0];
                         }, function error(response) {
                             throw response;
