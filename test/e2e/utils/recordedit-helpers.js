@@ -613,9 +613,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }).then(function(ct) {
                                         expect(ct).toBe(col.count, colError(col.name, "number of foreign key rows are not as expected."));
 
+                                        browser.sleep(10);
                                         return chaisePage.recordsetPage.getTotalCount().getText();
                                     }).then(function(text) {
-                                        expect(text).toBe("Displaying 5 of " + col.count + " Records", "The total count display in the foreign key popup is incorrect");
+                                        expect(text).toBe("Displaying " + col.count + " of " + col.totalCount + " Records", colError(col.name, "The total count display in the foreign key popup is incorrect"));
 
                                         return rows.get(fkSelectedValue.index).all(by.css(".select-action-button"));
                                     }).then(function(selectButtons) {

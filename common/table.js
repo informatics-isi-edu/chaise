@@ -110,6 +110,7 @@
             if (isBackground) {
                 if (!scope.vm.foregroundSearch) {
                     scope.vm.backgroundSearch = true;
+                    scope.vm.totalRowsCnt = null;
                 } else {
                     scope.vm.backgroundSearchPendingTerm = null;
                     scope.vm.backgroundSearch = false;
@@ -132,7 +133,9 @@
                 }, 200);
 
                 // tell parent controller data updated
-                scope.$emit('recordset-update');
+                if (!isBackground) {
+                    scope.$emit('recordset-update');
+                }
 
             }, function error(exception) {
                 scope.vm.hasLoaded = true;
