@@ -90,11 +90,11 @@
         });
 
         $scope.onSelect = function(tuple) {
-            var rowIndex = recordsetModel.selectedRows.indexOf(tuple);
+            var rowIndex = recordsetModel.selectedRows.indexOf(tuple.displayname.value);
 
             // add the tuple to the list of selected rows
             if (rowIndex === -1) {
-                recordsetModel.selectedRows.push(tuple);
+                recordsetModel.selectedRows.push(tuple.displayname.value);
             } else {
                 recordsetModel.selectedRows.splice(rowIndex, 1);
             }

@@ -179,6 +179,10 @@
                     scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
                     recordTableUtils.read(scope);
                 };
+
+                scope.isSelected = function (displayname) {
+                    return (scope.vm.selectedRows.indexOf(displayname) > -1);
+                };
             }
         };
     }])

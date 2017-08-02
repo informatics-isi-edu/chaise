@@ -52,10 +52,11 @@
             scope: {
                 tuple: '=',
                 rowValues: '=', // tuple's values
-                context: "=",
+                context: '=',
                 config: '=',    // {viewable, editable, deletable, selectable}
                 onRowClickBind: '=?',
-                fromTuple: "=?"
+                fromTuple: '=?',
+                selected: '='
             },
             link: function (scope, element) {
 
@@ -65,7 +66,6 @@
                     scope.hideContent = false;
                     scope.linkText = "more";
                     scope.maxHeightStyle = { };
-                    scope.selected = false;
 
 
                     var editLink = null;
