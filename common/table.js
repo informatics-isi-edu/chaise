@@ -32,9 +32,14 @@
      *        pageLimit,    // number of rows per page
      *        rowValues,    // array of rows values, each value has this structure {isHTML:boolean, value:value}
      *        search:       // search term, null for none
-     *        config,       // {viewable, editable, deletable, selectable, context}
+     *        config,       // {viewable, editable, deletable, selectMode}
      *        context       // reference's context
      *       }
+     *
+     *      config.selectMode can be one of the following:
+     *          no-select       // do not allow selection of the rows
+     *          single-select   // only allow one row to be selected
+     *          multi-select    // allow the user to select as many rows as they want
      *
      *
      * Handle recordset/recordTable events in your controller:

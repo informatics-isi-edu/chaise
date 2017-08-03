@@ -163,16 +163,14 @@
                     viewable: false,
                     editable: false,
                     deletable: false,
-                    selectable: true,
-                    multiSelect: true
+                    selectMode: "multi-select"
                 };
             } else {
                 recordsetModel.config = {
                     viewable: true,
                     editable: modifyEnabled,
                     deletable: modifyEnabled && deleteEnabled,
-                    selectable: false,
-                    multiSelect: false
+                    selectMode: "no-select"
                 };
             }
 

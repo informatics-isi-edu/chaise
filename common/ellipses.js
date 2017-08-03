@@ -53,7 +53,7 @@
                 tuple: '=',
                 rowValues: '=', // tuple's values
                 context: '=',
-                config: '=',    // {viewable, editable, deletable, selectable}
+                config: '=',    // {viewable, editable, deletable, selectMode}
                 onRowClickBind: '=?',
                 fromTuple: '=?',
                 selected: '='

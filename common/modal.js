@@ -82,7 +82,7 @@
             enableAutoSearch:   true,
             pageLimit:          25,
             search:             null,
-            config:             {viewable: false, editable: false, deletable: false, selectable: true, multiSelect: false},
+            config:             {viewable: false, editable: false, deletable: false, selectMode: "single-select"},
             context:            params.context
         };
 

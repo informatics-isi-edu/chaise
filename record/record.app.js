@@ -160,8 +160,7 @@
                                 viewable: true,
                                 editable: $rootScope.modifyRecord,
                                 deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                                selectable: false,
-                                multiSelect: false
+                                selectMode: "no-select"
                             };
                             $rootScope.tableModels[i] = model;
                             $rootScope.displayReady = true;
