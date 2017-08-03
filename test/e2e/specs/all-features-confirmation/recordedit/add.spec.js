@@ -16,7 +16,7 @@ var testParams = {
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
             { name: "title", title: "Name of Accommodation", type: "text", nullok: false},
             { name: "website", title: "Website", type: "text", comment: "A valid url of the accommodation"},
-            { name: "category", title: "Category", type: "text", nullok: false, isForeignKey: true,  count: 5, table_title: "Categories", comment: "Type of accommodation ('Resort/Hotel/Motel')"},
+            { name: "category", title: "Category", type: "text", nullok: false, isForeignKey: true,  count: 5, totalCount: 5, table_title: "Categories", comment: "Type of accommodation ('Resort/Hotel/Motel')"}, // the total count is the total number of rows in the category.json data file
             { name: "rating", title: "User Rating", type: "float4", nullok: false},
             { name: "summary", title: "Summary", type: "longtext", nullok: false},
             { name: "description", title: "Description", type: "markdown"},

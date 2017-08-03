@@ -100,7 +100,7 @@ describe('View recordset,', function() {
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
                 chaisePage.recordsetPage.getCustomPageSize().then(function(text) {
                     expect(text).toBe("15 (Custom)");
-                })
+                });
             });
 
             it("should show correct table rows", function() {
@@ -170,6 +170,7 @@ describe('View recordset,', function() {
                     return chaisePage.recordsetPage.getRows()
                 }).then(function(rows) {
                     expect(rows.length).toBe(1);
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "Display total count for 'Super 8 North Hollywood Motel' search is incorrect");
                     // clear search
                     return clearSearchButton.click();
                 }).then(function() {
@@ -178,6 +179,7 @@ describe('View recordset,', function() {
                     return chaisePage.recordsetPage.getRows();
                 }).then(function(rows) {
                     expect(rows.length).toBe(4);
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 4 of 4 Records", "Display total count for no search term is incorrect");
 
                     // apply conjunctive search words
                     searchBox.sendKeys('"Super 8" motel "North Hollywood"');
@@ -189,6 +191,7 @@ describe('View recordset,', function() {
                     return chaisePage.recordsetPage.getRows();
                 }).then(function(rows) {
                     expect(rows.length).toBe(1);
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "Display total count for '\"Super 8\" motel \"North Hollywood\"' search is incorrect");
                     // clear search
                     return clearSearchButton.click();
                 }).then(function() {
@@ -204,6 +207,7 @@ describe('View recordset,', function() {
                     return chaisePage.recordsetPage.getRows();
                 }).then(function(rows) {
                     expect(rows.length).toBe(0);
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 0 Records", "Display total count for 'asdfghjkl' search is incorrect");
 
                     return chaisePage.recordsetPage.getNoResultsRow().getText();
                 }).then(function(text) {
@@ -404,6 +408,12 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.custom_page_size);
+            });
+        });
+
+        it("should display the proper row count and total row count.", function () {
+            chaisePage.recordsetPage.getTotalCount().getText().then(function(text) {
+                expect(text).toBe("Displaying 5 of 14 Records");
             });
         });
 

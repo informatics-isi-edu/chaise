@@ -237,6 +237,9 @@
                     recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                     recordsetModel.initialized = true;
                     recordsetModel.hasLoaded = true;
+
+                    $rootScope.$broadcast('recordset-update');
+
                 }, function error(response) {
                     throw response;
                 }).catch(function genericCatch(exception) {
