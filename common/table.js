@@ -323,9 +323,25 @@
                     $window.open(appLink, '_blank');
                 };
 
+                // function for selecting all rows currently displayed
+                scope.selectAll = function() {
+
+                };
+
+                // function for selecting none of the rows currently displayed
+                scope.selectNone = function() {
+
+                };
+
+                // function for removing a single pill and it's corresponding selected row
                 scope.removePill = function(displayname) {
                     scope.vm.selectedRows.splice(scope.vm.selectedRows.indexOf(displayname), 1);
-                }
+                };
+
+                // function for removing all pills
+                scope.removeAllPills = function() {
+                    scope.vm.selectedRows.clear();
+                };
 
                 // on window focus, if has pending add record requests
                 // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
