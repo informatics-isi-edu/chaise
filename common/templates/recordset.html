@@ -36,7 +36,7 @@
             </span>
         </div>
     </div>
-    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="height: 34px;">
+    <div style="height: 34px;">
         <!-- pagination -->
         <span class="dropdown" style="margin-left: 5px">
             <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
@@ -52,6 +52,7 @@
                 </li>
             </ul>
         </span>
+        <button class="btn btn-default" type="button" ng-click="::toggleSelection()">Select {{vm.currentPageSelected ? "None" : "All"}}</button>
     </div>
     <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 pull-right" align="right">
         <!-- add record -->

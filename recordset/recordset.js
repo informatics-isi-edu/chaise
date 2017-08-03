@@ -98,6 +98,8 @@
             } else {
                 recordsetModel.selectedRows.splice(rowIndex, 1);
             }
+
+            recordsetModel.checkSelectedRows();
         };
 
         $scope.permalink = function() {

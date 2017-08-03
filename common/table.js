@@ -209,6 +209,7 @@
                 scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
                 scope.vm.backgroundSearchPendingTerm = null;
+                scope.vm.currentPageSelected = false;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -323,24 +324,48 @@
                     $window.open(appLink, '_blank');
                 };
 
-                // function for selecting all rows currently displayed
-                scope.selectAll = function() {
+                scope.vm.checkSelectedRows = function() {
+                    // assume all the rows are selected
+                    var allSelected = true;
+                    for (var i = 0; i < scope.vm.page.tuples.length; i++) {
+                        var rowname = scope.vm.page.tuples[i].displayname.value;
 
-                };
+                        // once you encounter the first unselected row, change the flag and break out of the loop
+                        if (scope.vm.selectedRows.indexOf(rowname) == -1) {
+                            allSelected = false;
+                            break;
+                        }
+                    }
 
-                // function for selecting none of the rows currently displayed
-                scope.selectNone = function() {
+                    scope.vm.currentPageSelected = allSelected;
+                }
 
+                scope.toggleSelection = function() {
+                    var i, rowname, index;
+
+                    for (i = 0; i < scope.vm.page.tuples.length; i++) {
+                        rowname = scope.vm.page.tuples[i].displayname.value;
+                        index = scope.vm.selectedRows.indexOf(rowname);
+
+                        if (scope.vm.currentPageSelected) {
+                            if (index > -1) scope.vm.selectedRows.splice(index, 1);
+                        } else {
+                            if (index == -1) scope.vm.selectedRows.push(rowname);
+                        }
+                    }
+                     scope.vm.currentPageSelected = !scope.vm.currentPageSelected;
                 };
 
                 // function for removing a single pill and it's corresponding selected row
                 scope.removePill = function(displayname) {
                     scope.vm.selectedRows.splice(scope.vm.selectedRows.indexOf(displayname), 1);
+                    scope.vm.checkSelectedRows();
                 };
 
                 // function for removing all pills
                 scope.removeAllPills = function() {
                     scope.vm.selectedRows.clear();
+                    scope.vm.currentPageSelected = false;
                 };
 
                 // on window focus, if has pending add record requests
@@ -371,9 +396,9 @@
                     updated = true;
                 }
 
-                // get the total row count to display above the table
                 scope.$on('recordset-update', function($event) {
-                    if(scope.vm.search == scope.vm.reference.location.searchTerm) {
+                    if (scope.vm.search == scope.vm.reference.location.searchTerm) {
+                        // get the total row count to display above the table
                         scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
                             // NOTE: scenario: A user triggered a foreground search. Once it returns the aggregate count request is queued.
                             // While that request is running, the user triggers another foreground search.
@@ -387,6 +412,8 @@
                             throw response;
                         });
                     }
+                    // update the currentPageSelected boolean based on what rows are selected
+                    scope.vm.checkSelectedRows();
                 });
             }
         };
