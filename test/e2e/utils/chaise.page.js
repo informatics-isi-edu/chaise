@@ -765,6 +765,10 @@ var recordsetPage = function() {
         return browser.executeScript("return $('#custom-page-size').text().trim();");
     };
 
+    this.getTotalCount = function() {
+        return element(by.id('rs-total-count'));
+    };
+
     this.getColumnNames = function() {
         return element.all(by.css(".table-column-displayname > span"));
     };

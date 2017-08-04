@@ -68,7 +68,7 @@ var JSONTestParams=[
         stringVal:JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
         expectedValue:true
     }
-    
+
 ];
 
 
@@ -304,7 +304,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     txtArea.sendKeys(text);
 
                                     expect(txtArea.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
-                                 
+
                             });
                         });
                     });
@@ -340,7 +340,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
                 });
             }
-            
+
             if (jsonCols.length > 0) {
                 describe("JSON fields, ", function () {
                     it("should show textarea input for JSON datatype and then set the value", function() {
@@ -348,7 +348,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
                             expect(jsonTxtArea.isDisplayed()).toBeTruthy();
                             jsonTxtArea.column = c;
-                                
+
                             JSONDataTypeFields.push(jsonTxtArea);
                             var value = getRecordValue(c.name);
 
@@ -358,7 +358,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
                  });
-                 
+
                  it("should only allow valid JSON values", function(){
                      jsonCols.forEach(function(c) {
                          chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
@@ -369,15 +369,15 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                      jsonTxtArea.sendKeys(input);
                                      chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json').then(function(error){
                                          expect(error).toBe(null, colError(c.name , "Some Valid JSON Values were not accepted"));
-                                     });                                        
+                                     });
                                  })(JSONTestParams[i].stringVal);
-                             }//for 
+                             }//for
                          });
                      });
                  });
              });
          }
-            
+
             if (markdownCols.length > 0) {
                 describe("Markdown fields, ", function () {
                     it('should have the correct value.', function () {
@@ -479,7 +479,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                     dropdowns.push(dropdown);
                                     booleanDataTypeFields.push(dropdown);
-                                
+
                             });
                         });
                     });
@@ -613,6 +613,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }).then(function(ct) {
                                         expect(ct).toBe(col.count, colError(col.name, "number of foreign key rows are not as expected."));
 
+                                        browser.sleep(10);
+                                        return chaisePage.recordsetPage.getTotalCount().getText();
+                                    }).then(function(text) {
+                                        expect(text).toBe("Displaying " + col.count + " of " + col.totalCount + " Records", colError(col.name, "The total count display in the foreign key popup is incorrect"));
 
                                         return rows.get(fkSelectedValue.index).all(by.css(".select-action-button"));
                                     }).then(function(selectButtons) {
@@ -895,7 +899,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             timeInput.sendKeys('12:00:00');
                             chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampDate').then(function(error) {
                                 expect(error.isDisplayed()).toBeTruthy(colError(column.name, "Accepted an invalid date."));
-                                
+
                                 // Good date + good time = no error
                                 // Now, if user enters a valid date, then no error message should appear
                                 return dateInput.sendKeys('2016-01-01');
