@@ -345,7 +345,9 @@
           "top_columns": ["title", "rating", "category", "opened_on","json_col"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", "title", "website", ["product-record", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-record", "fk_cover"], ["product-record", "fk_thumbnail"], "opened_on", "luxurious","json_col"]
+          "detailed" : [
+            "id", "title", "website", ["product-record", "fk_category"],"id", "title", "website", ["product-record", "fk_booking_accommodation"], "rating", "summary", "description", "no_of_rooms", ["product-record", "fk_cover"], ["product-record", "fk_thumbnail"], "opened_on", "luxurious","json_col"
+        ]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
@@ -457,8 +459,12 @@
         "description": {
           "display": "Bookings"
         },
-        "tag:isrd.isi.edu,2016:visible-columns" : {
-          "*": ["id", ["product-record", "fk_booking_accommodation"], "price", "bookin_date"]
+         
+        "tag:isrd.isi.edu,2016:table-display": {
+          "*": {
+            "separator_markdown": " ",
+            "row_markdown_pattern": "**{{accommodation_id}}**{.vocab} **{{id}}**{.vocab} **{{price}}**{.vocab} **{{booking_date}}**{.vocab}"
+          }
         }
       }
     },

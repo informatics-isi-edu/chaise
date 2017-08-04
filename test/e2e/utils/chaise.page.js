@@ -620,7 +620,7 @@ var recordPage = function() {
     };
 
     this.getColumnValueElements = function() {
-        return browser.executeScript("return $('.entity-value > span.ng-scope');");
+        return browser.executeScript("return $('.entity-value > span.ng-scope > span.ng-scope');");
     };
 
     this.getColumnValue = function(columnName) {

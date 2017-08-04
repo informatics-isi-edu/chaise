@@ -122,12 +122,8 @@ exports.testPresentation = function (tableParams) {
                         expect(aTag.getText()).toEqual(column.value);
                     });
                 } else {
-				
-					el.getText().then(function(elText){
-						console.log(elText);
-					})
-                    // expect(el.getAttribute('innerHTML')).toBe(column.value);
-					expect(el.getText()).toBe(column.value);                }
+                     expect(el.getAttribute('innerHTML')).toBe(column.value);
+				}
 			});
 		});
 	});

@@ -14,7 +14,7 @@
         related: 'rel'
     };
 })
-    .directive('recordDisplay', [function() {
+        .directive('recordDisplay', ['DataUtils', function (DataUtils) {
         return {
             restrict: 'E',
             transclude: true,
@@ -33,9 +33,7 @@
             templateUrl: '../common/templates/record.html',
             controller: function ($scope) {
                 $scope.repeater = [1,2];
-            //    $scope.toRecordSet()($scope.rtrefDisType);
-            //console.log($scope.rtrefDisTypetable0[1]);
-            // return $scope;
+                $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             }
 
         };
