@@ -6,7 +6,7 @@
                     clear all
                 </span>
             </a>
-            <div class="filter-label label label-primary" ng-repeat="value in vm.selectedRows track by $index">
+            <div class="filter-label label label-default" ng-repeat="value in vm.selectedRows track by $index">
                 <a class="remove-link" ng-click="removePill(value)"><i class="glyphicon glyphicon-remove"></i></a>
                 <span ng-bind="value"></span>
             </div>
@@ -52,7 +52,6 @@
                 </li>
             </ul>
         </span>
-        <button class="btn btn-default" type="button" ng-click="::toggleSelection()">Select {{vm.currentPageSelected ? "None" : "All"}}</button>
     </div>
     <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 pull-right" align="right">
         <!-- add record -->

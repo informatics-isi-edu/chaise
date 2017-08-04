@@ -3,7 +3,14 @@
         <!-- sortable column header -->
         <thead class="table-heading">
             <tr>
-                <th ng-if="::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode != 'no-select')">Actions</th>
+                <th ng-switch="::vm.config.selectMode" ng-if="::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode)">
+                    <span ng-switch-when="no-select">Actions</span>
+                    <span ng-switch-when="single-select">Select</span>
+                    <div ng-switch-when="multi-select">
+                        <span ng-click="::selectAll()" class="glyphicon glyphicon-ok" ng-style="{'cursor': 'pointer'}">All</span>
+                        <span ng-click="::selectNone()" class="glyphicon glyphicon-remove" ng-style="{'cursor': 'pointer'}">None</span>
+                    </div>
+                </th>
                 <th nowrap ng-repeat="col in vm.columns track by $index">
                     <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.comment) ? col.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.comment) ? 'top' : undefined}}" title="{{col.comment}}" ng-click="col.sortable && vm.enableSort && sortby(col.name)">
                         <span ng-if="::col.displayname.isHTML" ng-bind-html="::col.displayname.value"></span>
