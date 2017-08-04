@@ -66,8 +66,9 @@
         enableSort: true,   // allow sorting
         page: null,         // current page
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
+        selectedRows: [],   // array of selected rows
         search: null,       // search term
-        pageLimit: 25,       // number of rows per page
+        pageLimit: 25,      // number of rows per page
         config: {}
     })
 
@@ -76,7 +77,6 @@
 
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
-        recordsetModel.selectedRows = [];
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
@@ -98,8 +98,6 @@
             } else {
                 recordsetModel.selectedRows.splice(rowIndex, 1);
             }
-
-            recordsetModel.checkSelectedRows();
         };
 
         $scope.permalink = function() {

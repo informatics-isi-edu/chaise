@@ -1,7 +1,7 @@
 <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
-    <div class="row total-filters">
+    <div ng-if="vm.selectedRows.length > 0" class="row total-filters">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <a ng-if="vm.selectedRows.length > 0" class="remove-link" ng-click="removeAllPills()">
+            <a class="remove-link" ng-click="removeAllPills()">
                 <span class="filter-label label label-primary">
                     clear all
                 </span>

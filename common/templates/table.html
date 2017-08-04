@@ -3,12 +3,16 @@
         <!-- sortable column header -->
         <thead class="table-heading">
             <tr>
-                <th ng-switch="::vm.config.selectMode" ng-if="::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode)">
+                <th ng-switch="::vm.config.selectMode" ng-if="::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode)" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
                     <span ng-switch-when="no-select">Actions</span>
                     <span ng-switch-when="single-select">Select</span>
                     <div ng-switch-when="multi-select">
-                        <span ng-click="::selectAll()" class="glyphicon glyphicon-ok" ng-style="{'cursor': 'pointer'}">All</span>
-                        <span ng-click="::selectNone()" class="glyphicon glyphicon-remove" ng-style="{'cursor': 'pointer'}">None</span>
+                        <button type="button" ng-click="::selectAll()" class="btn btn-sm btn-default btn-condensed" tooltip-placement="bottom" uib-tooltip="Select all rows in table">
+                            <span class="glyphicon glyphicon-check"> All</span>
+                        </button>
+                        <button type="button" ng-click="::selectNone()" class="btn btn-sm btn-default btn-condensed" tooltip-placement="bottom" uib-tooltip="Deselect all rows in table">
+                            <span class="glyphicon glyphicon-unchecked"> None</span>
+                        </button>
                     </div>
                 </th>
                 <th nowrap ng-repeat="col in vm.columns track by $index">

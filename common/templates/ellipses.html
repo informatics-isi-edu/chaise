@@ -1,4 +1,4 @@
-<td ng-if="config.viewable || config.editable || config.deletable || config.selectMode != 'no-select'" class="block" style="width: 1px; white-space: nowrap">
+<td ng-if="config.viewable || config.editable || config.deletable || config.selectMode != 'no-select'" class="block actions-layout">
     <div class="btn-group" style="display: flex">
         <a ng-if="config.viewable" type="button" class="view-action-button btn btn-xs btn-default btn-no-focus" ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View">
             <span class="glyphicon glyphicon-eye-open"></span>
@@ -15,8 +15,8 @@
         <button ng-if="config.selectMode == 'single-select'" type="button" class="select-action-button btn btn-xs btn-default btn-no-focus" ng-click="onSelect()" tooltip-placement="bottom" uib-tooltip="Select" >
             <span class="glyphicon glyphicon-check"></span>
         </button>
-        <input ng-if="config.selectMode == 'multi-select'" type="checkbox" ng-checked="selected" ng-click="onSelect()">
     </div>
+    <input ng-if="config.selectMode == 'multi-select'" type="checkbox" class="" ng-checked="selected" ng-click="onSelect()">
 </td>
 <td ng-repeat="val in rowValues track by $index">
     <div ng-switch="val.isHTML">

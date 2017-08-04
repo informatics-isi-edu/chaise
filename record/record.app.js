@@ -145,12 +145,13 @@
                                 pageLimit: ($rootScope.relatedReferences[i].display.defaultPageSize ? $rootScope.relatedReferences[i].display.defaultPageSize : constants.defaultPageSize),
                                 hasNext: page.hasNext,      // used to determine if a link should be shown
                                 hasLoaded: true,            // used to determine if the current table and next table should be rendered
-                                open: boolIsOpen,                 // to define if the accordion is open or closed
+                                open: boolIsOpen,           // to define if the accordion is open or closed
                                 enableSort: true,           // allow sorting on table
                                 sortby: null,               // column name, user selected or null
                                 sortOrder: null,            // asc (default) or desc
                                 rowValues: [],              // array of rows values
-                                search: null,                // search term
+                                selectedRows: [],           // array of selected rows, needs to be defined even if not used
+                                search: null,               // search term
                                 displayType: $rootScope.relatedReferences[i].display.type,
                                 context: "compact/brief",
                                 fromTuple: $rootScope.tuple

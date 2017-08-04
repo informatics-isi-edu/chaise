@@ -11,7 +11,7 @@
     <loading-spinner ng-show="!displayReady"></loading-spinner>
     <div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
-            <div id="record-bookmark-container" class="col-xs-12 meta-icons">
+            <div id="bookmark-container" class="col-xs-12 meta-icons">
                 <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
                 </a>&nbsp;&nbsp;
