@@ -639,6 +639,15 @@ var recordPage = function() {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName));
     };
+    this.getEntityRelatedTable = function (displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("entity-" + displayName));
+    };
+    this.getEntityRelatedTableScope = function (displayName,safeId=false) { //if safeId==true then no need to call the function
+        displayName = safeId?displayName:makeSafeIdAttr(displayName);
+        return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
+    };
+    
 
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-heading"));

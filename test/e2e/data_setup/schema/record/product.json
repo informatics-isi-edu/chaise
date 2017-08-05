@@ -463,7 +463,7 @@
         "tag:isrd.isi.edu,2016:table-display": {
           "*": {
             "separator_markdown": " ",
-            "row_markdown_pattern": "**{{accommodation_id}}**{.vocab} **{{id}}**{.vocab} **{{price}}**{.vocab} **{{booking_date}}**{.vocab}"
+            "row_markdown_pattern": "**{{id}}**{.vocab} **{{price}}**{.vocab} **{{booking_date}}**{.vocab}"
           }
         }
       }

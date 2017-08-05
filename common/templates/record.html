@@ -6,15 +6,13 @@
                 <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
             </span>
         </td>
-        <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML" id="entity-{{$index}}-{{makeSafeIdAttr(column.displayname.value)}}">
+        <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML" id="entity-{{makeSafeIdAttr(column.displayname.value)}}">
 
             <span ng-if="::values[$index].value != ''">
                 <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
                 <span ng-switch-default>{{::values[$index].value}}</span>
             </span>
             <span ng-if="::values[$index].value == ''" id="entity-{{$index}}-table">
-
-                  <!-- <div ng-transclude></div> -->
                   <record-action-bar tabtype="entity" rtref-dis-type="rtrefDisTypetable0[$index].display.type" tab-model-display="rectab[$index].displayType"
                   toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:rectab[$index]})' can-edit-related="canEditRelated({ref:rtrefDisTypetable0[$index]})"
                   can-create-related="canCreateRelated0({ref:rtrefDisTypetable0[$index]})"
@@ -22,18 +20,13 @@
                   dummytest="dummytest({k:rtrefDisTypetable0[$index].display.type})">
                   </record-action-bar>
 
-                <span ng-show="rectab[$index].displayType == 'markdown'" >
+                <span ng-show="rectab[$index].displayType == 'markdown'" id="entity-{{$index}}-markdown">
                     <span class="markdown-container" ng-bind-html="::rectab[$index].page.content | trustedHTML"></span>
                 </span>
-                <span ng-show="rectab[$index].displayType != 'markdown'">
+                <span ng-show="rectab[$index].displayType != 'markdown'" id="entity-{{$index}}-recTab">
                         <record-table class="related-table" vm="::rectab[$index]"></record-table>
-                </span>
-            
-
+                </span> 
          </span>
         </td>
     </tr>
-    <!--  delete-->
-
-    <!--  -->
 </table>
