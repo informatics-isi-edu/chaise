@@ -189,9 +189,9 @@
 
                 ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
                     session = Session.getSessionValue();
-                    
+
                     var location = reference.location;
-                    
+
                     // only allowing single column sort here
                     if (reference.sortObject) {
                         recordsetModel.sortby = location.sortObject[0].column;
@@ -233,6 +233,9 @@
                     recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                     recordsetModel.initialized = true;
                     recordsetModel.hasLoaded = true;
+
+                    $rootScope.$broadcast('recordset-update');
+
                 }, function error(response) {
                     throw response;
                 }).catch(function genericCatch(exception) {

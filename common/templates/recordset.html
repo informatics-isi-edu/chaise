@@ -67,6 +67,7 @@
 
 <!-- record table -->
 <div ng-if="vm.hasLoaded">
+    <h4 id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + vm.totalRowsCnt : ''}} Records</h4>
     <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
 </div>
 
