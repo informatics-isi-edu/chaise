@@ -89,16 +89,31 @@
             $rootScope.location = $window.location.href;
         });
 
-        $scope.onSelect = function(tuple) {
-            var rowIndex = recordsetModel.selectedRows.indexOf(tuple.displayname.value);
-
-            // add the tuple to the list of selected rows
-            if (rowIndex === -1) {
-                recordsetModel.selectedRows.push(tuple.displayname.value);
-            } else {
-                recordsetModel.selectedRows.splice(rowIndex, 1);
-            }
-        };
+        // TODO: This function is used for multi-select functionality.
+        /**
+         * Creates a displayObj with a unique identifier to store the selected rows
+         *  displayname =   used for the display value in the pills for which which row is selected`
+         *  key =           unique identifier that is composed from each shortest key column's value
+         *
+         * Facilitates the multi select functionality for multi edit in the future
+         */
+        // $scope.onSelect = function(tuple) {
+        //     var displayObj = {
+        //         displayname: tuple.displayname.value,
+        //         key: tuple.uniqueId
+        //     };
+        //
+        //     var rowIndex = recordsetModel.selectedRows.findIndex(function (obj) {
+        //         return obj.key == displayObj.key
+        //     });
+        //
+        //     // add the tuple to the list of selected rows
+        //     if (rowIndex === -1) {
+        //         recordsetModel.selectedRows.push(displayObj);
+        //     } else {
+        //         recordsetModel.selectedRows.splice(rowIndex, 1);
+        //     }
+        // };
 
         $scope.permalink = function() {
 
@@ -156,21 +171,14 @@
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
-            if (true) {
-                recordsetModel.config = {
-                    viewable: false,
-                    editable: false,
-                    deletable: false,
-                    selectMode: "multi-select"
-                };
-            } else {
-                recordsetModel.config = {
-                    viewable: true,
-                    editable: modifyEnabled,
-                    deletable: modifyEnabled && deleteEnabled,
-                    selectMode: "no-select"
-                };
-            }
+
+            recordsetModel.config = {
+                viewable: true,
+                editable: modifyEnabled,
+                deletable: modifyEnabled && deleteEnabled,
+                selectMode: "no-select"
+            };
+
 
             $rootScope.alerts = AlertsService.alerts;
 

@@ -16,7 +16,7 @@
             <span class="glyphicon glyphicon-check"></span>
         </button>
     </div>
-    <input ng-if="config.selectMode == 'multi-select'" type="checkbox" class="" ng-checked="selected" ng-click="onSelect()">
+    <input ng-if="config.selectMode == 'multi-select'" type="checkbox" ng-checked="selected" ng-click="onSelect()">
 </td>
 <td ng-repeat="val in rowValues track by $index">
     <div ng-switch="val.isHTML">

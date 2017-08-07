@@ -229,6 +229,7 @@ td.actions-layout {
 
 th.multi-select-width {
     width: 140px;
+    text-align: center;
 }
 
 .btn-condensed {

@@ -190,29 +190,40 @@
                     recordTableUtils.read(scope);
                 };
 
-                scope.isSelected = function (displayname) {
-                    return (scope.vm.selectedRows.indexOf(displayname) > -1);
+                scope.isSelected = function (key) {
+                    var index = scope.vm.selectedRows.findIndex(function (obj) {
+                        return obj.key == key
+                    });
+                    return (index > -1);
                 };
 
                 scope.selectNone = function() {
-                    var i, rowname, index;
+                    for (var i = 0; i < scope.vm.page.tuples.length; i++) {
+                        var displayObj = {
+                            displayname: scope.vm.page.tuples[i].displayname.value,
+                            key: scope.vm.page.tuples[i].uniqueId
+                        };
 
-                    for (i = 0; i < scope.vm.page.tuples.length; i++) {
-                        rowname = scope.vm.page.tuples[i].displayname.value;
-                        index = scope.vm.selectedRows.indexOf(rowname);
+                        var index = scope.vm.selectedRows.findIndex(function (obj) {
+                            return obj.key == displayObj.key
+                        });
 
                         if (index > -1) scope.vm.selectedRows.splice(index, 1);
                     }
                 };
 
                 scope.selectAll = function() {
-                    var i, rowname, index;
+                    for (var i = 0; i < scope.vm.page.tuples.length; i++) {
+                        var displayObj = {
+                            displayname: scope.vm.page.tuples[i].displayname.value,
+                            key: scope.vm.page.tuples[i].uniqueId
+                        };
 
-                    for (i = 0; i < scope.vm.page.tuples.length; i++) {
-                        rowname = scope.vm.page.tuples[i].displayname.value;
-                        index = scope.vm.selectedRows.indexOf(rowname);
+                        var index = scope.vm.selectedRows.findIndex(function (obj) {
+                            return obj.key == displayObj.key
+                        });
 
-                        if (index == -1) scope.vm.selectedRows.push(rowname);
+                        if (index == -1) scope.vm.selectedRows.push(displayObj);
                     }
                 };
             }
@@ -353,8 +364,11 @@
                 };
 
                 // function for removing a single pill and it's corresponding selected row
-                scope.removePill = function(displayname) {
-                    scope.vm.selectedRows.splice(scope.vm.selectedRows.indexOf(displayname), 1);
+                scope.removePill = function(key) {
+                    var index = scope.vm.selectedRows.findIndex(function (obj) {
+                        return obj.key == key
+                    });
+                    scope.vm.selectedRows.splice(index, 1);
                 };
 
                 // function for removing all pills
