@@ -271,6 +271,14 @@ var recordEditPage = function() {
         return element(by.id('entity-title'));
     };
 
+    this.getResultTitle = function () {
+        return element(by.id('result-title'));
+    };
+
+    this.getResultTitleLink = function () {
+        return element.all(by.css('#result-title > a'));
+    };
+
     this.getAllColumnCaptions = function() {
         return browser.executeScript("return $('td.entity-key > span.column-displayname > span')");
     };
@@ -381,9 +389,19 @@ var recordEditPage = function() {
         return element(by.id("entity-title"));
     };
 
+    this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("row-" + index + '-' + columnDisplayName + "-display"));
+    };
+
     this.getForeignKeyInputValue = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
         return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
+    };
+
+    this.getForeignKeyInputButton = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("row-" + index + '-' + columnDisplayName + "-button"));
     };
 
     this.getForeignKeyInputs = function() {
@@ -404,12 +422,23 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).parent().find('.ng-scope._720kb-datepicker-open')[0];", el);
     };
 
+    this.getDateInputsForAColumn = function(name, index) {
+        index = index || 0;
+        var inputs = {};
+        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).get(index);
+        inputs.todayBtn = inputs.date.element(by.xpath('..')).all(by.css(".input-group-btn > button")).get(0);
+        inputs.clearBtn = inputs.date.element(by.xpath('..')).all(by.css(".input-group-btn > button")).get(1);
+        return inputs;
+    };
+
     this.getTimestampInputsForAColumn = function(name, index) {
         index = index || 0;
         var inputs = {};
-        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).first();
-        inputs.time = element.all(by.css('input[name="' + name + '"][time]')).first();
-        inputs.meridiem = element.all(by.css('button[name="' + name + '"]')).first();
+        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).get(index);
+        inputs.time = element.all(by.css('input[name="' + name + '"][time]')).get(index);
+        inputs.meridiem = element.all(by.css('button[name="' + name + '"]')).get(index);
+        inputs.nowBtn = element.all(by.css('button[name="' + name + '-now"]')).get(index);
+        inputs.clearBtn = element.all(by.css('button[name="' + name + '-clear"]')).get(index);
         return inputs;
     };
 
@@ -431,12 +460,16 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
-    this.getDateInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parent().siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
-    };
-
     this.getTimestampInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"timestamp\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
+    this.getJSONInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"json\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
+    this.getDateInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"date\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
     this.clearInput = function(el) {
@@ -494,6 +527,10 @@ var recordEditPage = function() {
         return browser.executeScript("return $('.alert-danger:visible')[0];");
     };
 
+    this.getAlertWarning = function() {
+        return browser.executeScript("return $('.alert-warning:visible')[0];");
+    };
+
     this.getViewModelRows = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
     };
@@ -533,6 +570,10 @@ var recordEditPage = function() {
     this.getInputById = function (index, displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("form-" + index + '-' + displayName + "-input"));
+    };
+
+    this.getClearButton = function(el) {
+        return browser.executeScript("return $(arguments[0]).parent().find('.glyphicon-remove')[0]", el);
     };
 };
 
@@ -612,6 +653,11 @@ var recordPage = function() {
         return element(by.id("rt-heading-" + displayName));
     };
 
+    this.getRelatedTableHeadingTitle = function(displayname) {
+        displayName = makeSafeIdAttr(displayname);
+        return element(by.id("rt-heading-" + displayName)).element(by.css('.panel-title'))
+    };
+
     this.getRelatedTableColumnNamesByTable = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
@@ -682,7 +728,15 @@ var recordPage = function() {
     };
 
     this.getModalText = function() {
-        return element(by.css(".modal-body"));    
+        return element(by.css(".modal-body"));
+    };
+
+    this.getErrorModalTitle = function(){
+        return browser.executeScript("return $('.modal-title')[0].innerHTML;");
+    };
+
+    this.getErrorModalOkButton = function(){
+        return browser.executeScript("return $('button')[1]");
     };
 };
 
@@ -693,7 +747,19 @@ var recordsetPage = function() {
 
     this.getPageTitleElement = function() {
         return element(by.id('page-title'));
-    }
+    };
+
+    this.getPageSubtitle = function() {
+        return browser.executeScript("return $('#page-subtitle).text();')");
+    };
+
+    this.getPageSubtitleElement = function() {
+        return element(by.id('page-subtitle'));
+    };
+
+    this.getShowUnfilterdButton = function() {
+        return element(by.id('show-unfiltered'));
+    };
 
     this.getCustomPageSize = function() {
         return browser.executeScript("return $('#custom-page-size').text().trim();");
@@ -767,8 +833,27 @@ var recordsetPage = function() {
 
     this.getConfirmDeleteButton = function () {
         return element(by.id("delete-confirmation"));
-    }
+    };
 
+    this.getNextButton = function () {
+        return element(by.id("rs-next-btn"));
+    };
+
+    this.getPreviousButton = function () {
+        return element(by.id("rs-previous-btn"));
+    };
+
+    this.getPageLimitDropdown = function () {
+        return element(by.id("page-size-dropdown"));
+    };
+
+    this.getPageLimitSelector = function (limit) {
+        return element(by.id("page-size-" + limit));
+    };
+
+    this.getDownloadButton = function (limit) {
+        return element(by.css("downloadCSV-link"));
+    };
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.
@@ -802,6 +887,12 @@ function chaisePage() {
         elementContainClass: function (ele, className) {
             expect(ele.getAttribute('class')).toContain(className);
         }
+    };
+    this.getWindowName = function() {
+        return browser.executeScript("return window.name;");
+    };
+    this.getPageId = function() {
+        return browser.executeScript("return angular.element('body').scope().$root.context.pageId");
     };
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {

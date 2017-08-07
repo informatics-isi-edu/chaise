@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "navbar/config.json"
+        ],
+        "schema": "product"
+    },
+    "cleanup": true
+}

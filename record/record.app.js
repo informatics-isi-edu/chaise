@@ -13,7 +13,8 @@
         'chaise.html',
         'chaise.utils',
         'ermrestjs',
-        'ui.bootstrap'
+        'ui.bootstrap',
+        'chaise.footer'
     ])
 
     .factory('constants', [function(){
@@ -33,149 +34,158 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
         var session,
             context = {};
-        UriUtils.setOrigin();
-        headInjector.addTitle();
-        headInjector.addCustomCSS();
+        $rootScope.displayReady = false;
 
+        UriUtils.setOrigin();
+        headInjector.setupHead();
+
+        $rootScope.showEmptyRelatedTables = false;
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
-        try {
-            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-            context = $rootScope.context = UriUtils.parseURLFragment($window.location, context);
+        $rootScope.context = context;
 
-            // The context object won't change unless the app is reloaded
-            context.appName = "record";
+        // The context object won't change unless the app is reloaded
+        context.appName = "record";
+        context.pageId = MathUtils.uuid();
 
-            if (context.filter) {
-                ERMrest.appLinkFn(UriUtils.appTagToURL);
-                Session.getSession().then(function getSession(_session) {
-                    session = _session;
+        ERMrest.appLinkFn(UriUtils.appTagToURL);
 
-                    return ERMrest.resolve(ermrestUri, {cid: context.appName});
-                }, function(exception){
-                    // do nothing but return without a session
-                    return ERMrest.resolve(ermrestUri, {cid: context.appName});
-                }).then(function getReference(reference) {
-                    // $rootScope.reference != reference after contextualization
-                    $rootScope.reference = reference.contextualize.detailed;
-                    $rootScope.reference.session = session;
+        // Subscribe to on change event for session
+        var subId = Session.subscribeOnChange(function() {
 
-                    $log.info("Reference: ", $rootScope.reference);
+            // Unsubscribe onchange event to avoid this function getting called again
+            Session.unsubscribeOnChange(subId);
 
-                    $rootScope.relatedReferences = $rootScope.reference.related;
-                    // There should only ever be one entity related to this reference
-                    return $rootScope.reference.read(1);
-                }, function error(exception) {
-                    throw exception;
-                }).then(function getPage(page) {
-                    $log.info("Page: ", page);
+            ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
+                context.filter = reference.location.filter;
 
-                    if (page.tuples.length < 1) {
-                        var noDataError = ErrorService.noRecordError(context.filter.filters);
-                        throw noDataError;
-                    }
+                DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
 
-                    var tuple = $rootScope.tuple = page.tuples[0];
-                    // Used directly in the record-display directive
-                    $rootScope.recordDisplayname = tuple.displayname;
+                // if the user can fetch the reference, they can see the content for the rest of the page
+                // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
+                session = Session.getSessionValue();
 
-                    // Collate tuple.isHTML and tuple.values into an array of objects
-                    // i.e. {isHTML: false, value: 'sample'}
-                    $rootScope.recordValues = [];
-                    tuple.values.forEach(function(value, index) {
-                        $rootScope.recordValues.push({
-                            isHTML: tuple.isHTML[index],
-                            value: value
-                        });
-                    });
+                // $rootScope.reference != reference after contextualization
+                $rootScope.reference = reference.contextualize.detailed;
+                $rootScope.reference.session = session;
 
-                    $rootScope.columns = $rootScope.reference.columns;
+                $log.info("Reference: ", $rootScope.reference);
 
-                    $rootScope.tableModels = [];
-                    $rootScope.lastRendered = null;
+                // There should only ever be one entity related to this reference, we are reading 2 entities now and if we get more than 1 entity than we throw a multipleRecordError.
+                return $rootScope.reference.read(2);
+            }, function error(exception) {
+                throw exception;
+            }).then(function getPage(page) {
+                $log.info("Page: ", page);
 
-                    $rootScope.loading = ($rootScope.relatedReferences.length > 0);
-                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
-
-                        var pageSize;
-                        if ($rootScope.relatedReferences[i].display.defaultPageSize) {
-                            pageSize = $rootScope.relatedReferences[i].display.defaultPageSize;
-                        } else {
-                            pageSize = constants.defaultPageSize;
-                        }
-
-                        (function(i) {
-                            $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
-                                var model = {
-                                    reference: $rootScope.relatedReferences[i],
-                                    columns: $rootScope.relatedReferences[i].columns,
-                                    page: page,
-                                    pageLimit: ($rootScope.relatedReferences[i].display.defaultPageSize ? $rootScope.relatedReferences[i].display.defaultPageSize : constants.defaultPageSize),
-                                    hasNext: page.hasNext,      // used to determine if a link should be shown
-                                    hasLoaded: true,            // used to determine if the current table and next table should be rendered
-                                    open: true,                 // to define if the accordion is open or closed
-                                    enableSort: true,           // allow sorting on table
-                                    sortby: null,               // column name, user selected or null
-                                    sortOrder: null,            // asc (default) or desc
-                                    rowValues: [],              // array of rows values
-                                    search: null,                // search term
-                                    displayType: $rootScope.relatedReferences[i].display.type,
-                                    context: "compact/brief",
-                                    fromTuple: $rootScope.tuple
-                                };
-                                model.rowValues = DataUtils.getRowValuesFromPage(page);
-                                model.config = {
-                                    viewable: true,
-                                    editable: $rootScope.modifyRecord,
-                                    deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                                    selectable: false
-                                };
-                                $rootScope.tableModels[i] = model;
-                            }, function readFail() {
-                                var model = {
-                                    hasLoaded: true
-                                };
-                                $rootScope.tableModels[i] = model;
-                            });
-                        })(i);
-                    }
-                }, function error(response) {
-                    $log.warn(response);
-                    throw response;
-                }).catch(function genericCatch(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError)
-                        ErrorService.catchAll(exception);
-                    else
-                        ErrorService.errorPopup(exception.message, exception.code, "home page");
-                });
-            // No filter defined, redirect to search
-            } else {
-                // change the path and redirect to search because no id was supplied
-                var modifiedPath = $window.location.pathname.replace(context.appName, "recordset");
-                // If default catalog/table are not defined, ...chaiseURItoErmrestURI would have caught that error
-                var catalogId = (context.catalogID ? context.catalogID : chaiseConfig.defaultCatalog);
-                if (chaiseConfig.defaultTables) {
-                    var tableConfig = chaiseConfig.defaultTables[catalogId];
+                if (page.tuples.length < 1) {
+                    var noDataError = ErrorService.noRecordError(context.filter.filters);
+                    throw noDataError;
                 }
-                var schemaTableName = ( (context.schemaName && context.tableName) ? context.schemaName + ':' + context.tableName : tableConfig.schema + ':' + tableConfig.table );
-                var modifiedHash = '#' + catalogId + '/' + schemaTableName;
+                else if(page.tuples.length > 1){
+                    var recordSetLink = page.reference.contextualize.compact.appLink;
+                    var multipleRecordError = ErrorService.multipleRecordError();
+                    multipleRecordError.redirectUrl=recordSetLink;
+                    $rootScope.displayReady = true;
+                    throw multipleRecordError;
+                }
 
-                var message = "No filter was defined. Cannot find a record without a filter.";
-                var redirectLink = $window.location.origin + modifiedPath + modifiedHash;
-                ErrorService.errorPopup(message, "No Entity", "search page", redirectLink);
-            }
-        // no catalog or schema:table defined, no defaults either, redirect to home page
-        } catch (exception) {
-            ErrorService.errorPopup(exception.message, exception.code, "home page");
-        }
+                var tuple = $rootScope.tuple = page.tuples[0];
+                // Used directly in the record-display directive
+                $rootScope.recordDisplayname = tuple.displayname;
+
+                // related references
+                $rootScope.relatedReferences = $rootScope.reference.related(tuple);
+
+                $rootScope.loading = $rootScope.relatedReferences.length > 0;
+
+                // Collate tuple.isHTML and tuple.values into an array of objects
+                // i.e. {isHTML: false, value: 'sample'}
+                $rootScope.recordValues = [];
+                tuple.values.forEach(function(value, index) {
+                    $rootScope.recordValues.push({
+                        isHTML: tuple.isHTML[index],
+                        value: value
+                    });
+                });
+
+                $rootScope.columns = $rootScope.reference.columns;
+
+                $rootScope.tableModels = [];
+                $rootScope.lastRendered = null;
+                var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
+                var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
+                for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+                    $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
+
+                    var pageSize;
+                    if ($rootScope.relatedReferences[i].display.defaultPageSize) {
+                        pageSize = $rootScope.relatedReferences[i].display.defaultPageSize;
+                    } else {
+                        pageSize = constants.defaultPageSize;
+                    }
+
+                    (function(i) {
+                        if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
+                            $rootScope.showEmptyRelatedTables = true;
+                        }
+                        $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
+                            var model = {
+                                reference: $rootScope.relatedReferences[i],
+                                columns: $rootScope.relatedReferences[i].columns,
+                                page: page,
+                                pageLimit: ($rootScope.relatedReferences[i].display.defaultPageSize ? $rootScope.relatedReferences[i].display.defaultPageSize : constants.defaultPageSize),
+                                hasNext: page.hasNext,      // used to determine if a link should be shown
+                                hasLoaded: true,            // used to determine if the current table and next table should be rendered
+                                open: boolIsOpen,                 // to define if the accordion is open or closed
+                                enableSort: true,           // allow sorting on table
+                                sortby: null,               // column name, user selected or null
+                                sortOrder: null,            // asc (default) or desc
+                                rowValues: [],              // array of rows values
+                                search: null,                // search term
+                                displayType: $rootScope.relatedReferences[i].display.type,
+                                context: "compact/brief",
+                                fromTuple: $rootScope.tuple
+                            };
+                            model.rowValues = DataUtils.getRowValuesFromPage(page);
+                            model.config = {
+                                viewable: true,
+                                editable: $rootScope.modifyRecord,
+                                deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
+                                selectable: false
+                            };
+                            $rootScope.tableModels[i] = model;
+                            $rootScope.displayReady = true;
+
+                        }, function readFail(error) {
+                            var model = {
+                                hasLoaded: true
+                            };
+                            $rootScope.tableModels[i] = model;
+                            $rootScope.displayReady = true;
+                            throw error;
+                        }).catch(function(e) {
+                            // The .catch from the outer promise won't catch errors from this closure
+                            // so a .catch needs to be appended here.
+                            throw e;
+                        });
+                    })(i);
+                }
+                $rootScope.displayReady = true;
+            }).catch(function genericCatch(exception) {
+                throw exception;
+            });
+            
+        })
+
 
         /**
          * it saves the location in $rootScope.location.

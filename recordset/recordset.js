@@ -26,11 +26,12 @@
         'chaise.errors',
         'chaise.modal',
         'chaise.html',
+        'chaise.footer',
         'chaise.record.table',
         'ui.bootstrap',
         'ngCookies',
         'ngSanitize',
-        'chaise.resizable',
+        'chaise.resizable', 
         'chaise.faceting'])
 
     .config(['$cookiesProvider', function($cookiesProvider) {
@@ -69,8 +70,7 @@
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
         search: null,       // search term
         pageLimit: 25,       // number of rows per page
-        config: {},
-        AppliedFilters: []
+        config: {}
     })
 
     // Register the recordset controller
@@ -81,26 +81,28 @@
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
-
-        $scope.login = function() {
-            Session.login($window.location.href);
-        };
-
-        $scope.logout = function() {
-            Session.logout();
-        };
+        
+        function updateLocation() {
+            $window.scrollTo(0, 0);
+            $window.location.replace($scope.permalink());
+            $rootScope.location = $window.location.href;
+        }
 
         // row data updated from directive
         // update permalink, address bar without reload
         $scope.$on('recordset-update', function() {
-            $window.scrollTo(0, 0);
-            $window.location.replace($scope.permalink());
-            $rootScope.location = $window.location.href;
+            console.log("changing the location");
+            
+            updateLocation();
         });
-
-        $scope.$on('error', function(event, exception) {
-            $log.warn(exception);
-            ErrorService.catchAll(exception);
+        
+        $scope.$on('reference-updated', function (event, data) {
+            console.log('reference updated in recordset controller');
+            
+            recordsetModel.facetColumns = recordsetModel.reference.facetColumns;
+            updateLocation();
+            
+            $scope.$broadcast('record-modified');
         });
 
         $scope.permalink = function() {
@@ -122,7 +124,10 @@
             if (recordsetModel.reference.location.paging)
                 url = url + recordsetModel.reference.location.paging;
 
-            url = url + "?limit=" + recordsetModel.pageLimit;
+            // add ermrestjs supported queryParams
+            if (recordsetModel.reference.location.queryParamsString) {
+                url = url + "?" + recordsetModel.reference.location.queryParamsString;
+            }
 
             return url;
         };
@@ -134,19 +139,22 @@
                 link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + recordsetModel.pageLimit;
 
             return link;
-        }
+        };
+
+        $scope.unfiltered = function () {
+            return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;
+        };
 
     }])
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
         try {
             var session;
 
-            headInjector.addTitle();
-            headInjector.addCustomCSS();
+            headInjector.setupHead();
 
             UriUtils.setOrigin();
 
@@ -162,77 +170,79 @@
 
             $rootScope.alerts = AlertsService.alerts;
 
-            // parse the URL
-            var p_context = UriUtils.parseURLFragment($window.location);
-
             $rootScope.location = $window.location.href;
             recordsetModel.hasLoaded = false;
             $rootScope.context = context;
 
-            context.mainURI = p_context.mainURI;
-
-            // only allowing single column sort here
-            if (p_context.sort) {
-                recordsetModel.sortby = p_context.sort[0].column;
-                recordsetModel.sortOrder = (p_context.sort[0].descending ? "desc" : "asc");
-            }
-
-            context.catalogID = p_context.catalogID;
-            context.tableName = p_context.tableName;
+            context.pageId = MathUtils.uuid();
 
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
 
             ERMrest.appLinkFn(UriUtils.appTagToURL);
 
-            recordsetModel.initialized = true;
-            recordsetModel.hasLoaded = true;
+            // Subscribe to on change event for session
+            var subId = Session.subscribeOnChange(function() {
 
-            /*
-            Session.getSession().then(function getSession(_session) {
-                session = _session;
+                // Unsubscribe onchange event to avoid this function getting called again
+                Session.unsubscribeOnChange(subId);
 
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }, function(exception) {
-                // do nothing but return without a session
-                return ERMrest.resolve(ermrestUri, {cid: context.appName});
-            }).then(function getReference(reference) {
-                recordsetModel.reference = reference.contextualize.compact;
-                recordsetModel.context = "compact";
-                recordsetModel.reference.session = session;
+                ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
+                    session = Session.getSessionValue();
+                    
+                    var location = reference.location;
+                    
+                    // only allowing single column sort here
+                    if (reference.sortObject) {
+                        recordsetModel.sortby = location.sortObject[0].column;
+                        recordsetModel.sortOrder = (location.sortObject[0].descending ? "desc" : "asc");
+                    }
+                    context.catalogID = reference.table.schema.catalog.id;
+                    context.tableName = reference.table.name;
 
-                $log.info("Reference:", recordsetModel.reference);
+                    recordsetModel.reference = reference.contextualize.compact;
+                    recordsetModel.context = "compact";
+                    recordsetModel.reference.session = session;
+                    baseRef = recordsetModel.reference;
 
-                if (p_context.queryParams.limit)
-                    recordsetModel.pageLimit = parseInt(p_context.queryParams.limit);
-                else if (recordsetModel.reference.display.defaultPageSize)
-                    recordsetModel.pageLimit = recordsetModel.reference.display.defaultPageSize;
-                else
-                    recordsetModel.pageLimit = 25;
-                recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
-                recordsetModel.columns = recordsetModel.reference.columns;
-                recordsetModel.search = recordsetModel.reference.location.searchTerm;
+                    $log.info("Reference:", recordsetModel.reference);
 
-                return recordsetModel.reference.read(recordsetModel.pageLimit);
-            }, function error(response) {
-                throw response;
-            }).then(function getPage(page) {
-                recordsetModel.page = page;
-                recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                recordsetModel.initialized = true;
-                recordsetModel.hasLoaded = true;
-            }, function error(response) {
-                throw response;
-            }).catch(function genericCatch(exception) {
-                $log.warn(exception);
-                recordsetModel.hasLoaded = true;
+                    if (location.queryParams.limit) {
+                        recordsetModel.pageLimit = parseInt(location.queryParams.limit);
+                    } else if (recordsetModel.reference.display.defaultPageSize) {
+                        recordsetModel.pageLimit = recordsetModel.reference.display.defaultPageSize;
+                    } else {
+                        recordsetModel.pageLimit = 25;
+                    }
+                    recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
 
-                if (exception instanceof ERMrest.UnauthorizedError)
-                    ErrorService.catchAll(exception);
-                else
-                    ErrorService.errorPopup(exception.message, exception.code, "home page");
+                     // the additional provided name
+                    if (location.queryParams && location.queryParams.subset) {
+                        recordsetModel.subTitle = location.queryParams.subset;
+                    }
+
+                    recordsetModel.facetColumns = recordsetModel.reference.facetColumns;
+                    recordsetModel.columns = recordsetModel.reference.columns;
+                    recordsetModel.search = recordsetModel.reference.location.searchTerm;
+
+                    return recordsetModel.reference.read(recordsetModel.pageLimit);
+                }, function error(response) {
+                    throw response;
+                }).then(function getPage(page) {
+                    recordsetModel.page = page;
+                    recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                    recordsetModel.initialized = true;
+                    recordsetModel.hasLoaded = true;
+                }, function error(response) {
+                    throw response;
+                }).catch(function genericCatch(exception) {
+                    $log.warn(exception);
+                    recordsetModel.hasLoaded = true;
+
+                    throw exception;
+                });
+
             });
-            */
 
             /**
              * Whenever recordset updates the url (no reloading and no history stack),
@@ -249,10 +259,7 @@
             UiUtils.setBootstrapDropdownButtonBehavior();
         } catch (exception) {
             // pass to error handler
-            if (exception instanceof ERMrest.UnauthorizedError)
-                ErrorService.catchAll(exception);
-            else
-                ErrorService.errorPopup(exception.message, exception.code, "home page");
+            throw exception;
         }
     }]);
 

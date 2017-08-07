@@ -220,10 +220,7 @@
                     console.log('annotation deleted')
                 }
             } else {
-                AlertsService.addAlert({
-                    type: 'error',
-                    message: 'Sorry, this annotation cannot be deleted because there is at least 1 comment on it. Please delete the comments before trying to delete the annotation.'
-                });
+                AlertsService.addAlert('Sorry, this annotation cannot be deleted because there is at least 1 comment on it. Please delete the comments before trying to delete the annotation.', 'error');
             }
         };
 

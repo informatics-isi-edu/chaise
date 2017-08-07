@@ -4,7 +4,7 @@
 .SUFFIXES:
 
 # Install directory on dev.isrd
-CHAISEDIR=/var/www/html/chaise
+CHAISEDIR?=/var/www/html/chaise
 
 # Install directory on travis
 CHAISETRAVISDIR=/var/www/html/chaise
@@ -18,37 +18,44 @@ MODULES=node_modules
 # Node bin scripts
 BIN=$(MODULES)/.bin
 
-# Protractor scripts
+### Protractor scripts
+## Sequential protractor scripts
 # Legacy apps tests
-E2EDIsearch=test/e2e/specs/search/data-independent/protractor.conf.js
-E2EDsearch=test/e2e/specs/search/data-dependent/protractor.conf.js
+E2Esearch=test/e2e/specs/default-config/search/presentation.conf.js
 E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 # Recordedit tests
-E2EDIrecordAdd=test/e2e/specs/recordedit/data-independent/add/protractor.conf.js
-E2EDIrecordEditMultiColTypes=test/e2e/specs/recordedit/data-independent/edit-multi-col-types/protractor.conf.js
-E2EDIrecordDefaults=test/e2e/specs/recordedit/data-independent/add-defaults/protractor.conf.js
-E2EDIrecordEdit=test/e2e/specs/recordedit/data-independent/edit/protractor.conf.js
-E2EDIrecordEditDeleteRecord=test/e2e/specs/recordedit/data-independent/delete-record/protractor.conf.js
-E2EDIrecordMultiAdd=test/e2e/specs/recordedit/data-independent/multi-add/protractor.conf.js
-E2EDIrecordMultiEdit=test/e2e/specs/recordedit/data-independent/multi-edit/protractor.conf.js
-E2EDrecordEditCompositeKey=test/e2e/specs/recordedit/data-dependent/composite-key/protractor.conf.js
-E2EDrecordEditSubmissionDisabled=test/e2e/specs/recordedit/data-dependent/submission-disabled/protractor.conf.js
+E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
+E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
+E2EDIrecordDefaults=test/e2e/specs/default-config/recordedit/add-defaults.conf.js
+E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
+E2ErecordEditNoDeleteBtn=test/e2e/specs/delete-prohibited/recordedit/no-delete-btn.conf.js
+E2EDIrecordMultiAdd=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js
+E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
+E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.conf.js
+E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.conf.js
+E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submission-disabled.conf.js
 # Record tests
-E2EDrecord=test/e2e/specs/record/data-dependent/protractor.conf.js
-E2EDrecordCopy=test/e2e/specs/record/copy-btn/protractor.conf.js
-E2ErecordNoDeleteBtn=test/e2e/specs/record/no-delete-btn/protractor.conf.js
-E2EDrecordRelatedTable=test/e2e/specs/record/related-table/protractor.conf.js
+E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
+E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
+E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.conf.js
+E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.conf.js
 # Recordset tests
-E2EDrecordset=test/e2e/specs/recordset/data-dependent/protractor.conf.js
-E2EDrecordsetEdit=test/e2e/specs/recordset/edit/protractor.conf.js
-E2ErecordsetAdd=test/e2e/specs/recordset/add/protractor.conf.js
+E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
+E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
+E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 # Viewer tests
-E2EDviewer=test/e2e/specs/viewer/data-dependent/protractor.conf.js
+E2EDviewer=test/e2e/specs/all-features/viewer/presentation.conf.js
 # misc tests
-E2Elogin=test/e2e/specs/login/protractor.conf.js
-E2Enavbar=test/e2e/specs/navbar/base-config/protractor.conf.js
-E2EnavbarHeadTitle=test/e2e/specs/navbar/no-logo-no-brandtext/protractor.conf.js
-E2EmultiPermissionsVisibility=test/e2e/specs/multi-permissions/visibility/protractor.conf.js
+E2Enavbar=test/e2e/specs/all-features/navbar/protractor.conf.js
+E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/protractor.conf.js
+E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
+# footer test
+E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
+## Parallel protractor scripts
+FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
+FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
+DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
+DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)
@@ -61,21 +68,31 @@ CAT=cat
 
 # HTML
 HTML=search/index.html \
-	 logout/index.html \
 	 login/index.html \
 	 detailed/index.html \
 	 recordset/index.html \
-	 matrix/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
-	 record/index.html
+	 record/index.html \
+	 recordedit/mdHelp.html
 
 # ERMrestjs Deps
-ERMRESTJS_DIR=../../ermrestjs
-ERMRESTJS_DEPS=$(ERMRESTJS_DIR)/ermrest.js
+ERMRESTJS_RT_DIR=../../ermrestjs
+ERMRESTJS_BLD_DIR=../ermrestjs/build
+ERMRESTJS_DEPS=ermrest.js
 
 # Shared utilities
 COMMON=common
+
+# Markdown Editor dependencies
+MDEDIT_CSS_DEPS=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css
+
+MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
+	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
 
 # CSS source
 CSS=styles
@@ -94,7 +111,6 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/ermrest.css \
 	$(CSS)/app.css \
 	$(COMMON)/styles/appheader.css \
-	$(CSS)/matrix.css \
 	$(CSS)/tour.css
 
 # JavaScript source and test specs
@@ -127,16 +143,22 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestFilterController.js \
 	$(JS)/controller/ermrestInitController.js \
 	$(JS)/controller/ermrestLoginController.js \
-	$(JS)/controller/ermrestLogoutController.js \
 	$(JS)/controller/ermrestResultsController.js \
 	$(JS)/controller/ermrestSideBarController.js \
 	$(JS)/controller/ermrestTourController.js \
-	$(JS)/controller/ermrestMatrixController.js \
 	$(JS)/tour.js \
-	$(JS)/matrix.js \
-	$(COMMON)/utils.js \
+	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/delete-link.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
+	$(COMMON)/filters.js \
+	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/record.js \
+	$(COMMON)/ellipses.js \
+	$(COMMON)/table.js \
+	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js
 
 # HTML templates
@@ -146,9 +168,6 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermsidebar.html \
 	$(TEMPLATES)/ermretrievefilters.html \
 	$(TEMPLATES)/ermretrieveresults.html
-
-MATRIX_TEMPLATES_DEPS =$(TEMPLATES)/erminit.html \
-    $(TEMPLATES)/ermmatrix.html
 
 DETAILED_TEMPLATES=detailed/assets/views/detailed.html
 RECSET_TEMPLATES_DEPS=recordset/recordset.html
@@ -208,6 +227,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
@@ -216,6 +236,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/footer.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
@@ -286,6 +307,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/mask.min.js \
 	$(COMMON)/vendor/moment.min.js \
+	$(COMMON)/vendor/sparkMD5.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
@@ -293,12 +315,15 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
+	$(COMMON)/upload.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/markdownPreview.js \
+	$(COMMON)/footer.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \
@@ -310,6 +335,9 @@ RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
 	$(RE_ASSETS)/model.js \
 	$(RE_ASSETS)/form.controller.js
 
+RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.controller.js
+
+
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/vendor/select.css \
@@ -320,6 +348,8 @@ RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/appheader.css
 
 RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
+
+RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
 
 # JavaScript and CSS source for RecordSet app
 RECSET_ASSETS=recordset
@@ -334,6 +364,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
@@ -343,6 +374,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular-plotly.js \
 	$(COMMON)/faceting.js \
+	$(COMMON)/footer.js
 
 RECSET_JS_SOURCE=$(COMMON)/authen.js \
     $(COMMON)/utils.js \
@@ -414,11 +446,11 @@ $(JSDOC): $(JS_SOURCE) $(BIN)
 
 # Rule to ensure Node bin scripts are present
 $(BIN): $(MODULES)
-	node_modules/.bin/webdriver-manager update --standalone
+	node_modules/protractor/bin/webdriver-manager update
 
 # Rule to install Node modules locally
 $(MODULES): package.json
-	npm install --force
+	npm install
 
 .PHONY: deps
 deps: $(BIN)
@@ -442,64 +474,93 @@ distclean: clean
 
 # Rule to run tests
 .PHONY: test
-test:
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+test: deps
+	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch) && $(BIN)/protractor $(E2Efooter)
 
 # Rule to run karma
 .PHONY: karma
-karma:
+karma: deps
 	$(BIN)/karma start
 
 # Rule to run tests
 .PHONY: testall
-testall:
-	$(BIN)/karma start
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch) && $(BIN)/protractor $(E2Elogin)
+testall: test karma
 
+#### Sequential make commands - these commands will run tests in sequential order
 #Rule to run navbar tests
 .PHONY: testnavbar
-testnavbar:
+testnavbar: deps
 	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle)
 
 #Rule to run search app tests
 .PHONY: testsearch
-testsearch:
-	$(BIN)/protractor $(E2EDIsearch) && $(BIN)/protractor $(E2EDsearch)
+testsearch: deps
+	$(BIN)/protractor $(E2Esearch)
 
 #Rule to run detailed app tests
 .PHONY: testdetailed
-testdetailed:
+testdetailed: deps
 	$(BIN)/protractor $(E2EDdetailed)
 
 #Rule to run record app tests
 .PHONY: testrecord
-testrecord:
+testrecord: deps
 	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordCopy)
 
 #Rule to run record add app tests
 .PHONY: testrecordadd
-testrecordadd:
+testrecordadd: deps
 	$(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordDefaults)
 
 #Rule to run recordset app tests
 .PHONY: testrecordset
-testrecordset:
+testrecordset: deps
 	$(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit)
 
 # Rule to run record edit app tests
 .PHONY: testrecordedit
-testrecordedit:
-	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2EDIrecordEditDeleteRecord) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes)
+testrecordedit: deps
+	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter)
+
+.PHONY: testpermissions
+testpermissions:
+	$(BIN)/protractor $(E2EmultiPermissionsVisibility)
 
 #Rule to run viewer app tests
 .PHONY: testviewer
-testviewer:
+testviewer: deps
 	$(BIN)/protractor $(E2EDviewer)
 
-#Rule to run detailed app tests
-.PHONY: testlogin
-testlogin:
-	$(BIN)/protractor $(E2Elogin)
+#### Parallel make commands - these commands will run tests in parallel
+#Rule to run all parallel test configurations
+.PHONY: testparallel
+testparallel: deps
+	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(FullFeaturesConfirmationParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(DefaultConfigParallel)
+
+#Rule to run the full features chaise configuration tests in parallel
+.PHONY: testfullfeatures
+testfullfeatures: deps
+	$(BIN)/protractor $(FullFeaturesParallel)
+
+#Rule to run the full features chaise configuration tests in parallel
+.PHONY: testfullfeaturesconfirmation
+testfullfeaturesconfirmation: deps
+	$(BIN)/protractor $(FullFeaturesConfirmationParallel)
+
+#Rule to run the delete prohibited chaise configuration tests in parallel
+.PHONY: testdeleteprohibited
+testdeleteprohibited: deps
+	$(BIN)/protractor $(DeleteProhibitedParallel)
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testdefaultconfig
+testdefaultconfig: deps
+	$(BIN)/protractor $(DefaultConfigParallel)
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testfooter
+testfooter: deps
+	$(BIN)/protractor $(E2Efooter)
 
 # Rule to make html
 .PHONY: html
@@ -515,10 +576,6 @@ login/index.html: login/index.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		login/index.html.in > login/index.html
 
-logout/index.html: logout/index.html.in .make-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		logout/index.html.in > logout/index.html
-
 detailed/index.html: detailed/index.html.in .make-detailed-asset-block .make-detailed-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-detailed-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-detailed-template-block' -e 'd' -e '}' \
@@ -533,11 +590,6 @@ recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-temp
 		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
 		recordset/index.html.in > recordset/index.html
 
-matrix/index.html: matrix/index.html.in .make-asset-block .make-matrix-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-matrix-template-block' -e 'd' -e '}' \
-		matrix/index.html.in > matrix/index.html
-
 viewer/index.html: viewer/index.html.in .make-viewer-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
 		viewer/index.html.in > viewer/index.html
@@ -545,6 +597,10 @@ viewer/index.html: viewer/index.html.in .make-viewer-asset-block
 recordedit/index.html: recordedit/index.html.in .make-de-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
 		recordedit/index.html.in > recordedit/index.html
+
+recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-md-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
+	recordedit/mdHelp.html.in > recordedit/mdHelp.html
 
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
@@ -600,12 +656,6 @@ $(JS_CONFIG): chaise-config-sample.js
 		$(CAT) $$file >> .make-rs-template-block ; \
 	done
 
-.make-matrix-template-block: $(MATRIX_TEMPLATES_DEPS)
-	> .make-matrix-template-block
-	for file in $(MATRIX_TEMPLATES_DEPS); do \
-		$(CAT) $$file >> .make-matrix-template-block ; \
-	done
-
 .make-detailed-template-block: $(DETAILED_TEMPLATES)
 	> .make-detailed-template-block
 	for file in $(DETAILED_TEMPLATES); do \
@@ -627,21 +677,23 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 	for file in $(VIEWER_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 
-.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_CSS_SOURCE) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG)
+.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_CSS_SOURCE) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG) $(MDEDIT_JS_DEPS) $(MDEDIT_CSS_DEPS)
 	> .make-de-asset-block
 	for file in $(RE_SHARED_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
-	for file in $(RE_CSS_SOURCE); do \
+	for file in $(RE_CSS_SOURCE) $(MDEDIT_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
@@ -650,10 +702,12 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-de-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
-	for file in $(RE_JS_SOURCE); do \
+	for file in $(RE_JS_SOURCE) $(MDEDIT_JS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
 	done
@@ -673,8 +727,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-rs-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-rs-asset-block ; \
 	done
 	for file in $(RECSET_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
@@ -696,20 +752,48 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 	for script in $(ERMRESTJS_DEPS); do \
-		checksum=$$($(MD5) $$script | awk '{ print $$1 }') ; \
-		echo "<script src='$$script?v=$$checksum'></script>" >> .make-record-asset-block ; \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 	for file in $(RECORD_JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
 	done
 
+.make-md-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_SHARED_JS_DEPS) $(JS_CONFIG) $(RE_JS_MDHELP) $(RE_CSS_MDHELP)
+	> .make-md-asset-block
+	for file in $(RE_SHARED_CSS_DEPS); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-md-asset-block ; \
+	done
+	for file in $(RE_CSS_MDHELP); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-md-asset-block ; \
+	done
+	for file in $(JS_CONFIG) $(RE_SHARED_JS_DEPS); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
+	done
+	for script in $(ERMRESTJS_DEPS); do \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-md-asset-block ; \
+	done
+	for file in $(RE_JS_MDHELP); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
+	done
 
-# Rule for installing on dev.isrd
-.PHONY: install
-install: $(HTML)
-	test -d $(dir $(CHAISEDIR)) && mkdir -p $(CHAISEDIR)
-	rsync -a --exclude='.*' --exclude=chaise-config.js ./. $(CHAISEDIR)/
+# Rule for installing for normal deployment
+.PHONY: install dont_install_in_root
+install: $(HTML) dont_install_in_root
+	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=chaise-config.js . $(CHAISEDIR)
+
+dont_install_in_root:
+	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
 
 # Rule for installing on Travis
 .PHONY: installTravis
@@ -731,7 +815,7 @@ usage:
 	@echo "    lint      		- lint the source"
 	@echo "    build     		- builds the package"
 	@echo "    test      		- runs e2e tests"
-	@echo "    karma     		- runs the karma tests"
+	@echo "    karma     		- runs the karma tests (only a scaffolding at present)"
 	@echo "    testall   		- runs e2e and Karma tests"
 	@echo "    doc       		- make autogenerated markdown docs"
 	@echo "    jsdoc     		- make autogenerated html docs"

@@ -70,6 +70,30 @@
         };
     })
 
+
+    //Validation directive for JSON for testing if an input value is valid JSON
+    // Use: <input type="textarea" json>
+    .directive('json', function() {
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$validators.json = function(modelValue, viewValue) {
+                    var value = modelValue || viewValue;
+                    if (ctrl.$isEmpty(value)) {
+                        return true;
+                    }
+                    try{
+                        JSON.parse(value);
+                        return true;
+                    }
+                    catch(e){
+                        return false;
+                    }
+                };
+            }
+        };
+    })
+
     // Validation directive for testing if an input value is a time
     // Use: <input type="text" time>
     .directive('time', function() {
@@ -80,7 +104,7 @@
                     if (ctrl.$isEmpty(modelValue)) {
                         return true;
                     }
-                    return moment(modelValue, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid();
+                    return moment(modelValue, ['H:m:s', 'H:m', 'H'], true).isValid();
                 };
                 /*
                 The parser below takes the view value and inserts the appropriate colons before updating the model value.
@@ -117,14 +141,16 @@
                 scope.$watch(attr.validateValues, function(newObj, oldObj) {
                     // If newObj and oldObj are identical, then this listener fn was triggered
                     // due to app initialization, not an actual model change. Do nothing.
-                    if (newObj === oldObj) {
+                    if (newObj === oldObj || newObj == null) {
                         return;
                     }
                     var date = newObj.date,
                         dateIsValid = moment(date, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid(),
                         dateIsEmpty = (date === null || date === '' || date === undefined),
                         time = newObj.time,
-                        timeIsValid = moment(time, ['hh:mm:ss', 'hh:mm', 'hh'], true).isValid(),
+                        // H:m:s matches all permutation of hours:minutes:seconds where there is a single digit or 2 digits input
+                        // eg. 02:02:02 === 2:2:2 are both validated as proper
+                        timeIsValid = moment(time, ['H:m:s', 'H:m', 'H'], true).isValid(),
                         timeIsEmpty = (time === null || time === '' || time === undefined);
 
                     if (dateIsValid) {
@@ -135,7 +161,7 @@
                         if (timeIsValid || !timeIsEmpty) {
                             return ctrl.$setValidity('timestampDate', false);
                         }
-                    } else { // if date is bad... the whole timestamp is bad..
+                    } else { // if date is bad, the whole timestamp is bad..
                         return ctrl.$setValidity('timestampDate', false);
                     }
                     ctrl.$setValidity('timestampDate', true);

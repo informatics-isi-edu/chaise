@@ -2,12 +2,13 @@
 <html ng-app="chaise.record">
 <head>
     <title>Record</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
+    <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
+    <script src="/gtm-id.js"></script>
     %ASSETS%
 </head>
 <body>
     <navbar></navbar>
-
+    <loading-spinner ng-show="!displayReady"></loading-spinner>
     <div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
             <div id="record-bookmark-container" class="col-xs-12 meta-icons">
@@ -21,11 +22,11 @@
                     <span class="glyphicon glyphicon-copy"></span> <strong>Copy</strong>
                 </a>&nbsp;&nbsp;
                 <delete-link id="delete-record" callback="::ctrl.deleteRecord()" ng-if="::ctrl.canDelete()" label="Delete" uib-tooltip="Click here to delete this record." tooltip-placement="bottom" icon="true"></delete-link>&nbsp;&nbsp;
-                <a id="show-all-related-tables" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((ctrl.showEmptyRelatedTables) ? 'hide empty related entities.' : 'show empty related entities too.')}}" tooltip-placement="bottom">
-                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !ctrl.showEmptyRelatedTables, 'glyphicon-resize-small': ctrl.showEmptyRelatedTables}"></span>
+                <a id="show-all-related-tables" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related entities.' : 'show empty related entities too.')}}" tooltip-placement="bottom">
+                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !showEmptyRelatedTables, 'glyphicon-resize-small': showEmptyRelatedTables}"></span>
                     <strong>
-                        <span ng-show="!ctrl.showEmptyRelatedTables">Show All</span>
-                        <span ng-show="ctrl.showEmptyRelatedTables">Hide Empty</span>
+                        <span ng-show="!showEmptyRelatedTables">Show All</span>
+                        <span ng-show="showEmptyRelatedTables">Hide Empty</span>
                          Related Records
                     </strong>
                 </a>&nbsp;&nbsp;
@@ -47,50 +48,50 @@
             </div>
 
             <!-- defined on $rootScope in run function -->
-            <div ng-if="recordValues && columns">
-                <record-display columns="::columns" values="::recordValues"></record-display>
-            </div>
+            <record-display columns="::columns" values="::recordValues"></record-display>
 
-            <uib-accordion close-others="false">
-                <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index" ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
-                    <uib-accordion-heading>
-                        <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': tableModels[$index].open, 'glyphicon-chevron-right': !tableModels[$index].open}"></i>
-                        <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> ({{::tableModels[$index].rowValues.length}}{{::tableModels[$index].hasNext ? '+' : ''}})
-                    </uib-accordion-heading>
+            <!-- used to delay empty accordions from displaying before simple record display -->
+            <div ng-if="recordValues">
+                <uib-accordion close-others="false">
+                    <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index" ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
+                        <uib-accordion-heading>
+                            <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': tableModels[$index].open, 'glyphicon-chevron-right': !tableModels[$index].open}"></i>
+                            <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> <span ng-if="tableModels[$index].rowValues.length==0">(no results found)</span><span ng-if="tableModels[$index].rowValues.length!=0">(showing {{::tableModels[$index].hasNext ? 'first' : 'all'}} {{tableModels[$index].rowValues.length}} results)</span>
+                        </uib-accordion-heading>
 
-                    <!-- for different elements inside the accordion -->
-                    <div class="pull-right" style="margin-top:-25px;">
-                        <span ng-if="relatedRef.display.type == 'markdown'">
-                            <a class="toggle-display-link" ng-click="::ctrl.toggleRelatedTableDisplayType($index)">
-                                <span ng-show="tableModels[$index].displayType == 'markdown'">
-                                    <span ng-if="::ctrl.canEdit()">Edit</span>
-                                    <span ng-if="::(!ctrl.canEdit())">Table Display</span>
-                                </span>
-                                <span ng-show="tableModels[$index].displayType != 'markdown'">
-                                    <span ng-if="::ctrl.canEdit()">Display</span>
-                                    <span ng-if="::(!ctrl.canEdit())">Revert Display</span>
-                                </span>
-                            </a>&nbsp;|</span>
-                        <span ng-if="::ctrl.canCreateRelated(relatedRef)">
-                            <a class="add-records-link" ng-click="::ctrl.addRelatedRecord(relatedRef)">
-                                <span ng-if="::!relatedRef.derivedAssociationReference">Add</span>
-                                <span ng-if="::relatedRef.derivedAssociationReference">Link</span>
-                            </a>&nbsp;|</span>
-                        <span><a class="more-results-link" ng-click="::ctrl.toRecordSet(relatedRef)">View More</a></span>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <div ng-show="tableModels[$index].displayType == 'markdown'">
-                                <span class="markdown-container" bind-html-unsafe="::tableModels[$index].page.content"></span>
-                            </div>
-                            <div ng-show="tableModels[$index].displayType != 'markdown'">
-                                <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::tableModels[$index]"></record-table>
+                        <!-- for different elements inside the accordion -->
+                        <div class="pull-right" style="margin-top:-25px;">
+                            <span ng-if="relatedRef.display.type == 'markdown'">
+                                <a class="toggle-display-link" ng-click="::ctrl.toggleRelatedTableDisplayType($index)">
+                                    <span ng-show="tableModels[$index].displayType == 'markdown'">
+                                        <span ng-if="::ctrl.canEdit()">Edit</span>
+                                        <span ng-if="::(!ctrl.canEdit())">Table Display</span>
+                                    </span>
+                                    <span ng-show="tableModels[$index].displayType != 'markdown'">
+                                        <span ng-if="::ctrl.canEdit()">Display</span>
+                                        <span ng-if="::(!ctrl.canEdit())">Revert Display</span>
+                                    </span>
+                                </a>&nbsp;|</span>
+                            <span ng-if="::ctrl.canCreateRelated(relatedRef)">
+                                <a class="add-records-link" ng-click="::ctrl.addRelatedRecord(relatedRef)">Add</a>
+                                &nbsp;|</span>
+                            <span><a class="more-results-link" ng-click="::ctrl.toRecordSet(relatedRef)">View More</a></span>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div ng-show="tableModels[$index].displayType == 'markdown'">
+                                    <span class="markdown-container" ng-bind-html="::tableModels[$index].page.content | trustedHTML"></span>
+                                </div>
+                                <div ng-show="tableModels[$index].displayType != 'markdown'">
+                                    <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::tableModels[$index]"></record-table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </uib-accordion>
-            <span ng-show="loading">Loading...</span>
+                </uib-accordion>
+            </div>
+            <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
     </div>
+    <footer></footer>
 </body>

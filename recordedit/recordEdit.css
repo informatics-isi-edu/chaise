@@ -72,6 +72,13 @@ input[type=number]::-webkit-outer-spin-button {
   max-width: 95vw;
 }
 
+.modal-md {
+  margin: 2.5vh auto;
+  width: auto !important;
+  max-width: 60vw;
+}
+
+
 /*Sets the maximum height of the entire modal to 95% of the screen height*/
 .modal-content {
   max-height: 95vh;
@@ -115,7 +122,7 @@ input[type=number]::-webkit-outer-spin-button {
     }
 }
 
-#spinner {
+.modal-body #spinner {
   width: 100%;
   text-align: center;
   padding: 14px 0;
@@ -129,7 +136,7 @@ input[type=number]::-webkit-outer-spin-button {
   background: rgba(128, 128, 128, 0.25);
 }
 
-img.spinner{
+.modal-body img.spinner{
     display: block;
     margin: 0 auto;
     width: 32px;
@@ -172,7 +179,7 @@ td.entity-value {
   margin-bottom: 0px;
 }
 
-#formEdit table tr td:first-child {
+#formEdit > table > tbody > tr >  td:first-child {
   position: absolute !important;
   left: 0;
   top: auto;
@@ -184,15 +191,15 @@ td.entity-value {
   border-left: 1px solid #ddd;
 }
 
-#formEdit.createMode table tr:first-child td {
+#formEdit.createMode > table > tbody >  tr:first-child >  td {
   height: 48px !important;
 }
 
-#formEdit.editMode table tr:first-child td {
+#formEdit.editMode > table > tbody >  tr:first-child >  td {
   padding-top: 7px;
 }
 
-#formEdit table tr:first-child td {
+#formEdit > table > tbody >  tr:first-child >  td {
   border-top: 1px solid #ddd;
   margin-top: 0px;
   color: #999;
@@ -200,12 +207,12 @@ td.entity-value {
   font-size: 1em;
 }
 
-#formEdit td {
+#formEdit > table > tbody > tr > td {
   border-right:1px solid #ddd;
 }
 
 
-td.entity-key, #formEdit table tr:first-child td:first-child {
+td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
   min-width: 150px;
 }
 
@@ -218,6 +225,7 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
 
 .modal-popup {
   width: 100%;
+  margin-bottom: 0px;
 }
 
 .record-number {
@@ -226,18 +234,18 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
   color: #999;
 }
 
-#formEdit.createMode table tr:first-child td:first-child {
+#formEdit.createMode >  table > tbody >  tr:first-child >  td:first-child {
   height: 49px !important;
 }
 
-#formEdit.editMode table tr:first-child td:first-child {}
+#formEdit.editMode >  table > tbody >  tr:first-child >  td:first-child {}
 
 .form-control[disabled] {
   color: #888888;
   cursor: not-allowed !important;
 }
 
-#formEdit.editMode table tr td:last-child {
+#formEdit.editMode >  table > tbody >  tr >  td:last-child {
   border-right: 0px;
 }
 
@@ -259,17 +267,78 @@ td.entity-key, #formEdit table tr:first-child td:first-child {
     border-right: 1px solid #ddd;
   }
 
-  #formEdit table {
+  #formEdit >  table {
     margin-bottom: -1px !important;
   }
 }
 
 @-moz-document url-prefix() {
-  #formEdit table tr td:first-child {
+  #formEdit >  table > tbody >  tr >  td:first-child {
     margin-top: 0px;
   }
 
-  #formEdit table tr:first-child td:first-child {
+  #formEdit >  table > tbody >  tr:first-child >  td:first-child {
     margin-top: -1px;
   }
+}
+
+/****************** Upload modal css *****************/
+
+
+.progress-percent {
+  font-weight: bold;
+  margin-top: -25px;
+  margin-left: 50%;
+}
+
+.inner-progress-percent {
+  margin-top: -18px;
+  font-size: 12px;
+}
+
+table.upload-table {
+
+}
+
+table.upload-table > tbody {
+  border: none;
+}
+
+table.upload-table > tbody > tr > td:first-child {
+  padding-left: 20px;
+
+}
+
+table.upload-table > tbody > tr > td:last-child {
+  width: 40%;
+}
+
+table.upload-table > tbody > tr > td:nth-child(2) {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+
+table.upload-table > tbody > tr:last-child > td {
+  border-bottom: 1px solid #ddd;
+  background-color: white;
+}
+
+
+table.upload-table > tbody > tr:first-child > td {
+  padding-left:0px;
+  padding-top: 15px;
+  border-bottom: 2px solid gainsboro;
+  font-weight: 600;
+}
+
+
+table.upload-table .progress {
+  height: 20px;
+}
+
+
+.upload-progress-bar {
+  width: 0%;
+  background-color: #8cacc7 !important;
 }

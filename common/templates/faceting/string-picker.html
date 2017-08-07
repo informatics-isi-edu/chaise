@@ -7,10 +7,13 @@
                 <button class="btn btn-primary" ng-click="addFilter()"><span class="glyphicon glyphicon-plus"></span></button>
             </span>
         </div>
-        <span class="info"><span ng-bind="totalCount"></span> <span>results found.</span></span>
+        <!-- <span class="info"><span ng-bind="totalCount"></span> <span>results found.</span></span> -->
     </div>
     <div class="divider"></div>
-    <table class="table table-bordered table-hover table-striped string-selector">
+    <div ng-bind="facetColumn.sourceReference.uri"></div>
+    min: <div ng-bind="min"></div>
+    max: <div ng-bind="max"></div>
+    <!-- <table class="table table-bordered table-hover table-striped string-selector">
         <thead class="table-heading">
             <tr>
                 <th>Value</th>
@@ -21,7 +24,7 @@
                 <td><span ng-bind="item.value"></span></td>
             </tr>
         </tbody>
-    </table>
+    </table> -->
     <div class="pager">
         <div class="btn btn-primary">
             <i class="glyphicon glyphicon-chevron-left"></i>

@@ -3,14 +3,13 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
 
         vm.alerts = AlertsService.alerts;
-        vm.showEmptyRelatedTables = false;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         vm.canCreate = function() {
@@ -18,42 +17,23 @@
         };
 
         vm.createRecord = function() {
-            var newRef = $rootScope.reference.table.reference.contextualize.entryCreate;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.location.href = appURL;
-            }
+            $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
         };
 
         vm.canEdit = function() {
             var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
             // Otherwise, canEdit will be undefined, so no need to change anything b/c showEmptyRelatedTables is already false.
-            if (canEdit === true) {
-                vm.showEmptyRelatedTables = true;
-            }
+
             return canEdit;
         };
 
         vm.editRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryEdit;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.location.href = appURL;
-            }
+            $window.location.href = $rootScope.reference.contextualize.entryEdit.appLink;
         };
 
         vm.copyRecord = function() {
-            var newRef = $rootScope.reference.contextualize.entryCreate;
-
-            var appLink = newRef.appLink + "?copy=true&limit=1";
-            $window.location.href = appLink;
+            $window.location.href = $rootScope.reference.contextualize.entryCreate.appLink + "?copy=true&limit=1";
         };
 
         vm.canDelete = function() {
@@ -66,44 +46,16 @@
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
-                if (error instanceof ERMrest.PreconditionFailedError) {
-                    $uibModal.open({
-                        templateUrl: "../common/templates/refresh.modal.html",
-                        controller: "ErrorDialogController",
-                        controllerAs: "ctrl",
-                        size: "sm",
-                        resolve: {
-                            params: {
-                                title: messageMap.pageRefreshRequired.title,
-                                message: messageMap.pageRefreshRequired.message
-                            }
-                        }
-                    }).result.then(function reload() {
-                        // Reload the page
-                        $window.location.reload();
-                    }).catch(function(error) {
-                        ErrorService.catchAll(error);
-                    });
-                } else {
-                    ErrorService.catchAll(error);
-                    $log.warn(error);
-                }
+                throw error;
             });
         };
 
         vm.permalink = function getPermalink() {
-            if (!$rootScope.reference) {
-                return $window.location.href;
-            }
-            return $rootScope.context.mainURI;
+            return $window.location.href;
         };
 
         vm.toRecordSet = function(ref) {
-            var appURL = ref.appLink;
-            if (!appURL) {
-                return AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + ref.compactPath});
-            }
-            return $window.location.href = appURL;
+            return $window.location.href = ref.appLink;
         };
 
         vm.showRelatedTable = function(i) {
@@ -123,7 +75,7 @@
                     $rootScope.loading = false;
                 }
 
-                if (vm.showEmptyRelatedTables) {
+                if ($rootScope.showEmptyRelatedTables) {
                     return isFirst || prevTableHasLoaded;
                 }
 
@@ -144,11 +96,12 @@
         };
 
         vm.toggleRelatedTables = function() {
-            vm.showEmptyRelatedTables = !vm.showEmptyRelatedTables;
+            $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
         };
 
         vm.canCreateRelated = function(relatedRef) {
-            return (relatedRef.canCreate && $rootScope.modifyRecord);
+           var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
+           return (ref.canCreate && $rootScope.modifyRecord);
         };
 
         // Send user to RecordEdit to create a new row in this related table
@@ -195,37 +148,46 @@
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
+            if ($rootScope.loading === false) {
+                var completed = {};
+                for (var id in addRecordRequests) {
+                    var cookie = $cookies.getObject(id);
+                    if (cookie) { // add request has been completed
+                        console.log('Cookie found', cookie);
+                        completed[addRecordRequests[id]] = true;
 
-            var completed = {};
-            for (var id in addRecordRequests) {
-                var cookie = $cookies.getObject(id);
-                if (cookie) { // add request has been completed
-                    completed[addRecordRequests[id]] = true;
-
-                    // remove cookie and request
-                    $cookies.remove(id);
-                    delete addRecordRequests[id];
+                        // remove cookie and request
+                        $cookies.remove(id);
+                        delete addRecordRequests[id];
+                    } else {
+                        console.log('Could not find cookie', cookie);
+                    }
                 }
-            }
 
-            // read updated tables
-            if (Object.keys(completed).length > 0 || updated !== {}) {
-                for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                    var relatedTableReference = $rootScope.relatedReferences[i];
-                    if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
-                        delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
-                        (function (i) {
-                            relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
-                                $rootScope.tableModels[i].page = page;
-                                $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
-                            });
-                        })(i);
+                // read updated tables
+                if (Object.keys(completed).length > 0 || updated !== {}) {
+                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+                        var relatedTableReference = $rootScope.relatedReferences[i];
+                        if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
+                            delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
+                            (function (i) {
+                                relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
+                                    $rootScope.tableModels[i].page = page;
+                                    $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
+                                }, function(error) {
+                                    throw error;
+                                }).catch(function(error) {
+                                    throw error;
+                                });
+                            })(i);
+                        }
                     }
                 }
             }
 
         };
 
+        // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
             delete editRecordRequests[id];

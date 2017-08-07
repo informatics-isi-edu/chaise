@@ -47,13 +47,6 @@
      *          $window.location.replace($scope.permalink());
      *          $rootScope.location = $window.location.href;
      *      });
-     *
-     * 2. error - an exception was caught
-     *
-     *      $scope.$on('error', function(event, exception) {
-     *          $log.warn(exception);
-     *          ErrorService.catchAll(exception);
-     *      });
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout','Session', function(DataUtils, $timeout, Session) {
 
@@ -61,7 +54,6 @@
         // If it returns true then we should render the data
         // else we should reject the data
         function setSearchStates(scope, isBackground, searchTerm) {
-
             // If request is background
             if (isBackground) {
                 // If there is a term in backgroundSearchPendingTerm for background and there is no foreground search going on then
@@ -107,7 +99,7 @@
               not empty then we render the background search results and empty the backgroundSearchPendingTerm
         */
         function read(scope, isBackground) {
-
+            console.log('reading');
             var searchTerm = scope.vm.search;
 
             scope.vm.hasLoaded = false;
@@ -127,7 +119,6 @@
             }
 
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
-
                 // This method sets the
                 if (!setSearchStates(scope, isBackground, searchTerm)) return;
 
@@ -139,24 +130,15 @@
                     if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 }, 200);
 
-
                 // tell parent controller data updated
+                console.log("recordset-update emitted!");
                 scope.$emit('recordset-update');
 
             }, function error(exception) {
-                // If the errorcode is unauthorizederror (401) then open the login window to make the user login
-                if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                    Session.loginInANewWindow(function() {
-                        //Once the user has logged in successfully trigger read again
-                        read(scope, isBackground);
-                    });
-                } else {
-                    scope.vm.hasLoaded = true;
-                    scope.$emit('error', exception);
-                    setSearchStates(scope, isBackground);
-
-                    if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
-                }
+                scope.vm.hasLoaded = true;
+                setSearchStates(scope, isBackground);
+                if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+                throw exception;
             });
         }
 
@@ -180,6 +162,7 @@
                 // row data has been modified (from ellipses)
                 // do a read
                 scope.$on('record-modified', function() {
+                    console.log('catching the record modified');
                     recordTableUtils.read(scope);
                 });
 
@@ -328,7 +311,7 @@
                     // open a new tab
                     var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
                     var appLink = newRef.appLink;
-                    appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
+                    appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
                         'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
 
                     // open url in a new tab
@@ -358,6 +341,7 @@
                 };
 
                 // allow child window to call to indicate table has been updated
+                // called from form.controller.js to communicate that an entity was just updated
                 window.updated = function() {
                     updated = true;
                 }

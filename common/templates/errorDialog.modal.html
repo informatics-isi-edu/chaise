@@ -1,10 +1,18 @@
 <div class="modal-header">
+    <button class="btn btn-default pull-right modal-close" ng-show="ctrl.params.canClose" type="button" ng-click="ctrl.cancel()">X</button>
     <h3 class="modal-title">Error: {{::ctrl.params.errorCode}}</h3>
 </div>
 <div class="modal-body">
     {{::ctrl.params.message}}
     <br><br>
-    Please check the URL or click OK to return to the {{::ctrl.params.pageName}}.
+    Click OK to go to the {{::ctrl.params.pageName}}.
+
+    <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">{{ctrl.linkText}}</a>
+    <br>
+    <span ng-show="ctrl.details">
+    	<br>
+    	<pre ng-bind="ctrl.params.subMessage" style="word-wrap: unset;"></pre>
+    </span>
 </div>
 <div class="modal-footer">
     <button class="btn btn-danger" type="button" ng-click="ctrl.ok()">OK</button>

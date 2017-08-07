@@ -1,0 +1,77 @@
+<div class="modal-header">
+	<button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
+    <h3 class="modal-title">{{ctrl.title}}</h3>
+</div>
+<div class="modal-body">
+	<div class="row no-row-margin" ng-show="!ctrl.isCreateUploadJob && !ctrl.isFileExists && !ctrl.isUpload ">
+    	<div class="col-md-12 pad0-left pad0-right text-right">
+	    	<strong>Completed: {{ctrl.checksumCompleted}}/{{ctrl.noOfFiles}}</strong>
+    	</div>
+	    <div class="progress">
+	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.checksumProgress + '%' }" ></div>
+	    </div>
+	    <div class="progress-percent">{{ctrl.checksumProgress | number:0}}%</div>
+    </div>
+    <div class="row no-row-margin" ng-show="ctrl.isCreateUploadJob && !ctrl.isFileExists && !ctrl.isUpload ">
+    	<div class="col-md-12 pad0-left pad0-right text-right">
+	    	<strong>Completed: {{ctrl.createUploadJobCompleted}}/{{ctrl.noOfFiles}}</strong>
+    	</div>
+	    <div class="progress">
+	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.createUploadJobProgress + '%' }"></div>
+	    </div>
+	    <div class="progress-percent">{{ctrl.createUploadJobProgress | number:0}}%</div>
+    </div>
+    <div class="row no-row-margin" ng-show="ctrl.isFileExists && !ctrl.isUpload">
+    	<div class="col-md-12 pad0-left pad0-right text-right">
+	    	<strong>Completed: {{ctrl.fileExistsCompleted}}/{{ctrl.noOfFiles}}</strong>
+    	</div>
+	    <div class="progress">
+	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.fileExistsProgress + '%' }"></div>
+	    </div>
+	    <div class="progress-percent">{{ctrl.fileExistsProgress | number:0}}%</div>
+    </div>
+    <div class="row no-row-margin" ng-show="ctrl.isUpload && (ctrl.uploadCompleted != ctrl.noOfFiles)">
+    	<div class="col-md-6  pad0-left pad0-right">
+	    	<strong>Completed: {{ctrl.uploadCompleted}}/{{ctrl.noOfFiles}} Files ({{ctrl.humanSizeTransferred}}/ {{ctrl.humanTotalSize}}) </strong>
+    	</div>
+    	<div class="col-md-6 pad0-left pad0-right text-right">
+	    	<strong>Speed: {{ctrl.speed}}</strong>
+    	</div>
+	    <div class="progress">
+	        <div class="progress-bar" role="progressbar" ng-style="{ 'width': ctrl.uploadProgress + '%' }" style="width: 0%;"></div>
+	    </div>
+	    <div class="progress-percent">{{ctrl.uploadProgress | number:0}}%</div>
+    </div>
+    <div class="row no-row-margin" ng-show="ctrl.isUpload && (ctrl.uploadCompleted == ctrl.noOfFiles)">
+    	<div class="col-md-12 pad0-left pad0-right text-right">
+	    	<strong>Completed: {{ctrl.uploadJobCompletedCount}}/{{ctrl.noOfFiles}}</strong>
+    	</div>
+	    <div class="progress">
+	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.uploadJobCompleteProgress + '%' }"></div>
+	    </div>
+	    <div class="progress-percent">{{ctrl.uploadJobCompleteProgress | number:0}}%</div>
+    </div>
+	<table class="table upload-table" ng-show="(!ctrl.isCreateUploadJob && !ctrl.isFileExists && !ctrl.isUpload) || (ctrl.isUpload && ctrl.uploadCompleted != ctrl.noOfFiles)">
+	    <tbody ng-repeat="(rowIndex, row) in ctrl.rows track by $index" ng-show="row.length">    
+	    	<tr>
+	    		<td colspan="3">Record <span ng-bind="rowIndex+1"></span></td>
+			</tr>
+			<tr ng-repeat="item in row"> 
+	            <td>
+	    			<div class="ellipsis">
+	    				{{item.name}} ( {{item.humanFileSize}} )
+					</div>
+				</td>
+				<td>
+	                <div class="progress">
+	                	<div ng-show="!item.uploadStarted" class="progress-bar" role="progressbar" ng-style="{ 'width': item.checksumPercent + '%' }" style="background-color: #8cacc7 !important;"></div>
+	                	
+	                	<div ng-show="item.uploadStarted" class="progress-bar" role="progressbar" ng-style="{ 'width': item.progressPercent + '%' }"></div>
+	                </div>
+	                <div ng-show="!item.uploadStarted" class="progress-percent inner-progress-percent">{{item.checksumPercent | number:0}}%</div>
+	                <div ng-show="item.uploadStarted" class="progress-percent inner-progress-percent">{{item.progressPercent | number:0}}%</div>
+	            </td>
+	        </tr>
+	    </tbody>
+	</table>
+</div>

@@ -1,0 +1,7 @@
+[{"id": 1, "position_type_col": "fixed", "int_value": 593},
+ {"id": 2, "position_type_col": "relative", "int_value": 632},
+ {"id": 3, "position_type_col": "fixed", "int_value": 864},
+ {"id": 4, "position_type_col": "absolute", "int_value": 191},
+ {"id": 5, "position_type_col": "absolute", "int_value": 47},
+ {"id": 6, "position_type_col": "fixed", "int_value": 824},
+ {"id": 7, "position_type_col": "nonsense", "int_value": 274}]

@@ -2,7 +2,7 @@
     'use strict';
     angular.module('chaise.navbar', [
         'ngCookies',
-        'chaise.utils', 
+        'chaise.utils',
         'chaise.authen',
         'ui.bootstrap'
     ])
@@ -17,7 +17,9 @@
             }
 
             var q = [root];
-
+            var reloadCb = function(){
+                 window.location.reload();
+            }; 
             while (q.length > 0) {
                 var obj = q.shift();
                 var parentNewTab = obj.newTab;
@@ -51,18 +53,25 @@
                 scope.signUpURL = chaiseConfig.signUpURL;
                 scope.profileURL = chaiseConfig.profileURL;
 
-                Session.getSession().then(function(session) {
-                    $rootScope.session = session;
+                Session.subscribeOnChange(function() {
+                    $rootScope.session = Session.getSessionValue();
 
-                    var user = session.client;
-                    scope.user = user.display_name || user.full_name || user.email || user;
-                }, function(error) {
-                    // No session = no user
-                    scope.user = null;
+                    if ($rootScope.session == null) {
+                        scope.user = null;
+                    } else {
+                        var user = $rootScope.session.client;
+                        scope.user = user.display_name || user.full_name || user.email || user;
+                    }
                 });
 
+                Session.getSession();
+
                 scope.login = function login() {
-                    Session.login($window.location.href);
+                    var x = window.innerWidth/2 - 800/2;
+                    var y = window.innerHeight/2 - 600/2;
+
+                    var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
+                    Session.loginInAPopUp(win,reloadCb);
                 };
 
                 scope.logout = function logout() {

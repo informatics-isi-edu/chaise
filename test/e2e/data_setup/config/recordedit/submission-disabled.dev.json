@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordedit/submission-disabled.config.json"
+        ],
+        "schema": "submission-disabled"
+    },
+    "cleanup" : true
+}

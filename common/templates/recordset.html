@@ -23,17 +23,17 @@
             </span>
         </div>
     </div>
-    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="height: 34px;">
         <!-- pagination -->
         <span class="dropdown" style="margin-left: 5px">
-            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
+            <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
                 <span class="caret"></span></button>
             <ul class="dropdown-menu dropdown-menu-right">
                 <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
                     <span class="glyphicon glyphicon-ok"></span>
                     {{ vm.pageLimit }} (Custom)</a>
                 </li>
-                <li ng-repeat="limit in pageLimits"><a href ng-click="setPageLimit(limit)">
+                <li ng-repeat="limit in pageLimits"><a id="page-size-{{limit}}" href ng-click="setPageLimit(limit)">
                     <span class="glyphicon" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
                     {{ limit }}</a>
                 </li>
@@ -50,20 +50,20 @@
 
 <div class="row total-filters" style="margin: 10px -15px;">
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-        <a class="remove-link" ng-click="vm.removeFilter()">
-            <span class="filter-label label label-primary" ng-if="vm.AppliedFilters.length > 1">
+        <a class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter()">
+            <span class="filter-label label label-primary">
                 clear all
             </span>
         </a>
-        <div class="filter-label label label-primary" ng-repeat="filter in vm.AppliedFilters">
-            <a class="remove-link" ng-click="vm.removeFilter(filter.colId)"><i class="glyphicon glyphicon-remove"></i></a>
-            <span ng-bind="filter.name"></span>:
-            <span ng-bind="filter.content"></span>
+        <div ng-repeat="fc in vm.facetColumns track by $index">
+            <div class="filter-label label label-primary" ng-repeat="filter in fc.filters">
+                <a class="remove-link" ng-click="vm.removeFilter(fc, $index)"><i class="glyphicon glyphicon-remove"></i></a>
+                <span ng-bind="fc.column.displayname.value"></span>:
+                <span ng-bind="filter.toString()"></span>
+            </div>
         </div>
     </div>
 </div>
-
-<div class="row-count">54 results found.</div>
 
 <!-- record table -->
 <div ng-if="vm.hasLoaded">
@@ -71,11 +71,11 @@
 </div>
 
 <!-- bottom pagination -->
-<div class="pager" ng-show="vm.initialized && vm.hasLoaded && (vm.page.hasPrevious || vm.page.hasNext)">
-    <button type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
+<div class="pager" ng-show="vm.initialized && vm.hasLoaded">
+    <button id="rs-previous-btn" type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
         <span class="glyphicon glyphicon-chevron-left"></span>
     </button>
-    <button type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
+    <button id="rs-next-btn" type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
         <span class="glyphicon glyphicon-chevron-right"></span>
     </button>
 </div>

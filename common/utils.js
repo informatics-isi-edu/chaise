@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.utils', [])
+    angular.module('chaise.utils', ['chaise.errors'])
 
     .constant("appTagMapping", {
         "tag:isrd.isi.edu,2016:chaise:record": "/record",
@@ -16,42 +16,55 @@
         "detailed": "/record",
         "compact": "/recordset",
         "edit": "/recordedit",
-        "entry": "/recordedit"
+        "entry": "/recordedit",
+        "*": "/record"
     })
 
     // this constant is used to keep track of our strings that the user is shown
     // so that when one is changed, it is changed in all places.
     // this will make localization easier if we go that route
     .constant("messageMap", {
+        "catalogMissing": "No catalog specified and no Default is set.",
+        "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
         "noDataMessage": "No entity exists with ",
+        "multipleDataErrorCode" : "Multiple Records Found",
+        "multipleDataMessage" : "There are more than 1 record for the filters provided.",
+        "onePagingModifier": "Invalid URL. Only one paging modifier allowed",
         "pageRefreshRequired": {
             title: "Page Refresh Required",
             message: "This record cannot be deleted at this time because someone else has modified it. Please refresh this page before attempting to delete again."
         },
+        "pagingModifierRequiresSort": "Invalid URL. Paging modifier requires @sort",
         "reviewModifiedRecord": {
             title: "Review Modified Record",
             message: "This record cannot be deleted or unlinked at this time because someone else has modified it. The record has been updated with the latest changes. Please review them before trying again."
         },
-        "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
         "sessionExpired": {
             title: "Your session has expired. Please login to continue.",
             message: "To open the login window press"
-        }
+        },
+        "noSession": {
+            title: "Your need to be logged in to continue.",
+            message: "To open the login window press"
+        },
+        "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set."
     })
 
-    .factory('UriUtils', ['$injector', '$window', 'parsedFilter', '$rootScope', 'appTagMapping', 'appContextMapping', 'ContextUtils',
-        function($injector, $window, ParsedFilter, $rootScope, appTagMapping, appContextMapping, ContextUtils) {
+    .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
+        function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
-            var chaiseBaseURL;
+        var chaiseBaseURL;
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
          * @desc
-         * Converts a chaise URI to an ermrest resource URI object
+         * Converts a chaise URI to an ermrest resource URI object.
+         * @throws {MalformedUriError} if table or catalog data are missing.
          */
+
         function chaiseURItoErmrestURI(location) {
-            var tableMissing = "No table specified in the form of 'schema-name:table-name' and no Default is set.",
-                catalogMissing = "No catalog specified and no Default is set.";
+            var tableMissing = messageMap.tableMissing,
+                catalogMissing = messageMap.catalogMissing;
 
             var hash = location.hash,
                 ermrestUri = {},
@@ -60,13 +73,16 @@
             // remove query params other than limit
             if (hash.indexOf('?') !== -1) {
                 var queries = hash.match(/\?(.+)/)[1].split("&"); // get the query params
+                var acceptedQueries = [], i;
+
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
-                for (var i = 0; i < queries.length; i++) { // add back only the valid queries
-                    var query = queries[i];
-                    if (query.indexOf("limit=") === 0) {
-                        hash = hash + "?" + query;
-                        break; // right now only 'limit' is valid
+                for (i = 0; i < queries.length; i++) { // add back only the valid queries
+                    if (queries[i].indexOf("limit=") === 0 || queries[i].indexOf("subset=") === 0) {
+                        acceptedQueries.push(queries[i]);
                     }
+                }
+                if (acceptedQueries.length != 0) {
+                    hash = hash + "?" + acceptedQueries.join("&");
                 }
             }
 
@@ -77,14 +93,19 @@
                         catalogId = chaiseConfig.defaultCatalog;
 
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        if (tableConfig) {
+                            hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        } else {
+                            // no defined or default schema:table for catalogId
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
                     } else {
                         // no defined or default schema:table
-                        throw new Error(tableMissing);
+                        throw new Errors.MalformedUriError(tableMissing);
                     }
                 } else {
                     // no defined or default catalog
-                    throw new Error(catalogMissing);
+                    throw new Errors.MalformedUriError(catalogMissing);
                 }
             } else {
                 // pull off the catalog ID
@@ -97,7 +118,7 @@
                         catalogId = chaiseConfig.defaultCatalog;
                     } else {
                         // no defined or default catalog
-                        throw new Error(catalogMissing);
+                        throw new Errors.MalformedUriError(catalogMissing);
                     }
                 }
 
@@ -106,10 +127,15 @@
                     // check for default Table
                     if (chaiseConfig.defaultTables) {
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
-                        hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        if (tableConfig) {
+                            hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
+                        } else {
+                            // no defined or default schema:table for catalogId
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
                     } else {
                         // no defined or default schema:table
-                        throw new Error(tableMissing);
+                        throw new Errors.MalformedUriError(tableMissing);
                     }
                 } else {
                     // grab the end of the hash from: '.../<schema-name>...'
@@ -131,34 +157,61 @@
         function fixedEncodeURIComponent(str) {
             return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
                 return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            })
+            });
         }
 
         /**
          * given an app tag and location object, return the full url
-         * @param {string} tag
-         * @param {ERMrest.Location} location
+         * @param {string} tag the tag that is defined in the annotation. If null, should use context.
+         * @param {ERMrest.Location} location the location object that ERMrest will return.
          * @param {string} context - optional, used to determine default app if tag is null/undefined
-         * @returns {string} url
+         * @returns {string} url the chaise url
          */
         function appTagToURL(tag, location, context) {
             if (!chaiseBaseURL)
                 chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             chaiseBaseURL = chaiseBaseURL.replace("/" + $rootScope.context.appName + "/", '');
             var appPath;
-            if (!tag && context) {
-                appPath = ContextUtils.getValueFromContext(appContextMapping, context);
-            } else if (tag) {
+            if (tag && (tag in appTagMapping)) {
                 appPath = appTagMapping[tag];
             } else {
-                return undefined;
+                appPath = ContextUtils.getValueFromContext(appContextMapping, context);
             }
 
-            return chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
+            var url = chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
+            if (location.queryParamsString && (context === "compact" || context === "compact/brief")) {
+                url = url + "?" + location.queryParamsString;
+            }
+            return url;
+        }
+        
+        
+        /**
+         * Return query params
+         * @param  {Object} location window.location object
+         * @return {Object} key-value pairs of query params
+         */
+        function getQueryParams(location) {
+            var queryParams = {}, 
+                modifierPath = location.hash,
+                q_parts, i;
+
+            if (modifierPath.indexOf("?") !== -1) {
+                var queries = modifierPath.match(/\?(.+)/)[1].split("&");
+                for (i = 0; i < queries.length; i++) {
+                    q_parts = queries[i].split("=");
+                    queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
+                }
+            }
+            return queryParams;
         }
 
         /**
+         * NOTE: DO NOT USE THIS FUNCTION, EMRESTJS will take care of parsing.
+         * old apps is using are, that's why we should still keep this function.
+         * 
          * @function
+         * @deprecated
          * @param {Object} location should be $window.location object
          * @param {context} context object; can be null
          * Parses the URL to create the context object
@@ -175,6 +228,8 @@
             if (chaiseConfig.ermrestLocation) {
                 context.serviceURL = chaiseConfig.ermrestLocation;
             }
+
+            context.queryParams = {};
 
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
@@ -195,8 +250,6 @@
 
             context.mainURI = hash; // uri without modifiers
             var modifierPath = uri.split(hash)[1];
-
-            context.queryParams = {};
 
             if (modifierPath) {
 
@@ -227,7 +280,7 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        throw new Error("Invalid URL. Paging modifier requires @sort");
+                        throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
                     }
 
                 }
@@ -235,7 +288,7 @@
                 // extract @after
                 if (modifierPath.indexOf("@after(") !== -1) {
                     if (context.paging)
-                        throw new Error("Invalid URL. Only one paging modifier allowed");
+                        throw new Errors.MalformedUriError(messageMap.onePagingModifier);
                     if (context.sort) {
                         context.paging = {};
                         context.paging.before = false;
@@ -247,7 +300,7 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        throw new Error("Invalid URL. Paging modifier requires @sort");
+                        throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
                     }
                 }
 
@@ -325,10 +378,10 @@
                             type = "Disjunction";
                         } else if (type === "Conjunction" && items[i] === ";") {
                             // using combination of ! and & without ()
-                            throw new Error("Invalid filter " + parts[2]);
+                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
                         } else if (type === "Disjunction" && items[i] === "&") {
                             // using combination of ! and & without ()
-                            throw new Error("Invalid filter " + parts[2]);
+                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
                         } else if (items[i] !== "&" && items[i] !== ";") {
                             // single filter on the first level
                             var binaryFilter = processSingleFilterString(items[i]);
@@ -365,20 +418,18 @@
                     var filter = new ParsedFilter("BinaryPredicate");
                     filter.setBinaryPredicate(decodeURIComponent(f[0]), "=", decodeURIComponent(f[1]));
                     return filter;
-                } else {
-                    // invalid filter
-                    throw new Error("Invalid filter " + filterString);
                 }
+                // invalid filter
+                throw new Errors.MalformedUriError("Invalid filter " + filterString);
             } else {
                 var f = filterString.split("::");
                 if (f.length === 3) {
                     var filter = new ParsedFilter("BinaryPredicate");
                     filter.setBinaryPredicate(decodeURIComponent(f[0]), "::"+f[1]+"::", decodeURIComponent(f[2]));
                     return filter;
-                } else {
-                    // invalid filter error
-                    throw new Error("Invalid filter " + filterString);
                 }
+                // invalid filter error
+                throw new Errors.MalformedUriError("Invalid filter " + filterString);
             }
         }
 
@@ -401,10 +452,10 @@
                     type = "Disjunction";
                 } else if (type === "Conjunction" && filterStrings[i] === ";") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    throw new Error("Invalid filter " + filterStrings);
+                    throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
                 } else if (type === "Disjunction" && filterStrings[i] === "&") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    throw new Error("Invalid filter " + filterStrings);
+                    throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
                 } else if (filterStrings[i] !== "&" && filterStrings[i] !== ";") {
                     // single filter on the first level
                     var binaryFilter = processSingleFilterString(filterStrings[i]);
@@ -473,7 +524,7 @@
 
 
         function queryStringToJSON(queryString) {
-            queryString  = queryString || window.location.search;
+            queryString  = queryString || $window.location.search;
             if (queryString.indexOf('?') > -1){
                 queryString = queryString.split('?')[1];
             }
@@ -491,7 +542,6 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
-
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -501,7 +551,8 @@
             setOrigin: setOrigin,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             setLocationChangeHandling: setLocationChangeHandling,
-            isBrowserIE: isBrowserIE
+            isBrowserIE: isBrowserIE,
+            getQueryParams: getQueryParams
         }
     }])
 
@@ -551,7 +602,7 @@
         return ParsedFilter;
     }])
 
-    .factory("DataUtils", [function() {
+    .factory("DataUtils", ['Errors', function(Errors) {
         /**
          *
          * @param {ERMrest.Page} page
@@ -569,6 +620,67 @@
                 });
                 return row;
             });
+        }
+
+        function getRowValuesFromTuples(tuples) {
+          return tuples.map(function(tuple, index, array) {
+              var row = [];
+              tuple.values.forEach(function(value, index) {
+                  row.push({
+                      isHTML: tuple.isHTML[index],
+                      value: value
+                  });
+              });
+              return row;
+          });
+        }
+
+        /**
+         * @param {ERMrest.Tuple[]} tuples - array of tuples
+         * @param {ERMrest.ReferenceColumn[]} columns - array of column names
+         * @return {Object[]} array of row value arrays [{isHTML: boolean, value: v}, ...]
+         */
+        function getRowValuesFromTupleData(tuples, columns) {
+            var rows = [];
+            for (var i = 0; i < tuples.length; i++) {
+                var tuple = tuples[i],
+                    row = [];
+
+                for (var j = 0; j < columns.length; j++) {
+                    var value,
+                        column = columns[j];
+
+                    if (column.isPseudo) {
+                        var keyColumns;
+
+                        if (column.key) {
+                            keyColumns = column.key.colset.columns;
+                        } else if (column.foreignKey) {
+                            keyColumns =  column.foreignKey.colset.columns;
+                        }
+
+                        for (var k = 0; k < keyColumns.length; k++) {
+                            var referenceColumn = keyColumns[k];
+
+                            value = tuple.data[referenceColumn.name];
+
+                            row.push({
+                                isHTML: false,
+                                value: value
+                            });
+                        }
+                    } else {
+                        value = tuple.data[column.name];
+
+                        row.push({
+                            isHTML: false,
+                            value: value
+                        });
+                    }
+                }
+                rows.push(row);
+            }
+            return rows;
         }
 
         /**
@@ -589,9 +701,28 @@
                 .replace(/'/g, '&#39;');
         }
 
+        /**
+         * Throws an {InvalidInputError} if test is
+         * not `True`.
+         * @memberof ERMrest
+         * @private
+         * @function verify
+         * @param {boolean} test The test
+         * @param {string} message The message
+         * @throws {InvalidInputError} If test is not true.
+         */
+        function verify(test, message) {
+            if (!test) {
+                throw new Errors.InvalidInputError(message);
+            }
+        }
+
         return {
             getRowValuesFromPage: getRowValuesFromPage,
-            makeSafeIdAttr: makeSafeIdAttr
+            getRowValuesFromTupleData: getRowValuesFromTupleData,
+            getRowValuesFromTuples: getRowValuesFromTuples,
+            makeSafeIdAttr: makeSafeIdAttr,
+            verify: verify
         };
     }])
 
@@ -650,9 +781,15 @@
             return images.concat(iframes);
         }
 
+        function humanFileSize(size) {
+            var i = Math.floor( Math.log(size) / Math.log(1024) );
+            return ( size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+        }
+
         return {
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
-            getImageAndIframes: getImageAndIframes
+            getImageAndIframes: getImageAndIframes,
+            humanFileSize: humanFileSize
         }
     }])
 
@@ -669,6 +806,7 @@
                 parts.splice(-1,1); // remove the last part
                 partial = parts.join("/");
             }
+            return object["*"];
         }
 
         return {
@@ -683,10 +821,31 @@
             return Math.floor(Math.random() * (max - min)) + min;
         }
 
+        /**
+         * Generates a unique uuid
+         * @returns {String} a string of length 24
+         */
+        function uuid() {
+            // gets a string of a deterministic length of 4
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000).toString(36);
+            }
+            return s4() + s4() + s4() + s4() + s4() + s4();
+        }
+
         return {
-            getRandomInt: getRandomInt
+            getRandomInt: getRandomInt,
+            uuid: uuid
         }
     }])
+
+    // directive for including the loading spinner
+    .directive('loadingSpinner', function () {
+        return {
+            restrict: 'E',
+            templateUrl: '../common/templates/spinner.html'
+        }
+    })
 
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {
@@ -706,7 +865,6 @@
 
     .directive('onEnter', function() {
         return function(scope, element, attrs) {
-
             element.bind("keydown keypress", function(event) {
                 var keyCode = event.which || event.keyCode;
 
@@ -724,9 +882,10 @@
     })
 
     // An "autofocus" directive that applies focus on an element when it becomes visible.
-    // The HTML5 autofocus attribute (1) isn't uniformly implemented across major modern browsers;
-    // (2) doesn't focus the element beyond the first time it's loaded in DOM; and (3) works
-    // unreliably for dynamically loaded templates.
+    // A directive is necessary because the HTML5 autofocus attribute (1) isn't
+    // uniformly implemented across major modern browsers; (2) doesn't focus the
+    // element beyond the first time it's loaded in DOM; and (3) works unreliably
+    // for dynamically loaded templates.
     // Use: <input type="text" autofocus>
     .directive('autofocus', ['$timeout', function($timeout) {
         return {
@@ -761,14 +920,14 @@
         };
     }])
 
-    .service('headInjector', function() {
+    .service('headInjector', ['$window', 'MathUtils', function($window, MathUtils) {
         function addCustomCSS() {
             if (chaiseConfig['customCSS'] !== undefined) {
-            	var fileref = document.createElement("link");
-            	fileref.setAttribute("rel", "stylesheet");
-            	fileref.setAttribute("type", "text/css");
-            	fileref.setAttribute("href", chaiseConfig['customCSS']);
-            	document.getElementsByTagName("head")[0].appendChild(fileref);
+                var fileref = document.createElement("link");
+                fileref.setAttribute("rel", "stylesheet");
+                fileref.setAttribute("type", "text/css");
+                fileref.setAttribute("href", chaiseConfig['customCSS']);
+                document.getElementsByTagName("head")[0].appendChild(fileref);
             }
         }
 
@@ -777,9 +936,25 @@
                 document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
             }
         }
+
+        // sets the WID if it doesn't already exist
+        function setWindowName() {
+            if (!$window.name) {
+                $window.name = MathUtils.uuid();
+            }
+        }
+
+        function setupHead() {
+            addCustomCSS();
+            addTitle();
+            setWindowName();
+        }
+
         return {
             addCustomCSS: addCustomCSS,
-            addTitle: addTitle
+            addTitle: addTitle,
+            setWindowName: setWindowName,
+            setupHead: setupHead
         };
-    });
+    }]);
 })();

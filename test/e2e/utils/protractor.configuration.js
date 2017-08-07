@@ -12,7 +12,7 @@ exports.getConfig = function(options) {
       //Apache log shows firefox is not requesting the server.
       'chromeOptions' : {
          args: ['--lang=en',
-                '--window-size=2480,1920']
+                '--window-size=1920,1920']
       },
       'os': 'MacOS El Capitan 10.11',
       'platform': 'OS X 10.11',
@@ -23,7 +23,7 @@ exports.getConfig = function(options) {
     ],
     jasmineNodeOpts: {
       showColors: true,
-      defaultTimeoutInterval: 120000,
+      defaultTimeoutInterval: 300000,
       print: function() {}
     },
     params: {
@@ -35,9 +35,9 @@ exports.getConfig = function(options) {
     }
   };
 
+  Object.assign(config, options);
 
   if (!options.configFileName && !options.testConfiguration) throw new Error("No configfile provided in protractor.conf.js");
-  if (!options.page) throw new Error("No page provided in protractor.conf.js");
 
   var testConfiguration = options.testConfiguration;
   if (options.configFileName) {
@@ -47,10 +47,19 @@ exports.getConfig = function(options) {
 
   var dataSetup = require('./protractor.parameterize.js');
 
+  // Look through schemaConfigurations, if any are strings (filenames), grab the json file and insert into the schemaConfigs array
+  var schemaConfigs = testConfiguration.setup.schemaConfigurations;
+  for (var i = 0; i < schemaConfigs.length; i++) {
+      var schemaConfig = schemaConfigs[i];
+      if (typeof schemaConfig === 'string') {
+          schemaConfigs[i] = require(process.env.PWD + "/test/e2e/data_setup/config/" + schemaConfig);
+      }
+  }
+
   var dateSetupOptions = {
-    testConfiguration: testConfiguration,
-    page: options.page
+    testConfiguration: testConfiguration
   };
+  if (options.page) dateSetupOptions.page = options.page;
 
 
   if (typeof options.setBaseUrl == 'function') {
@@ -88,6 +97,13 @@ exports.getConfig = function(options) {
   else {
     console.log("Unable to copy file " + chaiseFilePath + " to chaise-config.js \n");
     process.exit(1);
+  }
+
+  config.capabilities.shardTestFiles = (process.env.SHARDING == 'false' || process.env.SHARDING == false) ? false : true;
+  config.capabilities.maxInstances = process.env.MAXINSTANCES || 4;
+
+  if (options.parallel == false) {
+    config.capabilities.shardTestFiles = false;
   }
 
   dataSetup.parameterize(config, dateSetupOptions);

@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordedit/add.config.json"
+        ],
+        "schema": "product-add"
+    },
+    "cleanup" : true
+}

@@ -1,0 +1,15 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "record/related-table/actions.config.json",
+            "record/related-table/links.config.json",
+            "record/related-table/max-related.config.json",
+            
+            "record/copy-btn.config.json",
+
+            "multi-permissions/config.json",
+            "navbar/config.json"
+        ]
+    },
+    "cleanup": true
+}

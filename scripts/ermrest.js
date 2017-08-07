@@ -353,7 +353,7 @@ function submitLogin(username, password, referrer, action, input_user, input_pas
 	successCallback = successCallback || successSubmitLogin;
 	errorCallback = errorCallback || errorSubmitLogin
 
-	var url = HOME + (action != null ? action : '/ermrest/authn/session');
+	var url = HOME + (action != null ? action : '/authn/session');
 	var obj = {};
 
 	if (input_user != null) {
@@ -602,7 +602,11 @@ function getPredicate(options, excludeColumn, table_name, peviousTable, aliases)
 				var checkValues = [];
 				$.each(value['values'], function(checkbox_key, checkbox_value) {
 					if (checkbox_value) {
-						checkValues.push(encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(checkbox_key));
+						if (checkbox_key == 'null') {
+							checkValues.push(encodeSafeURIComponent(key) + '::null::');
+						} else {
+							checkValues.push(encodeSafeURIComponent(key) + '=' + encodeSafeURIComponent(checkbox_key));
+						}
 					}
 				});
 				checkValues = checkValues.join(';');
@@ -1323,9 +1327,7 @@ function successGetColumnDescriptions(data, textStatus, jqXHR, param) {
 			entity[col]['ready'] = true;
 			var values = [];
 			$.each(data, function(i, row) {
-				if (row[col] != null) {
-					values.push(row[col]);
-				}
+				values.push(row[col]);
 			});
 			entity[col]['values'] = values;
 		} else if (entity[col]['type'] == 'select') {
@@ -1906,7 +1908,7 @@ function errorErmrest(jqXHR, textStatus, errorThrown, url, param) {
 
 function deleteSession(param) {
 	if (token == null) {
-		var url = HOME + '/ermrest/authn/session';
+		var url = HOME + '/authn/session';
 		if (chaiseConfig['logoutURL'] != null) {
 			url += '?logout_url=' + encodeSafeURIComponent(chaiseConfig['logoutURL']);
 		}
@@ -1938,7 +1940,7 @@ function errorDeleteSession(jqXHR, textStatus, errorThrown, url, param) {
 }
 
 function getSession(param) {
-	var url = HOME + '/ermrest/authn/session';
+	var url = HOME + '/authn/session';
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successGetSession, errorGetSession, param);
 }
 
@@ -2036,7 +2038,7 @@ function errorGetSession(jqXHR, textStatus, errorThrown, url, param) {
 }
 
 function login(referrer) {
-	var url = HOME + '/ermrest/authn/preauth?referrer='+referrer;
+	var url = HOME + '/authn/preauth?referrer='+referrer;
 	ERMREST.GET(url, 'application/x-www-form-urlencoded; charset=UTF-8', successLogin, errorLogin, null);
 }
 
@@ -2597,9 +2599,7 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 		entity[col]['ready'] = true;
 		var values = [];
 		$.each(data, function(i, row) {
-			if (row[col] != null) {
-				values.push(row[col]);
-			}
+			values.push(row[col]);
 		});
 		entity[col]['values'] = values;
 	} else if (sliderPresentation.contains(entity[col]['type'])) {
@@ -2636,7 +2636,15 @@ function successGetAssociationColumnsDescriptions(data, textStatus, jqXHR, param
 function getColumnDisplayName(column) {
 	var parts = column.split('_');
 	$.each(parts, function(i, part) {
-		parts[i] = part[0].toUpperCase() + part.substr(1);
+        if (part.length == 0) {
+            parts[i] = ' ';
+        }
+        else if (part.length == 1) {
+            parts[i] = part[0].toUpperCase();
+        }
+        else {
+            parts[i] = part[0].toUpperCase() + part.substr(1);
+        }
 	});
 	return parts.join(' ');
 }
@@ -3686,9 +3694,7 @@ function successInitFacetGroups(data, textStatus, jqXHR, param) {
 		ready = true;
 		var values = [];
 		$.each(data, function(i, row) {
-			if (row[col] != null) {
-				values.push(row[col]);
-			}
+			values.push(row[col]);
 		});
 		options['colsGroup'][table][col] = {};
 		options['colsDescr'][table][col]['type'] = col_type;

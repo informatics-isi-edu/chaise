@@ -38,6 +38,14 @@ a:hover, a:focus{
     z-index: 10;
 }
 
+img.spinner {
+    display: block;
+    margin: 0 auto;
+    width: 32px;
+    height: 32px;
+    opacity: 0.8;
+}
+
 .glyphicon-trash {
     color: #428bca;
 }
@@ -508,9 +516,45 @@ tbody{
     overflow-x: hidden;
 }
 
+.page-filters {
+    margin: 1em 0;
+}
+
+.page-filters .sub-title {
+    font-size: 1.2em;
+    color: #747474;
+    margin-left: 15px;
+}
+
 /************* custom buttons **************/
 .btn-no-focus:focus {
     outline: none;
+}
+
+.progress {
+  margin-bottom: 0;
+  height: 30px;
+  border: 1px solid #ccc9c9;
+}
+
+.ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.no-row-margin {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.pad0-left {
+  padding-left: 0px;
+}
+
+.pad0-right {
+  padding-right: 0px;
 }
 
 /************* search loader ***************/
@@ -593,6 +637,35 @@ input.search-progress {
 .mtl { margin-top: 20px; }
 .mbl { margin-bottom: 20px; }
 .marl { margin: 20px;  }
+
+footer .container1 {
+	padding-right: 5px;
+    padding-left: 5px;
+    padding-top: 5px;
+    color: #595757;
+    font-size: 11px;
+	line-height: 0;
+}
+.container1 > p{
+	margin: 8px 0 5px !important;
+}
+.container1 li {
+     list-style-type: inherit;
+ }
+ .container1 ul {
+     list-style-type: disc;
+     margin: 8px 0 5px !important;
+ }
+ .container1 ol {
+     list-style-type: decimal;
+     margin: 8px 0 5px !important;
+ }
+ .container1 code {
+     padding-left: 0;
+     padding-right: 0;
+     color: #333;
+     background-color: #F5F5F5;
+ }
 
 /************* resizable ***************/
 .resizable {
@@ -717,6 +790,29 @@ input.search-progress {
 
 .faceting-container .panel {
     border: 1px solid transparent;
+}
+
+.faceting-container .panel .accordion-toggle {
+    cursor: pointer;
+}
+
+.faceting-container .panel-heading .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings'; 
+    content: "\e114";   
+    float: left;        
+    color: grey;        
+    margin-right: 5px;
+}
+
+.faceting-container .panel-heading .accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";
+}
+
+
+.faceting-container .panel .panel-title {
+    margin-bottom: 7px;
 }
 
 .faceting-container .panel .panel-body {

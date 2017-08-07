@@ -8,156 +8,105 @@
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/faceting.html',
                 scope: {
-                    reference: "=",
-                    totalAppliedFilters: "=",
                     vm: "=",
                 },
                 link: function (scope, element, attr) {
-
+                    
                     //TODO dynamic
-                    scope.columns = [
-                        {"name": "Integer Column", "type": "int"},
-                        {"name": "Vocabulary Column", "type": "vocab"},
-                        {"name": "Text Column", "type": "text"},
-                        {"name": "Integer Column 2", "type": "int"}
-                    ];
-                    scope.filters = [{}, {}, {}, {}];
+                    // scope.columns = scope.vm.facetColumns;
 
-                    scope.totalAppliedFilters = [];
-                    scope.isDirty = [false];
-
-                    scope.hasFilter = function (colId) {
-                        return !angular.equals({}, scope.filters[colId]);
+                    scope.hasFilter = function (col) {
+                        if (typeof col === 'undefined') {
+                            return scope.vm.reference.location.facets !== null; //TODO
+                        } else {
+                            return col.filters.length !== 0;
+                        }
                     };
 
-                    scope.removeFilter = function (colId, id) {
-                        if (typeof colId === 'undefined') {
-                            // delete all filters
-                            scope.filters = [{}, {}, {}, {}];
-                        } else if (typeof id === "undefined") {
+                    scope.removeFilter = function (col, filterIndex) {
+                        var newRef;
+                        if (typeof col === 'undefined') {
+                            // // delete all filters
+                            newRef = scope.vm.reference.removeAllFacetFilters();
+                        } else if (typeof filterIndex === "undefined") {
                             // delete all fitler for one column
-                            scope.filters[colId] = {};
+                            newRef = col.removeAllFilters();
                         } else {
                             // delete individual filter
-                            delete scope.filters[colId][id];
+                            newRef = col.removeFilter(filterIndex);
                         }
-                        scope.isDirty[0] = true; // fix
+                        scope.vm.reference = newRef;
+                        scope.$emit("reference-updated");
                     };
-
-                    scope.updateAppliedFilters = function (colId) {
-                        var filters = [], content;
-                        for(var i = 0; i < scope.filters.length; i++) {
-                            if (Object.keys(scope.filters[i]).length === 0) {
-                                continue;
-                            }
-                            content = [];
-                            angular.forEach(scope.filters[i], function(filter){
-                                content.push(filter.content);
-                            });
-
-                            filters.push({
-                                "colId": i,
-                                "name": scope.columns[i].name,
-                                "content": content.join(", ")
-                            });
-                        }
-                        scope.totalAppliedFilters = filters;
-                        scope.isDirty[0] = false; // fix
-                    }
 
                     scope.vm.removeFilter = function (colId, id) {
                         scope.removeFilter(colId, id);
                         scope.updateAppliedFilters(colId);
                     }
-
-                    scope.anyDirty = function() {
-                        return scope.isDirty.some(function(val) {
-                            return val;
-                        });
-                    }
+                    
+                    scope.$on('reference-updated', function (event, data) {
+                        console.log('reference updated in faceting');
+                    });
                 }
             };
         }])
 
-        .directive('integerRangePicker', ['$timeout', function ($timeout) {
+        .directive('stringPicker', ['$window', function ($window) {
+            
+            function updateMinMax(scope) {
+                console.log('getting min and max for ' + scope.facetColumn.column.name);
+                var aggregateList = [
+                    scope.facetColumn.column.aggregate.minAgg,
+                    scope.facetColumn.column.aggregate.maxAgg
+                ];
+                
+                scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function (res) {
+                    scope.min = res[0];
+                    scope.max = res[1];
+                }).catch(function (err) {
+                    console.log(err);
+                    // throw error;
+                });
+            }
+            
             return {
                 restrict: 'AE',
-                templateUrl: '../common/templates/faceting/integer-range-picker.html',
+                templateUrl: '../common/templates/faceting/string-picker.html',
                 scope: {
-                    reference: "=",
-                    appliedFilters: "=",
-                    isDirty: "=",
+                    vm: "=",
+                    facetColumn: "="
                 },
                 link: function (scope, element, attr) {
-                    //TODO use this reference to get the values
-                    scope.internalReference = null;
-
-                    // draw the plot
-                    // TODO change the data
-                    scope.plot = {
-                        data: [{
-                            x: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-                            y: [0, 5, 4, 9, 6, 6, 7, 4, 8],
-                            type: 'bar'
-                        }],
-                        options: {
-                            displayLogo: false
-                        },
-                        layout: {
-                            autosize: false,
-                            width: 400,
-                            height: 150,
-                            margin: {
-                                l: 15,
-                                r: 10,
-                                b: 20,
-                                t: 20,
-                                pad: 2
-                            },
-                            yaxis: {
-                                fixedrange: true
-                            }
-                        }
-                    }
-
-                    scope.appliedFilterCount = Object.keys(scope.appliedFilters).length;
-
-                    /**
-                     * Add new integer filter
-                     */
+                    
+                    // METHODS:
                     scope.addFilter = function () {
-                        scope.isDirty = true;
-                        scope.appliedFilters[++scope.appliedFilterCount] = {
-                            "content": scope.min + "-" + scope.max,
-                            "min": scope.min,
-                            "max": scope.max
-                        };
+                        if(scope.searchKey === undefined || scope.searchKey === null || scope.searchKey.trim().length == 0) {
+                            return;
+                        }
+                        var value = scope.searchKey.trim();
+                        
+                        scope.vm.reference = scope.facetColumn.addSearchFilter(value);
+                        scope.$emit("reference-updated");
                     };
-
-                    /**
-                     * all the events related to the plot
-                     */
-                    scope.plotlyEvents = function (graph) {
-                        graph.on('plotly_relayout', function (event) {
-                            $timeout(function () {
-                                scope.min = Math.floor(event['xaxis.range[0]']);
-                                scope.max = Math.ceil(event['xaxis.range[1]']);
-                            });
-                        });
-
-                    };
+                    
+                    scope.$on('reference-updated', function (event, data) {
+                        updateMinMax(scope);
+                        console.log('reference updated in string picker');
+                    });
+                    
+                    updateMinMax(scope);
                 }
             };
-        }])
-
+        }]);
+        
+        /*
         .directive('vocabularyPicker', ['$window', function ($window) {
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/vocabulary-picker.html',
                 scope: {
                     reference: "=",
-                    appliedFilters: "=",
-                    isDirty: "=",
+                    facetColumn: "="
                 },
                 link: function (scope, element, attr) {
                     //TODO use this reference to get the values
@@ -197,44 +146,77 @@
                 }
             };
         }])
-
-        .directive('stringPicker', ['$window', function ($window) {
+        
+        .directive('integerRangePicker', ['$timeout', function ($timeout) {
             return {
                 restrict: 'AE',
-                templateUrl: '../common/templates/faceting/string-picker.html',
+                templateUrl: '../common/templates/faceting/integer-range-picker.html',
                 scope: {
-                    reference: "=",
-                    appliedFilters: "=",
-                    isDirty: "=",
+                    vm: "=",
+                    facetColumn: "=",
                 },
                 link: function (scope, element, attr) {
                     //TODO use this reference to get the values
                     scope.internalReference = null;
-                    scope.totalCount = 54;
-                    // TODO dynamic values
-                    scope.values = [
-                        {"value": "valued 1"},
-                        {"value": "value 2"},
-                        {"value": "value 3"},
-                    ];
 
-                    // METHODS:
-                    scope.addFilter = function () {
-                        if(scope.searchKey === undefined || scope.searchKey === null || scope.searchKey.trim().length == 0) {
-                            return;
+                    // draw the plot
+                    // TODO change the data
+                    scope.plot = {
+                        data: [{
+                            x: ["0-1", "1-2", "3-4", "5-6", "6-7", "7-8", "8-9"],
+                            y: [5, 10, 12, 4, 11, 4, 58],
+                            type: 'bar'
+                        }],
+                        options: {
+                            displayLogo: false
+                        },
+                        layout: {
+                            autosize: false,
+                            width: 400,
+                            height: 150,
+                            margin: {
+                                l: 15,
+                                r: 10,
+                                b: 20,
+                                t: 20,
+                                pad: 2
+                            },
+                            yaxis: {
+                                fixedrange: true
+                            },
+                            bargap: 0
                         }
-                        scope.isDirty = true;
-                        var value = scope.searchKey.trim();
-                        scope.appliedFilters[value] = {
-                            "content": value
-                        };
+                    }
+
+                    // scope.appliedFilterCount = Object.keys(scope.appliedFilters).length;
+
+                    // Add new integer filter
+                    scope.addFilter = function () {
+                    //     scope.isDirty = true;
+                    //     scope.appliedFilters[++scope.appliedFilterCount] = {
+                    //         "content": scope.min + "-" + scope.max,
+                    //         "min": scope.min,
+                    //         "max": scope.max
+                    //     };
                     };
 
-                    scope.isSelected = function (value) {
-                        return value in scope.appliedFilters;
-                    };
+                    //  all the events related to the plot
+                    scope.plotlyEvents = function (graph) {
+                        graph.on('plotly_relayout', function (event) {
+                            $timeout(function () {
+                                scope.min = Math.floor(event['xaxis.range[0]']);
+                                scope.max = Math.ceil(event['xaxis.range[1]']);
+                            });
+                        });
 
+                    };
+                    
+                    scope.$on('reference-updated', function (event, data) {
+                        console.log('reference updated in integer picker');
+                    });
                 }
             };
-        }]);
+        }])
+                
+        */
 })();

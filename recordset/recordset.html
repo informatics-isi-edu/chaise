@@ -9,6 +9,10 @@
                     ng-href="{{ edit() }}" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
                     <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                 </a>&nbsp;&nbsp;
+                <!-- Download Link -->
+                <a id="downloadCSV-link" ng-if="vm.rowValues.length>0" ng-href={{vm.reference.csvDownloadLink}} tooltip-placement="bottom" uib-tooltip="Click to download all the results displayed">
+                    <span class="glyphicon glyphicon-download-alt"></span> <strong>Download CSV</strong>
+                </a>&nbsp;&nbsp;
                 <!-- permalink -->
                 <a id="permalink" ng-href="{{ permalink() }}">
                     <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
@@ -17,19 +21,22 @@
             <h2 id="page-title">
                 <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value"></span>
                 <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value"></span>
-                <span>TABLE NAME</span>
             </h2>
+            <div class="page-filters">
+                <span ng-if="::vm.subTitle" id="page-subtitle" class="sub-title" ng-bind="vm.subTitle"></span>
+                <a ng-if="::vm.subTitle && vm.reference" class="btn btn-sm btn-primary" ng-href="{{ unfiltered() }}" tooltip-placement="bottom"
+                    uib-tooltip="Show unfiltered list" id="show-unfiltered">Show Unfiltered</a>
+            </div>
         </div>
+        
         <div class="row">
             <div class="col-md-4" resizable r-directions=["right"]>
-                <faceting reference="vm.reference" total-applied-filters="vm.AppliedFilters" vm="vm"></faceting>
+                <faceting vm="vm"></faceting>
             </div>
             <div class="col-md-8">
                 <!-- loading spinner -->
-                <div ng-show="!vm.hasLoaded && !vm.backgroundSearch" id="spinner">
-                    <img src="spinner.gif" style="display: block; margin: 0 auto; width: 32px; height: 32px; opacity: 0.8;" />
-                    <div style="margin-top: 15px;">Loading...</div>
-                </div>
+                <loading-spinner ng-show="!vm.hasLoaded && !vm.backgroundSearch"></loading-spinner>
+                
                 <recordset vm="vm" default-row-linking="true"></recordset>
             </div>
         </div>

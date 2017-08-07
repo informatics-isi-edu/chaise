@@ -1,0 +1,11 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "record/config.json",
+            "record/create-btn.config.json",
+            "record/delete-btn.config.json",
+            "record/edit-btn.config.json"
+        ]
+    },
+    "cleanup" : true
+}

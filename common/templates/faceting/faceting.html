@@ -1,31 +1,29 @@
 <div class="faceting-container">
     <div class="columns-container">
         <div class="panel-group" id="ft-cols-1">
-            <div class="panel panel-default" ng-repeat="col in columns track by $index">
+            <div class="panel panel-default" ng-repeat="fc in vm.facetColumns track by $index">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
+                    <h4 class="panel-title accordion-toggle" data-toggle="collapse" href="#ft-col-1-{{$index}}">
                         <!-- data-parent="#ft-cols-1" -->
-                        <a data-toggle="collapse" href="#ft-col-1-{{$index}}" ng-bind="col.name"></a>
-                        <span ng-show="anyDirty()" ng-click="updateAppliedFilters()" class="btn btn-primary btn-xs update-btn">
-                            <span class="glyphicon glyphicon-refresh"></span>
-                            <span>Update</span>
-                        </span>
+                        <a ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}" title="{{fc.comment}}">
+                            <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
+                            <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
+                        </a>
                     </h4>
-                    <section class="applied-filters" ng-show="hasFilter($index)">
+                    <span class="applied-filters" ng-show="hasFilter(fc)">
                         <span class="label label-default">
-                            <a class="remove-link" ng-click="removeFilter($index)">clear all</a>
+                            <a class="remove-link" ng-click="removeFilter(fc)">clear all</a>
                         </span>
-                        <span class="label label-default" ng-repeat="(id, filter) in filters[$index]">
-                            <a class="remove-link" ng-click="removeFilter($parent.$index, id)"><i class="glyphicon glyphicon-remove"></i></a>
-                            <span ng-bind="filter.content"></span>
+                        <span class="label label-default" ng-repeat="filter in fc.filters track by $index">
+                            <a class="remove-link" ng-click="removeFilter(fc, $index)"><i class="glyphicon glyphicon-remove"></i></a>
+                            <span ng-bind="filter.toString()"></span>
                         </span>
-                    </section>
+                    </span>
                 </div>
                 <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
-                    <div class="panel-body" ng-switch="col.type">
-                        <integer-range-picker ng-switch-when="int" reference="reference" applied-filters="filters[$index]" is-dirty="isDirty[0]"></integer-range-picker>
-                        <vocabulary-picker ng-switch-when="vocab" reference="reference" applied-filters="filters[$index]" is-dirty="isDirty[0]"></vocabulary-picker>
-                        <string-picker ng-switch-default reference="reference" applied-filters="filters[$index]" is-dirty="isDirty[0]"></string-picker>
+                    <div class="panel-body">
+                        <!-- <integer-range-picker ng-switch-when="int" vm="vm" facet-column="vm.facetColumns[$index]"></integer-range-picker> -->
+                        <string-picker vm="vm" facet-column="fc"></string-picker>
                     </div>
                 </div>
             </div>

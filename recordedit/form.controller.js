@@ -3,15 +3,15 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap', function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap',function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap) {
         var vm = this;
         var context = $rootScope.context;
+
 
         vm.recordEditModel = recordEditModel;
         vm.resultset = false;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
-        context.appContext = vm.editMode ? 'entry/edit': 'entry/create';
         vm.booleanValues = context.booleanValues;
         vm.mdHelpLinks = { // Links to Markdown references to be used in help text
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
@@ -28,7 +28,6 @@
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
-        vm.showSubmissionError = showSubmissionError;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
@@ -73,6 +72,7 @@
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
 
+
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
         function redirectAfterSubmission(page) {
             var rowset = vm.recordEditModel.rows,
@@ -86,19 +86,15 @@
 
             // Created a single entity or Updated one
             if (rowset.length == 1) {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the record...'});
+                AlertsService.addAlert('Your data has been submitted. Redirecting you now to the record...', 'success');
                 redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             } else {
-                AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Redirecting you now to the recordset...'});
+                AlertsService.addAlert('Your data has been submitted. Redirecting you now to the recordset...', 'success');
                 redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
             }
 
             // Redirect to record or recordset app..
             $window.location = redirectUrl;
-        }
-
-        function showSubmissionError(response) {
-            ErrorService.catchAll(response);
         }
 
         /*
@@ -107,6 +103,7 @@
          * Date/Timestamptz: If the value is empty ('') then set it as null
          */
         function transformRowValues(row) {
+            var transformedRow = {};
             /* Go through the set of columns for the reference.
              * If a value for that column is present (row[col.name]), transform the row value as needed
              * NOTE:
@@ -118,7 +115,7 @@
             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                 var col = $rootScope.reference.columns[i];
                 var rowVal = row[col.name];
-                if (rowVal) {
+                if (rowVal && !col.getInputDisabled(context.appContext)) {
                     switch (col.type.name) {
                         case "timestamp":
                         case "timestamptz":
@@ -128,30 +125,273 @@
                                 } else if (rowVal.date && rowVal.time === null) {
                                     rowVal.time = '00:00:00';
                                     rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                                } else if (!rowVal.date || !rowVal.time || !rowVal.meridiem) {
+                                // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
+                                // meridiem should never be null,time can be left empty (null) but the case above would catch that.
+                                } else if (!rowVal.date) {
                                     rowVal = null;
                                 }
                             }
                             break;
+                        case "json":
+                        case "jsonb":
+                            rowVal=JSON.parse(rowVal);
+                            break;
                         default:
-                            if (rowVal === '') {
-                                rowVal = null;
+                            if (col.isAsset) {
+                                if (!vm.readyToSubmit) {
+                                    rowVal = { url: "" };
+                                }
                             }
                             break;
                     }
                 }
-                row[col.name] = rowVal;
+                transformedRow[col.name] = rowVal;
             }
-            return row;
+            return transformedRow;
+        }
+
+        // This function checks whether file columns are getting the correct url and
+        // are not nul if nullok is false
+        function areFilesValid(rows) {
+            var isValid = true, index = 0;
+            // Iterate over all rows that are passed as parameters to the modal controller
+            rows.forEach(function(row) {
+
+                index++;
+
+                // Iterate over each property/column of a row
+                for(var k in row) {
+
+                    // If the column type is object and has a file property inside it
+                    // Then increment the count for no of files and create an uploadFile Object for it
+                    // Push this to the tuple array for the row
+                    // NOTE: each file object has an hatracObj property which is an hatrac object
+                    try {
+                        var column = $rootScope.reference.columns.find(function(c) { return c.name == k;  });
+                        if (column.isAsset) {
+
+                            if (row[k].url == "" && !column.nullok) {
+                                isValid = false;
+                                AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
+                            } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
+                                try {
+                                    if (!row[k].hatracObj.validateURL(row)) {
+                                        isValid = false;
+                                        AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
+                                    }
+                                } catch(e) {
+                                    isValid = false;
+                                    AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
+                                }
+                            }
+                        }
+                    } catch(e) {
+                        //NOthing to do
+                    }
+
+                }
+            });
+
+            return isValid;
+        }
+
+        function uploadFiles(submissionRowsCopy, isUpdate, onSuccess) {
+
+            // If url is valid
+            if (areFilesValid(submissionRowsCopy)) {
+
+                $uibModal.open({
+                    templateUrl: "../common/templates/uploadProgress.modal.html",
+                    controller: "UploadModalDialogController",
+                    controllerAs: "ctrl",
+                    size: "md",
+                    backdrop: 'static',
+                    keyboard: false,
+                    resolve: {
+                        params: {
+                            reference: $rootScope.reference,
+                            rows: submissionRowsCopy
+                        }
+                    }
+                }).result.then(onSuccess, function(exception) {
+                    vm.readyToSubmit = false;
+                    vm.submissionButtonDisabled = false;
+
+                    if (exception) AlertsService.addAlert(exception.message, 'error');
+                });
+            } else {
+                vm.readyToSubmit = false;
+                vm.submissionButtonDisabled = false;
+            }
+        }
+
+        function addRecords(isUpdate) {
+            var model = vm.recordEditModel;
+            var form = vm.formContainer;
+
+            // this will include updated and previous raw values.
+            var submissionRowsCopy = [];
+
+            model.submissionRows.forEach(function(row) {
+                submissionRowsCopy.push(Object.assign({}, row));
+            });
+
+            /**
+             * Add raw values that are not visible to submissionRowsCopy:
+             *
+             * submissionRowsCopy is the datastructure that will be used for creating
+             * the upload url. It must have all the visible and invisible data.
+             * The following makes sure that submissionRowsCopy has all the underlying data
+             */
+            if (isUpdate) {
+                for (var i = 0; i < submissionRowsCopy.length; i++) {
+                    var newData = submissionRowsCopy[i];
+                    var oldData = $rootScope.tuples[i].data;
+
+                    // make sure submissionRowsCopy has all the data
+                    for (var key in oldData) {
+                        if (key in newData) continue;
+                        newData[key] = oldData[key];
+                    }
+                }
+            }
+
+            //call uploadFiles which will upload files and callback on success
+            uploadFiles(submissionRowsCopy, isUpdate, function() {
+
+                var fn = "create", fnScope = $rootScope.reference.unfilteredReference.contextualize.entryCreate, args = [submissionRowsCopy];
+
+                // If this is an update call
+                if (isUpdate) {
+
+                    /**
+                     * After uploading files, the returned submissionRowsCopy contains
+                     * new file data. This includes filename, filebyte, and md5.
+                     * The following makes sure that all the data are updated.
+                     * That's why this for loop must be after uploading files and not before.
+                     * And we cannot just pass submissionRowsCopy to update function, because
+                     * update function only accepts array of tuples (and not just key-value pair).
+                     */
+                    for (var i = 0; i < submissionRowsCopy.length; i++) {
+                        var row = submissionRowsCopy[i];
+                        var data = $rootScope.tuples[i].data;
+                        // assign each value from the form to the data object on tuple
+                        for (var key in row) {
+                            data[key] = (row[key] === '' ? null : row[key]);
+                        }
+                    }
+
+                    // submit $rootScope.tuples because we are changing and
+                    // comparing data from the old data set for the tuple with the updated data set from the UI
+                    fn = "update", fnScope = $rootScope.reference, args = [$rootScope.tuples];
+                }
+
+                fnScope[fn].apply(fnScope, args).then(function success(result) {
+
+                    var page = result.successful;
+                    var failedPage = result.failed;
+
+                    // the returned reference is contextualized and we don't need to contextualize it again
+                    var resultsReference = page.reference;
+
+                    if (isUpdate) {
+                        for (var i = 0; i < submissionRowsCopy.length; i++) {
+                            var row = submissionRowsCopy[i];
+                            var data = $rootScope.tuples[i].data;
+                            // assign each value from the form to the data object on tuple
+                            for (var key in row) {
+                                data[key] = (row[key] === '' ? null : row[key]);
+                            }
+                        }
+
+                        // check if there is a window that opened the current one
+                        // make sure the update function is defined for that window
+                        // verify whether we still have a valid vaue to call that function with
+                        if (window.opener && window.opener.updated && context.queryParams.invalidate) {
+                            window.opener.updated(context.queryParams.invalidate);
+                        }
+                    } else {
+                        if (vm.prefillCookie) {
+                            $cookies.remove(context.queryParams.prefill);
+                        }
+
+                        // add cookie indicating record added
+                        if (context.queryParams.invalidate) {
+                            $cookies.put(context.queryParams.invalidate, submissionRowsCopy.length,
+                                {
+                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                                }
+                            );
+                        }
+                    }
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+
+                    if (model.rows.length == 1) {
+                        vm.redirectAfterSubmission(page);
+                    } else { // multi create/edit: show result
+                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
+
+                        // can't use page.reference because it reflects the specific values that were inserted
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
+                        //set values for the view to flip to recordedit resultset view
+                        vm.resultsetModel = {
+                            hasLoaded: true,
+                            reference: resultsReference,
+                            tableDisplayName: resultsReference.displayname,
+                            columns: resultsReference.columns,
+                            enableSort: false,
+                            sortby: null,
+                            sortOrder: null,
+                            page: page,
+                            pageLimit: model.rows.length,
+                            rowValues: DataUtils.getRowValuesFromTuples(page.tuples),
+                            search: null,
+                            config: {}
+                        };
+
+                        // NOTE: This case is for a pseudo-failure case
+                        // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
+                        if (failedPage !== null) {
+                            vm.omittedResultsetModel = {
+                                hasLoaded: true,
+                                reference: resultsReference,
+                                tableDisplayName: resultsReference.displayname,
+                                columns: resultsReference.columns,
+                                enableSort: false,
+                                sortby: null,
+                                sortOrder: null,
+                                page: page,
+                                pageLimit: model.rows.length,
+                                rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
+                                search: null,
+                                config: {}
+                            };
+                        }
+
+                        vm.resultset = true;
+                    }
+                }).catch(function (exception) {
+                    vm.submissionButtonDisabled = false;
+                    if (exception instanceof ERMrest.NoDataChangedError) {
+                        AlertsService.addAlert(exception.message, 'warning');
+                    } else {
+                        AlertsService.addAlert(exception.message, 'error');
+                    }
+                });
+
+            });
+
         }
 
         function submit() {
-            var form = vm.formContainer;
-            var model = vm.recordEditModel;
+            var originalTuple,
+                editOrCopy = true,
+                form = vm.formContainer,
+                model = vm.recordEditModel;
 
             if (form.$invalid) {
                 vm.readyToSubmit = false;
-                AlertsService.addAlert({type: 'error', message: 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.'});
+                AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
                 form.$setSubmitted();
                 return;
             }
@@ -160,142 +400,19 @@
             vm.readyToSubmit = true;
             vm.submissionButtonDisabled = true;
             for (var j = 0; j < model.rows.length; j++) {
-                var transformedRow = transformRowValues(model.rows[j]);
-                $rootScope.reference.columns.forEach(function (column) {
-                    // If the column is a pseudo column, it needs to get the originating columns name for data submission
-                    if (column.isPseudo) {
-
-                        var foreignKeyColumns = column.foreignKey.colset.columns;
-                        for (var k = 0; k < foreignKeyColumns.length; k++) {
-                            var referenceColumn = foreignKeyColumns[k];
-                            var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
-                            // check if value is set in submission data yet
-                            if (!model.submissionRows[j][referenceColumn.name]) {
-                                /**
-                                 * User didn't change the foreign key, copy the value over to the submission data with the proper column name
-                                 * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
-                                 * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
-                                **/
-                                if (vm.editMode) {
-                                    model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[j].data[referenceColumn.name] || null;
-                                } else if (context.queryParams.copy) {
-                                    // in the copy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
-                                    model.submissionRows[j][referenceColumn.name] = $rootScope.tuples[0].data[referenceColumn.name] || null;
-                                } else {
-                                    model.submissionRows[j][referenceColumn.name] = null;
-                                }
-                            }
-                        }
-                    // not pseudo, column.name is sufficient for the keys
-                    } else {
-                        // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                        model.submissionRows[j][column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
-                    }
-                });
-            }
-
-            if (vm.editMode) {
-                // loop through model.submissionRows
-                for (var i = 0; i < model.submissionRows.length; i++) {
-                    var row = model.submissionRows[i];
-                    var data = $rootScope.tuples[i].data;
-                    // assign each value from the form to the data object on tuple
-                    for (var key in row) {
-                        data[key] = (row[key] === '' ? null : row[key]);
-                    }
+                // in the copy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
+                if (vm.editMode) {
+                    originalTuple = $rootScope.tuples[j];
+                }else if (context.queryParams.copy) {
+                    originalTuple = $rootScope.tuples[0];
+                } else {
+                    originalTuple = null;
+                    editOrCopy = false;
                 }
-                // submit $rootScope.tuples because we are changing and comparing data from the old data set for the tuple with the updated data set from the UI
-                $rootScope.reference.update($rootScope.tuples).then(function success(page) {
-                    if (window.opener && window.opener.updated) {
-                        console.dir('I ran here and here is my opener:', window.opener);
-                        window.opener.updated(context.queryParams.invalidate);
-                    }
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    if (model.rows.length == 1) {
-                        vm.redirectAfterSubmission(page);
-                    } else {
-                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
-                        // can't use page.reference because it reflects the specific values that were inserted
-                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
-                        //set values for the view to flip to recordedit resultset view
-                        vm.resultsetModel = {
-                            hasLoaded: true,
-                            reference: page.reference,
-                            tableDisplayName: page.reference.displayname,
-                            columns: page.reference.columns,
-                            enableSort: false,
-                            sortby: null,
-                            sortOrder: null,
-                            page: page,
-                            pageLimit: model.rows.length,
-                            rowValues: [],
-                            search: null,
-                            config: {}
-                        }
-                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                        vm.resultset = true;
-                    }
-                }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
-                });
-            } else {
-                $rootScope.reference.table.reference.create(model.submissionRows).then(function success(page) {
-                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
-                    if (vm.prefillCookie) {
-                        $cookies.remove(context.queryParams.prefill);
-                    }
-
-                    // add cookie indicating record added
-                    if (context.queryParams.invalidate) {
-                        $cookies.put(context.queryParams.invalidate, model.submissionRows.length,
-                            {
-                                expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-                            }
-                        );
-                    }
-
-                    if (model.rows.length == 1) {
-                        vm.redirectAfterSubmission(page);
-                    } else {
-                        AlertsService.addAlert({type: 'success', message: 'Your data has been submitted. Showing you the result set...'});
-                        // can't use page.reference because it reflects the specific values that were inserted
-                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink
-                        //set values for the view to flip to recordedit resultset view
-                        vm.resultsetModel = {
-                            hasLoaded: true,
-                            reference: page.reference,
-                            tableDisplayName: page.reference.displayname.value,
-                            columns: page.reference.columns,
-                            enableSort: false,
-                            sortby: null,
-                            sortOrder: null,
-                            page: page,
-                            pageLimit: model.rows.length,
-                            rowValues: [],
-                            search: null,
-                            config: {}
-                        }
-                        vm.resultsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                        vm.resultset = true;
-                    }
-                }, function error(exception) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            submit();
-                        });
-                    } else {
-                        vm.showSubmissionError(exception);
-                        vm.submissionButtonDisabled = false;
-                    }
-                });
+                populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
             }
+
+            addRecords(vm.editMode);
         }
 
         function deleteRecord() {
@@ -313,67 +430,20 @@
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (response instanceof ERMrest.PreconditionFailedError) {
-                        $uibModal.open({
-                            templateUrl: "../common/templates/refresh.modal.html",
-                            controller: "ErrorDialogController",
-                            controllerAs: "ctrl",
-                            size: "sm",
-                            resolve: {
-                                params: {
-                                    title: messageMap.pageRefreshRequired.title,
-                                    message: messageMap.pageRefreshRequired.message
-                                }
-                            },
-                            backdrop: 'static',
-                            keyboard: false
-                        }).result.then(function reload() {
-                            // Reload the page
-                            $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
-                        });
-                    } else {
-                        if (response !== 'cancel') {
-                            vm.showSubmissionError(response);
-                        }
+                    if (response !== 'cancel') {
+                        throw response;
                     }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
                 $rootScope.reference.delete($rootScope.tuples).then(function deleteSuccess() {
                     // redirect after successful delete
                     $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
                 }, function deleteFailure(response) {
-                    if (exception instanceof ERMrest.UnauthorizedError || exception.code == 401) {
-                        Session.loginInANewWindow(function() {
-                            deleteRecord();
-                        });
-                    } else if (response instanceof ERMrest.PreconditionFailedError) {
-                        $uibModal.open({
-                            templateUrl: "../common/templates/refresh.modal.html",
-                            controller: "ErrorDialogController",
-                            controllerAs: "ctrl",
-                            size: "sm",
-                            resolve: {
-                                params: {
-                                    message: messageMap.pageRefreshRequired
-                                }
-                            },
-                            backdrop: 'static',
-                            keyboard: false
-                        }).result.then(function reload() {
-                            // Reload the page
-                            $window.location.reload();
-                        }).catch(function(error) {
-                            ErrorService.catchAll(error);
-                        });
-                    } else {
-                        vm.showSubmissionError(response);
-                    }
-                }).catch(function (error) {
-                    ErrorService.catchAll(error);
+                    throw response;
+                }).catch(function (exception) {
+                    AlertsService.addAlert(exception.message, 'error');
                 });
             }
         }
@@ -382,10 +452,24 @@
 
             if (isDisabled(column)) return;
 
-            var params = {};
+            var originalTuple,
+                editOrCopy = true,
+                params = {};
 
             // pass the reference as a param for the modal
-            params.reference = column.reference.contextualize.compactSelect;
+            // call to page with tuple to get proper reference
+            if (vm.editMode) {
+                originalTuple = $rootScope.tuples[rowIndex];
+            }else if (context.queryParams.copy) {
+                originalTuple = $rootScope.tuples[0];
+            } else {
+                originalTuple = null;
+                editOrCopy = false;
+            }
+
+            var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
+
+            params.reference = column.filteredRef(submissionRow).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
 
@@ -413,8 +497,6 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            }, function noDataSelected() {
-                // do nothing
             });
         }
 
@@ -433,19 +515,12 @@
         }
 
         function createRecord(column) {
-            var newRef = column.reference.contextualize.entryCreate;
-            var appURL = newRef.appLink;
-            if (!appURL) {
-                AlertsService.addAlert({type: 'error', message: "Application Error: app linking undefined for " + newRef.compactPath});
-            }
-            else {
-                $window.open(appURL, '_blank');
-            }
+            $window.open(column.reference.contextualize.entryCreate.appLink, '_blank');
         }
 
         function copyFormRow() {
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
-                AlertsService.addAlert({type: "error", message: "Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.'});
+                AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
                 return true;
             }
             // Check if the prototype row to copy has any invalid values. If it
@@ -457,7 +532,7 @@
                 var value = protoRowValidityStates[key];
                 if (value.$dirty && value.$invalid) {
                     vm.readyToSubmit = false, validRow = false;
-                    AlertsService.addAlert({type: 'error', message: "Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again."});
+                    AlertsService.addAlert("Sorry, we can't copy this record because it has invalid values in it. Please check its fields and try again.", "error");
                     return true;
                 }
             });
@@ -484,6 +559,40 @@
             }
         }
 
+        function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
+            var transformedRow = transformRowValues(modelRow);
+            columns.forEach(function (column) {
+                // If the column is a foreign key column, it needs to get the originating columns name for data submission
+                if (column.isForeignKey) {
+
+                    var foreignKeyColumns = column.foreignKey.colset.columns;
+                    for (var k = 0; k < foreignKeyColumns.length; k++) {
+                        var referenceColumn = foreignKeyColumns[k];
+                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+                        // check if value is set in submission data yet
+                        if (!submissionRow[referenceColumn.name]) {
+                            /**
+                             * User didn't change the foreign key, copy the value over to the submission data with the proper column name
+                             * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
+                             * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
+                            **/
+                            if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
+                                submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
+                            } else {
+                                submissionRow[referenceColumn.name] = null;
+                            }
+                        }
+                    }
+                // not foreign key, column.name is sufficient for the keys
+                } else {
+                    // set null if not set so that the whole data object is filled out for posting to ermrestJS
+                    submissionRow[column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
+                }
+            });
+
+            return submissionRow;
+        }
+
         function removeFormRow(index) {
             vm.recordEditModel.rows.splice(index, 1);
             vm.recordEditModel.submissionRows.splice(index, 1);
@@ -496,7 +605,7 @@
             var name = column.name;
             var type = column.type.name;
             var displayType;
-            if (isForeignKey(column)) {
+            if (column.isForeignKey) {
                 displayType = 'popup-select';
             } else {
                 switch (type) {
@@ -526,12 +635,20 @@
                         break;
                     case 'markdown':
                     case 'longtext':
-                        displayType = 'longtext';
+                            displayType = 'longtext';
+                        break;
+                    case 'json':
+                    case 'jsonb':
+                            displayType= 'json';
                         break;
                     case 'shorttext':
                     default:
                         displayType = 'text';
                         break;
+                }
+
+                if (column.isAsset) {
+                    displayType = 'file';
                 }
             }
             return displayType;
@@ -549,10 +666,6 @@
             } catch (e) {
                 $log.info(e);
             }
-        }
-
-        function isForeignKey(column) {
-            return column.isPseudo;
         }
 
         // Returns true if a column type is found in the given array of types
@@ -573,7 +686,7 @@
                         return value;
                     }
                     return '';
-                } else if (isForeignKey(column)) {
+                } else if (column.isForeignKey) {
                     return 'Select a value';
                 }
             } catch (e) {
@@ -646,7 +759,7 @@
         // to make it uniform
         vm.firstHeaderStyle = {
             'width' : captionColumnWidth + "px",
-            'height' : headerHeight + "px"
+            'height' : (headerHeight + 1) + "px"
         };
         vm.tableWidth = { width: '0px' };
 
@@ -741,7 +854,7 @@
 
                     var valuetdHeight = trs[i].children[1].offsetHeight;
 
-                    if (editMode && i==0) valuetdHeight++;
+                    //if (editMode && i==0) valuetdHeight++;
 
                     // If keytdHeight is greater than valuetdHeight
                     // then set valuetdHeight

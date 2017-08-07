@@ -3,11 +3,13 @@
     <head>
         <meta charset="UTF-8">
         <title>Record Set App</title>
+        <script src="/gtm-id.js"></script>
         %ASSETS%
     </head>
     <body>
         <div class="container-fluid">
         %TEMPLATES%
         </div>
+            <footer></footer>       
     </body>
 </html>
