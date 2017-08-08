@@ -12,8 +12,19 @@
         return{
         entity: 'ent',
         related: 'rel'
-    };
-})
+        };
+        }) /* *Directive record-display is called to display related table as part of entity layout
+            These items will be passed to record-table diretive for table display.
+            @example <record-display columns="::columns" values="::recordValues"  rectab="::colTableModels" rtref-dis-typetable0="::rtrefDisTypetable"
+                toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="ctrl.canEditRelated(ref)" can-create-related0="ctrl.canCreateRelated(ref)"
+                add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)">
+                </record-display>
+            @param columns : Array with columns labels
+            @param Values: Array with column values
+            @param rectab: All record table items
+            @param rtrefDisTypetable0: related reference table
+            @param toggleRelatedTableDisplayType: RT table display type
+        */
         .directive('recordDisplay', ['DataUtils', function (DataUtils) {
         return {
             restrict: 'E',
@@ -27,17 +38,30 @@
                 canEditRelated:'&',
                 canCreateRelated0:'&',
                 addRelatedRecord:'&',
-                toRecordSet:'&',
-                dummytest:'&'
+                toRecordSet:'&'
+                
             },
             templateUrl: '../common/templates/record.html',
             controller: function ($scope) {
-                $scope.repeater = [1,2];
                 $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             }
 
         };
     }])
+    /* *Directive to display action bar on top right corner. For non-table display contents wrap around the action bar.
+    While for the table siaply it appear on top right corner.
+            @example: <record-action-bar rtref-dis-type="rtrefDisTypetable0[$index].display.type" tab-model-display="rectab[$index].displayType"
+                  toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:rectab[$index]})' can-edit-related="canEditRelated({ref:rtrefDisTypetable0[$index]})"
+                  can-create-related="canCreateRelated0({ref:rtrefDisTypetable0[$index]})"
+                  add-related-record="addRelatedRecord({ref:rtrefDisTypetable0[$index]})" to-record-set="toRecordSet({ref:rtrefDisTypetable0[$index]})">
+                  </record-action-bar>
+            @param  rtrefDisType: Related ref. display type
+            @param  tabModelDisplay: Internal model display type
+            @param  canEditRelated: function to check canEdit()
+            @param: canCreateRelated: function to check canCreate()
+            @param: addRelatedRecord: function to check add feature
+            @param: toRecordSet:view more record function
+     */
     .directive('recordActionBar', ['templates',function(templates) {
         return {
             restrict: 'E',
@@ -49,8 +73,8 @@
                 canEditRelated:'&',
                 canCreateRelated:'&',
                 addRelatedRecord:'&',
-                toRecordSet:'&',
-                dummytest:'&'
+                toRecordSet:'&'
+                
             },
             templateUrl:function(elem, attr){
                 var temp = '../common/templates/recordAction-' + templates[attr.tabtype] + '.html';
@@ -62,20 +86,14 @@
                 angular.isUndefinedOrNull = function(val) {
                     return val == '' || angular.isUndefined(val) || val === null
                 }
-                scope.actionStyle = {};
-                // scope.rowStyle = {};
-                // scope.actionStyle['font-size']='11px';
+                scope.actionStyle = {};                
                 scope.actionStyle['padding-left']= '5px';
                 scope.actionStyle['padding-bottom']= '5px';
-                // scope.actionStyle['font-weight']='bold';
+                scope.actionStyle.float = 'right';                        
 
-                function setClass(f) {
-                        //scope.actionStyle.display =f? 'block':'';
-                        // scope.actionStyle.border= f?'2px solid #31b7e1':'';
-                        scope.actionStyle.float= 'right';// f?'left':'right';
-                        // scope.actionStyle['margin-left'] = f?'0px':'-15px';
+                function setClass(f) {                                                
                         scope.actionStyle['margin-right'] = f?'0px':'15px';
-                        //scope.actionStyle['background-color'] = f?'azure':'';
+                        
                     }
                 function checkDisplayType(){
 
@@ -83,9 +101,6 @@
                             scope.rowStyle = false;
                             setClass(true);
                         } else {
-                            //scope.actionStyle.float= 'right';
-                            // scope.rowStyle['margin-left'] = '-15px';
-                            //scope.rowStyle['margin-right'] = '15px';
                             scope.rowStyle = true;
                             setClass(false)
                         }

@@ -58,11 +58,7 @@
             console.log(ref);
             return $window.location.href = ref.appLink;
         };
-        vm.k = 0;
-        vm.dummytest = function(k){
-            return ("ehllo "+k);
-        }
-
+    
         vm.showRelatedTable = function(i) {
             var isFirst = false, prevTableHasLoaded = false;
             if ($rootScope.tableModels && $rootScope.tableModels[i]) {

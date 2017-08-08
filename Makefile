@@ -246,8 +246,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/footer.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
-	$(JS)/vendor/lodash.js
+	$(JS)/vendor/ui-bootstrap-tpls.js
 
 RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 	$(RECORD_ASSETS)/record.controller.js

@@ -13,15 +13,15 @@ var testParams = {
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
-        {
-            title: "booking",
-            displayname: "booking",
-            columns: [ "id", "price", "booking_date" ],
-            data: [
-                { id: 3, price: 200.00, booking_date: "5/31/2016, 12:00:00 AM" },
-                { id: 4, price: 350.00, booking_date: "4/18/2016, 12:00:00 AM" }
-            ]
-        },
+        // {
+        //     title: "booking",
+        //     displayname: "booking",
+        //     columns: [ "id", "price", "booking_date" ],
+        //     data: [
+        //         { id: 3, price: 200.00, booking_date: "5/31/2016, 12:00:00 AM" },
+        //         { id: 4, price: 350.00, booking_date: "4/18/2016, 12:00:00 AM" }
+        //     ]
+        // },
         {
             title: "accommodation_image",
             displayname: "accommodation_image",
@@ -41,9 +41,9 @@ var testParams = {
     columns: [
         { title: "Id", value: "2002", type: "serial4"},
         { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
-        { title: "Website", value: "Link to Website\n", type: "text", comment : "A valid url of the accommodation"},
+        { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>\n", type: "text", comment: "A valid url of the accommodation", match:"html" },
         { title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/id=10003"} },
-        { title: "booking", value:'<p><strong class="vocab">1</strong> <strong class="vocab">200.0000</strong> <strong class="vocab">2016-05-31 00:00:00</strong> <strong class="vocab">3</strong> <strong class="vocab">350.0000</strong> <strong class="vocab">2016-04-18 00:00:00</strong></p>\n', type: "text" },
+        { title: "booking", value:'<p><strong class="vocab">2</strong> <strong class="vocab">350.0000</strong> <strong class="vocab">2016-04-18 00:00:00</strong> <strong class="vocab">4</strong> <strong class="vocab">200.0000</strong> <strong class="vocab">2016-05-31 00:00:00</strong></p>\n', type: "text" },
         { title: "User Rating", value: "4.3000", type: "float4", annotations: { "tag:misd.isi.edu,2015:display": { markdown_name: "<strong>User Rating</strong>"}} },
         { title: "Summary", value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
         { title: "Description", type: "markdown",match:"html", value: "<p><strong>CARING. SHARING. DARING.</strong><br>\nRadisson<sup>®</sup> is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.<br>\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding <code>Yes I Can!</code> <sup>SM</sup> service, comfort and style where you need us.</p>\n<p><strong>THE RADISSON<sup>®</sup> WAY</strong> Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to <code>Yes I Can!</code> <sup>SM</sup> hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.</p>\n"},
@@ -121,12 +121,12 @@ describe('View existing record,', function() {
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTables().count().then(function(ct) {
+                return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
                     return (ct=testParams.no_related_data.tables_order.length);
                 });
             }, browser.params.defaultTimeout);
 
-            chaisePage.recordPage.getRelatedTables().count().then(function(count) {
+            chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
                 expect(count).toBe(testParams.no_related_data.tables_order.length, "Number of related tables is not correct");
 
                 return chaisePage.recordPage.getRelatedTableTitles();
@@ -136,8 +136,8 @@ describe('View existing record,', function() {
                 expect(showAllRTButton.getText()).toBe("Hide Empty Related Records", "Sow all Related tables button has wrong text");
                 return showAllRTButton.click();
             }).then(function() {
-                expect(chaisePage.recordPage.getRelatedTables().count()).toBe(0, "Not all the related tables were hidden");
-                expect(chaisePage.recordPage.getRelatedTables().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
+                expect(chaisePage.recordPage.getRelatedTablesWithPanel().count()).toBe(0, "Not all the related tables were hidden");
+                expect(chaisePage.recordPage.getRelatedTablesWithPanel().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
             })
         });
     });

@@ -137,7 +137,7 @@ exports.testPresentation = function (tableParams) {
                 // index = index + 1;
                 if (column.title=='booking') 
                     {
-                    expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toBe(column.value);                    
+                    expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);                    
                     }
                 else if (column.match=='html'){
                     expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value);                    
@@ -193,13 +193,13 @@ exports.testPresentation = function (tableParams) {
             relatedTables = tableParams.related_tables;
 
         browser.wait(function() {
-            return chaisePage.recordPage.getRelatedTables().count().then(function(ct) {
+            return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
                 return (ct=relatedTables.length);
             });
         }, browser.params.defaultTimeout);
 
-        chaisePage.recordPage.getRelatedTables().count().then(function(count) {
-            expect(count).toBe(relatedTables.length);
+        chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
+            expect(count).toBe(relatedTables.length,'Mismatch in Related table count!');
             tableCount = count;
 
             // check the headings have the right name and in the right order
@@ -207,7 +207,7 @@ exports.testPresentation = function (tableParams) {
         }).then(function(headings) {
             // tables should be in order based on annotation for visible foreign_keys
             // Headings have a '-' when page loads, and a count after them
-            expect(headings).toEqual(tableParams.tables_order);
+            expect(headings).toEqual(tableParams.tables_order,"Order is not maintained for related tables!");
 
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
@@ -242,6 +242,27 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    it("visible column related table should appear with action item in the entity area",function(){
+        chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
+            return element(by.id('entity-4-markdown'));
+        }).then(function(mdRecord){
+            expect(mdRecord.isDisplayed()).toBeTruthy();
+            return element(by.id('actionbar-4'));
+        }).then( function(actionBar){
+            expect(actionBar.getAttribute('innerText')).toBe('Edit  | Add  | View More\n','Action bar text did not match.');
+            return browser.executeScript("return $('a.toggle-display-link').click()");
+        }).then(function(editLink){
+            return element(by.id('entity-4-recTab'));
+        }).then(function (RecordTab) {
+            expect(RecordTab.isDisplayed()).toBeTruthy();
+            return element(by.id('entity-4-recTab')).element(by.tagName('tbody')).all(by.tagName('tr')).count();
+        }).then(function (recordRowsCount){
+            expect(recordRowsCount).toBe(2,'Record row count in booking table is incorrect.');
+        }).catch(function(err){
+            console.log(err);
+            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');            
+        })
+    });
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
     it("should honor the page_size annotation for the table, file, in the compact context based on inheritance.", function() {
         var relatedTableName = tableParams.related_table_name_with_page_size_annotation;

@@ -468,6 +468,115 @@
         }
       }
     },
+      "booking": {
+      "comment": null,
+      "kind": "table",
+      "entityCount": 0,
+      "keys": [
+        {
+          "comment": null,
+          "annotations": {},
+          "unique_columns": [
+            "id",
+            "accommodation_id"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names" : [["product-record", "fk_booking_accommodation"]],
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "booking",
+              "schema_name": "product-record",
+              "column_name": "accommodation_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product-record",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "table_name": "booking",
+      "schema_name": "product-record",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "serial4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        },
+        {
+          "comment": null,
+          "name": "accommodation_id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        },
+        {
+          "comment": null,
+          "name": "price",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "float4"
+          },
+          "annotations": {
+            "description": {
+              "display": "Price"
+            },
+            "facetOrder": ["4"]
+          }
+        },
+        {
+          "comment": null,
+          "name": "booking_date",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "timestamptz"
+          },
+          "annotations": {
+            "description": {
+              "display": "Date of Booking"
+            },
+            "facetOrder": ["5"]
+          }
+        }
+      ],
+      "annotations": {
+        "comment": [
+          "association"
+        ],
+        "description": {
+          "display": "Bookings"
+        },
+         
+        "tag:isrd.isi.edu,2016:table-display": {
+          "*": {
+            "separator_markdown": " ",
+            "row_markdown_pattern": "**{{id}}**{.vocab} **{{price}}**{.vocab} **{{booking_date}}**{.vocab}"
+          }
+        }
+      }
+    },
     "file": {
       "comment": "asset/object",
       "kind": "table",

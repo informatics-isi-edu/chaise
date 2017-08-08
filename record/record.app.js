@@ -168,7 +168,8 @@
 
                 $rootScope.columns = $rootScope.reference.columns;
                 var allInbFKColsIdx = [];
-                var allInbFKCols = _.filter($rootScope.columns,function(o,i){
+                // var allInbFKCols = _.filter($rootScope.columns,function(o,i){
+                var allInbFKCols = $rootScope.columns.filter(function (o, i) {
                     if(o.isInboundForeignKey){
                         allInbFKColsIdx.push(i);
                         return o;
@@ -187,40 +188,6 @@
                             $rootScope.rtrefDisTypetable[allInbFKColsIdx[i]] = allInbFKCols[i].reference;
                             $rootScope.recDisplayReady =  (i==allInbFKCols.length-1)?true:false;
                         });
-
-
-                //     allInbFKCols[i].reference.read(ifkPageSize).then(function (ifkPage) {
-                //
-                //         //
-                //         var model = {
-                //             reference: allInbFKCols[i].reference,
-                //             columns: allInbFKCols[i].reference.columns,
-                //             page: ifkPage,
-                //             pageLimit: (allInbFKCols[i].reference.display.defaultPageSize ? allInbFKCols[i].reference.display.defaultPageSize : constants.defaultPageSize),
-                //             hasNext: ifkPage.hasNext,      // used to determine if a link should be shown
-                //             hasLoaded: true,            // used to determine if the current table and next table should be rendered
-                //             open: true,                 // to define if the accordion is open or closed
-                //             enableSort: true,           // allow sorting on table
-                //             sortby: null,               // column name, user selected or null
-                //             sortOrder: null,            // asc (default) or desc
-                //             rowValues: [],              // array of rows values
-                //             search: null,                // search term
-                //             displayType: allInbFKCols[i].reference.display.type,
-                //             context: "compact/brief",
-                //             fromTuple: $rootScope.tuple
-                //         };
-                //
-                //         model.rowValues = DataUtils.getRowValuesFromPage(ifkPage);
-                //         model.config = {
-                //             viewable: true,
-                //             editable: $rootScope.modifyRecord,
-                //             deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                //             selectable: false
-                //         };
-                //         $rootScope.colTableModels[allInbFKColsIdx[i]] = model;
-                //         $rootScope.rtrefDisTypetable[allInbFKColsIdx[i]] = allInbFKCols[i].reference;
-                //         $rootScope.recDisplayReady =  (i==allInbFKCols.length-1)?true:false;
-                // });
             })(i);
             }
         }else{
@@ -242,46 +209,6 @@
                             $rootScope.tableModels[i] = model;
                             $rootScope.displayReady = true;
                         });
-                        // $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
-                        //     var model = {
-                        //         reference: $rootScope.relatedReferences[i],
-                        //         columns: $rootScope.relatedReferences[i].columns,
-                        //         page: page,
-                        //         pageLimit: ($rootScope.relatedReferences[i].display.defaultPageSize ? $rootScope.relatedReferences[i].display.defaultPageSize : constants.defaultPageSize),
-                        //         hasNext: page.hasNext,      // used to determine if a link should be shown
-                        //         hasLoaded: true,            // used to determine if the current table and next table should be rendered
-                        //         open: boolIsOpen,                 // to define if the accordion is open or closed
-                        //         enableSort: true,           // allow sorting on table
-                        //         sortby: null,               // column name, user selected or null
-                        //         sortOrder: null,            // asc (default) or desc
-                        //         rowValues: [],              // array of rows values
-                        //         search: null,                // search term
-                        //         displayType: $rootScope.relatedReferences[i].display.type,
-                        //         context: "compact/brief",
-                        //         fromTuple: $rootScope.tuple
-                        //     };
-                        //     model.rowValues = DataUtils.getRowValuesFromPage(page);
-                        //     model.config = {
-                        //         viewable: true,
-                        //         editable: $rootScope.modifyRecord,
-                        //         deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                        //         selectable: false
-                        //     };
-                        //     $rootScope.tableModels[i] = model;
-                        //     $rootScope.displayReady = true;
-                        //
-                        // }, function readFail(error) {
-                        //     var model = {
-                        //         hasLoaded: true
-                        //     };
-                        //     $rootScope.tableModels[i] = model;
-                        //     $rootScope.displayReady = true;
-                        //     throw error;
-                        // }).catch(function(e) {
-                        //     // The .catch from the outer promise won't catch errors from this closure
-                        //     // so a .catch needs to be appended here.
-                        //     throw e;
-                        // });
                     })(i);
                 }
                 $rootScope.displayReady = true;
