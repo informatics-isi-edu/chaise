@@ -13,15 +13,7 @@ var testParams = {
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
-        // {
-        //     title: "booking",
-        //     displayname: "booking",
-        //     columns: [ "id", "price", "booking_date" ],
-        //     data: [
-        //         { id: 3, price: 200.00, booking_date: "5/31/2016, 12:00:00 AM" },
-        //         { id: 4, price: 350.00, booking_date: "4/18/2016, 12:00:00 AM" }
-        //     ]
-        // },
+       
         {
             title: "accommodation_image",
             displayname: "accommodation_image",
