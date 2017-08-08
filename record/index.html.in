@@ -55,8 +55,7 @@
                 </record-display>
 
             </div>
-            <!-- used to delay empty accordions from displaying before simple record display -->
-            <!-- <div ng-if="recordValues" ng-show="recDisplayReady"> -->
+            <!-- used to delay empty accordions from displaying before simple record display -->            
             <div ng-if="recDisplayReady">
                 <uib-accordion close-others="false">
                     <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index"  ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">

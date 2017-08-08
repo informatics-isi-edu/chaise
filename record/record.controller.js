@@ -53,9 +53,8 @@
         vm.permalink = function getPermalink() {
             return $window.location.href;
         };
-        vm.ref = {};
+         
         vm.toRecordSet = function(ref) {
-            console.log(ref);
             return $window.location.href = ref.appLink;
         };
     
@@ -86,7 +85,7 @@
                 return false;
             }
         };
-        vm.dataModel= {};
+         
         vm.toggleRelatedTableDisplayType = function(dataModel) {
             if (dataModel.displayType == 'markdown') {
                 dataModel.displayType = 'table';

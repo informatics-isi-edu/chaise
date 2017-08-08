@@ -41,7 +41,6 @@
             context = {};
         $rootScope.displayReady = false;
         $rootScope.recDisplayReady = false;
-        $rootScope.inbFK = false;
 
         UriUtils.setOrigin();
         headInjector.setupHead();
@@ -59,12 +58,17 @@
         context.pageId = MathUtils.uuid();
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
-
+        /* @desc getPageSize(obj) returms page size of the obj.           */
         function getPageSize(obj){
             return ((!angular.isUndefined(obj) && obj.display.defaultPageSize)?obj.display.defaultPageSize:constants.defaultPageSize);
         }
-
-        function getRelatedTableData(refObj,displaytype,accordionOpen,callback){
+        /*@desc  getRelatedTableData(refObj, accordionOpen, callback) returns model object with all required component values
+        *       that is needed by <record-table>, <record-action-bar> and <record-display> diretives.
+        *       refObj: Reference object with component details
+        *       accordionOpen: bool value
+        *       callback: to be called after function processing
+        */
+        function getRelatedTableData(refObj, accordionOpen, callback){
 
             var pageSize = getPageSize(refObj);
             refObj.read(pageSize).then(function (page) {
@@ -75,13 +79,13 @@
                     pageLimit: pageSize,
                     hasNext: page.hasNext,      // used to determine if a link should be shown
                     hasLoaded: true,            // used to determine if the current table and next table should be rendered
-                    open: accordionOpen,                 // to define if the accordion is open or closed
+                    open: accordionOpen,        // to define if the accordion is open or closed
                     enableSort: true,           // allow sorting on table
                     sortby: null,               // column name, user selected or null
                     sortOrder: null,            // asc (default) or desc
                     rowValues: [],              // array of rows values
                     search: null,                // search term
-                    displayType: displaytype,//refObj.reference.display.type,
+                    displayType: refObj.display.type,
                     context: "compact/brief",
                     fromTuple: $rootScope.tuple
                 };
@@ -94,19 +98,19 @@
                 };
                 // return model;
                 callback(model);
-        },function readFail(error) {
-            var model = {
-                hasLoaded: true
-            };
-            // return model;
-            callback(model);
-            throw error;
-        }).catch(function(e) {
-            // The .catch from the outer promise won't catch errors from this closure
-            // so a .catch needs to be appended here.
-            throw e;
-        });
-}
+                },function readFail(error) {
+                    var model = {
+                        hasLoaded: true
+                    };
+                    // return model;
+                    callback(model);
+                    throw error;
+                }).catch(function(e) {
+                    // The .catch from the outer promise won't catch errors from this closure
+                    // so a .catch needs to be appended here.
+                    throw e;
+                });
+        }
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {
 
@@ -168,44 +172,47 @@
 
                 $rootScope.columns = $rootScope.reference.columns;
                 var allInbFKColsIdx = [];
-                // var allInbFKCols = _.filter($rootScope.columns,function(o,i){
                 var allInbFKCols = $rootScope.columns.filter(function (o, i) {
                     if(o.isInboundForeignKey){
                         allInbFKColsIdx.push(i);
                         return o;
-                }
-            });
+                    }
+                });
                 if(allInbFKCols.length>0){
                     $rootScope.rtrefDisTypetable = [];
                     $rootScope.colTableModels = [];
 
-                for(var i =0;i<allInbFKCols.length;i++){
-                    allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBrief;
-                    var ifkPageSize = getPageSize(allInbFKCols[i].reference);
-                    (function(i) {
-                        getRelatedTableData(allInbFKCols[i].reference,allInbFKCols[i].reference.display.type,true,function(model){
-                            $rootScope.colTableModels[allInbFKColsIdx[i]] = model;
-                            $rootScope.rtrefDisTypetable[allInbFKColsIdx[i]] = allInbFKCols[i].reference;
-                            $rootScope.recDisplayReady =  (i==allInbFKCols.length-1)?true:false;
-                        });
-            })(i);
-            }
-        }else{
-            $rootScope.recDisplayReady =  true;
-        }
+                    for(var i =0;i<allInbFKCols.length;i++){
+                        allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBrief;
+                        var ifkPageSize = getPageSize(allInbFKCols[i].reference);
+                        (function(i) {
+                            getRelatedTableData(allInbFKCols[i].reference, true, function(model){
+
+                                $rootScope.colTableModels[allInbFKColsIdx[i]] = model;
+                                $rootScope.rtrefDisTypetable[allInbFKColsIdx[i]] = allInbFKCols[i].reference;
+                                $rootScope.recDisplayReady =  (i==allInbFKCols.length-1)?true:false;
+
+                            });
+                        })(i);
+                    }
+                }else{
+                    $rootScope.recDisplayReady =  true;
+                }
 
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
                 var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
                 var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
+
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+
                     $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
                     var pageSize = getPageSize($rootScope.relatedReferences[i]);
                     (function(i) {
                         if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
                             $rootScope.showEmptyRelatedTables = true;
                         }
-                        getRelatedTableData($rootScope.relatedReferences[i],$rootScope.relatedReferences[i].display.type,boolIsOpen,function(model){
+                        getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, function(model){
                             $rootScope.tableModels[i] = model;
                             $rootScope.displayReady = true;
                         });

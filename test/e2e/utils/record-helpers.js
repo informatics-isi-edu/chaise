@@ -104,29 +104,6 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-	// it("should validate the values of each column", function() {
-	// 	var columns = tableParams.columns.filter(function(c) {return c.value != null;});
-	// 	chaisePage.recordPage.getColumnValueElements().then(function(columnEls) {
-    //         expect(columnEls.length).toBe(columns.length);
-	// 		var index = 0, columnUrl, aTag;
-	// 		columnEls.forEach(function(el) {
-	// 			var column = columns[index++];
-    //             if (column.presentation && column.presentation.type == "url") {
-    //                 chaisePage.recordPage.getLinkChild(el).then(function(aTag) {
-    //                     columnUrl = mustache.render(column.presentation.template, {
-    //                         "catalog_id": process.env.catalogId,
-    //                         "chaise_url": process.env.CHAISE_BASE_URL,
-    //                     });
-
-    //                     expect(aTag.getAttribute('href')).toEqual(columnUrl);
-    //                     expect(aTag.getText()).toEqual(column.value);
-    //                 });
-    //             } else {
-    //                  expect(el.getAttribute('innerHTML')).toBe(column.value);
-	// 			}
-	// 		});
-	// 	});
-	// });
     it("should validate the values of each column", function () {
         var columns = tableParams.columns.filter(function (c) { return c.value != null; });
         expect(element.all(by.className('entity-value')).count()).toEqual(columns.length);
@@ -134,7 +111,6 @@ exports.testPresentation = function (tableParams) {
             var index = -1, columnUrl, aTag;
             columns.forEach(function (column) {
                 var columnEls;
-                // index = index + 1;
                 if (column.title=='booking') 
                     {
                     expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);                    
@@ -159,11 +135,9 @@ exports.testPresentation = function (tableParams) {
                             expect(aTag.getText()).toEqual(column.value);
                         });
                     }
-                    else {
-                    
+                    else {                    
                         expect(columnEls.getAttribute('innerText')).toBe(column.value);
-                    }
-            
+                    }            
             }
         });
     });
