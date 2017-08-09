@@ -3,7 +3,7 @@
         "schemaConfigurations": [
             "navbar/config.json"
         ],
-        "schema": "product"
+        "schema": "product-navbar"
     },
     "cleanup": true
 }

@@ -3,7 +3,7 @@ describe('Navbar ', function() {
 
     beforeAll(function () {
         browser.ignoreSynchronization=true;
-        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product:accommodation");
+        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
         navbar = element(by.id('mainnav'));
         menu = element(by.id('navbar-menu'));
         browser.executeScript('return chaiseConfig;').then(function(config) {

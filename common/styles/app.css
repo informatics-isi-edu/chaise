@@ -79,6 +79,21 @@ span[uib-tooltip] {
     margin: 0px 0 12px 0;
 }
 
+#bookmark-container {
+    text-align: right;
+    position: fixed;
+    top: 50px;
+    right: 0;
+    padding: 15px 50px 15px 50px; /* padding-left and padding-right sides are to equal the left and right paddings of .container-fluid */
+    background-color: #f1f1f1;
+    box-shadow: 0 4px 2px -2px rgba(0,0,0,0.4);
+    z-index: 100;
+}
+
+#bookmark-container > * {
+    display: inline-block;
+}
+
 /****************** ACCORDION ******************/
 
 .panel{
@@ -204,6 +219,21 @@ tbody{
 .table-heading{
     background-color: rgb(116, 116, 116);
     color: #fff;
+}
+
+td.actions-layout {
+    width: 1px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+th.multi-select-width {
+    width: 140px;
+    text-align: center;
+}
+
+.btn-condensed {
+    padding: 0px 5px;
 }
 
 .table-reference .entity-key{
@@ -666,6 +696,7 @@ footer .container1 {
      color: #333;
      background-color: #F5F5F5;
  }
+
 .actionBarRTStyle{
     margin-top: -25px;
 }
@@ -681,3 +712,32 @@ footer .container1 {
     float: right;                
     margin-left: 15px;        
 }
+
+ /********** faceting ************/
+ .total-filters {
+    margin-bottom: 10px;
+    margin-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    max-height: 140px;
+    max-width: 98%;
+    overflow-y: auto;
+    background-color: #f1f1f1;
+ }
+
+ .total-filters .filter-label {
+     font-size: 1em;
+     margin-right: 5px;
+     margin-bottom: 5px;
+     display: inline-block;
+ }
+
+ .total-filters .remove-link {
+     color: #333;
+ }
+
+ .label-default {
+    background-color: #f1f1f1;
+    color: #333;
+    font-weight: 500;
+ }
