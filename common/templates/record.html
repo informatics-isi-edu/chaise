@@ -13,17 +13,17 @@
                 <span ng-switch-default>{{::values[$index].value}}</span>
             </span>
             <span ng-if="::values[$index].value == ''" id="entity-{{$index}}-table">
-                  <record-action-bar id="actionbar-{{$index}}" tabtype="entity" rtref-dis-type="rtrefDisTypetable0[$index].display.type" tab-model-display="rectab[$index].displayType"
-                  toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:rectab[$index]})' can-edit-related="canEditRelated({ref:rtrefDisTypetable0[$index]})"
-                  can-create-related="canCreateRelated0({ref:rtrefDisTypetable0[$index]})"
-                  add-related-record="addRelatedRecord({ref:rtrefDisTypetable0[$index]})" to-record-set="toRecordSet({ref:rtrefDisTypetable0[$index]})">
+                  <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="relatedReferenceDisplayTable[$index].display.type" tab-model-display="recordTableModel[$index].displayType"
+                  toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:recordTableModel[$index]})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
+                  can-create-related="canCreateRelated({ref:relatedReferenceDisplayTable[$index]})"
+                  add-related-record="addRelatedRecord({ref:relatedReferenceDisplayTable[$index]})" to-record-set="toRecordSet({ref:relatedReferenceDisplayTable[$index]})">
                   </record-action-bar>
 
-                <span ng-show="rectab[$index].displayType == 'markdown'" id="entity-{{$index}}-markdown">
-                    <span class="markdown-container" ng-bind-html="::rectab[$index].page.content | trustedHTML"></span>
+                <span ng-show="recordTableModel[$index].displayType == 'markdown'" id="entity-{{$index}}-markdown">
+                    <span class="markdown-container" ng-bind-html="::recordTableModel[$index].page.content | trustedHTML"></span>
                 </span>
-                <span ng-show="rectab[$index].displayType != 'markdown'" id="entity-{{$index}}-recTab">
-                        <record-table class="related-table" vm="::rectab[$index]"></record-table>
+                <span ng-show="recordTableModel[$index].displayType != 'markdown'" id="entity-{{$index}}-recTab">
+                        <record-table class="related-table" vm="::recordTableModel[$index]"></record-table>
                 </span> 
          </span>
         </td>

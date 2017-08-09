@@ -1,6 +1,6 @@
 <div ng-class="{row:rowStyle}">
 <div ng-style="actionStyle">
-    <span ng-if="rtrefDisType == 'markdown'">
+    <span ng-if="relatedTableRefDisplay == 'markdown'">
         <a class="toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
             <span ng-show="tabModelDisplay == 'markdown'">
                 <span ng-if="canEditRelated({ref:ref})">Edit</span>

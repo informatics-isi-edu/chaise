@@ -15,14 +15,14 @@
         };
         }) /* *Directive record-display is called to display related table as part of entity layout
             These items will be passed to record-table diretive for table display.
-            @example <record-display columns="::columns" values="::recordValues"  rectab="::colTableModels" rtref-dis-typetable0="::rtrefDisTypetable"
-                toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="ctrl.canEditRelated(ref)" can-create-related0="ctrl.canCreateRelated(ref)"
+            @example <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" rtref-dis-typetable="::rtrefDisTypetable"
+                toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="ctrl.canEditRelated(ref)" can-create-related="ctrl.canCreateRelated(ref)"
                 add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)">
                 </record-display>
             @param columns : Array with columns labels
             @param Values: Array with column values
-            @param rectab: All record table items
-            @param rtrefDisTypetable0: related reference table
+            @param recordTableModel: All record table items
+            @param relatedReferenceDisplayTable: related reference table
             @param toggleRelatedTableDisplayType: RT table display type
         */
         .directive('recordDisplay', ['DataUtils', function (DataUtils) {
@@ -32,11 +32,11 @@
             scope: {
                 columns: '=',
                 values: '=',
-                rectab:'=',
-                rtrefDisTypetable0: '=',
+                recordTableModel:'=',
+                relatedReferenceDisplayTable: '=',
                 toggleRelatedTableDisplayType: '&',
                 canEditRelated:'&',
-                canCreateRelated0:'&',
+                canCreateRelated:'&',
                 addRelatedRecord:'&',
                 toRecordSet:'&'
                 
@@ -50,13 +50,13 @@
     }])
     /* *Directive to display action bar on top right corner. For non-table display contents wrap around the action bar.
     While for the table siaply it appear on top right corner.
-            @example: <record-action-bar rtref-dis-type="rtrefDisTypetable0[$index].display.type" tab-model-display="rectab[$index].displayType"
-                  toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:rectab[$index]})' can-edit-related="canEditRelated({ref:rtrefDisTypetable0[$index]})"
-                  can-create-related="canCreateRelated0({ref:rtrefDisTypetable0[$index]})"
-                  add-related-record="addRelatedRecord({ref:rtrefDisTypetable0[$index]})" to-record-set="toRecordSet({ref:rtrefDisTypetable0[$index]})">
+            @example: <record-action-bar rtref-dis-type="relatedReferenceDisplayTable[$index].display.type" tab-model-display="recordTableModel[$index].displayType"
+                  toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:recordTableModel[$index]})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
+                  can-create-related="canCreateRelated0({ref:relatedReferenceDisplayTable[$index]})"
+                  add-related-record="addRelatedRecord({ref:relatedReferenceDisplayTable[$index]})" to-record-set="toRecordSet({ref:relatedReferenceDisplayTable[$index]})">
                   </record-action-bar>
-            @param  rtrefDisType: Related ref. display type
-            @param  tabModelDisplay: Internal model display type
+            @param  relatedTableRefDisplay: Related table ref. display type
+            @param  tabModelDisplay: Display type of individual model
             @param  canEditRelated: function to check canEdit()
             @param: canCreateRelated: function to check canCreate()
             @param: addRelatedRecord: function to check add feature
@@ -67,7 +67,7 @@
             restrict: 'E',
             transclude: true,
             scope: {
-                rtrefDisType: '=',
+                relatedTableRefDisplay: '=',
                 tabModelDisplay: '=',
                 toggleRelatedTableDisplayType: '&',
                 canEditRelated:'&',
