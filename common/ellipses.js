@@ -52,10 +52,11 @@
             scope: {
                 tuple: '=',
                 rowValues: '=', // tuple's values
-                context: "=",
-                config: '=',    // {viewable, editable, deletable, selectable}
+                context: '=',
+                config: '=',    // {viewable, editable, deletable, selectMode}
                 onRowClickBind: '=?',
-                fromTuple: "=?"
+                fromTuple: '=?',
+                selected: '='
             },
             link: function (scope, element) {
 

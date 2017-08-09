@@ -81,8 +81,10 @@
             enableSort:         true,
             enableAutoSearch:   true,
             pageLimit:          25,
+            rowValues:          [],
+            selectedRows:       [],
             search:             null,
-            config:             {viewable: false, editable: false, deletable: false, selectable: true},
+            config:             {viewable: false, editable: false, deletable: false, selectMode: "single-select"},
             context:            params.context
         };
 
