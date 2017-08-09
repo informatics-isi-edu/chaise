@@ -89,32 +89,6 @@
             $rootScope.location = $window.location.href;
         });
 
-        // TODO: This function is used for multi-select functionality.
-        /**
-         * Creates a displayObj with a unique identifier to store the selected rows
-         *  displayname =   used for the display value in the pills for which which row is selected`
-         *  key =           unique identifier that is composed from each shortest key column's value
-         *
-         * Facilitates the multi select functionality for multi edit in the future
-         */
-        // $scope.onSelect = function(tuple) {
-        //     var displayObj = {
-        //         displayname: tuple.displayname.value,
-        //         key: tuple.uniqueId
-        //     };
-        //
-        //     var rowIndex = recordsetModel.selectedRows.findIndex(function (obj) {
-        //         return obj.key == displayObj.key
-        //     });
-        //
-        //     // add the tuple to the list of selected rows
-        //     if (rowIndex === -1) {
-        //         recordsetModel.selectedRows.push(displayObj);
-        //     } else {
-        //         recordsetModel.selectedRows.splice(rowIndex, 1);
-        //     }
-        // };
-
         $scope.permalink = function() {
 
             // before run, use window location

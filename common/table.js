@@ -190,28 +190,28 @@
                     recordTableUtils.read(scope);
                 };
 
+                // verifies whether or not the current key value is in the set of selected rows or not
                 scope.isSelected = function (key) {
                     var index = scope.vm.selectedRows.findIndex(function (obj) {
-                        return obj.key == key
+                        return obj.key == key;
                     });
                     return (index > -1);
                 };
 
+                // this is for the button on the table heading that deselects all currently visible rows
                 scope.selectNone = function() {
                     for (var i = 0; i < scope.vm.page.tuples.length; i++) {
-                        var displayObj = {
-                            displayname: scope.vm.page.tuples[i].displayname.value,
-                            key: scope.vm.page.tuples[i].uniqueId
-                        };
+                        var key = scope.vm.page.tuples[i].uniqueId;
 
                         var index = scope.vm.selectedRows.findIndex(function (obj) {
-                            return obj.key == displayObj.key
+                            return obj.key == key
                         });
 
                         if (index > -1) scope.vm.selectedRows.splice(index, 1);
                     }
                 };
 
+                // this is for the button on the table heading that selects all currently visible rows
                 scope.selectAll = function() {
                     for (var i = 0; i < scope.vm.page.tuples.length; i++) {
                         var displayObj = {
@@ -219,11 +219,40 @@
                             key: scope.vm.page.tuples[i].uniqueId
                         };
 
-                        var index = scope.vm.selectedRows.findIndex(function (obj) {
-                            return obj.key == displayObj.key
-                        });
+                        if (!scope.isSelected(displayObj.key)) scope.vm.selectedRows.push(displayObj);
+                    }
+                };
 
-                        if (index == -1) scope.vm.selectedRows.push(displayObj);
+                /**
+                 * Creates a displayObj with a unique identifier to store the selected rows
+                 *  displayname =   used for the display value in the pills for which which row is selected`
+                 *  key =           unique identifier that is composed from each shortest key column's value
+                 *
+                 * Facilitates the multi select functionality for multi edit in the future
+                 */
+                scope.onSelect = function(args) {
+                    var tuple = args.tuple;
+                    
+                    var displayObj = {
+                        displayname: tuple.displayname.value,
+                        key: tuple.uniqueId
+                    };
+
+                    var rowIndex = scope.vm.selectedRows.findIndex(function (obj) {
+                        return obj.key == displayObj.key
+                    });
+
+                    // add the tuple to the list of selected rows
+                    if (rowIndex === -1) {
+                        scope.vm.selectedRows.push(displayObj);
+                    } else {
+                        scope.vm.selectedRows.splice(rowIndex, 1);
+                    }
+
+                    if (scope.onRowClickBind) {
+                        scope.onRowClickBind(args);
+                    } else if (scope.onRowClick) {
+                        scope.onRowClick(args);
                     }
                 };
             }
@@ -331,8 +360,7 @@
 
                 scope.search = function(term, isBackground) {
 
-                    if (term)
-                        term = term.trim();
+                    if (term) term = term.trim();
 
                     scope.vm.search = term;
                     scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
@@ -366,12 +394,12 @@
                 // function for removing a single pill and it's corresponding selected row
                 scope.removePill = function(key) {
                     var index = scope.vm.selectedRows.findIndex(function (obj) {
-                        return obj.key == key
+                        return obj.key == key;
                     });
                     scope.vm.selectedRows.splice(index, 1);
                 };
 
-                // function for removing all pills
+                // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
                 scope.removeAllPills = function() {
                     scope.vm.selectedRows.clear();
                     scope.vm.currentPageSelected = false;
