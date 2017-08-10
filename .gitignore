@@ -8,6 +8,7 @@
 .Trashes
 .idea
 .idea/
+.vscode
 ehthumbs.db
 Thumbs.db
 bower_components

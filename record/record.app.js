@@ -40,6 +40,7 @@
         var session,
             context = {};
         $rootScope.displayReady = false;
+        $rootScope.recDisplayReady = false;
 
         UriUtils.setOrigin();
         headInjector.setupHead();
@@ -58,6 +59,65 @@
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
 
+        /**
+        * getPageSize(obj) returms page size of the display attribute in the object.
+        * @param {object} obj Object reference that has the display attribute
+        */
+        function getPageSize(obj){
+            return ((!angular.isUndefined(obj) && obj.display.defaultPageSize)?obj.display.defaultPageSize:constants.defaultPageSize);
+        }
+
+        /**
+        * getRelatedTableData(refObj, accordionOpen, callback) returns model object with all required component values
+        * that is needed by <record-table>, <record-action-bar> and <record-display> diretives.
+        * @param {object} refObj Reference object with component details
+        * @param {bool} accordionOpen if paased as TRUE accordion should be expanded
+        * @param {callback} callback to be called after function processing
+        */
+        function getRelatedTableData(refObj, accordionOpen, callback){
+
+            var pageSize = getPageSize(refObj);
+            refObj.read(pageSize).then(function (page) {
+                var model = {
+                    reference: refObj,
+                    columns: refObj.columns,
+                    page: page,
+                    pageLimit: pageSize,
+                    hasNext: page.hasNext,      // used to determine if a link should be shown
+                    hasLoaded: true,            // used to determine if the current table and next table should be rendered
+                    open: accordionOpen,        // to define if the accordion is open or closed
+                    enableSort: true,           // allow sorting on table
+                    sortby: null,               // column name, user selected or null
+                    sortOrder: null,            // asc (default) or desc
+                    rowValues: [],              // array of rows values
+                    selectedRows: [],           // array of selected rows, needs to be defined even if not used
+                    search: null,                // search term
+                    displayType: refObj.display.type,
+                    context: "compact/brief",
+                    fromTuple: $rootScope.tuple
+                };
+                model.rowValues = DataUtils.getRowValuesFromPage(page);
+                model.config = {
+                    viewable: true,
+                    editable: $rootScope.modifyRecord,
+                    deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
+                    selectable: false
+                };
+                // return model;
+                callback(model);
+                },function readFail(error) {
+                    var model = {
+                        hasLoaded: true
+                    };
+                    // return model;
+                    callback(model);
+                    throw error;
+                }).catch(function(e) {
+                    // The .catch from the outer promise won't catch errors from this closure
+                    // so a .catch needs to be appended here.
+                    throw e;
+                });
+        }
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {
 
@@ -118,65 +178,50 @@
                 });
 
                 $rootScope.columns = $rootScope.reference.columns;
+                var allInbFKColsIdx = [];
+                var allInbFKCols = $rootScope.columns.filter(function (o, i) {
+                    if(o.isInboundForeignKey){
+                        allInbFKColsIdx.push(i);
+                        return o;
+                    }
+                });
+                if(allInbFKCols.length>0){
+                    $rootScope.rtrefDisTypetable = [];
+                    $rootScope.colTableModels = [];
+
+                    for(var i =0;i<allInbFKCols.length;i++){
+                        allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBrief;
+                        var ifkPageSize = getPageSize(allInbFKCols[i].reference);
+                        (function(i) {
+                            getRelatedTableData(allInbFKCols[i].reference, true, function(model){
+
+                                $rootScope.colTableModels[allInbFKColsIdx[i]] = model;
+                                $rootScope.rtrefDisTypetable[allInbFKColsIdx[i]] = allInbFKCols[i].reference;
+                                $rootScope.recDisplayReady =  (i==allInbFKCols.length-1)?true:false;
+
+                            });
+                        })(i);
+                    }
+                }else{
+                    $rootScope.recDisplayReady =  true;
+                }
 
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
                 var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
                 var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
+
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+
                     $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
-
-                    var pageSize;
-                    if ($rootScope.relatedReferences[i].display.defaultPageSize) {
-                        pageSize = $rootScope.relatedReferences[i].display.defaultPageSize;
-                    } else {
-                        pageSize = constants.defaultPageSize;
-                    }
-
+                    var pageSize = getPageSize($rootScope.relatedReferences[i]);
                     (function(i) {
                         if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
                             $rootScope.showEmptyRelatedTables = true;
                         }
-                        $rootScope.relatedReferences[i].read(pageSize).then(function (page) {
-                            var model = {
-                                reference: $rootScope.relatedReferences[i],
-                                columns: $rootScope.relatedReferences[i].columns,
-                                page: page,
-                                pageLimit: ($rootScope.relatedReferences[i].display.defaultPageSize ? $rootScope.relatedReferences[i].display.defaultPageSize : constants.defaultPageSize),
-                                hasNext: page.hasNext,      // used to determine if a link should be shown
-                                hasLoaded: true,            // used to determine if the current table and next table should be rendered
-                                open: boolIsOpen,           // to define if the accordion is open or closed
-                                enableSort: true,           // allow sorting on table
-                                sortby: null,               // column name, user selected or null
-                                sortOrder: null,            // asc (default) or desc
-                                rowValues: [],              // array of rows values
-                                selectedRows: [],           // array of selected rows, needs to be defined even if not used
-                                search: null,               // search term
-                                displayType: $rootScope.relatedReferences[i].display.type,
-                                context: "compact/brief",
-                                fromTuple: $rootScope.tuple
-                            };
-                            model.rowValues = DataUtils.getRowValuesFromPage(page);
-                            model.config = {
-                                viewable: true,
-                                editable: $rootScope.modifyRecord,
-                                deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                                selectMode: "no-select"
-                            };
+                        getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, function(model){
                             $rootScope.tableModels[i] = model;
                             $rootScope.displayReady = true;
-
-                        }, function readFail(error) {
-                            var model = {
-                                hasLoaded: true
-                            };
-                            $rootScope.tableModels[i] = model;
-                            $rootScope.displayReady = true;
-                            throw error;
-                        }).catch(function(e) {
-                            // The .catch from the outer promise won't catch errors from this closure
-                            // so a .catch needs to be appended here.
-                            throw e;
                         });
                     })(i);
                 }

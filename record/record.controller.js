@@ -53,11 +53,11 @@
         vm.permalink = function getPermalink() {
             return $window.location.href;
         };
-
+         
         vm.toRecordSet = function(ref) {
             return $window.location.href = ref.appLink;
         };
-
+    
         vm.showRelatedTable = function(i) {
             var isFirst = false, prevTableHasLoaded = false;
             if ($rootScope.tableModels && $rootScope.tableModels[i]) {
@@ -82,16 +82,15 @@
                 if ((isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues && $rootScope.tableModels[i].rowValues.length > 0) {
                     return (i == $rootScope.lastRendered);
                 }
-
                 return false;
             }
         };
-
-        vm.toggleRelatedTableDisplayType = function(i) {
-            if ($rootScope.tableModels[i].displayType == 'markdown') {
-                $rootScope.tableModels[i].displayType = 'table';
+         
+        vm.toggleRelatedTableDisplayType = function(dataModel) {
+            if (dataModel.displayType == 'markdown') {
+                dataModel.displayType = 'table';
             } else {
-                $rootScope.tableModels[i].displayType = 'markdown';
+                dataModel.displayType = 'markdown';
             }
         };
 
@@ -99,7 +98,15 @@
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
         };
 
+        vm.canEditRelated = function(ref) {
+            if(angular.isUndefined(ref))
+            return false;
+           return (ref.canUpdate && $rootScope.modifyRecord);
+        };
+
         vm.canCreateRelated = function(relatedRef) {
+            if(angular.isUndefined(relatedRef))
+            return false;
            var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
            return (ref.canCreate && $rootScope.modifyRecord);
         };

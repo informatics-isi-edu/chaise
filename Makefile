@@ -132,6 +132,7 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/bootstrap-tour.min.js \
 	$(JS)/vendor/plotly-latest.min.js
 
+
 JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \

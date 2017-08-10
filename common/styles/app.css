@@ -697,6 +697,21 @@ footer .container1 {
      background-color: #F5F5F5;
  }
 
+.actionBarRTStyle{
+    margin-top: -25px;
+}
+.actionBarEntityStyle{                  
+    padding-left: 5px;
+    padding-bottom: 5px;
+    float: right;
+    margin-right: -10px;    
+}
+.actionBarEntityStyleWithMargin{  
+    padding-left: 5px;
+    padding-bottom: 5px;
+    float: right;                
+    margin-left: 15px;        
+}
 
  /********** faceting ************/
  .total-filters {
