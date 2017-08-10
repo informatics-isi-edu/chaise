@@ -90,6 +90,7 @@
                     sortby: null,               // column name, user selected or null
                     sortOrder: null,            // asc (default) or desc
                     rowValues: [],              // array of rows values
+                    selectedRows: [],           // array of selected rows, needs to be defined even if not used
                     search: null,                // search term
                     displayType: refObj.display.type,
                     context: "compact/brief",
