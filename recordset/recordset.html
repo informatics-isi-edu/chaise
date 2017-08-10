@@ -2,12 +2,12 @@
 
     <navbar></navbar>
 
-    <div id="mainContent" class="container-fluid">
+    <div id="main-content" class="container-fluid">
 
         <alerts alerts="alerts"></alerts>
 
         <div class="row">
-            <div id="recordset-bookmark-container" class="col-xs-12">
+            <div id="bookmark-container" class="col-xs-12">
                 <!-- edit -->
                 <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable" ng-disabled="vm.pageLimit > vm.RECORDEDIT_MAX_ROWS" ng-href="{{ edit() }}" tooltip-placement="bottom"
                     uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">

@@ -66,8 +66,9 @@
         enableSort: true,   // allow sorting
         page: null,         // current page
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
+        selectedRows: [],   // array of selected rows
         search: null,       // search term
-        pageLimit: 25,       // number of rows per page
+        pageLimit: 25,      // number of rows per page
         config: {}
     })
 
@@ -144,12 +145,14 @@
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
+
             recordsetModel.config = {
                 viewable: true,
                 editable: modifyEnabled,
                 deletable: modifyEnabled && deleteEnabled,
-                selectable: false
+                selectMode: "no-select"
             };
+
 
             $rootScope.alerts = AlertsService.alerts;
 
@@ -172,9 +175,9 @@
 
                 ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
                     session = Session.getSessionValue();
-                    
+
                     var location = reference.location;
-                    
+
                     // only allowing single column sort here
                     if (reference.sortObject) {
                         recordsetModel.sortby = location.sortObject[0].column;
@@ -214,6 +217,9 @@
                     recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                     recordsetModel.initialized = true;
                     recordsetModel.hasLoaded = true;
+
+                    $rootScope.$broadcast('recordset-update');
+
                 }, function error(response) {
                     throw response;
                 }).catch(function genericCatch(exception) {

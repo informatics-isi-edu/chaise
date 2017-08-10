@@ -345,8 +345,14 @@
                             page: page,
                             pageLimit: model.rows.length,
                             rowValues: DataUtils.getRowValuesFromTuples(page.tuples),
+                            selectedRows: [],
                             search: null,
-                            config: {}
+                            config: {
+                                viewable: false,
+                                editable: false,
+                                deletable: false,
+                                selectMode: 'no-select'
+                            }
                         };
 
                         // NOTE: This case is for a pseudo-failure case
@@ -363,8 +369,14 @@
                                 page: page,
                                 pageLimit: model.rows.length,
                                 rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
+                                selectedRows: [],
                                 search: null,
-                                config: {}
+                                config: {
+                                    viewable: false,
+                                    editable: false,
+                                    deletable: false,
+                                    selectMode: 'no-select'
+                                }
                             };
                         }
 

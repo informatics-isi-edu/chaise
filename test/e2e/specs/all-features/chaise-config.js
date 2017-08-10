@@ -6,7 +6,7 @@ var chaiseConfig = {
     deleteRecord: true,
     // configuration for navbar spec with base condig
     navbarBrand: 'test123',
-    navbarBrandImage: 'test123.jpg',
+    navbarBrandImage: '../images/genetic-data.png',
     navbarBrandText: 'test123',
     headTitle: 'this one should be ignored in favor of navbarBrandText',
     // config for biewer spec
