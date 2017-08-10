@@ -58,15 +58,21 @@
         context.pageId = MathUtils.uuid();
 
         ERMrest.appLinkFn(UriUtils.appTagToURL);
-        /* @desc getPageSize(obj) returms page size of the obj.           */
+
+        /**
+        * getPageSize(obj) returms page size of the display attribute in the object.
+        * @param {object} obj Object reference that has the display attribute
+        */
         function getPageSize(obj){
             return ((!angular.isUndefined(obj) && obj.display.defaultPageSize)?obj.display.defaultPageSize:constants.defaultPageSize);
         }
-        /*@desc  getRelatedTableData(refObj, accordionOpen, callback) returns model object with all required component values
-        *       that is needed by <record-table>, <record-action-bar> and <record-display> diretives.
-        *       refObj: Reference object with component details
-        *       accordionOpen: bool value
-        *       callback: to be called after function processing
+
+        /**
+        * getRelatedTableData(refObj, accordionOpen, callback) returns model object with all required component values
+        * that is needed by <record-table>, <record-action-bar> and <record-display> diretives.
+        * @param {object} refObj Reference object with component details
+        * @param {bool} accordionOpen if paased as TRUE accordion should be expanded
+        * @param {callback} callback to be called after function processing
         */
         function getRelatedTableData(refObj, accordionOpen, callback){
 
