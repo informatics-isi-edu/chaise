@@ -791,6 +791,8 @@
          *
          */
         function getDisplayType(type) {
+            var displayType;
+
             switch (type.name) {
                 case 'timestamp':
                 case 'timestamptz':
