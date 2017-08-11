@@ -1,26 +1,11 @@
 .container-fluid {
-    /* If changing paddings here, change the padding in #record-bookmark-container */
+    /* If changing paddings here, change the padding in #bookmark-container */
     padding-right: 50px;
     padding-left: 50px;
 }
 
 #main-content {
     margin-top: 120px;
-}
-
-#record-bookmark-container {
-    text-align: right;
-    position: fixed;
-    top: 50px;
-    right: 0;
-    padding: 15px 50px 15px 50px; /* padding-left and padding-right sides are to equal the left and right paddings of .container-fluid */
-    background-color: #f1f1f1;
-    box-shadow: 0 4px 2px -2px rgba(0,0,0,0.4);
-    z-index: 100;
-}
-
-#record-bookmark-container > * {
-    display: inline-block;
 }
 
 

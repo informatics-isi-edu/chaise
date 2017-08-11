@@ -11,10 +11,10 @@
                         </a>
                     </h4>
                     <span class="applied-filters" ng-show="hasFilter(fc)">
-                        <span class="label label-default">
+                        <span class="label label-primary">
                             <a class="remove-link" ng-click="removeFilter(fc)">clear all</a>
                         </span>
-                        <span class="label label-default" ng-repeat="filter in fc.filters track by $index">
+                        <span class="label label-primary" ng-repeat="filter in fc.filters track by $index">
                             <a class="remove-link" ng-click="removeFilter(fc, $index)"><i class="glyphicon glyphicon-remove"></i></a>
                             <span ng-bind="filter.toString()"></span>
                         </span>

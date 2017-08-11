@@ -31,10 +31,16 @@
      *        page,         // current page object
      *        pageLimit,    // number of rows per page
      *        rowValues,    // array of rows values, each value has this structure {isHTML:boolean, value:value}
-     *        search:       // search term, null for none
-     *        config,       // {viewable, editable, deletable, selectable, context}
+     *        selectedRows, // array of selected rows
+     *        search,       // search term, null for none
+     *        config,       // {viewable, editable, deletable, selectMode}
      *        context       // reference's context
      *       }
+     *
+     *      config.selectMode can be one of the following:
+     *          no-select       // do not allow selection of the rows
+     *          single-select   // only allow one row to be selected
+     *          multi-select    // allow the user to select as many rows as they want
      *
      *
      * Handle recordset/recordTable events in your controller:
@@ -184,6 +190,72 @@
                     scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
                     recordTableUtils.read(scope);
                 };
+
+                // verifies whether or not the current key value is in the set of selected rows or not
+                scope.isSelected = function (key) {
+                    var index = scope.vm.selectedRows.findIndex(function (obj) {
+                        return obj.key == key;
+                    });
+                    return (index > -1);
+                };
+
+                // this is for the button on the table heading that deselects all currently visible rows
+                scope.selectNone = function() {
+                    for (var i = 0; i < scope.vm.page.tuples.length; i++) {
+                        var key = scope.vm.page.tuples[i].uniqueId;
+
+                        var index = scope.vm.selectedRows.findIndex(function (obj) {
+                            return obj.key == key
+                        });
+
+                        if (index > -1) scope.vm.selectedRows.splice(index, 1);
+                    }
+                };
+
+                // this is for the button on the table heading that selects all currently visible rows
+                scope.selectAll = function() {
+                    for (var i = 0; i < scope.vm.page.tuples.length; i++) {
+                        var displayObj = {
+                            displayname: scope.vm.page.tuples[i].displayname.value,
+                            key: scope.vm.page.tuples[i].uniqueId
+                        };
+
+                        if (!scope.isSelected(displayObj.key)) scope.vm.selectedRows.push(displayObj);
+                    }
+                };
+
+                /**
+                 * Creates a displayObj with a unique identifier to store the selected rows
+                 *  displayname =   used for the display value in the pills for which which row is selected`
+                 *  key =           unique identifier that is composed from each shortest key column's value
+                 *
+                 * Facilitates the multi select functionality for multi edit in the future
+                 */
+                scope.onSelect = function(args) {
+                    var tuple = args.tuple;
+                    
+                    var displayObj = {
+                        displayname: tuple.displayname.value,
+                        key: tuple.uniqueId
+                    };
+
+                    var rowIndex = scope.vm.selectedRows.findIndex(function (obj) {
+                        return obj.key == displayObj.key
+                    });
+
+                    // add the tuple to the list of selected rows
+                    if (rowIndex === -1) {
+                        scope.vm.selectedRows.push(displayObj);
+                    } else {
+                        scope.vm.selectedRows.splice(rowIndex, 1);
+                    }
+
+                    if (scope.onRowClickBind) {
+                        scope.onRowClickBind(args);
+                    } else if (scope.onRowClick) {
+                        scope.onRowClick(args);
+                    }
+                };
             }
         };
     }])
@@ -206,6 +278,7 @@
                 scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
                 scope.vm.backgroundSearchPendingTerm = null;
+                scope.vm.currentPageSelected = false;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -289,8 +362,7 @@
 
                 scope.search = function(term, isBackground) {
 
-                    if (term)
-                        term = term.trim();
+                    if (term) term = term.trim();
 
                     scope.vm.search = term;
                     scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
@@ -321,6 +393,20 @@
                     $window.open(appLink, '_blank');
                 };
 
+                // function for removing a single pill and it's corresponding selected row
+                scope.removePill = function(key) {
+                    var index = scope.vm.selectedRows.findIndex(function (obj) {
+                        return obj.key == key;
+                    });
+                    scope.vm.selectedRows.splice(index, 1);
+                };
+
+                // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
+                scope.removeAllPills = function() {
+                    scope.vm.selectedRows.clear();
+                    scope.vm.currentPageSelected = false;
+                };
+
                 // on window focus, if has pending add record requests
                 // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
                 $window.onfocus = function() {
@@ -349,9 +435,9 @@
                     updated = true;
                 }
 
-                // get the total row count to display above the table
                 scope.$on('recordset-update', function($event) {
-                    if(scope.vm.search == scope.vm.reference.location.searchTerm) {
+                    if (scope.vm.search == scope.vm.reference.location.searchTerm) {
+                        // get the total row count to display above the table
                         scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
                             // NOTE: scenario: A user triggered a foreground search. Once it returns the aggregate count request is queued.
                             // While that request is running, the user triggers another foreground search.

@@ -613,7 +613,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }).then(function(ct) {
                                         expect(ct).toBe(col.count, colError(col.name, "number of foreign key rows are not as expected."));
 
-                                        browser.sleep(10);
+                                        // wait for the text to display before verifying it
+                                        browser.wait(function() {
+                                            return chaisePage.recordsetPage.getTotalCount().getText().then(function(text) {
+                                                return (text="Displaying " + col.count + " of " + col.totalCount + " Records");
+                                            });
+                                        }, browser.params.defaultTimeout);
+
                                         return chaisePage.recordsetPage.getTotalCount().getText();
                                     }).then(function(text) {
                                         expect(text).toBe("Displaying " + col.count + " of " + col.totalCount + " Records", colError(col.name, "The total count display in the foreign key popup is incorrect"));
