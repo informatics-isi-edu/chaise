@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap',function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UiUtils', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap',function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UiUtils, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -614,54 +614,14 @@
         }
 
         function columnToDisplayType(column) {
-            var name = column.name;
-            var type = column.type.name;
             var displayType;
+
             if (column.isForeignKey) {
                 displayType = 'popup-select';
+            } else if (column.isAsset) {
+                displayType = 'file';
             } else {
-                switch (type) {
-                    case 'timestamp':
-                    case 'timestamptz':
-                        displayType = 'timestamp';
-                        break;
-                    case 'date':
-                        displayType = 'date';
-                        break;
-                    case 'float4':
-                    case 'float8':
-                    case 'numeric':
-                        displayType = 'number';
-                        break;
-                    case 'int2':
-                        displayType = 'integer2';
-                        break;
-                    case 'int4':
-                        displayType = 'integer4';
-                        break;
-                    case 'int8':
-                        displayType = 'integer8';
-                        break;
-                    case 'boolean':
-                        displayType = 'boolean';
-                        break;
-                    case 'markdown':
-                    case 'longtext':
-                            displayType = 'longtext';
-                        break;
-                    case 'json':
-                    case 'jsonb':
-                            displayType= 'json';
-                        break;
-                    case 'shorttext':
-                    default:
-                        displayType = 'text';
-                        break;
-                }
-
-                if (column.isAsset) {
-                    displayType = 'file';
-                }
+                displayType = UiUtils.getDisplayType(column.type);
             }
             return displayType;
         }
