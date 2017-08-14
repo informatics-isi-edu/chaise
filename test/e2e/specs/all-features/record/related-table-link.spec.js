@@ -45,7 +45,7 @@ describe('View existing record,', function() {
             browser.get(url);
             chaisePage.waitForElement(element(by.id('rt-accommodation_image')));
         });
-        
+
         describe("Show the related entity tables,", function() {
             // Default order tests
             it("should have the tables in default order.", function() {
