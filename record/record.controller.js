@@ -8,6 +8,7 @@
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
+        var context = $rootScope.context;
 
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -112,13 +113,163 @@
         };
 
         // Send user to RecordEdit to create a new row in this related table
-        vm.addRelatedRecord = function(ref) {
-            var testREController = $scope.$new();
-            $controller('FormController', { $scope: testREController});
-            if(1){
-                testREController.testShare();
-                return;
+        function isDisabled(column) {
+            try {
+                if (column.getInputDisabled(context.appContext)) {
+                    return true;
+                } else if (vm.prefillCookie) {
+                    return vm.prefillCookie.constraintName == column.name;
+                }
+                return false;
+            } catch (e) {
+                $log.info(e);
             }
+        }
+        function transformRowValues(row) {
+            var transformedRow = {};
+            /* Go through the set of columns for the reference.
+             * If a value for that column is present (row[col.name]), transform the row value as needed
+             * NOTE:
+             * Opted to loop through the columns once and use the row object for quick checking instead
+             * of looking at each key in row and looping through the column set each time to grab the column
+             * My solution is worst case n-time
+             * The latter is worst case rowKeys.length * n time
+             */
+            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+                var col = $rootScope.reference.columns[i];
+                var rowVal = row[col.name];
+                if (rowVal && !col.getInputDisabled(context.appContext)) {
+                    switch (col.type.name) {
+                        case "timestamp":
+                        case "timestamptz":
+                            if (vm.readyToSubmit) {
+                                if (rowVal.date && rowVal.time && rowVal.meridiem) {
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                } else if (rowVal.date && rowVal.time === null) {
+                                    rowVal.time = '00:00:00';
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                    // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
+                                    // meridiem should never be null,time can be left empty (null) but the case above would catch that.
+                                } else if (!rowVal.date) {
+                                    rowVal = null;
+                                }
+                            }
+                            break;
+                        case "json":
+                        case "jsonb":
+                            rowVal = JSON.parse(rowVal);
+                            break;
+                        default:
+                            if (col.isAsset) {
+                                if (!vm.readyToSubmit) {
+                                    rowVal = { url: "" };
+                                }
+                            }
+                            break;
+                    }
+                }
+                transformedRow[col.name] = rowVal;
+            }
+            return transformedRow;
+        }
+        function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
+            var transformedRow = transformRowValues(modelRow);
+            columns.forEach(function (column) {
+                // If the column is a foreign key column, it needs to get the originating columns name for data submission
+                if (column.isForeignKey) {
+
+                    var foreignKeyColumns = column.foreignKey.colset.columns;
+                    for (var k = 0; k < foreignKeyColumns.length; k++) {
+                        var referenceColumn = foreignKeyColumns[k];
+                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+                        // check if value is set in submission data yet
+                        if (!submissionRow[referenceColumn.name]) {
+                            
+                            if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
+                                submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
+                            } else {
+                                submissionRow[referenceColumn.name] = null;
+                            }
+                        }
+                    }
+                    // not foreign key, column.name is sufficient for the keys
+                } else {
+                    // set null if not set so that the whole data object is filled out for posting to ermrestJS
+                    submissionRow[column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
+                }
+            });
+
+            return submissionRow;
+        }
+        function updateViewModel(cookie){
+            var recordEditModel = {
+                table: {},
+                rows: [{}], // rows of data in the form, not the table from ERMrest
+                oldRows: [{}], // Keep a copy of the initial rows data so that we can see if user has made any changes later
+                submissionRows: [{}] // rows of data converted to raw data for submission
+            };
+            // Update view model
+            recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
+
+            // Update submission model
+            var columnNames = Object.keys(cookie.keys);
+            columnNames.forEach(function (colName) {
+                var colValue = cookie.keys[colName];
+                recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
+            });
+            vm.recordEditModel = recordEditModel;
+        }
+        var addPopup = function(column,rowIndex){
+            // if (isDisabled(column)) return;
+       
+
+            var originalTuple,
+                editOrCopy = true,
+                params = {};
+
+            // pass the reference as a param for the modal
+            // call to page with tuple to get proper reference
+           
+            if (vm.editMode) {
+                originalTuple = $rootScope.tuples[rowIndex];
+            }else {
+                originalTuple = null;
+                editOrCopy = false;
+            }
+
+            var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
+            //filteredRef(submissionRow)
+            params.reference = column._baseReference.contextualize.compactSelect;
+            params.reference.session = $rootScope.session;
+            params.context = "compact/select";
+
+            var modalInstance = $uibModal.open({
+                animation: false,
+                controller: "SearchPopupController",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                size: "lg",
+                templateUrl: "../common/templates/searchPopup.modal.html"
+            });
+
+            modalInstance.result.then(function dataSelected(tuple) {
+                // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
+                // set data in view model (model.rows) and submission model (model.submissionRows)
+
+                var foreignKeyColumns = column.foreignKey.colset.columns;
+                for (var i = 0; i < foreignKeyColumns.length; i++) {
+                    var referenceCol = foreignKeyColumns[i];
+                    var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
+
+                    vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
+                }
+
+                vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
+            });
+        }
+        vm.addRelatedRecord = function(ref) {
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
             var cookie = {
                 rowname: $rootScope.recordDisplayname,
@@ -128,11 +279,19 @@
 
             // Get the column pair that form this FKR between this related table and the main entity
             cookie.keys = {};
-            mapping._from.forEach(function(fromColumn, i) {
+            mapping._from.forEach(function (fromColumn, i) {
                 var toColumn = mapping._to[i];
                 // Assign the column value into cookie
                 cookie.keys[fromColumn.name] = $rootScope.tuple.data[toColumn.name];
             });
+
+            if(1){
+                updateViewModel(cookie);
+                addPopup(ref.contextualize.entryCreate.columns[0],0);
+                return;
+            }
+            
+           
             // 2. Generate a unique cookie name and set it to expire after 24hrs.
             var COOKIE_NAME = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
             $cookies.putObject(COOKIE_NAME, cookie, {
