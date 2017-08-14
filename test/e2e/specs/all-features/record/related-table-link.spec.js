@@ -468,6 +468,10 @@ describe('View existing record,', function() {
                    return selectButtons[0].click();
                }).then(function() { 
                    return chaisePage.recordEditPage.submitForm();
+               }).then(function(){
+                   browser.wait(function() {
+                       return chaisePage.waitForElementInverse(element(by.id("spinner")));
+                   }, browser.params.defaultTimeout);
                }).then (function() {
                    return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
                }).then( function() {
