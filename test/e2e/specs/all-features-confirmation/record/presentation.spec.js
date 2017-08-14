@@ -45,7 +45,7 @@ var testParams = {
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
         { title: "Is Luxurious", value: "true", type: "boolean" },
         { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"},
-        { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n"}
+        { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n", match:"html"}
     ],
     no_related_data: {
         key: {
