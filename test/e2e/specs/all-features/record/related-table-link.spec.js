@@ -406,6 +406,7 @@ describe('View existing record,', function() {
                     return browser.switchTo().window(allWindows[0]);
                 }).then(function (){
                     browser.driver.navigate().refresh();
+                    chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
                     browser.wait(function() {
                         return chaisePage.recordPage.getRelatedTableRows(associationTableName).count().then(function(ct) {
                             return ct == testParams.association_count + 1;
