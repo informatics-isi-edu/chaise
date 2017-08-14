@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal','$controller', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -113,6 +113,12 @@
 
         // Send user to RecordEdit to create a new row in this related table
         vm.addRelatedRecord = function(ref) {
+            var testREController = $scope.$new();
+            $controller('FormController', { $scope: testREController});
+            if(1){
+                testREController.testShare();
+                return;
+            }
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
             var cookie = {
                 rowname: $rootScope.recordDisplayname,
