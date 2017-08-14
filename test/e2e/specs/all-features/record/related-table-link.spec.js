@@ -381,8 +381,6 @@ describe('View existing record,', function() {
                     return chaisePage.waitForElement(element(by.id('submit-record-button')));
                 }).then(function() {
                     return chaisePage.recordEditPage.getForeignKeyInputs();
-                }).then(function() {
-                    return chaisePage.recordEditPage.getForeignKeyInputs();
                 }).then( function(inputs) {
                     foreignKeyInputs = inputs;
                     return chaisePage.recordEditPage.getModalPopupBtnsUsingScript();
@@ -445,8 +443,6 @@ describe('View existing record,', function() {
                     var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + associationTableName + "/id_base=" + associationTableKey;
                     expect(browser.driver.getCurrentUrl()).toContain(result);                    
                 }).then(function() {
-                    return chaisePage.recordEditPage.getForeignKeyInputs();
-                }).then(function(){
                     return chaisePage.recordEditPage.getForeignKeyInputs();
                 }).then(function() {
                     return chaisePage.waitForElementInverse(element(by.id("spinner")));
