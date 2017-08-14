@@ -81,8 +81,10 @@
             enableSort:         true,
             enableAutoSearch:   true,
             pageLimit:          25,
+            rowValues:          [],
+            selectedRows:       [],
             search:             null,
-            config:             {viewable: false, editable: false, deletable: false, selectable: true},
+            config:             {viewable: false, editable: false, deletable: false, selectMode: "single-select"},
             context:            params.context
         };
 
@@ -93,6 +95,8 @@
                 vm.tableModel.initialized = true;
                 vm.tableModel.page = page;
                 vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
+
+                $scope.$broadcast('recordset-update');
             }, function(exception) {
                 throw exception;
             });

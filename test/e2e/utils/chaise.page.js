@@ -620,7 +620,7 @@ var recordPage = function() {
     };
 
     this.getColumnValueElements = function() {
-        return browser.executeScript("return $('.entity-value > span.ng-scope');");
+        return browser.executeScript("return $('.entity-value > span.ng-scope > span.ng-scope');");
     };
 
     this.getColumnValue = function(columnName) {
@@ -634,11 +634,23 @@ var recordPage = function() {
     this.getRelatedTables = function() {
         return element.all(by.css(".related-table"));
     };
+    this.getRelatedTablesWithPanel = function () {
+        return element.all(by.css(".panel"));
+    };
 
     this.getRelatedTable = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName));
     };
+    this.getEntityRelatedTable = function (displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("entity-" + displayName));
+    };
+    this.getEntityRelatedTableScope = function (displayName,safeId=false) { //if safeId==true then no need to call the function
+        displayName = safeId?displayName:makeSafeIdAttr(displayName);
+        return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
+    };
+    
 
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-heading"));
@@ -763,6 +775,10 @@ var recordsetPage = function() {
 
     this.getCustomPageSize = function() {
         return browser.executeScript("return $('#custom-page-size').text().trim();");
+    };
+
+    this.getTotalCount = function() {
+        return element(by.id('rs-total-count'));
     };
 
     this.getColumnNames = function() {

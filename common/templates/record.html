@@ -6,9 +6,26 @@
                 <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
             </span>
         </td>
-        <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML">
-            <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
-            <span ng-switch-default>{{::values[$index].value}}</span>
+        <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML" id="entity-{{makeSafeIdAttr(column.displayname.value)}}">
+
+            <span ng-if="::values[$index].value != ''">
+                <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
+                <span ng-switch-default>{{::values[$index].value}}</span>
+            </span>
+            <span ng-if="::values[$index].value == ''" id="entity-{{$index}}-table">
+                  <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="relatedReferenceDisplayTable[$index].display.type" tab-model-display="recordTableModel[$index].displayType"
+                  toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:recordTableModel[$index]})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
+                  can-create-related="canCreateRelated({ref:relatedReferenceDisplayTable[$index]})"
+                  add-related-record="addRelatedRecord({ref:relatedReferenceDisplayTable[$index]})" to-record-set="toRecordSet({ref:relatedReferenceDisplayTable[$index]})">
+                  </record-action-bar>
+
+                <span ng-show="recordTableModel[$index].displayType == 'markdown'" id="entity-{{$index}}-markdown">
+                    <span class="markdown-container" ng-bind-html="::recordTableModel[$index].page.content | trustedHTML"></span>
+                </span>
+                <span ng-show="recordTableModel[$index].displayType != 'markdown'" id="entity-{{$index}}-recTab">
+                        <record-table class="related-table" vm="::recordTableModel[$index]"></record-table>
+                </span> 
+         </span>
         </td>
     </tr>
 </table>

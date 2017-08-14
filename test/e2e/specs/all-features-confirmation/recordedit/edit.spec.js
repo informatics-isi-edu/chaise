@@ -1,6 +1,6 @@
 /**
  * This test case is for testing editing a single record
- * 
+ *
  */
 var testConfiguration = browser.params.configuration;
 var chaisePage = require('../../../utils/chaise.page.js');
@@ -20,7 +20,7 @@ var testParams = {
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
             { name: "title", title: "<strong>Name of Accommodation</strong>", type: "text", nullok: false},
             { name: "website", title: "Website", type: "text", comment: "A valid url of the accommodation"},
-            { name: "category",  title: "Category", type: "text", isForeignKey: true, count: 5, table_title: "Categories", comment: "Type of accommodation ('Resort/Hotel/Motel')", nullok: false},
+            { name: "category",  title: "Category", type: "text", isForeignKey: true, count: 5, totalCount: 5, table_title: "Categories", comment: "Type of accommodation ('Resort/Hotel/Motel')", nullok: false}, // the total count is the total number of rows in the category.json data file
             { name: "rating", title: "User Rating", type: "float4", nullok: false},
             { name: "summary", title: "Summary", nullok: false, type: "longtext"},
             { name: "description", title: "Description", type: "markdown"},
@@ -38,16 +38,16 @@ var testParams = {
             }
         ],
         inputs: [
-            {"title": "new title 1", "website": "https://example1.com", "category": {index: 1, value: "Ranch"}, 
-             "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1", 
+            {"title": "new title 1", "website": "https://example1.com", "category": {index: 1, value: "Ranch"},
+             "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1",
              "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false},
         ],
         result_columns: [
             "title", "website", "product-edit_fk_category", "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"
         ],
         results: [
-            ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, 
-            {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10004", "value":"Ranch"}, 
+            ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"},
+            {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10004", "value":"Ranch"},
             "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"]
         ],
         files: []
@@ -93,7 +93,7 @@ describe('Edit existing record,', function() {
     for (var i=0; i< testParams.tables.length; i++) {
 
         (function(tableParams, index) {
-            
+
             if (!process.env.TRAVIS && tableParams.files.length > 0) {
                 beforeAll(function() {
                     // create files that will be uploaded
@@ -107,7 +107,7 @@ describe('Edit existing record,', function() {
                 var record;
 
                 beforeAll(function () {
-                
+
                     var keys = [];
                     keys.push(tableParams.key.name + tableParams.key.operator + tableParams.key.value);
                     browser.ignoreSynchronization=true;
@@ -135,7 +135,7 @@ describe('Edit existing record,', function() {
                 describe("Submitting an existing record,", function() {
                     recordEditHelpers.testSubmission(tableParams, true);
                 });
-                
+
                 if (!process.env.TRAVIS && tableParams.files.length > 0) {
                     afterAll(function(done) {
                         recordEditHelpers.deleteFiles(tableParams.files);

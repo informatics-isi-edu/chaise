@@ -28,7 +28,7 @@
         "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
         "noDataMessage": "No entity exists with ",
         "multipleDataErrorCode" : "Multiple Records Found",
-        "multipleDataMessage" : "There are more than 1 record for the filters provided.",
+        "multipleDataMessage" : "There are more than 1 record found for the filters provided.",
         "onePagingModifier": "Invalid URL. Only one paging modifier allowed",
         "pageRefreshRequired": {
             title: "Page Refresh Required",
@@ -786,10 +786,59 @@
             return ( size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
         }
 
+        /**
+         *
+         *
+         */
+        function getDisplayType(type) {
+            var displayType;
+
+            switch (type.name) {
+                case 'timestamp':
+                case 'timestamptz':
+                    displayType = 'timestamp';
+                    break;
+                case 'date':
+                    displayType = 'date';
+                    break;
+                case 'float4':
+                case 'float8':
+                case 'numeric':
+                    displayType = 'number';
+                    break;
+                case 'int2':
+                    displayType = 'integer2';
+                    break;
+                case 'int4':
+                    displayType = 'integer4';
+                    break;
+                case 'int8':
+                    displayType = 'integer8';
+                    break;
+                case 'boolean':
+                    displayType = 'boolean';
+                    break;
+                case 'markdown':
+                case 'longtext':
+                    displayType = 'longtext';
+                    break;
+                case 'json':
+                case 'jsonb':
+                    displayType= 'json';
+                    break;
+                case 'shorttext':
+                default:
+                    displayType = type.baseType ? getDisplayType(type.baseType) : 'text';
+                    break;
+            }
+            return displayType;
+        }
+
         return {
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
             getImageAndIframes: getImageAndIframes,
-            humanFileSize: humanFileSize
+            humanFileSize: humanFileSize,
+            getDisplayType: getDisplayType
         }
     }])
 
