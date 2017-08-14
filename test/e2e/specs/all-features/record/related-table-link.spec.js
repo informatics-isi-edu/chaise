@@ -56,11 +56,11 @@ describe('View existing record,', function() {
                     expect(headings).toEqual(testParams.tables_order);
                 });
             });
-        
+            
             // Page size is set to 2 for the file table so that only 2 entries should be present with a link
             it("should honor the page_size annotation for the table, file, in the compact/brief context.", function() {
                 var relatedTableName = testParams.related_table_name_with_page_size_annotation;
-        
+                
                 chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(count) {
                     expect(count).toBe(testParams.page_size);
                 });
@@ -68,10 +68,10 @@ describe('View existing record,', function() {
         
             // related table links tests
             var allWindows;
-        
+            
             it("should create a functional link for table rows with links in them.", function() {
                 var relatedTableName = testParams.related_table_name_with_link_in_table;
-        
+                
                 chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
                     return rows[0].all(by.tagName("td"));
                 }).then(function(cells) {
@@ -81,21 +81,21 @@ describe('View existing record,', function() {
                     expect(cell.indexOf("href")).toBeGreaterThan(-1);
                 });
             });
-        
+            
             it('should have a link to toggle between markdown and tabular views for markdown tables', function() {
                 var EC = protractor.ExpectedConditions, tableDisplay,
                     markdownRelatedTable = testParams.related_table_name_with_row_markdown_pattern, // "media"
                     markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(markdownRelatedTable);
-        
+                    
                 browser.wait(EC.elementToBeClickable(markdownToggleLink), browser.params.defaultTimeout);
-        
+                
                 // expect the markdown table to display this link
                 expect(markdownToggleLink.isDisplayed()).toBeTruthy();
-        
+                
                 // Expect initial display to be markdown by searching for a .markdown-container
                 var initialMarkdownDisplay = element(by.id('rt-heading-' + markdownRelatedTable)).element(by.css('.markdown-container'));
                 expect(initialMarkdownDisplay.isDisplayed()).toBeTruthy();
-        
+                
                 chaisePage.clickButton(markdownToggleLink).then(function() {
                     // After clicking toggle link, the table should now be displayed as a regular table (which would have an id of "rt-media")
                     tableDisplay = element(by.id('rt-' + markdownRelatedTable));
@@ -103,7 +103,7 @@ describe('View existing record,', function() {
                     return viewActions;
                 }).then(function(btns) {
                     browser.wait(EC.elementToBeClickable(btns[0]), browser.params.defaultTimeout);
-        
+                    
                     expect(tableDisplay.isDisplayed()).toBeTruthy();
                     return chaisePage.clickButton(markdownToggleLink);
                 }).then(function() {
@@ -113,14 +113,14 @@ describe('View existing record,', function() {
                     console.log(error);
                 });
             });
-        
+            
             describe("for a related entity without an association table", function() {
                 it('should have an "Add" link for a related table that redirects to that related table in recordedit with a prefill query parameter.', function() {
-        
+                    
                     var EC = protractor.ExpectedConditions, newTabUrl,
                         relatedTableName = testParams.related_regular_table,
                         addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
-        
+                        
                     // Should make sure user is logged in
                     browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
         
@@ -138,7 +138,7 @@ describe('View existing record,', function() {
                         newTabUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
                         return chaisePage.waitForElement(element(by.id('submit-record-button')));
                     }).then(function() {
-        
+                        
                         browser.wait(function () {
                             return browser.driver.getCurrentUrl().then(function(url) {
                                 return url.startsWith(newTabUrl);
@@ -150,17 +150,17 @@ describe('View existing record,', function() {
                         expect(url.indexOf(newTabUrl)).toBeGreaterThan(-1);
                         expect(url.indexOf('?prefill=')).toBeGreaterThan(-1);
                         expect(url.indexOf(relatedTableName)).toBeGreaterThan(-1);
-        
+                        
                         return chaisePage.recordEditPage.getFormTitle().getText();
                     }).then(function(text) {
                         var title = "Create " + relatedTableName + " Record";
                         expect(text).toBe(title);
-        
+                        
                         return chaisePage.recordEditPage.getForeignKeyInputs();
                     }).then(function(inputs) {
                         expect(inputs.length).toBe(1);
                         expect(inputs[0].getText()).toBe("Super 8 North Hollywood Motel");
-        
+                        
                         return chaisePage.recordEditPage.getInputById(0, "price");
                     }).then(function(input) {
                         input.sendKeys(testParams.price);
