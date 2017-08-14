@@ -1,0 +1,20 @@
+<div ng-class="{'pull-right':tabtype=='related',actionBarRTStyle:tabtype=='related'}">
+<div ng-class="{row:tabtype=='entity' && tabModelDisplay!= 'markdown',actionBarEntityStyle:tabtype=='entity' && tabModelDisplay=='markdown', actionBarEntityStyleWithMargin:tabtype=='entity' && tabModelDisplay != 'markdown'}">
+    <span ng-if="relatedTableRefDisplay == 'markdown'">
+        <a class="toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
+            <span ng-show="tabModelDisplay == 'markdown'">
+                <span ng-if="canEditRelated({ref:ref})">Edit</span>
+                <span ng-if="!canEditRelated({ref:ref})">Table Display</span>
+            </span>
+            <span ng-show="tabModelDisplay != 'markdown'">
+                <span ng-if="canEditRelated({ref:ref})">Display</span>
+                <span ng-if="!canEditRelated({ref:ref})">Revert Display</span>
+            </span>
+        </a>&nbsp;|</span>
+    <span ng-if="canCreateRelated({ref:ref})">
+        <a class="add-records-link" ng-click="addRelatedRecord({ref:ref})">Add</a>
+        &nbsp;|</span>
+    <span><a class="more-results-link" ng-click="toRecordSet({ref:ref})">View More</a></span>
+    <div ng-transclude></div>
+</div>
+</div>
