@@ -46,12 +46,8 @@ img.spinner {
     opacity: 0.8;
 }
 
-.glyphicon-trash {
+a .glyphicon-trash {
     color: #428bca;
-}
-
-button .glyphicon-trash {
-    color: #fff;
 }
 
 span[uib-tooltip] {
