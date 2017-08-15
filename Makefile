@@ -134,12 +134,7 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 
 
 JS_SOURCE=$(JS)/respond.js \
-	$(JS)/variables.js \
-	$(JS)/utils.js \
-	$(JS)/ermrest.js \
 	$(JS)/app.js \
-	$(JS)/facetsModel.js \
-	$(JS)/facetsService.js \
 	$(JS)/controller/ermrestDetailController.js \
 	$(JS)/controller/ermrestFilterController.js \
 	$(JS)/controller/ermrestInitController.js \
@@ -147,20 +142,26 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestResultsController.js \
 	$(JS)/controller/ermrestSideBarController.js \
 	$(JS)/controller/ermrestTourController.js \
+	$(JS)/ermrest.js \
+	$(JS)/facetsModel.js \
+	$(JS)/facetsService.js \
 	$(JS)/tour.js \
+	$(JS)/utils.js \
+	$(JS)/variables.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/delete-link.js \
+	$(COMMON)/ellipses.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/inputs.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/record.js \
-	$(COMMON)/ellipses.js \
 	$(COMMON)/table.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/bindHtmlUnsafe.js
+	$(COMMON)/utils.js
 
 # HTML templates
 TEMPLATES=views
@@ -303,33 +304,34 @@ RE_ASSETS=recordedit
 
 RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/angular-messages.min.js \
+	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/select.js \
+	$(JS)/vendor/rzslider.js \
+	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/mask.min.js \
 	$(COMMON)/vendor/moment.min.js \
 	$(COMMON)/vendor/sparkMD5.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
-	$(COMMON)/errors.js \
-	$(COMMON)/filters.js \
+	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/delete-link.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/errorDialog.controller.js \
+	$(COMMON)/filters.js \
+	$(COMMON)/footer.js \
+	$(COMMON)/inputs.js \
+	$(COMMON)/markdownPreview.js \
+	$(COMMON)/modal.js \
+	$(COMMON)/navbar.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/upload.js \
-	$(COMMON)/validators.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/errorDialog.controller.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/delete-link.js \
-	$(COMMON)/bindHtmlUnsafe.js \
-	$(COMMON)/markdownPreview.js \
-	$(COMMON)/footer.js \
-	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
-	$(JS)/vendor/select.js \
-	$(JS)/vendor/angular-datepicker.js \
-	$(JS)/vendor/rzslider.js
+	$(COMMON)/validators.js
 
 
 RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \

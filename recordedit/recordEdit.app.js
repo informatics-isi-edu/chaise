@@ -3,28 +3,29 @@
 
     angular.module('chaise.recordEdit', [
         '720kb.datepicker',
+        'angular-markdown-editor',
         'chaise.alerts',
         'chaise.authen',
         'chaise.delete',
         'chaise.errors',
         'chaise.filters',
+        'chaise.footer',
+        'chaise.inputs',
+        'chaise.html',
+        'chaise.markdown',
         'chaise.modal',
         'chaise.navbar',
-        'chaise.upload',
         'chaise.record.table',
-        'chaise.markdown',
+        'chaise.upload',
         'chaise.utils',
         'chaise.validators',
-        'chaise.html',
         'ermrestjs',
         'ngCookies',
         'ngMessages',
         'ngSanitize',
         'ui.bootstrap',
         'ui.mask',
-        'ui.select',
-        'angular-markdown-editor',
-        'chaise.footer'
+        'ui.select'
     ])
 
     .config(['$cookiesProvider', function($cookiesProvider) {
