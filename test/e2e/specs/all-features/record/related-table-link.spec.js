@@ -442,11 +442,10 @@ describe('View existing record,', function() {
                     return browser.switchTo().window(allWindows[1]);
                 }).then(function() {
                     var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + associationTableName + "/id_base=" + associationTableKey;
-                    expect(browser.driver.getCurrentUrl()).toContain(result);                    
-                }).then(function() {
+                    expect(browser.driver.getCurrentUrl()).toContain(result);
+                    return chaisePage.waitForElement(element(by.id('submit-record-button')));
+                }).then(function(){
                     return chaisePage.recordEditPage.getForeignKeyInputs();
-                }).then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
                 }).then(function(inputs) {
                     foreignKeyInputs = inputs;
                     return chaisePage.recordEditPage.getModalPopupBtnsUsingScript();
@@ -466,15 +465,14 @@ describe('View existing record,', function() {
                }).then(function() { 
                    return chaisePage.recordEditPage.submitForm();
                }).then(function(){
-                   browser.wait(function() {
-                       return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                   }, browser.params.defaultTimeout);
-               }).then (function() {
+
                    return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
-               }).then( function() {
+               }).then(function() {
                    browser.close();
                    return browser.switchTo().window(allWindows[0]);
                }).then(function (){
+                   browser.driver.navigate().refresh();
+                   chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
                    return chaisePage.recordPage.getRelatedTableRows(associationTableName);
                }).then(function(rows){
                    return rows[1].all(by.tagName("td"));
@@ -483,11 +481,11 @@ describe('View existing record,', function() {
                }).then(function(cell){
                   return cell[0].getAttribute('innerHTML');
               }).then(function(id){
-                   expect(id).toBe('4');
-               }).catch(function(error) {
-                    console.log(error);
-                    expect('There was an error in this promise chain').toBe('Please see error message.');
-                });
+                  expect(id).toBe('4');
+              }).catch(function(error) {
+                  console.log(error);
+                  expect('There was an error in this promise chain').toBe('Please see error message.');
+              });
             });
              
             it("on click of View button should redirect to record page of related entity", function(){
