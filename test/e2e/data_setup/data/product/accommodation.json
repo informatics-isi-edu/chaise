@@ -11,6 +11,7 @@
   "cover": 3001,
   "opened_on": "1976-06-15T00:00:00-07:00",
   "json_col":{"name":"testing_json"},
+  "json_col_with_markdown": "delivered",
   "date_col": "12/9/2008",
   "luxurious": true
  },
@@ -27,6 +28,7 @@
   "cover": 3002,
   "opened_on": "2002-01-22T00:00:00-08:00",
   "json_col":{"name":"testing_json"},
+  "json_col_with_markdown": "delivered",
   "date_col": "12/9/2008",
   "luxurious": true
  },
@@ -43,6 +45,7 @@
   "cover": 3005,
   "opened_on": "2008-12-09T00:00:00-08:00",
   "json_col":null,
+  "json_col_with_markdown": "delivered",
   "date_col": "12/9/2008",
   "luxurious": true
  },
@@ -73,6 +76,7 @@
  "description": "** CARING. SHARING. DARING.**\nRadisson^®^ is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding `Yes I Can!` ^SM^ service, comfort and style where you need us.\n\n**THE RADISSON^®^ WAY** Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to `Yes I Can!` ^SM^ hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.",
  "opened_on": "2013-06-11T00:00:00-07:00",
  "json_col":9876.3543,
+ "json_col_with_markdown": "Processing",
  "date_col": "12/9/2008",
  "luxurious": true
 },
