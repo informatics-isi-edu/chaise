@@ -3,20 +3,24 @@
 
     angular.module('chaise.inputs', ['chaise.validators'])
 
+    /**
+     * This directive is a reusable integer input for all types of integers that chaise 
+     * allows (int2, int4, int8). It includes the validator for the input as well.
+     */
     .directive('integerInput', function() {
         return {
             require: "?ngModel",
             restrict: 'E',
             scope: {
-                column: '=',
-                elePlaceholder: '=?',
-                formContainerInput: '=',
-                inputId: '@',
-                inputType: '@',
-                isDisabled: '=',
-                isRequired: '=',
-                isSubmitted: '=',
-                modelType: '@'
+                column: '=',                // column associated with the input
+                elePlaceholder: '=?',       // placeholder text
+                formContainerInput: '=',    // input field on the for container
+                inputId: '@',               // id for the input used by e2e tests
+                inputType: '@',             // input type as defined by getInputType
+                isDisabled: '=',            // boolean whether input is disabled
+                isRequired: '=',            // boolean whether input is required
+                isSubmitted: '=',           // boolean whether form was submitted
+                modelType: '@'              // model type as defined by ermrest
             },
             templateUrl: '../common/templates/inputs/integer.html',
             link: function(scope, elem, attr, ngModel) {
@@ -36,7 +40,6 @@
                     default:
                         break;
                 }
-                console.log(scope);
 
                 if (!ngModel) return;
 

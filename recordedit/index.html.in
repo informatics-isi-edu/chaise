@@ -171,35 +171,14 @@
                                                     <!-- int2 input -->
                                                     <integer-input ng-switch-when="integer2" input-id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" inputType="integer2" modelType="int2" ng-model="form.recordEditModel.rows[rowIndex][column.name]" column="::column" is-submitted="form.formContainer.$submitted"
                                                         is-required="::form.isRequired(column);" is-disabled="::form.isDisabled(column);" ele-placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);" form-container-input="form.formContainer.row[rowIndex][column.name]"></integer-input>
-                                                    <!-- <input ng-switch-when="integer2" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
-                                                        name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{::form.int2min}}" max="{{::form.int2max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
-                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
-                                                            <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
-                                                            <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
-                                                        </div>
-                                                    </input> -->
 
                                                     <!-- int4 input -->
                                                     <integer-input ng-switch-when="integer4" input-id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" input-type="integer4" model-type="int4" ng-model="form.recordEditModel.rows[rowIndex][column.name]" column="::column" is-submitted="form.formContainer.$submitted"
                                                         is-required="::form.isRequired(column);" is-disabled="::form.isDisabled(column);" ele-placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);" form-container-input="form.formContainer.row[rowIndex][column.name]"></integer-input>
-                                                    <!-- <input ng-switch-when="integer4" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
-                                                        name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{::form.int4min}}" max="{{::form.int4max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
-                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
-                                                            <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
-                                                            <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
-                                                        </div>
-                                                    </input> -->
 
                                                     <!-- int8 input -->
                                                     <integer-input ng-switch-when="integer8" input-id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" input-type="integer8" model-type="int8" ng-model="form.recordEditModel.rows[rowIndex][column.name]" column="::column" is-submitted="form.formContainer.$submitted"
                                                         is-required="::form.isRequired(column);" is-disabled="::form.isDisabled(column);" ele-placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);" form-container-input="form.formContainer.row[rowIndex][column.name]"></integer-input>
-                                                    <!-- <input ng-switch-when="integer8" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
-                                                        name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{::form.int8min}}" max="{{::form.int8max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
-                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
-                                                            <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
-                                                            <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
-                                                        </div>
-                                                    </input> -->
 
                                                     <!-- float/decimal/numeric -->
                                                     <input ng-switch-when="number" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]"
