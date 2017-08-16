@@ -219,7 +219,8 @@
             });
             vm.recordEditModel = recordEditModel;
         }
-        var addPopup = function(column,rowIndex){
+        var addPopup = function(ref,rowIndex){
+            var column = ref;
             // if (isDisabled(column)) return;
        
 
@@ -239,9 +240,10 @@
 
             var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
             //filteredRef(submissionRow)
-            params.reference = column._baseReference.contextualize.compactSelect;
+            params.reference = ref.contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
+            params.selectMode = "multi-select";
 
             var modalInstance = $uibModal.open({
                 animation: false,
@@ -258,15 +260,15 @@
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
-                var foreignKeyColumns = column.foreignKey.colset.columns;
-                for (var i = 0; i < foreignKeyColumns.length; i++) {
-                    var referenceCol = foreignKeyColumns[i];
-                    var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
+                // var foreignKeyColumns = column.foreignKey.colset.columns;
+                // for (var i = 0; i < foreignKeyColumns.length; i++) {
+                //     var referenceCol = foreignKeyColumns[i];
+                //     var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
 
-                    vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
-                }
-
-                vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
+                //     vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
+                // }
+                vm.recordEditModel.submissionRows[rowIndex][column.table.name] = tuple.data['term'];
+                vm.recordEditModel.rows[rowIndex][column.columns[0].name] = tuple.displayname.value;
             });
         }
         vm.addRelatedRecord = function(ref) {
@@ -285,9 +287,12 @@
                 cookie.keys[fromColumn.name] = $rootScope.tuple.data[toColumn.name];
             });
 
-            if(1){
+            if(ref.derivedAssociationReference){
                 updateViewModel(cookie);
-                addPopup(ref.contextualize.entryCreate.columns[0],0);
+                // NOTE: we're showing all the available domain values, which might result in 409
+                // also since we're changing context to compact, it might not refer to the same table (alternative tables)    
+                ref = ref.unfilteredReference.contextualize.compact;
+                addPopup(ref,0);
                 return;
             }
             

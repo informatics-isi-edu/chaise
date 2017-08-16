@@ -486,6 +486,7 @@
             params.reference = column.filteredRef(submissionRow).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
+            params.selectMode = "single-select";
 
             var modalInstance = $uibModal.open({
                 animation: false,

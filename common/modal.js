@@ -70,6 +70,7 @@
         var reference = params.reference;
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
+        var selectMode = params.selectMode?params.selectMode:"single-select";
 
         vm.tableModel = {
             hasLoaded:          false,
@@ -84,7 +85,7 @@
             rowValues:          [],
             selectedRows:       [],
             search:             null,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: "single-select"},
+            config:             {viewable: false, editable: false, deletable: false, selectMode: selectMode},
             context:            params.context
         };
 
