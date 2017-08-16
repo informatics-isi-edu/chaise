@@ -1,4 +1,4 @@
-<input ng-model="value" ng-change="onChange()" name="{{::column.name}}" type="number" class="form-control" ng-required="{{::isRequired}}" min="::min" max="::max" ng-disabled="{{::isDisabled}}" placeholder="{{::elePlaceholder}}" integer>
+<input id="{{inputId}}" ng-model="value" ng-change="onChange()" name="{{::column.name}}" type="number" class="form-control" ng-required="{{::isRequired}}" min="{{::min}}" max="{{::max}}" ng-disabled="{{::isDisabled}}" placeholder="{{::elePlaceholder}}" integer>
     <div ng-messages="formContainerInput.$error" ng-show="formContainerInput.$dirty  || isSubmitted" class="text-danger" role="alert" ng-if="::column.type.name == modelType">
         <div ng-message="min">This field requires a value greater than {{min}}.</div>
         <div ng-message="max">This field requires a value smaller than {{max}}.</div>

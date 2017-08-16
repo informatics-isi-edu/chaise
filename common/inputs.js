@@ -8,13 +8,14 @@
             require: "?ngModel",
             restrict: 'E',
             scope: {
-                column: '@',
-                elePlaceholder: '@',
-                formContainerInput: '@',
+                column: '=',
+                elePlaceholder: '=?',
+                formContainerInput: '=',
+                inputId: '@',
                 inputType: '@',
-                isDisabled: '@',
-                isRequired: '@',
-                isSubmitted: '@',
+                isDisabled: '=',
+                isRequired: '=',
+                isSubmitted: '=',
                 modelType: '@'
             },
             templateUrl: '../common/templates/inputs/integer.html',
@@ -35,8 +36,8 @@
                     default:
                         break;
                 }
+                console.log(scope);
 
-                console.log(ngModel);
                 if (!ngModel) return;
 
                 scope.onChange = function(){
