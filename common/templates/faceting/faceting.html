@@ -3,7 +3,7 @@
         <div class="panel-group" id="ft-cols-1">
             <div class="panel panel-default" ng-repeat="fc in vm.facetColumns track by $index">
                 <div class="panel-heading">
-                    <h4 class="panel-title accordion-toggle" data-toggle="collapse" href="#ft-col-1-{{$index}}">
+                    <h4 class="panel-title accordion-toggle collapsed" data-toggle="collapse" href="#ft-col-1-{{$index}}" ng-click="toggleFacet($index)">
                         <!-- data-parent="#ft-cols-1" -->
                         <a ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}" title="{{fc.comment}}">
                             <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
@@ -23,7 +23,7 @@
                 <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
                     <div class="panel-body">
                         <!-- <integer-range-picker ng-switch-when="int" vm="vm" facet-column="vm.facetColumns[$index]"></integer-range-picker> -->
-                        <string-picker vm="vm" facet-column="fc"></string-picker>
+                        <string-picker vm="vm" facet-column="fc" is-open="isOpen[$index]"></string-picker>
                     </div>
                 </div>
             </div>

@@ -7,7 +7,7 @@
      * Ways to use recordTable directive:
      *
      * 1. Table only
-     *    <record-table vm="vm" default-row-linking="true"></record-table>
+     *    <record-table vm="vm"></record-table>
      *
      * 2. Selectable table only with select function
      *    <record-table vm="vm" on-row-click="gotoRowLink(tuple)"></record-table>

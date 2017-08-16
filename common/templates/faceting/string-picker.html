@@ -10,27 +10,7 @@
         <!-- <span class="info"><span ng-bind="totalCount"></span> <span>results found.</span></span> -->
     </div>
     <div class="divider"></div>
-    <div ng-bind="facetColumn.sourceReference.uri"></div>
-    min: <div ng-bind="min"></div>
-    max: <div ng-bind="max"></div>
-    <!-- <table class="table table-bordered table-hover table-striped string-selector">
-        <thead class="table-heading">
-            <tr>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="item in values">
-                <td><span ng-bind="item.value"></span></td>
-            </tr>
-        </tbody>
-    </table> -->
-    <div class="pager">
-        <div class="btn btn-primary">
-            <i class="glyphicon glyphicon-chevron-left"></i>
-        </div>
-        <div class="btn btn-primary">
-            <i class="glyphicon glyphicon-chevron-right"></i>
-        </div>
-    </div>
+    <div ng-bind="facetColumn.sourceReference.location.ermrestUri"></div>
+    <loading-spinner ng-show="loading"></loading-spinner>
+    <recordset vm="domainModel"></recordset>
 </div>

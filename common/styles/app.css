@@ -801,7 +801,6 @@ footer .container1 {
     max-height: 140px;
     max-width: 98%;
     overflow-y: auto;
-    background-color: #f1f1f1;
  }
 
  .total-filters .filter-label {
@@ -834,7 +833,7 @@ footer .container1 {
 
  .faceting-container {
      overflow-y: auto;
-     max-height: 600px; /* needs js*/
+     /*max-height: 600px; /* needs js*/*/
  }
 
  .faceting-container .divider {
