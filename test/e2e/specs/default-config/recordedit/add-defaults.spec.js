@@ -33,7 +33,8 @@ var testParams = {
         timestamptz_disabled_value: "2010-06-13 17:22:00-07:00",
         timestamptz_disabled_no_default_value: "Automatically generated",
         json_value:JSON.stringify({"name":"testing_json"}),
-        json_disabled_value:JSON.stringify(98.786)
+        json_disabled_value:JSON.stringify(98.786),
+        json_disabled_no_default_value: "Automatically generated",
     },
     record_column_values: {
     // data values
@@ -77,7 +78,7 @@ describe('Record Add with defaults', function() {
             dateInput, dateDisabledInput,
             timestampInputs, timestampDisabledInput, timestampDisabledNoDefaultInput,
             timestamptzInputs, timestamptzDisabledInput, timestamptzDisabledNoDefaultInput,
-            jsonInput, jsonDisabledInput
+            jsonInput, jsonDisabledInput, jsonDisabledNoDefaultInput
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
@@ -123,7 +124,15 @@ describe('Record Add with defaults', function() {
             expect(jsonInputDisabled.getAttribute("value")).toBe(values.json_disabled_value, "JSON disabled input default is incorrect");
 
         });
+        
+        //JOSN columns
+        it("should initialize json columns properly if they are disabled without a default.", function() {
+            jsonDisabledNoDefaultInput = chaisePage.recordEditPage.getInputById(0, "json_disabled_no_default");
 
+            expect(jsonDisabledNoDefaultInput.getAttribute("value")).toBe("", "The disabled json value is incorrect");
+            expect(jsonDisabledNoDefaultInput.getAttribute("placeholder")).toBe(values.json_disabled_no_default_value, "The disabled json placeholder is incorrect");
+        });
+        
         // Timestamp columns
         it("should intialize timestamp columns properly with a default value.", function() {
             timestampInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn("timestamp", 0);

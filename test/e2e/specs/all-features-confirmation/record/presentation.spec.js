@@ -44,7 +44,8 @@ var testParams = {
         { title: "Thumbnail", value: null, type: "int4"},
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
         { title: "Is Luxurious", value: "true", type: "boolean" },
-        { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"}
+        { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"},
+        { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n", match:"html"}
     ],
     no_related_data: {
         key: {
@@ -110,13 +111,13 @@ describe('View existing record,', function() {
         });
 
         it("should show all of the related tables in the correct order.", function() {
-            var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
             browser.wait(function() {
                 return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
                     return (ct=testParams.no_related_data.tables_order.length);
                 });
             }, browser.params.defaultTimeout);
+            var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
             chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
                 expect(count).toBe(testParams.no_related_data.tables_order.length, "Number of related tables is not correct");

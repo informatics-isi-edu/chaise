@@ -39,7 +39,9 @@ var testParams = {
             {name: "date_null_col", value: null, displayType: "date"},
             {name: "date_col", value: "2016-08-15", displayType: "date"},
             {name: "fk_null_col", value: null, displayType: "popup-select"},
-            {name: "fk_col", value: "1", displayType: "popup-select"}
+            {name: "fk_col", value: "1", displayType: "popup-select"},
+            {name: "json_col", value: "89.586" , displayType: "json"},
+            {name: "json_null_col", value: null, displayType: "json"}
         ]
     },
     table_w_generated_columns : {
@@ -196,7 +198,9 @@ describe('When editing a record', function() {
                 "date_null_col": "2016-08-15",
                 "date_col": null,
                 "fk_null_col": 1,
-                "fk_col": null
+                "fk_col": null,
+                "json_null_col": null,
+                "json_col": 89.586
             };
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
@@ -277,7 +281,7 @@ describe('When editing a record', function() {
                                 newValue = '';
                             }
                             recordEditPage.selectDropdownValue(dropdown, newValue);
-                            break;
+                            break;                           
                         default:
                             var input = recordEditPage.getInputById(0, column.name);
                             input.clear().then(function() {
