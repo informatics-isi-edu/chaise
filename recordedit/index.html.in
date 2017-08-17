@@ -226,7 +226,7 @@
                                                     <!--JSON input -->
                                                     <div ng-switch-when="json">
                                                         <textarea json id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5"
-                                                            name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);"  empty-to-null></textarea>
+                                                            name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);"  placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}"  empty-to-null></textarea>
                                                     </div>
 
                                                     <!-- shorttext/default text input -->

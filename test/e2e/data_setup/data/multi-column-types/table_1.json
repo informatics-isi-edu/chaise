@@ -27,6 +27,8 @@
         "date_null_col": null,
         "date_col": "2016-08-15",
         "fk_null_col": null,
-        "fk_col": 1
+        "fk_col": 1,
+        "json_col" : "89.586",
+        "json_null_col": null
     }
 ]

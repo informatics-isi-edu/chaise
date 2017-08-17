@@ -241,7 +241,23 @@
             "typename": "json"
           },
           "annotations": {}
-      },
+        },
+        {
+          "comment": null,
+          "name": "json_col_with_markdown",
+          "default": "Processing",
+          "nullok": true,
+          "type": {
+            "typename": "json"
+          },
+          "annotations": {
+              "tag:isrd.isi.edu,2016:column-display": {
+                        "*": {
+                          "markdown_pattern": " Status is: {{{json_col_with_markdown}}}"
+                        }
+                    }
+          }
+        },
         {
           "comment": null,
           "name": "no_of_rooms",
@@ -346,10 +362,10 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", ["product-recordset", "fk_category"], "website", "rating", "summary", "description","json_col", ["product-recordset", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
-          "entry/create": ["id", "title", "website", ["product-recordset", "fk_category"], "rating", "summary", "description","json_col", "no_of_rooms", ["product-recordset", "fk_thumbnail"], ["product-recordset", "fk_cover"],"terms", "opened_on","luxurious"],
-          "entry/edit": ["id", "title", "website", ["product-recordset", "fk_category"], "rating", "summary", "description","json_col", "no_of_rooms", ["product-recordset", "fk_thumbnail"], ["product-recordset", "fk_cover"],"terms", "opened_on","luxurious"],
-          "compact" : ["title", "website", "rating", "summary","terms", "opened_on", "luxurious","json_col"]
+          "detailed" : ["id", ["product-recordset", "fk_category"], "website", "rating", "summary", "description","json_col", "json_col_with_markdown", ["product-recordset", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
+          "entry/create": ["id", "title", "website", ["product-recordset", "fk_category"], "rating", "summary", "description","json_col", "json_col_with_markdown","no_of_rooms", ["product-recordset", "fk_thumbnail"], ["product-recordset", "fk_cover"],"terms", "opened_on","luxurious"],
+          "entry/edit": ["id", "title", "website", ["product-recordset", "fk_category"], "rating", "summary", "description","json_col", "json_col_with_markdown","no_of_rooms", ["product-recordset", "fk_thumbnail"], ["product-recordset", "fk_cover"],"terms", "opened_on","luxurious"],
+          "compact" : ["title", "website", "rating", "summary","terms", "opened_on", "luxurious","json_col", "json_col_with_markdown"]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {

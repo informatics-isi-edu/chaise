@@ -315,6 +315,22 @@
         },
         {
           "comment": null,
+          "name": "json_col_with_markdown",
+          "default": "Processing",
+          "nullok": true,
+          "type": {
+            "typename": "json"
+          },
+          "annotations": {
+              "tag:isrd.isi.edu,2016:column-display": {
+                        "*": {
+                          "markdown_pattern": " Status is: {{{json_col_with_markdown}}}"
+                        }
+                    }
+          }
+        },
+        {
+          "comment": null,
           "name": "luxurious",
           "default": null,
           "nullok": true,
@@ -342,11 +358,11 @@
         },
         "description": {
           "display": "Accommodations",
-          "top_columns": ["title", "rating", "category", "opened_on","json_col"]
+          "top_columns": ["title", "rating", "category", "opened_on", "json_col", "json_col_with_markdown"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : [
-            "id", "title", "website", ["product-record", "fk_category"],"id", "title", "website", ["product-record", "fk_booking_accommodation"], "rating", "summary", "description", "no_of_rooms", ["product-record", "fk_cover"], ["product-record", "fk_thumbnail"], "opened_on", "luxurious","json_col"
+            "detailed" : [
+            "id", "title", "website", ["product-record", "fk_category"],"id", "title", "website", ["product-record", "fk_booking_accommodation"], "rating", "summary", "description", "no_of_rooms", ["product-record", "fk_cover"], ["product-record", "fk_thumbnail"], "opened_on", "luxurious","json_col","json_col_with_markdown"
         ]
         },
 
