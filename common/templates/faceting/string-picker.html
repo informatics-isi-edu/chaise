@@ -1,5 +1,5 @@
 <div class="string-picker">
-    <div class="string-search">
+    <!-- <div class="string-search">
         <div class="input-group">
             <input type="text" class="form-control" placeholder="Search Key" ng-model="searchKey" />
             <span class="input-group-btn">
@@ -8,9 +8,11 @@
             </span>
         </div>
         <!-- <span class="info"><span ng-bind="totalCount"></span> <span>results found.</span></span> -->
-    </div>
-    <div class="divider"></div>
+    <!-- </div> --> 
+    <!-- <div class="divider"></div> -->
     <div ng-bind="facetColumn.sourceReference.location.ermrestUri"></div>
+    <div ng-bind="facetColumn.column._baseReference.location.ermrestUri"></div>
+    <div ng-bind="domainRef.uri"></div>
     <loading-spinner ng-show="loading"></loading-spinner>
-    <recordset vm="domainModel"></recordset>
+    <recordset vm="domainModel" on-row-click="changeFilters"></recordset>
 </div>

@@ -103,9 +103,10 @@
         }
 
         fetchRecords();
-
-        function ok(tuple) {
-            $uibModalInstance.close(tuple);
+        
+        // since this is currently used for single select mode, the isSelected will always be true
+        function ok(tuples, isSelected) {
+            $uibModalInstance.close(tuples[0]);
         }
 
         function cancel() {

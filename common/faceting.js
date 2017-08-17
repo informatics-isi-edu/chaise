@@ -14,8 +14,12 @@
                     
                     scope.isOpen = [];
                     scope.hasFilter = function (col) {
+                        if(scope.vm.reference == null) {
+                            return false;
+                        }
+                        
                         if (typeof col === 'undefined') {
-                            return scope.vm.reference.location.facets !== null; //TODO
+                            return scope.vm.reference.location.facets != null; //TODO
                         } else {
                             return col.filters.length !== 0;
                         }
@@ -44,16 +48,20 @@
                             scope.isOpen[index] = true;
                         }
                     };
+                    
+                    scope.vm.hasFilter = function (col) {
+                        return scope.hasFilter(col);
+                    }
 
                     // TODO I am attaching the removeFilter to the vm here, maybe I shouldn't?
                     scope.vm.removeFilter = function (colId, id) {
                         scope.removeFilter(colId, id);
                     }
                     
-                    // scope.$on('reference-updated', function (event, data) {
-                    //     scope.$broadcast('reference-updated');
-                    //     console.log('reference updated in faceting');
-                    // });
+                    scope.$on('reference-updated', function (event, data) {
+                        console.log('reference updated in faceting');
+                        scope.$broadcast('update-all');
+                    });
                 }
             };
         }])
@@ -61,7 +69,14 @@
         .directive('stringPicker', ['$window', 'DataUtils', function ($window, DataUtils) {
             
             function updateFacetColumn(scope) {
+                console.log(scope.facetColumn.displayname.value + ": updating domainRef");
                 scope.domainRef = scope.facetColumn.column.groupAggregate.entityCounts;
+                scope.selectedRows = scope.facetColumn.choiceFilters.map(function (f) { 
+                    return {
+                        displayname: f.toString(), 
+                        key: f.term
+                    };
+                });
             }
             
             return {
@@ -77,7 +92,7 @@
                     scope.fetched = false;
                     scope.loading = true;
                     
-                    scope.domainRef = scope.facetColumn.column.groupAggregate.entityCounts;
+                    updateFacetColumn(scope);
                     scope.domainModel = {
                         hasLoaded: !scope.loading,
                         tableDisplayName: null, //TODO
@@ -89,17 +104,19 @@
                         sortby: null,
                         sortOrder: null,
                         rowValues: [],
-                        selectedRows: [],
+                        selectedRows: scope.selectedRows,
                         pageLimit: 5,
-                        config: {viewable: false, editable: false, deletable: false, selectMode: "multi-select"}
+                        config: {
+                            viewable: false, editable: false, deletable: false, selectMode: "multi-select",
+                            hideTotalCount: true, hideSelectedRows: true
+                        }
                     };
                     
                     // this should be part of recordset directive to do it by default if the page is not defined
                     var fetchRecords = function() {
                         // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
                         scope.loading = true;
-                        console.log('reading: ');
-                        console.log(scope.domainRef.uri);
+                        console.log(scope.facetColumn.displayname.value + ": fetching " + scope.domainRef.uri);
                         scope.domainRef.read(5).then(function getPseudoData(page) {
                             scope.domainModel.hasLoaded = true;
                             scope.domainModel.initialized = true;
@@ -116,25 +133,33 @@
                     
                     
                     // METHODS:
-                    scope.addFilter = function () {
-                        if(scope.searchKey === undefined || scope.searchKey === null || scope.searchKey.trim().length == 0) {
-                            return;
+                    scope.changeFilters = function (tuples, isSelected) {
+                        var ref;
+                        var terms = tuples.map(function (t) {
+                            return t.uniqueId;
+                        });
+                        if (isSelected) {
+                            ref = scope.facetColumn.addChoiceFilters(terms);
+                        } else {
+                            ref = scope.facetColumn.removeChoiceFilters(terms);
                         }
-                        var value = scope.searchKey.trim();
                         
-                        scope.vm.reference = scope.facetColumn.addSearchFilter(value);
+                        scope.vm.reference = ref;
                         scope.$emit("reference-updated");
                     };
                     
-                    scope.$on('reference-updated', function (event, data) {
-                        console.log('reference updated in string picker for ' + scope.facetColumn.column.name);
+                    scope.$on('update-all', function (event, data) {
+                        console.log(scope.facetColumn.displayname.value + ": got the update-all");
                         updateFacetColumn(scope);
                         scope.fetched = false;
+                        if (scope.isOpen) {
+                            fetchRecords();
+                        }
                     });
                     
                     scope.$watch("isOpen", function (newVal, oldVal) {
-                        console.log('opened!!!!');
                         if (newVal && !scope.fetched) {
+                            console.log(scope.facetColumn.displayname.value + ": opened!");
                             fetchRecords();
                         }
                     });   

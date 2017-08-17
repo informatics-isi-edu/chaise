@@ -18,8 +18,13 @@
      * 4. Selectable table with search, page size, previous/next
      *    <recordset vm="vm" on-row-click="gotoRowLink(tuple)"></recordset>
      *
-     *
-     * vm is the table model, should have this format:
+     * These are recordset and record-table directive parameters:
+     * - onRowClick(tuple, isSelected): 
+     *   - A callback for when in select mode a row is selected.
+     *   - If isSelected is false, that means the row has been deselected.
+     * - 
+     * 
+     * - vm: The table model, should have this format:
      *
      *      { hasLoaded,    // data is ready, loading icon should not be visible
      *        reference,    // reference object
@@ -33,14 +38,20 @@
      *        rowValues,    // array of rows values, each value has this structure {isHTML:boolean, value:value}
      *        selectedRows, // array of selected rows
      *        search,       // search term, null for none
-     *        config,       // {viewable, editable, deletable, selectMode}
+     *        config,       // {viewable, editable, deletable, selectMode} TODO should be renamed to mode
      *        context       // reference's context
+     *        options,
      *       }
      *
      *      config.selectMode can be one of the following:
      *          no-select       // do not allow selection of the rows
      *          single-select   // only allow one row to be selected
      *          multi-select    // allow the user to select as many rows as they want
+     *
+     *      options:
+     *          hideSelectedRows
+     *          hideTotalCount
+     *          
      *
      *
      * Handle recordset/recordTable events in your controller:
@@ -157,13 +168,27 @@
     }])
 
     .directive('recordTable', ['AlertsService', 'recordTableUtils', function(AlertsService, recordTableUtils) {
-
+        
+        function callOnRowClick(scope, tuples, isSelected) {
+            if (scope.onRowClickBind) {
+                console.log('calling bind');
+                scope.onRowClickBind()(tuples, isSelected);
+            } else if (scope.onRowClick) {
+                console.log('calling');
+                scope.onRowClick()(tuples, isSelected);
+            }
+        }
+        
         return {
             restrict: 'E',
             templateUrl: '../common/templates/table.html',
             scope: {
                 vm: '=',
-                onRowClickBind: '=?',    // used by the recordset template to pass down on click function
+                /*
+                 * used by the recordset template to pass down on click function
+                 * The recordset has a onRowClick which will be passed to this onRowClickBind.
+                 */
+                onRowClickBind: '=?',    
                 onRowClick: '&?'      // set row click function
             },
             link: function (scope, elem, attr) {
@@ -201,26 +226,42 @@
 
                 // this is for the button on the table heading that deselects all currently visible rows
                 scope.selectNone = function() {
+                    var tuples = [], tuple;
                     for (var i = 0; i < scope.vm.page.tuples.length; i++) {
-                        var key = scope.vm.page.tuples[i].uniqueId;
+                        tuple = scope.vm.page.tuples[i];
+                        var key = tuple.uniqueId;
 
                         var index = scope.vm.selectedRows.findIndex(function (obj) {
-                            return obj.key == key
+                            return obj.key == key;
                         });
 
-                        if (index > -1) scope.vm.selectedRows.splice(index, 1);
+                        if (index > -1) {
+                            tuples.push(tuple);
+                            scope.vm.selectedRows.splice(index, 1);
+                        }
+                    }
+                    if (tuples.length > 0) {
+                        callOnRowClick(scope, tuples, false);
                     }
                 };
 
                 // this is for the button on the table heading that selects all currently visible rows
                 scope.selectAll = function() {
+                    var tuples = [], tuple;
                     for (var i = 0; i < scope.vm.page.tuples.length; i++) {
+                        tuple = scope.vm.page.tuples[i];
                         var displayObj = {
-                            displayname: scope.vm.page.tuples[i].displayname.value,
-                            key: scope.vm.page.tuples[i].uniqueId
+                            displayname: tuple.displayname.value, //TODO this is wrong, we should take care of HTML too
+                            key: tuple.uniqueId
                         };
 
-                        if (!scope.isSelected(displayObj.key)) scope.vm.selectedRows.push(displayObj);
+                        if (!scope.isSelected(displayObj.key)) { 
+                            tuples.push(tuple);
+                            scope.vm.selectedRows.push(displayObj);
+                        }
+                    }
+                    if (tuples.length > 0) {
+                        callOnRowClick(scope, tuples, true);
                     }
                 };
 
@@ -228,10 +269,12 @@
                  * Creates a displayObj with a unique identifier to store the selected rows
                  *  displayname =   used for the display value in the pills for which which row is selected`
                  *  key =           unique identifier that is composed from each shortest key column's value
+                 *  tuple =         the tuple object
                  *
                  * Facilitates the multi select functionality for multi edit in the future
                  */
                 scope.onSelect = function(args) {
+                    console.log(args);
                     var tuple = args.tuple;
                     
                     var displayObj = {
@@ -244,17 +287,15 @@
                     });
 
                     // add the tuple to the list of selected rows
-                    if (rowIndex === -1) {
+                    var isSelected = rowIndex === -1;
+                    
+                    if (isSelected) {
                         scope.vm.selectedRows.push(displayObj);
                     } else {
                         scope.vm.selectedRows.splice(rowIndex, 1);
                     }
-
-                    if (scope.onRowClickBind) {
-                        scope.onRowClickBind(args);
-                    } else if (scope.onRowClick) {
-                        scope.onRowClick(args);
-                    }
+                    
+                    callOnRowClick(scope, [tuple], isSelected);
                 };
             }
         };
@@ -436,7 +477,7 @@
                 }
 
                 scope.$on('recordset-update', function($event) {
-                    if (scope.vm.search == scope.vm.reference.location.searchTerm) {
+                    if (!scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
                         // get the total row count to display above the table
                         scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
                             // NOTE: scenario: A user triggered a foreground search. Once it returns the aggregate count request is queued.
