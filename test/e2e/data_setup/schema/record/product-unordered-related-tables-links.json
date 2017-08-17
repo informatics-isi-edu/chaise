@@ -863,6 +863,111 @@
           ],
           "annotations": {}
       },
+      "related_table_markdown": {
+            "comment":"This is a related table with markdown annotations",
+            "kind": "table",
+            "keys": [
+              {
+                "comment": null,
+                "annotations": {},
+                "unique_columns": [
+                  "id"
+                ]
+              }
+            ],
+            "foreign_keys": [],
+            "table_name": "related_table_markdown",
+            "schema_name": "product-unordered-related-tables-links",
+            "column_definitions": [
+              {
+                "name": "id",
+                "nullok": false,
+                "type": {
+                  "typename": "text"
+                }
+              },
+              {
+                "name": "facility",
+                "type": {
+                  "typename": "text"
+                }
+              }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+               "*": {
+                 "separator_markdown": " ", 
+                 "row_markdown_pattern": " **{{id}}:{{facility}}**{.vocab} "
+               }
+             }
+            }
+        },
+      "association_table_markdown": {
+            "comment":"This is an association table for markdown display",
+            "kind": "table",
+            "keys": [
+              {
+                "comment": null,
+                "annotations": {},
+                "unique_columns": [
+                  "id_related", "id_base"
+                ]
+              }
+            ],
+            "foreign_keys": [
+                {
+                    "comment": "",
+                    "foreign_key_columns": [{
+                        "table_name": "association_table_markdown",
+                        "schema_name": "product-unordered-related-tables-links",
+                        "column_name": "id_related"
+                    }],
+                    "referenced_columns": [{
+                        "table_name": "related_table_markdown",
+                        "schema_name": "product-unordered-related-tables-links",
+                        "column_name": "id"
+                    }],
+                    "annotations": {}
+                },
+                {
+                    "comment": "",
+                    "foreign_key_columns": [{
+                        "table_name": "association_table_markdown",
+                        "schema_name": "product-unordered-related-tables-links",
+                        "column_name": "id_base"
+                    }],
+                    "referenced_columns": [{
+                        "table_name": "accommodation",
+                        "schema_name": "product-unordered-related-tables-links",
+                        "column_name": "id"
+                    }],
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "to_name": "base table association related"
+                        }
+                    }
+                }
+            ],
+            "table_name": "association_table_markdown",
+            "schema_name": "product-unordered-related-tables-links",
+            "column_definitions": [
+              {
+                "name": "id_related",
+                "nullok": false,
+                "type": {
+                  "typename": "text"
+                }
+              },
+              {
+                "name": "id_base",
+                "nullok": false,
+                "type": {
+                  "typename": "serial4"
+                }
+              }
+            ],
+            "annotations": {}
+        },
     "association_table": {
           "comment":"This is an association table to hold the association of accomodation and facility",
           "kind": "table",
@@ -939,7 +1044,9 @@
     "booking",
     "media",
     "related_table",
-    "association_table"
+    "association_table",
+    "association_table_markdown",
+    "related_table_markdown"
   ],
   "comment": null,
   "annotations": {
