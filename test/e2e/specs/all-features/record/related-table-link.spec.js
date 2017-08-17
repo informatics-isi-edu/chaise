@@ -588,11 +588,6 @@ describe('View existing record,', function() {
                     return browser.switchTo().window(allWindows[0]);
                 }).then(function (){ 
                      // browser.switchTo() does not work some times and the test case fails
-                     browser.wait(function () {
-                            return chaisePage.recordPage.getRelatedTableRows(associationTableName).count().then(function (ct) {
-                                return (ct > 1);
-                            });
-                        });
                      return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
                 }).then(function (count){
                     expect(count).toBe(testParams.association_count + 1);
