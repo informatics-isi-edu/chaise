@@ -20,7 +20,8 @@
                 isDisabled: '=',            // boolean whether input is disabled
                 isRequired: '=',            // boolean whether input is required
                 isSubmitted: '=',           // boolean whether form was submitted
-                modelType: '@'              // model type as defined by ermrest
+                modelType: '@',             // model type as defined by ermrest
+                onChangeCb: '=?'            // callback function to trigger when the input field changes
             },
             templateUrl: '../common/templates/inputs/integer.html',
             link: function(scope, elem, attr, ngModel) {
@@ -45,6 +46,8 @@
 
                 scope.onChange = function(){
                     ngModel.$setViewValue(scope.value);
+
+                    if (scope.onChangeCb) scope.onChangeCb();
                 };
 
                 ngModel.$render = function(){

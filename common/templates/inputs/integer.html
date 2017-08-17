@@ -2,5 +2,6 @@
     <div ng-messages="formContainerInput.$error" ng-show="formContainerInput.$dirty  || isSubmitted" class="text-danger" role="alert" ng-if="::column.type.name == modelType">
         <div ng-message="min">This field requires a value greater than {{min}}.</div>
         <div ng-message="max">This field requires a value smaller than {{max}}.</div>
+        <div ng-message="integer">Please enter an integer value.</div>
     </div>
 </input>
