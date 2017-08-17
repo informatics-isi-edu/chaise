@@ -9,7 +9,7 @@
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
         var context = $rootScope.context;
-
+        
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
@@ -113,6 +113,133 @@
         };
 
         // Send user to RecordEdit to create a new row in this related table
+        function uploadFiles(submissionRowsCopy, isUpdate, onSuccess) {
+
+            // If url is valid
+            // if (areFilesValid(submissionRowsCopy)) {
+            if (1) {
+                $uibModal.open({
+                    templateUrl: "../common/templates/uploadProgress.modal.html",
+                    controller: "UploadModalDialogController",
+                    controllerAs: "ctrl",
+                    size: "md",
+                    backdrop: 'static',
+                    keyboard: false,
+                    resolve: {
+                        params: {
+                            reference: $rootScope.reference,
+                            rows: submissionRowsCopy
+                        }
+                    }
+                }).result.then(onSuccess, function (exception) {
+                    vm.readyToSubmit = false;
+                    vm.submissionButtonDisabled = false;
+
+                    if (exception) AlertsService.addAlert(exception.message, 'error');
+                });
+            } else {
+                vm.readyToSubmit = false;
+                vm.submissionButtonDisabled = false;
+            }
+        }
+
+        function addRecords(isUpdate, derivedref) {
+            var model = vm.recordEditModel;
+            var form = vm.formContainer;
+
+            // this will include updated and previous raw values.
+            var submissionRowsCopy = [];
+
+            model.submissionRows.forEach(function (row) {
+                submissionRowsCopy.push(Object.assign({}, row));
+            });
+
+            
+
+            //call uploadFiles which will upload files and callback on success
+            uploadFiles(submissionRowsCopy, isUpdate, function () {
+
+                var fn = "create", fnScope = derivedref.unfilteredReference.contextualize.entryCreate, args = [submissionRowsCopy];
+
+                fnScope[fn].apply(fnScope, args).then(function success(result) {
+
+                    var page = result.successful;
+                    var failedPage = result.failed;
+
+                    // the returned reference is contextualized and we don't need to contextualize it again
+                    var resultsReference = page.reference;
+                    vm.readyToSubmit = false; // form data has already been submitted to ERMrest
+
+                    if (model.rows.length == 1) {
+                        //vm.redirectAfterSubmission(page);
+                        console.log("Succesfully added");
+                    } else { // multi create/edit: show result
+                        AlertsService.addAlert({ type: 'success', message: 'Your data has been submitted. Showing you the result set...' });
+
+                        // can't use page.reference because it reflects the specific values that were inserted
+                        vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
+                        //set values for the view to flip to recordedit resultset view
+                        vm.resultsetModel = {
+                            hasLoaded: true,
+                            reference: resultsReference,
+                            tableDisplayName: resultsReference.displayname,
+                            columns: resultsReference.columns,
+                            enableSort: false,
+                            sortby: null,
+                            sortOrder: null,
+                            page: page,
+                            pageLimit: model.rows.length,
+                            rowValues: DataUtils.getRowValuesFromTuples(page.tuples),
+                            selectedRows: [],
+                            search: null,
+                            config: {
+                                viewable: false,
+                                editable: false,
+                                deletable: false,
+                                selectMode: 'no-select'
+                            }
+                        };
+
+                        // NOTE: This case is for a pseudo-failure case
+                        // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
+                        if (failedPage !== null) {
+                            vm.omittedResultsetModel = {
+                                hasLoaded: true,
+                                reference: resultsReference,
+                                tableDisplayName: resultsReference.displayname,
+                                columns: resultsReference.columns,
+                                enableSort: false,
+                                sortby: null,
+                                sortOrder: null,
+                                page: page,
+                                pageLimit: model.rows.length,
+                                rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
+                                selectedRows: [],
+                                search: null,
+                                config: {
+                                    viewable: false,
+                                    editable: false,
+                                    deletable: false,
+                                    selectMode: 'no-select'
+                                }
+                            };
+                        }
+
+                        vm.resultset = true;
+                    }
+                }).catch(function (exception) {
+                    vm.submissionButtonDisabled = false;
+                    if (exception instanceof ERMrest.NoDataChangedError) {
+                        AlertsService.addAlert(exception.message, 'warning');
+                    } else {
+                        AlertsService.addAlert(exception.message, 'error');
+                    }
+                });
+
+            });
+
+        }
+        
         function isDisabled(column) {
             try {
                 if (column.getInputDisabled(context.appContext)) {
@@ -219,7 +346,7 @@
             });
             vm.recordEditModel = recordEditModel;
         }
-        var addPopup = function(ref,rowIndex){
+        var addPopup = function(ref,rowIndex,derivedref){
             var column = ref;
             // if (isDisabled(column)) return;
        
@@ -238,7 +365,7 @@
                 editOrCopy = false;
             }
 
-            var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
+            //var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
             //filteredRef(submissionRow)
             params.reference = ref.contextualize.compactSelect;
             params.reference.session = $rootScope.session;
@@ -256,7 +383,7 @@
                 templateUrl: "../common/templates/searchPopup.modal.html"
             });
 
-            modalInstance.result.then(function dataSelected(tuple) {
+            modalInstance.result.then(function dataSelected(tuples) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
@@ -267,8 +394,18 @@
 
                 //     vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
                 // }
-                vm.recordEditModel.submissionRows[rowIndex][column.table.name] = tuple.data['term'];
-                vm.recordEditModel.rows[rowIndex][column.columns[0].name] = tuple.displayname.value;
+                // var key_subRow = vm.recordEditModel.submissionRows[0];
+                // var key_row = vm.recordEditModel.rows[0];
+                // for (i = 1; i < tuples.length; i++) {
+                //     vm.recordEditModel.submissionRows.push(key_subRow);
+                //     vm.recordEditModel.rows.push(key_row);
+                // }
+                for(i=0;i<tuples.length;i++){                  
+                    vm.recordEditModel.submissionRows[0][column.table.name] = tuples[i].data['term'];
+                    vm.recordEditModel.rows[0][column.columns[0].name] = tuples[i].displayname.value;
+                    addRecords(false, derivedref);
+                }
+                
             });
         }
         vm.addRelatedRecord = function(ref) {
@@ -286,13 +423,15 @@
                 // Assign the column value into cookie
                 cookie.keys[fromColumn.name] = $rootScope.tuple.data[toColumn.name];
             });
-
+            
             if(ref.derivedAssociationReference){
+                var derivedref = ref.derivedAssociationReference;
                 updateViewModel(cookie);
                 // NOTE: we're showing all the available domain values, which might result in 409
                 // also since we're changing context to compact, it might not refer to the same table (alternative tables)    
                 ref = ref.unfilteredReference.contextualize.compact;
-                addPopup(ref,0);
+                
+                addPopup(ref,0,derivedref);
                 return;
             }
             

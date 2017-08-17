@@ -14,7 +14,8 @@
         'chaise.utils',
         'ermrestjs',
         'ui.bootstrap',
-        'chaise.footer'
+        'chaise.footer',
+        'chaise.upload'
     ])
 
     .factory('constants', [function(){

@@ -66,12 +66,14 @@
         vm.params = params;
         vm.ok = ok;
         vm.cancel = cancel;
+        vm.submit = submitMutliSelection;
 
         var reference = params.reference;
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
         var selectMode = params.selectMode?params.selectMode:"single-select";
-
+        var tuplesCollection = [];
+        
         vm.tableModel = {
             hasLoaded:          false,
             reference:          reference,
@@ -106,7 +108,13 @@
         fetchRecords();
 
         function ok(tuple) {
-            $uibModalInstance.close(tuple);
+            if(selectMode!="multi-select")
+                $uibModalInstance.close(tuple);
+            else
+                tuplesCollection.push(tuple); //keep pushing selected rows
+        }
+        function submitMutliSelection() {
+            $uibModalInstance.close(tuplesCollection);
         }
 
         function cancel() {

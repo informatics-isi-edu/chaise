@@ -5,7 +5,9 @@
         <span ng-if="::!ctrl.reference.displayname.isHTML" ng-bind="::ctrl.reference.displayname.value"></span>
     </h3>
 </div>
+
 <div class="modal-body">
     <loading-spinner ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch"></loading-spinner>
+    <span ng-show="ctrl.tableModel.config.selectMode=='multi-select'"><button class="btn btn-primary pull-right" type="button" ng-click="ctrl.submit(tuple)">Submit</button></span>
     <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok(tuple)"></recordset>
 </div>
