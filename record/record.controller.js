@@ -152,9 +152,7 @@
 
             model.submissionRows.forEach(function (row) {
                 submissionRowsCopy.push(Object.assign({}, row));
-            });
-
-            
+            });           
 
             //call uploadFiles which will upload files and callback on success
             uploadFiles(submissionRowsCopy, isUpdate, function () {
@@ -170,11 +168,7 @@
                     var resultsReference = page.reference;
                     vm.readyToSubmit = false; // form data has already been submitted to ERMrest
 
-                    if (model.rows.length == 1) {
-                        //vm.redirectAfterSubmission(page);
-                        console.log("Succesfully added");
-                    } else { // multi create/edit: show result
-                        AlertsService.addAlert({ type: 'success', message: 'Your data has been submitted. Showing you the result set...' });
+                        AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
 
                         // can't use page.reference because it reflects the specific values that were inserted
                         vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
@@ -226,7 +220,7 @@
                         }
 
                         vm.resultset = true;
-                    }
+                    
                 }).catch(function (exception) {
                     vm.submissionButtonDisabled = false;
                     if (exception instanceof ERMrest.NoDataChangedError) {
@@ -394,17 +388,29 @@
 
                 //     vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
                 // }
-                // var key_subRow = vm.recordEditModel.submissionRows[0];
-                // var key_row = vm.recordEditModel.rows[0];
+                var key_subRow ={},key_row={};
+                angular.copy(vm.recordEditModel.submissionRows[0],key_subRow);
+                angular.copy(vm.recordEditModel.rows[0],key_row);
                 // for (i = 1; i < tuples.length; i++) {
                 //     vm.recordEditModel.submissionRows.push(key_subRow);
                 //     vm.recordEditModel.rows.push(key_row);
                 // }
-                for(i=0;i<tuples.length;i++){                  
-                    vm.recordEditModel.submissionRows[0][column.table.name] = tuples[i].data['term'];
-                    vm.recordEditModel.rows[0][column.columns[0].name] = tuples[i].displayname.value;
-                    addRecords(false, derivedref);
+                for(i=0;i<tuples.length;i++){        
+                    if(i!=0){
+                        var ob1 = {},ob2={}; 
+                        angular.copy(key_subRow, ob1)
+                        angular.copy(key_row, ob2)
+                        ob1[column.table.name] = tuples[i].key;//tuples[i].data['term'];
+                        vm.recordEditModel.submissionRows.push(ob1);
+                        ob2[column.columns[0].name] = tuples[i].displayname;//tuples[i].displayname.value;
+                        vm.recordEditModel.rows.push(ob2);
+                    }          
+                    else{                                       
+                        vm.recordEditModel.submissionRows[i][column.table.name] = tuples[i].key;//tuples[i].data['term'];
+                        vm.recordEditModel.rows[i][column.columns[0].name] = tuples[i].displayname;//tuples[i].displayname.value;
                 }
+                }
+                addRecords(false, derivedref);
                 
             });
         }

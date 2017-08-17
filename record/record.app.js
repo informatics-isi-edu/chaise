@@ -4,6 +4,7 @@
     angular.module('chaise.record', [
         'ngSanitize',
         'ngCookies',
+        'chaise.alerts',
         'chaise.delete',
         'chaise.errors',
         'chaise.modal',
