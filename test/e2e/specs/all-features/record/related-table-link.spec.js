@@ -550,8 +550,8 @@ describe('View existing record,', function() {
                 var EC = protractor.ExpectedConditions, newTabUrl, foreignKeyInputs;
                 browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
                 
-                expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
-                expect(addRelatedRecordLink.getText()).toBe("Add");
+                expect(addRelatedRecordLink.isDisplayed()).toBeTruthy("The Add button is not displayed");
+                expect(addRelatedRecordLink.getText()).toBe("Add", "The Add button is not displayed as Add");
                 
                 addRelatedRecordLink.click().then(function(){
                     return browser.getAllWindowHandles();
@@ -587,6 +587,12 @@ describe('View existing record,', function() {
                     browser.close();
                     return browser.switchTo().window(allWindows[0]);
                 }).then(function (){ 
+                     // browser.switchTo() does not work some times and the test case fails
+                     browser.wait(function () {
+                            return chaisePage.recordPage.getRelatedTableRows(associationTableName).count().then(function (ct) {
+                                return (ct > 1);
+                            });
+                        });
                      return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
                 }).then(function (count){
                     expect(count).toBe(testParams.association_count + 1);
