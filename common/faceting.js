@@ -60,7 +60,7 @@
                     
                     scope.$on('reference-updated', function (event, data) {
                         console.log('reference updated in faceting');
-                        scope.$broadcast('update-all');
+                        scope.$broadcast('update-facets');
                     });
                 }
             };
@@ -108,7 +108,7 @@
                         pageLimit: 5,
                         config: {
                             viewable: false, editable: false, deletable: false, selectMode: "multi-select",
-                            hideTotalCount: true, hideSelectedRows: true
+                            hideTotalCount: true, hideSelectedRows: true, hasFacetColumns: false
                         }
                     };
                     
@@ -148,7 +148,7 @@
                         scope.$emit("reference-updated");
                     };
                     
-                    scope.$on('update-all', function (event, data) {
+                    scope.$on('update-facets', function (event, data) {
                         console.log(scope.facetColumn.displayname.value + ": got the update-all");
                         updateFacetColumn(scope);
                         scope.fetched = false;

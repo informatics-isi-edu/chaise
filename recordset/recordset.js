@@ -167,7 +167,8 @@
                 viewable: true,
                 editable: modifyEnabled,
                 deletable: modifyEnabled && deleteEnabled,
-                selectMode: "no-select"
+                selectMode: "no-select",
+                hasFacetColumns: true
             };
 
 

@@ -61,7 +61,7 @@
     </div>
 </div>
 
-<div class="row total-filters" style="margin: 10px -15px;">
+<div class="row total-filters" style="margin: 10px -15px;" ng-if="vm.config.hasFacetColumns">
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
         <a class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter()">
             <span class="filter-label label label-primary">
