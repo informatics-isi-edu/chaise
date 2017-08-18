@@ -71,12 +71,14 @@
             function updateFacetColumn(scope) {
                 console.log(scope.facetColumn.displayname.value + ": updating domainRef");
                 scope.domainRef = scope.facetColumn.column.groupAggregate.entityCounts;
-                scope.selectedRows = scope.facetColumn.choiceFilters.map(function (f) { 
-                    return {
-                        displayname: f.toString(), 
-                        key: f.term
-                    };
-                });
+                scope.selectedRows = [];
+                // TODO when you load the page, how can I set the selectedRows??
+                // scope.selectedRows = scope.facetColumn.choiceFilters.map(function (f) { 
+                //     return {
+                //         displayname: f.toString(), 
+                //         key: f.term
+                //     };
+                // });
             }
             
             return {

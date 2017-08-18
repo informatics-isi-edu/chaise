@@ -6,6 +6,7 @@
     <div ng-class="vm.config.hasFaceting ? 'col-md-8' : 'col-md-12'">
 
         <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
+            
             <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <a class="remove-link" ng-click="removeAllPills()">
@@ -14,11 +15,13 @@
                         </span>
                     </a>
                     <div class="filter-label label label-default" ng-repeat="row in vm.selectedRows track by $index">
-                        <a class="remove-link" ng-click="removePill(row.key)"><i class="glyphicon glyphicon-remove"></i></a>
-                        <span ng-bind="row.displayname"></span>
+                        <a class="remove-link" ng-click="removePill(row.uniqueId)"><i class="glyphicon glyphicon-remove"></i></a>
+                        <span ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
+                        <span ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
                     </div>
                 </div>
             </div>
+            
             <div class="col-lg-4 col-md-5 col-sm-6 col-xs-7">
                 <!-- search box -->
                 <div class="input-group has-feedback">
@@ -43,6 +46,7 @@
                     </span>
                 </div>
             </div>
+            
             <div style="height: 34px;">
                 <!-- pagination -->
                 <span class="dropdown" style="margin-left: 5px">
@@ -60,12 +64,14 @@
                     </ul>
                 </span>
             </div>
+            
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 pull-right" align="right">
                 <!-- add record -->
                 <button id="add-record-btn" type="button" class="btn btn-primary" ng-if="vm.reference.canCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
                     <span class="glyphicon glyphicon-plus"></span>
                 </button>
             </div>
+            
         </div>
 
         <div class="row total-filters" style="margin: 10px -15px;" ng-if="vm.config.hasFaceting">
