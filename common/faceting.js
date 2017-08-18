@@ -274,6 +274,20 @@
                     //     };
                     };
 
+                    scope.initialFacetData = function () {
+                        var agg = scope.facetColumn.column.aggregate;
+                        var aggregateList = [
+                            agg.minAgg,
+                            agg.maxAgg
+                        ];
+
+                        scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
+                            console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
+                            scope.absMin = response[0];
+                            scope.absMax = response[1];
+                        });
+                    };
+
                     //  all the events related to the plot
                     // scope.plotlyEvents = function (graph) {
                     //     graph.on('plotly_relayout', function (event) {
@@ -285,11 +299,18 @@
                     // 
                     // };
                     
-                    scope.$watch("isOpen", function (newVal, oldVal) {
-                        if (newVal && !scope.fetched) {
-                            console.log(scope.facetColumn.displayname.value + ": opened!");
+                    scope.$on("data-modified", function ($event) {
+                        if (scope.isOpen) {
+                            scope.initialFacetData();
                         }
-                    });   
+                    });
+
+                    scope.$watch("isOpen", function (newVal, oldVal) {
+                        console.log("Open or close: ", newVal);
+                        if (newVal && !scope.fetched) {
+                            scope.initialFacetData();
+                        }
+                    });
                 }
             };
         }]);
