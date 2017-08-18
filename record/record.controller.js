@@ -400,14 +400,14 @@
                         var ob1 = {},ob2={}; 
                         angular.copy(key_subRow, ob1)
                         angular.copy(key_row, ob2)
-                        ob1[column.table.name] = tuples[i].key;//tuples[i].data['term'];
+                        ob1[column.table.name] = tuples[i].data['term'];
                         vm.recordEditModel.submissionRows.push(ob1);
-                        ob2[column.columns[0].name] = tuples[i].displayname;//tuples[i].displayname.value;
+                        ob2[column.columns[0].name] = tuples[i].displayname.value;
                         vm.recordEditModel.rows.push(ob2);
                     }          
                     else{                                       
-                        vm.recordEditModel.submissionRows[i][column.table.name] = tuples[i].key;//tuples[i].data['term'];
-                        vm.recordEditModel.rows[i][column.columns[0].name] = tuples[i].displayname;//tuples[i].displayname.value;
+                        vm.recordEditModel.submissionRows[i][column.table.name] = tuples[i].data['term'];
+                        vm.recordEditModel.rows[i][column.columns[0].name] = tuples[i].displayname.value;
                 }
                 }
                 addRecords(false, derivedref);
