@@ -38,7 +38,7 @@
                             newRef = col.removeFilter(filterIndex);
                         }
                         scope.vm.reference = newRef;
-                        scope.$emit("reference-updated");
+                        scope.$emit("facet-modified");
                     };
                     
                     scope.toggleFacet = function (index) {
@@ -49,6 +49,7 @@
                         }
                     };
                     
+                    // TODO I am attaching the removeFilter to the vm here, maybe I shouldn't?
                     scope.vm.hasFilter = function (col) {
                         return scope.hasFilter(col);
                     }
@@ -58,10 +59,9 @@
                         scope.removeFilter(colId, id);
                     }
                     
-                    scope.$on('reference-updated', function (event, data) {
-                        console.log('reference updated in faceting');
-                        scope.$broadcast('update-facets');
-                    });
+                    scope.$on('data-modified', function ($event) {
+                        console.log('data-modified in faceting');
+                    })
                 }
             };
         }])
@@ -108,13 +108,12 @@
                         pageLimit: 5,
                         config: {
                             viewable: false, editable: false, deletable: false, selectMode: "multi-select",
-                            hideTotalCount: true, hideSelectedRows: true, hasFacetColumns: false
+                            hideTotalCount: true, hideSelectedRows: true
                         }
                     };
                     
                     // this should be part of recordset directive to do it by default if the page is not defined
                     var fetchRecords = function() {
-                        // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
                         scope.loading = true;
                         console.log(scope.facetColumn.displayname.value + ": fetching " + scope.domainRef.uri);
                         scope.domainRef.read(5).then(function getPseudoData(page) {
@@ -131,7 +130,6 @@
                         });
                     }
                     
-                    
                     // METHODS:
                     scope.changeFilters = function (tuples, isSelected) {
                         var ref;
@@ -145,11 +143,11 @@
                         }
                         
                         scope.vm.reference = ref;
-                        scope.$emit("reference-updated");
+                        scope.$emit("facet-modified");
                     };
                     
-                    scope.$on('update-facets', function (event, data) {
-                        console.log(scope.facetColumn.displayname.value + ": got the update-all");
+                    scope.$on('data-modified', function ($event) {
+                        console.log('data-modified in facet');
                         updateFacetColumn(scope);
                         scope.fetched = false;
                         if (scope.isOpen) {

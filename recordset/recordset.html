@@ -31,16 +31,6 @@
             </div>
         </div>
         
-        <div class="row">
-            <div class="col-md-4" resizable r-directions=["right"]>
-                <faceting vm="vm"></faceting>
-            </div>
-            <div class="col-md-8">
-                <!-- loading spinner -->
-                <loading-spinner ng-show="!vm.hasLoaded && !vm.backgroundSearch"></loading-spinner>
-                
-                <recordset vm="vm"></recordset>
-            </div>
-        </div>
+        <recordset vm="vm"></recordset>
     </div>
 </div>

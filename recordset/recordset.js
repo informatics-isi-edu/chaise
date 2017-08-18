@@ -89,21 +89,8 @@
             $rootScope.location = $window.location.href;
         }
 
-        // row data updated from directive
-        // update permalink, address bar without reload
-        $scope.$on('recordset-update', function() {
-            console.log("changing the location");
-            
+        $scope.$on('reference-modified', function() {
             updateLocation();
-        });
-        
-        $scope.$on('reference-updated', function (event, data) {
-            console.log('reference updated in recordset controller');
-            
-            recordsetModel.facetColumns = recordsetModel.reference.facetColumns;
-            updateLocation();
-            
-            $scope.$broadcast('record-modified');
         });
 
         $scope.permalink = function() {
@@ -168,7 +155,7 @@
                 editable: modifyEnabled,
                 deletable: modifyEnabled && deleteEnabled,
                 selectMode: "no-select",
-                hasFacetColumns: true
+                hasFaceting: true
             };
 
 
@@ -207,6 +194,8 @@
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = "compact";
                     recordsetModel.reference.session = session;
+                    recordsetModel.facetColumns = recordsetModel.reference.facetColumns;
+                    //TODO should remove this:
                     baseRef = recordsetModel.reference;
 
                     $log.info("Reference:", recordsetModel.reference);

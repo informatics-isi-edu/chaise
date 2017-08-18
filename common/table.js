@@ -38,32 +38,39 @@
      *        rowValues,    // array of rows values, each value has this structure {isHTML:boolean, value:value}
      *        selectedRows, // array of selected rows
      *        search,       // search term, null for none
-     *        config,       // {viewable, editable, deletable, selectMode} TODO should be renamed to mode
+     *        config,       // set of config to disable or enable features
      *        context       // reference's context
-     *        options,
      *       }
      *
-     *      config.selectMode can be one of the following:
-     *          no-select       // do not allow selection of the rows
-     *          single-select   // only allow one row to be selected
-     *          multi-select    // allow the user to select as many rows as they want
+     *      available config options:
+     *          - viewable
+     *          - editable
+     *          - deletable
+     *          - selectMode:
+     *              can be one of the following:
+     *                  no-select       // do not allow selection of the rows
+     *                  single-select   // only allow one row to be selected
+     *                  multi-select    // allow the user to select as many rows as they want
+     *          - hideSelectedRows
+     *          - hideTotalCount
+     *          - hasFaceting
      *
-     *      options:
-     *          hideSelectedRows
-     *          hideTotalCount
-     *          
-     *
-     *
-     * Handle recordset/recordTable events in your controller:
-     *
-     * 1. recordset-update - data model has been updated
+     * The events that are being used by directives in this file and their children:
+     * 1. `reference-modified`: data model has been updated.
      *    your app may want to update address bar, permalink etc.
      *
-     *      $scope.$on('recordset-update', function() {
+     *      $scope.$on('reference-modified', function() {
      *          $window.scrollTo(0, 0);
      *          $window.location.replace($scope.permalink());
      *          $rootScope.location = $window.location.href;
      *      });
+     * 2. `data-modified`: data has been updated, this is an internal event which
+     * the children of recordset directive should listen to.
+     * 3. `facet-modified`: one of the facet has been updated. This is an internal
+     * event that facets will send to the parents. recordset directive uses this
+     * event to call read on this new reference.
+     * 4. `record-modified`: one of the records in the recordset table has been
+     * modified. ellipses will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils', ['DataUtils', '$timeout','Session', function(DataUtils, $timeout, Session) {
 
@@ -115,7 +122,7 @@
             - If the background search is completed successfully, and if the vm.foregroundSearch flag is false, and the backgroundSearchpendingTerm is
               not empty then we render the background search results and empty the backgroundSearchPendingTerm
         */
-        function read(scope, isBackground) {
+        function read(scope, isBackground, broadcast) {
 
             if (scope.vm.search == '') scope.vm.search = null;
             var searchTerm = scope.vm.search;
@@ -149,9 +156,14 @@
                     if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
                 }, 200);
 
-                // tell parent controller data updated
                 if (!isBackground) {
-                    scope.$emit('recordset-update');
+                    // tell parent controller data modified
+                    scope.$emit('reference-modified');
+                }
+                
+                // tell children that data modified
+                if (broadcast) {
+                    scope.$broadcast('data-modified');
                 }
 
             }, function error(exception) {
@@ -192,13 +204,6 @@
                 onRowClick: '&?'      // set row click function
             },
             link: function (scope, elem, attr) {
-
-                // row data has been modified (from ellipses)
-                // do a read
-                scope.$on('record-modified', function() {
-                    console.log('catching the record modified');
-                    recordTableUtils.read(scope);
-                });
 
                 scope.sortby = function(column) {
                     if (scope.vm.sortby !== column) {
@@ -407,7 +412,7 @@
 
                     scope.vm.search = term;
                     scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
-                    recordTableUtils.read(scope, isBackground);
+                    recordTableUtils.read(scope, isBackground, true);
                 };
 
                 scope.clearSearch = function() {
@@ -476,7 +481,8 @@
                     updated = true;
                 }
 
-                scope.$on('recordset-update', function($event) {
+                scope.$on('data-modified', function($event) {
+                    console.log('data-modified in recordset directive, getting count');
                     if (!scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
                         // get the total row count to display above the table
                         scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
@@ -492,6 +498,21 @@
                             throw response;
                         });
                     }
+                });
+                
+                scope.$on('facet-modified', function ($event) {
+                    console.log('facet-modified in recordset directive');
+                    scope.vm.facetColumns = scope.vm.reference.facetColumns;
+                    recordTableUtils.read(scope, false, true);
+                    // $event.stopPropagation();
+                });
+                
+                // row data has been modified (from ellipses)
+                // do a read
+                scope.$on('record-modified', function($event) {
+                    console.log('record-modified in recordset directive');
+                    recordTableUtils.read(scope, false, true);
+                    // $event.stopPropagation();
                 });
             }
         };
