@@ -193,7 +193,7 @@
                 // verifies whether or not the current key value is in the set of selected rows or not
                 scope.isSelected = function (key) {
                     var index = scope.vm.selectedRows.findIndex(function (obj) {
-                        return obj.key == key;
+                        return obj.uniqueId == key;
                     });
                     return (index > -1);
                 };
@@ -204,7 +204,7 @@
                         var key = scope.vm.page.tuples[i].uniqueId;
 
                         var index = scope.vm.selectedRows.findIndex(function (obj) {
-                            return obj.key == key
+                            return obj.uniqueId == key;
                         });
 
                         if (index > -1) scope.vm.selectedRows.splice(index, 1);
@@ -214,37 +214,24 @@
                 // this is for the button on the table heading that selects all currently visible rows
                 scope.selectAll = function() {
                     for (var i = 0; i < scope.vm.page.tuples.length; i++) {
-                        var displayObj = {
-                            displayname: scope.vm.page.tuples[i].displayname.value,
-                            key: scope.vm.page.tuples[i].uniqueId
-                        };
+                        var tuple = scope.vm.page.tuples[i];
 
-                        if (!scope.isSelected(displayObj.key)) scope.vm.selectedRows.push(displayObj);
+                        if (!scope.isSelected(tuple.uniqueId)) scope.vm.selectedRows.push(tuple);
                     }
                 };
 
-                /**
-                 * Creates a displayObj with a unique identifier to store the selected rows
-                 *  displayname =   used for the display value in the pills for which which row is selected`
-                 *  key =           unique identifier that is composed from each shortest key column's value
-                 *
-                 * Facilitates the multi select functionality for multi edit in the future
-                 */
+
+                // Facilitates the multi select functionality for multi edit by storing the tuple in the selectedRows array
                 scope.onSelect = function(args) {
                     var tuple = args.tuple;
-                    
-                    var displayObj = {
-                        displayname: tuple.displayname.value,
-                        key: tuple.uniqueId
-                    };
 
                     var rowIndex = scope.vm.selectedRows.findIndex(function (obj) {
-                        return obj.key == displayObj.key
+                        return obj.uniqueId == tuple.uniqueId;
                     });
 
                     // add the tuple to the list of selected rows
                     if (rowIndex === -1) {
-                        scope.vm.selectedRows.push(displayObj);
+                        scope.vm.selectedRows.push(tuple);
                     } else {
                         scope.vm.selectedRows.splice(rowIndex, 1);
                     }
@@ -394,7 +381,7 @@
                 // function for removing a single pill and it's corresponding selected row
                 scope.removePill = function(key) {
                     var index = scope.vm.selectedRows.findIndex(function (obj) {
-                        return obj.key == key;
+                        return obj.uniqueId == key;
                     });
                     scope.vm.selectedRows.splice(index, 1);
                 };
