@@ -7,7 +7,7 @@
                         <!-- data-parent="#ft-cols-1" -->
                         <a ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}" title="{{fc.comment}}">
                             <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
-                            <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
+                            <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span> [{{fc.column.type.name}}]
                         </a>
                     </h4>
                     <span class="applied-filters" ng-show="hasFilter(fc)">
@@ -22,8 +22,8 @@
                 </div>
                 <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <!-- <integer-range-picker ng-switch-when="int" vm="vm" facet-column="vm.facetColumns[$index]"></integer-range-picker> -->
-                        <string-picker vm="vm" facet-column="fc" is-open="isOpen[$index]"></string-picker>
+                        <integer-range-picker ng-if="fc.column.type.name.indexOf('int') > -1" vm="vm" facet-column="fc" is-open="isOpen[$index]"></integer-range-picker>
+                        <string-picker ng-if="fc.column.type.name.indexOf('int') == -1" vm="vm" facet-column="fc" is-open="isOpen[$index]"></string-picker>
                     </div>
                 </div>
             </div>
