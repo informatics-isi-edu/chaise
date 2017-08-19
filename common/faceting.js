@@ -8,7 +8,7 @@
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/faceting.html',
                 scope: {
-                    vm: "=",
+                    vm: "="
                 },
                 link: function (scope, element, attr) {
                     
@@ -170,7 +170,7 @@
                     });   
                 }
             };
-        }]);
+        }])
         
         /*
         .directive('vocabularyPicker', ['$window', function ($window) {
@@ -219,6 +219,7 @@
                 }
             };
         }])
+        */
         
         .directive('integerRangePicker', ['$timeout', function ($timeout) {
             return {
@@ -227,45 +228,50 @@
                 scope: {
                     vm: "=",
                     facetColumn: "=",
+                    isOpen: "="
                 },
                 link: function (scope, element, attr) {
                     //TODO use this reference to get the values
                     scope.internalReference = null;
+                    scope.fetched = false;
 
                     // draw the plot
                     // TODO change the data
-                    scope.plot = {
-                        data: [{
-                            x: ["0-1", "1-2", "3-4", "5-6", "6-7", "7-8", "8-9"],
-                            y: [5, 10, 12, 4, 11, 4, 58],
-                            type: 'bar'
-                        }],
-                        options: {
-                            displayLogo: false
-                        },
-                        layout: {
-                            autosize: false,
-                            width: 400,
-                            height: 150,
-                            margin: {
-                                l: 15,
-                                r: 10,
-                                b: 20,
-                                t: 20,
-                                pad: 2
-                            },
-                            yaxis: {
-                                fixedrange: true
-                            },
-                            bargap: 0
-                        }
-                    }
+                    // scope.plot = {
+                    //     data: [{
+                    //         x: ["0-1", "1-2", "3-4", "5-6", "6-7", "7-8", "8-9"],
+                    //         y: [5, 10, 12, 4, 11, 4, 58],
+                    //         type: 'bar'
+                    //     }],
+                    //     options: {
+                    //         displayLogo: false
+                    //     },
+                    //     layout: {
+                    //         autosize: false,
+                    //         width: 400,
+                    //         height: 150,
+                    //         margin: {
+                    //             l: 15,
+                    //             r: 10,
+                    //             b: 20,
+                    //             t: 20,
+                    //             pad: 2
+                    //         },
+                    //         yaxis: {
+                    //             fixedrange: true
+                    //         },
+                    //         bargap: 0
+                    //     }
+                    // }
 
                     // scope.appliedFilterCount = Object.keys(scope.appliedFilters).length;
 
                     // Add new integer filter
                     scope.addFilter = function () {
-                    //     scope.isDirty = true;
+                        scope.isDirty = true;
+                        var ref = scope.facetColumn.addRangeFilter(scope.min, scope.max);
+                        scope.vm.reference = ref;
+                        scope.$emit("facet-modified");
                     //     scope.appliedFilters[++scope.appliedFilterCount] = {
                     //         "content": scope.min + "-" + scope.max,
                     //         "min": scope.min,
@@ -273,23 +279,44 @@
                     //     };
                     };
 
-                    //  all the events related to the plot
-                    scope.plotlyEvents = function (graph) {
-                        graph.on('plotly_relayout', function (event) {
-                            $timeout(function () {
-                                scope.min = Math.floor(event['xaxis.range[0]']);
-                                scope.max = Math.ceil(event['xaxis.range[1]']);
-                            });
-                        });
+                    scope.initialFacetData = function () {
+                        var agg = scope.facetColumn.column.aggregate;
+                        var aggregateList = [
+                            agg.minAgg,
+                            agg.maxAgg
+                        ];
 
+                        scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
+                            console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
+                            scope.absMin = response[0];
+                            scope.absMax = response[1];
+                        });
                     };
+
+                    //  all the events related to the plot
+                    // scope.plotlyEvents = function (graph) {
+                    //     graph.on('plotly_relayout', function (event) {
+                    //         $timeout(function () {
+                    //             scope.min = Math.floor(event['xaxis.range[0]']);
+                    //             scope.max = Math.ceil(event['xaxis.range[1]']);
+                    //         });
+                    //     });
+                    // 
+                    // };
                     
-                    scope.$on('reference-updated', function (event, data) {
-                        console.log('reference updated in integer picker');
+                    scope.$on("data-modified", function ($event) {
+                        if (scope.isOpen) {
+                            scope.initialFacetData();
+                        }
+                    });
+
+                    scope.$watch("isOpen", function (newVal, oldVal) {
+                        console.log("Open or close: ", newVal);
+                        if (newVal && !scope.fetched) {
+                            scope.initialFacetData();
+                        }
                     });
                 }
             };
-        }])
-                
-        */
+        }]);
 })();

@@ -227,7 +227,7 @@
                     recordsetModel.initialized = true;
                     recordsetModel.hasLoaded = true;
 
-                    $rootScope.$broadcast('recordset-update');
+                    $rootScope.$broadcast('data-modified');
 
                 }, function error(response) {
                     throw response;

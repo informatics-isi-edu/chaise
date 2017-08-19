@@ -2,14 +2,14 @@
     <form class="form-inline" name="minMaxForm">
         <div class="form-group">
             <label for="from-val">From:</label>
-            <input type="number" class="form-control" id="from-val" placeholder="Minimum" ng-model="min" required />
+            <input type="number" class="form-control" id="from-val" placeholder="{{absMin}}" ng-model="min" required />
         </div>
         <div class="form-group">
             <label for="to-val">To:</label>
-            <input type="number" class="form-control" id="to-val" placeholder="Maximum" ng-model="max" required />
+            <input type="number" class="form-control" id="to-val" placeholder="{{absMax}}" ng-model="max" required />
         </div>
         <button type="submit" class="btn btn-default" ng-click="addFilter()" ng-disabled="minMaxForm.$invalid">Add</button>
     </form>
     <div class="divider"></div>
-    <plotly plotly-data="plot.data" plotly-layout="plot.layout" plotly-options="plot.options" plotly-events="plotlyEvents"></plotly>
+    <!-- <plotly plotly-data="plot.data" plotly-layout="plot.layout" plotly-options="plot.options" plotly-events="plotlyEvents"></plotly> -->
 </div>
