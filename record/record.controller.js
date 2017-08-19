@@ -170,20 +170,22 @@
                         console.log('Could not find cookie', cookie);
                     }
                 }
-
+                console.log($rootScope.inboundFKCols.length);
                 // read updated tables
                 if (Object.keys(completed).length > 0 || updated !== {}) {
-                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        var relatedTableReference = $rootScope.relatedReferences[i];
-                        if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
+                    for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
+                        var relatedTableReference = $rootScope.inboundFKCols[i].reference;
+                        if (true || completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
                             delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
                             (function (i) {
-                                relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
-                                    $rootScope.tableModels[i].page = page;
-                                    $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
+                                relatedTableReference.read($rootScope.colTableModels[$rootScope.inboundFKColsIdx[i]].pageLimit).then(function (page) {
+                                    $rootScope.colTableModels[$rootScope.inboundFKColsIdx[i]].page = page;
+                                    $rootScope.colTableModels[$rootScope.inboundFKColsIdx[i]].rowValues = DataUtils.getRowValuesFromPage(page);
                                 }, function(error) {
+                                    console.log(error);
                                     throw error;
                                 }).catch(function(error) {
+                                    console.log(error);
                                     throw error;
                                 });
                             })(i);

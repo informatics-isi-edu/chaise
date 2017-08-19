@@ -185,7 +185,10 @@
                         return o;
                     }
                 });
+                $rootScope.inboundFKCols = allInbFKCols;
+                $rootScope.inboundFKColsIdx = allInbFKColsIdx;
                 if(allInbFKCols.length>0){
+                   
                     $rootScope.rtrefDisTypetable = [];
                     $rootScope.colTableModels = [];
 
