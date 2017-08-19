@@ -220,6 +220,7 @@
                         }
 
                         vm.resultset = true;
+                        // winOnfocus();
                     
                 }).catch(function (exception) {
                     vm.submissionButtonDisabled = false;
@@ -438,6 +439,7 @@
                 ref = ref.unfilteredReference.contextualize.compact;
                 
                 addPopup(ref,0,derivedref);
+                
                 return;
             }
             
@@ -469,7 +471,9 @@
 
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
-        $window.onfocus = function() {
+        
+        $window.onfocus = function () {
+            $log.info("inside onfocus");
             if ($rootScope.loading === false) {
                 var completed = {};
                 for (var id in addRecordRequests) {
@@ -482,24 +486,28 @@
                         $cookies.remove(id);
                         delete addRecordRequests[id];
                     } else {
+                        
                         console.log('Could not find cookie', cookie);
                     }
                 }
 
                 // read updated tables
                 if (Object.keys(completed).length > 0 || updated !== {}) {
-                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        var relatedTableReference = $rootScope.relatedReferences[i];
-                        if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
+                    for (var i = 0; i < $rootScope.inbFKRef.length; i++) {
+                        var relatedTableReference = $rootScope.inbFKRef[i].reference;
+                        if (true||completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
                             delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
                             (function (i) {
-                                relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
-                                    $rootScope.tableModels[i].page = page;
-                                    $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
+                                relatedTableReference.read($rootScope.colTableModels[i].pageLimit).then(function (page) {
+                                    $rootScope.colTableModels[i].page = page;
+                                    $rootScope.colTableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
                                 }, function(error) {
-                                    throw error;
+                                    console.log(error);
+                                    throw error;                                    
                                 }).catch(function(error) {
+                                    console.log(error);
                                     throw error;
+
                                 });
                             })(i);
                         }

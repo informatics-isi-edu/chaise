@@ -16,7 +16,8 @@
         'ermrestjs',
         'ui.bootstrap',
         'chaise.footer',
-        'chaise.upload'
+        'chaise.upload',
+        'chaise.recordcreate'
     ])
 
     .factory('constants', [function(){
@@ -187,6 +188,7 @@
                         return o;
                     }
                 });
+                $rootScope.inbFKRef = allInbFKCols;
                 if(allInbFKCols.length>0){
                     $rootScope.rtrefDisTypetable = [];
                     $rootScope.colTableModels = [];

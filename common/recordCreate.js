@@ -1,9 +1,8 @@
 (function () {
     'use strict';
-    angular.module('chaise.recordcreate')
-        .factory("recordCreate", ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', '$controller', function recordCreate (AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller)
-         {
-           
+    angular.module('chaise.recordcreate', [])
+        .factory("recordCreate", ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', '$controller', function recordCreate(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller) {
+
             /**
              * Gets all images and iframe with only a src attribute
              * @param element Any element from where to start the function.
@@ -20,16 +19,9 @@
                 return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
             }
 
-            return {
-                setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
-                getImageAndIframes: getImageAndIframes,
-                humanFileSize: humanFileSize,
-                getDisplayType: getDisplayType
-            }
-        }])
 
-        .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', '$controller', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller) {
-         
+
+
             function uploadFiles(submissionRowsCopy, isUpdate, onSuccess) {
 
                 // If url is valid
@@ -74,7 +66,9 @@
                 //call uploadFiles which will upload files and callback on success
                 uploadFiles(submissionRowsCopy, isUpdate, function () {
 
-                    var fn = "create", fnScope = derivedref.unfilteredReference.contextualize.entryCreate, args = [submissionRowsCopy];
+                    var fn = "create",
+                        fnScope = derivedref.unfilteredReference.contextualize.entryCreate,
+                        args = [submissionRowsCopy];
 
                     fnScope[fn].apply(fnScope, args).then(function success(result) {
 
@@ -153,6 +147,7 @@
 
             function isDisabled(column) {
                 try {
+                    31
                     if (column.getInputDisabled(context.appContext)) {
                         return true;
                     } else if (vm.prefillCookie) {
@@ -163,6 +158,7 @@
                     $log.info(e);
                 }
             }
+
             function transformRowValues(row) {
                 var transformedRow = {};
                 /* Go through the set of columns for the reference.
@@ -200,7 +196,9 @@
                             default:
                                 if (col.isAsset) {
                                     if (!vm.readyToSubmit) {
-                                        rowVal = { url: "" };
+                                        rowVal = {
+                                            url: ""
+                                        };
                                     }
                                 }
                                 break;
@@ -210,6 +208,7 @@
                 }
                 return transformedRow;
             }
+
             function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
                 var transformedRow = transformRowValues(modelRow);
                 columns.forEach(function (column) {
@@ -239,6 +238,7 @@
 
                 return submissionRow;
             }
+
             function updateViewModel(cookie) {
                 var recordEditModel = {
                     table: {},
@@ -305,7 +305,8 @@
 
                     //     vm.recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
                     // }
-                    var key_subRow = {}, key_row = {};
+                    var key_subRow = {},
+                        key_row = {};
                     angular.copy(vm.recordEditModel.submissionRows[0], key_subRow);
                     angular.copy(vm.recordEditModel.rows[0], key_row);
                     // for (i = 1; i < tuples.length; i++) {
@@ -314,15 +315,15 @@
                     // }
                     for (i = 0; i < tuples.length; i++) {
                         if (i != 0) {
-                            var ob1 = {}, ob2 = {};
+                            var ob1 = {},
+                                ob2 = {};
                             angular.copy(key_subRow, ob1)
                             angular.copy(key_row, ob2)
                             ob1[column.table.name] = tuples[i].data['term'];
                             vm.recordEditModel.submissionRows.push(ob1);
                             ob2[column.columns[0].name] = tuples[i].displayname.value;
                             vm.recordEditModel.rows.push(ob2);
-                        }
-                        else {
+                        } else {
                             vm.recordEditModel.submissionRows[i][column.table.name] = tuples[i].data['term'];
                             vm.recordEditModel.rows[i][column.columns[0].name] = tuples[i].displayname.value;
                         }
@@ -331,7 +332,7 @@
 
                 });
             }
-            vm.addRelatedRecord = function (ref) {
+            addRelatedRecord = function (ref) {
                 // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
                 var cookie = {
                     rowname: $rootScope.recordDisplayname,
@@ -381,7 +382,10 @@
             };
 
             $scope.$on("edit-request", function (event, args) {
-                editRecordRequests[args.id] = { "schema": args.schema, "table": args.table };
+                editRecordRequests[args.id] = {
+                    "schema": args.schema,
+                    "table": args.table
+                };
             });
 
             // When page gets focus, check cookie for completed requests
@@ -431,5 +435,12 @@
                 updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
                 delete editRecordRequests[id];
             }
-        }]);
+
+            return {
+                addRelatedRecord: addRelatedRecord,
+                getImageAndIframes: getImageAndIframes,
+                humanFileSize: humanFileSize,
+                getDisplayType: getDisplayType
+            }
+        }])
 })();
