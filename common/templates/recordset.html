@@ -81,7 +81,7 @@
                         clear all
                     </span>
                 </a>
-                <div ng-repeat="fc in vm.facetColumns track by $index">
+                <div ng-repeat="fc in vm.reference.facetColumns track by $index">
                     <div class="filter-label label label-primary" ng-repeat="filter in fc.filters">
                         <a class="remove-link" ng-click="vm.removeFilter(fc, $index)"><i class="glyphicon glyphicon-remove"></i></a>
                         <span ng-bind="fc.column.displayname.value"></span>:

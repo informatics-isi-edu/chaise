@@ -467,6 +467,9 @@
                 }
 
                 scope.$on('data-modified', function($event) {
+                    //TODO fix this
+                    scope.vm.facetColumns = scope.vm.reference.facetColumns;
+                    
                     console.log('data-modified in recordset directive, getting count');
                     if (!scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
                         // get the total row count to display above the table
@@ -487,7 +490,6 @@
                 
                 scope.$on('facet-modified', function ($event) {
                     console.log('facet-modified in recordset directive');
-                    scope.vm.facetColumns = scope.vm.reference.facetColumns;
                     recordTableUtils.read(scope, false, true);
                     // $event.stopPropagation();
                 });

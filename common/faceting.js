@@ -70,7 +70,7 @@
             
             function updateFacetColumn(scope) {
                 console.log(scope.facetColumn.displayname.value + ": updating domainRef");
-                scope.domainRef = scope.facetColumn.column.groupAggregate.entityCounts;
+                scope.selectDomainRef = scope.facetColumn.column.groupAggregate.entityCounts;
                 scope.selectedRows = [];
                 // TODO when you load the page, how can I set the selectedRows??
                 // scope.selectedRows = scope.facetColumn.choiceFilters.map(function (f) { 
@@ -91,20 +91,19 @@
                 },
                 link: function (scope, element, attr) {
                     
-                    scope.fetched = false;
-                    scope.loading = true;
+                    scope.selectFetched = false;
                     
                     updateFacetColumn(scope);
-                    scope.domainModel = {
+                    scope.selectDomainModel = {
                         hasLoaded: !scope.loading,
                         tableDisplayName: null, //TODO
-                        reference: scope.domainRef,
-                        columns: scope.domainRef.columns,
+                        reference: scope.selectDomainRef,
+                        columns: scope.selectDomainRef.columns,
                         enableAutoSearch: true,
                         enableSort: true,
                         page: null,
-                        sortby: null,
-                        sortOrder: null,
+                        sortby: "c1",
+                        sortOrder: "asc",
                         rowValues: [],
                         selectedRows: scope.selectedRows,
                         pageLimit: 5,
@@ -117,17 +116,16 @@
                     // this should be part of recordset directive to do it by default if the page is not defined
                     var fetchRecords = function() {
                         scope.loading = true;
-                        console.log(scope.facetColumn.displayname.value + ": fetching " + scope.domainRef.uri);
-                        scope.domainRef.read(5).then(function getPseudoData(page) {
-                            scope.domainModel.hasLoaded = true;
-                            scope.domainModel.initialized = true;
-                            scope.domainModel.page = page;
-                            scope.domainModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                            scope.fetched = true;
-                            scope.loading = false;
-                            // $scope.$broadcast('recordset-update');
+                        console.log(scope.facetColumn.displayname.value + ": fetching " + scope.selectDomainRef.uri);
+                        scope.selectDomainRef.read(5).then(function getPseudoData(page) {
+                            
+                            scope.selectDomainModel.hasLoaded = true;
+                            scope.selectDomainModel.initialized = true;
+                            scope.selectDomainModel.page = page;
+                            scope.selectDomainModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                            
+                            scope.selectFetched = true;
                         }, function(exception) {
-                            scope.loading = false;
                             throw exception;
                         });
                     }
@@ -148,10 +146,17 @@
                         scope.$emit("facet-modified");
                     };
                     
+                    scope.addSearchFilter = function (term) {
+                        scope.vm.reference = scope.facetColumn.addSearchFilter(term);
+                    }
+                    
                     scope.$on('data-modified', function ($event) {
+                        //TODO fix this
+                        scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
+                        
                         console.log('data-modified in facet');
                         updateFacetColumn(scope);
-                        scope.fetched = false;
+                        scope.selectFetched = false;
                         if (scope.isOpen) {
                             fetchRecords();
                         }

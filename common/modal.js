@@ -95,8 +95,6 @@
                 vm.tableModel.initialized = true;
                 vm.tableModel.page = page;
                 vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
-
-                $scope.$broadcast('recordset-update');
             }, function(exception) {
                 throw exception;
             });

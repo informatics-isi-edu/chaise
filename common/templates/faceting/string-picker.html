@@ -9,10 +9,15 @@
         </div>
         <!-- <span class="info"><span ng-bind="totalCount"></span> <span>results found.</span></span> -->
     <!-- </div> --> 
-    <!-- <div class="divider"></div> -->
     <div ng-bind="facetColumn.sourceReference.location.ermrestUri"></div>
-    <div ng-bind="facetColumn.column._baseReference.location.ermrestUri"></div>
-    <div ng-bind="domainRef.uri"></div>
-    <loading-spinner ng-show="loading"></loading-spinner>
-    <recordset vm="domainModel" on-row-click="changeFilters"></recordset>
+    <div ng-bind="selectDomainRef.uri"></div>
+    <div class="divider"></div>
+    <!-- <uib-tabset active="active"> -->
+        <!-- <ui-tab index="0" heading="Select Value"> -->
+            <recordset vm="selectDomainModel" on-row-click="changeFilters"></recordset>
+        <!-- </ui-tab>
+        <ui-tab index="1" heading="Search Value"> -->
+            <!-- <recordset vm="domainModel" on-add-search="addSearchFilter"></recordset> -->
+        <!-- </ui-tab> -->
+    <!-- </uib-tabset> -->
 </div>
