@@ -4,6 +4,7 @@ var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
         var title = chaisePage.recordPage.getEntityTitleElement();
+		browser.pause();
 		chaisePage.waitForElement(title);
         expect(title.getText()).toEqual(tableParams.title);
 	});
@@ -103,27 +104,36 @@ exports.testPresentation = function (tableParams) {
             });
         });
     });
+	// added
+	it("should load accordion values after loading main entities",function(){
+			var accordionSet = element(by.id("divRecordSet"));
+			var lastMainEntity = element(by.id("entity-json_col_with_markdown"));
+			chaisePage.waitForElement(accordionSet);
+			if(accordionSet.isDisplayed){
+				expect(lastMainEntity.isDisplayed).toBeTruthy();
+			}
+		});
 
     it("should validate the values of each column", function () {
         var columns = tableParams.columns.filter(function (c) { return c.value != null; });
         expect(element.all(by.className('entity-value')).count()).toEqual(columns.length);
-            
+
             var index = -1, columnUrl, aTag;
             columns.forEach(function (column) {
                 var columnEls;
-                if (column.title=='booking') 
+                if (column.title=='booking')
                     {
-                    expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);                    
+                    expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
                     }
                 else if (column.match=='html'){
-                    expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value);                    
+                    expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value);
                 }
                 else if (column.title == 'User Rating'){
-                    expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value);                    
-                }                    
+                    expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value);
+                }
                 else {
                     columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
-                
+
                     if (column.presentation && column.presentation.type == "url") {
                         chaisePage.recordPage.getLinkChild(columnEls).then(function (aTag) {
                             columnUrl = mustache.render(column.presentation.template, {
@@ -135,9 +145,9 @@ exports.testPresentation = function (tableParams) {
                             expect(aTag.getText()).toEqual(column.value);
                         });
                     }
-                    else {                    
+                    else {
                         expect(columnEls.getAttribute('innerText')).toBe(column.value);
-                    }            
+                    }
             }
         });
     });
@@ -234,7 +244,7 @@ exports.testPresentation = function (tableParams) {
             expect(recordRowsCount).toBe(2,'Record row count in booking table is incorrect.');
         }).catch(function(err){
             console.log(err);
-            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');            
+            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
         })
     });
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`

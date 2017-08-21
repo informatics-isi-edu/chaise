@@ -176,6 +176,7 @@
                         value: value
                     });
                 });
+                $rootScope.mainEntity = $rootScope.recordValues.length>0?true:false;
 
                 $rootScope.columns = $rootScope.reference.columns;
                 var allInbFKColsIdx = [];
