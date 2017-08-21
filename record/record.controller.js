@@ -154,6 +154,25 @@
 
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
+        function readUpdatedTable(refObj,idx){
+            var relatedTableReference = $rootScope.inboundFKCols[i].reference;
+            if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
+                delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
+                (function (i) {
+                    relatedTableReference.read($rootScope.colTableModels[$rootScope.inboundFKColsIdx[i]].pageLimit).then(function (page) {
+                        $rootScope.colTableModels[$rootScope.inboundFKColsIdx[i]].page = page;
+                        $rootScope.colTableModels[$rootScope.inboundFKColsIdx[i]].rowValues = DataUtils.getRowValuesFromPage(page);
+                    }, function (error) {
+                        console.log(error);
+                        throw error;
+                    }).catch(function (error) {
+                        console.log(error);
+                        throw error;
+                    });
+                })(i);
+            }
+        }
+
         $window.onfocus = function() {
             if ($rootScope.loading === false) {
                 var completed = {};
@@ -173,23 +192,9 @@
                 console.log($rootScope.inboundFKCols.length);
                 // read updated tables
                 if (Object.keys(completed).length > 0 || updated !== {}) {
+                    // if()
                     for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
-                        var relatedTableReference = $rootScope.inboundFKCols[i].reference;
-                        if (true || completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
-                            delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
-                            (function (i) {
-                                relatedTableReference.read($rootScope.colTableModels[$rootScope.inboundFKColsIdx[i]].pageLimit).then(function (page) {
-                                    $rootScope.colTableModels[$rootScope.inboundFKColsIdx[i]].page = page;
-                                    $rootScope.colTableModels[$rootScope.inboundFKColsIdx[i]].rowValues = DataUtils.getRowValuesFromPage(page);
-                                }, function(error) {
-                                    console.log(error);
-                                    throw error;
-                                }).catch(function(error) {
-                                    console.log(error);
-                                    throw error;
-                                });
-                            })(i);
-                        }
+                        readUpdatedTable($rootScope.inboundFKCols[i].reference, $rootScope.inboundFKColsIdx[i]);
                     }
                 }
             }
