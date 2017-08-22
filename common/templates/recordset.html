@@ -22,7 +22,7 @@
                 </div>
             </div>
             
-            <div class="col-lg-4 col-md-5 col-sm-6 col-xs-7">
+            <div ng-class="vm.config.hidePageSettings ? 'col-lg-8 col-md-8 col-sm-8 col-xs-8': 'col-lg-4 col-md-5 col-sm-6 col-xs-7'">
                 <!-- search box -->
                 <div class="input-group has-feedback">
                     <input type="text"
@@ -35,7 +35,7 @@
                            placeholder="Search"
                            autofocus
                            ng-disabled="!vm.hasLoaded && !vm.backgroundSearch">
-                    <div class="form-control-feedback coltooltip" ng-hide="!vm.reference.location.searchTerm || !vm.hasLoaded || vm.backgroundSearch" ng-style="{'cursor': 'pointer', 'right': '50px', 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
+                    <div class="form-control-feedback coltooltip" ng-hide="!vm.reference.location.searchTerm || !vm.hasLoaded || vm.backgroundSearch" ng-style="{'cursor': 'pointer', 'right': (onPlusButtonClick ? '85px': '50px'), 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
                         <span id="search-clear" class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                     </div>
                     <span class="input-group-btn">
@@ -43,11 +43,14 @@
                             uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
                             &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                         </button>
+                        <button class="btn btn-primary" ng-if="onPlusButtonClick" ng-click="onPlusButtonClickCB()" ng-disabled="(!vm.hasLoaded && !vm.backgroundSearch) || vm.search.trim().length == 0 || vm.search == null" tooltip-placement="bottom" uib-tooltip="Add Pattern Filter" role="button">
+                            <span class="glyphicon glyphicon-plus"></span>
+                        </button>
                     </span>
                 </div>
             </div>
             
-            <div style="height: 34px;">
+            <div style="height: 34px;" ng-if="!vm.config.hidePageSettings">
                 <!-- pagination -->
                 <span class="dropdown" style="margin-left: 5px">
                     <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page

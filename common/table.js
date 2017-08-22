@@ -53,6 +53,7 @@
      *                  multi-select    // allow the user to select as many rows as they want
      *          - hideSelectedRows
      *          - hideTotalCount
+     *          - hidePageSettings
      *          - hasFaceting
      *
      * The events that are being used by directives in this file and their children:
@@ -298,7 +299,8 @@
             templateUrl: '../common/templates/recordset.html',
             scope: {
                 vm: '=',
-                onRowClick: '&?'         // set row click function
+                onRowClick: '&?',        // set row click function
+                onPlusButtonClick: '&?'
             },
             link: function (scope, elem, attr) {
 
@@ -335,7 +337,12 @@
                     }
 
                 };
-
+                
+                scope.onPlusButtonClickCB = function () {
+                    console.log("!!!!!!!!!!!");
+                    scope.onPlusButtonClick()(scope.vm.search);
+                }
+ 
 
                 var inputChangedPromise;
 
