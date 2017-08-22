@@ -7,7 +7,7 @@
                         <!-- data-parent="#ft-cols-1" -->
                         <a ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}" title="{{fc.comment}}">
                             <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
-                            <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span> [{{fc.column.type.name}}]
+                            <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span> [{{fc.preferredMode}}]
                         </a>
                     </h4>
                     <span class="applied-filters" ng-show="hasFilter(fc)">
@@ -21,9 +21,10 @@
                     </span>
                 </div>
                 <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
-                    <div class="panel-body">
-                        <range-picker ng-if="fc.column.type.name.indexOf('text') == -1" vm="vm" facet-column="fc" is-open="isOpen[$index]"></range-picker>
-                        <string-picker ng-if="fc.column.type.name.indexOf('text') > -1" vm="vm" facet-column="fc" is-open="isOpen[$index]"></string-picker>
+                    <div class="panel-body" ng-switch="fc.preferredMode">
+                        <range-picker ng-switch-when="range" vm="vm" facet-column="fc" is-open="isOpen[$index]"></range-picker>
+                        <string-picker ng-switch-when="choices" vm="vm" facet-column="fc" is-open="isOpen[$index]"></string-picker>
+                        <vocab-picker ng-switch-when="entity" vm="vm" facet-column="fc" is-open="isOpen[$index]"></vocab-picker>
                     </div>
                 </div>
             </div>
