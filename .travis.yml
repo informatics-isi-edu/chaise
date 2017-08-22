@@ -9,10 +9,9 @@ branches:
   only:
     - master
 
-
 addons:
   sauce_connect: true
-  postgresq: '9.4'
+  postgresq: '9.6'
   hosts:
     - travis.dev
 
@@ -29,14 +28,14 @@ cache:
   - node_modules
   - scripts/vendor
 
+services:
+  - postgresql
+
 before_install:
   - export TZ=America/Los_Angeles
   - sudo apt-get -y update
-  - sudo service postgresql stop
-  - sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3
-  - sudo apt-get -y install libpq-dev postgresql-server-dev-9.4 python-dev
-  - sudo apt-get -y install apache2 apache2-dev libjson-c-dev postgresql-9.5 ssl-cert libapache2-mod-wsgi python python-dateutil python-ply python-tz
-  - sudo service postgresql start 9.5
+  - sudo apt-get -y install libpq-dev python-dev
+  - sudo apt-get -y install apache2 apache2-dev libjson-c-dev ssl-cert libapache2-mod-wsgi python python-dateutil python-ply python-tz
   - sudo apt-get -y purge python-psycopg2
   - sudo pip install web.py
   - sudo pip install psycopg2
