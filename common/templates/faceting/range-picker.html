@@ -1,0 +1,79 @@
+<div class="range-picker">
+    <form class="form-inline" name="minMaxForm">
+        <div class="form-group" ng-switch="displayType()">
+            <label for="from-val">From:</label>
+            <!-- int and float -->
+            <div ng-show="isNumeric()" id="from-val">
+                <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" ng-required="isNumeric()" />
+            </div>
+            <!-- date -->
+            <div ng-show="isDate()" id="from-val" class="input-group">
+                <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" ui-mask="9999-19-39" ui-options="maskOptions.date" ng-required="isDate()" />
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-primary" ng-click="applyCurrentDatetime('min')">Today</button>
+                    <button type="button" class="btn btn-danger" ng-click="clearInput('min')">Clear</button>
+                </span>
+            </div>
+            <!-- timestamp[tz] -->
+            <div ng-show="isTimestamp()" id="from-val">
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">Date</span>
+                        <input type="text" class="form-control input-timestamptz" placeholder="{{absMin.date}}" ng-model="min.date" ui-mask="9999-99-99" ui-options="maskOptions.date" ng-required="isTimestamp()" />
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">Time</span>
+                        <input type="text" class="form-control" placeholder="{{absMin.time}}" ng-model="min.time">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-primary" ng-click="applyCurrentDatetime('min');">Now</button>
+                        <button type="button" class="btn btn-danger" ng-click="clearInput('min');">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="to-val">To:</label>
+            <!-- int and float -->
+            <div ng-show="isNumeric()" id="to-val">
+                <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" ng-required="isNumeric()" />
+            </div>
+            <!-- date -->
+            <div ng-show="isDate()" id="to-val" class="input-group">
+                <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" ui-mask="9999-19-39" ui-options="maskOptions.date" ng-required="isDate()" />
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-primary" ng-click="applyCurrentDatetime('max')">Today</button>
+                    <button type="button" class="btn btn-danger" ng-click="clearInput('max')">Clear</button>
+                </span>
+            </div>
+            <!-- timestamp[tz] -->
+            <div ng-show="isTimestamp()" id="to-val">
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">Date</span>
+                        <input type="text" class="form-control input-timestamptz" placeholder="{{absMax.date}}" ng-model="max.date" ui-mask="9999-99-99" ui-options="maskOptions.date" ng-required="isTimestamp()" />
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">Time</span>
+                        <input type="text" class="form-control" placeholder="{{absMax.time}}" ng-model="max.time">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-primary" ng-click="applyCurrentDatetime('max');">Now</button>
+                        <button type="button" class="btn btn-danger" ng-click="clearInput('max');">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-default" ng-click="addFilter()" ng-disabled="minMaxForm.$invalid">Add</button>
+    </form>
+    <div class="divider"></div>
+    <!-- <plotly plotly-data="plot.data" plotly-layout="plot.layout" plotly-options="plot.options" plotly-events="plotlyEvents"></plotly> -->
+</div>
