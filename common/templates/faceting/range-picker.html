@@ -1,4 +1,5 @@
 <div class="range-picker">
+    <alerts alerts="facetAlerts"></alerts>
     <form class="form-inline" name="minMaxForm">
         <div class="form-group" ng-switch="displayType()">
             <label for="from-val">From:</label>
@@ -72,8 +73,8 @@
                 </div>
             </div>
         </div>
-        <button type="submit" class="btn btn-default" ng-click="addFilter()" ng-disabled="minMaxForm.$invalid">Add</button>
+        <button type="submit" class="btn btn-default" ng-click="addFilter()" ng-disabled="disableAdd()">Add</button>
     </form>
-    <div class="divider"></div>
+    <!-- <div class="divider"></div> -->
     <!-- <plotly plotly-data="plot.data" plotly-layout="plot.layout" plotly-options="plot.options" plotly-events="plotlyEvents"></plotly> -->
 </div>
