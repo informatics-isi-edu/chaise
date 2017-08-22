@@ -184,10 +184,10 @@
                     updateFacetColumn(scope);
                     
                     scope.changeFilters = function (tuples, isSelected) {
-                        var ref;
                         var terms = tuples.map(function (t) {
                             return t.uniqueId;
                         });
+                        var ref;
                         if (isSelected) {
                             ref = scope.facetColumn.addChoiceFilters(terms);
                         } else {
