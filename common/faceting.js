@@ -285,10 +285,10 @@
         }])
         */
         
-        .directive('integerRangePicker', ['$timeout', function ($timeout) {
+        .directive('rangePicker', ['$timeout', function ($timeout) {
             return {
                 restrict: 'AE',
-                templateUrl: '../common/templates/faceting/integer-range-picker.html',
+                templateUrl: '../common/templates/faceting/range-picker.html',
                 scope: {
                     vm: "=",
                     facetColumn: "=",
@@ -298,6 +298,34 @@
                     //TODO use this reference to get the values
                     scope.internalReference = null;
                     scope.fetched = false;
+
+                    scope.maskOptions = {
+                        date: {
+                            maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
+                            clearOnBlur: true
+                        },
+                        time: {
+                            maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
+                            clearOnBlur: true
+                        }
+                    };
+
+                    scope.applyCurrentDatetime = function (modelVal) {
+                        if (scope.isTimestamp()) {
+                            return scope[modelVal] = {
+                                date: moment().format('YYYY-MM-DD'),
+                                time: moment().format('hh:mm:ss')
+                            }
+                        }
+                        return scope[modelVal] = moment().format('YYYY-MM-DD');
+                    };
+
+                    scope.clearInput = function (modelVal) {
+                        if (scope.isTimestamp()) {
+                            return scope[modelVal] = {date: null, time: null};
+                        }
+                        return scope[modelVal] = null;
+                    };
 
                     // draw the plot
                     // TODO change the data
@@ -332,8 +360,18 @@
 
                     // Add new integer filter
                     scope.addFilter = function () {
+                        var min, max;
                         scope.isDirty = true;
-                        var ref = scope.facetColumn.addRangeFilter(scope.min, scope.max);
+                        // data for timestamp[tz] needs to be formatted properly
+                        if (scope.isTimestamp()) {
+                            min = moment(scope.min.date + scope.min.time, 'YYYY-MM-DDHH:mm:ss').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                            max = moment(scope.max.date + scope.max.time, 'YYYY-MM-DDHH:mm:ss').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                        } else {
+                            min = scope.min;
+                            max = scope.max;
+                        }
+                        
+                        var ref = scope.facetColumn.addRangeFilter(min, max);
                         scope.vm.reference = ref;
                         scope.$emit("facet-modified");
                     //     scope.appliedFilters[++scope.appliedFilterCount] = {
@@ -352,9 +390,35 @@
 
                         scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
                             console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
-                            scope.absMin = response[0];
-                            scope.absMax = response[1];
+                            if (scope.isTimestamp()) {
+                                var minTs = moment(response[0]);
+                                var maxTs = moment(response[1]);
+
+                                scope.absMin = {
+                                    date: minTs.format('YYYY-MM-DD'),
+                                    time: minTs.format('hh:mm:ss')
+                                };
+                                scope.absMax = {
+                                    date: maxTs.format('YYYY-MM-DD'),
+                                    time: maxTs.format('hh:mm:ss')
+                                };
+                            } else {
+                                scope.absMin = response[0];
+                                scope.absMax = response[1];
+                            }
                         });
+                    };
+
+                    scope.isNumeric = function () {
+                        return (scope.facetColumn.column.type.name.indexOf("int") > -1 || scope.facetColumn.column.type.name.indexOf("float") > -1)
+                    };
+
+                    scope.isDate = function () {
+                        return scope.facetColumn.column.type.name == 'date';
+                    };
+
+                    scope.isTimestamp = function () {
+                        return scope.facetColumn.column.type.name.indexOf('timestamp') > -1;
                     };
 
                     //  all the events related to the plot
@@ -367,8 +431,9 @@
                     //     });
                     // 
                     // };
-                    
+
                     scope.$on("data-modified", function ($event) {
+                        scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
                         if (scope.isOpen) {
                             scope.initialFacetData();
                         }

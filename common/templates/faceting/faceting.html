@@ -22,8 +22,8 @@
                 </div>
                 <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <integer-range-picker ng-if="fc.column.type.name.indexOf('int') > -1" vm="vm" facet-column="fc" is-open="isOpen[$index]"></integer-range-picker>
-                        <string-picker ng-if="fc.column.type.name.indexOf('int') == -1" vm="vm" facet-column="fc" is-open="isOpen[$index]"></string-picker>
+                        <range-picker ng-if="fc.column.type.name.indexOf('text') == -1" vm="vm" facet-column="fc" is-open="isOpen[$index]"></range-picker>
+                        <string-picker ng-if="fc.column.type.name.indexOf('text') > -1" vm="vm" facet-column="fc" is-open="isOpen[$index]"></string-picker>
                     </div>
                 </div>
             </div>

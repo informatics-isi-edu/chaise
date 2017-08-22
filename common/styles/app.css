@@ -908,11 +908,11 @@ footer .container1 {
 
  /* INTEGER SEARCH */
 
- .faceting-container .integer-range-picker hr {
+ .faceting-container .range-picker hr {
   color: #f5f5f5;
   width: 1px;
  }
- .faceting-container .integer-range-picker input {
+ .faceting-container .range-picker input {
      width: 120px;
      margin-right: 10px;
  }
