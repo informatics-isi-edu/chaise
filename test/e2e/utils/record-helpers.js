@@ -4,7 +4,6 @@ var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
         var title = chaisePage.recordPage.getEntityTitleElement();
-		browser.pause();
 		chaisePage.waitForElement(title);
         expect(title.getText()).toEqual(tableParams.title);
 	});
@@ -106,8 +105,8 @@ exports.testPresentation = function (tableParams) {
     });
 	// added
 	it("should load accordion values after loading main entities",function(){
-			var accordionSet = element(by.id("divRecordSet"));
-			var lastMainEntity = element(by.id("entity-json_col_with_markdown"));
+			var accordionSet = chaisePage.recordPage.getRelatedTable("heading-accommodation_image");
+			var lastMainEntity =chaisePage.recordPage.getEntityRelatedTable("json_col_with_markdown");
 			chaisePage.waitForElement(accordionSet);
 			if(accordionSet.isDisplayed){
 				expect(lastMainEntity.isDisplayed).toBeTruthy();
