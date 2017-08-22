@@ -103,16 +103,7 @@ exports.testPresentation = function (tableParams) {
             });
         });
     });
-	// added
-	it("should load accordion values after loading main entities",function(){
-			var accordionSet = chaisePage.recordPage.getRelatedTable("heading-accommodation_image");
-			var lastMainEntity =chaisePage.recordPage.getEntityRelatedTable("json_col_with_markdown");
-			chaisePage.waitForElement(accordionSet);
-			if(accordionSet.isDisplayed){
-				expect(lastMainEntity.isDisplayed).toBeTruthy();
-			}
-		});
-
+	
     it("should validate the values of each column", function () {
         var columns = tableParams.columns.filter(function (c) { return c.value != null; });
         expect(element.all(by.className('entity-value')).count()).toEqual(columns.length);
