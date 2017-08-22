@@ -299,6 +299,7 @@
                     scope.internalReference = null;
                     scope.fetched = false;
 
+                    // mask options for time and date inputs
                     scope.maskOptions = {
                         date: {
                             maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
@@ -310,6 +311,7 @@
                         }
                     };
 
+                    // sets the date and time inputs to current date and time
                     scope.applyCurrentDatetime = function (modelVal) {
                         if (scope.isTimestamp()) {
                             return scope[modelVal] = {
@@ -320,6 +322,7 @@
                         return scope[modelVal] = moment().format('YYYY-MM-DD');
                     };
 
+                    // clears the date and time inputs
                     scope.clearInput = function (modelVal) {
                         if (scope.isTimestamp()) {
                             return scope[modelVal] = {date: null, time: null};
@@ -358,6 +361,11 @@
 
                     // scope.appliedFilterCount = Object.keys(scope.appliedFilters).length;
 
+                    // returns a boolean to disable the add button if both min and max are not set
+                    scope.disableAdd = function () {
+                        return ( (scope.min == '' || scope.min == null || scope.min == undefined) && (scope.max == '' || scope.max == null || scope.max == undefined) )
+                    };
+
                     // Add new integer filter
                     scope.addFilter = function () {
                         var min, max;
@@ -370,7 +378,9 @@
                             min = scope.min;
                             max = scope.max;
                         }
-                        
+
+                        if (min == '') min = null;
+                        if (max == '') max = null;
                         var ref = scope.facetColumn.addRangeFilter(min, max);
                         scope.vm.reference = ref;
                         scope.$emit("facet-modified");
@@ -381,6 +391,8 @@
                     //     };
                     };
 
+                    // Gets the facet data for min/max
+                    // TODO get the histogram data
                     scope.initialFacetData = function () {
                         var agg = scope.facetColumn.column.aggregate;
                         var aggregateList = [
@@ -409,14 +421,17 @@
                         });
                     };
 
+                    // checks whether the type is integer (int2, int4, int8) or float (float4, float8)
                     scope.isNumeric = function () {
                         return (scope.facetColumn.column.type.name.indexOf("int") > -1 || scope.facetColumn.column.type.name.indexOf("float") > -1)
                     };
 
+                    // checks whether the type is date
                     scope.isDate = function () {
                         return scope.facetColumn.column.type.name == 'date';
                     };
 
+                    // checks whether the input is timestamp or timestamptz
                     scope.isTimestamp = function () {
                         return scope.facetColumn.column.type.name.indexOf('timestamp') > -1;
                     };
