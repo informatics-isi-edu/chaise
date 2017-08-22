@@ -930,6 +930,6 @@ footer .container1 {
  }
 
  /* STRING SEARCH */
- .faceting-container .string-search .input-group{
-     margin-bottom: 5px;
+ .faceting-container .string-picker .tab-content{
+     margin-top: 10px;
  }

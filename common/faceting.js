@@ -67,18 +67,78 @@
         }])
 
         .directive('stringPicker', ['$window', 'DataUtils', function ($window, DataUtils) {
+            var PAGE_SIZE = 5;
             
+            /**
+             * Should be called each time facetColumn has been modified.
+             * Will populate the following:
+             *  - scope.selectModel.reference
+             *  - scope.selectModel.columns
+             *  - scope.selectModel.selectedRows
+             *  - scope.selectFetched
+             *  - scope.searchModel.reference
+             *  - scope.searchModel.columns
+             *  - scope.searchModel.selectedRows
+             *  - scope.searchFetched
+             */
             function updateFacetColumn(scope) {
-                console.log(scope.facetColumn.displayname.value + ": updating domainRef");
-                scope.selectDomainRef = scope.facetColumn.column.groupAggregate.entityCounts;
-                scope.selectedRows = [];
-                // TODO when you load the page, how can I set the selectedRows??
-                // scope.selectedRows = scope.facetColumn.choiceFilters.map(function (f) { 
-                //     return {
-                //         displayname: f.toString(), 
-                //         key: f.term
-                //     };
-                // });
+                
+                // update the selectModel reference
+                var ref = scope.facetColumn.column.groupAggregate.entityCounts;
+                if (scope.selectModel.search) {
+                    ref = ref.search(scope.selectModel.search);
+                }
+                scope.selectModel.reference = ref;
+                scope.selectModel.columns = ref.columns;
+                scope.selectFetched = false;
+                
+                // update the selectred rows
+                scope.selectModel.selectedRows = scope.facetColumn.choiceFilters.map(function (f) { 
+                    return {
+                        displayname: f.displayname, 
+                        uniqueId: f.term
+                    };
+                });
+                
+                // update the searchModel reference
+                ref = scope.facetColumn.column.groupAggregate.entityValues;
+                if (scope.searchModel.search) {
+                    ref = ref.search(scope.searchModel.search);
+                }
+                scope.searchModel.reference = ref;
+                scope.searchModel.columns = ref.columns;
+                scope.searchFetched = false;
+            }
+            
+            /**
+             * Fetch the records for the active tab, if already not fetched
+             */
+            function fetchRecords(scope) {
+                var isSelect = scope.activeTab === scope.SELECT_TAB;
+    
+                // make sure data has not been fetched before.
+                if ( (isSelect && scope.selectFetched) || (!isSelect && scope.searchFetched)) {
+                    return;
+                }
+                
+                var model = isSelect ? scope.selectModel : scope.searchModel;
+                
+                model.reference.read(PAGE_SIZE).then(function getPseudoData(page) {
+                    
+                    model.hasLoaded = true;
+                    model.initialized = true;
+                    model.page = page;
+                    model.rowValues = DataUtils.getRowValuesFromPage(page);
+                    
+                    if (isSelect) {
+                        scope.selectFetched = true;
+                    } else {
+                        scope.searchFetched = true;
+                    }
+                    
+                }, function(exception) {
+                    throw exception;
+                });
             }
             
             return {
@@ -90,47 +150,39 @@
                     isOpen: "="
                 },
                 link: function (scope, element, attr) {
+                    scope.SELECT_TAB = 'select';
+                    scope.SEARCH_TAB = 'search';
                     
-                    scope.selectFetched = false;
-                    
-                    updateFacetColumn(scope);
-                    scope.selectDomainModel = {
-                        hasLoaded: !scope.loading,
-                        tableDisplayName: null, //TODO
-                        reference: scope.selectDomainRef,
-                        columns: scope.selectDomainRef.columns,
+                    // used for the scalar multi-select
+                    scope.selectModel = {
+                        selectedRows: [],
                         enableAutoSearch: true,
                         enableSort: true,
-                        page: null,
                         sortby: "c1",
                         sortOrder: "asc",
-                        rowValues: [],
-                        selectedRows: scope.selectedRows,
-                        pageLimit: 5,
+                        pageLimit: PAGE_SIZE,
                         config: {
                             viewable: false, editable: false, deletable: false, selectMode: "multi-select",
-                            hideTotalCount: true, hideSelectedRows: true
+                            hideTotalCount: true, hideSelectedRows: true, hidePageSettings: true
                         }
                     };
-                    
-                    // this should be part of recordset directive to do it by default if the page is not defined
-                    var fetchRecords = function() {
-                        scope.loading = true;
-                        console.log(scope.facetColumn.displayname.value + ": fetching " + scope.selectDomainRef.uri);
-                        scope.selectDomainRef.read(5).then(function getPseudoData(page) {
-                            
-                            scope.selectDomainModel.hasLoaded = true;
-                            scope.selectDomainModel.initialized = true;
-                            scope.selectDomainModel.page = page;
-                            scope.selectDomainModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                            
-                            scope.selectFetched = true;
-                        }, function(exception) {
-                            throw exception;
-                        });
+                    // used for the scalar search
+                    scope.searchModel = {
+                        selectedRows: [], //TODO this should be optional
+                        enableAutoSearch: true,
+                        enableSort: true,
+                        sortby: "c1",
+                        sortOrder: "asc",
+                        pageLimit: PAGE_SIZE,
+                        config: {
+                            viewable: false, editable: false, deletable: false, selectMode: "no-select",
+                            hideTotalCount: true, hideSelectedRows: true, hidePageSettings: true
+                        }
                     }
                     
-                    // METHODS:
+                    // populate the search and select model reference and selected rows
+                    updateFacetColumn(scope);
+                    
                     scope.changeFilters = function (tuples, isSelected) {
                         var ref;
                         var terms = tuples.map(function (t) {
@@ -147,27 +199,39 @@
                     };
                     
                     scope.addSearchFilter = function (term) {
+                        var sf = scope.facetColumn.searchFilters.filter(function (f) {
+                            return f.term === term;
+                        });
+                        if (sf.length !== 0) {
+                            return; // already exists
+                        }
                         scope.vm.reference = scope.facetColumn.addSearchFilter(term);
+                        scope.$emit("facet-modified");
                     }
                     
                     scope.$on('data-modified', function ($event) {
                         //TODO fix this
                         scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
                         
-                        console.log('data-modified in facet');
                         updateFacetColumn(scope);
-                        scope.selectFetched = false;
                         if (scope.isOpen) {
-                            fetchRecords();
+                            fetchRecords(scope);
                         }
                     });
                     
-                    scope.$watch("isOpen", function (newVal, oldVal) {
-                        if (newVal && !scope.fetched) {
-                            console.log(scope.facetColumn.displayname.value + ": opened!");
-                            fetchRecords();
+                    scope.$watch("isOpen", function (newValue, oldValue) {
+                        if(angular.equals(newValue, oldValue) || !newValue){
+                            return;
                         }
-                    });   
+                        fetchRecords(scope);
+                    });
+                    
+                    scope.onTabSelected = function (tab) {
+                        scope.activeTab = tab;
+                        if (scope.isOpen) {
+                            fetchRecords(scope);
+                        }
+                    }
                 }
             };
         }])
