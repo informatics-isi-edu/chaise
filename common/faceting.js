@@ -370,7 +370,9 @@
                             min = scope.min;
                             max = scope.max;
                         }
-                        
+
+                        if (min == '') min = null;
+                        if (max == '') max = null;
                         var ref = scope.facetColumn.addRangeFilter(min, max);
                         scope.vm.reference = ref;
                         scope.$emit("facet-modified");
