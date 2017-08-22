@@ -52,6 +52,7 @@
                 toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
                 add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)">
                 </record-display>
+
             <!-- used to delay empty accordions from displaying before simple record display -->
             <div ng-if="displayReady">
                 <uib-accordion close-others="false">
