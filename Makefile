@@ -6,9 +6,6 @@
 # Install directory on dev.isrd
 CHAISEDIR?=/var/www/html/chaise
 
-# Install directory on travis
-CHAISETRAVISDIR=/var/www/html/chaise
-
 # Project name
 PROJ=chaise
 
@@ -792,13 +789,6 @@ install: $(HTML) dont_install_in_root
 dont_install_in_root:
 	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
 
-# Rule for installing on Travis
-.PHONY: installTravis
-installTravis: $(HTML)
-	sudo sh ./git_version_info.sh
-	test -d $(dir $(CHAISETRAVISDIR)) && mkdir -p $(CHAISETRAVISDIR)
-	rsync -a --exclude='.*' ./. $(CHAISETRAVISDIR)/
-
 # Rules for help/usage
 .PHONY: help usage
 help: usage
@@ -806,7 +796,6 @@ usage:
 	@echo "Available 'make' targets:"
 	@echo "    all       		- an alias for build"
 	@echo "    install          - installs the client (CHAISEDIR=$(CHAISEDIR))"
-	@echo "    installTravis    - installs the client (CHAISETRAVISDIR=$(CHAISETRAVISDIR))"
 	@echo "    deps      		- local install of node dependencies"
 	@echo "    updeps    		- update local dependencies"
 	@echo "    lint      		- lint the source"
