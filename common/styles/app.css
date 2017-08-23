@@ -897,7 +897,7 @@ footer .container1 {
  .faceting-container .applied-filters {
      margin-top: 5px;
      max-height: 100px;
-     overflow-y: scroll;
+     overflow-y: auto;
  }
 
  .faceting-container .applied-filters .filter-label {
