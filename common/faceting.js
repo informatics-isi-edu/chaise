@@ -95,7 +95,7 @@
                 // update the selectred rows
                 scope.selectModel.selectedRows = scope.facetColumn.choiceFilters.map(function (f) { 
                     return {
-                        displayname: f.displayname, 
+                        displayname: f.displayname,
                         uniqueId: f.term
                     };
                 });
@@ -184,14 +184,15 @@
                     updateFacetColumn(scope);
                     
                     scope.changeFilters = function (tuples, isSelected) {
-                        var terms = tuples.map(function (t) {
-                            return t.uniqueId;
-                        });
                         var ref;
                         if (isSelected) {
-                            ref = scope.facetColumn.addChoiceFilters(terms);
+                            ref = scope.facetColumn.addChoiceFilters(tuples.map(function (t) {
+                                return {value: t.uniqueId, displayvalue: t.uniqueId, isHTML: false};
+                            }));
                         } else {
-                            ref = scope.facetColumn.removeChoiceFilters(terms);
+                            ref = scope.facetColumn.removeChoiceFilters(tuples.map(function (t) {
+                                return t.uniqueId;
+                            }));
                         }
                         
                         scope.vm.reference = ref;
