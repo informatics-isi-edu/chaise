@@ -9,7 +9,8 @@
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
         var context = $rootScope.context;
-        
+        var completed = {};
+        var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
@@ -54,11 +55,11 @@
         vm.permalink = function getPermalink() {
             return $window.location.href;
         };
-         
+
         vm.toRecordSet = function(ref) {
             return $window.location.href = ref.appLink;
         };
-    
+
         vm.showRelatedTable = function(i) {
             var isFirst = false, prevTableHasLoaded = false;
             if ($rootScope.tableModels && $rootScope.tableModels[i]) {
@@ -86,7 +87,7 @@
                 return false;
             }
         };
-         
+
         vm.toggleRelatedTableDisplayType = function(dataModel) {
             if (dataModel.displayType == 'markdown') {
                 dataModel.displayType = 'table';
@@ -152,7 +153,7 @@
 
             model.submissionRows.forEach(function (row) {
                 submissionRowsCopy.push(Object.assign({}, row));
-            });           
+            });
 
             //call uploadFiles which will upload files and callback on success
             uploadFiles(submissionRowsCopy, isUpdate, function () {
@@ -220,8 +221,9 @@
                         }
 
                         vm.resultset = true;
-                        // winOnfocus();
-                    
+                        modalUpdate = true;
+                        onfocusEventCall(modalUpdate);
+
                 }).catch(function (exception) {
                     vm.submissionButtonDisabled = false;
                     if (exception instanceof ERMrest.NoDataChangedError) {
@@ -234,7 +236,7 @@
             });
 
         }
-        
+
         function isDisabled(column) {
             try {
                 if (column.getInputDisabled(context.appContext)) {
@@ -306,7 +308,7 @@
                         var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
                         // check if value is set in submission data yet
                         if (!submissionRow[referenceColumn.name]) {
-                            
+
                             if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
                                 submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
                             } else {
@@ -344,7 +346,7 @@
         var addPopup = function(ref,rowIndex,derivedref){
             var column = ref;
             // if (isDisabled(column)) return;
-       
+
 
             var originalTuple,
                 editOrCopy = true,
@@ -352,7 +354,7 @@
 
             // pass the reference as a param for the modal
             // call to page with tuple to get proper reference
-           
+
             if (vm.editMode) {
                 originalTuple = $rootScope.tuples[rowIndex];
             }else {
@@ -396,23 +398,23 @@
                 //     vm.recordEditModel.submissionRows.push(key_subRow);
                 //     vm.recordEditModel.rows.push(key_row);
                 // }
-                for(i=0;i<tuples.length;i++){        
+                for(i=0;i<tuples.length;i++){
                     if(i!=0){
-                        var ob1 = {},ob2={}; 
+                        var ob1 = {},ob2={};
                         angular.copy(key_subRow, ob1)
                         angular.copy(key_row, ob2)
                         ob1[column.table.name] = tuples[i].data['term'];
                         vm.recordEditModel.submissionRows.push(ob1);
                         ob2[column.columns[0].name] = tuples[i].displayname.value;
                         vm.recordEditModel.rows.push(ob2);
-                    }          
-                    else{                                       
+                    }
+                    else{
                         vm.recordEditModel.submissionRows[i][column.table.name] = tuples[i].data['term'];
                         vm.recordEditModel.rows[i][column.columns[0].name] = tuples[i].displayname.value;
                 }
                 }
                 addRecords(false, derivedref);
-                
+
             });
         }
         vm.addRelatedRecord = function(ref) {
@@ -430,20 +432,20 @@
                 // Assign the column value into cookie
                 cookie.keys[fromColumn.name] = $rootScope.tuple.data[toColumn.name];
             });
-            
+
             if(ref.derivedAssociationReference){
                 var derivedref = ref.derivedAssociationReference;
                 updateViewModel(cookie);
                 // NOTE: we're showing all the available domain values, which might result in 409
-                // also since we're changing context to compact, it might not refer to the same table (alternative tables)    
+                // also since we're changing context to compact, it might not refer to the same table (alternative tables)
                 ref = ref.unfilteredReference.contextualize.compact;
-                
+
                 addPopup(ref,0,derivedref);
-                
+
                 return;
             }
-            
-           
+
+
             // 2. Generate a unique cookie name and set it to expire after 24hrs.
             var COOKIE_NAME = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
             $cookies.putObject(COOKIE_NAME, cookie, {
@@ -469,13 +471,41 @@
             editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
         });
 
+        /**
+        * readUpdatedTable(refObj, dataModel, idx, isModalUpdate) returns model object with all updated component values
+        * @param {object} refObj Reference object with component details
+        * @param {object} dataModel Contains value that is bind to the table columns
+        * @param {int} idx Index of each reference
+        * @param {bool} isModalUpdate if update happens through modal pop up
+        */
+        function readUpdatedTable(refObj, dataModel, idx, isModalUpdate){
+            if (isModalUpdate || completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
+                delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
+                (function (i) {
+                    refObj.read(dataModel.pageLimit).then(function (page) {
+                        dataModel.page = page;
+                        dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                    }, function (error) {
+                        console.log(error);
+                        throw error;
+                    }).catch(function (error) {
+                        console.log(error);
+                        throw error;
+                    });
+                })(i);
+            }
+        }
+
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
-        
-        $window.onfocus = function () {
-            $log.info("inside onfocus");
+        $window.onfocus = function() {
+            onfocusEventCall(false);
+        }
+
+        var onfocusEventCall = function(isModalUpdate) {
             if ($rootScope.loading === false) {
-                var completed = {};
+                var idxInbFk;
+                completed = { };
                 for (var id in addRecordRequests) {
                     var cookie = $cookies.getObject(id);
                     if (cookie) { // add request has been completed
@@ -486,31 +516,18 @@
                         $cookies.remove(id);
                         delete addRecordRequests[id];
                     } else {
-                        
                         console.log('Could not find cookie', cookie);
                     }
                 }
-
+                console.log($rootScope.inboundFKCols.length);
                 // read updated tables
-                if (Object.keys(completed).length > 0 || updated !== {}) {
-                    for (var i = 0; i < $rootScope.inbFKRef.length; i++) {
-                        var relatedTableReference = $rootScope.inbFKRef[i].reference;
-                        if (true||completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
-                            delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
-                            (function (i) {
-                                relatedTableReference.read($rootScope.colTableModels[i].pageLimit).then(function (page) {
-                                    $rootScope.colTableModels[i].page = page;
-                                    $rootScope.colTableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
-                                }, function(error) {
-                                    console.log(error);
-                                    throw error;                                    
-                                }).catch(function(error) {
-                                    console.log(error);
-                                    throw error;
-
-                                });
-                            })(i);
-                        }
+                if (isModalUpdate || Object.keys(completed).length > 0 || updated !== {}) {
+                    for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
+                        idxInbFk = $rootScope.inboundFKColsIdx[i];
+                        readUpdatedTable($rootScope.inboundFKCols[i].reference, $rootScope.colTableModels[idxInbFk], idxInbFk, isModalUpdate);
+                    }
+                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
+                        readUpdatedTable($rootScope.relatedReferences[i], $rootScope.tableModels[i], i, isModalUpdate);
                     }
                 }
             }
