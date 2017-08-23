@@ -89,7 +89,7 @@ before_install:
 install:
   - sudo mkdir -p /var/www/html/chaise
   - sudo make build
-  - sudo make install GENERATE_VERSION=true
+  - sudo make install
   - sudo cp chaise-config.js /var/www/html/chaise/chaise-config.js
   - sudo service apache2 restart
   - sudo cat /var/www/html/chaise/chaise-config.js
