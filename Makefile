@@ -6,9 +6,6 @@
 # Install directory on dev.isrd
 CHAISEDIR?=/var/www/html/chaise
 
-# Install directory on travis
-CHAISETRAVISDIR=/var/www/html/chaise
-
 # Project name
 PROJ=chaise
 
@@ -786,18 +783,15 @@ $(JS_CONFIG): chaise-config-sample.js
 
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
-install: $(HTML) dont_install_in_root
-	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=chaise-config.js . $(CHAISEDIR)
+install: $(HTML) dont_install_in_root gitversion
+	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=./chaise-config.js . $(CHAISEDIR)
+
+.PHONY: gitversion
+gitversion:
+	sh ./git_version_info.sh
 
 dont_install_in_root:
 	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
-
-# Rule for installing on Travis
-.PHONY: installTravis
-installTravis: $(HTML)
-	sudo sh ./git_version_info.sh
-	test -d $(dir $(CHAISETRAVISDIR)) && mkdir -p $(CHAISETRAVISDIR)
-	rsync -a --exclude='.*' ./. $(CHAISETRAVISDIR)/
 
 # Rules for help/usage
 .PHONY: help usage
@@ -806,7 +800,6 @@ usage:
 	@echo "Available 'make' targets:"
 	@echo "    all       		- an alias for build"
 	@echo "    install          - installs the client (CHAISEDIR=$(CHAISEDIR))"
-	@echo "    installTravis    - installs the client (CHAISETRAVISDIR=$(CHAISETRAVISDIR))"
 	@echo "    deps      		- local install of node dependencies"
 	@echo "    updeps    		- update local dependencies"
 	@echo "    lint      		- lint the source"
@@ -822,8 +815,8 @@ usage:
 	@echo "    testdetailed 	- runs detailed app e2e tests"
 	@echo "    testrecordadd 	- runs data entry app add e2e tests"
 	@echo "    testrecordedit 	- runs data entry app edit e2e tests"
-	@echo "	   testrecord 		- runs record app e2e tests"
-	@echo "	   testrecordset 	- runs recordset app e2e tests"
-	@echo "	   testviewer   	- runs viewer app e2e tests"
-	@echo "	   testnavbar   	- runs navbar e2e tests"
-	@echo "	   testlogin    	- runs login app e2e tests"
+	@echo "    testrecord 		- runs record app e2e tests"
+	@echo "    testrecordset 	- runs recordset app e2e tests"
+	@echo "    testviewer   	- runs viewer app e2e tests"
+	@echo "    testnavbar   	- runs navbar e2e tests"
+	@echo "    testlogin    	- runs login app e2e tests"
