@@ -10,15 +10,25 @@
                             <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span> [{{fc.preferredMode}}]
                         </a>
                     </h4>
-                    <span class="applied-filters" ng-show="hasFilter(fc)">
-                        <span class="label label-primary">
-                            <a class="remove-link" ng-click="removeFilter(fc)">clear all</a>
-                        </span>
-                        <span class="label label-primary" ng-repeat="filter in fc.filters track by $index">
-                            <a class="remove-link" ng-click="removeFilter(fc, $index)"><i class="glyphicon glyphicon-remove"></i></a>
-                            <span ng-bind="filter.toString()"></span>
-                        </span>
-                    </span>
+                    <div class="applied-filters row" ng-show="hasFilter(fc)">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <a class="remove-link" ng-click="removeFilter(fc)">
+                                <span class="filter-label label label-primary">
+                                    Clear All
+                                </span>
+                            </a>
+                            <div class="label label-default filter-label" ng-repeat="filter in fc.filters track by $index">
+                                <a class="remove-link" ng-click="removeFilter(fc, $index)"><i class="glyphicon glyphicon-remove"></i></a>
+                                <span ng-switch="filter.facetFilterKey">
+                                    <i ng-switch-when="choices" class="filter-icon glyphicon glyphicon-check" tooltip-placement="bottom" uib-tooltip="Exact value"></i>
+                                    <i ng-switch-when="search" class="filter-icon glyphicon glyphicon-search" tooltip-placement="bottom" uib-tooltip="Pattern"></i>
+                                    <i ng-switch-when="ranges" class="filter-icon glyphicon glyphicon-resize-horizontal" tooltip-placement="bottom" uib-tooltip="Range"></i>
+                                </span>
+                                <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                                <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
                     <div class="panel-body" ng-switch="fc.preferredMode">

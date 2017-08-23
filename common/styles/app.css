@@ -804,11 +804,18 @@ footer .container1 {
      margin-right: 5px;
      margin-bottom: 5px;
      display: inline-block;
+     border: 1px solid #323a45;
  }
 
  .total-filters .remove-link {
-     color: #333;
+     color: #337ab7;
+     font-weight: 600;
  }
+ 
+ .total-filters .remove-link:hover {
+     color: #2c6392;
+ }
+
 
  .label-default {
     background-color: #f1f1f1;
@@ -821,10 +828,6 @@ footer .container1 {
      margin-right:5px;
      margin-bottom: 5px;
      display:inline-block;
- }
-
- .total-filters .remove-link {
-     color: white;
  }
 
  .faceting-container {
@@ -893,17 +896,33 @@ footer .container1 {
 
  .faceting-container .applied-filters {
      margin-top: 5px;
+     max-height: 100px;
+     overflow-y: scroll;
  }
 
- .faceting-container .applied-filters span {
+ .faceting-container .applied-filters .filter-label {
      margin-right: 5px;
+     margin-bottom: 5px;
+     border: 1px solid #323a45;
+     display: inline-block;
+     font-size: 0.8em;
+ }
+ 
+ .faceting-container .panel-default>.panel-heading div:before, 
+ .faceting-container .panel-default>.panel-heading div.active:before {
+     content: "";
+ }
+ 
+ .faceting-container .applied-filters .filter-icon {
+     /*color: white;*/
  }
 
  .faceting-container .applied-filters .remove-link {
-     color: white;
+     color: #337ab7;
+     font-weight: 600;
  }
  .faceting-container .applied-filters .remove-link:hover {
-     color: #f5f5f5
+     color: #2c6392;
  }
 
  /* INTEGER SEARCH */
