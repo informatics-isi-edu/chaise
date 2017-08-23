@@ -194,8 +194,7 @@
                     } else {
                         console.log('Could not find cookie', cookie);
                     }
-                }
-                console.log($rootScope.inboundFKCols.length);
+                }  
                 // read updated tables
                 if (Object.keys(completed).length > 0 || updated !== {}) {
                     for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
