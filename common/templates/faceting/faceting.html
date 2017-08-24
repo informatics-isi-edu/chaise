@@ -22,7 +22,7 @@
                                 <span ng-switch="filter.facetFilterKey">
                                     <i ng-switch-when="choices" class="filter-icon glyphicon glyphicon-check" tooltip-placement="bottom" uib-tooltip="Exact value"></i>
                                     <i ng-switch-when="search" class="filter-icon glyphicon glyphicon-search" tooltip-placement="bottom" uib-tooltip="Pattern"></i>
-                                    <i ng-switch-when="ranges" class="filter-icon glyphicon glyphicon-resize-horizontal" tooltip-placement="bottom" uib-tooltip="Range"></i>
+                                    <i ng-switch-when="ranges" class="filter-icon glyphicon glyphicon-stats" tooltip-placement="bottom" uib-tooltip="Range"></i>
                                 </span>
                                 <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
                                 <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
