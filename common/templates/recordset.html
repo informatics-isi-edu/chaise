@@ -76,7 +76,7 @@
             
         </div>
 
-        <div class="row total-filters" style="margin: 10px -15px;" ng-if="vm.config.hasFaceting && vm.reference.location && vm.reference.location.facets">
+        <div class="row total-filters" ng-if="vm.config.hasFaceting && vm.reference.location && vm.reference.location.facets">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <a class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter()">
                     <span class="filter-label label label-primary">
@@ -108,10 +108,10 @@
 
         <!-- bottom pagination -->
         <div class="pager" ng-show="vm.initialized && vm.hasLoaded">
-            <button id="rs-previous-btn" type="button" class="btn btn-primary btn-sm" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
+            <button id="rs-previous-btn" type="button" class="btn btn-primary btn-xs" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </button>
-            <button id="rs-next-btn" type="button" class="btn btn-primary btn-sm" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
+            <button id="rs-next-btn" type="button" class="btn btn-primary btn-xs" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
                 <span class="glyphicon glyphicon-chevron-right"></span>
             </button>
         </div>
