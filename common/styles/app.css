@@ -1005,18 +1005,6 @@ box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
      margin-right: 10px;
  }
 
-
- /* VOCAB SEARCH */
-
- .faceting-container .vocab-search .input-group{
-     margin-bottom: 5px;
- }
-
- .faceting-container table.vocab-selector .select-input {
-     width: 20px;
-     text-align: center;
- }
-
  /* STRING SEARCH */
  .faceting-container .string-picker .tab-content{
      margin-top: 10px;

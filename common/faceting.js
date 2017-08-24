@@ -236,56 +236,71 @@
                 }
             };
         }])
-        
-        /*
-        .directive('vocabularyPicker', ['$window', function ($window) {
+
+        .directive('entityPicker', ['$uibModal', function ($uibModal) {
+            /**
+             * Should be called each time facetColumn has been modified.
+             * Will populate the following:
+             *  - scope.entityModel.selectedRows
+             */
+            function updateFacetColumn(scope) {
+                // update the selected rows
+                scope.entityModel.selectedRows = scope.facetColumn.choiceFilters.map(function (f) { 
+                    return {
+                        displayname: f.displayname,
+                        uniqueId: f.term
+                    };
+                });
+            }
+            
             return {
                 restrict: 'AE',
-                templateUrl: '../common/templates/faceting/vocabulary-picker.html',
+                templateUrl: '../common/templates/faceting/entity-picker.html',
                 scope: {
-                    reference: "=",
-                    facetColumn: "="
+                    vm: "=",
+                    facetColumn: "=",
+                    isOpen: "="
                 },
                 link: function (scope, element, attr) {
-                    //TODO use this reference to get the values
-                    scope.internalReference = null;
-                    scope.totalCount = 54;
-                    // TODO dynamic values
-                    scope.values = [
-                        {"value": "valued 1", "count": 12},
-                        {"value": "value 2", "count": 5},
-                        {"value": "value 3", "count": 4},
-                    ];
-
-                    // METHODS:
-                    scope.addFilter = function (value) {
-                        scope.appliedFilters[value] = {
-                            "content": value
-                        };
-                    };
-
-                    scope.removeFilter = function (value) {
-                        delete scope.appliedFilters[value];
+                    scope.entityModel = {
+                        selectedRows: []
                     }
 
-                    scope.toggleFilter = function (event, value) {
-                        scope.isDirty = true;
-                        if (event.target.checked) {
-                            scope.addFilter(value);
-                        } else {
-                            scope.removeFilter(value);
-                        }
-                    };
+                    updateFacetColumn(scope);
 
-                    scope.isSelected = function (value) {
-                        return value in scope.appliedFilters;
-                    };
+                    scope.openEntityPicker = function () {
+                        var params = {};
 
+                        params.reference = scope.facetColumn.sourceReference;
+                        params.reference.session = scope.$root.session;
+                        params.context = "compact/select";
+                        params.selectMode = "multi-select";
+                        params.selectedRows = scope.entityModel.selectedRows;
+
+                        var modalInstance = $uibModal.open({
+                            animation: false,
+                            controller: "SearchPopupController",
+                            controllerAs: "ctrl",
+                            resolve: {
+                                params: params
+                            },
+                            size: "lg",
+                            templateUrl: "../common/templates/searchPopup.modal.html"
+                        });
+
+                        modalInstance.result.then(function dataSelected(tuples) {
+                            var ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
+                                return {value: t.uniqueId, displayvalue: t.displayname.value, isHTML: t.displayname.isHTML};
+                            }));
+
+                            scope.vm.reference = ref;
+                            scope.$emit("facet-modified");
+                        });
+                    };
                 }
             };
         }])
-        */
-        
+
         .directive('rangePicker', ['$timeout', function ($timeout) {
             return {
                 restrict: 'AE',
@@ -296,9 +311,6 @@
                     isOpen: "="
                 },
                 link: function (scope, element, attr) {
-                    //TODO use this reference to get the values
-                    scope.internalReference = null;
-                    scope.fetched = false;
 
                     // mask options for time and date inputs
                     scope.maskOptions = {
@@ -310,25 +322,6 @@
                             maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
                             clearOnBlur: true
                         }
-                    };
-
-                    // sets the date and time inputs to current date and time
-                    scope.applyCurrentDatetime = function (modelVal) {
-                        if (scope.isTimestamp()) {
-                            return scope[modelVal] = {
-                                date: moment().format('YYYY-MM-DD'),
-                                time: moment().format('hh:mm:ss')
-                            }
-                        }
-                        return scope[modelVal] = moment().format('YYYY-MM-DD');
-                    };
-
-                    // clears the date and time inputs
-                    scope.clearInput = function (modelVal) {
-                        if (scope.isTimestamp()) {
-                            return scope[modelVal] = {date: null, time: null};
-                        }
-                        return scope[modelVal] = null;
                     };
 
                     // draw the plot
@@ -385,11 +378,6 @@
                         var ref = scope.facetColumn.addRangeFilter(min, max);
                         scope.vm.reference = ref;
                         scope.$emit("facet-modified");
-                    //     scope.appliedFilters[++scope.appliedFilterCount] = {
-                    //         "content": scope.min + "-" + scope.max,
-                    //         "min": scope.min,
-                    //         "max": scope.max
-                    //     };
                     };
 
                     // Gets the facet data for min/max
@@ -404,17 +392,21 @@
                         scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
                             console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
                             if (scope.isTimestamp()) {
-                                var minTs = moment(response[0]);
-                                var maxTs = moment(response[1]);
+                                // convert and set the values if they are defined.
+                                // if values are null, undefined, false, 0, or '' we don't want to show anything
+                                if (response[0] && response[1]) { 
+                                    var minTs = moment(response[0]);
+                                    var maxTs = moment(response[1]);
 
-                                scope.absMin = {
-                                    date: minTs.format('YYYY-MM-DD'),
-                                    time: minTs.format('hh:mm:ss')
-                                };
-                                scope.absMax = {
-                                    date: maxTs.format('YYYY-MM-DD'),
-                                    time: maxTs.format('hh:mm:ss')
-                                };
+                                    scope.absMin = {
+                                        date: minTs.format('YYYY-MM-DD'),
+                                        time: minTs.format('hh:mm:ss')
+                                    };
+                                    scope.absMax = {
+                                        date: maxTs.format('YYYY-MM-DD'),
+                                        time: maxTs.format('hh:mm:ss')
+                                    };
+                                }
                             } else {
                                 scope.absMin = response[0];
                                 scope.absMax = response[1];
@@ -457,7 +449,7 @@
 
                     scope.$watch("isOpen", function (newVal, oldVal) {
                         console.log("Open or close: ", newVal);
-                        if (newVal && !scope.fetched) {
+                        if (newVal) {
                             scope.initialFacetData();
                         }
                     });
