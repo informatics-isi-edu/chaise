@@ -12,7 +12,7 @@
                 <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
                 <span ng-switch-default>{{::values[$index].value}}</span>
             </span>
-            <span ng-if="::values[$index].value == ''" id="entity-{{$index}}-table">
+            <span ng-if="::values[$index].value == '' && recordTableModel" id="entity-{{$index}}-table">
                   <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="relatedReferenceDisplayTable[$index].display.type" tab-model-display="recordTableModel[$index].displayType"
                   toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:recordTableModel[$index]})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
                   can-create-related="canCreateRelated({ref:relatedReferenceDisplayTable[$index]})"
@@ -24,7 +24,7 @@
                 </span>
                 <span ng-show="recordTableModel[$index].displayType != 'markdown'" id="entity-{{$index}}-recTab">
                         <record-table class="related-table" vm="::recordTableModel[$index]"></record-table>
-                </span> 
+                </span>
          </span>
         </td>
     </tr>
