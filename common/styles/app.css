@@ -704,7 +704,7 @@ footer .container1 {
 
 .rg-right, .rg-left, .rg-top, .rg-bottom {
   display: block;
-  width: 14px;
+  width: 30px;
   height: 14px;
   line-height: 14px;
   position: absolute;
@@ -719,16 +719,22 @@ footer .container1 {
   position: absolute;
   box-sizing: border-box;
   display: block;
-  border: 1px solid #ccc;
+  /*border: 1px solid #ccc;*/
 }
 
 .rg-right span, .rg-left span {
-  border-width: 0 1px;
-  top: 50%;
+  /*border-width: 0 1px;*/
+  font-family: 'Glyphicons Halflings'; 
+  font-size: 1.9em;
+  top: 50vh;
   margin-top: -10px;
-  margin: -10px 0 0 3.5px;
+  margin: -10px 0 0 0.8px;
   height: 20px;
-  width: 7px;
+  width: 30px;
+}
+
+.rg-right span:before, .rg-left span:before {
+    /*content: "\e120";*/
 }
 
 .rg-top span, .rg-bottom span {
@@ -750,9 +756,10 @@ footer .container1 {
 .rg-right {
   cursor: col-resize;
   height: 100%;
-  right: 0;
+  right: -20px;
   top: 0;
   margin-right: -14px;
+  /*border: 1px solid #ccc;*/
 }
 
 .rg-bottom {
@@ -771,6 +778,8 @@ footer .container1 {
   margin-left: -14px;
 }
 
+
+/************* ACTION BAR ***********/
 
 .actionBarRTStyle{
     margin-top: -25px;
@@ -829,10 +838,37 @@ footer .container1 {
      margin-bottom: 5px;
      display:inline-block;
  }
+ 
+ .recordset-container.with-faceting {
+     -webkit-box-flex: 1;
+     display: flex;
+     flex: 1;
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable {
+     flex:0 0 450px;
+     position: relative;
+     /*border-right: 15px solid white;*/
+     min-width: 350px;
+     max-width: 600px;
+     -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+-moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+ }
+ .recordset-container.with-faceting > .main-container {
+     flex:1;
+     border-left: 25px solid white;
+ }
+ /*.recordset-container.with-faceting > .main-container {
+     overflow-x: auto;
+ }*/
+ /*.recordset-container.without-faceting > .main-container.outer-table {
+     overflow-x: inherit;
+ }*/
 
  .faceting-container {
      overflow-y: auto;
-     /*max-height: 600px; /* needs js*/*/
+     max-height: 100vh;
  }
 
  .faceting-container .divider {
@@ -886,12 +922,19 @@ footer .container1 {
 
  .faceting-container .panel .panel-title {
      margin-bottom: 7px;
+     font-size: 1.15em;
+     color: #333;
  }
 
  .faceting-container .panel .panel-body {
-     padding: 15px !important;
+     padding: 5px 25px !important;
      border: 1px solid #ddd;
      border-top: none;
+ }
+ 
+ .faceting-container .panel-group {
+     margin-right: 5px;
+     margin-top: 5px;
  }
 
  .faceting-container .applied-filters {
@@ -940,3 +983,10 @@ footer .container1 {
  .faceting-container .string-picker .tab-content{
      margin-top: 10px;
  }
+.faceting-container .string-picker .pager {
+    margin: 0px;
+}
+
+.faceting-container .string-picker a.nav-link {
+    padding: 5px 15px;
+}
