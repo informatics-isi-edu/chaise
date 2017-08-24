@@ -480,6 +480,7 @@
                     console.log('data-modified in recordset directive, getting count');
                     if (!scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
                         // get the total row count to display above the table
+                        console.log("Data-updated: ", scope.vm);
                         scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
                             // NOTE: scenario: A user triggered a foreground search. Once it returns the aggregate count request is queued.
                             // While that request is running, the user triggers another foreground search.

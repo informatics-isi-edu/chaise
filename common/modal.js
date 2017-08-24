@@ -60,16 +60,25 @@
         }
 
     }])
+    /**
+     * Controller used to show the modal popup with the recordset directive for searching through entitiy sets
+     * 
+     * params must include:
+     *  - reference {ERMrest.Reference} - the reference backing the set of data shown
+     *  - context {String} - the current context that the directive fetches data for
+     *  - selectMode {String} - the select mode the modal uses
+     */
     .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
         var vm = this;
 
         vm.params = params;
         vm.ok = ok;
         vm.cancel = cancel;
+        vm.submit = submitMultiSelection;
 
-        var reference = params.reference;
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
+        var limit = 25;
 
         vm.tableModel = {
             hasLoaded:          false,
@@ -80,31 +89,37 @@
             sortOrder:          null,
             enableSort:         true,
             enableAutoSearch:   true,
-            pageLimit:          25,
+            pageLimit:          limit,
             rowValues:          [],
-            selectedRows:       [],
+            selectedRows:       params.selectedRows,
             search:             null,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: "single-select"},
+            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode},
             context:            params.context
         };
 
         var fetchRecords = function() {
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
-            reference.read(25).then(function getPseudoData(page) {
+            reference.read(limit).then(function getPseudoData(page) {
                 vm.tableModel.hasLoaded = true;
                 vm.tableModel.initialized = true;
                 vm.tableModel.page = page;
                 vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
+
+                $scope.$broadcast('data-modified');
             }, function(exception) {
                 throw exception;
             });
         }
 
         fetchRecords();
-        
+    
         // since this is currently used for single select mode, the isSelected will always be true
         function ok(tuples, isSelected) {
-            $uibModalInstance.close(tuples[0]);
+            if (params.selectMode != "multi-select") $uibModalInstance.close(tuples[0]);
+        }
+
+        function submitMultiSelection() {
+            $uibModalInstance.close(this.tableModel.selectedRows);
         }
 
         function cancel() {

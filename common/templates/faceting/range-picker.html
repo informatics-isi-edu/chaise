@@ -13,13 +13,13 @@
             </div>
             <!-- timestamp[tz] -->
             <div ng-show="isTimestamp()" id="from-val">
-                <div class="col-xs-12">
+                <div>
                     <div class="input-group">
                         <span class="input-group-addon">Date</span>
-                        <input type="text" class="form-control input-timestamptz" placeholder="{{absMin.date}}" ng-model="min.date" ui-mask="9999-99-99" ui-options="maskOptions.date" />
+                        <input type="text" class="form-control" placeholder="{{absMin.date}}" ng-model="min.date" ui-mask="9999-99-99" ui-options="maskOptions.date" />
                     </div>
                 </div>
-                <div class="col-xs-12">
+                <div>
                     <div class="input-group">
                         <span class="input-group-addon">Time</span>
                         <input type="text" class="form-control" placeholder="{{absMin.time}}" ng-model="min.time">
@@ -39,13 +39,13 @@
             </div>
             <!-- timestamp[tz] -->
             <div ng-show="isTimestamp()" id="to-val">
-                <div class="col-xs-12">
+                <div>
                     <div class="input-group">
                         <span class="input-group-addon">Date</span>
-                        <input type="text" class="form-control input-timestamptz" placeholder="{{absMax.date}}" ng-model="max.date" ui-mask="9999-99-99" ui-options="maskOptions.date" />
+                        <input type="text" class="form-control" placeholder="{{absMax.date}}" ng-model="max.date" ui-mask="9999-99-99" ui-options="maskOptions.date" />
                     </div>
                 </div>
-                <div class="col-xs-12">
+                <div>
                     <div class="input-group">
                         <span class="input-group-addon">Time</span>
                         <input type="text" class="form-control" placeholder="{{absMax.time}}" ng-model="max.time">
