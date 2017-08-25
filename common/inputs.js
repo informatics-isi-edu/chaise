@@ -9,7 +9,7 @@
             templateUrl: '../common/templates/rangeInputs.html',
             scope: {
                 type: '=',
-                callback: '&',
+                addRangeCb: '=',
                 absMin: '=?',
                 absMax: '=?'
             },
@@ -66,7 +66,7 @@
 
                     if (min == '') min = null;
                     if (max == '') max = null;
-                    scope.callback(min, max);
+                    scope.addRangeCb(min, max);
                 };
             }
         }
