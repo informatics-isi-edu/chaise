@@ -1,0 +1,12 @@
+<ul>
+    <li ng-repeat="row in rows track by $index">
+        <input type="checkbox" ng-checked="row.selected" ng-click="onSelect()">
+        <span ng-if="::row.displayname.isHTML" ng-bind-html="::row.displayname.value"></span>
+        <span ng-if="::!row.displayname.isHTML" ng-bind="::row.displayname.value"></span>
+        <div>{{row.count}}</div>
+    </li>
+    <a ng-if="findMoreCB" ng-click="openSearchPopup()">Find More</a>
+    <div ng-if="rangeOptions">
+        <range-inputs type="rangeOptions.type" callback="addRange(min, max)" abs-min="rangeOptions.absMin" abs-max="rangeOptions.absMax"></range-inputs>
+    </div>
+</ul>

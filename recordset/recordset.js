@@ -19,20 +19,21 @@
 
     // The Chaise RecordSet module
     angular.module('recordset', [
-        'ermrestjs',
-        'chaise.navbar',
-        'chaise.utils',
         'chaise.authen',
         'chaise.errors',
-        'chaise.modal',
-        'chaise.html',
+        'chaise.faceting',
         'chaise.footer',
+        'chaise.html',
+        'chaise.inputs',
+        'chaise.modal',
+        'chaise.navbar',
         'chaise.record.table',
-        'ui.bootstrap',
+        'chaise.resizable', 
+        'chaise.utils',
+        'ermrestjs',
         'ngCookies',
         'ngSanitize',
-        'chaise.resizable', 
-        'chaise.faceting'])
+        'ui.bootstrap'])
 
     .config(['$cookiesProvider', function($cookiesProvider) {
         $cookiesProvider.defaults.path = '/';

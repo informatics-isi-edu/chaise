@@ -311,19 +311,7 @@
                     isOpen: "="
                 },
                 link: function (scope, element, attr) {
-
-                    // mask options for time and date inputs
-                    scope.maskOptions = {
-                        date: {
-                            maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
-                            clearOnBlur: true
-                        },
-                        time: {
-                            maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
-                            clearOnBlur: true
-                        }
-                    };
-
+                    scope.ranges = [];
                     // draw the plot
                     // TODO change the data
                     // scope.plot = {
@@ -354,28 +342,21 @@
                     // }
 
                     // scope.appliedFilterCount = Object.keys(scope.appliedFilters).length;
-
-                    // returns a boolean to disable the add button if both min and max are not set
-                    scope.disableAdd = function () {
-                        return ( (scope.min == '' || scope.min == null || scope.min == undefined) && (scope.max == '' || scope.max == null || scope.max == undefined) )
+                    scope.onSelect = function () {
+                        
                     };
 
-                    // Add new integer filter
-                    scope.addFilter = function () {
-                        var min, max;
-                        scope.isDirty = true;
-                        // data for timestamp[tz] needs to be formatted properly
-                        if (scope.isTimestamp()) {
-                            min = moment(scope.min.date + scope.min.time, 'YYYY-MM-DDHH:mm:ss').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                            max = moment(scope.max.date + scope.max.time, 'YYYY-MM-DDHH:mm:ss').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                        } else {
-                            min = scope.min;
-                            max = scope.max;
-                        }
-
-                        if (min == '') min = null;
-                        if (max == '') max = null;
+                    // Add new integer filter, used as the callback function to range-inputs
+                    scope.addFilter = function (min, max) {
                         var ref = scope.facetColumn.addRangeFilter(min, max);
+                        // TODO: push the filter into the view
+                        // var listRow = {
+                        //     selected: true,
+                        //     displayname: ,
+                        //     uniqueid: ,
+                        //     count: 
+                        // }
+                        // scope.ranges.push(scope.facetColumn.filters[last]);
                         scope.vm.reference = ref;
                         scope.$emit("facet-modified");
                     };
@@ -391,7 +372,7 @@
 
                         scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
                             console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
-                            if (scope.isTimestamp()) {
+                            if (scope.facetColumn.column.type.name.indexOf("timestamp" > -1)) {
                                 // convert and set the values if they are defined.
                                 // if values are null, undefined, false, 0, or '' we don't want to show anything
                                 if (response[0] && response[1]) { 
@@ -414,21 +395,6 @@
                         });
                     };
 
-                    // checks whether the type is integer (int2, int4, int8) or float (float4, float8)
-                    scope.isNumeric = function () {
-                        return (scope.facetColumn.column.type.name.indexOf("int") > -1 || scope.facetColumn.column.type.name.indexOf("float") > -1)
-                    };
-
-                    // checks whether the type is date
-                    scope.isDate = function () {
-                        return scope.facetColumn.column.type.name == 'date';
-                    };
-
-                    // checks whether the input is timestamp or timestamptz
-                    scope.isTimestamp = function () {
-                        return scope.facetColumn.column.type.name.indexOf('timestamp') > -1;
-                    };
-
                     //  all the events related to the plot
                     // scope.plotlyEvents = function (graph) {
                     //     graph.on('plotly_relayout', function (event) {
@@ -439,6 +405,12 @@
                     //     });
                     // 
                     // };
+                    scope.rangeOptions = {
+                        type: scope.facetColumn.column.type,
+                        callback: scope.addFilter,
+                        absMin: scope.absMin,
+                        absMax: scope.absMax
+                    }
 
                     scope.$on("data-modified", function ($event) {
                         scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
