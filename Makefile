@@ -353,26 +353,28 @@ RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
 RECSET_ASSETS=recordset
 
 RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
-	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(DETAILED_ASSETS)/lib/angular-animate.min.js \
 	$(COMMON)/alerts.js \
-	$(COMMON)/vendor/angular-cookies.min.js \
-	$(COMMON)/filters.js \
+	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/ellipses.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/errorDialog.controller.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/ellipses.js \
-	$(COMMON)/table.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/bindHtmlUnsafe.js \
-	$(COMMON)/resizable.js \
-	$(JS)/vendor/plotly-latest.min.js \
-	$(JS)/vendor/angular-plotly.js \
 	$(COMMON)/faceting.js \
-	$(COMMON)/footer.js
+	$(COMMON)/filters.js \
+	$(COMMON)/footer.js \
+	$(COMMON)/inputs.js \
+	$(COMMON)/modal.js \
+	$(COMMON)/navbar.js \
+	$(COMMON)/resizable.js \
+	$(COMMON)/table.js \
+	$(COMMON)/validators.js \
+	$(COMMON)/vendor/angular-cookies.min.js
 
 RECSET_JS_SOURCE=$(COMMON)/authen.js \
     $(COMMON)/utils.js \

@@ -292,6 +292,32 @@
         };
     }])
 
+    .directive('recordList', ['recordTableUtils', function(recordTableUtils) {
+
+        return {
+            restrict: 'E',
+            templateUrl: '../common/templates/list.html',
+            scope: {
+                findMoreCB: '&?',
+                onRowClick: '&',
+                rangeOptions: '=?',
+                rows: '='
+            },
+            link: function (scope, elem, attr) {
+                scope.openSearchPopup = function () {
+                    
+                    scope.findMoreCB();
+                }
+
+                scope.addRange = function (min, max) {
+                    console.log(min);
+                    console.log(max);
+                    scope.rangeOptions.callback();
+                }
+            }
+        }
+    }])
+
     .directive('recordset', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils','$timeout', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout) {
 
         return {
