@@ -1,4 +1,4 @@
-<ul>
+<ul style="padding-left: 0px;">
     <li ng-repeat="row in rows track by $index">
         <input type="checkbox" ng-checked="row.selected" ng-click="onSelect()">
         <span ng-if="::row.displayname.isHTML" ng-bind-html="::row.displayname.value"></span>

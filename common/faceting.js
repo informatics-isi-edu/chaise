@@ -372,25 +372,26 @@
 
                         scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
                             console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
-                            if (scope.facetColumn.column.type.name.indexOf("timestamp" > -1)) {
+                            if (scope.facetColumn.column.type.name.indexOf("timestamp") > -1) {
+                                console.log("LOLWHY");
                                 // convert and set the values if they are defined.
                                 // if values are null, undefined, false, 0, or '' we don't want to show anything
                                 if (response[0] && response[1]) { 
                                     var minTs = moment(response[0]);
                                     var maxTs = moment(response[1]);
 
-                                    scope.absMin = {
+                                    scope.rangeOptions.absMin = {
                                         date: minTs.format('YYYY-MM-DD'),
                                         time: minTs.format('hh:mm:ss')
                                     };
-                                    scope.absMax = {
+                                    scope.rangeOptions.absMax = {
                                         date: maxTs.format('YYYY-MM-DD'),
                                         time: maxTs.format('hh:mm:ss')
                                     };
                                 }
                             } else {
-                                scope.absMin = response[0];
-                                scope.absMax = response[1];
+                                scope.rangeOptions.absMin = response[0];
+                                scope.rangeOptions.absMax = response[1];
                             }
                         });
                     };
@@ -407,9 +408,7 @@
                     // };
                     scope.rangeOptions = {
                         type: scope.facetColumn.column.type,
-                        callback: scope.addFilter,
-                        absMin: scope.absMin,
-                        absMax: scope.absMax
+                        callback: scope.addFilter
                     }
 
                     scope.$on("data-modified", function ($event) {

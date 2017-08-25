@@ -305,8 +305,13 @@
             },
             link: function (scope, elem, attr) {
                 scope.openSearchPopup = function () {
-                    
+
                     scope.findMoreCB();
+                }
+
+                scope.onSelect = function () {
+
+                    scope.onRowClick();
                 }
 
                 scope.addRange = function (min, max) {
