@@ -299,7 +299,7 @@
             templateUrl: '../common/templates/list.html',
             scope: {
                 findMoreCB: '&?',
-                onRowClick: '&',
+                onRowClick: '=',
                 rangeOptions: '=?',
                 rows: '='
             },
@@ -310,9 +310,7 @@
                 }
 
                 scope.addRange = function (min, max) {
-                    console.log(min);
-                    console.log(max);
-                    scope.rangeOptions.callback();
+                    scope.rangeOptions.callback(min, max);
                 }
             }
         }
