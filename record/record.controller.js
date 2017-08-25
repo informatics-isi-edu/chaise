@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal','$controller', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal','$controller','recordCreate', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller, recordCreate) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -419,6 +419,8 @@
         }
         vm.addRelatedRecord = function(ref) {
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
+            recordCreate.addRelatedRecordFact(true, ref, 0, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.resultsetModel, vm.resultset, vm.submissionButtonDisabled, vm.omittedResultsetModel);
+            return;
             var cookie = {
                 rowname: $rootScope.recordDisplayname,
                 constraintName: ref.origColumnName
@@ -439,7 +441,7 @@
                 // NOTE: we're showing all the available domain values, which might result in 409
                 // also since we're changing context to compact, it might not refer to the same table (alternative tables)
                 ref = ref.unfilteredReference.contextualize.compact;
-
+                console.log(recordCreate.testfunction(10));
                 addPopup(ref,0,derivedref);
 
                 return;
@@ -519,7 +521,7 @@
                         console.log('Could not find cookie', cookie);
                     }
                 }
-                console.log($rootScope.inboundFKCols.length);
+
                 // read updated tables
                 if (isModalUpdate || Object.keys(completed).length > 0 || updated !== {}) {
                     for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
