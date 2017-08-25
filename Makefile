@@ -784,7 +784,7 @@ $(JS_CONFIG): chaise-config-sample.js
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
 install: $(HTML) dont_install_in_root gitversion
-	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=./chaise-config.js . $(CHAISEDIR)
+	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
 
 .PHONY: gitversion
 gitversion:
