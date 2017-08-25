@@ -298,24 +298,13 @@
             restrict: 'E',
             templateUrl: '../common/templates/list.html',
             scope: {
-                findMoreCB: '&?',
                 onRowClick: '=',
-                rangeOptions: '=?',
-                rows: '='
+                rows: '=' // each row: {uniqueId, displayname, count, selected}
             },
             link: function (scope, elem, attr) {
-                scope.openSearchPopup = function () {
-
-                    scope.findMoreCB();
-                }
-
-                scope.onSelect = function () {
-
-                    scope.onRowClick();
-                }
-
-                scope.addRange = function (min, max) {
-                    scope.rangeOptions.callback(min, max);
+                scope.onSelect = function (row) {
+                    row.selected = !row.selected;
+                    scope.onRowClick()(row);
                 }
             }
         }

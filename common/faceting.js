@@ -342,8 +342,8 @@
                     // }
 
                     // scope.appliedFilterCount = Object.keys(scope.appliedFilters).length;
-                    scope.onSelect = function () {
-                        
+                    scope.onSelect = function (row) {
+                        console.log("selected the row" + row.uniqueId);
                     };
 
                     // Add new integer filter, used as the callback function to range-inputs
