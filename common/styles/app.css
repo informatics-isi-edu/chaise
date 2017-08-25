@@ -826,9 +826,11 @@ footer .container1 {
      border: 0.1px solid #ccc;
  }
 
- .total-filters .remove-link {
-     color: #337ab7;
+ .total-filters .remove-link .filter-label {
+     background-color: #337ab7;
+     color: white;
      font-weight: 600;
+     padding: .34em .4em .33em .4em;
  }
  
  .total-filters .remove-link:hover {
@@ -984,7 +986,8 @@ box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
  }
  
  .remove-link .filter-label {
-     color: #337ab7;
+     background-color: #337ab7;
+     color: white;
  }
  
  .filter-label {
