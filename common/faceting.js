@@ -350,13 +350,11 @@
                     scope.addFilter = function (min, max) {
                         var ref = scope.facetColumn.addRangeFilter(min, max);
                         // TODO: push the filter into the view
-                        // var listRow = {
-                        //     selected: true,
-                        //     displayname: ,
-                        //     uniqueid: ,
-                        //     count: 
-                        // }
-                        // scope.ranges.push(scope.facetColumn.filters[last]);
+                        var listRow = {
+                            selected: true,
+                            displayname: {isHTML: false, value: min+" - "+max}
+                        }
+                        scope.ranges.push(listRow);
                         scope.vm.reference = ref;
                         scope.$emit("facet-modified");
                     };
