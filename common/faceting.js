@@ -343,19 +343,31 @@
 
                     // scope.appliedFilterCount = Object.keys(scope.appliedFilters).length;
                     scope.onSelect = function (row) {
-                        console.log("selected the row" + row.uniqueId);
+                        var res;
+                        if (row.selected) {
+                            res = scope.facetColumn.addRangeFilter(row.metaData.min, row.metaData.max);
+                        } else {
+                            res = scope.facetColumn.removeRangeFilter(row.metaData.min, row.metaData.max);
+                        }
+                        scope.vm.reference = res.reference;
+                        scope.$emit("facet-modified");
                     };
 
                     // Add new integer filter, used as the callback function to range-inputs
                     scope.addFilter = function (min, max) {
-                        var ref = scope.facetColumn.addRangeFilter(min, max);
-                        // TODO: push the filter into the view
-                        var listRow = {
+                        var res = scope.facetColumn.addRangeFilter(min, max);
+                        if (!res) return;
+
+                        scope.ranges.push({
+                            uniqueId: res.filter.uniqueId,
+                            displayname: res.filter.displayname,
                             selected: true,
-                            displayname: {isHTML: false, value: min+" - "+max}
-                        }
-                        scope.ranges.push(listRow);
-                        scope.vm.reference = ref;
+                            metaData: {
+                                min: res.filter.min,
+                                max: res.filter.max
+                            }
+                        });
+                        scope.vm.reference = res.reference;
                         scope.$emit("facet-modified");
                     };
 
