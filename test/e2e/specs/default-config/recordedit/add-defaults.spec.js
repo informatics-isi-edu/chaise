@@ -94,7 +94,7 @@ describe('Record Add with defaults', function() {
             booleanTrueInput = chaisePage.recordEditPage.getInputById(0, "boolean_true");
             booleanFalseInput = chaisePage.recordEditPage.getInputById(0, "boolean_false");
             dateInput = chaisePage.recordEditPage.getInputById(0, "date");
-            jsonInput= chaisePage.recordEditPage.getInputById(0, "json");
+            jsonInput = chaisePage.recordEditPage.getInputById(0, "json");
 
             expect(textInput.getAttribute("value")).toBe(values.text_value, "Text input default is incorrect");
             expect(markdownInput.getAttribute("value")).toBe(values.markdown_value, "Markdown input default is incorrect");

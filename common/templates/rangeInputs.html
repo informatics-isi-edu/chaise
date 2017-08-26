@@ -2,15 +2,15 @@
     <div class="form-group">
         <label for="from-val">From:</label>
         <!-- int, float, numeric -->
-        <div ng-show="type(type) == 'number'" id="from-val">
+        <div ng-show="displayType(type) == 'number'" id="from-val">
             <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" />
         </div>
         <!-- date -->
-        <div ng-show="type(type) == 'date'" id="from-val">
+        <div ng-show="displayType(type) == 'date'" id="from-val">
             <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" />
         </div>
         <!-- timestamp[tz] -->
-        <div ng-show="type(type) == 'datetime'" id="from-val">
+        <div ng-show="displayType(type) == 'datetime'" id="from-val">
             <div>
                 <div class="input-group">
                     <span class="input-group-addon">Date</span>
@@ -28,15 +28,15 @@
     <div class="form-group">
         <label for="to-val">To:</label>
         <!-- int, float, numeric -->
-        <div ng-show="type(type) == 'number'" id="to-val">
+        <div ng-show="displayType(type) == 'number'" id="to-val">
             <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" />
         </div>
         <!-- date -->
-        <div ng-show="type(type) == 'date'" id="to-val">
+        <div ng-show="displayType(type) == 'date'" id="to-val">
             <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" />
         </div>
         <!-- timestamp[tz] -->
-        <div ng-show="type(type) == 'datetime'" id="to-val">
+        <div ng-show="displayType(type) == 'datetime'" id="to-val">
             <div>
                 <div class="input-group">
                     <span class="input-group-addon">Date</span>
