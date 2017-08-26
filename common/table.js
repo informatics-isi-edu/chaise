@@ -304,7 +304,7 @@
             link: function (scope, elem, attr) {
                 scope.onSelect = function (row) {
                     row.selected = !row.selected;
-                    scope.onRowClick()(row);
+                    scope.onRowClick(row);
                 }
             }
         }

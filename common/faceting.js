@@ -343,12 +343,22 @@
 
                     // scope.appliedFilterCount = Object.keys(scope.appliedFilters).length;
                     scope.onSelect = function (row) {
-                        console.log("selected the row" + row.uniqueId);
+                        var res;
+                        if (row.selected) {
+                            res = scope.facetColumn.addRangeFilter(row.metaData.min, row.metaData.max);
+                        } else {
+                            res = scope.facetColumn.removeRangeFilter(row.metaData.min, row.metaData.max);
+                        }
+                        scope.vm.reference = res.reference;
+                        scope.$emit("facet-modified");
                     };
 
                     // Add new integer filter, used as the callback function to range-inputs
                     scope.addFilter = function (min, max) {
-                        var ref = scope.facetColumn.addRangeFilter(min, max);
+                        var res = scope.facetColumn.addRangeFilter(min, max);
+                        if (!res) {
+                            return;
+                        }
                         // TODO: push the filter into the view
                         // var listRow = {
                         //     selected: true,
@@ -357,7 +367,16 @@
                         //     count: 
                         // }
                         // scope.ranges.push(scope.facetColumn.filters[last]);
-                        scope.vm.reference = ref;
+                        scope.ranges.push({
+                            uniqueId: res.filter.uniqueId,
+                            displayname: res.filter.displayname,
+                            selected: true,
+                            metaData: {
+                                min: res.filter.min,
+                                max: res.filter.max
+                            }
+                        });
+                        scope.vm.reference = res.reference;
                         scope.$emit("facet-modified");
                     };
 
