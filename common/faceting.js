@@ -3,7 +3,7 @@
 
     angular.module('chaise.faceting', ['plotly'])
 
-        .directive('faceting', ['$document', function ($document) {
+        .directive('faceting', [function () {
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/faceting.html',
@@ -47,6 +47,17 @@
                         } else {
                             scope.isOpen[index] = true;
                         }
+                    };
+                    
+                    scope.vm.openFacet = function (fc) {
+                        var el = document.getElementById('ft-heading-1-' + fc.index);
+                        var container = document.getElementsByClassName('faceting-container')[0];
+                        setTimeout(function() {
+                            container.scrollTop = el.offsetTop;
+                            if (!scope.isOpen[fc.index]) {
+                                el.click();
+                            }
+                        }, 0);
                     };
                     
                     // TODO I am attaching the removeFilter to the vm here, maybe I shouldn't?
@@ -464,6 +475,7 @@
             
             function updateFacetColumn(scope) {
                 scope.hasLoaded = false;
+                scope.initialized = false;
                 
                 // facetColumn has changed so create the new reference
                 if (scope.facetColumn.isEntityMode) {
@@ -497,7 +509,8 @@
                                 // therefore the uniqueId is not correct.
                                 value = tuple.data[scope.facetColumn.column.name];
                             } else {
-                                value = tuple.uniqueId;
+                                // The name of column is value
+                                value = tuple.data['value'];
                             }
                             
                             if (!(value in currentValues)) {
@@ -528,6 +541,7 @@
             }
 
             function updateVMReference(scope, ref) {
+                scope.hasLoaded = false;
                 scope.vm.reference = ref;
                 scope.$emit('facet-modified');
             }
@@ -542,6 +556,7 @@
                 },
                 link: function (scope, element, attr) {
                     scope.initialized = false;
+                    scope.isActive = false;
 
                     scope.openSearchPopup = function() {
                         var params = {};
@@ -572,7 +587,7 @@
                                 if (scope.facetColumn.isEntityMode) {
                                     value = t.data[scope.facetColumn.column.name];
                                 } else {
-                                    value = t.uniqueId;
+                                    value = t.data['value'];
                                 }
                                 return {value: value, displayvalue: t.displayname.value, isHTML: t.displayname.isHTML};
                             }));
@@ -582,15 +597,14 @@
 
                     scope.onRowClick = function(row) {
                         var ref;
-                        var rowFilter = {
-                            value: row.uniqueId,
-                            displayvalue: row.displayname.value,
-                            isHTML: row.displayname.isHTML
-                        };
                         if (row.selected) {
-                            ref = scope.facetColumn.addChoiceFilters([rowFilter]);
+                            ref = scope.facetColumn.addChoiceFilters([{
+                                value: row.uniqueId,
+                                displayvalue: row.displayname.value,
+                                isHTML: row.displayname.isHTML
+                            }]);
                         } else {
-                            ref = scope.facetColumn.removeChoiceFilters([rowFilter]);
+                            ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
                         }
                         scope.isActive = true;
                         updateVMReference(scope, ref);

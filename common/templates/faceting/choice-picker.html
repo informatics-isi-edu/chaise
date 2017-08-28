@@ -2,5 +2,5 @@
     <loading-spinner ng-show="!hasLoaded && !initialized"></loading-spinner>
     <record-list rows='checkboxRows' on-row-click='onRowClick'></record-list>
     <span ng-if="hasLoaded && !hasMore && checkboxRows.length === 0">No Results Found</span>
-    <a ng-if="hasMore" ng-click="openSearchPopup()">Find More{{facetColumn.isEntityMode ? " (entity)":""}}</a>
+    <a ng-if="hasMore" ng-click="openSearchPopup()">Find More</a>
 </div>
