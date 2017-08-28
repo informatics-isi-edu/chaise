@@ -23,16 +23,16 @@
                  *
                  * @returns {String} - the column's type's name
                  */
-                scope.type = function (type) {
+                scope.displayType = function (colType) {
                     var relativeType;
-                    
-                    switch (type.name) {
+
+                    switch (colType.name) {
                         case 'date':
-                            relativeType: "date";
+                            relativeType = "date";
                             break;
                         case 'timestamp':
                         case 'timestamptz':
-                            relativeType: "datetime";
+                            relativeType = "datetime";
                             break;
                         case 'int2':
                         case 'int4':
@@ -40,8 +40,10 @@
                         case 'float4':
                         case 'float8':
                         case 'numeric':
+                            relativeType = "number";
+                            break;
                         default:
-                            relativeType = type.baseType ? type(type.baseType) : "number";
+                            relativeType = type(colType.baseType);
                             break;
                     }
                     return relativeType;
@@ -56,7 +58,7 @@
                     var min, max;
                     scope.isDirty = true;
                     // data for timestamp[tz] needs to be formatted properly
-                    if (scope.type(scope.type) == "datetime") {
+                    if (scope.displayType(scope.type) == "datetime") {
                         min = moment(scope.min.date + scope.min.time, 'YYYY-MM-DDHH:mm:ss').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                         max = moment(scope.max.date + scope.max.time, 'YYYY-MM-DDHH:mm:ss').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                     } else {

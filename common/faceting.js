@@ -342,6 +342,19 @@
                     // }
 
                     // scope.appliedFilterCount = Object.keys(scope.appliedFilters).length;
+                    
+                    function createChoiceDisplay(filter, selected) { 
+                        return {
+                            uniqueId: filter.uniqueId,
+                            displayname: filter.displayname,
+                            selected: selected,
+                            metaData: {
+                                min: filter.min,
+                                max: filter.max
+                            }
+                        };
+                    };
+
                     scope.onSelect = function (row) {
                         var res;
                         if (row.selected) {
@@ -356,28 +369,27 @@
                     // Add new integer filter, used as the callback function to range-inputs
                     scope.addFilter = function (min, max) {
                         var res = scope.facetColumn.addRangeFilter(min, max);
-                        if (!res) {
-                            return;
-                        }
-                        // TODO: push the filter into the view
-                        // var listRow = {
-                        //     selected: true,
-                        //     displayname: ,
-                        //     uniqueid: ,
-                        //     count: 
-                        // }
-                        // scope.ranges.push(scope.facetColumn.filters[last]);
-                        scope.ranges.push({
-                            uniqueId: res.filter.uniqueId,
-                            displayname: res.filter.displayname,
-                            selected: true,
-                            metaData: {
-                                min: res.filter.min,
-                                max: res.filter.max
-                            }
-                        });
+                        if (!res) return;
+
+                        scope.ranges.push(createChoiceDisplay(res.filter, true));
                         scope.vm.reference = res.reference;
                         scope.$emit("facet-modified");
+                    };
+
+                    // Look at the filters available for the facet and add rows to represent the preset filters
+                    scope.addRowsToPicker = function () {
+                        for (var i = 0; i < scope.facetColumn.filters.length; i++) {
+                            var filter = scope.facetColumn.filters[i];
+
+                            var rowIndex = scope.ranges.findIndex(function (obj) {
+                                return obj.uniqueId == filter.uniqueId;
+                            });
+
+                            // if the row is not in the set of choices, add it
+                            if (rowIndex == -1) {
+                                scope.ranges.push(createChoiceDisplay(filter, true));
+                            }
+                        }
                     };
 
                     // Gets the facet data for min/max
@@ -392,7 +404,6 @@
                         scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
                             console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
                             if (scope.facetColumn.column.type.name.indexOf("timestamp") > -1) {
-                                console.log("LOLWHY");
                                 // convert and set the values if they are defined.
                                 // if values are null, undefined, false, 0, or '' we don't want to show anything
                                 if (response[0] && response[1]) { 
@@ -440,6 +451,7 @@
                     scope.$watch("isOpen", function (newVal, oldVal) {
                         console.log("Open or close: ", newVal);
                         if (newVal) {
+                            scope.addRowsToPicker();
                             scope.initialFacetData();
                         }
                     });
