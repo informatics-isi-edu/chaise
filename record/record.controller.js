@@ -8,7 +8,7 @@
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
-
+        var completed = {};
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
@@ -53,11 +53,11 @@
         vm.permalink = function getPermalink() {
             return $window.location.href;
         };
-         
+
         vm.toRecordSet = function(ref) {
             return $window.location.href = ref.appLink;
         };
-    
+
         vm.showRelatedTable = function(i) {
             var isFirst = false, prevTableHasLoaded = false;
             if ($rootScope.tableModels && $rootScope.tableModels[i]) {
@@ -85,7 +85,7 @@
                 return false;
             }
         };
-         
+
         vm.toggleRelatedTableDisplayType = function(dataModel) {
             if (dataModel.displayType == 'markdown') {
                 dataModel.displayType = 'table';
@@ -152,11 +152,36 @@
             editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
         });
 
+        /**
+        * readUpdatedTable(refObj, dataModel, idx) returns model object with all updated component values
+        * @param {object} refObj Reference object with component details
+        * @param {object} dataModel Contains value that is bind to the table columns
+        * @param {int} idx Index of each reference
+        */
+        function readUpdatedTable(refObj, dataModel, idx){
+            if (completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
+                delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
+                (function (i) {
+                    refObj.read(dataModel.pageLimit).then(function (page) {
+                        dataModel.page = page;
+                        dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                    }, function (error) {
+                        console.log(error);
+                        throw error;
+                    }).catch(function (error) {
+                        console.log(error);
+                        throw error;
+                    });
+                })(i);
+            }
+        }
+
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
             if ($rootScope.loading === false) {
-                var completed = {};
+                var idxInbFk;
+                completed = { };
                 for (var id in addRecordRequests) {
                     var cookie = $cookies.getObject(id);
                     if (cookie) { // add request has been completed
@@ -169,31 +194,20 @@
                     } else {
                         console.log('Could not find cookie', cookie);
                     }
-                }
-
+                }  
                 // read updated tables
                 if (Object.keys(completed).length > 0 || updated !== {}) {
+                    for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
+                        idxInbFk = $rootScope.inboundFKColsIdx[i];
+                        readUpdatedTable($rootScope.inboundFKCols[i].reference, $rootScope.colTableModels[idxInbFk],idxInbFk);
+                    }
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        var relatedTableReference = $rootScope.relatedReferences[i];
-                        if (completed[relatedTableReference.uri] || updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName]) {
-                            delete updated[relatedTableReference.location.schemaName + ":" + relatedTableReference.location.tableName];
-                            (function (i) {
-                                relatedTableReference.read($rootScope.tableModels[i].pageLimit).then(function (page) {
-                                    $rootScope.tableModels[i].page = page;
-                                    $rootScope.tableModels[i].rowValues = DataUtils.getRowValuesFromPage(page);
-                                }, function(error) {
-                                    throw error;
-                                }).catch(function(error) {
-                                    throw error;
-                                });
-                            })(i);
-                        }
+                        readUpdatedTable($rootScope.relatedReferences[i], $rootScope.tableModels[i],i);
                     }
                 }
             }
 
         };
-
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
