@@ -78,15 +78,16 @@
 
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
+        var tableDisplayName = params.displayname ? params.displayname : reference.displayname;
         var limit = 25;
 
         vm.tableModel = {
             hasLoaded:          false,
             reference:          reference,
-            tableDisplayName:   reference.displayname,
+            tableDisplayName:   tableDisplayName,
             columns:            reference.columns,
-            sortBy:             null,
-            sortOrder:          null,
+            sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
+            sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,
             enableSort:         true,
             enableAutoSearch:   true,
             pageLimit:          limit,

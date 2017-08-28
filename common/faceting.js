@@ -445,5 +445,166 @@
                     });
                 }
             };
+        }])
+        
+        .directive('choicePicker', ['$uibModal', function ($uibModal) {
+            var PAGE_SIZE = 5;
+            
+            function updateFacetColumn(scope) {
+                scope.hasLoaded = false;
+                
+                // facetColumn has changed so create the new reference
+                if (scope.facetColumn.isEntityMode) {
+                    scope.reference = scope.facetColumn.sourceReference.contextualize.compact;
+                } else {
+                    scope.reference = scope.facetColumn.column.groupAggregate.entityCounts;
+                }
+                
+                // get the list of applied filters
+                var currentValues = {};
+                scope.checkboxRows = scope.facetColumn.choiceFilters.map(function(f) {
+                    currentValues[f.uniqueId] = true;
+                    return {
+                        selected: true, displayname: f.displayname, uniqueId: f.uniqueId
+                    }; // what about the count? do we want to read or not?
+                });
+
+                var appliedLen = scope.facetColumn.choiceFilters.length;
+
+                // read new data if needed
+                if (appliedLen < 5) {
+                    scope.reference.read(appliedLen + PAGE_SIZE).then(function (page) {
+                        page.tuples.forEach(function (tuple) {
+                            if (scope.checkboxRows.length == PAGE_SIZE) {
+                                return;
+                            }
+                            
+                            var value;
+                            if (scope.facetColumn.isEntityMode) {
+                                // the filter might not be on the shortest key,
+                                // therefore the uniqueId is not correct.
+                                value = tuple.data[scope.facetColumn.column.name];
+                            } else {
+                                value = tuple.uniqueId;
+                            }
+                            
+                            if (!(value in currentValues)) {
+                                var row = {
+                                    selected: false,
+                                    displayname: tuple.displayname,
+                                    uniqueId: value
+                                };
+                                
+                                currentValues[value] = true;
+                                scope.checkboxRows.push(row);
+                            }
+                        });
+                        
+                        if (page.hasNext) {
+                            scope.hasMore = true; // TODO need to add this
+                        }
+                        scope.initialized = true;
+                        scope.hasLoaded = true;
+                    }, function (err) {
+                        throw err;
+                    });
+                    
+                } else {
+                    scope.initialized = true;
+                    scope.hasLoaded = true;
+                }
+            }
+
+            function updateVMReference(scope, ref) {
+                scope.vm.reference = ref;
+                scope.$emit('facet-modified');
+            }
+            
+            return {
+                restrict: 'AE',
+                templateUrl: '../common/templates/faceting/choice-picker.html',
+                scope: {
+                    vm: "=",
+                    facetColumn: "=",
+                    isOpen: "="
+                },
+                link: function (scope, element, attr) {
+                    scope.initialized = false;
+
+                    scope.openSearchPopup = function() {
+                        var params = {};
+                        
+                        params.reference = scope.reference;    
+                        params.reference.session = scope.$root.session;
+                        params.displayname = scope.facetColumn.displayname;
+                        params.context = "compact/select";
+                        params.selectMode = "multi-select";
+                        params.selectedRows = scope.checkboxRows.filter(function (row) {
+                            return row.selected;
+                        });
+
+                        var modalInstance = $uibModal.open({
+                            animation: false,
+                            controller: "SearchPopupController",
+                            controllerAs: "ctrl",
+                            resolve: {
+                                params: params
+                            },
+                            size: "lg",
+                            templateUrl: "../common/templates/searchPopup.modal.html"
+                        });
+
+                        modalInstance.result.then(function dataSelected(tuples) {
+                            var ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
+                                var value;
+                                if (scope.facetColumn.isEntityMode) {
+                                    value = t.data[scope.facetColumn.column.name];
+                                } else {
+                                    value = t.uniqueId;
+                                }
+                                return {value: value, displayvalue: t.displayname.value, isHTML: t.displayname.isHTML};
+                            }));
+                            updateVMReference(scope, ref);
+                        });
+                    }
+
+                    scope.onRowClick = function(row) {
+                        var ref;
+                        var rowFilter = {
+                            value: row.uniqueId,
+                            displayvalue: row.displayname.value,
+                            isHTML: row.displayname.isHTML
+                        };
+                        if (row.selected) {
+                            ref = scope.facetColumn.addChoiceFilters([rowFilter]);
+                        } else {
+                            ref = scope.facetColumn.removeChoiceFilters([rowFilter]);
+                        }
+                        scope.isActive = true;
+                        updateVMReference(scope, ref);
+                    };
+
+                    scope.$on('data-modified', function ($event) {
+                        scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
+
+                        if (scope.isOpen && !scope.isActive) {
+                            updateFacetColumn(scope);
+                        }
+                        if (!scope.isOpen) {
+                            scope.initialized = false;
+                        }
+                        scope.isActive = false;
+                    });
+
+                    scope.$watch("isOpen", function (newValue, oldValue) {
+                        //TODO This is wrong, this should be called just one time!
+                        if(angular.equals(newValue, oldValue) || !newValue || scope.initialized){
+                            return;
+                        }
+                        updateFacetColumn(scope);
+                    });
+                }
+            };
+            
         }]);
 })();
