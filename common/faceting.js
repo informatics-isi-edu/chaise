@@ -13,6 +13,7 @@
                 link: function (scope, element, attr) {
                     
                     scope.isOpen = [];
+                    
                     scope.hasFilter = function (col) {
                         if(scope.vm.reference == null) {
                             return false;
@@ -42,18 +43,20 @@
                     };
                     
                     scope.toggleFacet = function (index) {
-                        if (scope.isOpen[index]) {
-                            scope.isOpen[index] = false;
-                        } else {
-                            scope.isOpen[index] = true;
-                        }
+                        // setTimeout(function() {
+                            if (scope.isOpen[index]) {
+                                scope.isOpen[index] = false;
+                            } else {
+                                scope.isOpen[index] = true;
+                            }
+                        // }, 0);
                     };
                     
                     scope.vm.openFacet = function (fc) {
                         var el = document.getElementById('ft-heading-1-' + fc.index);
                         var container = document.getElementsByClassName('faceting-container')[0];
                         setTimeout(function() {
-                            container.scrollTop = el.offsetTop;
+                            container.scrollTop = el.offsetTop - 50;
                             if (!scope.isOpen[fc.index]) {
                                 el.click();
                             }
@@ -322,6 +325,7 @@
                     isOpen: "="
                 },
                 link: function (scope, element, attr) {
+                    scope.isOpen = scope.facetColumn.filters.length > 0;
                     scope.ranges = [];
                     // draw the plot
                     // TODO change the data
@@ -471,7 +475,7 @@
         }])
         
         .directive('choicePicker', ['$uibModal', function ($uibModal) {
-            var PAGE_SIZE = 5;
+            var PAGE_SIZE = 10;
             
             function updateFacetColumn(scope) {
                 scope.hasLoaded = false;
@@ -489,7 +493,8 @@
                 scope.checkboxRows = scope.facetColumn.choiceFilters.map(function(f) {
                     currentValues[f.uniqueId] = true;
                     return {
-                        selected: true, displayname: f.displayname, uniqueId: f.uniqueId
+                        selected: true, displayname: f.displayname, 
+                        uniqueId: f.uniqueId, data: {value: f.term}
                     }; // what about the count? do we want to read or not?
                 });
 
@@ -525,9 +530,7 @@
                             }
                         });
                         
-                        if (page.hasNext) {
-                            scope.hasMore = true; // TODO need to add this
-                        }
+                        scope.hasMore = page.hasNext;    
                         scope.initialized = true;
                         scope.hasLoaded = true;
                     }, function (err) {
@@ -557,6 +560,11 @@
                 link: function (scope, element, attr) {
                     scope.initialized = false;
                     scope.isActive = false;
+                    scope.isOpen = scope.facetColumn.filters.length > 0;
+                    
+                    if (scope.isOpen) {
+                        updateFacetColumn(scope);
+                    }
 
                     scope.openSearchPopup = function() {
                         var params = {};
@@ -587,7 +595,7 @@
                                 if (scope.facetColumn.isEntityMode) {
                                     value = t.data[scope.facetColumn.column.name];
                                 } else {
-                                    value = t.data['value'];
+                                    value = t.uniqueId;
                                 }
                                 return {value: value, displayvalue: t.displayname.value, isHTML: t.displayname.isHTML};
                             }));

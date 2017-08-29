@@ -70,14 +70,23 @@ span[uib-tooltip] {
     color: #fff;
 }
 
+#page-title {
+    margin: 0;
+    margin-top: -7px;
+}
+
+#main-content {
+    margin-top: 110px;
+}
+
 #entity-title, .entity-title{
     clear: both;
-    padding-top: 10px;
+    /*padding-top: 10px;*/
 }
 #entity-subtitle{
     text-transform: uppercase;
     font-size: 14px;
-    margin: 0px 0 12px 0;
+    /*margin: 0px 0 12px 0;*/
 }
 
 #bookmark-container {
@@ -808,10 +817,11 @@ footer .container1 {
     margin-left: 0px;
     padding-top: 5px;
     padding-bottom: 5px;
-    max-height: 140px;
-    max-width: 98%;
-    overflow-y: auto;
-    background-color: #f5f5f5;
+    max-width: 100%;
+    /*background-color: #f5f5f5;*/
+    overflow-x: hidden;
+    /*max-height: 140px;*/
+    /*overflow-y: auto;*/
  }
 
  .filter-label {
@@ -823,7 +833,15 @@ footer .container1 {
      margin-right: 5px;
      margin-bottom: 5px;
      display: inline-block;
+     position: relative;
      border: 0.1px solid #ccc;
+     overflow: hidden;
+     max-width: 30vw;
+     text-overflow: ellipsis;
+ }
+ 
+ .total-filters .filter-label span {
+     border: none;
  }
 
  .total-filters .remove-link .filter-label {
@@ -858,25 +876,30 @@ footer .container1 {
  }
 
  .recordset-container.with-faceting > .faceting-resizable {
-     flex:0 0 450px;
+     flex:0 0 500px;
      position: relative;
      /*border-right: 15px solid white;*/
-     min-width: 370px;
-     max-width: 600px;
+     min-width: 400px;
+     max-width: 50vw;
      -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
--moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+    -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+    box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
  }
  .recordset-container.with-faceting > .main-container {
      flex:1;
      border-left: 25px solid white;
+     overflow-x: hidden;
+     overflow-y: auto;
+     max-height: 100vh;
+     padding-bottom: 100px;
  }
  /*.recordset-container.with-faceting > .main-container {
      overflow-x: auto;
  }*/
- /*.recordset-container.without-faceting > .main-container.outer-table {
-     overflow-x: inherit;
- }*/
+ 
+ .recordset-container > .main-container {
+     margin-top: 10px;
+ }
 
  .faceting-container {
      overflow-y: auto;
@@ -909,9 +932,6 @@ box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
      float: right;
  }
 
- .faceting-container .panel {
-     border: 1px solid transparent;
- }
 
  .faceting-container .panel .accordion-toggle {
      cursor: pointer;
@@ -938,16 +958,22 @@ box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
      color: #337ab7;
      font-weight: 600;
  }
-
+ 
+ .faceting-container .panel {
+     border: 1px solid #ddd !important;
+ }
+ 
  .faceting-container .panel .panel-body {
      padding: 5px 25px !important;
-     border: 1px solid #ddd;
-     border-top: none;
+     /*border: 1px solid #ddd;*/
+     border-top: none !important;
+     border: none;
  }
  
  .faceting-container .panel-group {
      margin-right: 5px;
      margin-top: 5px;
+     margin-bottom: 150px;
  }
 
  .faceting-container .applied-filters {
@@ -1018,4 +1044,66 @@ box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
 
 .faceting-container .string-picker a.nav-link {
     padding: 5px 15px;
+}
+
+
+/*************** LIST ***************************/
+.chaise-list-container {
+    padding-left: 0px;
+}
+.chaise-checkbox {
+    position: relative;
+    margin: 10px 0;
+}
+
+.chaise-checkbox input {
+    position: absolute;
+    opacity: 0;
+    z-index: 1;
+    cursor: pointer;
+    width: 17px;
+    height: 17px;
+}
+.chaise-checkbox label {
+    display: inline-block;
+    padding-left: 25px;
+    font-weight: 500;
+    position: relative;
+    vertical-align: middle;
+}
+.chaise-checkbox label:before {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    width: 17px;
+    height: 17px;
+    left: 0;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    background-color: #fff;
+    -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+    -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+    transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+.chaise-checkbox input[type="checkbox"]:checked + label::before {
+    background-color: #5bc0de;
+    border-color: #5bc0de;
+}
+
+.chaise-checkbox input[type="checkbox"]:checked + label:after{
+    font-family: 'Glyphicons Halflings'; 
+    content:"\e013";
+    color: #fff;
+}
+.chaise-checkbox label::after {
+    display: inline-block;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 0;
+    top: 0;
+    padding-left: 3px;
+    padding-top: 1px;
+    font-size: 11px;
+    color: #555555;
 }

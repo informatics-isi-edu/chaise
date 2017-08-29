@@ -12,6 +12,17 @@
     <div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
             <div id="bookmark-container" class="col-xs-12 meta-icons">
+                <div ng-if="recordDisplayname" id="page-title" class="pull-left">
+                    <div id="entity-title">
+                        <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
+                        <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
+                    </div>
+                    <div id="entity-subtitle" class="pull-left">
+                        <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value"></span>
+                        <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value"></span>
+                    </div>
+                </div>
+                
                 <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
                 </a>&nbsp;&nbsp;
@@ -35,17 +46,6 @@
                 </a>
             </div>
             <alerts alerts="ctrl.alerts"></alerts>
-
-            <div ng-if="recordDisplayname">
-                <div id="entity-title">
-                    <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
-                    <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
-                </div>
-                <div id="entity-subtitle">
-                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value"></span>
-                    <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value"></span>
-                </div>
-            </div>
 
             <!-- defined on $rootScope in run function -->
                 <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"

@@ -73,32 +73,35 @@
                     <span class="glyphicon glyphicon-plus"></span>
                 </button>
             </div>
-            
         </div>
-
-        <div class="row total-filters" ng-if="vm.config.hasFaceting && vm.reference.location && vm.reference.location.facets">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        
+        <div ng-if="vm.hasLoaded">
+            <div class="total-filters" ng-if="vm.config.hasFaceting && vm.reference.location && vm.reference.location.facets">
                 <a class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter()">
                     <span class="filter-label label label-primary">
                         Clear All
                     </span>
                 </a>
                 <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns" ng-if="vm.hasFilter(fc)">
-                    <a class="remove-link" ng-click="vm.removeFilter(fc)"><i class="glyphicon glyphicon-remove"></i></a>
-                    <a ng-click="vm.openFacet(fc)" ng-if="::fc.column.displayname.isHTML" ng-bind-html="::fc.column.displayname.value"></a>
-                    <a ng-click="vm.openFacet(fc)" ng-if="::!fc.column.displayname.isHTML" ng-bind="::fc.column.displayname.value"></a>:
-                    <span ng-repeat="filter in fc.filters track by $index">
+                    <a class="remove-link" ng-click="vm.removeFilter(fc)" tooltip-placement="bottom" uib-tooltip="Clear All Filters"><i class="glyphicon glyphicon-remove"></i></a>
+                    <a tooltip-placement="bottom" ng-click="vm.openFacet(fc)" ng-if="::fc.displayname.isHTML"  uib-tooltip-html="{{fc.displayname.value}}" ng-bind-html="::fc.displayname.value"></a>
+                    <a tooltip-placement="bottom" ng-click="vm.openFacet(fc)" ng-if="::!fc.displayname.isHTML" uib-tooltip="{{fc.displayname.value}}" ng-bind="::fc.displayname.value"></a>:
+                    <span ng-if="::fc.filtersString.isHTML" ng-bind-html="::fc.filtersString.value" tooltip-placement="bottom" uib-tooltip="{{fc.filtersString.value}}"></span>
+                    <span ng-if="::!fc.filtersString.isHTML" ng-bind="::fc.filtersString.value" tooltip-placement="bottom" uib-tooltip="{{fc.filtersString.value}}"></span>
+                    <!-- <span ng-repeat="filter in fc.filters track by $index">
                         <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
                         <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
                         <span>{{$last ? '': ', '}}</span>
-                    </span>
+                    </span> -->
                 </div>
             </div>
         </div>
-
+        
         <!-- record table -->
         <div ng-if="vm.hasLoaded">
             <h4 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + vm.totalRowsCnt : ''}} Records</h4>
+        </div>
+        <div ng-if="vm.hasLoaded">
             <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
         </div>
 

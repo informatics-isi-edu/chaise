@@ -1,7 +1,7 @@
-<ul style="padding-left: 0px;">
-    <li ng-repeat="row in rows track by $index">
-        <input type="checkbox" ng-checked="row.selected" ng-click="onSelect(row)" style="margin-right: 10px;"/>
-        <span ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
-        <span ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
+<ul class="chaise-list-container">
+    <li ng-repeat="row in rows track by $index"  class="chaise-checkbox">
+        <input type="checkbox" ng-checked="row.selected" ng-click="onSelect(row)" />
+        <label ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></label>
+        <label ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></label>
     </li>
 </ul>

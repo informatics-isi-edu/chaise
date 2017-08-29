@@ -1,13 +1,14 @@
 <div class="faceting-container">
     <div class="columns-container">
         <div class="panel-group" id="ft-cols-1">
-            <div class="panel panel-default" ng-repeat="fc in vm.facetColumns track by $index">
+            <div class="panel" ng-repeat="fc in vm.facetColumns track by $index">
                 <div class="panel-heading">
-                    <h4 class="panel-title accordion-toggle collapsed" data-toggle="collapse" href="#ft-col-1-{{$index}}" id="ft-heading-1-{{$index}}" ng-click="toggleFacet($index)">
+                    <h4 class="panel-title accordion-toggle" data-toggle="collapse" href="#ft-col-1-{{$index}}" id="ft-heading-1-{{$index}}" 
+                        ng-class="fc.filters.length > 0 ? '': 'collapsed'" ng-click="toggleFacet($index)">
                         <!-- data-parent="#ft-cols-1" -->
                         <a ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}" title="{{fc.comment}}">
                             <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
-                            <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span> [{{fc.preferredMode}}]
+                            <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
                         </a>
                     </h4>
                     <!-- <div class="applied-filters row" ng-show="hasFilter(fc)">
@@ -30,7 +31,7 @@
                         </div>
                     </div> -->
                 </div>
-                <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
+                <div id="ft-col-1-{{$index}}" class="panel-collapse collapse" ng-class="fc.filters.length > 0 ? 'in': ''">
                     <div class="panel-body" ng-switch="fc.preferredMode">
                         <range-picker ng-switch-when="range" vm="vm" facet-column="fc" is-open="isOpen[$index]"></range-picker>
                         <choice-picker ng-switch-when="choices" vm="vm" facet-column="fc" is-open="isOpen[$index]"></string-picker>
