@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors']).factory("recordCreate", ['$rootScope', '$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', function($rootScope, $cookies, $log, $window, $uibModal, AlertsService, DataUtils) {
+    angular.module('chaise.recordcreate', ['chaise.errors']).factory("recordCreate", ['$rootScope', '$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'MathUtils', 'UriUtils', function($rootScope, $cookies, $log, $window, $uibModal, AlertsService, DataUtils, MathUtils, UriUtils) {
 
         // .factory("recordCreate", ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', '$controller', function (AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller) {
         var viewModel = {};
@@ -41,8 +41,8 @@
             }
         }
 
-        function addRecords(isUpdate, derivedref, isModalUpdate) {
-            var model = GV_recordEditModel;
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, onSuccessFunction) {
+            var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             var form = viewModel.formContainer;
 
             // this will include updated and previous raw values.
@@ -52,12 +52,56 @@
                 submissionRowsCopy.push(Object.assign({}, row));
             });
 
+            /**
+             * Add raw values that are not visible to submissionRowsCopy:
+             *
+             * submissionRowsCopy is the datastructure that will be used for creating
+             * the upload url. It must have all the visible and invisible data.
+             * The following makes sure that submissionRowsCopy has all the underlying data
+             */
+            if (isUpdate) {
+                for (var i = 0; i < submissionRowsCopy.length; i++) {
+                    var newData = submissionRowsCopy[i];
+                    var oldData = $rootScope.tuples[i].data;
+
+                    // make sure submissionRowsCopy has all the data
+                    for (var key in oldData) {
+                        if (key in newData) continue;
+                        newData[key] = oldData[key];
+                    }
+                }
+            }
+
             //call uploadFiles which will upload files and callback on success
             uploadFiles(submissionRowsCopy, isUpdate, function() {
 
                 var fn = "create",
-                    fnScope = derivedref.unfilteredReference.contextualize.entryCreate,
                     args = [submissionRowsCopy];
+                var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : $rootScope.reference.unfilteredReference.contextualize.entryCreate;
+
+                if (isUpdate) {
+
+                    /**
+                     * After uploading files, the returned submissionRowsCopy contains
+                     * new file data. This includes filename, filebyte, and md5.
+                     * The following makes sure that all the data are updated.
+                     * That's why this for loop must be after uploading files and not before.
+                     * And we cannot just pass submissionRowsCopy to update function, because
+                     * update function only accepts array of tuples (and not just key-value pair).
+                     */
+                    for (var i = 0; i < submissionRowsCopy.length; i++) {
+                        var row = submissionRowsCopy[i];
+                        var data = $rootScope.tuples[i].data;
+                        // assign each value from the form to the data object on tuple
+                        for (var key in row) {
+                            data[key] = (row[key] === '' ? null : row[key]);
+                        }
+                    }
+
+                    // submit $rootScope.tuples because we are changing and
+                    // comparing data from the old data set for the tuple with the updated data set from the UI
+                    fn = "update", fnScope = $rootScope.reference, args = [$rootScope.tuples];
+                }
 
                 fnScope[fn].apply(fnScope, args).then(function success(result) {
 
@@ -66,62 +110,42 @@
 
                     // the returned reference is contextualized and we don't need to contextualize it again
                     var resultsReference = page.reference;
+                    if (isUpdate) {
+                        for (var i = 0; i < submissionRowsCopy.length; i++) {
+                            var row = submissionRowsCopy[i];
+                            var data = $rootScope.tuples[i].data;
+                            // assign each value from the form to the data object on tuple
+                            for (var key in row) {
+                                data[key] = (row[key] === '' ? null : row[key]);
+                            }
+                        }
+
+                        // check if there is a window that opened the current one
+                        // make sure the update function is defined for that window
+                        // verify whether we still have a valid vaue to call that function with
+                        if (window.opener && window.opener.updated && context.queryParams.invalidate) {
+                            window.opener.updated(context.queryParams.invalidate);
+                        }
+                    } else {
+                        if (!isModalUpdate) {
+                            $cookies.remove($rootScope.context.queryParams.prefill);
+
+
+                            // add cookie indicating record added
+                            if ($rootScope.context.queryParams.invalidate) {
+                                $cookies.put($rootScope.context.queryParams.invalidate, submissionRowsCopy.length, {
+                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                                });
+                            }
+                        }
+                    }
                     viewModel.readyToSubmit = false; // form data has already been submitted to ERMrest
 
-                    AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
-
-                    // can't use page.reference because it reflects the specific values that were inserted
-                    viewModel.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
-                    //set values for the view to flip to recordedit resultset view
-                    viewModel.resultsetModel = {
-                        hasLoaded: true,
-                        reference: resultsReference,
-                        tableDisplayName: resultsReference.displayname,
-                        columns: resultsReference.columns,
-                        enableSort: false,
-                        sortby: null,
-                        sortOrder: null,
-                        page: page,
-                        pageLimit: model.rows.length,
-                        rowValues: DataUtils.getRowValuesFromTuples(page.tuples),
-                        selectedRows: [],
-                        search: null,
-                        config: {
-                            viewable: false,
-                            editable: false,
-                            deletable: false,
-                            selectMode: 'no-select'
-                        }
-                    };
-
-                    // NOTE: This case is for a pseudo-failure case
-                    // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
-                    if (failedPage !== null) {
-                        viewModel.omittedResultsetModel = {
-                            hasLoaded: true,
-                            reference: resultsReference,
-                            tableDisplayName: resultsReference.displayname,
-                            columns: resultsReference.columns,
-                            enableSort: false,
-                            sortby: null,
-                            sortOrder: null,
-                            page: page,
-                            pageLimit: model.rows.length,
-                            rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
-                            selectedRows: [],
-                            search: null,
-                            config: {
-                                viewable: false,
-                                editable: false,
-                                deletable: false,
-                                selectMode: 'no-select'
-                            }
-                        };
+                    if (!isModalUpdate) {
+                        onSuccessFunction(page);
+                    } else {
+                        onSuccessFunction(model, page, result);
                     }
-
-                    viewModel.resultset = true;
-                    onfocusEventCall(isModalUpdate);
-
                 }).catch(function(exception) {
                     viewModel.submissionButtonDisabled = false;
                     if (exception instanceof ERMrest.NoDataChangedError) {
@@ -162,7 +186,7 @@
             for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                 var col = $rootScope.reference.columns[i];
                 var rowVal = row[col.name];
-                if (rowVal && !col.getInputDisabled(context.appContext)) {
+                if (rowVal && !col.getInputDisabled($rootScope.context.appContext)) {
                     switch (col.type.name) {
                         case "timestamp":
                         case "timestamptz":
@@ -234,7 +258,7 @@
                 table: {},
                 rows: [{}], // rows of data in the form, not the table from ERMrest
                 oldRows: [{}], // Keep a copy of the initial rows data so that we can see if user has made any changes later
-                submissionRows: [{}] // rows of data converted to raw data for submission
+                submissionRows: [{}] // rows of data
             };
             // Update view model
             recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
@@ -252,7 +276,7 @@
             // if (isDisabled(column)) return;
 
 
-            var originalTuple,
+            var originalTuple, nullArr = [],
                 editOrCopy = true,
                 params = {};
 
@@ -267,11 +291,12 @@
             }
 
             //var submissionRow = populateSubmissionRow(GV_recordEditModel.rows[rowIndex], GV_recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
-            //filteredRef(submissionRow)
-            params.reference = ref.contextualize.compactSelect;
+            // var ref1 = isModalUpdate?ref.unfilteredReference.contextualize.compact:ref.filteredRef(submissionRow).contextualize.compactSelect;
+            var ref1 = ref.unfilteredReference.contextualize.compact;
+            params.reference = ref1.contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
-            params.selectMode = "multi-select";
+            params.selectMode = isModalUpdate ? "multi-select" : "single-select";
 
             var modalInstance = $uibModal.open({
                 animation: false,
@@ -287,154 +312,54 @@
             modalInstance.result.then(function dataSelected(tuples) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
+                if (!isModalUpdate) {
+                    var foreignKeyColumns = ref.foreignKey.colset.columns;
+                    for (var i = 0; i < foreignKeyColumns.length; i++) {
+                        var referenceCol = foreignKeyColumns[i];
+                        var foreignTableCol = ref.foreignKey.mapping.get(referenceCol);
 
-                // var foreignKeyColumns = column.foreignKey.colset.columns;
-                // for (var i = 0; i < foreignKeyColumns.length; i++) {
-                //     var referenceCol = foreignKeyColumns[i];
-                //     var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
-
-                //     GV_recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
-                // }
-                var key_subRow = {},
-                    key_row = {};
-                angular.copy(GV_recordEditModel.submissionRows[0], key_subRow);
-                angular.copy(GV_recordEditModel.rows[0], key_row);
-                // for (i = 1; i < tuples.length; i++) {
-                //     GV_recordEditModel.submissionRows.push(key_subRow);
-                //     GV_recordEditModel.rows.push(key_row);
-                // }
-                for (i = 0; i < tuples.length; i++) {
-                    if (i != 0) {
-                        var ob1 = {},
-                            ob2 = {};
-                        angular.copy(key_subRow, ob1)
-                        angular.copy(key_row, ob2)
-                        ob1[column.table.name] = tuples[i].data['term'];
-                        GV_recordEditModel.submissionRows.push(ob1);
-                        ob2[column.columns[0].name] = tuples[i].displayname.value;
-                        GV_recordEditModel.rows.push(ob2);
-                    } else {
-                        GV_recordEditModel.submissionRows[i][column.table.name] = tuples[i].data['term'];
-                        GV_recordEditModel.rows[i][column.columns[0].name] = tuples[i].displayname.value;
+                        GV_recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuples.data[foreignTableCol.name];
+                        return GV_recordEditModel;
+                    }
+                } else {
+                    var key_subRow = {},
+                        key_row = {};
+                    angular.copy(GV_recordEditModel.submissionRows[0], key_subRow);
+                    angular.copy(GV_recordEditModel.rows[0], key_row);
+                    // for (i = 1; i < tuples.length; i++) {
+                    //     GV_recordEditModel.submissionRows.push(key_subRow);
+                    //     GV_recordEditModel.rows.push(key_row);
+                    // }
+                    for (i = 0; i < tuples.length; i++) {
+                        if (i != 0) {
+                            var ob1 = {},
+                                ob2 = {};
+                            angular.copy(key_subRow, ob1)
+                            angular.copy(key_row, ob2)
+                            ob1[column.table.name] = tuples[i].data['term'];
+                            GV_recordEditModel.submissionRows.push(ob1);
+                            ob2[column.columns[0].name] = tuples[i].displayname.value;
+                            GV_recordEditModel.rows.push(ob2);
+                        } else {
+                            GV_recordEditModel.submissionRows[i][column.table.name] = tuples[i].data['term'];
+                            GV_recordEditModel.rows[i][column.columns[0].name] = tuples[i].displayname.value;
+                        }
                     }
                 }
-                addRecords(false, derivedref, isModalUpdate);
+                if (isModalUpdate)
+                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, viewModel.onSuccess);
 
             });
         }
-        var addRelatedRecord = function(ref, rowIndex, isModal) {
-            // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
-            var cookie = {
-                rowname: $rootScope.recordDisplayname,
-                constraintName: ref.origColumnName
-            };
-            var mapping = ref.contextualize.entryCreate.origFKR.mapping;
+        var addRelatedRecord = function(ref, rowIndex, modelObject, isModal) {
 
-            // Get the column pair that form this FKR between this related table and the main entity
-            cookie.keys = {};
-            mapping._from.forEach(function(fromColumn, i) {
-                var toColumn = mapping._to[i];
-                // Assign the column value into cookie
-                cookie.keys[fromColumn.name] = $rootScope.tuple.data[toColumn.name];
-            });
-
-            if (ref.derivedAssociationReference) {
-                var derivedref = ref.derivedAssociationReference;
-                updateViewModel(cookie);
-                // NOTE: we're showing all the available domain values, which might result in 409
-                // also since we're changing context to compact, it might not refer to the same table (alternative tables)
-                ref = ref.unfilteredReference.contextualize.compact;
-
-                addPopup(ref, 0, derivedref, isModal);
-                return;
-            }
-
-
-            // 2. Generate a unique cookie name and set it to expire after 24hrs.
-            var COOKIE_NAME = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-            $cookies.putObject(COOKIE_NAME, cookie, {
-                expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-            });
-
-            // Generate a unique id for this request
-            // append it to the URL
-            var referrer_id = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-            addRecordRequests[referrer_id] = ref.uri;
-
-            // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
-            var appLink = (ref.derivedAssociationReference ? ref.derivedAssociationReference.contextualize.entryCreate.appLink : ref.contextualize.entryCreate.appLink);
-            appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
-                'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
-                '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
-
-            // 4. Redirect to the url in a new tab
-            $window.open(appLink, '_blank');
+            updateViewModel(modelObject);
+            var derivedref = isModal ? ref.derivedAssociationReference : null;
+            // var refToPass =  isModal?ref.unfilteredReference.contextualize.compact;
+            addPopup(ref, 0, derivedref, isModal);
         };
 
 
-
-        /**
-         * readUpdatedTable(refObj, dataModel, idx, isModalUpdate) returns model object with all updated component values
-         * @param {object} refObj Reference object with component details
-         * @param {object} dataModel Contains value that is bind to the table columns
-         * @param {int} idx Index of each reference
-         * @param {bool} isModalUpdate if update happens through modal pop up
-         */
-        function readUpdatedTable(refObj, dataModel, idx, isModalUpdate) {
-            if (isModalUpdate || completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
-                delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
-                (function(i) {
-                    refObj.read(dataModel.pageLimit).then(function(page) {
-                        dataModel.page = page;
-                        dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                    }, function(error) {
-                        console.log(error);
-                        throw error;
-                    }).catch(function(error) {
-                        console.log(error);
-                        throw error;
-                    });
-                })(i);
-            }
-        }
-
-        // When page gets focus, check cookie for completed requests
-        // re-read the records for that table
-        $window.onfocus = function() {
-            onfocusEventCall(false);
-        }
-
-        var onfocusEventCall = function(isModalUpdate) {
-            if ($rootScope.loading === false) {
-                var idxInbFk;
-                completed = {};
-                for (var id in addRecordRequests) {
-                    var cookie = $cookies.getObject(id);
-                    if (cookie) { // add request has been completed
-                        console.log('Cookie found', cookie);
-                        completed[addRecordRequests[id]] = true;
-
-                        // remove cookie and request
-                        $cookies.remove(id);
-                        delete addRecordRequests[id];
-                    } else {
-                        console.log('Could not find cookie', cookie);
-                    }
-                }
-
-                // read updated tables
-                if (isModalUpdate || Object.keys(completed).length > 0 || updated !== {}) {
-                    for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
-                        idxInbFk = $rootScope.inboundFKColsIdx[i];
-                        readUpdatedTable($rootScope.inboundFKCols[i].reference, $rootScope.colTableModels[idxInbFk], idxInbFk, isModalUpdate);
-                    }
-                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        readUpdatedTable($rootScope.relatedReferences[i], $rootScope.tableModels[i], i, isModalUpdate);
-                    }
-                }
-            }
-
-        };
 
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
@@ -445,8 +370,8 @@
             return p * 3;
         }
 
-        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, editMode, formContainer, readyToSubmit, recordsetLink, resultsetModel, resultset, submissionButtonDisabled, omittedResultsetModel) {
-
+        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, resultsetModel, resultset, submissionButtonDisabled, omittedResultsetModel, onSuccess) {
+            viewModel.onSuccess = onSuccess;
             viewModel.editMode = editMode;
             viewModel.formContainer = formContainer;
             viewModel.readyToSubmit = readyToSubmit;
@@ -455,14 +380,13 @@
             viewModel.resultset = resultset;
             viewModel.submissionButtonDisabled = submissionButtonDisabled;
             viewModel.omittedResultsetModel = omittedResultsetModel;
-            addRelatedRecord(ref, rowIdx, isModalUpdate);
+            addRelatedRecord(ref, rowIdx, modelObject, isModalUpdate);
         }
 
         return {
             addRelatedRecordFact: addRelatedRecordFact,
-            testfunction: testfunction,
-            humanFileSize: humanFileSize
-
+            addRecords: addRecords,
+            testfunction: testfunction
         }
     }])
 })();
