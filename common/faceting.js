@@ -323,6 +323,8 @@
                 },
                 link: function (scope, element, attr) {
                     scope.ranges = [];
+                    scope.initialized = false;
+                    scope.hasLoaded = false;
                     // draw the plot
                     // TODO change the data
                     // scope.plot = {
@@ -406,6 +408,9 @@
                     // Gets the facet data for min/max
                     // TODO get the histogram data
                     scope.initialFacetData = function () {
+                        scope.hasLoaded = false;
+                        scope.initialized = false;
+                        
                         var agg = scope.facetColumn.column.aggregate;
                         var aggregateList = [
                             agg.minAgg,
@@ -434,6 +439,9 @@
                                 scope.rangeOptions.absMin = response[0];
                                 scope.rangeOptions.absMax = response[1];
                             }
+
+                            scope.initialized = true;
+                            scope.hasLoaded = true;
                         });
                     };
 
@@ -456,6 +464,8 @@
                         scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
                         if (scope.isOpen) {
                             scope.initialFacetData();
+                        } else {
+                            scope.initialized = false;
                         }
                     });
 

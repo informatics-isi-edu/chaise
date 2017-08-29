@@ -896,6 +896,15 @@
         }
     })
 
+    // directive for including a smaller loading spinner with less styling
+    .directive('loadingSpinnerSm', function () {
+        return {
+            restrict: 'A',
+            transclude: true,
+            templateUrl: '../common/templates/spinner-sm.html'
+        }
+    })
+
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {
         return {

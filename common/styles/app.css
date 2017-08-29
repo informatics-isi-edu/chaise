@@ -21,6 +21,21 @@ a:hover, a:focus{
     outline: none;
 }
 
+a .glyphicon-trash {
+    color: #428bca;
+}
+
+span[uib-tooltip] {
+    border-bottom: 1px dotted black;
+}
+
+.btn.btn-primary.btn-inverted {
+    color: #337ab7;
+    background-color: white;
+}
+
+/**************** SPINNER **************/
+
 #spinner{
     background: #fff;
     width: 130px;
@@ -38,25 +53,28 @@ a:hover, a:focus{
     z-index: 10;
 }
 
+.spinner-container-sm {
+    position: relative;
+}
+
+#spinner-sm {
+    background: #fff;
+    border: 1px solid #C3C3C3;
+    border-radius: 7px;
+    color: #828282;
+    left: 40%;
+    padding: 5px;
+    position: absolute;
+    text-align: center;
+    z-index: 10;
+}
+
 img.spinner {
     display: block;
     margin: 0 auto;
     width: 32px;
     height: 32px;
     opacity: 0.8;
-}
-
-a .glyphicon-trash {
-    color: #428bca;
-}
-
-span[uib-tooltip] {
-    border-bottom: 1px dotted black;
-}
-
-.btn.btn-primary.btn-inverted {
-    color: #337ab7;
-    background-color: white;
 }
 
 /****************** HEADER ******************/
